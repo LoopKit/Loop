@@ -1,0 +1,14 @@
+PODS:
+  - RileyLink (0.1)
+
+DEPENDENCIES:
+  - RileyLink (from `~/src/github.com/ps2/rileylink`)
+
+EXTERNAL SOURCES:
+  RileyLink:
+    :path: ~/src/github.com/ps2/rileylink
+
+SPEC CHECKSUMS:
+  RileyLink: 3cd68281f9164fe40fb6a6c401024e70eeec8fb8
+
+COCOAPODS: 0.38.2
