@@ -202,7 +202,7 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
     func pumpIDTableViewControllerDidEndEditing(controller: PumpIDTableViewController) {
         dataManager.pumpID = controller.pumpID
 
-        tableView.reloadSections(NSIndexSet(index: 1), withRowAnimation: .Automatic)
+        tableView.reloadData()
     }
 
 }
