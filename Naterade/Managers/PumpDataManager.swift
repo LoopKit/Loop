@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MinimedKit
 import RileyLinkKit
 
 class PumpDataManager {
@@ -15,7 +16,7 @@ class PumpDataManager {
         case Ready(manager: RileyLinkManager)
     }
 
-    // Observed state
+    // MARK: - Observed state
 
     var rileyLinkManager: RileyLinkManager? {
         switch state {
@@ -26,9 +27,17 @@ class PumpDataManager {
         }
     }
 
-    var rileyLinkObserver: AnyObject? {
+    var rileyLinkManagerObserver: AnyObject? {
         willSet {
-            if let observer = rileyLinkObserver {
+            if let observer = rileyLinkManagerObserver {
+                NSNotificationCenter.defaultCenter().removeObserver(observer)
+            }
+        }
+    }
+
+    var rileyLinkDeviceObserver: AnyObject? {
+        willSet {
+            if let observer = rileyLinkDeviceObserver {
                 NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
@@ -36,6 +45,18 @@ class PumpDataManager {
 
     func receivedRileyLinkManagerNotification(note: NSNotification) {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
+    }
+
+    func receivedRileyLinkPacketNotification(note: NSNotification) {
+        if let
+            device = note.object as? RileyLinkDevice,
+            packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true,
+            let message = PumpMessage(data: packet.messageData)
+        {
+            // Reply to PumpStatus packets with an ACK
+
+            // Parse PumpStatus packets and store the relevant data
+        }
     }
 
     func connectToRileyLink(device: RileyLinkDevice) {
@@ -56,12 +77,17 @@ class PumpDataManager {
         willSet {
             switch newValue {
             case .Ready(manager: let manager):
-                rileyLinkObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self = self] (note) -> Void in
+                rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self = self] (note) -> Void in
                     self?.receivedRileyLinkManagerNotification(note)
                 }
 
+                rileyLinkDeviceObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil, usingBlock: { [weak self = self] (note) -> Void in
+                    self?.receivedRileyLinkPacketNotification(note)
+                })
+
             case .NeedsConfiguration:
-                rileyLinkObserver = nil
+                rileyLinkManagerObserver = nil
+                rileyLinkDeviceObserver = nil
             }
         }
     }
@@ -98,6 +124,8 @@ class PumpDataManager {
     }
 
     deinit {
-        rileyLinkObserver = nil  // iOS 8 only
+        // Unregistering observers necessary in iOS 8 only
+        rileyLinkManagerObserver = nil
+        rileyLinkDeviceObserver = nil
     }
 }

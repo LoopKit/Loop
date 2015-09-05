@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MinimedKit
 import RileyLinkKit
 
 class PacketLogViewController: UIViewController {
@@ -19,7 +20,7 @@ class PacketLogViewController: UIViewController {
         super.viewDidLoad()
 
         packetObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil) { (note) -> Void in
-            if let packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket {
+            if let packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true {
                 self.prependLogText(packet.messageData.hexadecimalString)
             }
         }
