@@ -54,10 +54,14 @@ public struct PumpMessage {
 }
 
 
-func messageBodyTypeForPacketType(packetType: PacketType, messageType: MessageType) -> MessageBody.Type? {
+private func messageBodyTypeForPacketType(packetType: PacketType, messageType: MessageType) -> MessageBody.Type? {
     switch packetType {
     case .MySentry:
         switch messageType {
+        case .Alert:
+            return MySentryAlertMessageBody.self
+        case .AlertCleared:
+            return MySentryAlertClearedMessageBody.self
         case .PumpStatus:
             return MySentryPumpStatusMessageBody.self
         case .PumpStatusAck:
