@@ -10,9 +10,20 @@ import Foundation
 
 
 public protocol MessageBody {
+    static var length: Int {
+        get
+    }
+
     init?(rxData: NSData)
 
     var txData: NSData {
         get
+    }
+}
+
+
+extension MessageBody {
+    static var emptyBuffer: [UInt8] {
+        return [UInt8](count: self.length, repeatedValue: 0)
     }
 }

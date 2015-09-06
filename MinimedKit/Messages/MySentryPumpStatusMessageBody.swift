@@ -18,11 +18,16 @@ enum GlucoseTrend {
 }
 
 
-/// Describes a status message sent periodically from the pump to any paired MySentry devices
-/// See: https://github.com/ps2/minimed_rf/blob/master/lib/minimed_rf/messages/pump_status.rb
-/// a2 594040 04 c9 51092c1e0f090401323300037a020205b01830132b00d100000070092b000f09040000 33
+/**
+Describes a status message sent periodically from the pump to any paired MySentry devices
+
+See: [MinimedRF Class](https://github.com/ps2/minimed_rf/blob/master/lib/minimed_rf/messages/pump_status.rb)
+```
+a2 594040 04 c9 51092c1e0f090401323300037a020205b01830132b00d100000070092b000f09040000 33
+```
+*/
 public struct MySentryPumpStatusMessageBody: MessageBody {
-    private static let length = 36
+    public static let length = 36
 
 //    let glucose: Int?
 //    let trend: GlucoseTrend

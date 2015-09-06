@@ -51,11 +51,17 @@ class PumpDataManager {
         if let
             device = note.object as? RileyLinkDevice,
             packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true,
-            let message = PumpMessage(data: packet.messageData)
+            let message = PumpMessage(rxData: packet.messageData),
+            pumpID = pumpID
         {
-            // Reply to PumpStatus packets with an ACK
-
-            // Parse PumpStatus packets and store the relevant data
+            switch message.packetType {
+            case .MySentry:
+                // Reply to PumpStatus packets with an ACK
+                let ack = PumpMessage(packetType: .MySentry, address: pumpID, messageType: .PumpStatusAck, messageBody: MySentryAckMessageBody(mySentryID: [0x00, 0x08, 0x88], responseMessageTypes: [message.messageType]))
+                device.sendMessageData(ack.txData)
+            default:
+                break
+            }
         }
     }
 

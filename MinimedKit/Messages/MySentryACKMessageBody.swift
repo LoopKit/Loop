@@ -1,5 +1,5 @@
 //
-//  MySentryACKMessageBody.swift
+//  MySentryAckMessageBody.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 9/4/15.
@@ -11,9 +11,8 @@ import Foundation
 
 /// Describes an ACK message sent by a MySentry device in response to pump status messages.
 /// a2 350535 06 59 000695 00 04000000 e2
-public struct MySentryACKMessageBody: MessageBody {
-    static let Type = MessageType.PumpStatusAck
-    private static let length = 9
+public struct MySentryAckMessageBody: MessageBody {
+    public static let length = 9
     static var MessageCounter: UInt8 = 0
 
     let mySentryID: [UInt8]
@@ -37,7 +36,7 @@ public struct MySentryACKMessageBody: MessageBody {
     }
 
     public var txData: NSData {
-        var buffer = [UInt8](count: 9, repeatedValue: 0)
+        var buffer = self.dynamicType.emptyBuffer
 
         buffer[0] = self.dynamicType.MessageCounter++
         buffer.replaceRange(1...3, with: mySentryID)

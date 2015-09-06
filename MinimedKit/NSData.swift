@@ -21,18 +21,18 @@ public extension NSData {
         return dataArray
     }
 
-    convenience init?(hexadecimalString: String) {
+    public convenience init?(hexadecimalString: String) {
         if let
             chars = hexadecimalString.cStringUsingEncoding(NSUTF8StringEncoding),
             mutableData = NSMutableData(capacity: chars.count / 2)
         {
             for i in 0..<chars.count / 2 {
-                var num: CChar = 0
-                var multi: CChar = 16
+                var num: UInt8 = 0
+                var multi: UInt8 = 16
 
                 for j in 0..<2 {
                     let c = chars[i * 2 + j]
-                    let offset: CChar
+                    var offset: UInt8
 
                     switch c {
                     case 48...57:   // '0'-'9'
@@ -45,7 +45,7 @@ public extension NSData {
                         return nil
                     }
 
-                    num += (c - offset) * multi
+                    num += (UInt8(c) - offset) * multi
                     multi = 1
                 }
                 mutableData.appendBytes(&num, length: 1)
@@ -57,7 +57,7 @@ public extension NSData {
         }
     }
 
-    var hexadecimalString: String {
+    public var hexadecimalString: String {
         let bytesCollection = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(bytes), count: length)
 
         let string = NSMutableString(capacity: length * 2)
