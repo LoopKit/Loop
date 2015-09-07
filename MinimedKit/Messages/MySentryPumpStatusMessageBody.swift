@@ -122,13 +122,13 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
     private static let iobSigificantDigit = 0.025
     public static let length = 36
 
-    let pumpDate: NSDate
-    let reservoirRemaining: Double
-    let iob: Double
+    public let pumpDate: NSDate
+    public let reservoirRemaining: Double
+    public let iob: Double
 
     public let glucoseTrend: GlucoseTrend
-    let glucoseDate: NSDate?
-    let glucose: SensorReading
+    public let glucoseDate: NSDate?
+    public let glucose: SensorReading
     let previousGlucose: SensorReading
 //    let sensorAgeHours: Int
 //    let sensorRemainingHours: Int
@@ -167,3 +167,11 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
         return NSData()
     }
 }
+
+extension MySentryPumpStatusMessageBody: Equatable {
+}
+
+public func ==(lhs: MySentryPumpStatusMessageBody, rhs: MySentryPumpStatusMessageBody) -> Bool {
+    return lhs.pumpDate == rhs.pumpDate && lhs.glucoseDate == rhs.glucoseDate
+}
+

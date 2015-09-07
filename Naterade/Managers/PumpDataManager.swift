@@ -7,10 +7,13 @@
 //
 
 import Foundation
+import HealthKit
 import MinimedKit
 import RileyLinkKit
 
 class PumpDataManager {
+    static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
+
     enum State {
         case NeedsConfiguration
         case Ready(manager: RileyLinkManager)
@@ -59,6 +62,13 @@ class PumpDataManager {
                 // Reply to PumpStatus packets with an ACK
                 let ack = PumpMessage(packetType: .MySentry, address: pumpID, messageType: .PumpStatusAck, messageBody: MySentryAckMessageBody(mySentryID: [0x00, 0x08, 0x88], responseMessageTypes: [message.messageType]))
                 device.sendMessageData(ack.txData)
+
+                switch message.messageBody {
+                case let body as MySentryPumpStatusMessageBody:
+                    latestPumpStatus = body
+                default:
+                    break
+                }
             default:
                 break
             }
@@ -78,6 +88,12 @@ class PumpDataManager {
     }
 
     // MARK: - Managed state
+
+    var latestPumpStatus: MySentryPumpStatusMessageBody? {
+        didSet {
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+        }
+    }
 
     var state: State = .NeedsConfiguration {
         willSet {
@@ -122,6 +138,12 @@ class PumpDataManager {
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
         }
     }
+
+    // MARK: - HealthKit
+
+    lazy var healthStore = HKHealthStore()
+
+    // MARK: - Initialization
 
     static let sharedManager = PumpDataManager()
 
