@@ -24,8 +24,8 @@ class MinimedKitTests: XCTestCase {
     func testValidPumpStatusMessage() {
         let message = PumpMessage(rxData: NSData(hexadecimalString: "a2594040042f511727070f09050184850000cd010105b03e0a0a1a009d030000711726000f09050000d0")!)
 
-        if let message = message, body = message.messageBody as? MySentryPumpStatusMessageBody {
-            XCTAssertEqual(GlucoseTrend.Flat, body.trend)
+        if let message = message {
+            XCTAssertTrue(message.messageBody is MySentryPumpStatusMessageBody)
         } else {
             XCTFail("\(message) is nil")
         }
