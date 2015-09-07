@@ -39,6 +39,7 @@ public enum SensorReading {
     case Off
     case MeterBGNow
     case WeakSignal
+    case CalError
     case Warmup
     case Ended
     case HighBG  // Above 400 mg/dL
@@ -54,6 +55,8 @@ public enum SensorReading {
             self = .MeterBGNow
         case 4:
             self = .WeakSignal
+        case 6:
+            self = .CalError
         case 8:
             self = .Warmup
         case 10:
@@ -115,6 +118,7 @@ a2 594040 04 ff 50 1219000f0906 01 00 00 00 0000 04 00 00 00 00 00 00 00 005e 00
 a2 594040 04 01 50 1223000f0906 01 00 00 00 0000 04 00 00 00 00 00 00 00 0059 00 00 00 72 000000000000 0000 9f
 a2 594040 04 2f 51 1727070f0905 01 84 85 00 00cd 01 01 05 b0 3e 0a 0a 1a 009d 03 00 00 71 1726000f0905 0000 d0
 a2 594040 04 9c 51 0003310f0905 01 39 37 00 025b 01 01 06 8d 26 22 08 15 0034 00 00 00 70 0003000f0905 0000 67
+a2 594040 04 87 51 0f18150f0907 01 03 71 00 045e 04 02 07 2c 04 44 ff ff 005e 02 00 00 73 0f16000f0907 0000 35
 ```
 */
 public struct MySentryPumpStatusMessageBody: MessageBody {

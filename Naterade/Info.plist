@@ -58,5 +58,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Historical glucose data is stored securely in HealthKit for later analysis</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Glucose data on Apple Watch is retrieved from HealthKit</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
 </dict>
 </plist>

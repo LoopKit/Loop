@@ -65,7 +65,7 @@ class PumpDataManager {
 
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
-                    latestPumpStatus = body
+                    updatePumpStatus(body, fromDevice: device)
                 default:
                     break
                 }
@@ -88,6 +88,56 @@ class PumpDataManager {
     }
 
     // MARK: - Managed state
+
+    private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
+        if status != latestPumpStatus {
+            latestPumpStatus = status
+
+            if let date = status.glucoseDate {
+                switch status.glucose {
+                case .Active(glucose: let value):
+                    let quantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
+                    let quantity = HKQuantity(unit: HKUnit(fromString: "mg/dL"), doubleValue: Double(value))
+
+                    let sample: HKQuantitySample
+                    if #available(iOS 9.0, *) {
+                        sample = HKQuantitySample(
+                            type: quantityType,
+                            quantity: quantity,
+                            startDate: date,
+                            endDate: date,
+                            device: HKDevice(rileyLinkDevice: device),
+                            metadata: [
+                                HKMetadataKeyWasUserEntered: false
+                            ]
+                        )
+                    } else {
+                        sample = HKQuantitySample(
+                            type: quantityType,
+                            quantity: quantity,
+                            startDate: date,
+                            endDate: date,
+                            metadata: [
+                                HKMetadataKeyWasUserEntered: false,
+                                HKMetadataKeyDeviceName: device.name ?? "",
+                                HKMetadataKeyDeviceManufacturerName: "@ps2",
+                            ]
+                        )
+                    }
+
+                    if let store = healthStore where store.authorizationStatusForType(glucoseQuantityType) == .SharingAuthorized {
+                        store.saveObject(sample, withCompletion: { (success, error) -> Void in
+                            if let error = error {
+                                NSLog("Error saving glucose sample: %@", error)
+                            }
+                        })
+                    }
+                default:
+                    break
+                }
+            }
+        }
+    }
 
     var latestPumpStatus: MySentryPumpStatusMessageBody? {
         didSet {
@@ -141,7 +191,25 @@ class PumpDataManager {
 
     // MARK: - HealthKit
 
-    lazy var healthStore = HKHealthStore()
+    lazy var glucoseQuantityType = HKSampleType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
+
+    lazy var healthStore: HKHealthStore? = {
+        if HKHealthStore.isHealthDataAvailable() {
+            let store = HKHealthStore()
+            let shareTypes = Set(arrayLiteral: self.glucoseQuantityType)
+
+            store.requestAuthorizationToShareTypes(shareTypes, readTypes: nil, completion: { (completed, error) -> Void in
+                if let error = error {
+                    NSLog("Failed to gain HealthKit authorization: %@", error)
+                }
+            })
+
+            return store
+        } else {
+            NSLog("Health data is not available on this device")
+            return nil
+        }
+    }()
 
     // MARK: - Initialization
 
