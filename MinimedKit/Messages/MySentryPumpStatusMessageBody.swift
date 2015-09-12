@@ -111,7 +111,7 @@ Describes a status message sent periodically from the pump to any paired MySentr
 See: [MinimedRF Class](https://github.com/ps2/minimed_rf/blob/master/lib/minimed_rf/messages/pump_status.rb)
 ```
 -- ------ -- 00 01 020304050607 08 09 10 11 1213 14 15 16 17 18 19 20 21 2223 24 25 26 27 282930313233 3435 --
-             se tr    pump date 01 bh ph    resv bt          st sr        iob bl             sens date 0000
+             se tr    pump date 01 bh ph    resv bt          st sr nxcal  iob bl             sens date 0000
 a2 594040 04 c9 51 092c1e0f0904 01 32 33 00 037a 02 02 05 b0 18 30 13 2b 00d1 00 00 00 70 092b000f0904 0000 33
 a2 594040 04 fb 51 1205000f0906 01 05 05 02 0000 04 00 00 00 ff 00 ff ff 0040 00 00 00 71 1205000f0906 0000 2b
 a2 594040 04 ff 50 1219000f0906 01 00 00 00 0000 04 00 00 00 00 00 00 00 005e 00 00 00 72 000000000000 0000 8b
@@ -127,15 +127,19 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
     public static let length = 36
 
     public let pumpDate: NSDate
-    public let reservoirRemaining: Double
+    public let batteryRemainingPercent: Int
     public let iob: Double
+    public let reservoirRemaining: Double
 
     public let glucoseTrend: GlucoseTrend
     public let glucoseDate: NSDate?
     public let glucose: SensorReading
-    let previousGlucose: SensorReading
-//    let sensorAgeHours: Int
-//    let sensorRemainingHours: Int
+    public let previousGlucose: SensorReading
+    public let sensorAgeHours: Int
+    public let sensorRemainingHours: Int
+    public let nextSensorCalibration: NSDate?
+
+    private let rxData: NSData
 
     public init?(rxData: NSData) {
         if rxData.length == self.dynamicType.length,
@@ -143,11 +147,14 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
             trend = GlucoseTrend(byte: rxData[1]),
             pumpDate = NSDateComponents(mySentryBytes: rxData[2...7]).date
         {
+            self.rxData = rxData
+
             self.glucoseTrend = trend
             self.pumpDate = pumpDate
 
             reservoirRemaining = Double(Int(bytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
             iob = Double(Int(bytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
+            batteryRemainingPercent = Int(round(Double(rxData[14]) / 4.0 * 100))
 
             let glucoseValue = Int(bytes: [rxData[9], rxData[24] << 7]) >> 7
             let previousGlucoseValue = Int(bytes: [rxData[10], rxData[24] << 6]) >> 7
@@ -162,6 +169,15 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
                 glucoseDate = NSDateComponents(mySentryBytes: rxData[28...33]).date
             }
 
+            sensorAgeHours = Int(rxData[18])
+            sensorRemainingHours = Int(rxData[19])
+
+            nextSensorCalibration = NSCalendar.currentCalendar().nextDateAfterDate(pumpDate,
+                matchingHour: Int(rxData[20]),
+                minute: Int(13),
+                second: 0,
+                options: [.MatchNextTime]
+            )
         } else {
             return nil
         }
@@ -184,7 +200,11 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
         case .Active(glucose: let glucose):
             dict["glucose"] = glucose
         default:
-            dict["glucose"] = nil
+            break
+        }
+
+        if let glucoseDate = glucoseDate {
+            dict["glucoseDate"] = dateFormatter.stringFromDate(glucoseDate)
         }
         dict["sensorStatus"] = String(glucose)
 
@@ -192,9 +212,23 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
         case .Active(glucose: let glucose):
             dict["lastGlucose"] = glucose
         default:
-            dict["lastGlucose"] = nil
+            break
         }
         dict["lastSensorStatus"] = String(previousGlucose)
+
+        dict["sensorAgeHours"] = sensorAgeHours
+        dict["sensorRemainingHours"] = sensorRemainingHours
+        if let nextSensorCalibration = nextSensorCalibration {
+            dict["nextSensorCalibration"] = dateFormatter.stringFromDate(nextSensorCalibration)
+        }
+
+        dict["batteryRemainingPercent"] = batteryRemainingPercent
+
+        dict["byte1"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
+        dict["byte11"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
+        dict["byte1517"] = rxData.subdataWithRange(NSRange(15...17)).hexadecimalString
+        dict["byte2526"] = rxData.subdataWithRange(NSRange(25...26)).hexadecimalString
+        dict["byte27"] = rxData.subdataWithRange(NSRange(27...27)).hexadecimalString
 
         return dict
     }
