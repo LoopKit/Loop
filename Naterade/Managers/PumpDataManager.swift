@@ -21,6 +21,8 @@ class PumpDataManager {
 
     // MARK: - Observed state
 
+    lazy var logger = DiagnosticLogger()
+
     var rileyLinkManager: RileyLinkManager? {
         switch state {
         case .Ready(manager: let manager):
@@ -93,37 +95,24 @@ class PumpDataManager {
         if status != latestPumpStatus {
             latestPumpStatus = status
 
+            logger?.addMessage(status)
+
             if let date = status.glucoseDate {
                 switch status.glucose {
                 case .Active(glucose: let value):
                     let quantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
                     let quantity = HKQuantity(unit: HKUnit(fromString: "mg/dL"), doubleValue: Double(value))
 
-                    let sample: HKQuantitySample
-                    if #available(iOS 9.0, *) {
-                        sample = HKQuantitySample(
-                            type: quantityType,
-                            quantity: quantity,
-                            startDate: date,
-                            endDate: date,
-                            device: HKDevice(rileyLinkDevice: device),
-                            metadata: [
-                                HKMetadataKeyWasUserEntered: false
-                            ]
-                        )
-                    } else {
-                        sample = HKQuantitySample(
-                            type: quantityType,
-                            quantity: quantity,
-                            startDate: date,
-                            endDate: date,
-                            metadata: [
-                                HKMetadataKeyWasUserEntered: false,
-                                HKMetadataKeyDeviceName: device.name ?? "",
-                                HKMetadataKeyDeviceManufacturerName: "@ps2",
-                            ]
-                        )
-                    }
+                    let sample = HKQuantitySample(
+                        type: quantityType,
+                        quantity: quantity,
+                        startDate: date,
+                        endDate: date,
+                        device: HKDevice(rileyLinkDevice: device),
+                        metadata: [
+                            HKMetadataKeyWasUserEntered: false
+                        ]
+                    )
 
                     if let store = healthStore where store.authorizationStatusForType(glucoseQuantityType) == .SharingAuthorized {
                         store.saveObject(sample, withCompletion: { (success, error) -> Void in
@@ -220,7 +209,6 @@ class PumpDataManager {
     }
 
     deinit {
-        // Unregistering observers necessary in iOS 8 only
         rileyLinkManagerObserver = nil
         rileyLinkDeviceObserver = nil
     }

@@ -167,6 +167,38 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
         }
     }
 
+    public var dictionaryRepresentation: [String: AnyObject] {
+        let dateFormatter = NSDateFormatter()
+
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+
+        var dict: [String: AnyObject] = [
+            "glucoseTrend": String(glucoseTrend),
+            "pumpDate": dateFormatter.stringFromDate(pumpDate),
+            "reservoirRemaining": reservoirRemaining,
+            "iob": iob
+        ]
+
+        switch glucose {
+        case .Active(glucose: let glucose):
+            dict["glucose"] = glucose
+        default:
+            dict["glucose"] = nil
+        }
+        dict["sensorStatus"] = String(glucose)
+
+        switch previousGlucose {
+        case .Active(glucose: let glucose):
+            dict["lastGlucose"] = glucose
+        default:
+            dict["lastGlucose"] = nil
+        }
+        dict["lastSensorStatus"] = String(previousGlucose)
+
+        return dict
+    }
+
     public var txData: NSData {
         return NSData()
     }

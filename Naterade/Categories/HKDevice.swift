@@ -11,16 +11,16 @@ import MinimedKit
 import RileyLinkKit
 
 
-@available(iOS 9.0, *)
 extension HKDevice {
     convenience init(rileyLinkDevice: RileyLinkDevice) {
+        // TODO: Don't hard-code this information here. Can we read firmware version from the pump?
         self.init(
             name: rileyLinkDevice.name,
-            manufacturer: "@ps2",
-            model: "RileyLink",
-            hardwareVersion: "1.0",
-            firmwareVersion: "0.0.1",
-            softwareVersion: "\(RileyLinkKitVersionNumber)/\(MinimedKitVersionNumber)/\(NSBundle.mainBundle().shortVersionString)",
+            manufacturer: "Medtronic",
+            model: "Revel",
+            hardwareVersion: "723",
+            firmwareVersion: "2.4A 1.1 0B 0B",
+            softwareVersion: "RileyLink: \(RileyLinkKitVersionNumber), MinimedKit: \(MinimedKitVersionNumber), Naterade: \(NSBundle.mainBundle().shortVersionString)",
             localIdentifier: nil,
             UDIDeviceIdentifier: nil
         )

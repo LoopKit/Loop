@@ -22,6 +22,12 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Glucose data on Apple Watch is retrieved from HealthKit</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Historical glucose data is stored securely in HealthKit for later analysis</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
@@ -50,6 +56,7 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -58,11 +65,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>Historical glucose data is stored securely in HealthKit for later analysis</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Glucose data on Apple Watch is retrieved from HealthKit</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
 </dict>
 </plist>

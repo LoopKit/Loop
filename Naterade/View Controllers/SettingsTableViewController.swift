@@ -54,7 +54,7 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
     }
 
     deinit {
-        dataManagerObserver = nil  // iOS 8 only
+        dataManagerObserver = nil
     }
 
     override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
