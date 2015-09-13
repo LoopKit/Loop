@@ -43,6 +43,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-
+    func applicationShouldRequestHealthAuthorization(application: UIApplication) {
+        PumpDataManager.sharedManager.healthStore?.handleAuthorizationForExtensionWithCompletion { (success, error) -> Void in
+            if let error = error {
+                NSLog("Failed to gain HealthKit extension authorization: %@", error)
+            }
+        }
+    }
 }
 
