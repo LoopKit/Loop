@@ -213,11 +213,11 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
         dict["byte1High"] = String(format: "%02x", rxData[1] & 0b11110000)
         // {1}
         dict["byte1Low"] = Int(rxData[1] & 0b00000001)
-        // Observed values: 00, 01, 02
+        // Observed values: 00, 01, 02, 03
         // These seem to correspond with carb/bolus activity
         dict["byte11"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
         // Reservoir time remaining?
-        // 15: {02,01,00}
+        // 15: {04,03,02,01,00}
         // 16: {00,04,05,06,07}
         // 1617: {05a*, 06**
         // 000000 when reservoir time is 0

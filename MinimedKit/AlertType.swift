@@ -7,6 +7,7 @@
 //
 
 public enum AlertType: UInt8 {
+    case NoDelivery     = 0x04
     case MaxHourlyBolus = 0x33
     case HighPredicted  = 0x72
     case LowPredicted   = 0x73
