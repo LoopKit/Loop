@@ -32,9 +32,9 @@ class DiagnosticLogger {
         }
     }
 
-    func addMessage(message: MySentryPumpStatusMessageBody) {
+    func addMessage(message: DictionaryRepresentable, toCollection collection: String) {
         if let messageData = try? NSJSONSerialization.dataWithJSONObject(message.dictionaryRepresentation, options: []),
-            let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent("sentryMessage"),
+            let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),
             components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
         {
             components.query = "apiKey=\(APIKey)"

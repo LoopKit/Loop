@@ -26,8 +26,7 @@ public struct PumpMessage {
         if rxData.length >= 7, let
             packetType = PacketType(rawValue: rxData[0]),
             messageType = MessageType(rawValue: rxData[4]),
-            messageBodyType = messageBodyTypeForPacketType(packetType, messageType: messageType),
-            messageBody = messageBodyType.init(rxData: rxData.subdataWithRange(NSRange(5..<rxData.length - 1)))
+            messageBody = messageType.bodyType?.init(rxData: rxData.subdataWithRange(NSRange(5..<rxData.length - 1)))
         {
             self.packetType = packetType
             self.address = rxData.subdataWithRange(NSRange(1...3))
@@ -52,26 +51,4 @@ public struct PumpMessage {
         return NSData(data: data)
     }
 }
-
-
-private func messageBodyTypeForPacketType(packetType: PacketType, messageType: MessageType) -> MessageBody.Type? {
-    switch packetType {
-    case .MySentry:
-        switch messageType {
-        case .Alert:
-            return MySentryAlertMessageBody.self
-        case .AlertCleared:
-            return MySentryAlertClearedMessageBody.self
-        case .PumpStatus:
-            return MySentryPumpStatusMessageBody.self
-        case .PumpStatusAck:
-            return MySentryAckMessageBody.self
-        default:
-            return nil
-        }
-    default:
-        return nil
-    }
-}
-
 

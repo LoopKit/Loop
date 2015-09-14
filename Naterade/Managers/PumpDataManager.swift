@@ -68,6 +68,10 @@ class PumpDataManager {
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
                     updatePumpStatus(body, fromDevice: device)
+                case let body as MySentryAlertMessageBody:
+                    logger?.addMessage(body, toCollection: "sentryAlert")
+                case let body as MySentryAlertClearedMessageBody:
+                    logger?.addMessage(body, toCollection: "sentryAlert")
                 default:
                     break
                 }
@@ -95,7 +99,7 @@ class PumpDataManager {
         if status != latestPumpStatus {
             latestPumpStatus = status
 
-            logger?.addMessage(status)
+            logger?.addMessage(status, toCollection: "sentryMessage")
 
             if let date = status.glucoseDate {
                 switch status.glucose {

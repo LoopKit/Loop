@@ -17,4 +17,19 @@ public enum MessageType: UInt8 {
     case DeviceLink     = 0x0A
     case GetBattery     = 0x72
     case GetPumpModel   = 0x8D
+
+    var bodyType: MessageBody.Type? {
+        switch self {
+        case .Alert:
+            return MySentryAlertMessageBody.self
+        case .AlertCleared:
+            return MySentryAlertClearedMessageBody.self
+        case .PumpStatus:
+            return MySentryPumpStatusMessageBody.self
+        case .PumpStatusAck:
+            return MySentryAckMessageBody.self
+        default:
+            return nil
+        }
+    }
 }

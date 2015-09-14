@@ -27,3 +27,10 @@ extension MessageBody {
         return [UInt8](count: self.length, repeatedValue: 0)
     }
 }
+
+
+public protocol DictionaryRepresentable {
+    var dictionaryRepresentation: [String: AnyObject] {
+        get
+    }
+}

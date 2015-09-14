@@ -89,22 +89,6 @@ private extension Int {
 }
 
 
-private extension NSDateComponents {
-    convenience init(mySentryBytes: [UInt8]) {
-        self.init()
-
-        hour = Int(mySentryBytes[0])
-        minute = Int(mySentryBytes[1])
-        second = Int(mySentryBytes[2])
-        year = Int(mySentryBytes[3]) + 2000
-        month = Int(mySentryBytes[4])
-        day = Int(mySentryBytes[5])
-
-        calendar = NSCalendar.currentCalendar()
-    }
-}
-
-
 /**
 Describes a status message sent periodically from the pump to any paired MySentry devices
 
@@ -121,7 +105,7 @@ a2 594040 04 9c 51 0003310f0905 01 39 37 00 025b 01 01 06 8d 26 22 08 15 0034 00
 a2 594040 04 87 51 0f18150f0907 01 03 71 00 045e 04 02 07 2c 04 44 ff ff 005e 02 00 00 73 0f16000f0907 0000 35
 ```
 */
-public struct MySentryPumpStatusMessageBody: MessageBody {
+public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentable {
     private static let reservoirSignificantDigit = 0.1
     private static let iobSigificantDigit = 0.025
     public static let length = 36
@@ -224,10 +208,28 @@ public struct MySentryPumpStatusMessageBody: MessageBody {
 
         dict["batteryRemainingPercent"] = batteryRemainingPercent
 
-        dict["byte1"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
+        dict["byte1"] = rxData.subdataWithRange(NSRange(1...1)).hexadecimalString
+        // {50}
+        dict["byte1High"] = String(format: "%02x", rxData[1] & 0b11110000)
+        // {1}
+        dict["byte1Low"] = Int(rxData[1] & 0b00000001)
+        // Observed values: 00, 01, 02
+        // These seem to correspond with carb/bolus activity
         dict["byte11"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
+        // Reservoir time remaining?
+        // 15: {02,01,00}
+        // 16: {00,04,05,06,07}
+        // 1617: {05a*, 06**
+        // 000000 when reservoir time is 0
+        // 2015-09-13T11:02:52-0700 -> 2015-09-13T17:09:00-0700
+        // 01053a, 010534, 010514, 01050e, 010509, 010504, 0104ff, 0104fa, 0104f5, 0104f0, 0104eb, 0104e6, 0104e1, 0104dc, 0104cd, 0104c8, 010055, 010050, 000000
+        //
         dict["byte1517"] = rxData.subdataWithRange(NSRange(15...17)).hexadecimalString
+        // Current alarms?
+        // 25: {00,52,65} 4:49 AM - 4:59 AM
+        // 26: 00
         dict["byte2526"] = rxData.subdataWithRange(NSRange(25...26)).hexadecimalString
+        // 27: {73}
         dict["byte27"] = rxData.subdataWithRange(NSRange(27...27)).hexadecimalString
 
         return dict
