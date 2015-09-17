@@ -18,7 +18,7 @@ public enum MessageType: UInt8 {
     case GetBattery     = 0x72
     case GetPumpModel   = 0x8D
 
-    var bodyType: MessageBody.Type? {
+    var bodyType: MessageBody.Type {
         switch self {
         case .Alert:
             return MySentryAlertMessageBody.self
@@ -29,7 +29,7 @@ public enum MessageType: UInt8 {
         case .PumpStatusAck:
             return MySentryAckMessageBody.self
         default:
-            return nil
+            return UnknownMessageBody.self
         }
     }
 }

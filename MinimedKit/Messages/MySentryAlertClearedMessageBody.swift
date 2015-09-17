@@ -36,7 +36,7 @@ public struct MySentryAlertClearedMessageBody: MessageBody, DictionaryRepresenta
     }
 
     public var txData: NSData {
-        return NSData()
+        return rxData
     }
 
     public var dictionaryRepresentation: [String: AnyObject] {

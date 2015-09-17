@@ -9,6 +9,7 @@
 public enum AlertType: UInt8 {
     case NoDelivery         = 0x04
     case MaxHourlyBolus     = 0x33
+    case LowReservoir       = 0x52
     case HighGlucose        = 0x65
     case LowGlucose         = 0x66
     case MeterBGNow         = 0x68

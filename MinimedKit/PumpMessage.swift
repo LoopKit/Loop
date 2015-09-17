@@ -26,7 +26,7 @@ public struct PumpMessage {
         if rxData.length >= 7, let
             packetType = PacketType(rawValue: rxData[0]),
             messageType = MessageType(rawValue: rxData[4]),
-            messageBody = messageType.bodyType?.init(rxData: rxData.subdataWithRange(NSRange(5..<rxData.length - 1)))
+            messageBody = messageType.bodyType.init(rxData: rxData.subdataWithRange(NSRange(5..<rxData.length - 1)))
         {
             self.packetType = packetType
             self.address = rxData.subdataWithRange(NSRange(1...3))

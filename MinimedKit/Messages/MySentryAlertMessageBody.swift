@@ -40,7 +40,7 @@ public struct MySentryAlertMessageBody: MessageBody, DictionaryRepresentable {
     }
 
     public var txData: NSData {
-        return NSData()
+        return rxData
     }
 
     public var dictionaryRepresentation: [String: AnyObject] {

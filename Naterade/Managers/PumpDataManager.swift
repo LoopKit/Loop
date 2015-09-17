@@ -72,6 +72,8 @@ class PumpDataManager {
                     logger?.addMessage(body, toCollection: "sentryAlert")
                 case let body as MySentryAlertClearedMessageBody:
                     logger?.addMessage(body, toCollection: "sentryAlert")
+                case let body as UnknownMessageBody:
+                    logger?.addMessage(body, toCollection: "sentryOther")
                 default:
                     break
                 }

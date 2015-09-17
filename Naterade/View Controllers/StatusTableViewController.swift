@@ -150,7 +150,7 @@ class StatusTableViewController: UITableViewController {
             case .ReservoirRemaining:
                 cell.textLabel?.text = NSLocalizedString("Units left", comment: "The title of the cell containing the amount of remaining insulin in the reservoir")
 
-                if let remaining = dataManager.latestPumpStatus?.reservoirRemaining {
+                if let remaining = dataManager.latestPumpStatus?.reservoirRemainingUnits {
                     let numberValue = remaining
                     cell.detailTextLabel?.text = "\(numberValue) Units"
                 } else {

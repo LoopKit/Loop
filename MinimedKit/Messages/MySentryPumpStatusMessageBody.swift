@@ -113,7 +113,10 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     public let pumpDate: NSDate
     public let batteryRemainingPercent: Int
     public let iob: Double
-    public let reservoirRemaining: Double
+    public let reservoirRemainingUnits: Double
+    public let reservoirRemainingDays: Int
+    public let reservoirRemainingMinutes: Int
+    public let reservoirEndDate: NSDate?
 
     public let glucoseTrend: GlucoseTrend
     public let glucoseDate: NSDate?
@@ -136,7 +139,18 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
             self.glucoseTrend = trend
             self.pumpDate = pumpDate
 
-            reservoirRemaining = Double(Int(bytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
+            reservoirRemainingUnits = Double(Int(bytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
+
+            reservoirRemainingDays = max(0, Int(rxData[15]) - 1)
+
+            if reservoirRemainingDays < 1 {
+                reservoirRemainingMinutes = Int(bytes: [rxData[16], rxData[17]])
+                reservoirEndDate = nil
+            } else {
+                reservoirRemainingMinutes = 0
+                reservoirEndDate = nil
+            }
+
             iob = Double(Int(bytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
             batteryRemainingPercent = Int(round(Double(rxData[14]) / 4.0 * 100))
 
@@ -176,7 +190,9 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
         var dict: [String: AnyObject] = [
             "glucoseTrend": String(glucoseTrend),
             "pumpDate": dateFormatter.stringFromDate(pumpDate),
-            "reservoirRemaining": reservoirRemaining,
+            "reservoirRemaining": reservoirRemainingUnits,
+            "reservoirRemainingDays": reservoirRemainingDays,
+            "reservoirRemainingMinutes": reservoirRemainingMinutes,
             "iob": iob
         ]
 
@@ -216,14 +232,15 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
         // Observed values: 00, 01, 02, 03
         // These seem to correspond with carb/bolus activity
         dict["byte11"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString
-        // Reservoir time remaining?
+        // Reservoir time remaining
         // 15: {04,03,02,01,00}
         // 16: {00,04,05,06,07}
         // 1617: {05a*, 06**
         // 000000 when reservoir time is 0
         // 2015-09-13T11:02:52-0700 -> 2015-09-13T17:09:00-0700
         // 01053a, 010534, 010514, 01050e, 010509, 010504, 0104ff, 0104fa, 0104f5, 0104f0, 0104eb, 0104e6, 0104e1, 0104dc, 0104cd, 0104c8, 010055, 010050, 000000
-        //
+        // 17:51?  01042f
+        // 17:45?  01 042a --> 17.75 hours... minutes!
         dict["byte1517"] = rxData.subdataWithRange(NSRange(15...17)).hexadecimalString
         // Current alarms?
         // 25: {00,52,65} 4:49 AM - 4:59 AM
@@ -236,7 +253,7 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     }
 
     public var txData: NSData {
-        return NSData()
+        return rxData
     }
 }
 
