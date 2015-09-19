@@ -60,7 +60,10 @@ class StatusTableViewController: UITableViewController {
 
     private enum Section: Int {
         case Pump = 0
+        case Watch
         case Sensor
+
+        static let count = 3
     }
 
     private enum PumpRow: Int {
@@ -85,13 +88,13 @@ class StatusTableViewController: UITableViewController {
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         switch dataManager.latestPumpStatus?.glucose {
         case .None:
-            return 1
+            return Section.count - 1
         case .Some(let glucose):
             switch glucose {
             case .Off:
-                return 1
+                return Section.count - 1
             default:
-                return 2
+                return Section.count
             }
         }
     }
@@ -119,7 +122,8 @@ class StatusTableViewController: UITableViewController {
                     return SensorRow.count
                 }
             }
-
+        case .Watch:
+            return 1
         }
     }
 
@@ -263,6 +267,29 @@ class StatusTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = emptyValueString
                 }
             }
+        case .Watch:
+            cell.textLabel?.text = NSLocalizedString("Watch App", comment: "The title of the cell containing Apple Watch App status")
+
+            let detailText: String
+
+            switch dataManager.watchSession {
+            case .None:
+                detailText = NSLocalizedString("Not available", comment: "The watch status detail displayed when connectivity is unavailable")
+            case let session?:
+                switch session.paired {
+                case false:
+                    detailText = NSLocalizedString("Not paired", comment: "The watch status detail displayed when there is no paired watch")
+                case true:
+                    switch session.watchAppInstalled {
+                    case false:
+                        detailText = NSLocalizedString("Not installed", comment: "The watch status detail displayed when the watch app is not installed")
+                    case true:
+                        detailText = String(session)
+                    }
+                }
+            }
+
+            cell.detailTextLabel?.text = detailText
         }
 
         return cell

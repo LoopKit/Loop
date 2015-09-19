@@ -177,7 +177,6 @@
                     </tabBar>
                     <connections>
                         <segue destination="1zR-tC-i50" kind="relationship" relationship="viewControllers" id="Bum-EM-yy8"/>
-                        <segue destination="dEy-1I-4y7" kind="relationship" relationship="viewControllers" id="uOT-R2-pZb"/>
                         <segue destination="Ndo-W4-z7b" kind="relationship" relationship="viewControllers" id="n8G-Jk-DLG"/>
                     </connections>
                 </tabBarController>
@@ -228,50 +227,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Tc-kF-7yT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="753" y="-1358"/>
-        </scene>
-        <!--Packet Log View Controller-->
-        <scene sceneID="y4Q-qD-NCh">
-            <objects>
-                <viewController id="dEy-1I-4y7" customClass="PacketLogViewController" customModule="Naterade" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="BeN-Fd-drt"/>
-                        <viewControllerLayoutGuide type="bottom" id="LvQ-cq-SQS"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="AcW-3t-cIB">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="y0I-Wa-eEq">
-                                <rect key="frame" x="0.0" y="20" width="600" height="523"/>
-                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textView>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="y0I-Wa-eEq" firstAttribute="top" secondItem="BeN-Fd-drt" secondAttribute="bottom" id="893-AC-ccc"/>
-                            <constraint firstItem="y0I-Wa-eEq" firstAttribute="trailing" secondItem="AcW-3t-cIB" secondAttribute="trailingMargin" id="E4f-Zh-pC4"/>
-                            <constraint firstAttribute="trailing" secondItem="y0I-Wa-eEq" secondAttribute="trailing" id="Fr6-v6-wK5"/>
-                            <constraint firstItem="LvQ-cq-SQS" firstAttribute="top" secondItem="y0I-Wa-eEq" secondAttribute="bottom" constant="8" symbolic="YES" id="Y7L-FR-y63"/>
-                            <constraint firstItem="y0I-Wa-eEq" firstAttribute="leading" secondItem="AcW-3t-cIB" secondAttribute="leadingMargin" id="cXu-cX-iFk"/>
-                            <constraint firstItem="y0I-Wa-eEq" firstAttribute="leading" secondItem="AcW-3t-cIB" secondAttribute="leading" id="m04-eG-fqm"/>
-                        </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="E4f-Zh-pC4"/>
-                                <exclude reference="cXu-cX-iFk"/>
-                            </mask>
-                        </variation>
-                    </view>
-                    <tabBarItem key="tabBarItem" systemItem="history" id="sY1-9a-QU5"/>
-                    <connections>
-                        <outlet property="logTextView" destination="y0I-Wa-eEq" id="7wb-bR-End"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="hy8-kN-vAE" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="753" y="-681"/>
+            <point key="canvasLocation" x="759" y="-1190"/>
         </scene>
         <!--Settings-->
         <scene sceneID="Y9V-uE-m8v">
@@ -290,7 +246,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="7fc-WD-Jlz" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="753" y="0.0"/>
+            <point key="canvasLocation" x="767" y="-286"/>
         </scene>
     </scenes>
 </document>

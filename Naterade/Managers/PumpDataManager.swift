@@ -12,6 +12,10 @@ import MinimedKit
 import RileyLinkKit
 import WatchConnectivity
 
+class ConnectDelegate: NSObject, WCSessionDelegate {
+
+}
+
 class PumpDataManager {
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -224,7 +228,11 @@ class PumpDataManager {
 
     lazy var watchSession: WCSession? = {
         if WCSession.isSupported() {
-            return WCSession.defaultSession()
+            let session = WCSession.defaultSession()
+            session.delegate = ConnectDelegate()
+            session.activateSession()
+
+            return session
         } else {
             return nil
         }
