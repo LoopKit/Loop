@@ -10,6 +10,7 @@ import Foundation
 import HealthKit
 import MinimedKit
 import RileyLinkKit
+import WatchConnectivity
 
 class PumpDataManager {
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
@@ -69,8 +70,10 @@ class PumpDataManager {
                 case let body as MySentryPumpStatusMessageBody:
                     updatePumpStatus(body, fromDevice: device)
                 case let body as MySentryAlertMessageBody:
+                    // TODO: de-dupe
                     logger?.addMessage(body, toCollection: "sentryAlert")
                 case let body as MySentryAlertClearedMessageBody:
+                    // TODO: de-dupe
                     logger?.addMessage(body, toCollection: "sentryAlert")
                 case let body as UnknownMessageBody:
                     logger?.addMessage(body, toCollection: "sentryOther")
@@ -129,6 +132,17 @@ class PumpDataManager {
                     }
                 default:
                     break
+                }
+            }
+
+            // Send data to watch
+            if let session = watchSession where session.paired && session.watchAppInstalled {
+                if !session.complicationEnabled {
+                    do {
+                        let context = ["statusData": status.txData]
+                        try session.updateApplicationContext(context)
+                    } catch {
+                    }
                 }
             }
         }
@@ -202,6 +216,16 @@ class PumpDataManager {
             return store
         } else {
             NSLog("Health data is not available on this device")
+            return nil
+        }
+    }()
+
+    // MARK: - WatchKit
+
+    lazy var watchSession: WCSession? = {
+        if WCSession.isSupported() {
+            return WCSession.defaultSession()
+        } else {
             return nil
         }
     }()

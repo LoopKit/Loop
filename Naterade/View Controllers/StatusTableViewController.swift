@@ -148,11 +148,22 @@ class StatusTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = emptyValueString
                 }
             case .ReservoirRemaining:
-                cell.textLabel?.text = NSLocalizedString("Units left", comment: "The title of the cell containing the amount of remaining insulin in the reservoir")
+                cell.textLabel?.text = NSLocalizedString("Reservoir", comment: "The title of the cell containing the amount of remaining insulin in the reservoir")
 
-                if let remaining = dataManager.latestPumpStatus?.reservoirRemainingUnits {
-                    let numberValue = remaining
-                    cell.detailTextLabel?.text = "\(numberValue) Units"
+                if let status = dataManager.latestPumpStatus {
+                    let components = NSDateComponents()
+                    components.day = status.reservoirRemainingDays
+                    components.minute = status.reservoirRemainingMinutes
+
+                    let componentsFormatter = NSDateComponentsFormatter()
+                    componentsFormatter.unitsStyle = .Short
+                    componentsFormatter.includesApproximationPhrase = components.day > 0
+                    componentsFormatter.includesTimeRemainingPhrase = true
+
+                    let daysValue = componentsFormatter.stringFromDateComponents(components) ?? ""
+                    let numberValue = NSNumber(double: status.reservoirRemainingUnits).descriptionWithLocale(locale)
+
+                    cell.detailTextLabel?.text = "\(numberValue) Units (\(daysValue))"
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
                 }
