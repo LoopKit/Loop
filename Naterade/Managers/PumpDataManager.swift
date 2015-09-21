@@ -145,7 +145,8 @@ class PumpDataManager {
                     do {
                         let context = ["statusData": status.txData]
                         try session.updateApplicationContext(context)
-                    } catch {
+                    } catch let error as NSError {
+                        NSLog("Error calling updateApplicationContext: %@", error)
                     }
                 }
             }

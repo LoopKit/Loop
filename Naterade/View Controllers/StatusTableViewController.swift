@@ -161,6 +161,7 @@ class StatusTableViewController: UITableViewController {
 
                     let componentsFormatter = NSDateComponentsFormatter()
                     componentsFormatter.unitsStyle = .Short
+                    componentsFormatter.allowedUnits = [.Day, .Hour, .Minute]
                     componentsFormatter.includesApproximationPhrase = components.day > 0
                     componentsFormatter.includesTimeRemainingPhrase = true
 
