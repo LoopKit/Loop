@@ -227,10 +227,12 @@ class PumpDataManager {
 
     // MARK: - WatchKit
 
+    lazy var watchSessionDelegate = ConnectDelegate()
+
     lazy var watchSession: WCSession? = {
         if WCSession.isSupported() {
             let session = WCSession.defaultSession()
-            session.delegate = ConnectDelegate()
+            session.delegate = self.watchSessionDelegate
             session.activateSession()
 
             return session
