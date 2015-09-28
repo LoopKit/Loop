@@ -18,7 +18,7 @@ extension Int {
 }
 
 
-class InterfaceController: WKInterfaceController, WCSessionDelegate {
+class InterfaceController: WKInterfaceController {
 
     @IBOutlet var glucoseLabel: WKInterfaceLabel!
     @IBOutlet var glucoseUnitLabel: WKInterfaceLabel!
@@ -26,32 +26,29 @@ class InterfaceController: WKInterfaceController, WCSessionDelegate {
     @IBOutlet var IOBLabel: WKInterfaceLabel!
     @IBOutlet var reservoirLabel: WKInterfaceLabel!
 
-    private var connectSession: WCSession?
-
-    private var lastStatusUpdateTime: NSDate?
+    let dataManager = PumpDataManager.sharedManager
 
     override func awakeWithContext(context: AnyObject?) {
         super.awakeWithContext(context)
-        
-        if WCSession.isSupported() {
-            connectSession = WCSession.defaultSession()
-            connectSession?.delegate = self
-            connectSession?.activateSession()
-        }
     }
 
     override func willActivate() {
         super.willActivate()
 
-        if lastStatusUpdateTime != nil && NSDate().timeIntervalSinceDate(lastStatusUpdateTime!) > 15.minutes {
-            lastStatusUpdateTime = nil
-            clearAllLabels()
-        }
+        dataManager.addObserver(self, forKeyPath: "lastStatusData", options: [], context: &lastStatusDataObserverContext)
+
+        lastStatusUpdate = MySentryPumpStatusMessageBody(rxData: dataManager.lastStatusData ?? NSData())
     }
 
     override func didDeactivate() {
+        dataManager.removeObserver(self, forKeyPath: "lastStatusData", context: &lastStatusDataObserverContext)
+
         super.didDeactivate()
     }
+
+    // MARK: - Data
+
+    private var lastStatusDataObserverContext = 0
 
     private func clearAllLabels() {
         glucoseLabel.setText("--")
@@ -60,44 +57,57 @@ class InterfaceController: WKInterfaceController, WCSessionDelegate {
         reservoirLabel.setText("-.-")
     }
 
-    // MARK: - WCSessionDelegate
+    private var lastStatusUpdate: MySentryPumpStatusMessageBody? {
+        didSet {
+            dispatch_async(dispatch_get_main_queue()) { [weak self = self, oldValue = oldValue] () -> Void in
+                if let status = self?.lastStatusUpdate where NSDate().timeIntervalSinceDate(status.pumpDate) <= 15.minutes {
+                    if oldValue != status {
+                        switch status.glucose {
+                        case .Active(glucose: let glucose):
+                            let direction: String
 
-    func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
-        if let statusData = applicationContext["statusData"] as? NSData, status = MySentryPumpStatusMessageBody(rxData: statusData) {
+                            switch status.glucoseTrend {
+                            case .Flat:
+                                direction = ""
+                            case .Down:
+                                direction = "↓ "
+                            case .DownDown:
+                                direction = "⇊ "
+                            case .Up:
+                                direction = "↑ "
+                            case .UpUp:
+                                direction = "⇈ "
+                            }
 
-            dispatch_async(dispatch_get_main_queue()) { [weak self = self] () -> Void in
-                self?.lastStatusUpdateTime = status.pumpDate
+                            self?.glucoseLabel.setText("\(direction)\(glucose)")
+                            self?.glucoseUnitLabel.setHidden(false)
+                        default:
+                            self?.glucoseLabel.setText(String(status.glucose))
+                            self?.glucoseUnitLabel.setHidden(true)
+                        }
 
-                switch status.glucose {
-                case .Active(glucose: let glucose):
-                    let direction: String
+                        let decimalFormatter = NSNumberFormatter()
+                        decimalFormatter.numberStyle = .DecimalStyle
 
-                    switch status.glucoseTrend {
-                    case .Flat:
-                        direction = ""
-                    case .Down:
-                        direction = "↓ "
-                    case .DownDown:
-                        direction = "⇊ "
-                    case .Up:
-                        direction = "↑ "
-                    case .UpUp:
-                        direction = "⇈ "
+                        self?.IOBLabel.setText(decimalFormatter.stringFromNumber(status.iob))
+                        self?.reservoirLabel.setText(decimalFormatter.stringFromNumber(status.reservoirRemainingUnits))
                     }
-
-                    self?.glucoseLabel.setText("\(direction)\(glucose)")
-                    self?.glucoseUnitLabel.setHidden(false)
-                default:
-                    self?.glucoseLabel.setText(String(status.glucose))
-                    self?.glucoseUnitLabel.setHidden(true)
+                } else {
+                    self?.clearAllLabels()
                 }
-
-                let decimalFormatter = NSNumberFormatter()
-                decimalFormatter.numberStyle = .DecimalStyle
-
-                self?.IOBLabel.setText(decimalFormatter.stringFromNumber(status.iob))
-                self?.reservoirLabel.setText(decimalFormatter.stringFromNumber(status.reservoirRemainingUnits))
             }
+        }
+    }
+
+    // MARK: - KVO
+
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+        if context == &lastStatusDataObserverContext {
+            if let data = dataManager.lastStatusData {
+                lastStatusUpdate = MySentryPumpStatusMessageBody(rxData: data)
+            }
+        } else {
+            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
         }
     }
 }
