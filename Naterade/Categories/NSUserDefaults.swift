@@ -13,6 +13,8 @@ extension NSUserDefaults {
     private enum Key: String {
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case PumpID = "com.loudnate.Naterade.PumpID"
+        case TransmitterID = "com.loudnate.Naterade.TransmitterID"
+        case TransmitterStartTime = "comm.loudnate.Naterade.TransmitterStartTime"
     }
 
     var connectedPeripheralIDs: [String] {
@@ -30,6 +32,28 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue, forKey: Key.PumpID.rawValue)
+        }
+    }
+
+    var transmitterStartTime: NSTimeInterval? {
+        get {
+            return doubleForKey(Key.TransmitterStartTime.rawValue)
+        }
+        set {
+            if let value = newValue {
+                setDouble(value, forKey: Key.TransmitterStartTime.rawValue)
+            } else {
+                setNilValueForKey(Key.TransmitterStartTime.rawValue)
+            }
+        }
+    }
+
+    var transmitterID: String? {
+        get {
+            return stringForKey(Key.TransmitterID.rawValue)
+        }
+        set {
+            setObject(newValue, forKey: Key.TransmitterID.rawValue)
         }
     }
 

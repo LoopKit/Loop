@@ -11,6 +11,7 @@ import HealthKit
 import MinimedKit
 import RileyLinkKit
 import WatchConnectivity
+import xDripG5
 
 class ConnectDelegate: NSObject, WCSessionDelegate {
 
@@ -200,6 +201,16 @@ class PumpDataManager {
             }
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
+        }
+    }
+
+    var transmitterID: String? {
+        didSet {
+            if transmitterID?.characters.count != 6 {
+                transmitterID = nil
+            }
+
+            NSUserDefaults.standardUserDefaults().transmitterID = transmitterID
         }
     }
 

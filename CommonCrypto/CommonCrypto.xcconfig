@@ -1,0 +1,13 @@
+//
+//  CommonCrypto.xcconfig
+//  Naterade
+//
+//  Created by Nathan Racklyeft on 11/25/15.
+//  Copyright © 2015 Nathan Racklyeft. All rights reserved.
+//
+
+// @see http://stackoverflow.com/questions/25248598/importing-commoncrypto-in-a-swift-framework
+
+MODULEMAP_FILE[sdk=iphoneos*]        = $(SRCROOT)/CommonCrypto/iphoneos.modulemap
+MODULEMAP_FILE[sdk=iphonesimulator*] = $(SRCROOT)/CommonCrypto/iphonesimulator.modulemap
+MODULEMAP_FILE[sdk=macosx*]          = $(SRCROOT)/CommonCrypto/macosx.modulemap

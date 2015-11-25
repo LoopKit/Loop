@@ -9,7 +9,7 @@
 import UIKit
 import RileyLinkKit
 
-class SettingsTableViewController: UITableViewController, PumpIDTableViewControllerDelegate {
+class SettingsTableViewController: UITableViewController, TextFieldTableViewControllerDelegate {
 
     @IBOutlet var devicesSectionTitleView: UIView!
 
@@ -99,7 +99,7 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return 1
+            return 2
         case 1:
             switch dataManager.state {
             case .Ready(manager: let manager):
@@ -117,11 +117,23 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
 
         switch indexPath.section {
         case 0:
-            let pumpIDCell = tableView.dequeueReusableCellWithIdentifier("PumpIDTableViewCell")!
+            switch indexPath.row {
+            case 0:
+                let pumpIDCell = tableView.dequeueReusableCellWithIdentifier("ConfigTableViewCell", forIndexPath: indexPath)
+                pumpIDCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
+                pumpIDCell.detailTextLabel?.text = dataManager.pumpID ?? NSLocalizedString("Tap to set", comment: "The empty-state text for the Pump ID value")
 
-            pumpIDCell.detailTextLabel?.text = dataManager.pumpID ?? NSLocalizedString("Tap to set", comment: "The empty-state text for the Pump ID value")
+                cell = pumpIDCell
+            case 1:
+                let transmitterIDCell = tableView.dequeueReusableCellWithIdentifier("ConfigTableViewCell", forIndexPath: indexPath)
+                transmitterIDCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the transmitter ID config value")
+                transmitterIDCell.detailTextLabel?.text = dataManager.transmitterID ?? NSLocalizedString("Tap to set", comment: "The empty-state text for the Transmitter ID value")
 
-            cell = pumpIDCell
+                cell = transmitterIDCell
+            default:
+                assertionFailure()
+            }
+
         case 1:
             let deviceCell = tableView.dequeueReusableCellWithIdentifier("RileyLinkDeviceTableViewCell") as! RileyLinkDeviceTableViewCell
 
@@ -173,9 +185,24 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
     // MARK: - Navigation
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let pumpIDTVC = segue.destinationViewController as? PumpIDTableViewController {
-            pumpIDTVC.pumpID = dataManager.pumpID
-            pumpIDTVC.delegate = self
+        if let vc = segue.destinationViewController as? TextFieldTableViewController,
+            cell = sender as? UITableViewCell,
+            indexPath = tableView.indexPathForCell(cell)
+        {
+            switch indexPath.row {
+            case 0:
+                vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                vc.value = dataManager.pumpID
+            case 1:
+                vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                vc.value = dataManager.transmitterID
+            default:
+                assertionFailure()
+            }
+
+            vc.title = cell.textLabel?.text
+            vc.indexPath = indexPath
+            vc.delegate = self
         }
     }
 
@@ -197,10 +224,19 @@ class SettingsTableViewController: UITableViewController, PumpIDTableViewControl
         }
     }
 
-    // MARK: - PumpIDTableViewControllerDelegate
+    // MARK: - TextFieldTableViewControllerDelegate
 
-    func pumpIDTableViewControllerDidEndEditing(controller: PumpIDTableViewController) {
-        dataManager.pumpID = controller.pumpID
+    func textFieldTableViewControllerDidEndEditing(controller: TextFieldTableViewController) {
+        if let indexPath = controller.indexPath {
+            switch indexPath.row {
+            case 0:
+                dataManager.pumpID = controller.value
+            case 1:
+                dataManager.transmitterID = controller.value
+            default:
+                assertionFailure()
+            }
+        }
 
         tableView.reloadData()
     }
