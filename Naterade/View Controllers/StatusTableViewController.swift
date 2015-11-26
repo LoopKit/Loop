@@ -10,7 +10,7 @@ import UIKit
 
 class StatusTableViewController: UITableViewController {
 
-    private var pumpDataStatusObserver: AnyObject?
+    private var dataManagerObserver: AnyObject?
 
     unowned let dataManager = PumpDataManager.sharedManager
 
@@ -19,13 +19,13 @@ class StatusTableViewController: UITableViewController {
 
         tableView.rowHeight = 44
 
-        pumpDataStatusObserver = NSNotificationCenter.defaultCenter().addObserverForName(PumpDataManager.PumpStatusUpdatedNotification, object: dataManager, queue: nil) { (note) -> Void in
+        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: dispatch_get_main_queue()) { (note) -> Void in
             self.tableView.reloadData()
         }
     }
 
     deinit {
-        if let observer = pumpDataStatusObserver {
+        if let observer = dataManagerObserver {
             NSNotificationCenter.defaultCenter().removeObserver(observer)
         }
     }
@@ -77,24 +77,18 @@ class StatusTableViewController: UITableViewController {
     private enum SensorRow: Int {
         case Date
         case Glucose
-        case PreviousGlucose
-        case Age
-        case NextCalibration
+        case Trend
+        case State
 
-        static let count = 5
+        static let count = 4
     }
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.latestPumpStatus?.glucose {
+        switch dataManager.latestGlucose {
         case .None:
             return Section.count - 1
-        case .Some(let glucose):
-            switch glucose {
-            case .Off:
-                return Section.count - 1
-            default:
-                return Section.count
-            }
+        case .Some:
+            return Section.count
         }
     }
 
@@ -104,23 +98,11 @@ class StatusTableViewController: UITableViewController {
             switch dataManager.latestPumpStatus {
             case .None:
                 return 1
-            case .Some(_):
+            case .Some:
                 return PumpRow.count
             }
         case .Sensor:
-            switch dataManager.latestPumpStatus?.glucose {
-            case .None:
-                return 0
-            case .Some(let glucose):
-                switch glucose {
-                case .Off:
-                    return 0
-                case .Ended:
-                    return 3
-                default:
-                    return SensorRow.count
-                }
-            }
+            return SensorRow.count
         }
     }
 
@@ -184,7 +166,9 @@ class StatusTableViewController: UITableViewController {
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Read", comment: "The title of the cell containing the last updated sensor date")
 
-                if let date = dataManager.latestPumpStatus?.glucoseDate {
+                if let glucose = dataManager.latestGlucose, startTime = dataManager.transmitterStartTime {
+                    let date = NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
+
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
@@ -192,77 +176,43 @@ class StatusTableViewController: UITableViewController {
             case .Glucose:
                 cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
 
-                if let status = dataManager.latestPumpStatus {
-
-                    switch status.glucose {
-                    case .Active(glucose: let value):
-                        let direction: String
-
-                        switch status.glucoseTrend {
-                        case .Flat:
-                            direction = ""
-                        case .Down:
-                            direction = "↓ "
-                        case .DownDown:
-                            direction = "⇊ "
-                        case .Up:
-                            direction = "↑ "
-                        case .UpUp:
-                            direction = "⇈ "
-                        }
-
-                        let numberString = NSNumber(integer: value).descriptionWithLocale(locale)
-                        cell.detailTextLabel?.text = "\(direction)\(numberString) mg/dL"
-                    default:
-                        cell.detailTextLabel?.text = String(status.glucose)
-                    }
-                    
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            case .PreviousGlucose:
-                cell.textLabel?.text = NSLocalizedString("Previous Glucose", comment: "The title of the cell containing the next most-recent glucose reading")
-
-                switch dataManager.latestPumpStatus?.previousGlucose {
-                case .None:
-                    cell.detailTextLabel?.text = emptyValueString
-                case .Active(glucose: let value)?:
-                    let numberString = NSNumber(integer: value).descriptionWithLocale(locale)
+                if let glucose = dataManager.latestGlucose {
+                    let numberString = NSNumber(unsignedShort: glucose.glucose).descriptionWithLocale(locale)
                     cell.detailTextLabel?.text = "\(numberString) mg/dL"
-                case .Some(let glucose):
-                    cell.detailTextLabel?.text = String(glucose)
-                }
-            case .Age:
-                cell.textLabel?.text = NSLocalizedString("Sensor Age", comment: "The title of the cell containing the sensor age and time remaining")
-
-                switch dataManager.latestPumpStatus {
-                case .None:
-                    cell.detailTextLabel?.text = emptyValueString
-                case let status?:
-                    let dateFormatter = NSDateComponentsFormatter()
-                    dateFormatter.unitsStyle = .Short
-
-                    let displayString = NSLocalizedString("%1$@ (%2$@)", comment: "The format of the sensor age (1) and sensor remaining (2) combined description")
-
-                    let sensorAge = dateFormatter.stringFromTimeInterval(NSTimeInterval(status.sensorAgeHours * 60 * 60))
-
-                    dateFormatter.includesTimeRemainingPhrase = true
-
-                    let sensorRemaining = dateFormatter.stringFromTimeInterval(NSTimeInterval(status.sensorRemainingHours * 60 * 60))
-
-                    if let sensorAge = sensorAge, sensorRemaining = sensorRemaining {
-                        cell.detailTextLabel?.text = String(format: displayString, sensorAge, sensorRemaining)
-                    } else {
-                        cell.detailTextLabel?.text = emptyValueString
-                    }
-                }
-            case .NextCalibration:
-                cell.textLabel?.text = NSLocalizedString("Next calibration", comment: "The title of the cell containing the date of next sensor calibration")
-
-                if let date = dataManager.latestPumpStatus?.nextSensorCalibration {
-                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
+                }
+            case .Trend:
+                cell.textLabel?.text = NSLocalizedString("Trend", comment: "The title of the cell containing the current glucose trend")
+
+                if let glucose = dataManager.latestGlucose {
+                    let direction: String
+
+                    switch glucose.trend {
+                    case let x where x < -10:
+                        direction = "⇊"
+                    case let x where x < 0:
+                        direction = "↓"
+                    case let x where x > 10:
+                        direction = "⇈"
+                    case let x where x > 0:
+                        direction = "↑"
+                    default:
+                        direction = ""
+                    }
+
+                    let numberString = NSNumber(char: glucose.trend).descriptionWithLocale(locale)
+                    cell.detailTextLabel?.text = "\(numberString)\(direction)"
+                } else {
+                    cell.detailTextLabel?.text = emptyValueString
+                }
+            case .State:
+                cell.textLabel?.text = NSLocalizedString("Calibration state", comment: "The title of the cell containing the current sensor state")
+
+                if let glucose = dataManager.latestGlucose {
+                    cell.detailTextLabel?.text = String(format: "%02x", glucose.state)
+                } else {
+                    cell.detailTextLabel?.text = nil
                 }
             }
         }

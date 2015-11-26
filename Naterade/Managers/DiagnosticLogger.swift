@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import MinimedKit
 
 
 class DiagnosticLogger {
@@ -32,8 +31,8 @@ class DiagnosticLogger {
         }
     }
 
-    func addMessage(message: DictionaryRepresentable, toCollection collection: String) {
-        if let messageData = try? NSJSONSerialization.dataWithJSONObject(message.dictionaryRepresentation, options: []),
+    func addMessage(message: [String: AnyObject], toCollection collection: String) {
+        if let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
             let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),
             components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
         {
@@ -54,7 +53,5 @@ class DiagnosticLogger {
                 task.resume()
             }
         }
-
-
     }
 }

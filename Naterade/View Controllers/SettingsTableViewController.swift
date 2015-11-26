@@ -88,7 +88,7 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
     // MARK: - UITableViewDataSource
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.state {
+        switch dataManager.rileyLinkState {
         case .Ready(manager: _):
             return 2
         case .NeedsConfiguration:
@@ -101,7 +101,7 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
         case 0:
             return 2
         case 1:
-            switch dataManager.state {
+            switch dataManager.rileyLinkState {
             case .Ready(manager: let manager):
                 return manager.devices.count
             case .NeedsConfiguration:

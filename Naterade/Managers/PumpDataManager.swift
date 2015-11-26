@@ -13,30 +13,42 @@ import RileyLinkKit
 import WatchConnectivity
 import xDripG5
 
+enum State<T> {
+    case NeedsConfiguration
+    case Ready(T)
+}
+
 class ConnectDelegate: NSObject, WCSessionDelegate {
 
 }
 
-class PumpDataManager {
+class PumpDataManager: TransmitterDelegate {
+    static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
-
-    enum State {
-        case NeedsConfiguration
-        case Ready(manager: RileyLinkManager)
-    }
 
     // MARK: - Observed state
 
     lazy var logger = DiagnosticLogger()
 
     var rileyLinkManager: RileyLinkManager? {
-        switch state {
-        case .Ready(manager: let manager):
+        switch rileyLinkState {
+        case .Ready(let manager):
             return manager
         case .NeedsConfiguration:
             return nil
         }
     }
+
+    var transmitter: Transmitter? {
+        switch transmitterState {
+        case .Ready(let transmitter):
+            return transmitter
+        case .NeedsConfiguration:
+            return nil
+        }
+    }
+
+    // MARK: - RileyLink observation
 
     var rileyLinkManagerObserver: AnyObject? {
         willSet {
@@ -76,12 +88,12 @@ class PumpDataManager {
                     updatePumpStatus(body, fromDevice: device)
                 case let body as MySentryAlertMessageBody:
                     // TODO: de-dupe
-                    logger?.addMessage(body, toCollection: "sentryAlert")
+//                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
                 case let body as MySentryAlertClearedMessageBody:
                     // TODO: de-dupe
-                    logger?.addMessage(body, toCollection: "sentryAlert")
+//                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
                 case let body as UnknownMessageBody:
-                    logger?.addMessage(body, toCollection: "sentryOther")
+                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryOther")
                 default:
                     break
                 }
@@ -103,13 +115,11 @@ class PumpDataManager {
         rileyLinkManager?.disconnectDevice(device)
     }
 
-    // MARK: - Managed state
-
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
         if status != latestPumpStatus {
             latestPumpStatus = status
 
-            logger?.addMessage(status, toCollection: "sentryMessage")
+//            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
 
             if let date = status.glucoseDate {
                 switch status.glucose {
@@ -154,16 +164,60 @@ class PumpDataManager {
         }
     }
 
+    // MARK: - TransmitterDelegate
+
+    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
+        logger?.addMessage([
+            "error": "\(error)",
+            "collectedAt": NSDateFormatter.ISO8601DateFormatter().stringFromDate(NSDate())
+            ], toCollection: "g5"
+        )
+
+        NSLog("%s, %@", __FUNCTION__, "\(error)")
+    }
+
+    func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
+        transmitterStartTime = transmitter.startTimeInterval
+        latestGlucose = glucose
+    }
+
+    // MARK: - Managed state
+
+    var transmitterStartTime: NSTimeInterval? = NSUserDefaults.standardUserDefaults().transmitterStartTime {
+        didSet {
+            if oldValue != transmitterStartTime {
+                NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
+            }
+        }
+    }
+
+    var latestGlucose: GlucoseRxMessage? {
+        didSet {
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+        }
+    }
+
     var latestPumpStatus: MySentryPumpStatusMessageBody? {
         didSet {
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
         }
     }
 
-    var state: State = .NeedsConfiguration {
+    var transmitterState: State<Transmitter> = .NeedsConfiguration {
+        didSet {
+            switch transmitterState {
+            case .Ready(let transmitter):
+                transmitter.delegate = self
+            case .NeedsConfiguration:
+                break
+            }
+        }
+    }
+
+    var rileyLinkState: State<RileyLinkManager> = .NeedsConfiguration {
         willSet {
             switch newValue {
-            case .Ready(manager: let manager):
+            case .Ready(let manager):
                 rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self = self] (note) -> Void in
                     self?.receivedRileyLinkManagerNotification(note)
                 }
@@ -191,13 +245,13 @@ class PumpDataManager {
                 pumpID = nil
             }
 
-            switch state {
-            case .NeedsConfiguration where pumpID != nil:
-                state = .Ready(manager: RileyLinkManager(pumpID: pumpID!, autoconnectIDs: connectedPeripheralIDs))
-            case .Ready(manager: _) where pumpID == nil:
-                state = .NeedsConfiguration
-            case .NeedsConfiguration, .Ready:
+            switch (rileyLinkState, pumpID) {
+            case (_, let pumpID?):
+                rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
+            case (.NeedsConfiguration, .None):
                 break
+            case (.Ready, .None):
+                rileyLinkState = .NeedsConfiguration
             }
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
@@ -208,6 +262,21 @@ class PumpDataManager {
         didSet {
             if transmitterID?.characters.count != 6 {
                 transmitterID = nil
+            }
+
+            switch (transmitterState, transmitterID) {
+            case (.NeedsConfiguration, let transmitterID?):
+                transmitterState = .Ready(Transmitter(
+                    ID: transmitterID,
+                    startTimeInterval: NSUserDefaults.standardUserDefaults().transmitterStartTime,
+                    passiveModeEnabled: true
+                ))
+            case (.Ready, .None):
+                transmitterState = .NeedsConfiguration
+            case (.Ready(let transmitter), let transmitterID?):
+                transmitter.ID = transmitterID
+            case (.NeedsConfiguration, .None):
+                break
             }
 
             NSUserDefaults.standardUserDefaults().transmitterID = transmitterID
