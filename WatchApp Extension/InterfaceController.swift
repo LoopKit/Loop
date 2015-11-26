@@ -35,66 +35,57 @@ class InterfaceController: WKInterfaceController {
     override func willActivate() {
         super.willActivate()
 
-        dataManager.addObserver(self, forKeyPath: "lastStatusData", options: [], context: &lastStatusDataObserverContext)
+        dataManager.addObserver(self, forKeyPath: "lastContextData", options: [], context: &lastContextDataObserverContext)
 
-        lastStatusUpdate = MySentryPumpStatusMessageBody(rxData: dataManager.lastStatusData ?? NSData())
+        updateFromContext(dataManager.lastContextData)
     }
 
     override func didDeactivate() {
-        dataManager.removeObserver(self, forKeyPath: "lastStatusData", context: &lastStatusDataObserverContext)
+        dataManager.removeObserver(self, forKeyPath: "lastContextData", context: &lastContextDataObserverContext)
 
         super.didDeactivate()
     }
 
     // MARK: - Data
 
-    private var lastStatusDataObserverContext = 0
+    private var lastContextDataObserverContext = 0
 
-    private func clearAllLabels() {
-        glucoseLabel.setText("--")
-        glucoseUnitLabel.setHidden(false)
-        IOBLabel.setText("-.-")
-        reservoirLabel.setText("-.-")
-    }
+    private func updateFromContext(context: WatchContext?) {
+        dispatch_async(dispatch_get_main_queue()) { [weak self] in
+            if let date = context?.pumpDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
+                let iob = context?.IOB, reservoir = context?.reservoir
+            {
+                let decimalFormatter = NSNumberFormatter()
+                decimalFormatter.numberStyle = .DecimalStyle
 
-    private var lastStatusUpdate: MySentryPumpStatusMessageBody? {
-        didSet {
-            dispatch_async(dispatch_get_main_queue()) { [weak self = self, oldValue = oldValue] () -> Void in
-                if let status = self?.lastStatusUpdate where NSDate().timeIntervalSinceDate(status.pumpDate) <= 15.minutes {
-                    if oldValue != status {
-                        switch status.glucose {
-                        case .Active(glucose: let glucose):
-                            let direction: String
+                self?.IOBLabel.setText(decimalFormatter.stringFromNumber(iob))
+                self?.reservoirLabel.setText(decimalFormatter.stringFromNumber(reservoir))
+            } else {
+                self?.IOBLabel.setText("-.-")
+                self?.reservoirLabel.setText("-.-")
+            }
 
-                            switch status.glucoseTrend {
-                            case .Flat:
-                                direction = ""
-                            case .Down:
-                                direction = "↓ "
-                            case .DownDown:
-                                direction = "⇊ "
-                            case .Up:
-                                direction = "↑ "
-                            case .UpUp:
-                                direction = "⇈ "
-                            }
-
-                            self?.glucoseLabel.setText("\(direction)\(glucose)")
-                            self?.glucoseUnitLabel.setHidden(false)
-                        default:
-                            self?.glucoseLabel.setText(String(status.glucose))
-                            self?.glucoseUnitLabel.setHidden(true)
-                        }
-
-                        let decimalFormatter = NSNumberFormatter()
-                        decimalFormatter.numberStyle = .DecimalStyle
-
-                        self?.IOBLabel.setText(decimalFormatter.stringFromNumber(status.iob))
-                        self?.reservoirLabel.setText(decimalFormatter.stringFromNumber(status.reservoirRemainingUnits))
-                    }
-                } else {
-                    self?.clearAllLabels()
+            if let date = context?.glucoseDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
+                let glucose = context?.glucoseValue, trend = context?.glucoseTrend
+            {
+                let direction: String
+                switch trend {
+                case let x where x < -10:
+                    direction = "⇊"
+                case let x where x < 0:
+                    direction = "↓"
+                case let x where x > 10:
+                    direction = "⇈"
+                case let x where x > 0:
+                    direction = "↑"
+                default:
+                    direction = ""
                 }
+
+                self?.glucoseLabel.setText("\(direction)\(glucose)")
+            } else {
+                self?.glucoseLabel.setText("--")
+                self?.glucoseUnitLabel.setHidden(false)
             }
         }
     }
@@ -102,9 +93,9 @@ class InterfaceController: WKInterfaceController {
     // MARK: - KVO
 
     override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-        if context == &lastStatusDataObserverContext {
-            if let data = dataManager.lastStatusData {
-                lastStatusUpdate = MySentryPumpStatusMessageBody(rxData: data)
+        if context == &lastContextDataObserverContext {
+            if let context = dataManager.lastContextData {
+                updateFromContext(context)
             }
         } else {
             super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)

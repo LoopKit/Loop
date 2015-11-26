@@ -86,10 +86,12 @@ class PumpDataManager: TransmitterDelegate {
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
                     updatePumpStatus(body, fromDevice: device)
-                case let body as MySentryAlertMessageBody:
+                case is MySentryAlertMessageBody:
+                    break
                     // TODO: de-dupe
 //                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
-                case let body as MySentryAlertClearedMessageBody:
+                case is MySentryAlertClearedMessageBody:
+                    break
                     // TODO: de-dupe
 //                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
                 case let body as UnknownMessageBody:
@@ -121,46 +123,13 @@ class PumpDataManager: TransmitterDelegate {
 
 //            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
 
-            if let date = status.glucoseDate {
-                switch status.glucose {
-                case .Active(glucose: let value):
-                    let quantityType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
-                    let quantity = HKQuantity(unit: HKUnit(fromString: "mg/dL"), doubleValue: Double(value))
+            updateWatch()
+        }
+    }
 
-                    let sample = HKQuantitySample(
-                        type: quantityType,
-                        quantity: quantity,
-                        startDate: date,
-                        endDate: date,
-                        device: HKDevice(rileyLinkDevice: device),
-                        metadata: [
-                            HKMetadataKeyWasUserEntered: false
-                        ]
-                    )
-
-                    if let store = healthStore where store.authorizationStatusForType(glucoseQuantityType) == .SharingAuthorized {
-                        store.saveObject(sample, withCompletion: { (success, error) -> Void in
-                            if let error = error {
-                                NSLog("Error saving glucose sample: %@", error)
-                            }
-                        })
-                    }
-                default:
-                    break
-                }
-            }
-
-            // Send data to watch
-            if let session = watchSession where session.paired && session.watchAppInstalled {
-                if !session.complicationEnabled {
-                    do {
-                        let context = ["statusData": status.txData]
-                        try session.updateApplicationContext(context)
-                    } catch let error as NSError {
-                        NSLog("Error calling updateApplicationContext: %@", error)
-                    }
-                }
-            }
+    private func updateGlucose(glucose: GlucoseRxMessage) {
+        if glucose != latestGlucose {
+            updateWatch()
         }
     }
 
@@ -307,9 +276,9 @@ class PumpDataManager: TransmitterDelegate {
 
     // MARK: - WatchKit
 
-    lazy var watchSessionDelegate = ConnectDelegate()
+    private lazy var watchSessionDelegate = ConnectDelegate()
 
-    lazy var watchSession: WCSession? = {
+    private lazy var watchSession: WCSession? = {
         if WCSession.isSupported() {
             let session = WCSession.defaultSession()
             session.delegate = self.watchSessionDelegate
@@ -320,6 +289,18 @@ class PumpDataManager: TransmitterDelegate {
             return nil
         }
     }()
+
+    private func updateWatch() {
+        if let session = watchSession where session.paired && session.watchAppInstalled {
+            if !session.complicationEnabled {
+                do {
+                    try session.updateApplicationContext(WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue)
+                } catch let error as NSError {
+                    NSLog("Error calling updateApplicationContext: %@", error)
+                }
+            }
+        }
+    }
 
     // MARK: - Initialization
 
@@ -334,3 +315,23 @@ class PumpDataManager: TransmitterDelegate {
         rileyLinkDeviceObserver = nil
     }
 }
+
+
+extension WatchContext {
+    convenience init(pumpStatus: MySentryPumpStatusMessageBody?, glucose: GlucoseRxMessage?, transmitterStartTime: NSTimeInterval?) {
+        self.init()
+
+        if let glucose = glucose, transmitterStartTime = transmitterStartTime where glucose.state > 5 {
+            glucoseValue = Int(glucose.glucose)
+            glucoseTrend = Int(glucose.trend)
+            glucoseDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
+        }
+
+        if let status = pumpStatus {
+            IOB = status.iob
+            reservoir = status.reservoirRemainingUnits
+            pumpDate = status.pumpDate
+        }
+    }
+}
+

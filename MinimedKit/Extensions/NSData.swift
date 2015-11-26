@@ -10,8 +10,31 @@ import Foundation
 
 
 public extension NSData {
-    subscript(index: Int) -> UInt8 {
-        return self[index...index][0]
+    @nonobjc subscript(index: Int) -> Int8 {
+        let bytes: [Int8] = self[index...index]
+
+        return bytes[0]
+    }
+
+    @nonobjc subscript(index: Int) -> UInt8 {
+        let bytes: [UInt8] = self[index...index]
+
+        return bytes[0]
+    }
+
+    @nonobjc subscript(range: Range<Int>) -> UInt16 {
+        return self[range][0]
+    }
+
+    @nonobjc subscript(range: Range<Int>) -> UInt32 {
+        return self[range][0]
+    }
+
+    subscript(range: Range<Int>) -> [Int8] {
+        var dataArray = [Int8](count: range.count, repeatedValue: 0)
+        self.getBytes(&dataArray, range: NSRange(range))
+
+        return dataArray
     }
 
     subscript(range: Range<Int>) -> [UInt8] {
@@ -19,6 +42,24 @@ public extension NSData {
         self.getBytes(&dataArray, range: NSRange(range))
 
         return dataArray
+    }
+
+    subscript(range: Range<Int>) -> [UInt16] {
+        var dataArray = [UInt16](count: range.count / 2, repeatedValue: 0)
+        self.getBytes(&dataArray, range: NSRange(range))
+
+        return dataArray
+    }
+
+    subscript(range: Range<Int>) -> [UInt32] {
+        var dataArray = [UInt32](count: range.count / 4, repeatedValue: 0)
+        self.getBytes(&dataArray, range: NSRange(range))
+
+        return dataArray
+    }
+
+    subscript(range: Range<Int>) -> NSData {
+        return subdataWithRange(NSRange(range))
     }
 
     public convenience init?(hexadecimalString: String) {
@@ -61,11 +102,11 @@ public extension NSData {
         let bytesCollection = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(bytes), count: length)
 
         let string = NSMutableString(capacity: length * 2)
-
+        
         for byte in bytesCollection {
             string.appendFormat("%02x", byte)
         }
-
+        
         return string as String
     }
 }

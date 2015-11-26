@@ -141,9 +141,10 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
 
             reservoirRemainingUnits = Double(Int(bytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
 
-            reservoirRemainingDays = max(0, Int(rxData[15]) - 1)
+            let reservoirRemainingDays: UInt8 = rxData[15]
+            self.reservoirRemainingDays = max(0, Int(reservoirRemainingDays) - 1)
 
-            if reservoirRemainingDays < 1 {
+            if self.reservoirRemainingDays < 1 {
                 reservoirRemainingMinutes = Int(bytes: [rxData[16], rxData[17]])
                 reservoirEndDate = nil
             } else {
@@ -152,7 +153,9 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
             }
 
             iob = Double(Int(bytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
-            batteryRemainingPercent = Int(round(Double(rxData[14]) / 4.0 * 100))
+
+            let batteryRemainingPercent: UInt8 = rxData[14]
+            self.batteryRemainingPercent = Int(round(Double(batteryRemainingPercent) / 4.0 * 100))
 
             let glucoseValue = Int(bytes: [rxData[9], rxData[24] << 7]) >> 7
             let previousGlucoseValue = Int(bytes: [rxData[10], rxData[24] << 6]) >> 7
@@ -167,11 +170,15 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
                 glucoseDate = NSDateComponents(mySentryBytes: rxData[28...33]).date
             }
 
-            sensorAgeHours = Int(rxData[18])
-            sensorRemainingHours = Int(rxData[19])
+            let sensorAgeHours: UInt8 = rxData[18]
+            self.sensorAgeHours = Int(sensorAgeHours)
 
+            let sensorRemainingHours: UInt8 = rxData[19]
+            self.sensorRemainingHours = Int(sensorRemainingHours)
+
+            let matchingHour: UInt8 = rxData[20]
             nextSensorCalibration = NSCalendar.currentCalendar().nextDateAfterDate(pumpDate,
-                matchingHour: Int(rxData[20]),
+                matchingHour: Int(matchingHour),
                 minute: Int(13),
                 second: 0,
                 options: [.MatchNextTime]
@@ -226,9 +233,10 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
 
         dict["byte1"] = rxData.subdataWithRange(NSRange(1...1)).hexadecimalString
         // {50}
-        dict["byte1High"] = String(format: "%02x", rxData[1] & 0b11110000)
+        let byte1: UInt8 = rxData[1]
+        dict["byte1High"] = String(format: "%02x", byte1 & 0b11110000)
         // {1}
-        dict["byte1Low"] = Int(rxData[1] & 0b00000001)
+        dict["byte1Low"] = Int(byte1 & 0b00000001)
         // Observed values: 00, 01, 02, 03
         // These seem to correspond with carb/bolus activity
         dict["byte11"] = rxData.subdataWithRange(NSRange(11...11)).hexadecimalString

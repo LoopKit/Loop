@@ -14,16 +14,32 @@ class PumpDataManager: NSObject, WCSessionDelegate {
 
     private var connectSession: WCSession?
 
-    private static var lastStatusDataFilename = "lastStatusData.data"
+    private static var lastContextDataFilename = "lastContextData.data"
 
-    private var lastStatusDataPath: String? {
-        return NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first?.URLByAppendingPathComponent(self.dynamicType.lastStatusDataFilename).path
+    private func getDataPath(filename: String) -> String? {
+        return NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first?.URLByAppendingPathComponent(filename).path
     }
 
-    dynamic var lastStatusData: NSData? {
+    private func readContext() -> WatchContext? {
+        if let cacheFilePath = getDataPath(self.dynamicType.lastContextDataFilename) {
+            return NSKeyedUnarchiver.unarchiveObjectWithFile(cacheFilePath) as? WatchContext
+        } else {
+            return nil
+        }
+    }
+
+    private func saveContext(context: WatchContext) {
+        if let cacheFilePath = getDataPath(self.dynamicType.lastContextDataFilename) {
+            let data = NSKeyedArchiver.archivedDataWithRootObject(context)
+
+            NSFileManager.defaultManager().createFileAtPath(cacheFilePath, contents: data, attributes: [NSFileProtectionKey: NSFileProtectionComplete])
+        }
+    }
+
+    dynamic var lastContextData: WatchContext? {
         didSet {
-            if let data = lastStatusData, cacheFilePath = lastStatusDataPath {
-                NSFileManager.defaultManager().createFileAtPath(cacheFilePath, contents: data, attributes: [NSFileProtectionKey: NSFileProtectionComplete])
+            if let data = lastContextData {
+                saveContext(data)
             }
         }
     }
@@ -31,8 +47,8 @@ class PumpDataManager: NSObject, WCSessionDelegate {
     // MARK: - WCSessionDelegate
 
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
-        if let statusData = applicationContext["statusData"] as? NSData {
-            lastStatusData = statusData
+        if let context = WatchContext(rawValue: applicationContext) {
+            lastContextData = context
         }
     }
 
@@ -49,8 +65,8 @@ class PumpDataManager: NSObject, WCSessionDelegate {
             connectSession?.activateSession()
         }
 
-        if let cacheFilePath = lastStatusDataPath, lastStatusData = NSFileManager.defaultManager().contentsAtPath(cacheFilePath) {
-            self.lastStatusData = lastStatusData
+        if let context = readContext() {
+            self.lastContextData = context
         }
     }
 }

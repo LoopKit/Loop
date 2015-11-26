@@ -19,7 +19,7 @@ class StatusTableViewController: UITableViewController {
 
         tableView.rowHeight = 44
 
-        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: dispatch_get_main_queue()) { (note) -> Void in
+        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: NSOperationQueue.mainQueue()) { (note) -> Void in
             self.tableView.reloadData()
         }
     }
@@ -185,7 +185,7 @@ class StatusTableViewController: UITableViewController {
             case .Trend:
                 cell.textLabel?.text = NSLocalizedString("Trend", comment: "The title of the cell containing the current glucose trend")
 
-                if let glucose = dataManager.latestGlucose {
+                if let glucose = dataManager.latestGlucose where glucose.state > 5 {
                     let direction: String
 
                     switch glucose.trend {
