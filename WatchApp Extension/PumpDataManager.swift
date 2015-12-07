@@ -6,6 +6,7 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import ClockKit
 import Foundation
 import WatchConnectivity
 
@@ -49,6 +50,18 @@ class PumpDataManager: NSObject, WCSessionDelegate {
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
         if let context = WatchContext(rawValue: applicationContext) {
             lastContextData = context
+        }
+    }
+
+    func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
+        if let context = WatchContext(rawValue: userInfo) {
+            lastContextData = context
+
+            let server = CLKComplicationServer.sharedInstance()
+
+            for complication in server.activeComplications {
+                server.extendTimelineForComplication(complication)
+            }
         }
     }
 

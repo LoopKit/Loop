@@ -6,6 +6,7 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import ClockKit
 import WatchKit
 import Foundation
 import WatchConnectivity
@@ -22,11 +23,20 @@ class InterfaceController: WKInterfaceController {
 
     @IBOutlet var glucoseLabel: WKInterfaceLabel!
     @IBOutlet var glucoseUnitLabel: WKInterfaceLabel!
-
+    @IBOutlet var glucoseDateLabel: WKInterfaceLabel!
+    @IBOutlet var pumpDateLabel: WKInterfaceLabel?
     @IBOutlet var IOBLabel: WKInterfaceLabel!
     @IBOutlet var reservoirLabel: WKInterfaceLabel!
 
     let dataManager = PumpDataManager.sharedManager
+
+    let dateFormatter: NSDateComponentsFormatter = {
+        let dateFormatter = NSDateComponentsFormatter()
+        dateFormatter.unitsStyle = .Abbreviated
+        dateFormatter.allowedUnits = [.Hour, .Minute]
+
+        return dateFormatter
+    }()
 
     override func awakeWithContext(context: AnyObject?) {
         super.awakeWithContext(context)
@@ -52,7 +62,7 @@ class InterfaceController: WKInterfaceController {
 
     private func updateFromContext(context: WatchContext?) {
         dispatch_async(dispatch_get_main_queue()) { [weak self] in
-            if let date = context?.pumpDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
+            if let date = context?.pumpDate where NSDate().timeIntervalSinceDate(date) <= 60.minutes,
                 let iob = context?.IOB, reservoir = context?.reservoir
             {
                 let decimalFormatter = NSNumberFormatter()
@@ -60,12 +70,16 @@ class InterfaceController: WKInterfaceController {
 
                 self?.IOBLabel.setText(decimalFormatter.stringFromNumber(iob))
                 self?.reservoirLabel.setText(decimalFormatter.stringFromNumber(reservoir))
+
+                if let dateString = self?.dateFormatter.stringFromDate(date, toDate: NSDate()) {
+                    self?.pumpDateLabel?.setText("\(dateString) ago")
+                }
             } else {
                 self?.IOBLabel.setText("-.-")
                 self?.reservoirLabel.setText("-.-")
             }
 
-            if let date = context?.glucoseDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
+            if let date = context?.glucoseDate where NSDate().timeIntervalSinceDate(date) <= 60.minutes,
                 let glucose = context?.glucoseValue, trend = context?.glucoseTrend
             {
                 let direction: String
@@ -83,10 +97,20 @@ class InterfaceController: WKInterfaceController {
                 }
 
                 self?.glucoseLabel.setText("\(direction)\(glucose)")
+
+                if let dateString = self?.dateFormatter.stringFromDate(date, toDate: NSDate()) {
+                    self?.glucoseDateLabel.setText("\(dateString) ago")
+                }
             } else {
                 self?.glucoseLabel.setText("--")
                 self?.glucoseUnitLabel.setHidden(false)
             }
+        }
+
+        let server = CLKComplicationServer.sharedInstance()
+
+        for complication in server.activeComplications {
+            server.extendTimelineForComplication(complication)
         }
     }
 

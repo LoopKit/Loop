@@ -122,13 +122,13 @@ class PumpDataManager: TransmitterDelegate {
             latestPumpStatus = status
 
 //            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
-
-            updateWatch()
+//            updateWatch()
         }
     }
 
     private func updateGlucose(glucose: GlucoseRxMessage) {
         if glucose != latestGlucose {
+            latestGlucose = glucose
             updateWatch()
         }
     }
@@ -147,7 +147,7 @@ class PumpDataManager: TransmitterDelegate {
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
-        latestGlucose = glucose
+        updateGlucose(glucose)
     }
 
     // MARK: - Managed state
@@ -162,9 +162,19 @@ class PumpDataManager: TransmitterDelegate {
 
     var latestGlucose: GlucoseRxMessage? {
         didSet {
+            if let complicationGlucose = latestComplicationGlucose, let glucose = latestGlucose {
+                complicationShouldUpdate = Int(glucose.timestamp) - Int(complicationGlucose.timestamp) >= 30 * 60 || abs(Int(glucose.glucose) - Int(complicationGlucose.glucose)) >= 20
+            } else {
+                complicationShouldUpdate = true
+            }
+
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
         }
     }
+
+    var latestComplicationGlucose: GlucoseRxMessage?
+
+    var complicationShouldUpdate = false
 
     var latestPumpStatus: MySentryPumpStatusMessageBody? {
         didSet {
@@ -292,11 +302,17 @@ class PumpDataManager: TransmitterDelegate {
 
     private func updateWatch() {
         if let session = watchSession where session.paired && session.watchAppInstalled {
-            if !session.complicationEnabled {
+            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue
+
+            if session.complicationEnabled && complicationShouldUpdate, let glucose = latestGlucose {
+                session.transferCurrentComplicationUserInfo(userInfo)
+                latestComplicationGlucose = glucose
+                complicationShouldUpdate = false
+            } else {
                 do {
-                    try session.updateApplicationContext(WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue)
-                } catch let error as NSError {
-                    NSLog("Error calling updateApplicationContext: %@", error)
+                    try session.updateApplicationContext(userInfo)
+                } catch let error {
+                    NSLog("WCSession error: \(error)")
                 }
             }
         }
