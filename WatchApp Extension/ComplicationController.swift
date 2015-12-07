@@ -64,7 +64,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         // Call the handler with the timeline entries after to the given date
 
         if let context = PumpDataManager.sharedManager.lastContextData,
-            glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) >= 0,
+            glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
             let template = CLKComplicationTemplateModularSmallStackText(context: context)
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
