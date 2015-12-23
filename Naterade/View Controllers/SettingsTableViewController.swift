@@ -62,11 +62,13 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
             if let peripheral = object as? CBPeripheral,
                 deviceManager = dataManager.rileyLinkManager
             {
+                tableView.beginUpdates()
                 for (index, device) in deviceManager.devices.enumerate() {
                     if device.peripheral == peripheral {
                         tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 1)], withRowAnimation: .Automatic)
                     }
                 }
+                tableView.endUpdates()
             }
         } else {
             super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)

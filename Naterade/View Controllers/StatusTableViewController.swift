@@ -135,7 +135,6 @@ class StatusTableViewController: UITableViewController {
 
                 if let status = dataManager.latestPumpStatus {
                     let components = NSDateComponents()
-                    components.day = status.reservoirRemainingDays
                     components.minute = status.reservoirRemainingMinutes
 
                     let componentsFormatter = NSDateComponentsFormatter()
@@ -144,8 +143,8 @@ class StatusTableViewController: UITableViewController {
                     componentsFormatter.includesApproximationPhrase = components.day > 0
                     componentsFormatter.includesTimeRemainingPhrase = true
 
-                    let daysValue = componentsFormatter.stringFromDateComponents(components) ?? ""
                     let numberValue = NSNumber(double: status.reservoirRemainingUnits).descriptionWithLocale(locale)
+                    let daysValue = componentsFormatter.stringFromDateComponents(components) ?? ""
 
                     cell.detailTextLabel?.text = "\(numberValue) Units (\(daysValue))"
                 } else {
