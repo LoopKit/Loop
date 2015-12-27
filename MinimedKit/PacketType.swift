@@ -9,6 +9,6 @@
 public enum PacketType: UInt8 {
     case MySentry  = 0xA2
     case Meter     = 0xA5
-    case CareLink  = 0xA7
+    case Carelink  = 0xA7
     case Sensor    = 0xA8
 }

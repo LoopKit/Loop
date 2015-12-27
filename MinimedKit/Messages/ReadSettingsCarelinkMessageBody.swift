@@ -37,7 +37,7 @@ public enum BasalProfile {
  a7 594040 c0 19 00 01 00 01 01 00 96 008c 00 00 00 00000064010400 14 00 1901 01 01 00 00 000000000000 000000 00000000000000000000000000000000000000000000000000000000 e9
  ```
  */
-public class ReadSettingsCarelinkMessageBody: CarelinkMessageBody {
+public class ReadSettingsCarelinkMessageBody: CarelinkLongMessageBody {
     private static let maxBolusSignificantDigit = 0.1
     private static let maxBasalSignificantDigit = 0.025
 

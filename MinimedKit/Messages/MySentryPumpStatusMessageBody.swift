@@ -74,21 +74,6 @@ public enum SensorReading {
 }
 
 
-private extension Int {
-    init(bytes: [UInt8]) {
-        assert(bytes.count <= 4)
-        var result: UInt = 0
-
-        for idx in 0..<(bytes.count) {
-            let shiftAmount = UInt((bytes.count) - idx - 1) * 8
-            result += UInt(bytes[idx]) << shiftAmount
-        }
-
-        self.init(result)
-    }
-}
-
-
 /**
 Describes a status message sent periodically from the pump to any paired MySentry devices
 
@@ -138,20 +123,20 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
             self.glucoseTrend = trend
             self.pumpDate = pumpDate
 
-            reservoirRemainingUnits = Double(Int(bytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
+            reservoirRemainingUnits = Double(Int(bigEndianBytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
 
             let reservoirRemainingPercent: UInt8 = rxData[15]
             self.reservoirRemainingPercent = Int(round(Double(reservoirRemainingPercent) / 4.0 * 100))
 
-            reservoirRemainingMinutes = Int(bytes: [rxData[16], rxData[17]])
+            reservoirRemainingMinutes = Int(bigEndianBytes: [rxData[16], rxData[17]])
 
-            iob = Double(Int(bytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
+            iob = Double(Int(bigEndianBytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
 
             let batteryRemainingPercent: UInt8 = rxData[14]
             self.batteryRemainingPercent = Int(round(Double(batteryRemainingPercent) / 4.0 * 100))
 
-            let glucoseValue = Int(bytes: [rxData[9], rxData[24] << 7]) >> 7
-            let previousGlucoseValue = Int(bytes: [rxData[10], rxData[24] << 6]) >> 7
+            let glucoseValue = Int(bigEndianBytes: [rxData[9], rxData[24] << 7]) >> 7
+            let previousGlucoseValue = Int(bigEndianBytes: [rxData[10], rxData[24] << 6]) >> 7
 
             glucose = SensorReading(glucose: glucoseValue)
             previousGlucose = SensorReading(glucose: previousGlucoseValue)
