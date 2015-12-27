@@ -16,7 +16,8 @@ public enum MessageType: UInt8 {
     case FindDevice     = 0x09
     case DeviceLink     = 0x0A
     case GetBattery     = 0x72
-    case GetPumpModel   = 0x8D
+    case GetPumpModel   = 0x8d
+    case ReadSettings   = 0xc0
 
     var bodyType: MessageBody.Type {
         switch self {
@@ -28,6 +29,8 @@ public enum MessageType: UInt8 {
             return MySentryPumpStatusMessageBody.self
         case .PumpStatusAck:
             return MySentryAckMessageBody.self
+        case .ReadSettings:
+            return ReadSettingsCarelinkMessageBody.self
         default:
             return UnknownMessageBody.self
         }

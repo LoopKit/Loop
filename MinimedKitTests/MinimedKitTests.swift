@@ -2,12 +2,11 @@
 //  MinimedKitTests.swift
 //  MinimedKitTests
 //
-//  Created by Nathan Racklyeft on 9/2/15.
+//  Created by Nathan Racklyeft on 12/26/15.
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
 import XCTest
-@testable import MinimedKit
 
 class MinimedKitTests: XCTestCase {
     
@@ -20,5 +19,5 @@ class MinimedKitTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-
+    
 }
