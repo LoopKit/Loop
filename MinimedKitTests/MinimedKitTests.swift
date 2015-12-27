@@ -20,22 +20,5 @@ class MinimedKitTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
-    
-    func testValidPumpStatusMessage() {
-        let message = PumpMessage(rxData: NSData(hexadecimalString: "a2594040042f511727070f09050184850000cd010105b03e0a0a1a009d030000711726000f09050000d0")!)
 
-        if let message = message {
-            XCTAssertTrue(message.messageBody is MySentryPumpStatusMessageBody)
-        } else {
-            XCTFail("\(message) is nil")
-        }
-    }
-
-    func testGlucoseTrendFlat() {
-        XCTAssertEqual(GlucoseTrend.Flat, GlucoseTrend(byte: 0b00000000))
-        XCTAssertEqual(GlucoseTrend.Flat, GlucoseTrend(byte: 0b11110001))
-        XCTAssertEqual(GlucoseTrend.Flat, GlucoseTrend(byte: 0b11110001))
-        XCTAssertEqual(GlucoseTrend.Flat, GlucoseTrend(byte: 0b000))
-        XCTAssertEqual(GlucoseTrend.Flat, GlucoseTrend(byte: 0x51))
-    }
 }
