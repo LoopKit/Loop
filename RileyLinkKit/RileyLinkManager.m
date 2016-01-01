@@ -7,6 +7,7 @@
 //
 
 #import "RileyLinkManager.h"
+#import "RileyLinkDevice_Private.h"
 #import "RileyLinkBLEDevice.h"
 #import "RileyLinkBLEManager.h"
 

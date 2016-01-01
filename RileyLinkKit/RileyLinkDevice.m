@@ -68,7 +68,7 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
     [[NSNotificationCenter defaultCenter] postNotificationName:RileyLinkDeviceDidReceivePacketNotification object:self userInfo:@{RileyLinkDevicePacketKey: note.userInfo[@"packet"]}];
 }
 
-- (void)executeCommand:(id<MessageSendOperationGroup>)command withCompletionHandler:(void (^)(id<MessageSendOperationGroup> _Nonnull))completionHandler
+- (void)executeCommand:(id)command withCompletionHandler:(void (^)(id _Nonnull))completionHandler
 {
     switch ([command packetType]) {
         case PacketTypeSentry:
@@ -92,7 +92,7 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
             break;
     }
 
-    [_messageQueue addOperations:[command messageOperations] waitUntilFinished:NO];
+//    [_messageQueue addOperations:[command messageOperations] waitUntilFinished:NO];
     [_messageQueue addOperationWithBlock:^{
         completionHandler(command);
     }];

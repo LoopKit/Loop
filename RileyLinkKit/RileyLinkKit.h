@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreBluetooth/CoreBluetooth.h>
 
 //! Project version number for RileyLinkKit.
 FOUNDATION_EXPORT double RileyLinkKitVersionNumber;
@@ -15,3 +16,5 @@ FOUNDATION_EXPORT double RileyLinkKitVersionNumber;
 FOUNDATION_EXPORT const unsigned char RileyLinkKitVersionString[];
 
 #import <RileyLinkKit/RileyLinkManager.h>
+#import <RileyLinkKit/RileyLinkDevice.h>
+#import <RileyLinkKit/MinimedPacket.h>

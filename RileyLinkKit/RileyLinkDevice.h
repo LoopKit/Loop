@@ -7,10 +7,7 @@
 //
 
 @import Foundation;
-@import CoreData;
-
-#import "RileyLinkBLEDevice.h"
-#import "MessageSendOperationGroup.h"
+@import CoreBluetooth;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,9 +17,7 @@ extern NSString * const RileyLinkDevicePacketKey;
 
 @interface RileyLinkDevice : NSObject
 
-- (nonnull instancetype)initWithBLEDevice:(nonnull RileyLinkBLEDevice *)device;
-
-- (void)executeCommand:(nonnull id<MessageSendOperationGroup>)command withCompletionHandler:(void (^ _Nonnull)(id<MessageSendOperationGroup> _Nonnull command))completionHandler;
+- (void)executeCommand:(nonnull id)command withCompletionHandler:(void (^ _Nonnull)(id _Nonnull command))completionHandler;
 
 - (void)sendMessageData:(nonnull NSData *)messageData;
 

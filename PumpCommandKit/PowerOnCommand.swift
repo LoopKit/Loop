@@ -10,44 +10,35 @@ import UIKit
 import MinimedKit
 import RileyLinkKit
 
-class PowerOnCommand: NSObject, MessageSendOperationGroup {
+class PowerOnCommand: NSObject {
 
-    private var operations: [RileyLinkKit.MessageSendOperation] = []
+    private let address: String
+
+    private var messages = [PumpMessage]()
 
     var duration: NSTimeInterval
 
-    init(duration: NSTimeInterval, address: String, device: RileyLinkBLEDevice) {
+    init(duration: NSTimeInterval, address: String) {
 
         self.duration = duration
 
+        self.address = address
+
         let requestMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .PowerOn, messageBody: CarelinkShortMessageBody())
-
-        let requestOperation = MessageSendOperation(device: device, message: MessageBase(data: requestMessage.txData), timeout: 10, completionHandler: nil)
-
-        requestOperation.responseMessageType = RileyLinkKit.MessageType.MESSAGE_TYPE_ACK
-
-        requestOperation.repeatInterval = 1.0/12.0
-
-        operations.append(requestOperation)
 
         let argsMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .PowerOn, messageBody: PowerOnCarelinkMessageBody(duration: duration))
 
-        let argsOperation = MessageSendOperation(device: device, message: MessageBase(data: argsMessage.txData), timeout: 10, completionHandler: nil)
-
-        argsOperation.responseMessageType = RileyLinkKit.MessageType.MESSAGE_TYPE_ACK
-
-        operations.append(argsOperation)
+        messages.append(requestMessage)
+        messages.append(argsMessage)
 
         super.init()
     }
-
-    // MARK: - MessageSendOperationGroup
 
     func packetType() -> RileyLinkKit.PacketType {
         return .Carelink
     }
 
-    func messageOperations() -> [MessageSendOperation] {
-        return operations
+    func packetAddress() -> String {
+        return address
     }
 }

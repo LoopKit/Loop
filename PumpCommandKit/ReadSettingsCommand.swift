@@ -10,34 +10,25 @@ import UIKit
 import MinimedKit
 import RileyLinkKit
 
-class ReadSettingsCommand: NSObject, MessageSendOperationGroup {
+class ReadSettingsCommand: NSObject {
 
-    private let messageOperation: MessageSendOperation
+    private let address: String
 
-    init(address: String, device: RileyLinkBLEDevice) {
-        let message = PumpMessage(packetType: MinimedKit.PacketType.Carelink, address: address, messageType: .ReadSettings, messageBody: CarelinkShortMessageBody())
+    private let message: PumpMessage
 
-        messageOperation = MessageSendOperation(device: device, message: MessageBase(data: message.txData), timeout: 10, completionHandler: nil)
-        messageOperation.responseMessageType = RileyLinkKit.MessageType.MESSAGE_TYPE_READ_SETTINGS
+    init(address: String) {
+        self.address = address
+
+        self.message = PumpMessage(packetType: MinimedKit.PacketType.Carelink, address: address, messageType: .ReadSettings, messageBody: CarelinkShortMessageBody())
 
         super.init()
     }
-
-    var result: PumpMessage? {
-        if let data = messageOperation.responsePacket?.data {
-            return PumpMessage(rxData: data)
-        } else {
-            return nil
-        }
-    }
-
-    // MARK: - MessageSendOperationGroup
 
     func packetType() -> RileyLinkKit.PacketType {
         return .Carelink
     }
 
-    func messageOperations() -> [MessageSendOperation] {
-        return [messageOperation]
+    func packetAddress() -> String {
+        return address
     }
 }
