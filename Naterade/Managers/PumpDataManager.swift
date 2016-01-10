@@ -249,6 +249,7 @@ class PumpDataManager: TransmitterDelegate {
                 transmitterState = .NeedsConfiguration
             case (.Ready(let transmitter), let transmitterID?):
                 transmitter.ID = transmitterID
+                transmitter.startTimeInterval = nil
             case (.NeedsConfiguration, .None):
                 break
             }
