@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CarbKit
 import HealthKit
 import MinimedKit
 import RileyLinkKit
@@ -48,7 +49,7 @@ class PumpDataManager: TransmitterDelegate {
         }
     }
 
-    // MARK: - RileyLink observation
+    // MARK: - RileyLink
 
     var rileyLinkManagerObserver: AnyObject? {
         willSet {
@@ -121,6 +122,8 @@ class PumpDataManager: TransmitterDelegate {
         }
     }
 
+    // MARK: - Transmitter
+
     private func updateGlucose(glucose: GlucoseRxMessage) {
         if glucose != latestGlucose {
             latestGlucose = glucose
@@ -128,7 +131,7 @@ class PumpDataManager: TransmitterDelegate {
         }
     }
 
-    // MARK: - TransmitterDelegate
+    // MARK: TransmitterDelegate
 
     func transmitter(transmitter: Transmitter, didError error: ErrorType) {
         logger?.addMessage([
@@ -258,9 +261,13 @@ class PumpDataManager: TransmitterDelegate {
         }
     }
 
+    // MARK: - CarbKit
+
+    let carbStore = CarbStore()
+
     // MARK: - HealthKit
 
-    lazy var glucoseQuantityType = HKSampleType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
+    private lazy var glucoseQuantityType = HKSampleType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
 
     lazy var healthStore: HKHealthStore? = {
         if HKHealthStore.isHealthDataAvailable() {
