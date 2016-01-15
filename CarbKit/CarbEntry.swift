@@ -14,6 +14,7 @@ public struct CarbEntry {
     public let startDate: NSDate
     public let description: String?
     public let absorptionTime: NSTimeInterval?
+    public let createdByCurrentApp: Bool
 
     let sampleUUID: NSUUID
 }

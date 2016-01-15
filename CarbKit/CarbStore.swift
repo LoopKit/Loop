@@ -12,6 +12,8 @@ import HealthKit
 
 public class CarbStore {
 
+    public static let CarbEntriesDidUpdateNotification = "com.loudnate.CarbKit.CarbEntriesDidUpdateNotification"
+
     private let foodType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)!
 
     private let carbType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryCarbohydrates)!
@@ -113,9 +115,10 @@ public class CarbStore {
         let predicate = recentSamplesPredicate()
 
         for type in readTypes {
-            let query = HKObserverQuery(sampleType: type, predicate: predicate, updateHandler: { (query, completionHandler, error) -> Void in
+            let query = HKObserverQuery(sampleType: type, predicate: predicate, updateHandler: { [unowned self] (query, completionHandler, error) -> Void in
 
                 // Handle new data for `query.sampleType`
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification, object: self)
 
                 completionHandler()
             })
@@ -217,6 +220,7 @@ public class CarbStore {
                         startDate: sample.startDate,
                         description: sample.foodType,
                         absorptionTime: sample.absorptionTime,
+                        createdByCurrentApp: sample.sourceRevision.source == HKSource.defaultSource(),
                         sampleUUID: sample.UUID
                     ))
                 }

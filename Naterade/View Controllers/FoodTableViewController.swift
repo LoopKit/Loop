@@ -37,6 +37,10 @@ class FoodTableViewController: UITableViewController {
         reloadData()
     }
 
+    deinit {
+        carbStoreObserver = nil
+    }
+
     // MARK: - Data
 
     private var carbEntries: [CarbEntry] = []
@@ -57,7 +61,13 @@ class FoodTableViewController: UITableViewController {
                 tableView.backgroundView = unavailableMessageView
             case .AuthorizationRequired:
                 tableView.backgroundView = authorizationRequiredMessageView
-            case .Display:
+                carbStoreObserver = nil
+            case .Display(let carbStore):
+                carbStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: carbStore, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (note) -> Void in
+
+                    self.reloadData()
+                })
+
                 tableView.backgroundView = nil
                 reloadData()
             }
@@ -81,6 +91,14 @@ class FoodTableViewController: UITableViewController {
                         self.tableView.reloadData()
                     }
                 }
+            }
+        }
+    }
+
+    private var carbStoreObserver: AnyObject? {
+        willSet {
+            if let observer = carbStoreObserver {
+                NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
     }
@@ -124,7 +142,7 @@ class FoodTableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return true
+        return carbEntries[indexPath.row].createdByCurrentApp
     }
 
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
