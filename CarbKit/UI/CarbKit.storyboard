@@ -36,7 +36,7 @@
                                             <rect key="frame" x="15" y="12" width="31.5" height="19.5"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="m95-PG-bTq">
@@ -59,7 +59,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Carbs" id="Qgq-n1-hm4">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="ddV-Ce-IIn">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" systemItem="add" id="ddV-Ce-IIn">
                             <connections>
                                 <segue destination="wgu-gT-TgV" kind="presentation" id="jMZ-bg-GVE"/>
                             </connections>
@@ -176,7 +176,7 @@
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="9Ci-XW-6nA">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DatePickerTableViewCell" rowHeight="244" id="QwR-YG-xXK" customClass="DatePickerTableViewCell" customModule="CarbKit" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="113.5" width="600" height="244"/>
@@ -191,7 +191,7 @@
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bi0-3A-425">
                                                     <rect key="frame" x="8" y="0.0" width="34.5" height="28"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vZi-6E-S8E">
@@ -241,17 +241,18 @@
                                     <outlet property="datePickerHeightConstraint" destination="lIl-gg-fGA" id="baE-jm-nfP"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Amount" id="Ace-JU-zKh" customClass="TextFieldTableViewCell" customModule="CarbKit" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="DecimalTextFieldTableViewCell" id="Ace-JU-zKh" customClass="DecimalTextFieldTableViewCell" customModule="CarbKit" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="357.5" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ace-JU-zKh" id="vvs-Vh-Dbj">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <textField opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qU9-hG-hMu">
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qU9-hG-hMu">
                                             <rect key="frame" x="162.5" y="12" width="410.5" height="20"/>
+                                            <color key="textColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="calibratedRGB"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                                            <textInputTraits key="textInputTraits" keyboardType="decimalPad" returnKeyType="next"/>
                                         </textField>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="g" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D2S-2h-yH6">
                                             <rect key="frame" x="575" y="11.5" width="10" height="20.5"/>
@@ -262,7 +263,7 @@
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Amount Consumed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K0S-my-3qL">
                                             <rect key="frame" x="15" y="12" width="139.5" height="19.5"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                     </subviews>
@@ -276,36 +277,49 @@
                                         <constraint firstItem="qU9-hG-hMu" firstAttribute="centerY" secondItem="vvs-Vh-Dbj" secondAttribute="centerY" id="z3u-0p-Mby"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="textField" destination="qU9-hG-hMu" id="PP5-os-4aH"/>
+                                </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="SegmentedControlTableViewCell" id="2Aw-ze-ygI" customClass="SegmentedControlTableViewCell" customModule="CarbKit" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AbsorptionTimeTextFieldTableViewCell" id="2Aw-ze-ygI" customClass="AbsorptionTimeTextFieldTableViewCell" customModule="CarbKit" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="401.5" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="2Aw-ze-ygI" id="x1h-JT-mSs">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="JjO-fA-2BM">
+                                            <rect key="frame" x="143" y="12" width="412" height="20"/>
+                                            <color key="textColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                            <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="next"/>
+                                        </textField>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Absorption Time" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DZF-z3-VyZ">
                                             <rect key="frame" x="15" y="12.5" width="120" height="19.5"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="1" translatesAutoresizingMaskIntoConstraints="NO" id="I6K-im-wDW">
-                                            <rect key="frame" x="394" y="7" width="191" height="29"/>
-                                            <segments>
-                                                <segment title="Fast"/>
-                                                <segment title="Medium"/>
-                                                <segment title="Slow"/>
-                                            </segments>
-                                        </segmentedControl>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="min" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UFe-MC-ZzC">
+                                            <rect key="frame" x="557" y="11" width="28" height="20.5"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="I6K-im-wDW" firstAttribute="centerY" secondItem="x1h-JT-mSs" secondAttribute="centerY" id="1fa-z2-Med"/>
+                                        <constraint firstItem="JjO-fA-2BM" firstAttribute="leading" secondItem="DZF-z3-VyZ" secondAttribute="trailing" constant="8" symbolic="YES" id="2ax-E0-tJz"/>
                                         <constraint firstItem="DZF-z3-VyZ" firstAttribute="leading" secondItem="x1h-JT-mSs" secondAttribute="leadingMargin" constant="7" id="2eK-ts-MId"/>
-                                        <constraint firstItem="I6K-im-wDW" firstAttribute="trailing" secondItem="x1h-JT-mSs" secondAttribute="trailingMargin" constant="-7" id="LeA-oI-dAM"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="UFe-MC-ZzC" secondAttribute="trailing" constant="7" id="3bB-aM-b1e"/>
+                                        <constraint firstItem="UFe-MC-ZzC" firstAttribute="baseline" secondItem="JjO-fA-2BM" secondAttribute="baseline" id="9rN-0l-GB8"/>
+                                        <constraint firstItem="UFe-MC-ZzC" firstAttribute="leading" secondItem="JjO-fA-2BM" secondAttribute="trailing" constant="2" id="KdD-B3-Jiv"/>
+                                        <constraint firstItem="JjO-fA-2BM" firstAttribute="centerY" secondItem="x1h-JT-mSs" secondAttribute="centerY" id="Sqz-cg-FzV"/>
                                         <constraint firstItem="DZF-z3-VyZ" firstAttribute="centerY" secondItem="x1h-JT-mSs" secondAttribute="centerY" id="y4t-c9-V8M"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="textField" destination="JjO-fA-2BM" id="LeQ-Xm-OuM"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <sections/>
@@ -321,14 +335,42 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="segmentedControlInputAccessoryView" destination="yOQ-K4-a5x" id="K2x-Pr-HOL"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="71E-eW-u0n" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <view clipsSubviews="YES" contentMode="scaleToFill" id="yOQ-K4-a5x" customClass="SegmentedControlInputAccessoryView" customModule="CarbKit" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="0.0" width="240" height="44"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bordered" momentary="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I6K-im-wDW">
+                            <rect key="frame" x="-6" y="-2" width="252" height="49"/>
+                            <segments>
+                                <segment title="🍇"/>
+                                <segment title="🍞"/>
+                                <segment title="🍕"/>
+                            </segments>
+                        </segmentedControl>
+                    </subviews>
+                    <color key="backgroundColor" red="0.81960784313725488" green="0.83529411764705885" blue="0.85882352941176465" alpha="1" colorSpace="calibratedRGB"/>
+                    <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="I6K-im-wDW" firstAttribute="leading" secondItem="yOQ-K4-a5x" secondAttribute="leading" constant="-6" id="OES-0m-Pwd"/>
+                        <constraint firstAttribute="bottom" secondItem="I6K-im-wDW" secondAttribute="bottom" constant="-2" id="SSb-c8-SlF"/>
+                        <constraint firstItem="I6K-im-wDW" firstAttribute="top" secondItem="yOQ-K4-a5x" secondAttribute="top" constant="-2" id="sK9-f0-t6W"/>
+                        <constraint firstAttribute="trailing" secondItem="I6K-im-wDW" secondAttribute="trailing" constant="-6" id="uQZ-cN-5e3"/>
+                    </constraints>
+                    <connections>
+                        <outlet property="segmentedControl" destination="I6K-im-wDW" id="avB-Eq-gJa"/>
+                    </connections>
+                </view>
                 <exit id="T5h-mI-vtL" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="3319" y="-810"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="9fZ-7e-aMq"/>
+        <segue reference="rV7-J1-5KP"/>
     </inferredMetricsTieBreakers>
 </document>

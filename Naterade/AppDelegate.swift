@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CarbKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -20,6 +21,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         PumpDataManager.sharedManager.transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
 
         window?.tintColor = UIColor(red: 1.0, green: 149.0 / 255.0, blue: 0, alpha: 1.0)
+
+        if let tabBarController = window?.rootViewController as? UITabBarController {
+            tabBarController.viewControllers?.flatMap({
+                $0.childViewControllers.first as? CarbEntryTableViewController
+            }).forEach({
+                $0.carbStore = PumpDataManager.sharedManager.carbStore
+            })
+        }
 
         return true
     }

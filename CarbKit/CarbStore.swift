@@ -31,8 +31,11 @@ public class CarbStore {
     /// The health store used for underlying queries
     public let healthStore = HKHealthStore()
 
-    /// The longest expected absorption time interval for carbohydrates. Defaults to 6 hours.
-    public let maximumAbsorptionTimeInterval: NSTimeInterval
+    /// A span of default carbohydrate absorption times. Defaults to 2, 3, and 4 hours.
+    public let defaultAbsorptionTimes: [NSTimeInterval]
+
+    /// The longest expected absorption time interval for carbohydrates. Defaults to 4 hours.
+    private let maximumAbsorptionTimeInterval: NSTimeInterval
 
     /**
      Initializes a new instance of the store.
@@ -41,8 +44,9 @@ public class CarbStore {
 
      - returns: A new instance of the store
      */
-    public init?(maximumAbsorptionTimeInterval: NSTimeInterval = NSTimeInterval(hours: 6)) {
-        self.maximumAbsorptionTimeInterval = maximumAbsorptionTimeInterval
+    public init?(defaultAbsorptionTimes: [NSTimeInterval] = [NSTimeInterval(hours: 2), NSTimeInterval(hours: 3), NSTimeInterval(hours: 4)]) {
+        self.defaultAbsorptionTimes = defaultAbsorptionTimes.sort()
+        self.maximumAbsorptionTimeInterval = defaultAbsorptionTimes.last ?? NSTimeInterval(hours: 4)
 
         guard HKHealthStore.isHealthDataAvailable() && !sharingDenied else {
             return nil
@@ -211,12 +215,12 @@ public class CarbStore {
         let startDateDesc = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
 
         let query = HKSampleQuery(sampleType: carbType, predicate: recentSamplesPredicate(), limit: Int(HKObjectQueryNoLimit), sortDescriptors: [startDateDesc]) { (query, samples, error) -> Void in
-            var entries: [CarbEntry]
+            var entries: [CarbEntry] = []
 
             if let samples = samples as? [HKQuantitySample] {
-                entries = samples
-            } else {
-                entries = []
+                for sample in samples {
+                    entries.append(sample)
+                }
             }
 
             resultsHandler(entries, error)
@@ -231,5 +235,9 @@ public class CarbStore {
 
     public func replaceCarbEntry(oldEntry: CarbEntry, withEntry newEntry: CarbEntry) {
         
+    }
+
+    public func deleteCarbEntry(entry: CarbEntry) {
+
     }
 }

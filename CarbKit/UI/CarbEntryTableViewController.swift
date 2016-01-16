@@ -16,7 +16,11 @@ public class CarbEntryTableViewController: UITableViewController {
 
     @IBOutlet var authorizationRequiredMessageView: UIView!
 
-    var carbStore: CarbStore?
+    public var carbStore: CarbStore?
+
+    public override func awakeFromNib() {
+        super.awakeFromNib()
+    }
 
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -31,13 +35,7 @@ public class CarbEntryTableViewController: UITableViewController {
             state = .Unavailable
         }
 
-        self.navigationItem.leftBarButtonItem = self.editButtonItem()
-    }
-
-    override public func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-
-        reloadData()
+        navigationItem.leftBarButtonItem = editButtonItem()
     }
 
     deinit {
@@ -71,7 +69,11 @@ public class CarbEntryTableViewController: UITableViewController {
                     self.reloadData()
                 })
 
+                navigationItem.leftBarButtonItem?.enabled = true
+                navigationItem.rightBarButtonItem?.enabled = true
+
                 tableView.backgroundView = nil
+                tableView.tableFooterView = nil
                 reloadData()
             }
         }
@@ -134,40 +136,60 @@ public class CarbEntryTableViewController: UITableViewController {
 
         cell.textLabel?.text = titleText
 
+        var detailText = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+
         if let absorptionTime = entry.absorptionTime {
-            cell.detailTextLabel?.text = "\(absorptionTime) min"
-        } else {
-            cell.detailTextLabel?.text = nil
+            detailText = "+ \(absorptionTime.minutes) min"
         }
+
+        cell.detailTextLabel?.text = detailText
 
         return cell
     }
 
     override public func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
         return carbEntries[indexPath.row].createdByCurrentApp
     }
 
     override public func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
-//            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            let entry = carbEntries.removeAtIndex(indexPath.row)
+            carbStore?.deleteCarbEntry(entry)
+
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         }
     }
 
     // MARK: - Navigation
 
     @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
-        
+        if let editVC = segue.sourceViewController as? CarbEntryEditViewController {
+            print(editVC.updatedCarbEntry)
+
+            if let updatedEntry = editVC.updatedCarbEntry {
+                if let originalEntry = editVC.originalCarbEntry {
+                    carbStore?.replaceCarbEntry(originalEntry, withEntry: updatedEntry)
+                } else {
+                    carbStore?.addCarbEntry(updatedEntry)
+                }
+            }
+        }
     }
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override public func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        print(segue)
-    }
+        var editVC = segue.destinationViewController as? CarbEntryEditViewController
 
-    @IBAction func addCarbItem(sender: AnyObject) {
+        if editVC == nil, let navVC = segue.destinationViewController as? UINavigationController {
+            editVC = navVC.viewControllers.first as? CarbEntryEditViewController
+        }
 
+        if let editVC = editVC {
+            if let selectedCell = sender as? UITableViewCell, indexPath = tableView.indexPathForCell(selectedCell) where indexPath.row < carbEntries.count {
+                editVC.originalCarbEntry = carbEntries[indexPath.row]
+            }
+
+            editVC.defaultAbsorptionTimes = carbStore?.defaultAbsorptionTimes ?? []
+        }
     }
 
     @IBAction func authorizeHealth(sender: AnyObject) {

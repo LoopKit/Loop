@@ -8,7 +8,15 @@
 
 import UIKit
 
-class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCellDelegate {
+class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCellDelegate, TextFieldTableViewCellDelegate {
+
+    var defaultAbsorptionTimes: [NSTimeInterval] = [] {
+        didSet {
+            if defaultAbsorptionTimes.count > 0 && absorptionTime == nil {
+                absorptionTime = defaultAbsorptionTimes[defaultAbsorptionTimes.count / 2]
+            }
+        }
+    }
 
     var originalCarbEntry: CarbEntry? {
         didSet {
@@ -33,10 +41,18 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         if let  amount = amount,
                 absorptionTime = absorptionTime
         {
+            if let o = originalCarbEntry where o.amount == amount && o.startDate == date && o.foodType == foodType && o.absorptionTime == absorptionTime {
+                return nil  // No changes were made
+            }
+
             return NewCarbEntry(amount: amount, startDate: date, foodType: foodType, absorptionTime: absorptionTime)
         } else {
             return nil
         }
+    }
+
+    private var isSampleEditable: Bool {
+        return originalCarbEntry?.createdByCurrentApp != false
     }
 
     override func viewDidLoad() {
@@ -50,6 +66,8 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
             title = NSLocalizedString("carb-entry-title-add", tableName: "CarbKit", value: "Add Carb Entry", comment: "The title of the view controller to create a new carb entry")
         }
     }
+
+    @IBOutlet var segmentedControlInputAccessoryView: SegmentedControlInputAccessoryView!
 
     // MARK: - Table view data source
 
@@ -70,18 +88,32 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         switch Row(rawValue: indexPath.row)! {
         case .Amount:
-            let cell = tableView.dequeueReusableCellWithIdentifier(TextFieldTableViewCell.defaultIdentifier) as! TextFieldTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(DecimalTextFieldTableViewCell.defaultIdentifier) as! DecimalTextFieldTableViewCell
+
+            if let amount = amount {
+                cell.number = NSNumber(double: amount)
+            }
+            cell.textField.enabled = isSampleEditable
+            cell.delegate = self
 
             return cell
         case .Date:
             let cell = tableView.dequeueReusableCellWithIdentifier(DatePickerTableViewCell.defaultIdentifier) as! DatePickerTableViewCell
 
             cell.date = date
+            cell.datePicker.enabled = isSampleEditable
             cell.delegate = self
 
             return cell
         case .AbsorptionTime:
-            let cell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.defaultIdentifier) as! SegmentedControlTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(AbsorptionTimeTextFieldTableViewCell.defaultIdentifier) as! AbsorptionTimeTextFieldTableViewCell
+
+            if let absorptionTime = absorptionTime {
+                cell.number = NSNumber(double: absorptionTime.minutes)
+            }
+            cell.segmentValues = defaultAbsorptionTimes.map { $0.minutes }
+            cell.segmentedControlInputAccessoryView = segmentedControlInputAccessoryView
+            cell.delegate = self
 
             return cell
         }
@@ -91,51 +123,46 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
 
     override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
 
-        // Don't allow selection of rows we can't edit
-        guard originalCarbEntry?.createdByCurrentApp != false else {
-            return nil
-        }
-
-        let currentSelection = Row(rawValue: tableView.indexPathForSelectedRow?.row ?? -1)
-        let newSelection = Row(rawValue: indexPath.row)!
-
-        switch (currentSelection, newSelection)  {
-        case (_, .AbsorptionTime):
-            return nil
-        case (let x, let y) where x == y:
-            tableView.beginUpdates()
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
-            tableView.endUpdates()
-
-            return nil
-        default:
-            tableView.beginUpdates()
-
-            return indexPath
-        }
+        tableView.endEditing(false)
+        tableView.beginUpdates()
+        return indexPath
     }
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.endUpdates()
-
-        if case .Amount? = Row(rawValue: indexPath.row) {
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        }
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        self.tableView.endEditing(true)
     }
-    */
 
     // MARK: - DatePickerTableViewCellDelegate
 
     func datePickerTableViewCellDidUpdateDate(cell: DatePickerTableViewCell) {
         date = cell.date
+    }
+
+    // MARK: - TextFieldTableViewCellDelegate
+
+    func textFieldTableViewCellDidUpdateText(cell: DecimalTextFieldTableViewCell) {
+        switch Row(rawValue: tableView.indexPathForCell(cell)?.row ?? -1) {
+        case .Amount?:
+            if let number = cell.number {
+                amount = number.doubleValue
+            } else {
+                amount = nil
+            }
+        case .AbsorptionTime?:
+            if let number = cell.number {
+                absorptionTime = NSTimeInterval(minutes: number.doubleValue)
+            } else {
+                absorptionTime = nil
+            }
+        default:
+            break
+        }
     }
 }

@@ -38,15 +38,19 @@ class DatePickerTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        setSelected(false, animated: false)
+        setSelected(true, animated: false)
         dateChanged(datePicker)
     }
 
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        datePicker.hidden = !selected
-        datePickerHeightConstraint.constant = selected ? 200 : 0
+        if selected {
+            let closed = datePicker.hidden
+
+            datePicker.hidden = !closed
+            datePickerHeightConstraint.constant = closed ? 200 : 0
+        }
     }
 
     @IBAction func dateChanged(sender: UIDatePicker) {
