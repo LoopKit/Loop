@@ -9,12 +9,10 @@
 import Foundation
 
 
-public struct CarbEntry {
-    public let amount: Double
-    public let startDate: NSDate
-    public let description: String?
-    public let absorptionTime: NSTimeInterval?
-    public let createdByCurrentApp: Bool
-
-    let sampleUUID: NSUUID
+public protocol CarbEntry {
+    var amount: Double { get }
+    var startDate: NSDate { get }
+    var foodType: String? { get }
+    var absorptionTime: NSTimeInterval? { get }
+    var createdByCurrentApp: Bool { get }
 }

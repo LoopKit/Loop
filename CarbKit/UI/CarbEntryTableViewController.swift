@@ -1,5 +1,5 @@
 //
-//  FoodTableViewController.swift
+//  CarbEntryTableViewController.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 1/10/16.
@@ -7,18 +7,21 @@
 //
 
 import UIKit
-import CarbKit
 
-class FoodTableViewController: UITableViewController {
+private let ReuseIdentifier = "CarbEntry"
+
+public class CarbEntryTableViewController: UITableViewController {
 
     @IBOutlet var unavailableMessageView: UIView!
 
     @IBOutlet var authorizationRequiredMessageView: UIView!
 
-    override func viewDidLoad() {
+    var carbStore: CarbStore?
+
+    override public func viewDidLoad() {
         super.viewDidLoad()
 
-        if let carbStore = PumpDataManager.sharedManager.carbStore {
+        if let carbStore = carbStore {
             if carbStore.authorizationRequired {
                 state = .AuthorizationRequired(carbStore)
             } else {
@@ -28,10 +31,10 @@ class FoodTableViewController: UITableViewController {
             state = .Unavailable
         }
 
-        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        self.navigationItem.leftBarButtonItem = self.editButtonItem()
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override public func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
         reloadData()
@@ -105,7 +108,7 @@ class FoodTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         switch state {
         case .Unknown, .Unavailable, .AuthorizationRequired:
             return 0
@@ -114,19 +117,19 @@ class FoodTableViewController: UITableViewController {
         }
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return carbEntries.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("CarbEntry", forIndexPath: indexPath)
+    override public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier(ReuseIdentifier, forIndexPath: indexPath)
 
         let entry = carbEntries[indexPath.row]
 
         var titleText = "\(entry.amount) g"
 
-        if let description = entry.description {
-            titleText += ": \(description)"
+        if let foodType = entry.foodType {
+            titleText += ": \(foodType)"
         }
 
         cell.textLabel?.text = titleText
@@ -140,27 +143,28 @@ class FoodTableViewController: UITableViewController {
         return cell
     }
 
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override public func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         return carbEntries[indexPath.row].createdByCurrentApp
     }
 
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    override public func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             // Delete the row from the data source
 //            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         }
     }
 
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
+        
     }
-    */
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override public func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        print(segue)
+    }
 
     @IBAction func addCarbItem(sender: AnyObject) {
 

@@ -211,24 +211,25 @@ public class CarbStore {
         let startDateDesc = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
 
         let query = HKSampleQuery(sampleType: carbType, predicate: recentSamplesPredicate(), limit: Int(HKObjectQueryNoLimit), sortDescriptors: [startDateDesc]) { (query, samples, error) -> Void in
-            var entries = [CarbEntry]()
+            var entries: [CarbEntry]
 
             if let samples = samples as? [HKQuantitySample] {
-                for sample in samples {
-                    entries.append(CarbEntry(
-                        amount: sample.quantity.doubleValueForUnit(HKUnit.gramUnit()),
-                        startDate: sample.startDate,
-                        description: sample.foodType,
-                        absorptionTime: sample.absorptionTime,
-                        createdByCurrentApp: sample.sourceRevision.source == HKSource.defaultSource(),
-                        sampleUUID: sample.UUID
-                    ))
-                }
+                entries = samples
+            } else {
+                entries = []
             }
 
             resultsHandler(entries, error)
         }
 
         healthStore.executeQuery(query)
+    }
+
+    public func addCarbEntry(entry: CarbEntry) {
+        
+    }
+
+    public func replaceCarbEntry(oldEntry: CarbEntry, withEntry newEntry: CarbEntry) {
+        
     }
 }
