@@ -84,13 +84,7 @@ public class CarbEntryTableViewController: UITableViewController {
             carbStore.getRecentCarbEntries { (entries, error) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     if let error = error {
-                        let alert = UIAlertController(
-                            title: error.userInfo[NSLocalizedDescriptionKey] as? String ?? "Error",
-                            message: error.userInfo[NSLocalizedRecoverySuggestionErrorKey] as? String ?? "",
-                            preferredStyle: .Alert
-                        )
-
-                        self.showViewController(alert, sender: nil)
+                        self.presentAlertControllerWithError(error)
                     } else {
                         self.carbEntries = entries
                         self.tableView.reloadData()
@@ -127,8 +121,9 @@ public class CarbEntryTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier(ReuseIdentifier, forIndexPath: indexPath)
 
         let entry = carbEntries[indexPath.row]
+        let amount = NSNumberFormatter.localizedStringFromNumber(entry.amount, numberStyle: .NoStyle)
 
-        var titleText = "\(entry.amount) g"
+        var titleText = "\(amount) g"
 
         if let foodType = entry.foodType {
             titleText += ": \(foodType)"
@@ -139,7 +134,8 @@ public class CarbEntryTableViewController: UITableViewController {
         var detailText = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle)
 
         if let absorptionTime = entry.absorptionTime {
-            detailText = "+ \(absorptionTime.minutes) min"
+            let minutes = NSNumberFormatter.localizedStringFromNumber(absorptionTime.minutes, numberStyle: .NoStyle)
+            detailText += " + \(minutes) min"
         }
 
         cell.detailTextLabel?.text = detailText
@@ -154,23 +150,51 @@ public class CarbEntryTableViewController: UITableViewController {
     override public func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             let entry = carbEntries.removeAtIndex(indexPath.row)
-            carbStore?.deleteCarbEntry(entry)
-
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            carbStore?.deleteCarbEntry(entry, resultHandler: { (success, error) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if success {
+                        tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                    } else if let error = error {
+                        self.presentAlertControllerWithError(error)
+                    }
+                }
+            })
         }
+    }
+
+    // MARK: - UITableViewDelegate
+
+    override public func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        let entry = carbEntries[indexPath.row]
+
+        if !entry.createdByCurrentApp {
+            return nil
+        }
+
+        return indexPath
     }
 
     // MARK: - Navigation
 
     @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
-        if let editVC = segue.sourceViewController as? CarbEntryEditViewController {
-            print(editVC.updatedCarbEntry)
-
-            if let updatedEntry = editVC.updatedCarbEntry {
-                if let originalEntry = editVC.originalCarbEntry {
-                    carbStore?.replaceCarbEntry(originalEntry, withEntry: updatedEntry)
-                } else {
-                    carbStore?.addCarbEntry(updatedEntry)
+        if let  editVC = segue.sourceViewController as? CarbEntryEditViewController,
+                updatedEntry = editVC.updatedCarbEntry
+        {
+            if let originalEntry = editVC.originalCarbEntry {
+                carbStore?.replaceCarbEntry(originalEntry, withEntry: updatedEntry) { (_, _, error) -> Void in
+                    if let error = error {
+                        dispatch_async(dispatch_get_main_queue()) {
+                            self.presentAlertControllerWithError(error)
+                        }
+                    }
+                }
+            } else {
+                carbStore?.addCarbEntry(updatedEntry) { (_, _, error) -> Void in
+                    if let error = error {
+                        dispatch_async(dispatch_get_main_queue()) {
+                            self.presentAlertControllerWithError(error)
+                        }
+                    }
                 }
             }
         }
@@ -199,14 +223,7 @@ public class CarbEntryTableViewController: UITableViewController {
                     if success {
                         self.state = .Display(carbStore)
                     } else if let error = error {
-
-                        let alert = UIAlertController(
-                            title: error.userInfo[NSLocalizedDescriptionKey] as? String ?? "Error",
-                            message: error.userInfo[NSLocalizedRecoverySuggestionErrorKey] as? String ?? "",
-                            preferredStyle: .Alert
-                        )
-
-                        self.presentViewController(alert, animated: true, completion: nil)
+                        self.presentAlertControllerWithError(error)
                     }
                 }
             }

@@ -270,6 +270,8 @@
                                     <constraints>
                                         <constraint firstItem="D2S-2h-yH6" firstAttribute="baseline" secondItem="qU9-hG-hMu" secondAttribute="baseline" id="AXU-cq-Gxc"/>
                                         <constraint firstItem="D2S-2h-yH6" firstAttribute="leading" secondItem="qU9-hG-hMu" secondAttribute="trailing" constant="2" id="G8z-4v-USb"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="qU9-hG-hMu" secondAttribute="bottom" priority="750" constant="4" id="OX0-CW-gmF"/>
+                                        <constraint firstItem="qU9-hG-hMu" firstAttribute="top" secondItem="vvs-Vh-Dbj" secondAttribute="topMargin" constant="4" id="bq2-k4-4AD"/>
                                         <constraint firstItem="K0S-my-3qL" firstAttribute="centerY" secondItem="vvs-Vh-Dbj" secondAttribute="centerY" id="dZW-pJ-gS5"/>
                                         <constraint firstItem="D2S-2h-yH6" firstAttribute="trailing" secondItem="vvs-Vh-Dbj" secondAttribute="trailingMargin" constant="-7" id="mfG-AP-DuG"/>
                                         <constraint firstItem="K0S-my-3qL" firstAttribute="leading" secondItem="vvs-Vh-Dbj" secondAttribute="leadingMargin" constant="7" id="msn-9C-u2W"/>
@@ -312,8 +314,10 @@
                                         <constraint firstItem="DZF-z3-VyZ" firstAttribute="leading" secondItem="x1h-JT-mSs" secondAttribute="leadingMargin" constant="7" id="2eK-ts-MId"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="UFe-MC-ZzC" secondAttribute="trailing" constant="7" id="3bB-aM-b1e"/>
                                         <constraint firstItem="UFe-MC-ZzC" firstAttribute="baseline" secondItem="JjO-fA-2BM" secondAttribute="baseline" id="9rN-0l-GB8"/>
+                                        <constraint firstItem="JjO-fA-2BM" firstAttribute="top" secondItem="x1h-JT-mSs" secondAttribute="topMargin" constant="4" id="DOx-sa-psL"/>
                                         <constraint firstItem="UFe-MC-ZzC" firstAttribute="leading" secondItem="JjO-fA-2BM" secondAttribute="trailing" constant="2" id="KdD-B3-Jiv"/>
                                         <constraint firstItem="JjO-fA-2BM" firstAttribute="centerY" secondItem="x1h-JT-mSs" secondAttribute="centerY" id="Sqz-cg-FzV"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="JjO-fA-2BM" secondAttribute="bottom" priority="750" constant="4" id="beB-Iv-WA5"/>
                                         <constraint firstItem="DZF-z3-VyZ" firstAttribute="centerY" secondItem="x1h-JT-mSs" secondAttribute="centerY" id="y4t-c9-V8M"/>
                                     </constraints>
                                 </tableViewCellContentView>

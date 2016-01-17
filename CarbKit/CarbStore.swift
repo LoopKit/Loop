@@ -14,8 +14,6 @@ public class CarbStore {
 
     public static let CarbEntriesDidUpdateNotification = "com.loudnate.CarbKit.CarbEntriesDidUpdateNotification"
 
-    private let foodType = HKCorrelationType.correlationTypeForIdentifier(HKCorrelationTypeIdentifierFood)!
-
     private let carbType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryCarbohydrates)!
 
     /// All the sample types we need permission to read.
@@ -229,15 +227,64 @@ public class CarbStore {
         healthStore.executeQuery(query)
     }
 
-    public func addCarbEntry(entry: CarbEntry) {
-        
+    public func addCarbEntry(entry: CarbEntry, resultHandler: (Bool, CarbEntry?, NSError?) -> Void) {
+        let amount = HKQuantity(unit: HKUnit.gramUnit(), doubleValue: entry.amount)
+        var metadata = [String: AnyObject]()
+
+        if let absorptionTime = entry.absorptionTime {
+            metadata[MetadataKeyAbsorptionTimeMinutes] = absorptionTime
+        }
+
+        if let foodType = entry.foodType {
+            metadata[HKMetadataKeyFoodType] = foodType
+        }
+
+        let carbs = HKQuantitySample(type: carbType, quantity: amount, startDate: entry.startDate, endDate: entry.startDate, device: nil, metadata: metadata)
+
+        healthStore.saveObject(carbs) { (completed, error) -> Void in
+            resultHandler(completed, carbs, error)
+        }
     }
 
-    public func replaceCarbEntry(oldEntry: CarbEntry, withEntry newEntry: CarbEntry) {
-        
+    public func replaceCarbEntry(oldEntry: CarbEntry, withEntry newEntry: CarbEntry, resultHandler: (Bool, CarbEntry?, NSError?) -> Void) {
+        deleteCarbEntry(oldEntry) { (completed, error) -> Void in
+            if let error = error {
+                resultHandler(false, nil, error)
+            } else {
+                self.addCarbEntry(newEntry, resultHandler: resultHandler)
+            }
+        }
     }
 
-    public func deleteCarbEntry(entry: CarbEntry) {
-
+    public func deleteCarbEntry(entry: CarbEntry, resultHandler: (Bool, NSError?) -> Void) {
+        if let sample = entry as? HKQuantitySample {
+            if sample.createdByCurrentApp {
+                healthStore.deleteObject(sample, withCompletion: resultHandler)
+            } else {
+                resultHandler(
+                    false,
+                    NSError(
+                        domain: HKErrorDomain,
+                        code: HKErrorCode.ErrorAuthorizationDenied.rawValue,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: NSLocalizedString("com.loudnate.CarbKit.deleteCarbEntryUnownedErrorDescription", tableName: "CarbKit", value: "Authorization Denied", comment: "The description of an error returned when attempting to delete a sample not shared by the current app"),
+                            NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString("com.loudnate.carbKit.sharingDeniedErrorRecoverySuggestion", tableName: "CarbKit", value: "This sample can be deleted from the Health app", comment: "The error recovery suggestion when attempting to delete a sample not shared by the current app")
+                        ]
+                    )
+                )
+            }
+        } else {
+            resultHandler(
+                false,
+                NSError(
+                    domain: HKErrorDomain,
+                    code: HKErrorCode.ErrorInvalidArgument.rawValue,
+                    userInfo: [
+                        NSLocalizedDescriptionKey: NSLocalizedString("com.loudnate.CarbKit.deleteCarbEntryInvalid", tableName: "CarbKit", value: "Invalid Entry", comment: "The description of an error returned when attempting to delete a non-HealthKit sample"),
+                        NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString("com.loudnate.carbKit.sharingDeniedErrorRecoverySuggestion", tableName: "CarbKit", value: "This object is not saved in the Health database and therefore cannot be deleted", comment: "The error recovery suggestion when attempting to delete a non-HealthKit sample")
+                    ]
+                )
+            )
+        }
     }
 }

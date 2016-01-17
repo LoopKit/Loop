@@ -12,7 +12,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
 
     var defaultAbsorptionTimes: [NSTimeInterval] = [] {
         didSet {
-            if defaultAbsorptionTimes.count > 0 && absorptionTime == nil {
+            if defaultAbsorptionTimes.count > 0 && originalCarbEntry == nil {
                 absorptionTime = defaultAbsorptionTimes[defaultAbsorptionTimes.count / 2]
             }
         }
@@ -61,7 +61,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         tableView.estimatedRowHeight = 44
 
         if originalCarbEntry != nil {
-            title = NSLocalizedString("carb-entry-title-edit", tableName: "CarbKit", value: "Add Carb Entry", comment: "The title of the view controller to edit an existing carb entry")
+            title = NSLocalizedString("carb-entry-title-edit", tableName: "CarbKit", value: "Edit Carb Entry", comment: "The title of the view controller to edit an existing carb entry")
         } else {
             title = NSLocalizedString("carb-entry-title-add", tableName: "CarbKit", value: "Add Carb Entry", comment: "The title of the view controller to create a new carb entry")
         }

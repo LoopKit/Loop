@@ -45,7 +45,7 @@ class DatePickerTableViewCell: UITableViewCell {
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
-        if selected {
+        if selected && datePicker.enabled {
             let closed = datePicker.hidden
 
             datePicker.hidden = !closed
