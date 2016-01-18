@@ -16,6 +16,12 @@ public protocol SampleValue {
     var unit: HKUnit { get }
 }
 
+extension SampleValue {
+    var quantity: HKQuantity {
+        return HKQuantity(unit: unit, doubleValue: value)
+    }
+}
+
 
 struct CarbValue: SampleValue {
     let startDate: NSDate
@@ -28,10 +34,6 @@ struct GlucoseEffect: SampleValue {
     let startDate: NSDate
     let value: Double
     let unit: HKUnit
-
-    var quantity: HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value)
-    }
 }
 
 

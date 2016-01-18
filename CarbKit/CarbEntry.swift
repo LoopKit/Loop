@@ -10,9 +10,6 @@ import Foundation
 
 
 public protocol CarbEntry: SampleValue {
-    var value: Double { get }
-    var startDate: NSDate { get }
-    var unit: HKUnit { get }
     var foodType: String? { get }
     var absorptionTime: NSTimeInterval? { get }
     var createdByCurrentApp: Bool { get }

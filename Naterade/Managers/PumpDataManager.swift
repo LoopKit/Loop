@@ -9,6 +9,7 @@
 import Foundation
 import CarbKit
 import HealthKit
+import LoopKit
 import MinimedKit
 import RileyLinkKit
 import WatchConnectivity
@@ -136,7 +137,7 @@ class PumpDataManager: TransmitterDelegate {
     func transmitter(transmitter: Transmitter, didError error: ErrorType) {
         logger?.addMessage([
             "error": "\(error)",
-            "collectedAt": NSDateFormatter.ISO8601DateFormatter().stringFromDate(NSDate())
+            "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
             ], toCollection: "g5"
         )
 
