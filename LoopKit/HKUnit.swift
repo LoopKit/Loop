@@ -9,7 +9,7 @@
 import HealthKit
 
 
-extension HKUnit {
+public extension HKUnit {
     static func milligramsPerDeciliterUnit() -> HKUnit {
         return HKUnit.gramUnitWithMetricPrefix(.Milli).unitDividedByUnit(HKUnit.literUnitWithMetricPrefix(.Deci))
     }

@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import LoopKit
 
 
 public protocol SampleValue {
