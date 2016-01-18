@@ -10,15 +10,27 @@ import Foundation
 import HealthKit
 
 
-struct GlucoseEffect {
-    let startAt: NSDate
-    let endAt: NSDate
-    let amount: Double
+public protocol SampleValue {
+    var startDate: NSDate { get }
+    var value: Double { get }
+    var unit: HKUnit { get }
+}
+
+
+struct CarbValue: SampleValue {
+    let startDate: NSDate
+    let value: Double
+    let unit: HKUnit = HKUnit.gramUnit()
+}
+
+
+struct GlucoseEffect: SampleValue {
+    let startDate: NSDate
+    let value: Double
     let unit: HKUnit
-    let description: String
 
     var quantity: HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: amount)
+        return HKQuantity(unit: unit, doubleValue: value)
     }
 }
 
@@ -55,16 +67,138 @@ struct CarbMath {
         return carbs * (1 - percentAbsorptionAtTime(time, absorptionTime: absorptionTime))
     }
 
-    static func glucoseEffectForCarbEntry(entry: CarbEntry, atDate date: NSDate, carbRatio: HKQuantity, insulinSensitivity: HKQuantity, defaultAbsorptionTime: NSTimeInterval) -> GlucoseEffect {
+    private static func carbsOnBoardForCarbEntry(entry: CarbEntry, atDate date: NSDate, defaultAbsorptionTime: NSTimeInterval, delay: NSTimeInterval) -> Double {
         let time = date.timeIntervalSinceDate(entry.startDate)
-        let amount = insulinSensitivity.doubleValueForUnit(HKUnit.milligramsPerDeciliter()) / carbRatio.doubleValueForUnit(HKUnit.gramUnit()) * absorbedCarbs(entry.amount, atTime: time, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
+        let value: Double
 
-        let unit = HKUnit.milligramsPerDeciliter()  // mg/dL / g * g
+        if time >= 0 {
+            value = unabsorbedCarbs(entry.value, atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
+        } else {
+            value = 0
+        }
 
-        return GlucoseEffect(startAt: date, endAt: date, amount: amount, unit: unit, description: String(format: "%.0fg @ %.0fmin", entry.amount, time.minutes))
+        return value
     }
 
-    static func glucoseEffectsForCarbEntries(entries: [CarbEntry], carbRatio: Double, insulinSensitivity: Double, defaultAbsorptionTime: NSTimeInterval) {
+    // mg/dL / g * g
+    private static func glucoseEffectForCarbEntry(
+        entry: CarbEntry,
+        atDate date: NSDate,
+        carbRatio: HKQuantity,
+        insulinSensitivity: HKQuantity,
+        defaultAbsorptionTime: NSTimeInterval,
+        delay: NSTimeInterval
+    ) -> Double {
+        let time = date.timeIntervalSinceDate(entry.startDate)
+        let value: Double
 
+        if time >= 0 {
+            value = insulinSensitivity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()) / carbRatio.doubleValueForUnit(HKUnit.gramUnit()) * absorbedCarbs(entry.value, atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
+        } else {
+            value = 0
+        }
+
+        return value
+    }
+
+    private static func simulationDateRangeForCarbEntries(
+        entries: [CarbEntry],
+        fromDate: NSDate?,
+        toDate: NSDate?,
+        defaultAbsorptionTime: NSTimeInterval,
+        delay: NSTimeInterval,
+        delta: NSTimeInterval
+    ) -> (NSDate, NSDate)? {
+        guard entries.count > 0 else {
+            return nil
+        }
+
+        let startDate: NSDate
+        let endDate: NSDate
+
+        if let fromDate = fromDate, toDate = toDate {
+            startDate = fromDate
+            endDate = toDate
+        } else {
+            var minDate = entries.first!.startDate
+            var maxDate = minDate
+            var maxAbsorptionTime = defaultAbsorptionTime
+
+            for entry in entries {
+                if entry.startDate < minDate {
+                    minDate = entry.startDate
+                }
+
+                if entry.startDate > maxDate {
+                    maxDate = entry.startDate
+                }
+
+                if let absorptionTime = entry.absorptionTime where absorptionTime > maxAbsorptionTime {
+                    maxAbsorptionTime = absorptionTime
+                }
+            }
+
+            startDate = fromDate ?? minDate.dateFlooredToTimeInterval(delta)
+            endDate = toDate ?? maxDate.dateByAddingTimeInterval(maxAbsorptionTime + delay).dateCeiledToTimeInterval(delta)
+        }
+        
+        return (startDate, endDate)
+    }
+
+    static func carbsOnBoardForCarbEntries(
+        entries: [CarbEntry],
+        fromDate: NSDate? = nil,
+        toDate: NSDate? = nil,
+        defaultAbsorptionTime: NSTimeInterval,
+        delay: NSTimeInterval = NSTimeInterval(minutes: 15),
+        delta: NSTimeInterval = NSTimeInterval(minutes: 5)
+    ) -> [CarbValue] {
+        guard let (startDate, endDate) = simulationDateRangeForCarbEntries(entries, fromDate: fromDate, toDate: toDate, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay, delta: delta) else {
+            return []
+        }
+
+        var date = startDate
+        var values = [CarbValue]()
+
+        repeat {
+            let value = entries.reduce(0.0) { (value, entry) -> Double in
+                return value + carbsOnBoardForCarbEntry(entry, atDate: date, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
+            }
+
+            values.append(CarbValue(startDate: date, value: value))
+            date = date.dateByAddingTimeInterval(delta)
+        } while date <= endDate
+
+        return values
+    }
+
+    static func glucoseEffectsForCarbEntries(
+        entries: [CarbEntry],
+        fromDate: NSDate? = nil,
+        toDate: NSDate? = nil,
+        carbRatio: HKQuantity,
+        insulinSensitivity: HKQuantity,
+        defaultAbsorptionTime: NSTimeInterval,
+        delay: NSTimeInterval = NSTimeInterval(minutes: 15),
+        delta: NSTimeInterval = NSTimeInterval(minutes: 5)
+    ) -> [GlucoseEffect] {
+        guard let (startDate, endDate) = simulationDateRangeForCarbEntries(entries, fromDate: fromDate, toDate: toDate, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay, delta: delta) else {
+            return []
+        }
+
+        var date = startDate
+        var values = [GlucoseEffect]()
+        let unit = HKUnit.milligramsPerDeciliterUnit()
+
+        repeat {
+            let value = entries.reduce(0.0) { (value, entry) -> Double in
+                return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatio, insulinSensitivity: insulinSensitivity, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
+            }
+
+            values.append(GlucoseEffect(startDate: date, value: value, unit: unit))
+            date = date.dateByAddingTimeInterval(delta)
+        } while date <= endDate
+
+        return values
     }
 }

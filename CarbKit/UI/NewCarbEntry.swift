@@ -10,9 +10,10 @@ import Foundation
 
 
 struct NewCarbEntry: CarbEntry {
-    var amount: Double
+    var value: Double
     var startDate: NSDate
     var foodType: String?
     var absorptionTime: NSTimeInterval?
+    let unit = HKUnit.gramUnit()
     let createdByCurrentApp = true
 }

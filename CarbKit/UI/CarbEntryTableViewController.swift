@@ -121,9 +121,9 @@ public class CarbEntryTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier(ReuseIdentifier, forIndexPath: indexPath)
 
         let entry = carbEntries[indexPath.row]
-        let amount = NSNumberFormatter.localizedStringFromNumber(entry.amount, numberStyle: .NoStyle)
+        let value = NSNumberFormatter.localizedStringFromNumber(entry.value, numberStyle: .NoStyle)
 
-        var titleText = "\(amount) g"
+        var titleText = "\(value) g"
 
         if let foodType = entry.foodType {
             titleText += ": \(foodType)"

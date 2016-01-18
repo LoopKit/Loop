@@ -14,8 +14,12 @@ let MetadataKeyAbsorptionTimeMinutes = "com.loudnate.CarbKit.HKMetadataKey.Absor
 
 
 extension HKQuantitySample: CarbEntry {
-    public var amount: Double {
+    public var value: Double {
         return quantity.doubleValueForUnit(HKUnit.gramUnit())
+    }
+
+    public var unit: HKUnit {
+        return HKUnit.gramUnit()
     }
 
     public var foodType: String? {

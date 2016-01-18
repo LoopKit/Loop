@@ -10,11 +10,11 @@ import HealthKit
 
 
 extension HKUnit {
-    static func milligramsPerDeciliter() -> HKUnit {
+    static func milligramsPerDeciliterUnit() -> HKUnit {
         return HKUnit.gramUnitWithMetricPrefix(.Milli).unitDividedByUnit(HKUnit.literUnitWithMetricPrefix(.Deci))
     }
 
-    static func millimolesPerLitre() -> HKUnit {
+    static func millimolesPerLiterUnit() -> HKUnit {
         return HKUnit.moleUnitWithMetricPrefix(.Milli, molarMass: HKUnitMolarMassBloodGlucose).unitDividedByUnit(HKUnit.literUnit())
     }
 }

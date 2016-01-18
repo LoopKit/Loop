@@ -228,7 +228,7 @@ public class CarbStore {
     }
 
     public func addCarbEntry(entry: CarbEntry, resultHandler: (Bool, CarbEntry?, NSError?) -> Void) {
-        let amount = HKQuantity(unit: HKUnit.gramUnit(), doubleValue: entry.amount)
+        let amount = HKQuantity(unit: HKUnit.gramUnit(), doubleValue: entry.value)
         var metadata = [String: AnyObject]()
 
         if let absorptionTime = entry.absorptionTime {
