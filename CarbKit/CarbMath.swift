@@ -1,6 +1,6 @@
 //
 //  CarbMath.swift
-//  Naterade
+//  CarbKit
 //
 //  Created by Nathan Racklyeft on 1/16/16.
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
@@ -179,10 +179,10 @@ struct CarbMath {
         entries: [CarbEntry],
         fromDate: NSDate? = nil,
         toDate: NSDate? = nil,
-        carbRatio: HKQuantity,
-        insulinSensitivity: HKQuantity,
+        carbRatios: CarbRatioSchedule,
+        insulinSensitivities: InsulinSensitivitySchedule,
         defaultAbsorptionTime: NSTimeInterval,
-        delay: NSTimeInterval = NSTimeInterval(minutes: 15),
+        delay: NSTimeInterval = NSTimeInterval(minutes: 10),
         delta: NSTimeInterval = NSTimeInterval(minutes: 5)
     ) -> [GlucoseEffect] {
         guard let (startDate, endDate) = simulationDateRangeForCarbEntries(entries, fromDate: fromDate, toDate: toDate, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay, delta: delta) else {
@@ -195,7 +195,7 @@ struct CarbMath {
 
         repeat {
             let value = entries.reduce(0.0) { (value, entry) -> Double in
-                return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatio, insulinSensitivity: insulinSensitivity, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
+                return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatios.at(entry.startDate), insulinSensitivity: insulinSensitivities.at(entry.startDate), defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
             }
 
             values.append(GlucoseEffect(startDate: date, value: value, unit: unit))

@@ -1,6 +1,6 @@
 //
 //  CarbEntryTableViewController.swift
-//  Naterade
+//  CarbKit
 //
 //  Created by Nathan Racklyeft on 1/10/16.
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.

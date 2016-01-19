@@ -1,6 +1,6 @@
 //
 //  CarbStore.swift
-//  Naterade
+//  CarbKit
 //
 //  Created by Nathan Racklyeft on 1/3/16.
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.

@@ -11,8 +11,13 @@ import HealthKit
 
 
 public struct ScheduleItem {
-    let startTime: NSTimeInterval
-    let value: Double
+    public let startTime: NSTimeInterval
+    public let value: Double
+
+    public init(startTime: NSTimeInterval, value: Double) {
+        self.startTime = startTime
+        self.value = value
+    }
 }
 
 
