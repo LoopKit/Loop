@@ -11,10 +11,18 @@ import Foundation
 
 public extension NSDate {
     func dateFlooredToTimeInterval(interval: NSTimeInterval) -> NSDate {
+        if interval == 0 {
+            return self.copy() as! NSDate
+        }
+
         return NSDate(timeIntervalSinceReferenceDate: floor(self.timeIntervalSinceReferenceDate / interval) * interval)
     }
 
     func dateCeiledToTimeInterval(interval: NSTimeInterval) -> NSDate {
+        if interval == 0 {
+            return self.copy() as! NSDate
+        }
+
         return NSDate(timeIntervalSinceReferenceDate: ceil(self.timeIntervalSinceReferenceDate / interval) * interval)
     }
 }
