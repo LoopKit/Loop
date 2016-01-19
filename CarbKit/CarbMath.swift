@@ -153,7 +153,7 @@ struct CarbMath {
         fromDate: NSDate? = nil,
         toDate: NSDate? = nil,
         defaultAbsorptionTime: NSTimeInterval,
-        delay: NSTimeInterval = NSTimeInterval(minutes: 15),
+        delay: NSTimeInterval = NSTimeInterval(minutes: 10),
         delta: NSTimeInterval = NSTimeInterval(minutes: 5)
     ) -> [CarbValue] {
         guard let (startDate, endDate) = simulationDateRangeForCarbEntries(entries, fromDate: fromDate, toDate: toDate, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay, delta: delta) else {
