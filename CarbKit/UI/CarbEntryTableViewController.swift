@@ -64,7 +64,14 @@ public class CarbEntryTableViewController: UITableViewController {
         super.viewDidAppear(animated)
 
         let updateInterval = NSTimeInterval(minutes: 5)
-        let timer = NSTimer(fireDate: NSDate().dateCeiledToTimeInterval(updateInterval), interval: updateInterval, target: self, selector: "updateTimelyStats:", userInfo: nil, repeats: true)
+        let timer = NSTimer(
+            fireDate: NSDate().dateCeiledToTimeInterval(updateInterval).dateByAddingTimeInterval(2),
+            interval: updateInterval,
+            target: self,
+            selector: "updateTimelyStats:",
+            userInfo: nil,
+            repeats: true
+        )
         updateTimer = timer
 
         NSRunLoop.currentRunLoop().addTimer(timer, forMode: NSDefaultRunLoopMode)

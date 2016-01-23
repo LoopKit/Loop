@@ -373,7 +373,6 @@ public class CarbStore {
                     if value.startDate <= date {
                         closestValue = value
                     } else {
-                        print(value.startDate, date)
                         break
                     }
                 }
