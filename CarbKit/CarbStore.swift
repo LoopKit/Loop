@@ -14,6 +14,12 @@ public class CarbStore {
 
     public static let CarbEntriesDidUpdateNotification = "com.loudnate.CarbKit.CarbEntriesDidUpdateNotification"
 
+    /// The `CarbEntriesDidUpdateNotification` user info key for an array of new CarbEntry items
+    public static let CarbEntriesAddedUserInfoKey = "com.loudnate.CarbKit.CarbEntriesAddedKey"
+
+    /// The `CarbEntriesDidUpdateNotification` user info key for an array of removed CarbEntry items
+    public static let CarbEntriesRemovedUserInfoKey = "com.loudnate.CarbKit.CarbEntriesRemovedKey"
+
     private let carbType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryCarbohydrates)!
 
     /// All the sample types we need permission to read.
@@ -51,7 +57,7 @@ public class CarbStore {
         }
 
         if !authorizationRequired {
-            createObserverQueries()
+            createQueries()
         }
     }
 
@@ -104,29 +110,46 @@ public class CarbStore {
             }
 
             if success {
-                self.createObserverQueries()
+                self.createQueries()
             }
 
             parentHandler(success: success, error: authError)
         })
     }
 
+    // MARK: - Query
+
     private var observerQueries: [HKObserverQuery] = []
 
-    private func createObserverQueries() {
+    private var anchoredObjectQueries: [HKObserverQuery: HKAnchoredObjectQuery] = [:]
+
+    private var queryAnchor: HKQueryAnchor?
+
+    private func createQueries() {
         let predicate = recentSamplesPredicate()
 
         for type in readTypes {
-            let query = HKObserverQuery(sampleType: type, predicate: predicate, updateHandler: { [unowned self] (query, completionHandler, error) -> Void in
+            let observerQuery = HKObserverQuery(sampleType: type, predicate: predicate, updateHandler: { [unowned self] (query, completionHandler, error) -> Void in
 
-                // Handle new data for `query.sampleType`
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification, object: self)
+                // TODO: Hand the error to the delegate
+
+                if error == nil {
+                    dispatch_async(self.recentSamplesAccessQueue) {
+                        if self.anchoredObjectQueries[query] == nil {
+                            let anchoredObjectQuery = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: self.queryAnchor, limit: Int(HKObjectQueryNoLimit), resultsHandler: self.processResultsFromAnchoredQuery)
+                            anchoredObjectQuery.updateHandler = self.processResultsFromAnchoredQuery
+
+                            self.anchoredObjectQueries[query] = anchoredObjectQuery
+                            self.healthStore.executeQuery(anchoredObjectQuery)
+                        }
+                    }
+                }
 
                 completionHandler()
             })
 
-            healthStore.executeQuery(query)
-            observerQueries.append(query)
+            healthStore.executeQuery(observerQuery)
+            observerQueries.append(observerQuery)
         }
     }
 
@@ -203,28 +226,69 @@ public class CarbStore {
         }
     }
 
+
     // MARK: - Data fetching
+
+    private func processResultsFromAnchoredQuery(query: HKAnchoredObjectQuery, newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, anchor: HKQueryAnchor?, error: NSError?) {
+        // TODO: Hand the error to the delegate
+
+        dispatch_async(self.recentSamplesAccessQueue) {
+            // Prune the sample data based on the startDate and deletedSamples array
+            var removedSamples: [HKQuantitySample] = []
+
+            let cutoffDate = NSDate().dateByAddingTimeInterval(-self.maximumAbsorptionTimeInterval)
+
+            // Filter samples to remove
+            for sample in self.recentSamples {
+                if sample.startDate < cutoffDate {
+                    removedSamples.append(sample)
+                } else if let deletedSamples = deletedSamples where deletedSamples.contains({ $0.UUID == sample.UUID }) {
+                    removedSamples.append(sample)
+                }
+            }
+
+            // Remove old samples
+            removedSamples = removedSamples.flatMap({ self.recentSamples.remove($0) })
+
+            // Append the new samples
+            if let samples = newSamples as? [HKQuantitySample] {
+                for sample in samples {
+                    self.recentSamples.insert(sample)
+                }
+            }
+
+            // Update the anchor
+            self.queryAnchor = anchor
+
+            // Notify listeners
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification,
+                object: self,
+                userInfo: [
+                    self.dynamicType.CarbEntriesAddedUserInfoKey: newSamples ?? [],
+                    self.dynamicType.CarbEntriesRemovedUserInfoKey: removedSamples
+                ]
+            )
+        }
+    }
+
+    private var recentSamples: Set<HKQuantitySample> = []
+
+    private var recentSamplesAccessQueue: dispatch_queue_t = dispatch_queue_create("com.loudnate.CarbKit.recentSamplesAccessQueue", DISPATCH_QUEUE_SERIAL)
 
     private func recentSamplesPredicate() -> NSPredicate {
         return HKQuery.predicateForSamplesWithStartDate(NSDate(timeIntervalSinceNow: -maximumAbsorptionTimeInterval), endDate: NSDate.distantFuture(), options: [.StrictStartDate])
     }
 
     public func getRecentCarbEntries(resultsHandler: ([CarbEntry], NSError?) -> Void) {
-        let startDateDesc = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
-
-        let query = HKSampleQuery(sampleType: carbType, predicate: recentSamplesPredicate(), limit: Int(HKObjectQueryNoLimit), sortDescriptors: [startDateDesc]) { (query, samples, error) -> Void in
+        dispatch_async(recentSamplesAccessQueue) {
             var entries: [CarbEntry] = []
 
-            if let samples = samples as? [HKQuantitySample] {
-                for sample in samples {
-                    entries.append(sample)
-                }
+            for sample in self.recentSamples {
+                entries.append(sample)
             }
 
-            resultsHandler(entries, error)
+            resultsHandler(entries, nil)
         }
-
-        healthStore.executeQuery(query)
     }
 
     public func addCarbEntry(entry: CarbEntry, resultHandler: (Bool, CarbEntry?, NSError?) -> Void) {

@@ -264,7 +264,17 @@ class PumpDataManager: TransmitterDelegate {
 
     // MARK: - CarbKit
 
-    let carbStore = CarbStore()
+    let carbStore: CarbStore? = {
+        let carbStore = CarbStore()
+
+        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
+            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
+                print(enabled, error)
+            }
+        }
+
+        return carbStore
+    }()
 
     // MARK: - HealthKit
 
