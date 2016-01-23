@@ -12,16 +12,7 @@ import HealthKit
 let MetadataKeyAbsorptionTimeMinutes = "com.loudnate.CarbKit.HKMetadataKey.AbsorptionTimeMinutes"
 
 
-
-extension HKQuantitySample: CarbEntry {
-    public var value: Double {
-        return quantity.doubleValueForUnit(HKUnit.gramUnit())
-    }
-
-    public var unit: HKUnit {
-        return HKUnit.gramUnit()
-    }
-
+extension HKQuantitySample {
     public var foodType: String? {
         return metadata?[HKMetadataKeyFoodType] as? String
     }

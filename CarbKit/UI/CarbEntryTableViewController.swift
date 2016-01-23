@@ -16,7 +16,23 @@ public class CarbEntryTableViewController: UITableViewController {
 
     @IBOutlet var authorizationRequiredMessageView: UIView!
 
+    @IBOutlet weak var COBValueLabel: UILabel!
+
+    @IBOutlet weak var COBDateLabel: UILabel!
+
+    @IBOutlet weak var totalValueLabel: UILabel!
+
+    @IBOutlet weak var totalDateLabel: UILabel!
+
     public var carbStore: CarbStore?
+
+    private var updateTimer: NSTimer? {
+        willSet {
+            if let timer = updateTimer {
+                timer.invalidate()
+            }
+        }
+    }
 
     public override func awakeFromNib() {
         super.awakeFromNib()
@@ -36,6 +52,28 @@ public class CarbEntryTableViewController: UITableViewController {
         }
 
         navigationItem.leftBarButtonItem = editButtonItem()
+    }
+
+    public override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+
+        updateTimelyStats(nil)
+    }
+
+    public override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+
+        let updateInterval = NSTimeInterval(minutes: 5)
+        let timer = NSTimer(fireDate: NSDate().dateCeiledToTimeInterval(updateInterval), interval: updateInterval, target: self, selector: "updateTimelyStats:", userInfo: nil, repeats: true)
+        updateTimer = timer
+
+        NSRunLoop.currentRunLoop().addTimer(timer, forMode: NSDefaultRunLoopMode)
+    }
+
+    public override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        updateTimer = nil
     }
 
     deinit {
@@ -73,6 +111,7 @@ public class CarbEntryTableViewController: UITableViewController {
                 navigationItem.rightBarButtonItem?.enabled = true
 
                 tableView.backgroundView = nil
+                tableView.tableHeaderView?.hidden = false
                 tableView.tableFooterView = nil
                 reloadData()
             }
@@ -88,6 +127,45 @@ public class CarbEntryTableViewController: UITableViewController {
                     } else {
                         self.carbEntries = entries
                         self.tableView.reloadData()
+                    }
+                }
+
+                self.updateTimelyStats(nil)
+                self.updateTotal()
+            }
+        }
+    }
+
+    func updateTimelyStats(_: NSTimer?) {
+        updateCOB()
+    }
+
+    private func updateCOB() {
+        if case .Display(let carbStore) = state {
+            carbStore.carbsOnBoardAtDate(NSDate(), resultHandler: { (value) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if let value = value {
+                        self.COBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.COBDateLabel.text = String(format: NSLocalizedString("com.loudnate.CarbKit.COBDateLabel", tableName: "CarbKit", value: "at %1$@", comment: "The format string describing the date of a COB value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                    } else {
+                        self.COBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)
+                        self.COBDateLabel.text = nil
+                    }
+                }
+            })
+        }
+    }
+
+    private func updateTotal() {
+        if case .Display(let carbStore) = state {
+            carbStore.getTotalRecentCarbValue { (value) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if let value = value {
+                        self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.CarbKit.totalDateLabel", tableName: "CarbKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                    } else {
+                        self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)
+                        self.totalDateLabel.text = nil
                     }
                 }
             }

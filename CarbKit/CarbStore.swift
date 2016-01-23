@@ -52,7 +52,7 @@ public class CarbStore {
         self.defaultAbsorptionTimes = defaultAbsorptionTimes.sort()
         self.maximumAbsorptionTimeInterval = defaultAbsorptionTimes.last ?? NSTimeInterval(hours: 4)
 
-        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied else {
+        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied && defaultAbsorptionTimes.count > 0 else {
             return nil
         }
 
@@ -104,7 +104,7 @@ public class CarbStore {
                     code: HKErrorCode.ErrorAuthorizationDenied.rawValue,
                     userInfo: [
                         NSLocalizedDescriptionKey: NSLocalizedString("com.loudnate.CarbKit.sharingDeniedErrorDescription", tableName: "CarbKit", value: "Authorization Denied", comment: "The error description describing when Health sharing was denied"),
-                        NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString("com.loudnate.carbKit.sharingDeniedErrorRecoverySuggestion", tableName: "CarbKit", value: "Please re-enable sharing in Health", comment: "The error recovery suggestion when Health sharing was denied")
+                        NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString("com.loudnate.CarbKit.sharingDeniedErrorRecoverySuggestion", tableName: "CarbKit", value: "Please re-enable sharing in Health", comment: "The error recovery suggestion when Health sharing was denied")
                     ]
                 )
             }
@@ -134,7 +134,7 @@ public class CarbStore {
                 // TODO: Hand the error to the delegate
 
                 if error == nil {
-                    dispatch_async(self.recentSamplesAccessQueue) {
+                    dispatch_async(self.dataAccessQueue) {
                         if self.anchoredObjectQueries[query] == nil {
                             let anchoredObjectQuery = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: self.queryAnchor, limit: Int(HKObjectQueryNoLimit), resultsHandler: self.processResultsFromAnchoredQuery)
                             anchoredObjectQuery.updateHandler = self.processResultsFromAnchoredQuery
@@ -232,7 +232,7 @@ public class CarbStore {
     private func processResultsFromAnchoredQuery(query: HKAnchoredObjectQuery, newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, anchor: HKQueryAnchor?, error: NSError?) {
         // TODO: Hand the error to the delegate
 
-        dispatch_async(self.recentSamplesAccessQueue) {
+        dispatch_async(self.dataAccessQueue) {
             // Prune the sample data based on the startDate and deletedSamples array
             var removedSamples: [HKQuantitySample] = []
 
@@ -260,6 +260,9 @@ public class CarbStore {
             // Update the anchor
             self.queryAnchor = anchor
 
+            // Clear the cached calculations
+            self.carbsOnBoardCache = nil
+
             // Notify listeners
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification,
                 object: self,
@@ -273,19 +276,17 @@ public class CarbStore {
 
     private var recentSamples: Set<HKQuantitySample> = []
 
-    private var recentSamplesAccessQueue: dispatch_queue_t = dispatch_queue_create("com.loudnate.CarbKit.recentSamplesAccessQueue", DISPATCH_QUEUE_SERIAL)
+    private var dataAccessQueue: dispatch_queue_t = dispatch_queue_create("com.loudnate.CarbKit.dataAccessQueue", DISPATCH_QUEUE_SERIAL)
 
     private func recentSamplesPredicate() -> NSPredicate {
         return HKQuery.predicateForSamplesWithStartDate(NSDate(timeIntervalSinceNow: -maximumAbsorptionTimeInterval), endDate: NSDate.distantFuture(), options: [.StrictStartDate])
     }
 
     public func getRecentCarbEntries(resultsHandler: ([CarbEntry], NSError?) -> Void) {
-        dispatch_async(recentSamplesAccessQueue) {
-            var entries: [CarbEntry] = []
-
-            for sample in self.recentSamples {
-                entries.append(sample)
-            }
+        dispatch_async(dataAccessQueue) {
+            let entries: [CarbEntry] = self.recentSamples.map({ (sample) in
+                return StoredCarbEntry(sample: sample)
+            })
 
             resultsHandler(entries, nil)
         }
@@ -306,7 +307,7 @@ public class CarbStore {
         let carbs = HKQuantitySample(type: carbType, quantity: amount, startDate: entry.startDate, endDate: entry.startDate, device: nil, metadata: metadata)
 
         healthStore.saveObject(carbs) { (completed, error) -> Void in
-            resultHandler(completed, carbs, error)
+            resultHandler(completed, StoredCarbEntry(sample: carbs), error)
         }
     }
 
@@ -321,9 +322,9 @@ public class CarbStore {
     }
 
     public func deleteCarbEntry(entry: CarbEntry, resultHandler: (Bool, NSError?) -> Void) {
-        if let sample = entry as? HKQuantitySample {
-            if sample.createdByCurrentApp {
-                healthStore.deleteObject(sample, withCompletion: resultHandler)
+        if let entry = entry as? StoredCarbEntry {
+            if entry.createdByCurrentApp {
+                healthStore.deleteObject(entry.sample, withCompletion: resultHandler)
             } else {
                 resultHandler(
                     false,
@@ -349,6 +350,44 @@ public class CarbStore {
                     ]
                 )
             )
+        }
+    }
+
+
+    // MARK: - Math
+
+    private var carbsOnBoardCache: [CarbValue]?
+
+    public func carbsOnBoardAtDate(date: NSDate, resultHandler: (CarbValue?) -> Void) {
+        dispatch_async(dataAccessQueue) { [unowned self] in
+            if self.carbsOnBoardCache == nil {
+                let entries: [CarbEntry] = self.recentSamples.map({ StoredCarbEntry(sample: $0) })
+
+                self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(entries, defaultAbsorptionTime: self.defaultAbsorptionTimes[self.defaultAbsorptionTimes.count / 2])
+            }
+
+            var closestValue: CarbValue?
+
+            if let values = self.carbsOnBoardCache {
+                for value in values {
+                    if value.startDate <= date {
+                        closestValue = value
+                    } else {
+                        print(value.startDate, date)
+                        break
+                    }
+                }
+            }
+
+            resultHandler(closestValue)
+        }
+    }
+
+    public func getTotalRecentCarbValue(resultHandler: (CarbValue?) -> Void) {
+        dispatch_async(dataAccessQueue) { [unowned self] in
+            let entries: [CarbEntry] = self.recentSamples.map({ StoredCarbEntry(sample: $0) })
+
+            resultHandler(CarbMath.totalCarbsForCarbEntries(entries))
         }
     }
 }

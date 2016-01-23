@@ -269,7 +269,7 @@ class PumpDataManager: TransmitterDelegate {
 
         if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
             carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
-                print(enabled, error)
+                // TODO: Log the error
             }
         }
 

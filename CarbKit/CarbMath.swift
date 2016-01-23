@@ -24,10 +24,10 @@ extension SampleValue {
 }
 
 
-struct CarbValue: SampleValue {
-    let startDate: NSDate
-    let value: Double
-    let unit: HKUnit = HKUnit.gramUnit()
+public struct CarbValue: SampleValue {
+    public let startDate: NSDate
+    public let value: Double
+    public let unit: HKUnit = HKUnit.gramUnit()
 }
 
 
@@ -203,5 +203,24 @@ struct CarbMath {
         } while date <= endDate
 
         return values
+    }
+
+    static func totalCarbsForCarbEntries(entries: [CarbEntry]) -> CarbValue? {
+        guard entries.count > 0 else {
+            return nil
+        }
+
+        var startDate = NSDate.distantFuture()
+        var totalGrams: Double = 0
+
+        for entry in entries {
+            totalGrams += entry.value
+
+            if entry.startDate < startDate {
+                startDate = entry.startDate
+            }
+        }
+
+        return CarbValue(startDate: startDate, value: totalGrams)
     }
 }
