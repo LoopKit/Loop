@@ -24,7 +24,6 @@
 		432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */ = {isa = PBXBuildFile; fileRef = 432AC0C61C2A396A00B1DC2F /* CRC8.m */; };
 		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
 		433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */; };
-		43702A761C48938C00284E32 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43702A751C48938C00284E32 /* HealthKit.framework */; };
 		437220121C4D7E4800C5F36C /* CarbMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220111C4D7E4800C5F36C /* CarbMathTests.swift */; };
 		437220141C4D7E4800C5F36C /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; };
 		4372201C1C4D80C500C5F36C /* carb_effect_from_history_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */; };
@@ -300,7 +299,6 @@
 		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
-		43702A751C48938C00284E32 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS2.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CarbKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		437220111C4D7E4800C5F36C /* CarbMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMathTests.swift; sourceTree = "<group>"; };
 		437220131C4D7E4800C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -405,7 +403,6 @@
 		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		43F5C2C71B929BFF003EB13D /* Naterade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Naterade.entitlements; sourceTree = "<group>"; };
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
-		43F5C2CA1B929C61003EB13D /* WatchApp Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "WatchApp Extension.entitlements"; sourceTree = "<group>"; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDeviceTableViewCell.swift; sourceTree = "<group>"; };
@@ -492,7 +489,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43702A761C48938C00284E32 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -716,7 +712,6 @@
 		43A943821B926B7B0051FA24 /* WatchApp Extension */ = {
 			isa = PBXGroup;
 			children = (
-				43F5C2CA1B929C61003EB13D /* WatchApp Extension.entitlements */,
 				43A943911B926B7B0051FA24 /* Info.plist */,
 				439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */,
 				43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */,
@@ -837,7 +832,6 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				43702A751C48938C00284E32 /* HealthKit.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
 				43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
@@ -1151,10 +1145,10 @@
 								enabled = 0;
 							};
 							com.apple.HealthKit = {
-								enabled = 1;
+								enabled = 0;
 							};
 							com.apple.Keychain = {
-								enabled = 1;
+								enabled = 0;
 							};
 						};
 					};
@@ -1864,7 +1858,6 @@
 		43A943961B926B7B0051FA24 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
@@ -1882,7 +1875,6 @@
 		43A943971B926B7B0051FA24 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
