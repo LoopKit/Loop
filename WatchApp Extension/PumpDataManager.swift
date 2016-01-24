@@ -45,7 +45,22 @@ class PumpDataManager: NSObject, WCSessionDelegate {
         }
     }
 
+    func sendCarbEntry(carbEntry: CarbEntryUserInfo) {
+        if let session = connectSession {
+            if session.reachable {
+                session.sendMessage(carbEntry.rawValue, replyHandler: nil, errorHandler: { (_) -> Void in
+                    session.transferUserInfo(carbEntry.rawValue)
+                })
+            } else {
+                session.transferUserInfo(carbEntry.rawValue)
+            }
+        }
+    }
+
     // MARK: - WCSessionDelegate
+
+// TODO: iOS 9.3
+//    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) { }
 
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
         if let context = WatchContext(rawValue: applicationContext) {
@@ -65,6 +80,16 @@ class PumpDataManager: NSObject, WCSessionDelegate {
         }
     }
 
+    func sessionDidBecomeInactive(session: WCSession) {
+        // Nothing to do here
+    }
+
+    func sessionDidDeactivate(session: WCSession) {
+        connectSession = WCSession.defaultSession()
+        connectSession?.delegate = self
+        connectSession?.activateSession()
+    }
+
     // MARK: - Initialization
 
     static let sharedManager = PumpDataManager()
@@ -72,11 +97,9 @@ class PumpDataManager: NSObject, WCSessionDelegate {
     override init() {
         super.init()
 
-        if WCSession.isSupported() {
-            connectSession = WCSession.defaultSession()
-            connectSession?.delegate = self
-            connectSession?.activateSession()
-        }
+        connectSession = WCSession.defaultSession()
+        connectSession?.delegate = self
+        connectSession?.activateSession()
 
         if let context = readContext() {
             self.lastContextData = context

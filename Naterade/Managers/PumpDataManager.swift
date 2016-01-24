@@ -20,11 +20,7 @@ enum State<T> {
     case Ready(T)
 }
 
-class ConnectDelegate: NSObject, WCSessionDelegate {
-
-}
-
-class PumpDataManager: TransmitterDelegate {
+class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -140,8 +136,6 @@ class PumpDataManager: TransmitterDelegate {
             "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
             ], toCollection: "g5"
         )
-
-        NSLog("%s, %@", __FUNCTION__, "\(error)")
     }
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
@@ -276,6 +270,19 @@ class PumpDataManager: TransmitterDelegate {
         return carbStore
     }()
 
+    private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
+        if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
+            let newEntry = NewCarbEntry(value: carbEntry.value, startDate: carbEntry.startDate, foodType: nil, absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes))
+
+            carbStore.addCarbEntry(newEntry, resultHandler: { (success, entry, error) -> Void in
+                if let error = error {
+                    // TODO: Remote logging
+                    NSLog("CarbKit error from watch message: \(error)")
+                }
+            })
+        }
+    }
+
     // MARK: - HealthKit
 
     private lazy var glucoseQuantityType = HKSampleType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
@@ -300,21 +307,27 @@ class PumpDataManager: TransmitterDelegate {
 
     // MARK: - WatchKit
 
-    private lazy var watchSessionDelegate = ConnectDelegate()
-
-    private lazy var watchSession: WCSession? = {
+    private var watchSession: WCSession? = {
         if WCSession.isSupported() {
-            let session = WCSession.defaultSession()
-            session.delegate = self.watchSessionDelegate
-            session.activateSession()
-
-            return session
+            return WCSession.defaultSession()
         } else {
             return nil
         }
     }()
 
     private func updateWatch() {
+        // TODO: Check session.activationState as of iOS 9.3
+        if let _ = watchSession {
+//            switch session.activationState {
+//            case .NotActivated, .Inactive:
+//                session.activateSession()
+//            case .Activated:
+                sendWatchContext()
+//            }
+        }
+    }
+
+    private func sendWatchContext() {
         if let session = watchSession where session.paired && session.watchAppInstalled {
             let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue
 
@@ -326,18 +339,47 @@ class PumpDataManager: TransmitterDelegate {
                 do {
                     try session.updateApplicationContext(userInfo)
                 } catch let error {
+                    // TODO: Remote logging
                     NSLog("WCSession error: \(error)")
                 }
             }
         }
     }
 
+    // MARK: WCSessionDelegate
+
+    func session(session: WCSession, didReceiveMessage message: [String : AnyObject]) {
+        addCarbEntryFromWatchMessage(message)
+    }
+
+    func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
+        addCarbEntryFromWatchMessage(userInfo)
+    }
+
+    // TODO: iOS 9.3
+    //    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) { }
+
+    func sessionDidBecomeInactive(session: WCSession) {
+        // Nothing to do here
+    }
+
+    func sessionDidDeactivate(session: WCSession) {
+        watchSession = WCSession.defaultSession()
+        watchSession?.delegate = self
+        watchSession?.activateSession()
+    }
+
     // MARK: - Initialization
 
     static let sharedManager = PumpDataManager()
 
-    init() {
+    override init() {
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
+
+        super.init()
+
+        watchSession?.delegate = self
+        watchSession?.activateSession()
     }
 
     deinit {
