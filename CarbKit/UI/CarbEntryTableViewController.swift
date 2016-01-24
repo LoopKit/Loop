@@ -297,7 +297,7 @@ public class CarbEntryTableViewController: UITableViewController {
                 editVC.originalCarbEntry = carbEntries[indexPath.row]
             }
 
-            editVC.defaultAbsorptionTimes = carbStore?.defaultAbsorptionTimes ?? []
+            editVC.defaultAbsorptionTimes = carbStore?.defaultAbsorptionTimes
         }
     }
 

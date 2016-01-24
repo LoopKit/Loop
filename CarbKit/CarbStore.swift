@@ -12,6 +12,8 @@ import HealthKit
 
 public class CarbStore {
 
+    public typealias DefaultAbsorptionTimes = (fast: NSTimeInterval, medium: NSTimeInterval, slow: NSTimeInterval)
+
     public static let CarbEntriesDidUpdateNotification = "com.loudnate.CarbKit.CarbEntriesDidUpdateNotification"
 
     /// The `CarbEntriesDidUpdateNotification` user info key for an array of new CarbEntry items
@@ -36,7 +38,7 @@ public class CarbStore {
     public let healthStore = HKHealthStore()
 
     /// A span of default carbohydrate absorption times. Defaults to 2, 3, and 4 hours.
-    public let defaultAbsorptionTimes: [NSTimeInterval]
+    public let defaultAbsorptionTimes: DefaultAbsorptionTimes
 
     /// The longest expected absorption time interval for carbohydrates. Defaults to 4 hours.
     private let maximumAbsorptionTimeInterval: NSTimeInterval
@@ -48,11 +50,11 @@ public class CarbStore {
 
      - returns: A new instance of the store
      */
-    public init?(defaultAbsorptionTimes: [NSTimeInterval] = [NSTimeInterval(hours: 2), NSTimeInterval(hours: 3), NSTimeInterval(hours: 4)]) {
-        self.defaultAbsorptionTimes = defaultAbsorptionTimes.sort()
-        self.maximumAbsorptionTimeInterval = defaultAbsorptionTimes.last ?? NSTimeInterval(hours: 4)
+    public init?(defaultAbsorptionTimes: DefaultAbsorptionTimes = (NSTimeInterval(hours: 2), NSTimeInterval(hours: 3), NSTimeInterval(hours: 4))) {
+        self.defaultAbsorptionTimes = defaultAbsorptionTimes
+        self.maximumAbsorptionTimeInterval = defaultAbsorptionTimes.slow
 
-        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied && defaultAbsorptionTimes.count > 0 else {
+        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied else {
             return nil
         }
 
@@ -363,7 +365,7 @@ public class CarbStore {
             if self.carbsOnBoardCache == nil {
                 let entries: [CarbEntry] = self.recentSamples.map({ StoredCarbEntry(sample: $0) })
 
-                self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(entries, defaultAbsorptionTime: self.defaultAbsorptionTimes[self.defaultAbsorptionTimes.count / 2])
+                self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(entries, defaultAbsorptionTime: self.defaultAbsorptionTimes.medium)
             }
 
             var closestValue: CarbValue?

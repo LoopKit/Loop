@@ -9,11 +9,18 @@
 import Foundation
 
 
-struct NewCarbEntry: CarbEntry {
-    var value: Double
-    var startDate: NSDate
-    var foodType: String?
-    var absorptionTime: NSTimeInterval?
-    let unit = HKUnit.gramUnit()
-    let createdByCurrentApp = true
+public struct NewCarbEntry: CarbEntry {
+    public var value: Double
+    public var startDate: NSDate
+    public var foodType: String?
+    public var absorptionTime: NSTimeInterval?
+    public let unit = HKUnit.gramUnit()
+    public let createdByCurrentApp = true
+
+    public init(value: Double, startDate: NSDate, foodType: String?, absorptionTime: NSTimeInterval?) {
+        self.value = value
+        self.startDate = startDate
+        self.foodType = foodType
+        self.absorptionTime = absorptionTime
+    }
 }

@@ -10,10 +10,10 @@ import UIKit
 
 class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCellDelegate, TextFieldTableViewCellDelegate {
 
-    var defaultAbsorptionTimes: [NSTimeInterval] = [] {
+    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes? {
         didSet {
-            if defaultAbsorptionTimes.count > 0 && originalCarbEntry == nil {
-                absorptionTime = defaultAbsorptionTimes[defaultAbsorptionTimes.count / 2]
+            if originalCarbEntry == nil, let times = defaultAbsorptionTimes {
+                absorptionTime = times.1
             }
         }
     }
@@ -111,7 +111,10 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
             if let absorptionTime = absorptionTime {
                 cell.number = NSNumber(double: absorptionTime.minutes)
             }
-            cell.segmentValues = defaultAbsorptionTimes.map { $0.minutes }
+
+            if let times = defaultAbsorptionTimes {
+                cell.segmentValues = [times.fast.minutes, times.medium.minutes, times.slow.minutes]
+            }
             cell.segmentedControlInputAccessoryView = segmentedControlInputAccessoryView
             cell.delegate = self
 
