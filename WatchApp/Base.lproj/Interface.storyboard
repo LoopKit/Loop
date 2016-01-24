@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="AgC-eL-Hgc">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="9515"/>
+    </dependencies>
+    <scenes>
+        <!--Naterade-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller title="Naterade" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="WatchApp" customModuleProvider="target">
+                    <items>
+                        <group width="1" alignment="left" id="aEO-Ly-eX3">
+                            <items>
+                                <button width="1" alignment="left" title="Add Carbs" id="Aqu-vC-vqQ">
+                                    <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
+                                    <connections>
+                                        <segue destination="zh0-gB-D44" kind="push" id="Cm4-v6-UsX"/>
+                                    </connections>
+                                </button>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="3uZ-YX-yCf">
+                            <items>
+                                <group width="1" alignment="left" id="MxH-gC-oTv">
+                                    <items>
+                                        <label alignment="left" text="GLUCOSE" id="FIF-qM-FU9">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                        <label alignment="right" id="SII-zE-v8z">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" id="Olx-IW-j14">
+                                    <items>
+                                        <label height="26" alignment="left" verticalAlignment="bottom" text="--" textAlignment="left" id="jyf-2i-aSI">
+                                            <fontDescription key="font" type="system" pointSize="27"/>
+                                        </label>
+                                        <label alignment="left" verticalAlignment="bottom" text="mg/dL" textAlignment="left" id="qRZ-7K-eLM">
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <separator alignment="left" id="SXA-5v-ANo">
+                            <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="Iwc-qf-d5t">
+                            <items>
+                                <group width="1" alignment="left" id="vbM-bh-6La">
+                                    <items>
+                                        <label alignment="left" text="IOB" id="8HH-S9-3dI">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                        <label alignment="right" id="A2U-lq-0vp">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" id="cKz-z2-jQ3">
+                                    <items>
+                                        <label height="26" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="Fey-vI-Ve9">
+                                            <fontDescription key="font" type="system" pointSize="27"/>
+                                        </label>
+                                        <label alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="rSy-Kj-t3c">
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <separator alignment="left" id="TEg-or-E2U">
+                            <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="scG-Bt-b6u">
+                            <items>
+                                <label alignment="left" text="RESERVOIR" id="NuQ-IY-BPz">
+                                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                </label>
+                                <group width="1" alignment="left" id="H2u-mq-dST">
+                                    <items>
+                                        <label height="26" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="7kS-O1-IHf">
+                                            <fontDescription key="font" type="system" pointSize="27"/>
+                                        </label>
+                                        <label alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="5JA-iE-bWl">
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <separator alignment="left" id="OMo-Mn-YBf">
+                            <color key="color" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                    </items>
+                    <connections>
+                        <outlet property="IOBLabel" destination="Fey-vI-Ve9" id="AxO-Gv-T23"/>
+                        <outlet property="glucoseDateLabel" destination="SII-zE-v8z" id="uDg-bG-6mo"/>
+                        <outlet property="glucoseLabel" destination="jyf-2i-aSI" id="yb7-1Y-vSu"/>
+                        <outlet property="glucoseUnitLabel" destination="qRZ-7K-eLM" id="nxB-4Z-hRo"/>
+                        <outlet property="pumpDateLabel" destination="A2U-lq-0vp" id="ACn-iS-qsE"/>
+                        <outlet property="reservoirLabel" destination="7kS-O1-IHf" id="t3a-hv-xST"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="235" y="347"/>
+        </scene>
+        <!--Add Carbs-->
+        <scene sceneID="hZK-vD-D34">
+            <objects>
+                <controller title="Add Carbs" hidesWhenLoading="NO" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
+                    <items>
+                        <group width="1" alignment="left" layout="vertical" id="uPt-Z4-ngs">
+                            <items>
+                                <picker height="2" alignment="left" style="sequence" id="brP-46-ycV">
+                                    <connections>
+                                        <action selector="pickerValueUpdated:" destination="zh0-gB-D44" id="cSR-oa-odP"/>
+                                    </connections>
+                                </picker>
+                                <group width="1" alignment="left" spacing="0.0" id="WLN-cX-0wl">
+                                    <items>
+                                        <group width="22" height="22" alignment="left" verticalAlignment="center" radius="11" id="J90-Xm-Znp">
+                                            <items>
+                                                <button width="22" height="22" alignment="left" verticalAlignment="center" title="−" id="Dh9-HV-fXy">
+                                                    <color key="titleColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <color key="backgroundColor" red="1" green="0.58431372549019611" blue="0.0" alpha="0.14999999999999999" colorSpace="calibratedRGB"/>
+                                                    <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                                    <connections>
+                                                        <action selector="decrement" destination="zh0-gB-D44" id="6k1-iq-yYz"/>
+                                                    </connections>
+                                                </button>
+                                            </items>
+                                        </group>
+                                        <label alignment="center" text="100" textAlignment="center" id="E5r-2c-UZm">
+                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="font" type="system" weight="light" pointSize="40"/>
+                                        </label>
+                                        <group width="22" height="22" alignment="right" verticalAlignment="center" radius="11" id="6ip-X6-F2J">
+                                            <items>
+                                                <button width="22" height="22" alignment="right" verticalAlignment="center" title="+" id="eu3-pj-GH3">
+                                                    <color key="titleColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="0.14999999999999999" colorSpace="calibratedRGB"/>
+                                                    <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                                    <connections>
+                                                        <action selector="increment" destination="zh0-gB-D44" id="itV-Ss-2Cc"/>
+                                                    </connections>
+                                                </button>
+                                            </items>
+                                        </group>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" spacing="0.0" id="XMa-yL-87D">
+                                    <items>
+                                        <button width="0.33000000000000002" alignment="left" title="🍭" id="gAn-qe-OvX">
+                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                            <connections>
+                                                <action selector="setAbsorptionTimeFast" destination="zh0-gB-D44" id="Eoj-WC-Fod"/>
+                                            </connections>
+                                        </button>
+                                        <button width="0.33000000000000002" alignment="left" title="🌮" id="0fo-Z3-hTi">
+                                            <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                            <connections>
+                                                <action selector="setAbsorptionTimeMedium" destination="zh0-gB-D44" id="GXY-aa-sz8"/>
+                                            </connections>
+                                        </button>
+                                        <button width="0.33000000000000002" alignment="left" title="🍕" id="dPF-QZ-sh6">
+                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                            <connections>
+                                                <action selector="setAbsorptionTimeSlow" destination="zh0-gB-D44" id="qa3-FG-c9F"/>
+                                            </connections>
+                                        </button>
+                                    </items>
+                                </group>
+                                <separator alignment="left" id="psX-Zk-dTM">
+                                    <color key="color" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                </separator>
+                                <button width="1" alignment="left" title="Save" id="b6f-3I-jki">
+                                    <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
+                                    <connections>
+                                        <action selector="save" destination="zh0-gB-D44" id="yLR-xy-bGK"/>
+                                    </connections>
+                                </button>
+                            </items>
+                        </group>
+                    </items>
+                    <connections>
+                        <outlet property="absorptionButtonA" destination="gAn-qe-OvX" id="mMN-LG-P3Q"/>
+                        <outlet property="absorptionButtonB" destination="0fo-Z3-hTi" id="bPH-HR-eTF"/>
+                        <outlet property="absorptionButtonC" destination="dPF-QZ-sh6" id="KfE-KO-HcS"/>
+                        <outlet property="incrementButton" destination="eu3-pj-GH3" id="fTm-Qt-Akb"/>
+                        <outlet property="valueLabel" destination="E5r-2c-UZm" id="oll-hK-YCN"/>
+                        <outlet property="valuePicker" destination="brP-46-ycV" id="9rB-uA-Dg4"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="520" y="345"/>
+        </scene>
+        <!--Glance Interface Controller-->
+        <scene sceneID="BOz-TT-tkC">
+            <objects>
+                <glanceController spacing="0.0" id="0uZ-2p-rRc" customClass="GlanceController" customModule="WatchApp" customModuleProvider="target">
+                    <items>
+                        <group alignment="left" layout="vertical" id="t8f-Gd-c4y">
+                            <items>
+                                <label alignment="left" text="Naterade" id="NZv-qc-hb8">
+                                    <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
+                                </label>
+                                <label alignment="left" text="Updating..." id="QD0-vn-vJK">
+                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                </label>
+                            </items>
+                        </group>
+                        <group alignment="left" layout="vertical" id="uCw-4Q-Ouw">
+                            <items>
+                                <group width="1" alignment="right" id="iqy-ki-8m4">
+                                    <items>
+                                        <label height="41" alignment="right" verticalAlignment="bottom" text="--" textAlignment="left" id="P3J-Ih-x51">
+                                            <fontDescription key="font" type="system" pointSize="38"/>
+                                        </label>
+                                        <label width="40" alignment="right" verticalAlignment="bottom" text="mg/dL" textAlignment="left" id="zdu-Ad-N3c">
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" spacing="0.0" id="Yra-MK-2Z9">
+                                    <items>
+                                        <label alignment="left" verticalAlignment="bottom" text="IOB" id="PpD-hc-GJ1">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                        <group alignment="right" id="KW3-BY-KQl">
+                                            <items>
+                                                <label height="27" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="LRQ-Vc-W3f">
+                                                    <fontDescription key="font" type="system" pointSize="27"/>
+                                                </label>
+                                                <label width="40" alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="N6T-Zf-sOk">
+                                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                                </label>
+                                            </items>
+                                        </group>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" spacing="0.0" id="Dbp-KF-yxY">
+                                    <items>
+                                        <label alignment="left" verticalAlignment="bottom" text="RES" id="Btl-qA-SRX">
+                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                        </label>
+                                        <group alignment="right" id="gfd-IA-vcT">
+                                            <items>
+                                                <label height="26" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="0xN-Rm-25M">
+                                                    <fontDescription key="font" type="system" pointSize="27"/>
+                                                </label>
+                                                <label width="40" alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="av7-5S-sFd">
+                                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                                </label>
+                                            </items>
+                                        </group>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                    </items>
+                    <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="14"/>
+                    <connections>
+                        <outlet property="IOBLabel" destination="LRQ-Vc-W3f" id="rIm-QJ-C89"/>
+                        <outlet property="glucoseDateLabel" destination="QD0-vn-vJK" id="hei-wl-S8R"/>
+                        <outlet property="glucoseLabel" destination="P3J-Ih-x51" id="6pO-dv-4aA"/>
+                        <outlet property="glucoseUnitLabel" destination="zdu-Ad-N3c" id="990-ZB-xEy"/>
+                        <outlet property="reservoirLabel" destination="0xN-Rm-25M" id="wLs-vK-iC8"/>
+                    </connections>
+                </glanceController>
+            </objects>
+            <point key="canvasLocation" x="235" y="672"/>
+        </scene>
+        <!--Static Notification Interface Controller-->
+        <scene sceneID="AEw-b0-oYE">
+            <objects>
+                <notificationController id="YCC-NB-fut">
+                    <items>
+                        <label alignment="left" text="Alert Label" id="XkS-y5-khE"/>
+                    </items>
+                    <notificationCategory key="notificationCategory" identifier="myCategory" id="JfB-70-Muf"/>
+                    <connections>
+                        <outlet property="notificationAlertLabel" destination="XkS-y5-khE" id="49B-RR-99y"/>
+                        <segue destination="gdX-wl-uQE" kind="relationship" relationship="dynamicNotificationInterface" id="fKh-qV-3T2"/>
+                    </connections>
+                </notificationController>
+            </objects>
+            <point key="canvasLocation" x="235" y="1001"/>
+        </scene>
+        <!--Notification Controller-->
+        <scene sceneID="KIl-fV-djm">
+            <objects>
+                <controller id="gdX-wl-uQE" customClass="NotificationController" customModule="WatchApp" customModuleProvider="target"/>
+            </objects>
+            <point key="canvasLocation" x="553" y="1001"/>
+        </scene>
+    </scenes>
+    <color key="tintColor" red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+</document>
