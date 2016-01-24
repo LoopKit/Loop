@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         PumpDataManager.sharedManager.pumpID = NSUserDefaults.standardUserDefaults().pumpID
         PumpDataManager.sharedManager.transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
 
-        window?.tintColor = UIColor(red: 1.0, green: 149.0 / 255.0, blue: 0, alpha: 1.0)
+        window?.tintColor = UIColor.tintColor()
 
         if let tabBarController = window?.rootViewController as? UITabBarController {
             tabBarController.viewControllers?.flatMap({
