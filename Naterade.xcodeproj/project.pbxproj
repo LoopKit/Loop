@@ -1,0 +1,2215 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 47;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
+		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
+		430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
+		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
+		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
+		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
+		432884F21BB515D40028E4EB /* PumpDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432884F11BB515D40028E4EB /* PumpDataManager.swift */; };
+		43298EDF1C3A0F4900F520A3 /* CarbKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 43298EDE1C3A0F4900F520A3 /* CarbKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43298EE31C3A0F4900F520A3 /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; };
+		43298EE41C3A0F4900F520A3 /* CarbKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43298EE81C3A104C00F520A3 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
+		43298EEA1C3A167800F520A3 /* CarbStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43298EE91C3A167800F520A3 /* CarbStore.swift */; };
+		43298EEC1C3A1DC900F520A3 /* CarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43298EEB1C3A1DC900F520A3 /* CarbEntry.swift */; };
+		432AC0C71C2A396A00B1DC2F /* CRC8.h in Headers */ = {isa = PBXBuildFile; fileRef = 432AC0C51C2A396A00B1DC2F /* CRC8.h */; };
+		432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */ = {isa = PBXBuildFile; fileRef = 432AC0C61C2A396A00B1DC2F /* CRC8.m */; };
+		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
+		433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */; };
+		43702A761C48938C00284E32 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43702A751C48938C00284E32 /* HealthKit.framework */; };
+		437220121C4D7E4800C5F36C /* CarbMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220111C4D7E4800C5F36C /* CarbMathTests.swift */; };
+		437220141C4D7E4800C5F36C /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; };
+		4372201C1C4D80C500C5F36C /* carb_effect_from_history_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */; };
+		4372201E1C4D814B00C5F36C /* carb_effect_from_history_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372201D1C4D814B00C5F36C /* carb_effect_from_history_output.json */; };
+		437220281C4D93F000C5F36C /* LoopKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 437220271C4D93F000C5F36C /* LoopKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4372202F1C4D93F000C5F36C /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		437220361C4D93F000C5F36C /* LoopKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220351C4D93F000C5F36C /* LoopKitTests.swift */; };
+		4372203A1C4D93F000C5F36C /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		4372203B1C4D93F000C5F36C /* LoopKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220421C4D95A200C5F36C /* NSDateFormatter.swift */; };
+		437220441C4D95D900C5F36C /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		437220461C4D96BF00C5F36C /* QuantitySchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220451C4D96BF00C5F36C /* QuantitySchedule.swift */; };
+		437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220471C4D96FF00C5F36C /* HKUnit.swift */; };
+		437220491C4D973D00C5F36C /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		4372204B1C4D9B4200C5F36C /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */; };
+		4372204E1C4DA62700C5F36C /* read_carb_ratios.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372204D1C4DA62700C5F36C /* read_carb_ratios.json */; };
+		437220501C4DA86C00C5F36C /* QuantityScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4372204F1C4DA86C00C5F36C /* QuantityScheduleTests.swift */; };
+		437220511C4DB43400C5F36C /* read_carb_ratios.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372204D1C4DA62700C5F36C /* read_carb_ratios.json */; };
+		437220531C4DD52D00C5F36C /* NSDateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220521C4DD52D00C5F36C /* NSDateTests.swift */; };
+		437220551C4DEFC400C5F36C /* carbs_on_board_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 437220541C4DEFC400C5F36C /* carbs_on_board_output.json */; };
+		437220561C4E012600C5F36C /* NSDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A921C4C955D00DF5FA4 /* NSDate.swift */; };
+		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
+		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
+		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
+		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
+		43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */; };
+		437A289F1C2F66DE00009647 /* MinimedKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A289E1C2F66DE00009647 /* MinimedKitTests.swift */; };
+		437A28A11C2F66DE00009647 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
+		437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */; };
+		437A28A81C2F676F00009647 /* NSDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D5CE11B9C1879002551A8 /* NSDataTests.swift */; };
+		437A28A91C2F677100009647 /* ReadSettingsCarelinkMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */; };
+		437A28AB1C2F6C4500009647 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28AA1C2F6C4500009647 /* Int.swift */; };
+		437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */; };
+		437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B21C2FC16700009647 /* PowerOnCommand.swift */; };
+		437A28B51C2FC41700009647 /* PowerOnCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */; };
+		4380993E1C498935009D8E26 /* CarbEntryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380993D1C498935009D8E26 /* CarbEntryTableViewController.swift */; };
+		438099441C499199009D8E26 /* CarbKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 438099431C499199009D8E26 /* CarbKit.storyboard */; };
+		438099461C49B844009D8E26 /* CarbEntryEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099451C49B844009D8E26 /* CarbEntryEditViewController.swift */; };
+		438099491C49C462009D8E26 /* DatePickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099481C49C462009D8E26 /* DatePickerTableViewCell.swift */; };
+		4380994B1C49C4DC009D8E26 /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */; };
+		4380994D1C49D490009D8E26 /* NewCarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994C1C49D490009D8E26 /* NewCarbEntry.swift */; };
+		4380994F1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */; };
+		438099511C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */; };
+		438099531C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099521C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift */; };
+		438C933D1B97F82000BE20E9 /* MinimedKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 438C933C1B97F82000BE20E9 /* MinimedKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
+		438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		438C93581B97FE5300BE20E9 /* PacketType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C93571B97FE5300BE20E9 /* PacketType.swift */; };
+		438C935A1B97FEDA00BE20E9 /* MessageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C93591B97FEDA00BE20E9 /* MessageType.swift */; };
+		438C935C1B9801DC00BE20E9 /* PumpMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935B1B9801DC00BE20E9 /* PumpMessage.swift */; };
+		438C935E1B980BC000BE20E9 /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935D1B980BC000BE20E9 /* NSData.swift */; };
+		439A30B51C53337500059771 /* StoredCarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B41C53337500059771 /* StoredCarbEntry.swift */; };
+		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
+		439FC9EC1C321C67007DE84C /* RileyLinkDevice_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 439FC9EB1C321C67007DE84C /* RileyLinkDevice_Private.h */; };
+		43A3634E1B96BA4900D0FE2E /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A3634C1B96BA4900D0FE2E /* Log.m */; };
+		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
+		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
+		43A9437F1B926B7B0051FA24 /* WatchApp Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A943851B926B7B0051FA24 /* InterfaceController.swift */; };
+		43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */; };
+		43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A943891B926B7B0051FA24 /* NotificationController.swift */; };
+		43A9438C1B926B7B0051FA24 /* GlanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A9438B1B926B7B0051FA24 /* GlanceController.swift */; };
+		43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A9438D1B926B7B0051FA24 /* ComplicationController.swift */; };
+		43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A9438F1B926B7B0051FA24 /* Assets.xcassets */; };
+		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
+		43A943A51B928D400051FA24 /* RileyLinkKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943A41B928D400051FA24 /* RileyLinkKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; };
+		43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43A943B71B9298BF0051FA24 /* MinimedPacket.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943AF1B9298BF0051FA24 /* MinimedPacket.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43A943B81B9298BF0051FA24 /* MinimedPacket.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B01B9298BF0051FA24 /* MinimedPacket.m */; };
+		43A943B91B9298BF0051FA24 /* RileyLinkBLEDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943B11B9298BF0051FA24 /* RileyLinkBLEDevice.h */; };
+		43A943BA1B9298BF0051FA24 /* RileyLinkBLEDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B21B9298BF0051FA24 /* RileyLinkBLEDevice.m */; };
+		43A943BB1B9298BF0051FA24 /* RileyLinkBLEManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943B31B9298BF0051FA24 /* RileyLinkBLEManager.h */; };
+		43A943BC1B9298BF0051FA24 /* RileyLinkBLEManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B41B9298BF0051FA24 /* RileyLinkBLEManager.m */; };
+		43A943BD1B9298BF0051FA24 /* SendDataTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943B51B9298BF0051FA24 /* SendDataTask.h */; };
+		43A943BE1B9298BF0051FA24 /* SendDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B61B9298BF0051FA24 /* SendDataTask.m */; };
+		43A943C11B92996B0051FA24 /* NSData+Conversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943BF1B92996B0051FA24 /* NSData+Conversion.h */; };
+		43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943C01B92996B0051FA24 /* NSData+Conversion.m */; };
+		43C667D21C5577270050C674 /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C667CB1C5577260050C674 /* CarbKit.framework */; };
+		43C667D31C5577270050C674 /* CarbKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43C667CB1C5577260050C674 /* CarbKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43C667D81C5579C80050C674 /* CarbKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 43298EDE1C3A0F4900F520A3 /* CarbKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43C85FCA1C4247F1002EFBC7 /* HKQuantitySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */; };
+		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
+		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
+		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
+		43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
+		43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE925B1C547A20001FFDE1 /* WatchContext.swift */; };
+		43DE925D1C547A20001FFDE1 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE925B1C547A20001FFDE1 /* WatchContext.swift */; };
+		43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */; };
+		43E0DDF91B9A98CA007B4443 /* MessageSendOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E0DDF71B9A98CA007B4443 /* MessageSendOperation.h */; };
+		43E0DDFA1B9A98CA007B4443 /* MessageSendOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DDF81B9A98CA007B4443 /* MessageSendOperation.m */; };
+		43E0DDFD1B9A997B007B4443 /* MessageBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 43E0DDFB1B9A997B007B4443 /* MessageBase.h */; };
+		43E0DDFE1B9A997B007B4443 /* MessageBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DDFC1B9A997B007B4443 /* MessageBase.m */; };
+		43E0DE021B9AA0D5007B4443 /* MySentryAckMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DE011B9AA0D5007B4443 /* MySentryAckMessageBody.swift */; };
+		43E0DE041B9AB6F6007B4443 /* MessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DE031B9AB6F6007B4443 /* MessageBody.swift */; };
+		43E0DE071B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DE061B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift */; };
+		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
+		43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */; };
+		43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A51B9E1B3300C85C07 /* NSBundle.swift */; };
+		43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
+		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
+		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
+		43EDDBF71C361D24007D89B5 /* CommonCrypto.framework.dSYM in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */; };
+		43EDDBF81C361D24007D89B5 /* xDripG5.framework.dSYM in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */; };
+		43F2756C1BAA7BA9006A5B6A /* UnknownMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */; };
+		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
+		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
+		43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */; };
+		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
+		43F5C2E01B937615003EB13D /* RileyLinkDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 43F5C2DC1B937615003EB13D /* RileyLinkDevice.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43F5C2E11B937615003EB13D /* RileyLinkDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DD1B937615003EB13D /* RileyLinkDevice.m */; };
+		43F5C2E21B937615003EB13D /* RileyLinkManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 43F5C2DE1B937615003EB13D /* RileyLinkManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		43F5C2E31B937615003EB13D /* RileyLinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DF1B937615003EB13D /* RileyLinkManager.m */; };
+		43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E51B93C685003EB13D /* PumpDataManager.swift */; };
+		43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */; };
+		43FF3D5E1BADE38300DE240A /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
+		43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935D1B980BC000BE20E9 /* NSData.swift */; };
+		43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
+		43FF3D611BADE38C00DE240A /* MessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E0DE031B9AB6F6007B4443 /* MessageBody.swift */; };
+		43FF3D631BADE39000DE240A /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
+		43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
+		43FF3D661BADE39000DE240A /* UnknownMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */; };
+		43FF3D681BADE39400DE240A /* PacketType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C93571B97FE5300BE20E9 /* PacketType.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		43298EE11C3A0F4900F520A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43298EDB1C3A0F4900F520A3;
+			remoteInfo = CarbKit;
+		};
+		437220151C4D7E4800C5F36C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43298EDB1C3A0F4900F520A3;
+			remoteInfo = CarbKit;
+		};
+		437220301C4D93F000C5F36C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 437220241C4D93F000C5F36C;
+			remoteInfo = LoopKit;
+		};
+		437220321C4D93F000C5F36C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
+			remoteInfo = Naterade;
+		};
+		437220381C4D93F000C5F36C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 437220241C4D93F000C5F36C;
+			remoteInfo = LoopKit;
+		};
+		437A28A21C2F66DE00009647 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 438C93391B97F82000BE20E9;
+			remoteInfo = MinimedKit;
+		};
+		438C934D1B97F82000BE20E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 438C93391B97F82000BE20E9;
+			remoteInfo = MinimedKit;
+		};
+		43A943801B926B7B0051FA24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43A9437D1B926B7B0051FA24;
+			remoteInfo = "WatchApp Extension";
+		};
+		43A943921B926B7B0051FA24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43A943711B926B7B0051FA24;
+			remoteInfo = WatchApp;
+		};
+		43A943A71B928D400051FA24 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43A943A11B928D400051FA24;
+			remoteInfo = RileyLinkKit;
+		};
+		43C667D01C5577270050C674 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43C667CA1C5577260050C674;
+			remoteInfo = "CarbKit-watchOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		43A943981B926B7B0051FA24 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				43A9437F1B926B7B0051FA24 /* WatchApp Extension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9439C1B926B7B0051FA24 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A943AE1B928D400051FA24 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */,
+				438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */,
+				43298EE41C3A0F4900F520A3 /* CarbKit.framework in Embed Frameworks */,
+				4372203B1C4D93F000C5F36C /* LoopKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43C667D71C5577280050C674 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				43C667D31C5577270050C674 /* CarbKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43EDDBF41C361CAD007D89B5 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				43EDDBF71C361D24007D89B5 /* CommonCrypto.framework.dSYM in CopyFiles */,
+				43EDDBF81C361D24007D89B5 /* xDripG5.framework.dSYM in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertMessageBody.swift; sourceTree = "<group>"; };
+		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
+		430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
+		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
+		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
+		430D5CE11B9C1879002551A8 /* NSDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataTests.swift; sourceTree = "<group>"; };
+		4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateComponents.swift; sourceTree = "<group>"; };
+		4326F5061BA6292F009204C6 /* AlertType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
+		432884F11BB515D40028E4EB /* PumpDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpDataManager.swift; sourceTree = "<group>"; };
+		43298EDC1C3A0F4900F520A3 /* CarbKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CarbKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43298EDE1C3A0F4900F520A3 /* CarbKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CarbKit.h; sourceTree = "<group>"; };
+		43298EE01C3A0F4900F520A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43298EE91C3A167800F520A3 /* CarbStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbStore.swift; sourceTree = "<group>"; };
+		43298EEB1C3A1DC900F520A3 /* CarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntry.swift; sourceTree = "<group>"; };
+		432AC0C51C2A396A00B1DC2F /* CRC8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CRC8.h; sourceTree = "<group>"; };
+		432AC0C61C2A396A00B1DC2F /* CRC8.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CRC8.m; sourceTree = "<group>"; };
+		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarelinkMessageBody.swift; sourceTree = "<group>"; };
+		433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
+		43702A751C48938C00284E32 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS2.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
+		4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CarbKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		437220111C4D7E4800C5F36C /* CarbMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMathTests.swift; sourceTree = "<group>"; };
+		437220131C4D7E4800C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = carb_effect_from_history_input.json; sourceTree = "<group>"; };
+		4372201D1C4D814B00C5F36C /* carb_effect_from_history_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = carb_effect_from_history_output.json; sourceTree = "<group>"; };
+		437220251C4D93F000C5F36C /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		437220271C4D93F000C5F36C /* LoopKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoopKit.h; sourceTree = "<group>"; };
+		437220291C4D93F000C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		437220351C4D93F000C5F36C /* LoopKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopKitTests.swift; sourceTree = "<group>"; };
+		437220371C4D93F000C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		437220421C4D95A200C5F36C /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
+		437220451C4D96BF00C5F36C /* QuantitySchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuantitySchedule.swift; sourceTree = "<group>"; };
+		437220471C4D96FF00C5F36C /* HKUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKUnit.swift; sourceTree = "<group>"; };
+		4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
+		4372204D1C4DA62700C5F36C /* read_carb_ratios.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = read_carb_ratios.json; sourceTree = "<group>"; };
+		4372204F1C4DA86C00C5F36C /* QuantityScheduleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuantityScheduleTests.swift; sourceTree = "<group>"; };
+		437220521C4DD52D00C5F36C /* NSDateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateTests.swift; sourceTree = "<group>"; };
+		437220541C4DEFC400C5F36C /* carbs_on_board_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = carbs_on_board_output.json; sourceTree = "<group>"; };
+		43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLKComplicationTemplate.swift; sourceTree = "<group>"; };
+		43776F8C1B8022E90074EA36 /* Naterade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naterade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		43776F981B8022E90074EA36 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinimedKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		437A289E1C2F66DE00009647 /* MinimedKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimedKitTests.swift; sourceTree = "<group>"; };
+		437A28A01C2F66DE00009647 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		437A28AA1C2F6C4500009647 /* Int.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
+		437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCommand.swift; sourceTree = "<group>"; };
+		437A28B21C2FC16700009647 /* PowerOnCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerOnCommand.swift; sourceTree = "<group>"; };
+		437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerOnCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		4380993D1C498935009D8E26 /* CarbEntryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryTableViewController.swift; sourceTree = "<group>"; };
+		438099431C499199009D8E26 /* CarbKit.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = CarbKit.storyboard; sourceTree = "<group>"; };
+		438099451C49B844009D8E26 /* CarbEntryEditViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditViewController.swift; sourceTree = "<group>"; };
+		438099481C49C462009D8E26 /* DatePickerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatePickerTableViewCell.swift; sourceTree = "<group>"; };
+		4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
+		4380994C1C49D490009D8E26 /* NewCarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewCarbEntry.swift; sourceTree = "<group>"; };
+		4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecimalTextFieldTableViewCell.swift; sourceTree = "<group>"; };
+		438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControlInputAccessoryView.swift; sourceTree = "<group>"; };
+		438099521C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbsorptionTimeTextFieldTableViewCell.swift; sourceTree = "<group>"; };
+		438C933A1B97F82000BE20E9 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		438C933C1B97F82000BE20E9 /* MinimedKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MinimedKit.h; sourceTree = "<group>"; };
+		438C933E1B97F82000BE20E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		438C93571B97FE5300BE20E9 /* PacketType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PacketType.swift; sourceTree = "<group>"; };
+		438C93591B97FEDA00BE20E9 /* MessageType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageType.swift; sourceTree = "<group>"; };
+		438C935B1B9801DC00BE20E9 /* PumpMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpMessage.swift; sourceTree = "<group>"; };
+		438C935D1B980BC000BE20E9 /* NSData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSData.swift; sourceTree = "<group>"; };
+		439A30B41C53337500059771 /* StoredCarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredCarbEntry.swift; sourceTree = "<group>"; };
+		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
+		439FC9EB1C321C67007DE84C /* RileyLinkDevice_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkDevice_Private.h; sourceTree = "<group>"; };
+		43A3634B1B96BA4900D0FE2E /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
+		43A3634C1B96BA4900D0FE2E /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
+		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
+		43A943771B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "WatchApp Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		43A943841B926B7B0051FA24 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
+		43A943851B926B7B0051FA24 /* InterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
+		43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionDelegate.swift; sourceTree = "<group>"; };
+		43A943891B926B7B0051FA24 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
+		43A9438B1B926B7B0051FA24 /* GlanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlanceController.swift; sourceTree = "<group>"; };
+		43A9438D1B926B7B0051FA24 /* ComplicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
+		43A9438F1B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43A943A21B928D400051FA24 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43A943A41B928D400051FA24 /* RileyLinkKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RileyLinkKit.h; sourceTree = "<group>"; };
+		43A943A61B928D400051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43A943AF1B9298BF0051FA24 /* MinimedPacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinimedPacket.h; sourceTree = "<group>"; };
+		43A943B01B9298BF0051FA24 /* MinimedPacket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MinimedPacket.m; sourceTree = "<group>"; };
+		43A943B11B9298BF0051FA24 /* RileyLinkBLEDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkBLEDevice.h; sourceTree = "<group>"; };
+		43A943B21B9298BF0051FA24 /* RileyLinkBLEDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RileyLinkBLEDevice.m; sourceTree = "<group>"; };
+		43A943B31B9298BF0051FA24 /* RileyLinkBLEManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkBLEManager.h; sourceTree = "<group>"; };
+		43A943B41B9298BF0051FA24 /* RileyLinkBLEManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RileyLinkBLEManager.m; sourceTree = "<group>"; };
+		43A943B51B9298BF0051FA24 /* SendDataTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SendDataTask.h; sourceTree = "<group>"; };
+		43A943B61B9298BF0051FA24 /* SendDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SendDataTask.m; sourceTree = "<group>"; };
+		43A943BF1B92996B0051FA24 /* NSData+Conversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Conversion.h"; sourceTree = "<group>"; };
+		43A943C01B92996B0051FA24 /* NSData+Conversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Conversion.m"; sourceTree = "<group>"; };
+		43C667CB1C5577260050C674 /* CarbKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CarbKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKQuantitySample.swift; sourceTree = "<group>"; };
+		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
+		43DE925B1C547A20001FFDE1 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
+		43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AbsorptionTimeType+CarbKit.swift"; sourceTree = "<group>"; };
+		43E0DDF71B9A98CA007B4443 /* MessageSendOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageSendOperation.h; sourceTree = "<group>"; };
+		43E0DDF81B9A98CA007B4443 /* MessageSendOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageSendOperation.m; sourceTree = "<group>"; };
+		43E0DDFB1B9A997B007B4443 /* MessageBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBase.h; sourceTree = "<group>"; };
+		43E0DDFC1B9A997B007B4443 /* MessageBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageBase.m; sourceTree = "<group>"; };
+		43E0DE011B9AA0D5007B4443 /* MySentryAckMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAckMessageBody.swift; sourceTree = "<group>"; };
+		43E0DE031B9AB6F6007B4443 /* MessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessageBody.swift; sourceTree = "<group>"; };
+		43E0DE061B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryPumpStatusMessageBody.swift; sourceTree = "<group>"; };
+		43E3449B1B9CB08800C85C07 /* Naterade.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Naterade.playground; sourceTree = "<group>"; };
+		43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryPumpStatusMessageBodyTests.swift; sourceTree = "<group>"; };
+		43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusTableViewController.swift; sourceTree = "<group>"; };
+		43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
+		43E344A51B9E1B3300C85C07 /* NSBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSBundle.swift; sourceTree = "<group>"; };
+		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
+		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
+		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
+		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
+		43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = xDripG5.framework.dSYM; path = Carthage/Build/iOS/xDripG5.framework.dSYM; sourceTree = "<group>"; };
+		43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnknownMessageBody.swift; sourceTree = "<group>"; };
+		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
+		43F5C2C71B929BFF003EB13D /* Naterade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Naterade.entitlements; sourceTree = "<group>"; };
+		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		43F5C2CA1B929C61003EB13D /* WatchApp Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "WatchApp Extension.entitlements"; sourceTree = "<group>"; };
+		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDeviceTableViewCell.swift; sourceTree = "<group>"; };
+		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
+		43F5C2DC1B937615003EB13D /* RileyLinkDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkDevice.h; sourceTree = "<group>"; };
+		43F5C2DD1B937615003EB13D /* RileyLinkDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RileyLinkDevice.m; sourceTree = "<group>"; };
+		43F5C2DE1B937615003EB13D /* RileyLinkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkManager.h; sourceTree = "<group>"; };
+		43F5C2DF1B937615003EB13D /* RileyLinkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RileyLinkManager.m; sourceTree = "<group>"; };
+		43F5C2E51B93C685003EB13D /* PumpDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpDataManager.swift; sourceTree = "<group>"; };
+		43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		43105EF81BADC8F9009CD81E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43298ED81C3A0F4900F520A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220491C4D973D00C5F36C /* LoopKit.framework in Frameworks */,
+				43298EE81C3A104C00F520A3 /* HealthKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372200C1C4D7E4800C5F36C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220441C4D95D900C5F36C /* LoopKit.framework in Frameworks */,
+				437220141C4D7E4800C5F36C /* CarbKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437220211C4D93F000C5F36C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372202B1C4D93F000C5F36C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4372202F1C4D93F000C5F36C /* LoopKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43776F891B8022E90074EA36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
+				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
+				43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */,
+				438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */,
+				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
+				43298EE31C3A0F4900F520A3 /* CarbKit.framework in Frameworks */,
+				4372203A1C4D93F000C5F36C /* LoopKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437A28991C2F66DD00009647 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437A28A11C2F66DE00009647 /* MinimedKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		438C93361B97F82000BE20E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9437B1B926B7B0051FA24 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43702A761C48938C00284E32 /* HealthKit.framework in Frameworks */,
+				43C667D21C5577270050C674 /* CarbKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9439E1B928D400051FA24 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43C667C71C5577260050C674 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4326F5031BA5EC3D009204C6 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				437A28AA1C2F6C4500009647 /* Int.swift */,
+				438C935D1B980BC000BE20E9 /* NSData.swift */,
+				4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		43298EDD1C3A0F4900F520A3 /* CarbKit */ = {
+			isa = PBXGroup;
+			children = (
+				43298EDE1C3A0F4900F520A3 /* CarbKit.h */,
+				43298EE01C3A0F4900F520A3 /* Info.plist */,
+				43298EEB1C3A1DC900F520A3 /* CarbEntry.swift */,
+				430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */,
+				43298EE91C3A167800F520A3 /* CarbStore.swift */,
+				43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */,
+				439A30B41C53337500059771 /* StoredCarbEntry.swift */,
+				438099471C49C408009D8E26 /* UI */,
+			);
+			path = CarbKit;
+			sourceTree = "<group>";
+		};
+		437220101C4D7E4800C5F36C /* CarbKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				4372201A1C4D807B00C5F36C /* Fixtures */,
+				437220111C4D7E4800C5F36C /* CarbMathTests.swift */,
+				437220131C4D7E4800C5F36C /* Info.plist */,
+			);
+			path = CarbKitTests;
+			sourceTree = "<group>";
+		};
+		4372201A1C4D807B00C5F36C /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */,
+				4372201D1C4D814B00C5F36C /* carb_effect_from_history_output.json */,
+				437220541C4DEFC400C5F36C /* carbs_on_board_output.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		437220261C4D93F000C5F36C /* LoopKit */ = {
+			isa = PBXGroup;
+			children = (
+				437220271C4D93F000C5F36C /* LoopKit.h */,
+				437220291C4D93F000C5F36C /* Info.plist */,
+				437220471C4D96FF00C5F36C /* HKUnit.swift */,
+				430D1A921C4C955D00DF5FA4 /* NSDate.swift */,
+				437220421C4D95A200C5F36C /* NSDateFormatter.swift */,
+				4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */,
+				437220451C4D96BF00C5F36C /* QuantitySchedule.swift */,
+			);
+			path = LoopKit;
+			sourceTree = "<group>";
+		};
+		437220341C4D93F000C5F36C /* LoopKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				437220371C4D93F000C5F36C /* Info.plist */,
+				437220351C4D93F000C5F36C /* LoopKitTests.swift */,
+				437220521C4DD52D00C5F36C /* NSDateTests.swift */,
+				4372204F1C4DA86C00C5F36C /* QuantityScheduleTests.swift */,
+				4372204C1C4DA5EC00C5F36C /* Fixtures */,
+			);
+			path = LoopKitTests;
+			sourceTree = "<group>";
+		};
+		4372204C1C4DA5EC00C5F36C /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				4372204D1C4DA62700C5F36C /* read_carb_ratios.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		43757D131C06F26C00910CB9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		43776F831B8022E90074EA36 = {
+			isa = PBXGroup;
+			children = (
+				43E3449B1B9CB08800C85C07 /* Naterade.playground */,
+				43298EDD1C3A0F4900F520A3 /* CarbKit */,
+				437220101C4D7E4800C5F36C /* CarbKitTests */,
+				968DCD53F724DE56FFE51920 /* Frameworks */,
+				437220261C4D93F000C5F36C /* LoopKit */,
+				437220341C4D93F000C5F36C /* LoopKitTests */,
+				438C933B1B97F82000BE20E9 /* MinimedKit */,
+				437A289D1C2F66DE00009647 /* MinimedKitTests */,
+				43776F8E1B8022E90074EA36 /* Naterade */,
+				43776F8D1B8022E90074EA36 /* Products */,
+				437A28AF1C2FB60C00009647 /* PumpCommandKit */,
+				43A943A31B928D400051FA24 /* RileyLinkKit */,
+				43A943731B926B7B0051FA24 /* WatchApp */,
+				43A943821B926B7B0051FA24 /* WatchApp Extension */,
+			);
+			sourceTree = "<group>";
+		};
+		43776F8D1B8022E90074EA36 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				43776F8C1B8022E90074EA36 /* Naterade.app */,
+				43A943721B926B7B0051FA24 /* WatchApp.app */,
+				43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */,
+				43A943A21B928D400051FA24 /* RileyLinkKit.framework */,
+				438C933A1B97F82000BE20E9 /* MinimedKit.framework */,
+				437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */,
+				43298EDC1C3A0F4900F520A3 /* CarbKit.framework */,
+				4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */,
+				437220251C4D93F000C5F36C /* LoopKit.framework */,
+				4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */,
+				43C667CB1C5577260050C674 /* CarbKit.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		43776F8E1B8022E90074EA36 /* Naterade */ = {
+			isa = PBXGroup;
+			children = (
+				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
+				43776F981B8022E90074EA36 /* Assets.xcassets */,
+				43E344A01B9E144300C85C07 /* Extensions */,
+				43F5C2D41B92A4A6003EB13D /* Info.plist */,
+				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
+				43776F951B8022E90074EA36 /* Main.storyboard */,
+				43F5C2E41B93C5D4003EB13D /* Managers */,
+				43757D131C06F26C00910CB9 /* Models */,
+				43F5C2C71B929BFF003EB13D /* Naterade.entitlements */,
+				43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */,
+				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
+				43F5C2CF1B92A2ED003EB13D /* Views */,
+			);
+			path = Naterade;
+			sourceTree = "<group>";
+		};
+		437A289D1C2F66DE00009647 /* MinimedKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				437A28A01C2F66DE00009647 /* Info.plist */,
+				437A289E1C2F66DE00009647 /* MinimedKitTests.swift */,
+				43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */,
+				430D5CE11B9C1879002551A8 /* NSDataTests.swift */,
+				433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */,
+			);
+			path = MinimedKitTests;
+			sourceTree = "<group>";
+		};
+		437A28AF1C2FB60C00009647 /* PumpCommandKit */ = {
+			isa = PBXGroup;
+			children = (
+				437A28B21C2FC16700009647 /* PowerOnCommand.swift */,
+				437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */,
+			);
+			path = PumpCommandKit;
+			sourceTree = "<group>";
+		};
+		438099471C49C408009D8E26 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				438099431C499199009D8E26 /* CarbKit.storyboard */,
+				438099521C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift */,
+				438099451C49B844009D8E26 /* CarbEntryEditViewController.swift */,
+				4380993D1C498935009D8E26 /* CarbEntryTableViewController.swift */,
+				438099481C49C462009D8E26 /* DatePickerTableViewCell.swift */,
+				4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */,
+				4380994C1C49D490009D8E26 /* NewCarbEntry.swift */,
+				438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */,
+				4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */,
+				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		438C933B1B97F82000BE20E9 /* MinimedKit */ = {
+			isa = PBXGroup;
+			children = (
+				438C933C1B97F82000BE20E9 /* MinimedKit.h */,
+				438C933E1B97F82000BE20E9 /* Info.plist */,
+				4326F5061BA6292F009204C6 /* AlertType.swift */,
+				43E0DE031B9AB6F6007B4443 /* MessageBody.swift */,
+				438C93591B97FEDA00BE20E9 /* MessageType.swift */,
+				438C93571B97FE5300BE20E9 /* PacketType.swift */,
+				438C935B1B9801DC00BE20E9 /* PumpMessage.swift */,
+				4326F5031BA5EC3D009204C6 /* Extensions */,
+				43E0DE051B9B51B3007B4443 /* Messages */,
+			);
+			path = MinimedKit;
+			sourceTree = "<group>";
+		};
+		43A943731B926B7B0051FA24 /* WatchApp */ = {
+			isa = PBXGroup;
+			children = (
+				43A943771B926B7B0051FA24 /* Assets.xcassets */,
+				43F5C2D61B92A4DC003EB13D /* Info.plist */,
+				43A943741B926B7B0051FA24 /* Interface.storyboard */,
+			);
+			path = WatchApp;
+			sourceTree = "<group>";
+		};
+		43A943821B926B7B0051FA24 /* WatchApp Extension */ = {
+			isa = PBXGroup;
+			children = (
+				43F5C2CA1B929C61003EB13D /* WatchApp Extension.entitlements */,
+				43A943911B926B7B0051FA24 /* Info.plist */,
+				439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */,
+				43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */,
+				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
+				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
+				43A9438B1B926B7B0051FA24 /* GlanceController.swift */,
+				43A943851B926B7B0051FA24 /* InterfaceController.swift */,
+				43A943891B926B7B0051FA24 /* NotificationController.swift */,
+				432884F11BB515D40028E4EB /* PumpDataManager.swift */,
+				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
+				43DE92571C5479C3001FFDE1 /* Models */,
+				43A943831B926B7B0051FA24 /* Supporting Files */,
+			);
+			path = "WatchApp Extension";
+			sourceTree = "<group>";
+		};
+		43A943831B926B7B0051FA24 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				43A943841B926B7B0051FA24 /* PushNotificationPayload.apns */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		43A943A31B928D400051FA24 /* RileyLinkKit */ = {
+			isa = PBXGroup;
+			children = (
+				432AC0C51C2A396A00B1DC2F /* CRC8.h */,
+				432AC0C61C2A396A00B1DC2F /* CRC8.m */,
+				43A943A61B928D400051FA24 /* Info.plist */,
+				43A3634B1B96BA4900D0FE2E /* Log.h */,
+				43A3634C1B96BA4900D0FE2E /* Log.m */,
+				43E0DDFB1B9A997B007B4443 /* MessageBase.h */,
+				43E0DDFC1B9A997B007B4443 /* MessageBase.m */,
+				43E0DDF71B9A98CA007B4443 /* MessageSendOperation.h */,
+				43E0DDF81B9A98CA007B4443 /* MessageSendOperation.m */,
+				43A943AF1B9298BF0051FA24 /* MinimedPacket.h */,
+				43A943B01B9298BF0051FA24 /* MinimedPacket.m */,
+				43A943BF1B92996B0051FA24 /* NSData+Conversion.h */,
+				43A943C01B92996B0051FA24 /* NSData+Conversion.m */,
+				43A943B11B9298BF0051FA24 /* RileyLinkBLEDevice.h */,
+				43A943B21B9298BF0051FA24 /* RileyLinkBLEDevice.m */,
+				43A943B31B9298BF0051FA24 /* RileyLinkBLEManager.h */,
+				43A943B41B9298BF0051FA24 /* RileyLinkBLEManager.m */,
+				439FC9EB1C321C67007DE84C /* RileyLinkDevice_Private.h */,
+				43F5C2DC1B937615003EB13D /* RileyLinkDevice.h */,
+				43F5C2DD1B937615003EB13D /* RileyLinkDevice.m */,
+				43A943A41B928D400051FA24 /* RileyLinkKit.h */,
+				43F5C2DE1B937615003EB13D /* RileyLinkManager.h */,
+				43F5C2DF1B937615003EB13D /* RileyLinkManager.m */,
+				43A943B51B9298BF0051FA24 /* SendDataTask.h */,
+				43A943B61B9298BF0051FA24 /* SendDataTask.m */,
+			);
+			path = RileyLinkKit;
+			sourceTree = "<group>";
+		};
+		43DE92571C5479C3001FFDE1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
+				43DE925B1C547A20001FFDE1 /* WatchContext.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		43E0DE051B9B51B3007B4443 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */,
+				43E0DE011B9AA0D5007B4443 /* MySentryAckMessageBody.swift */,
+				430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */,
+				430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */,
+				43E0DE061B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift */,
+				437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */,
+				433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */,
+				43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */,
+			);
+			path = Messages;
+			sourceTree = "<group>";
+		};
+		43E344A01B9E144300C85C07 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				43E344A51B9E1B3300C85C07 /* NSBundle.swift */,
+				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
+				43DE92501C541832001FFDE1 /* UIColor.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		43F5C2CE1B92A2A0003EB13D /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
+				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
+				43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */,
+			);
+			path = "View Controllers";
+			sourceTree = "<group>";
+		};
+		43F5C2CF1B92A2ED003EB13D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		43F5C2E41B93C5D4003EB13D /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				43F5C2E51B93C685003EB13D /* PumpDataManager.swift */,
+				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		968DCD53F724DE56FFE51920 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				43702A751C48938C00284E32 /* HealthKit.framework */,
+				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
+				43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */,
+				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
+				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
+				43EDDBF11C361C75007D89B5 /* xDripG5.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		43298ED91C3A0F4900F520A3 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43298EDF1C3A0F4900F520A3 /* CarbKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437220221C4D93F000C5F36C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220281C4D93F000C5F36C /* LoopKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		438C93371B97F82000BE20E9 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				438C933D1B97F82000BE20E9 /* MinimedKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9439F1B928D400051FA24 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43E0DDFD1B9A997B007B4443 /* MessageBase.h in Headers */,
+				43A943BB1B9298BF0051FA24 /* RileyLinkBLEManager.h in Headers */,
+				43E0DDF91B9A98CA007B4443 /* MessageSendOperation.h in Headers */,
+				439FC9EC1C321C67007DE84C /* RileyLinkDevice_Private.h in Headers */,
+				432AC0C71C2A396A00B1DC2F /* CRC8.h in Headers */,
+				43A943B91B9298BF0051FA24 /* RileyLinkBLEDevice.h in Headers */,
+				43A943B71B9298BF0051FA24 /* MinimedPacket.h in Headers */,
+				43A943C11B92996B0051FA24 /* NSData+Conversion.h in Headers */,
+				43A943A51B928D400051FA24 /* RileyLinkKit.h in Headers */,
+				43F5C2E01B937615003EB13D /* RileyLinkDevice.h in Headers */,
+				43F5C2E21B937615003EB13D /* RileyLinkManager.h in Headers */,
+				43A943BD1B9298BF0051FA24 /* SendDataTask.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43C667C81C5577260050C674 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43C667D81C5579C80050C674 /* CarbKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit-iOS" */;
+			buildPhases = (
+				43298ED71C3A0F4900F520A3 /* Sources */,
+				43298ED81C3A0F4900F520A3 /* Frameworks */,
+				43298ED91C3A0F4900F520A3 /* Headers */,
+				43298EDA1C3A0F4900F520A3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CarbKit-iOS";
+			productName = CarbKit;
+			productReference = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		4372200E1C4D7E4800C5F36C /* CarbKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 437220191C4D7E4800C5F36C /* Build configuration list for PBXNativeTarget "CarbKitTests" */;
+			buildPhases = (
+				4372200B1C4D7E4800C5F36C /* Sources */,
+				4372200C1C4D7E4800C5F36C /* Frameworks */,
+				4372200D1C4D7E4800C5F36C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				437220161C4D7E4800C5F36C /* PBXTargetDependency */,
+			);
+			name = CarbKitTests;
+			productName = CarbKitTests;
+			productReference = 4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		437220241C4D93F000C5F36C /* LoopKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4372203C1C4D93F000C5F36C /* Build configuration list for PBXNativeTarget "LoopKit" */;
+			buildPhases = (
+				437220201C4D93F000C5F36C /* Sources */,
+				437220211C4D93F000C5F36C /* Frameworks */,
+				437220221C4D93F000C5F36C /* Headers */,
+				437220231C4D93F000C5F36C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LoopKit;
+			productName = LoopKit;
+			productReference = 437220251C4D93F000C5F36C /* LoopKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		4372202D1C4D93F000C5F36C /* LoopKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4372203F1C4D93F000C5F36C /* Build configuration list for PBXNativeTarget "LoopKitTests" */;
+			buildPhases = (
+				4372202A1C4D93F000C5F36C /* Sources */,
+				4372202B1C4D93F000C5F36C /* Frameworks */,
+				4372202C1C4D93F000C5F36C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				437220311C4D93F000C5F36C /* PBXTargetDependency */,
+				437220331C4D93F000C5F36C /* PBXTargetDependency */,
+			);
+			name = LoopKitTests;
+			productName = LoopKitTests;
+			productReference = 4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		43776F8B1B8022E90074EA36 /* Naterade */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43776FB61B8022E90074EA36 /* Build configuration list for PBXNativeTarget "Naterade" */;
+			buildPhases = (
+				43776F881B8022E90074EA36 /* Sources */,
+				43776F891B8022E90074EA36 /* Frameworks */,
+				43776F8A1B8022E90074EA36 /* Resources */,
+				43A9439C1B926B7B0051FA24 /* Embed Watch Content */,
+				43A943AE1B928D400051FA24 /* Embed Frameworks */,
+				43EDDBEF1C361BCE007D89B5 /* ShellScript */,
+				43EDDBF41C361CAD007D89B5 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43A943931B926B7B0051FA24 /* PBXTargetDependency */,
+				43A943A81B928D400051FA24 /* PBXTargetDependency */,
+				438C934E1B97F82000BE20E9 /* PBXTargetDependency */,
+				43298EE21C3A0F4900F520A3 /* PBXTargetDependency */,
+				437220391C4D93F000C5F36C /* PBXTargetDependency */,
+			);
+			name = Naterade;
+			productName = Naterade;
+			productReference = 43776F8C1B8022E90074EA36 /* Naterade.app */;
+			productType = "com.apple.product-type.application";
+		};
+		437A289B1C2F66DD00009647 /* MinimedKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 437A28A41C2F66DE00009647 /* Build configuration list for PBXNativeTarget "MinimedKitTests" */;
+			buildPhases = (
+				437A28981C2F66DD00009647 /* Sources */,
+				437A28991C2F66DD00009647 /* Frameworks */,
+				437A289A1C2F66DD00009647 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				437A28A31C2F66DE00009647 /* PBXTargetDependency */,
+			);
+			name = MinimedKitTests;
+			productName = MinimedKitTests;
+			productReference = 437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		438C93391B97F82000BE20E9 /* MinimedKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 438C93511B97F82100BE20E9 /* Build configuration list for PBXNativeTarget "MinimedKit" */;
+			buildPhases = (
+				438C93351B97F82000BE20E9 /* Sources */,
+				438C93361B97F82000BE20E9 /* Frameworks */,
+				438C93371B97F82000BE20E9 /* Headers */,
+				438C93381B97F82000BE20E9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MinimedKit;
+			productName = MinimedKit;
+			productReference = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		43A943711B926B7B0051FA24 /* WatchApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43A943991B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp" */;
+			buildPhases = (
+				43A943701B926B7B0051FA24 /* Resources */,
+				43A943981B926B7B0051FA24 /* Embed App Extensions */,
+				43105EF81BADC8F9009CD81E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43A943811B926B7B0051FA24 /* PBXTargetDependency */,
+			);
+			name = WatchApp;
+			productName = WatchApp;
+			productReference = 43A943721B926B7B0051FA24 /* WatchApp.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+		43A9437D1B926B7B0051FA24 /* WatchApp Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43A943951B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp Extension" */;
+			buildPhases = (
+				43A9437A1B926B7B0051FA24 /* Sources */,
+				43A9437B1B926B7B0051FA24 /* Frameworks */,
+				43A9437C1B926B7B0051FA24 /* Resources */,
+				43C667D71C5577280050C674 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43C667D11C5577270050C674 /* PBXTargetDependency */,
+			);
+			name = "WatchApp Extension";
+			productName = "WatchApp Extension";
+			productReference = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */;
+			productType = "com.apple.product-type.watchkit2-extension";
+		};
+		43A943A11B928D400051FA24 /* RileyLinkKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43A943AB1B928D400051FA24 /* Build configuration list for PBXNativeTarget "RileyLinkKit" */;
+			buildPhases = (
+				43A9439D1B928D400051FA24 /* Sources */,
+				43A9439E1B928D400051FA24 /* Frameworks */,
+				43A9439F1B928D400051FA24 /* Headers */,
+				43A943A01B928D400051FA24 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RileyLinkKit;
+			productName = RileyLinkKit;
+			productReference = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		43C667CA1C5577260050C674 /* CarbKit-watchOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43C667D61C5577280050C674 /* Build configuration list for PBXNativeTarget "CarbKit-watchOS" */;
+			buildPhases = (
+				43C667C61C5577260050C674 /* Sources */,
+				43C667C71C5577260050C674 /* Frameworks */,
+				43C667C81C5577260050C674 /* Headers */,
+				43C667C91C5577260050C674 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CarbKit-watchOS";
+			productName = "CarbKit-watchOS";
+			productReference = 43C667CB1C5577260050C674 /* CarbKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		43776F841B8022E90074EA36 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0720;
+				LastUpgradeCheck = 0700;
+				ORGANIZATIONNAME = "Nathan Racklyeft";
+				TargetAttributes = {
+					43298EDB1C3A0F4900F520A3 = {
+						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					4372200E1C4D7E4800C5F36C = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					437220241C4D93F000C5F36C = {
+						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					4372202D1C4D93F000C5F36C = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					43776F8B1B8022E90074EA36 = {
+						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 26AMK8X5DW;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
+					};
+					437A289B1C2F66DD00009647 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					438C93391B97F82000BE20E9 = {
+						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					43A943711B926B7B0051FA24 = {
+						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 26AMK8X5DW;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+						};
+					};
+					43A9437D1B926B7B0051FA24 = {
+						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 26AMK8X5DW;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+							com.apple.Keychain = {
+								enabled = 1;
+							};
+						};
+					};
+					43A943A11B928D400051FA24 = {
+						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					43C667CA1C5577260050C674 = {
+						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+				};
+			};
+			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */;
+			compatibilityVersion = "Xcode 6.3";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 43776F831B8022E90074EA36;
+			productRefGroup = 43776F8D1B8022E90074EA36 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				43776F8B1B8022E90074EA36 /* Naterade */,
+				43A943711B926B7B0051FA24 /* WatchApp */,
+				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
+				43A943A11B928D400051FA24 /* RileyLinkKit */,
+				438C93391B97F82000BE20E9 /* MinimedKit */,
+				437A289B1C2F66DD00009647 /* MinimedKitTests */,
+				43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */,
+				43C667CA1C5577260050C674 /* CarbKit-watchOS */,
+				4372200E1C4D7E4800C5F36C /* CarbKitTests */,
+				437220241C4D93F000C5F36C /* LoopKit */,
+				4372202D1C4D93F000C5F36C /* LoopKitTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		43298EDA1C3A0F4900F520A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				438099441C499199009D8E26 /* CarbKit.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372200D1C4D7E4800C5F36C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220551C4DEFC400C5F36C /* carbs_on_board_output.json in Resources */,
+				4372201E1C4D814B00C5F36C /* carb_effect_from_history_output.json in Resources */,
+				437220511C4DB43400C5F36C /* read_carb_ratios.json in Resources */,
+				4372201C1C4D80C500C5F36C /* carb_effect_from_history_input.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437220231C4D93F000C5F36C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372202C1C4D93F000C5F36C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4372204E1C4DA62700C5F36C /* read_carb_ratios.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43776F8A1B8022E90074EA36 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
+				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
+				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
+				43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437A289A1C2F66DD00009647 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		438C93381B97F82000BE20E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A943701B926B7B0051FA24 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */,
+				43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9437C1B926B7B0051FA24 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A943A01B928D400051FA24 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43C667C91C5577260050C674 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		43EDDBEF1C361BCE007D89B5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/CommonCrypto.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/xDripG5.framework",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		43298ED71C3A0F4900F520A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */,
+				438099511C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift in Sources */,
+				4380994B1C49C4DC009D8E26 /* UITableViewCell.swift in Sources */,
+				43298EEC1C3A1DC900F520A3 /* CarbEntry.swift in Sources */,
+				43C85FCA1C4247F1002EFBC7 /* HKQuantitySample.swift in Sources */,
+				438099531C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift in Sources */,
+				4380993E1C498935009D8E26 /* CarbEntryTableViewController.swift in Sources */,
+				439A30B51C53337500059771 /* StoredCarbEntry.swift in Sources */,
+				430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */,
+				43298EEA1C3A167800F520A3 /* CarbStore.swift in Sources */,
+				438099491C49C462009D8E26 /* DatePickerTableViewCell.swift in Sources */,
+				438099461C49B844009D8E26 /* CarbEntryEditViewController.swift in Sources */,
+				4380994D1C49D490009D8E26 /* NewCarbEntry.swift in Sources */,
+				4380994F1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372200B1C4D7E4800C5F36C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220121C4D7E4800C5F36C /* CarbMathTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437220201C4D93F000C5F36C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4372204B1C4D9B4200C5F36C /* NSTimeInterval.swift in Sources */,
+				437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */,
+				437220461C4D96BF00C5F36C /* QuantitySchedule.swift in Sources */,
+				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
+				437220561C4E012600C5F36C /* NSDate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4372202A1C4D93F000C5F36C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437220531C4DD52D00C5F36C /* NSDateTests.swift in Sources */,
+				437220361C4D93F000C5F36C /* LoopKitTests.swift in Sources */,
+				437220501C4DA86C00C5F36C /* QuantityScheduleTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43776F881B8022E90074EA36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
+				43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */,
+				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
+				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
+				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
+				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
+				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
+				437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */,
+				43DE92511C541832001FFDE1 /* UIColor.swift in Sources */,
+				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
+				43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */,
+				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
+				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
+				43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
+				43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		437A28981C2F66DD00009647 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */,
+				437A28A91C2F677100009647 /* ReadSettingsCarelinkMessageBodyTests.swift in Sources */,
+				437A28A81C2F676F00009647 /* NSDataTests.swift in Sources */,
+				437A289F1C2F66DE00009647 /* MinimedKitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		438C93351B97F82000BE20E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */,
+				43E0DE071B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift in Sources */,
+				437A28B51C2FC41700009647 /* PowerOnCarelinkMessageBody.swift in Sources */,
+				438C93581B97FE5300BE20E9 /* PacketType.swift in Sources */,
+				43F2756C1BAA7BA9006A5B6A /* UnknownMessageBody.swift in Sources */,
+				438C935C1B9801DC00BE20E9 /* PumpMessage.swift in Sources */,
+				438C935E1B980BC000BE20E9 /* NSData.swift in Sources */,
+				433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */,
+				4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */,
+				43E0DE041B9AB6F6007B4443 /* MessageBody.swift in Sources */,
+				438C935A1B97FEDA00BE20E9 /* MessageType.swift in Sources */,
+				43E0DE021B9AA0D5007B4443 /* MySentryAckMessageBody.swift in Sources */,
+				430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */,
+				437A28AB1C2F6C4500009647 /* Int.swift in Sources */,
+				430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */,
+				4326F5071BA6292F009204C6 /* AlertType.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9437A1B926B7B0051FA24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43FF3D661BADE39000DE240A /* UnknownMessageBody.swift in Sources */,
+				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
+				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
+				43FF3D631BADE39000DE240A /* MySentryAlertClearedMessageBody.swift in Sources */,
+				43FF3D681BADE39400DE240A /* PacketType.swift in Sources */,
+				43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */,
+				43FF3D5E1BADE38300DE240A /* AlertType.swift in Sources */,
+				439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */,
+				43FF3D611BADE38C00DE240A /* MessageBody.swift in Sources */,
+				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
+				432884F21BB515D40028E4EB /* PumpDataManager.swift in Sources */,
+				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
+				43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */,
+				43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */,
+				43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */,
+				43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */,
+				43DE925D1C547A20001FFDE1 /* WatchContext.swift in Sources */,
+				43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */,
+				43A9438C1B926B7B0051FA24 /* GlanceController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43A9439D1B928D400051FA24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43F5C2E31B937615003EB13D /* RileyLinkManager.m in Sources */,
+				43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */,
+				43E0DDFE1B9A997B007B4443 /* MessageBase.m in Sources */,
+				43A3634E1B96BA4900D0FE2E /* Log.m in Sources */,
+				432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */,
+				43F5C2E11B937615003EB13D /* RileyLinkDevice.m in Sources */,
+				43E0DDFA1B9A98CA007B4443 /* MessageSendOperation.m in Sources */,
+				43A943BE1B9298BF0051FA24 /* SendDataTask.m in Sources */,
+				43A943BC1B9298BF0051FA24 /* RileyLinkBLEManager.m in Sources */,
+				43A943B81B9298BF0051FA24 /* MinimedPacket.m in Sources */,
+				43A943BA1B9298BF0051FA24 /* RileyLinkBLEDevice.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43C667C61C5577260050C674 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		43298EE21C3A0F4900F520A3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */;
+			targetProxy = 43298EE11C3A0F4900F520A3 /* PBXContainerItemProxy */;
+		};
+		437220161C4D7E4800C5F36C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */;
+			targetProxy = 437220151C4D7E4800C5F36C /* PBXContainerItemProxy */;
+		};
+		437220311C4D93F000C5F36C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 437220241C4D93F000C5F36C /* LoopKit */;
+			targetProxy = 437220301C4D93F000C5F36C /* PBXContainerItemProxy */;
+		};
+		437220331C4D93F000C5F36C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43776F8B1B8022E90074EA36 /* Naterade */;
+			targetProxy = 437220321C4D93F000C5F36C /* PBXContainerItemProxy */;
+		};
+		437220391C4D93F000C5F36C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 437220241C4D93F000C5F36C /* LoopKit */;
+			targetProxy = 437220381C4D93F000C5F36C /* PBXContainerItemProxy */;
+		};
+		437A28A31C2F66DE00009647 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 438C93391B97F82000BE20E9 /* MinimedKit */;
+			targetProxy = 437A28A21C2F66DE00009647 /* PBXContainerItemProxy */;
+		};
+		438C934E1B97F82000BE20E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 438C93391B97F82000BE20E9 /* MinimedKit */;
+			targetProxy = 438C934D1B97F82000BE20E9 /* PBXContainerItemProxy */;
+		};
+		43A943811B926B7B0051FA24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43A9437D1B926B7B0051FA24 /* WatchApp Extension */;
+			targetProxy = 43A943801B926B7B0051FA24 /* PBXContainerItemProxy */;
+		};
+		43A943931B926B7B0051FA24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43A943711B926B7B0051FA24 /* WatchApp */;
+			targetProxy = 43A943921B926B7B0051FA24 /* PBXContainerItemProxy */;
+		};
+		43A943A81B928D400051FA24 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43A943A11B928D400051FA24 /* RileyLinkKit */;
+			targetProxy = 43A943A71B928D400051FA24 /* PBXContainerItemProxy */;
+		};
+		43C667D11C5577270050C674 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43C667CA1C5577260050C674 /* CarbKit-watchOS */;
+			targetProxy = 43C667D01C5577270050C674 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		43776F951B8022E90074EA36 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				43776F961B8022E90074EA36 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				43776F9B1B8022E90074EA36 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		43A943741B926B7B0051FA24 /* Interface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				43A943751B926B7B0051FA24 /* Base */,
+			);
+			name = Interface.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		43298EE51C3A0F4A00F520A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CarbKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
+				PRODUCT_NAME = CarbKit;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		43298EE61C3A0F4A00F520A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CarbKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
+				PRODUCT_NAME = CarbKit;
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		437220171C4D7E4800C5F36C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = CarbKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		437220181C4D7E4800C5F36C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = CarbKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		4372203D1C4D93F000C5F36C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = LoopKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		4372203E1C4D93F000C5F36C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = LoopKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		437220401C4D93F000C5F36C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = LoopKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		437220411C4D93F000C5F36C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = LoopKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		43776FB41B8022E90074EA36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WARNING_CFLAGS = "-Wall";
+			};
+			name = Debug;
+		};
+		43776FB51B8022E90074EA36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				WARNING_CFLAGS = "-Wall";
+			};
+			name = Release;
+		};
+		43776FB71B8022E90074EA36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Naterade/Naterade.entitlements;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = Naterade/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+			};
+			name = Debug;
+		};
+		43776FB81B8022E90074EA36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Naterade/Naterade.entitlements;
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = Naterade/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+			};
+			name = Release;
+		};
+		437A28A51C2F66DE00009647 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = MinimedKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.MinimedKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		437A28A61C2F66DE00009647 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = MinimedKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.MinimedKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		438C93521B97F82100BE20E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = MinimedKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.MinimedKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		438C93531B97F82100BE20E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = MinimedKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.MinimedKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		43A943961B926B7B0051FA24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		43A943971B926B7B0051FA24 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		43A9439A1B926B7B0051FA24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				IBSC_MODULE = WatchApp_Extension;
+				INFOPLIST_FILE = WatchApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		43A9439B1B926B7B0051FA24 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				IBSC_MODULE = WatchApp_Extension;
+				INFOPLIST_FILE = WatchApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.Naterade.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		43A943AC1B928D400051FA24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		43A943AD1B928D400051FA24 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		43C667D41C5577280050C674 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CarbKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
+				PRODUCT_NAME = CarbKit;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+				WATCHOS_DEPLOYMENT_TARGET = 2.1;
+			};
+			name = Debug;
+		};
+		43C667D51C5577280050C674 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CarbKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
+				PRODUCT_NAME = CarbKit;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+				WATCHOS_DEPLOYMENT_TARGET = 2.1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43298EE51C3A0F4A00F520A3 /* Debug */,
+				43298EE61C3A0F4A00F520A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		437220191C4D7E4800C5F36C /* Build configuration list for PBXNativeTarget "CarbKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				437220171C4D7E4800C5F36C /* Debug */,
+				437220181C4D7E4800C5F36C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4372203C1C4D93F000C5F36C /* Build configuration list for PBXNativeTarget "LoopKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4372203D1C4D93F000C5F36C /* Debug */,
+				4372203E1C4D93F000C5F36C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4372203F1C4D93F000C5F36C /* Build configuration list for PBXNativeTarget "LoopKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				437220401C4D93F000C5F36C /* Debug */,
+				437220411C4D93F000C5F36C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43776FB41B8022E90074EA36 /* Debug */,
+				43776FB51B8022E90074EA36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43776FB61B8022E90074EA36 /* Build configuration list for PBXNativeTarget "Naterade" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43776FB71B8022E90074EA36 /* Debug */,
+				43776FB81B8022E90074EA36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		437A28A41C2F66DE00009647 /* Build configuration list for PBXNativeTarget "MinimedKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				437A28A51C2F66DE00009647 /* Debug */,
+				437A28A61C2F66DE00009647 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		438C93511B97F82100BE20E9 /* Build configuration list for PBXNativeTarget "MinimedKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				438C93521B97F82100BE20E9 /* Debug */,
+				438C93531B97F82100BE20E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43A943951B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43A943961B926B7B0051FA24 /* Debug */,
+				43A943971B926B7B0051FA24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43A943991B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43A9439A1B926B7B0051FA24 /* Debug */,
+				43A9439B1B926B7B0051FA24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43A943AB1B928D400051FA24 /* Build configuration list for PBXNativeTarget "RileyLinkKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43A943AC1B928D400051FA24 /* Debug */,
+				43A943AD1B928D400051FA24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43C667D61C5577280050C674 /* Build configuration list for PBXNativeTarget "CarbKit-watchOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43C667D41C5577280050C674 /* Debug */,
+				43C667D51C5577280050C674 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 43776F841B8022E90074EA36 /* Project object */;
+}

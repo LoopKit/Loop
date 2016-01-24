@@ -6,7 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 
 extension UITableViewCell {

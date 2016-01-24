@@ -139,7 +139,7 @@
                                                 </button>
                                             </items>
                                         </group>
-                                        <label alignment="center" text="100" textAlignment="center" id="E5r-2c-UZm">
+                                        <label alignment="center" text="15" textAlignment="center" id="E5r-2c-UZm">
                                             <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <fontDescription key="font" type="system" weight="light" pointSize="40"/>
                                         </label>

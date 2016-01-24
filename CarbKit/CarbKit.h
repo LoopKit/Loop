@@ -6,8 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-#import <HealthKit/HealthKit.h>
+@import Foundation;
 
 //! Project version number for CarbKit.
 FOUNDATION_EXPORT double CarbKitVersionNumber;
