@@ -103,9 +103,6 @@
 		43A943BE1B9298BF0051FA24 /* SendDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B61B9298BF0051FA24 /* SendDataTask.m */; };
 		43A943C11B92996B0051FA24 /* NSData+Conversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943BF1B92996B0051FA24 /* NSData+Conversion.h */; };
 		43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943C01B92996B0051FA24 /* NSData+Conversion.m */; };
-		43C667D21C5577270050C674 /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C667CB1C5577260050C674 /* CarbKit.framework */; };
-		43C667D31C5577270050C674 /* CarbKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43C667CB1C5577260050C674 /* CarbKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		43C667D81C5579C80050C674 /* CarbKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 43298EDE1C3A0F4900F520A3 /* CarbKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		43C85FCA1C4247F1002EFBC7 /* HKQuantitySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */; };
 		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
@@ -221,13 +218,6 @@
 			remoteGlobalIDString = 43A943A11B928D400051FA24;
 			remoteInfo = RileyLinkKit;
 		};
-		43C667D01C5577270050C674 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43C667CA1C5577260050C674;
-			remoteInfo = "CarbKit-watchOS";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -273,7 +263,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				43C667D31C5577270050C674 /* CarbKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -390,7 +379,6 @@
 		43A943B61B9298BF0051FA24 /* SendDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SendDataTask.m; sourceTree = "<group>"; };
 		43A943BF1B92996B0051FA24 /* NSData+Conversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Conversion.h"; sourceTree = "<group>"; };
 		43A943C01B92996B0051FA24 /* NSData+Conversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Conversion.m"; sourceTree = "<group>"; };
-		43C667CB1C5577260050C674 /* CarbKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CarbKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKQuantitySample.swift; sourceTree = "<group>"; };
 		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
@@ -505,18 +493,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				43702A761C48938C00284E32 /* HealthKit.framework in Frameworks */,
-				43C667D21C5577270050C674 /* CarbKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		43A9439E1B928D400051FA24 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		43C667C71C5577260050C674 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -646,7 +626,6 @@
 				4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */,
 				437220251C4D93F000C5F36C /* LoopKit.framework */,
 				4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */,
-				43C667CB1C5577260050C674 /* CarbKit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -914,20 +893,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		43C667C81C5577260050C674 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				43C667D81C5579C80050C674 /* CarbKit.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */ = {
+		43298EDB1C3A0F4900F520A3 /* CarbKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit-iOS" */;
+			buildConfigurationList = 43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit" */;
 			buildPhases = (
 				43298ED71C3A0F4900F520A3 /* Sources */,
 				43298ED81C3A0F4900F520A3 /* Frameworks */,
@@ -938,7 +909,7 @@
 			);
 			dependencies = (
 			);
-			name = "CarbKit-iOS";
+			name = CarbKit;
 			productName = CarbKit;
 			productReference = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */;
 			productType = "com.apple.product-type.framework";
@@ -1090,7 +1061,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				43C667D11C5577270050C674 /* PBXTargetDependency */,
 			);
 			name = "WatchApp Extension";
 			productName = "WatchApp Extension";
@@ -1113,24 +1083,6 @@
 			name = RileyLinkKit;
 			productName = RileyLinkKit;
 			productReference = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		43C667CA1C5577260050C674 /* CarbKit-watchOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 43C667D61C5577280050C674 /* Build configuration list for PBXNativeTarget "CarbKit-watchOS" */;
-			buildPhases = (
-				43C667C61C5577260050C674 /* Sources */,
-				43C667C71C5577260050C674 /* Frameworks */,
-				43C667C81C5577260050C674 /* Headers */,
-				43C667C91C5577260050C674 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "CarbKit-watchOS";
-			productName = "CarbKit-watchOS";
-			productReference = 43C667CB1C5577260050C674 /* CarbKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -1210,10 +1162,6 @@
 						CreatedOnToolsVersion = 7.0;
 						DevelopmentTeam = 26AMK8X5DW;
 					};
-					43C667CA1C5577260050C674 = {
-						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = 26AMK8X5DW;
-					};
 				};
 			};
 			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */;
@@ -1235,8 +1183,7 @@
 				43A943A11B928D400051FA24 /* RileyLinkKit */,
 				438C93391B97F82000BE20E9 /* MinimedKit */,
 				437A289B1C2F66DD00009647 /* MinimedKitTests */,
-				43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */,
-				43C667CA1C5577260050C674 /* CarbKit-watchOS */,
+				43298EDB1C3A0F4900F520A3 /* CarbKit */,
 				4372200E1C4D7E4800C5F36C /* CarbKitTests */,
 				437220241C4D93F000C5F36C /* LoopKit */,
 				4372202D1C4D93F000C5F36C /* LoopKitTests */,
@@ -1322,13 +1269,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		43A943A01B928D400051FA24 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		43C667C91C5577260050C674 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1507,24 +1447,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		43C667C61C5577260050C674 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		43298EE21C3A0F4900F520A3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */;
+			target = 43298EDB1C3A0F4900F520A3 /* CarbKit */;
 			targetProxy = 43298EE11C3A0F4900F520A3 /* PBXContainerItemProxy */;
 		};
 		437220161C4D7E4800C5F36C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 43298EDB1C3A0F4900F520A3 /* CarbKit-iOS */;
+			target = 43298EDB1C3A0F4900F520A3 /* CarbKit */;
 			targetProxy = 437220151C4D7E4800C5F36C /* PBXContainerItemProxy */;
 		};
 		437220311C4D93F000C5F36C /* PBXTargetDependency */ = {
@@ -1566,11 +1499,6 @@
 			isa = PBXTargetDependency;
 			target = 43A943A11B928D400051FA24 /* RileyLinkKit */;
 			targetProxy = 43A943A71B928D400051FA24 /* PBXContainerItemProxy */;
-		};
-		43C667D11C5577270050C674 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43C667CA1C5577260050C674 /* CarbKit-watchOS */;
-			targetProxy = 43C667D01C5577270050C674 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1617,7 +1545,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
-				PRODUCT_NAME = CarbKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1640,7 +1568,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
-				PRODUCT_NAME = CarbKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -2049,60 +1977,10 @@
 			};
 			name = Release;
 		};
-		43C667D41C5577280050C674 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = CarbKit/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
-				PRODUCT_NAME = CarbKit;
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = 4;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-				WATCHOS_DEPLOYMENT_TARGET = 2.1;
-			};
-			name = Debug;
-		};
-		43C667D51C5577280050C674 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = CarbKit/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.CarbKit;
-				PRODUCT_NAME = CarbKit;
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = 4;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-				WATCHOS_DEPLOYMENT_TARGET = 2.1;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit-iOS" */ = {
+		43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43298EE51C3A0F4A00F520A3 /* Debug */,
@@ -2200,14 +2078,6 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
-		};
-		43C667D61C5577280050C674 /* Build configuration list for PBXNativeTarget "CarbKit-watchOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				43C667D41C5577280050C674 /* Debug */,
-				43C667D51C5577280050C674 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
