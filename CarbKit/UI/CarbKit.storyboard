@@ -354,6 +354,7 @@
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="textField" destination="qU9-hG-hMu" id="PP5-os-4aH"/>
+                                    <outlet property="unitLabel" destination="D2S-2h-yH6" id="HBr-nn-Pb2"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="AbsorptionTimeTextFieldTableViewCell" id="2Aw-ze-ygI" customClass="AbsorptionTimeTextFieldTableViewCell" customModule="CarbKit" customModuleProvider="target">

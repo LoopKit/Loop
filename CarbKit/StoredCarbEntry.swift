@@ -24,12 +24,8 @@ struct StoredCarbEntry: CarbEntry {
         return sample.startDate
     }
 
-    var value: Double {
-        return sample.quantity.doubleValueForUnit(unit)
-    }
-
-    var unit: HKUnit {
-        return HKUnit.gramUnit()
+    var quantity: HKQuantity {
+        return sample.quantity
     }
 
     // MARK: - CarbEntry

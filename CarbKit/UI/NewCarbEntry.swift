@@ -11,15 +11,14 @@ import HealthKit
 
 
 public struct NewCarbEntry: CarbEntry {
-    public var value: Double
+    public var quantity: HKQuantity
     public var startDate: NSDate
     public var foodType: String?
     public var absorptionTime: NSTimeInterval?
-    public let unit = HKUnit.gramUnit()
     public let createdByCurrentApp = true
 
-    public init(value: Double, startDate: NSDate, foodType: String?, absorptionTime: NSTimeInterval?) {
-        self.value = value
+    public init(quantity: HKQuantity, startDate: NSDate, foodType: String?, absorptionTime: NSTimeInterval?) {
+        self.quantity = quantity
         self.startDate = startDate
         self.foodType = foodType
         self.absorptionTime = absorptionTime

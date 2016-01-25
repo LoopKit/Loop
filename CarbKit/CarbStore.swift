@@ -35,6 +35,8 @@ public class CarbStore: HealthKitSampleStore {
         return Set(arrayLiteral: carbType)
     }
 
+    public private(set) var preferredUnit: HKUnit = HKUnit.gramUnit()
+
     /// A span of default carbohydrate absorption times. Defaults to 2, 3, and 4 hours.
     public let defaultAbsorptionTimes: DefaultAbsorptionTimes
 
@@ -245,7 +247,7 @@ public class CarbStore: HealthKitSampleStore {
     }
 
     public func addCarbEntry(entry: CarbEntry, resultHandler: (Bool, CarbEntry?, NSError?) -> Void) {
-        let amount = HKQuantity(unit: HKUnit.gramUnit(), doubleValue: entry.value)
+        let quantity = entry.quantity
         var metadata = [String: AnyObject]()
 
         if let absorptionTime = entry.absorptionTime {
@@ -256,7 +258,7 @@ public class CarbStore: HealthKitSampleStore {
             metadata[HKMetadataKeyFoodType] = foodType
         }
 
-        let carbs = HKQuantitySample(type: carbType, quantity: amount, startDate: entry.startDate, endDate: entry.startDate, device: nil, metadata: metadata)
+        let carbs = HKQuantitySample(type: carbType, quantity: quantity, startDate: entry.startDate, endDate: entry.startDate, device: nil, metadata: metadata)
 
         healthStore.saveObject(carbs) { (completed, error) -> Void in
             resultHandler(completed, StoredCarbEntry(sample: carbs), error)

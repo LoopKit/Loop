@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import HealthKit
 
 private let ReuseIdentifier = "CarbEntry"
 
@@ -152,7 +153,7 @@ public class CarbEntryTableViewController: UITableViewController {
             carbStore.carbsOnBoardAtDate(NSDate(), resultHandler: { (value) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     if let value = value {
-                        self.COBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.COBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.quantity.doubleValueForUnit(carbStore.preferredUnit), numberStyle: .NoStyle)
                         self.COBDateLabel.text = String(format: NSLocalizedString("com.loudnate.CarbKit.COBDateLabel", tableName: "CarbKit", value: "at %1$@", comment: "The format string describing the date of a COB value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
                     } else {
                         self.COBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)
@@ -168,7 +169,7 @@ public class CarbEntryTableViewController: UITableViewController {
             carbStore.getTotalRecentCarbValue { (value) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     if let value = value {
-                        self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.quantity.doubleValueForUnit(carbStore.preferredUnit), numberStyle: .NoStyle)
                         self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.CarbKit.totalDateLabel", tableName: "CarbKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
                     } else {
                         self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)
@@ -205,26 +206,27 @@ public class CarbEntryTableViewController: UITableViewController {
     public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(ReuseIdentifier, forIndexPath: indexPath)
 
-        let entry = carbEntries[indexPath.row]
-        let value = NSNumberFormatter.localizedStringFromNumber(entry.value, numberStyle: .NoStyle)
+        if case .Display(let carbStore) = state {
+            let entry = carbEntries[indexPath.row]
+            let value = NSNumberFormatter.localizedStringFromNumber(entry.quantity.doubleValueForUnit(carbStore.preferredUnit), numberStyle: .NoStyle)
 
-        var titleText = "\(value) g"
+            var titleText = "\(value) \(carbStore.preferredUnit)"
 
-        if let foodType = entry.foodType {
-            titleText += ": \(foodType)"
+            if let foodType = entry.foodType {
+                titleText += ": \(foodType)"
+            }
+
+            cell.textLabel?.text = titleText
+
+            var detailText = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+
+            if let absorptionTime = entry.absorptionTime {
+                let minutes = NSNumberFormatter.localizedStringFromNumber(absorptionTime.minutes, numberStyle: .NoStyle)
+                detailText += " + \(minutes) min"
+            }
+
+            cell.detailTextLabel?.text = detailText
         }
-
-        cell.textLabel?.text = titleText
-
-        var detailText = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle)
-
-        if let absorptionTime = entry.absorptionTime {
-            let minutes = NSNumberFormatter.localizedStringFromNumber(absorptionTime.minutes, numberStyle: .NoStyle)
-            detailText += " + \(minutes) min"
-        }
-
-        cell.detailTextLabel?.text = detailText
-
         return cell
     }
 

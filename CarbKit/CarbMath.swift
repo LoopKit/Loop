@@ -13,28 +13,19 @@ import LoopKit
 
 public protocol SampleValue {
     var startDate: NSDate { get }
-    var value: Double { get }
-    var unit: HKUnit { get }
-}
-
-extension SampleValue {
-    var quantity: HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value)
-    }
+    var quantity: HKQuantity { get }
 }
 
 
 public struct CarbValue: SampleValue {
     public let startDate: NSDate
-    public let value: Double
-    public let unit: HKUnit = HKUnit.gramUnit()
+    public let quantity: HKQuantity
 }
 
 
 struct GlucoseEffect: SampleValue {
     let startDate: NSDate
-    let value: Double
-    let unit: HKUnit
+    let quantity: HKQuantity
 }
 
 
@@ -75,7 +66,7 @@ struct CarbMath {
         let value: Double
 
         if time >= 0 {
-            value = unabsorbedCarbs(entry.value, atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
+            value = unabsorbedCarbs(entry.quantity.doubleValueForUnit(HKUnit.gramUnit()), atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
         } else {
             value = 0
         }
@@ -94,9 +85,10 @@ struct CarbMath {
     ) -> Double {
         let time = date.timeIntervalSinceDate(entry.startDate)
         let value: Double
+        let unit = HKUnit.gramUnit()
 
         if time >= 0 {
-            value = insulinSensitivity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()) / carbRatio.doubleValueForUnit(HKUnit.gramUnit()) * absorbedCarbs(entry.value, atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
+            value = insulinSensitivity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()) / carbRatio.doubleValueForUnit(unit) * absorbedCarbs(entry.quantity.doubleValueForUnit(unit), atTime: time - delay, absorptionTime: entry.absorptionTime ?? defaultAbsorptionTime)
         } else {
             value = 0
         }
@@ -168,7 +160,7 @@ struct CarbMath {
                 return value + carbsOnBoardForCarbEntry(entry, atDate: date, defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
             }
 
-            values.append(CarbValue(startDate: date, value: value))
+            values.append(CarbValue(startDate: date, quantity: HKQuantity(unit: HKUnit.gramUnit(), doubleValue: value)))
             date = date.dateByAddingTimeInterval(delta)
         } while date <= endDate
 
@@ -198,7 +190,7 @@ struct CarbMath {
                 return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatios.at(entry.startDate), insulinSensitivity: insulinSensitivities.at(entry.startDate), defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
             }
 
-            values.append(GlucoseEffect(startDate: date, value: value, unit: unit))
+            values.append(GlucoseEffect(startDate: date, quantity: HKQuantity(unit: unit, doubleValue: value)))
             date = date.dateByAddingTimeInterval(delta)
         } while date <= endDate
 
@@ -210,17 +202,18 @@ struct CarbMath {
             return nil
         }
 
+        let unit = HKUnit.gramUnit()
         var startDate = NSDate.distantFuture()
         var totalGrams: Double = 0
 
         for entry in entries {
-            totalGrams += entry.value
+            totalGrams += entry.quantity.doubleValueForUnit(unit)
 
             if entry.startDate < startDate {
                 startDate = entry.startDate
             }
         }
 
-        return CarbValue(startDate: startDate, value: totalGrams)
+        return CarbValue(startDate: startDate, quantity: HKQuantity(unit: unit, doubleValue: totalGrams))
     }
 }

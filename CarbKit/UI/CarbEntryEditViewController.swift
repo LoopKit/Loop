@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import HealthKit
+
 
 class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCellDelegate, TextFieldTableViewCellDelegate {
 
@@ -18,10 +20,12 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         }
     }
 
+    var preferredUnit: HKUnit = HKUnit.gramUnit()
+
     var originalCarbEntry: CarbEntry? {
         didSet {
             if let entry = originalCarbEntry {
-                value = entry.value
+                quantity = entry.quantity
                 date = entry.startDate
                 foodType = entry.foodType
                 absorptionTime = entry.absorptionTime
@@ -29,7 +33,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         }
     }
 
-    private var value: Double?
+    private var quantity: HKQuantity?
 
     private var date = NSDate()
 
@@ -38,14 +42,14 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
     private var absorptionTime: NSTimeInterval?
 
     var updatedCarbEntry: CarbEntry? {
-        if let  value = value,
+        if let  quantity = quantity,
                 absorptionTime = absorptionTime
         {
-            if let o = originalCarbEntry where o.value == value && o.startDate == date && o.foodType == foodType && o.absorptionTime == absorptionTime {
+            if let o = originalCarbEntry where o.quantity == quantity && o.startDate == date && o.foodType == foodType && o.absorptionTime == absorptionTime {
                 return nil  // No changes were made
             }
 
-            return NewCarbEntry(value: value, startDate: date, foodType: foodType, absorptionTime: absorptionTime)
+            return NewCarbEntry(quantity: quantity, startDate: date, foodType: foodType, absorptionTime: absorptionTime)
         } else {
             return nil
         }
@@ -90,10 +94,11 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         case .Value:
             let cell = tableView.dequeueReusableCellWithIdentifier(DecimalTextFieldTableViewCell.defaultIdentifier) as! DecimalTextFieldTableViewCell
 
-            if let value = value {
-                cell.number = NSNumber(double: value)
+            if let quantity = quantity {
+                cell.number = NSNumber(double: quantity.doubleValueForUnit(preferredUnit))
             }
             cell.textField.enabled = isSampleEditable
+            cell.unitLabel.text = String(preferredUnit)
             cell.delegate = self
 
             return cell
@@ -154,9 +159,9 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
         switch Row(rawValue: tableView.indexPathForCell(cell)?.row ?? -1) {
         case .Value?:
             if let number = cell.number {
-                value = number.doubleValue
+                quantity = HKQuantity(unit: preferredUnit, doubleValue: number.doubleValue)
             } else {
-                value = nil
+                quantity = nil
             }
         case .AbsorptionTime?:
             if let number = cell.number {

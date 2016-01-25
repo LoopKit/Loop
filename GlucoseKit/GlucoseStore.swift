@@ -23,15 +23,10 @@ public class GlucoseStore: HealthKitSampleStore {
         return Set(arrayLiteral: glucoseType)
     }
 
-    public override init?() {
-        super.init()
+    /// The maximum interval to purge automatically
+    private var purgeBeforeInterval: NSTimeInterval = NSTimeInterval(hours: 24) * 7
 
-        if !authorizationRequired {
-
-        }
-    }
-
- /// The interval before which glucose values should be parsed from HealthKit.
+    /// The interval before which glucose values should be purged from HealthKit.
     private var purgeAfterInterval: NSTimeInterval? = NSTimeInterval(hours: 3)
 
     public func addGlucose(quantity: HKQuantity, date: NSDate, device: HKDevice?, resultHandler: (Bool, HKQuantitySample?, NSError?) -> Void) {
@@ -42,6 +37,20 @@ public class GlucoseStore: HealthKitSampleStore {
             resultHandler(completed, glucose, error)
         }
 
-//        let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000224")
+        purgeOldGlucoseSamples()
+    }
+
+    private func purgeOldGlucoseSamples() {
+        if let purgeAfterInterval = purgeAfterInterval {
+
+            let predicate = HKQuery.predicateForSamplesWithStartDate(NSDate(timeIntervalSinceNow: -purgeBeforeInterval), endDate: NSDate(timeIntervalSinceNow: -purgeAfterInterval), options: [])
+
+            healthStore.deleteObjectsOfType(glucoseType, predicate: predicate, withCompletion: { (success, count, error) -> Void in
+                if let error = error {
+                    // TODO: Remote error handling
+                    NSLog("%@", error)
+                }
+            })
+        }
     }
 }

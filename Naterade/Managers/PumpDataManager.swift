@@ -126,7 +126,21 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
         if glucose != latestGlucose {
             latestGlucose = glucose
 
-            updateWatch()
+            if glucose.glucose >= 20, let transmitterStartTime = transmitterStartTime {
+                let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose.glucose))
+
+                let startDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
+
+                let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000224")
+
+                glucoseStore?.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, _, error) -> Void in
+                    if let error = error {
+                        NSLog("%@", error)
+                    }
+                })
+
+                updateWatch()
+            }
         }
     }
 
@@ -264,7 +278,12 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
 
     private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
-            let newEntry = NewCarbEntry(value: carbEntry.value, startDate: carbEntry.startDate, foodType: nil, absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes))
+            let newEntry = NewCarbEntry(
+                quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
+                startDate: carbEntry.startDate,
+                foodType: nil,
+                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
+            )
 
             carbStore.addCarbEntry(newEntry, resultHandler: { (success, entry, error) -> Void in
                 if let error = error {

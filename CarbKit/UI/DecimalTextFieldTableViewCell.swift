@@ -22,6 +22,8 @@ class DecimalTextFieldTableViewCell: UITableViewCell, UITextFieldDelegate {
         }
     }
 
+    @IBOutlet weak var unitLabel: UILabel!
+
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: true)
 

@@ -18,6 +18,7 @@
 		430C59A31C558BE3006CDB2A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		430C59A51C558CD6006CDB2A /* GlucoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A41C558CD6006CDB2A /* GlucoseStore.swift */; };
 		430C59A71C559407006CDB2A /* HealthKitSampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */; };
+		430C59A91C55BFA3006CDB2A /* GlucoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A81C55BFA3006CDB2A /* GlucoseMath.swift */; };
 		430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
 		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -321,6 +322,7 @@
 		430C59971C558BD4006CDB2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		430C59A41C558CD6006CDB2A /* GlucoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseStore.swift; sourceTree = "<group>"; };
 		430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthKitSampleStore.swift; sourceTree = "<group>"; };
+		430C59A81C55BFA3006CDB2A /* GlucoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseMath.swift; sourceTree = "<group>"; };
 		430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
 		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
@@ -564,6 +566,7 @@
 			children = (
 				430C59871C558BD4006CDB2A /* GlucoseKit.h */,
 				430C59891C558BD4006CDB2A /* Info.plist */,
+				430C59A81C55BFA3006CDB2A /* GlucoseMath.swift */,
 				430C59A41C558CD6006CDB2A /* GlucoseStore.swift */,
 			);
 			path = GlucoseKit;
@@ -1444,6 +1447,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				430C59A91C55BFA3006CDB2A /* GlucoseMath.swift in Sources */,
 				430C59A51C558CD6006CDB2A /* GlucoseStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
