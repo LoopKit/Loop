@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 
 
 public protocol CarbEntry: SampleValue {

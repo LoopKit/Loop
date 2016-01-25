@@ -11,21 +11,9 @@ import HealthKit
 import LoopKit
 
 
-public protocol SampleValue {
-    var startDate: NSDate { get }
-    var quantity: HKQuantity { get }
-}
-
-
 public struct CarbValue: SampleValue {
     public let startDate: NSDate
     public let quantity: HKQuantity
-}
-
-
-struct GlucoseEffect: SampleValue {
-    let startDate: NSDate
-    let quantity: HKQuantity
 }
 
 
@@ -104,40 +92,17 @@ struct CarbMath {
         delay: NSTimeInterval,
         delta: NSTimeInterval
     ) -> (NSDate, NSDate)? {
-        guard entries.count > 0 else {
-            return nil
-        }
+        var maxAbsorptionTime = defaultAbsorptionTime
 
-        let startDate: NSDate
-        let endDate: NSDate
-
-        if let fromDate = fromDate, toDate = toDate {
-            startDate = fromDate
-            endDate = toDate
-        } else {
-            var minDate = entries.first!.startDate
-            var maxDate = minDate
-            var maxAbsorptionTime = defaultAbsorptionTime
-
-            for entry in entries {
-                if entry.startDate < minDate {
-                    minDate = entry.startDate
-                }
-
-                if entry.startDate > maxDate {
-                    maxDate = entry.startDate
-                }
-
-                if let absorptionTime = entry.absorptionTime where absorptionTime > maxAbsorptionTime {
-                    maxAbsorptionTime = absorptionTime
-                }
+        for entry in entries {
+            if let absorptionTime = entry.absorptionTime where absorptionTime > maxAbsorptionTime {
+                maxAbsorptionTime = absorptionTime
             }
-
-            startDate = fromDate ?? minDate.dateFlooredToTimeInterval(delta)
-            endDate = toDate ?? maxDate.dateByAddingTimeInterval(maxAbsorptionTime + delay).dateCeiledToTimeInterval(delta)
         }
-        
-        return (startDate, endDate)
+
+        let samples: [SampleValue] = entries.map({ $0 })
+
+        return LoopMath.simulationDateRangeForSamples(samples as [SampleValue], fromDate: fromDate, toDate: toDate, duration: maxAbsorptionTime, delay: delay, delta: delta)
     }
 
     static func carbsOnBoardForCarbEntries(

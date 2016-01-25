@@ -9,6 +9,7 @@
 import XCTest
 @testable import CarbKit
 import LoopKit
+import HealthKit
 
 typealias JSONDictionary = [String: AnyObject]
 
@@ -40,7 +41,7 @@ class CarbMathTests: XCTestCase {
 
         return fixture.map {
             return NewCarbEntry(
-                value: $0["amount"] as! Double,
+                quantity: HKQuantity(unit: HKUnit(fromString: $0["unit"] as! String), doubleValue: $0["amount"] as! Double),
                 startDate: dateFormatter.dateFromString($0["start_at"] as! String)!,
                 foodType: nil,
                 absorptionTime: nil
@@ -53,7 +54,7 @@ class CarbMathTests: XCTestCase {
         let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
 
         return fixture.map {
-            return GlucoseEffect(startDate: dateFormatter.dateFromString($0["date"] as! String)!, value: $0["amount"] as! Double, unit: HKUnit(fromString: $0["unit"] as! String))
+            return GlucoseEffect(startDate: dateFormatter.dateFromString($0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(fromString: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
         }
     }
 
@@ -62,7 +63,7 @@ class CarbMathTests: XCTestCase {
         let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
 
         return fixture.map {
-            return CarbValue(startDate: dateFormatter.dateFromString($0["date"] as! String)!, value: $0["amount"] as! Double)
+            return CarbValue(startDate: dateFormatter.dateFromString($0["date"] as! String)!, quantity: HKQuantity(unit: HKUnit(fromString: $0["unit"] as! String), doubleValue:$0["amount"] as! Double))
         }
     }
 
@@ -75,7 +76,7 @@ class CarbMathTests: XCTestCase {
 
         for (expected, calculated) in zip(output, effects) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(10.0, -11))
+            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), calculated.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), accuracy: pow(10.0, -11))
         }
     }
 
@@ -87,7 +88,7 @@ class CarbMathTests: XCTestCase {
 
         for (expected, calculated) in zip(output, cob) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(10.0, -11))
+            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.gramUnit()), calculated.quantity.doubleValueForUnit(HKUnit.gramUnit()), accuracy: pow(10.0, -11))
         }
     }
 }

@@ -10,12 +10,18 @@ import Foundation
 import HealthKit
 
 
-public struct GlucoseValue {
-    public let startDate: NSDate
-    public let quantity: HKQuantity
+struct GlucoseValue {
+    let startDate: NSDate
+    let quantity: HKQuantity
 }
 
 
 struct GlucoseMath {
-
+    static func momentumEffectForGlucoseEntries(
+        entries: [GlucoseValue],
+        duration: NSTimeInterval = NSTimeInterval(minutes: 30),
+        delta: NSTimeInterval = NSTimeInterval(minutes: 5)
+    ) {
+        
+    }
 }

@@ -19,6 +19,9 @@
 		430C59A51C558CD6006CDB2A /* GlucoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A41C558CD6006CDB2A /* GlucoseStore.swift */; };
 		430C59A71C559407006CDB2A /* HealthKitSampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */; };
 		430C59A91C55BFA3006CDB2A /* GlucoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A81C55BFA3006CDB2A /* GlucoseMath.swift */; };
+		430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AA1C55E9AB006CDB2A /* SampleValue.swift */; };
+		430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */; };
+		430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AE1C55ED53006CDB2A /* LoopMath.swift */; };
 		430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
 		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -323,6 +326,9 @@
 		430C59A41C558CD6006CDB2A /* GlucoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseStore.swift; sourceTree = "<group>"; };
 		430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthKitSampleStore.swift; sourceTree = "<group>"; };
 		430C59A81C55BFA3006CDB2A /* GlucoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseMath.swift; sourceTree = "<group>"; };
+		430C59AA1C55E9AB006CDB2A /* SampleValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleValue.swift; sourceTree = "<group>"; };
+		430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseEffect.swift; sourceTree = "<group>"; };
+		430C59AE1C55ED53006CDB2A /* LoopMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopMath.swift; sourceTree = "<group>"; };
 		430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
 		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
@@ -631,12 +637,15 @@
 			children = (
 				437220271C4D93F000C5F36C /* LoopKit.h */,
 				437220291C4D93F000C5F36C /* Info.plist */,
+				430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */,
+				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
 				437220471C4D96FF00C5F36C /* HKUnit.swift */,
+				430C59AE1C55ED53006CDB2A /* LoopMath.swift */,
 				430D1A921C4C955D00DF5FA4 /* NSDate.swift */,
 				437220421C4D95A200C5F36C /* NSDateFormatter.swift */,
 				4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */,
 				437220451C4D96BF00C5F36C /* QuantitySchedule.swift */,
-				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
+				430C59AA1C55E9AB006CDB2A /* SampleValue.swift */,
 			);
 			path = LoopKit;
 			sourceTree = "<group>";
@@ -1498,6 +1507,9 @@
 				437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */,
 				437220461C4D96BF00C5F36C /* QuantitySchedule.swift in Sources */,
 				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
+				430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */,
+				430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */,
+				430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */,
 				437220561C4E012600C5F36C /* NSDate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
