@@ -38,7 +38,7 @@ public class CarbEntryTableViewController: UITableViewController {
         super.awakeFromNib()
     }
 
-    override public func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
 
         if let carbStore = carbStore {
@@ -189,7 +189,7 @@ public class CarbEntryTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override public func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    public override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         switch state {
         case .Unknown, .Unavailable, .AuthorizationRequired:
             return 0
@@ -198,11 +198,11 @@ public class CarbEntryTableViewController: UITableViewController {
         }
     }
 
-    override public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return carbEntries.count
     }
 
-    override public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(ReuseIdentifier, forIndexPath: indexPath)
 
         let entry = carbEntries[indexPath.row]
@@ -228,11 +228,11 @@ public class CarbEntryTableViewController: UITableViewController {
         return cell
     }
 
-    override public func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return carbEntries[indexPath.row].createdByCurrentApp
     }
 
-    override public func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             let entry = carbEntries.removeAtIndex(indexPath.row)
             carbStore?.deleteCarbEntry(entry, resultHandler: { (success, error) -> Void in
@@ -249,7 +249,7 @@ public class CarbEntryTableViewController: UITableViewController {
 
     // MARK: - UITableViewDelegate
 
-    override public func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+    public override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
         let entry = carbEntries[indexPath.row]
 
         if !entry.createdByCurrentApp {
@@ -285,7 +285,7 @@ public class CarbEntryTableViewController: UITableViewController {
         }
     }
 
-    override public func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    public override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         var editVC = segue.destinationViewController as? CarbEntryEditViewController
 
         if editVC == nil, let navVC = segue.destinationViewController as? UINavigationController {

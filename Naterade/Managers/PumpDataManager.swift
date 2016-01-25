@@ -8,6 +8,7 @@
 
 import Foundation
 import CarbKit
+import GlucoseKit
 import HealthKit
 import LoopKit
 import MinimedKit
@@ -124,6 +125,7 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
     private func updateGlucose(glucose: GlucoseRxMessage) {
         if glucose != latestGlucose {
             latestGlucose = glucose
+
             updateWatch()
         }
     }
@@ -155,19 +157,9 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
 
     var latestGlucose: GlucoseRxMessage? {
         didSet {
-            if let complicationGlucose = latestComplicationGlucose, let glucose = latestGlucose {
-                complicationShouldUpdate = Int(glucose.timestamp) - Int(complicationGlucose.timestamp) >= 30 * 60 || abs(Int(glucose.glucose) - Int(complicationGlucose.glucose)) >= 20
-            } else {
-                complicationShouldUpdate = true
-            }
-
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
         }
     }
-
-    var latestComplicationGlucose: GlucoseRxMessage?
-
-    var complicationShouldUpdate = false
 
     var latestPumpStatus: MySentryPumpStatusMessageBody? {
         didSet {
@@ -283,27 +275,9 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
         }
     }
 
-    // MARK: - HealthKit
+    // MARK: - GlucoseKit
 
-    private lazy var glucoseQuantityType = HKSampleType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
-
-    lazy var healthStore: HKHealthStore? = {
-        if HKHealthStore.isHealthDataAvailable() {
-            let store = HKHealthStore()
-            let shareTypes = Set(arrayLiteral: self.glucoseQuantityType)
-
-            store.requestAuthorizationToShareTypes(shareTypes, readTypes: nil, completion: { (completed, error) -> Void in
-                if let error = error {
-                    NSLog("Failed to gain HealthKit authorization: %@", error)
-                }
-            })
-
-            return store
-        } else {
-            NSLog("Health data is not available on this device")
-            return nil
-        }
-    }()
+    let glucoseStore: GlucoseStore? = GlucoseStore()
 
     // MARK: - WatchKit
 
@@ -327,14 +301,23 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
         }
     }
 
+    private var latestComplicationGlucose: GlucoseRxMessage?
+
     private func sendWatchContext() {
         if let session = watchSession where session.paired && session.watchAppInstalled {
             let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue
 
+            let complicationShouldUpdate: Bool
+
+            if let complicationGlucose = latestComplicationGlucose, glucose = latestGlucose {
+                complicationShouldUpdate = Int(glucose.timestamp) - Int(complicationGlucose.timestamp) >= 30 * 60 || abs(Int(glucose.glucose) - Int(complicationGlucose.glucose)) >= 20
+            } else {
+                complicationShouldUpdate = true
+            }
+
             if session.complicationEnabled && complicationShouldUpdate, let glucose = latestGlucose {
                 session.transferCurrentComplicationUserInfo(userInfo)
                 latestComplicationGlucose = glucose
-                complicationShouldUpdate = false
             } else {
                 do {
                     try session.updateApplicationContext(userInfo)

@@ -9,6 +9,15 @@
 /* Begin PBXBuildFile section */
 		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
+		430C59881C558BD4006CDB2A /* GlucoseKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 430C59871C558BD4006CDB2A /* GlucoseKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		430C598F1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; };
+		430C59961C558BD4006CDB2A /* GlucoseKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */; };
+		430C599A1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; };
+		430C599B1C558BD4006CDB2A /* GlucoseKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		430C59A21C558BE3006CDB2A /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		430C59A31C558BE3006CDB2A /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
+		430C59A51C558CD6006CDB2A /* GlucoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A41C558CD6006CDB2A /* GlucoseStore.swift */; };
+		430C59A71C559407006CDB2A /* HealthKitSampleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */; };
 		430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
 		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -147,6 +156,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		430C59901C558BD4006CDB2A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 430C59841C558BD4006CDB2A;
+			remoteInfo = GlucoseKit;
+		};
+		430C59921C558BD4006CDB2A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
+			remoteInfo = Naterade;
+		};
+		430C59981C558BD4006CDB2A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 430C59841C558BD4006CDB2A;
+			remoteInfo = GlucoseKit;
+		};
 		43298EE11C3A0F4900F520A3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -251,6 +281,7 @@
 				43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */,
 				438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */,
 				43298EE41C3A0F4900F520A3 /* CarbKit.framework in Embed Frameworks */,
+				430C599B1C558BD4006CDB2A /* GlucoseKit.framework in Embed Frameworks */,
 				4372203B1C4D93F000C5F36C /* LoopKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -282,6 +313,14 @@
 /* Begin PBXFileReference section */
 		430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertMessageBody.swift; sourceTree = "<group>"; };
 		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
+		430C59851C558BD4006CDB2A /* GlucoseKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GlucoseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		430C59871C558BD4006CDB2A /* GlucoseKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlucoseKit.h; sourceTree = "<group>"; };
+		430C59891C558BD4006CDB2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		430C598E1C558BD4006CDB2A /* GlucoseKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GlucoseKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseKitTests.swift; sourceTree = "<group>"; };
+		430C59971C558BD4006CDB2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		430C59A41C558CD6006CDB2A /* GlucoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseStore.swift; sourceTree = "<group>"; };
+		430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthKitSampleStore.swift; sourceTree = "<group>"; };
 		430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
 		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
@@ -416,6 +455,23 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		430C59811C558BD4006CDB2A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430C59A21C558BE3006CDB2A /* LoopKit.framework in Frameworks */,
+				430C59A31C558BE3006CDB2A /* HealthKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		430C598B1C558BD4006CDB2A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430C598F1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43105EF81BADC8F9009CD81E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -462,6 +518,7 @@
 			files = (
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
 				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
+				430C599A1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */,
 				43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */,
 				438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
@@ -502,6 +559,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		430C59861C558BD4006CDB2A /* GlucoseKit */ = {
+			isa = PBXGroup;
+			children = (
+				430C59871C558BD4006CDB2A /* GlucoseKit.h */,
+				430C59891C558BD4006CDB2A /* Info.plist */,
+				430C59A41C558CD6006CDB2A /* GlucoseStore.swift */,
+			);
+			path = GlucoseKit;
+			sourceTree = "<group>";
+		};
+		430C59941C558BD4006CDB2A /* GlucoseKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */,
+				430C59971C558BD4006CDB2A /* Info.plist */,
+			);
+			path = GlucoseKitTests;
+			sourceTree = "<group>";
+		};
 		4326F5031BA5EC3D009204C6 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -557,6 +633,7 @@
 				437220421C4D95A200C5F36C /* NSDateFormatter.swift */,
 				4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */,
 				437220451C4D96BF00C5F36C /* QuantitySchedule.swift */,
+				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
 			);
 			path = LoopKit;
 			sourceTree = "<group>";
@@ -595,6 +672,8 @@
 				43E3449B1B9CB08800C85C07 /* Naterade.playground */,
 				43298EDD1C3A0F4900F520A3 /* CarbKit */,
 				437220101C4D7E4800C5F36C /* CarbKitTests */,
+				430C59861C558BD4006CDB2A /* GlucoseKit */,
+				430C59941C558BD4006CDB2A /* GlucoseKitTests */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				437220261C4D93F000C5F36C /* LoopKit */,
 				437220341C4D93F000C5F36C /* LoopKitTests */,
@@ -622,6 +701,8 @@
 				4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */,
 				437220251C4D93F000C5F36C /* LoopKit.framework */,
 				4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */,
+				430C59851C558BD4006CDB2A /* GlucoseKit.framework */,
+				430C598E1C558BD4006CDB2A /* GlucoseKitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -844,6 +925,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		430C59821C558BD4006CDB2A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430C59881C558BD4006CDB2A /* GlucoseKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43298ED91C3A0F4900F520A3 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -890,6 +979,43 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		430C59841C558BD4006CDB2A /* GlucoseKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 430C59A01C558BD4006CDB2A /* Build configuration list for PBXNativeTarget "GlucoseKit" */;
+			buildPhases = (
+				430C59801C558BD4006CDB2A /* Sources */,
+				430C59811C558BD4006CDB2A /* Frameworks */,
+				430C59821C558BD4006CDB2A /* Headers */,
+				430C59831C558BD4006CDB2A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GlucoseKit;
+			productName = GlucoseKit;
+			productReference = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		430C598D1C558BD4006CDB2A /* GlucoseKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 430C59A11C558BD4006CDB2A /* Build configuration list for PBXNativeTarget "GlucoseKitTests" */;
+			buildPhases = (
+				430C598A1C558BD4006CDB2A /* Sources */,
+				430C598B1C558BD4006CDB2A /* Frameworks */,
+				430C598C1C558BD4006CDB2A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				430C59911C558BD4006CDB2A /* PBXTargetDependency */,
+				430C59931C558BD4006CDB2A /* PBXTargetDependency */,
+			);
+			name = GlucoseKitTests;
+			productName = GlucoseKitTests;
+			productReference = 430C598E1C558BD4006CDB2A /* GlucoseKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		43298EDB1C3A0F4900F520A3 /* CarbKit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit" */;
@@ -983,6 +1109,7 @@
 				438C934E1B97F82000BE20E9 /* PBXTargetDependency */,
 				43298EE21C3A0F4900F520A3 /* PBXTargetDependency */,
 				437220391C4D93F000C5F36C /* PBXTargetDependency */,
+				430C59991C558BD4006CDB2A /* PBXTargetDependency */,
 			);
 			name = Naterade;
 			productName = Naterade;
@@ -1089,6 +1216,13 @@
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Nathan Racklyeft";
 				TargetAttributes = {
+					430C59841C558BD4006CDB2A = {
+						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					430C598D1C558BD4006CDB2A = {
+						CreatedOnToolsVersion = 7.2;
+					};
 					43298EDB1C3A0F4900F520A3 = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = 26AMK8X5DW;
@@ -1181,11 +1315,27 @@
 				4372200E1C4D7E4800C5F36C /* CarbKitTests */,
 				437220241C4D93F000C5F36C /* LoopKit */,
 				4372202D1C4D93F000C5F36C /* LoopKitTests */,
+				430C59841C558BD4006CDB2A /* GlucoseKit */,
+				430C598D1C558BD4006CDB2A /* GlucoseKitTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		430C59831C558BD4006CDB2A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		430C598C1C558BD4006CDB2A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43298EDA1C3A0F4900F520A3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1290,6 +1440,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		430C59801C558BD4006CDB2A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430C59A51C558CD6006CDB2A /* GlucoseStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		430C598A1C558BD4006CDB2A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				430C59961C558BD4006CDB2A /* GlucoseKitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43298ED71C3A0F4900F520A3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1323,6 +1489,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				430C59A71C559407006CDB2A /* HealthKitSampleStore.swift in Sources */,
 				4372204B1C4D9B4200C5F36C /* NSTimeInterval.swift in Sources */,
 				437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */,
 				437220461C4D96BF00C5F36C /* QuantitySchedule.swift in Sources */,
@@ -1444,6 +1611,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		430C59911C558BD4006CDB2A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 430C59841C558BD4006CDB2A /* GlucoseKit */;
+			targetProxy = 430C59901C558BD4006CDB2A /* PBXContainerItemProxy */;
+		};
+		430C59931C558BD4006CDB2A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43776F8B1B8022E90074EA36 /* Naterade */;
+			targetProxy = 430C59921C558BD4006CDB2A /* PBXContainerItemProxy */;
+		};
+		430C59991C558BD4006CDB2A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 430C59841C558BD4006CDB2A /* GlucoseKit */;
+			targetProxy = 430C59981C558BD4006CDB2A /* PBXContainerItemProxy */;
+		};
 		43298EE21C3A0F4900F520A3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43298EDB1C3A0F4900F520A3 /* CarbKit */;
@@ -1524,6 +1706,75 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		430C599C1C558BD4006CDB2A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = GlucoseKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.GlucoseKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		430C599D1C558BD4006CDB2A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = GlucoseKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.GlucoseKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		430C599E1C558BD4006CDB2A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = GlucoseKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.GlucoseKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		430C599F1C558BD4006CDB2A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = GlucoseKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.GlucoseKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		43298EE51C3A0F4A00F520A3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1972,6 +2223,22 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		430C59A01C558BD4006CDB2A /* Build configuration list for PBXNativeTarget "GlucoseKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				430C599C1C558BD4006CDB2A /* Debug */,
+				430C599D1C558BD4006CDB2A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		430C59A11C558BD4006CDB2A /* Build configuration list for PBXNativeTarget "GlucoseKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				430C599E1C558BD4006CDB2A /* Debug */,
+				430C599F1C558BD4006CDB2A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

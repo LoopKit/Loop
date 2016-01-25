@@ -58,11 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationShouldRequestHealthAuthorization(application: UIApplication) {
-        PumpDataManager.sharedManager.healthStore?.handleAuthorizationForExtensionWithCompletion { (success, error) -> Void in
-            if let error = error {
-                NSLog("Failed to gain HealthKit extension authorization: %@", error)
-            }
-        }
+
     }
 }
 

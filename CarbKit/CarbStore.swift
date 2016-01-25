@@ -8,9 +8,10 @@
 
 import Foundation
 import HealthKit
+import LoopKit
 
 
-public class CarbStore {
+public class CarbStore: HealthKitSampleStore {
 
     public typealias DefaultAbsorptionTimes = (fast: NSTimeInterval, medium: NSTimeInterval, slow: NSTimeInterval)
 
@@ -26,16 +27,13 @@ public class CarbStore {
 
     /// All the sample types we need permission to read.
     /// Eventually, we want to consider fat, protein, and other factors to estimate carb absorption.
-    private var readTypes: Set<HKSampleType> {
+    public override var readTypes: Set<HKSampleType> {
         return Set(arrayLiteral: carbType)
     }
 
-    private var shareTypes: Set<HKSampleType> {
+    public override var shareTypes: Set<HKSampleType> {
         return Set(arrayLiteral: carbType)
     }
-
-    /// The health store used for underlying queries
-    public let healthStore = HKHealthStore()
 
     /// A span of default carbohydrate absorption times. Defaults to 2, 3, and 4 hours.
     public let defaultAbsorptionTimes: DefaultAbsorptionTimes
@@ -54,69 +52,21 @@ public class CarbStore {
         self.defaultAbsorptionTimes = defaultAbsorptionTimes
         self.maximumAbsorptionTimeInterval = defaultAbsorptionTimes.slow
 
-        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied else {
-            return nil
-        }
+        super.init()
 
         if !authorizationRequired {
             createQueries()
         }
     }
 
-    private var sharingDenied: Bool {
-        for type in shareTypes {
-            if healthStore.authorizationStatusForType(type) == .SharingDenied {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    /// True if the store requires authorization
-    public var authorizationRequired: Bool {
-        for type in readTypes.union(shareTypes) {
-            if healthStore.authorizationStatusForType(type) == .NotDetermined {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    /**
-     Initializes the HealthKit authorization flow for all required sample types
-
-     - parameter completion: A closure called after authorization is completed. This closure takes two arguments:
-        - success: Whether the authorization to share was successful
-        - error:   An error object explaining why the authorization was unsuccessful
-     */
-    public func authorize(completion: (success: Bool, error: NSError?) -> Void) {
-        let parentHandler = completion
-
-        healthStore.requestAuthorizationToShareTypes(shareTypes, readTypes: readTypes, completion: { (completed, error) -> Void in
-
-            // Make sure we received authorization to write food and carb data
-            let success = completed && !self.sharingDenied
-            var authError = error
-
-            if !success && authError == nil {
-                authError = NSError(
-                    domain: HKErrorDomain,
-                    code: HKErrorCode.ErrorAuthorizationDenied.rawValue,
-                    userInfo: [
-                        NSLocalizedDescriptionKey: NSLocalizedString("com.loudnate.CarbKit.sharingDeniedErrorDescription", tableName: "CarbKit", value: "Authorization Denied", comment: "The error description describing when Health sharing was denied"),
-                        NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString("com.loudnate.CarbKit.sharingDeniedErrorRecoverySuggestion", tableName: "CarbKit", value: "Please re-enable sharing in Health", comment: "The error recovery suggestion when Health sharing was denied")
-                    ]
-                )
-            }
-
+    public override func authorize(completion: (success: Bool, error: NSError?) -> Void) {
+        super.authorize { (success, error) -> Void in
             if success {
                 self.createQueries()
             }
 
-            parentHandler(success: success, error: authError)
-        })
+            completion(success: success, error: error)
+        }
     }
 
     // MARK: - Query

@@ -39,6 +39,12 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
                 device.peripheral.addObserver(self, forKeyPath: "state", options: [], context: &peripheralStateChangeContext)
             }
         }
+
+        if dataManager.transmitterID != nil, let glucoseStore = dataManager.glucoseStore where glucoseStore.authorizationRequired {
+            glucoseStore.authorize({ (success, error) -> Void in
+                // Do nothing for now
+            })
+        }
     }
 
     override func viewWillDisappear(animated: Bool) {
