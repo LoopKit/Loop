@@ -42,13 +42,16 @@ public class GlucoseStore: HealthKitSampleStore {
 
     private func purgeOldGlucoseSamples() {
         if let purgeAfterInterval = purgeAfterInterval {
+            guard UIApplication.sharedApplication().protectedDataAvailable else {
+                return
+            }
 
             let predicate = HKQuery.predicateForSamplesWithStartDate(NSDate(timeIntervalSinceNow: -purgeBeforeInterval), endDate: NSDate(timeIntervalSinceNow: -purgeAfterInterval), options: [])
 
             healthStore.deleteObjectsOfType(glucoseType, predicate: predicate, withCompletion: { (success, count, error) -> Void in
                 if let error = error {
                     // TODO: Remote error handling
-                    NSLog("%@", error)
+                    NSLog("Error deleting objects: %@", error)
                 }
             })
         }

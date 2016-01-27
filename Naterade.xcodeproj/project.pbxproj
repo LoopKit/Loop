@@ -11,7 +11,7 @@
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
 		430C59881C558BD4006CDB2A /* GlucoseKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 430C59871C558BD4006CDB2A /* GlucoseKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		430C598F1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; };
-		430C59961C558BD4006CDB2A /* GlucoseKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */; };
+		430C59961C558BD4006CDB2A /* GlucoseMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59951C558BD4006CDB2A /* GlucoseMathTests.swift */; };
 		430C599A1C558BD4006CDB2A /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; };
 		430C599B1C558BD4006CDB2A /* GlucoseKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 430C59851C558BD4006CDB2A /* GlucoseKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		430C59A21C558BE3006CDB2A /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
@@ -37,6 +37,14 @@
 		432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */ = {isa = PBXBuildFile; fileRef = 432AC0C61C2A396A00B1DC2F /* CRC8.m */; };
 		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
 		433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */; };
+		4362488F1C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 436248871C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json */; };
+		436248901C586C1A0088BB43 /* momentum_effect_bouncing_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 436248881C586C1A0088BB43 /* momentum_effect_bouncing_glucose_output.json */; };
+		436248911C586C1A0088BB43 /* momentum_effect_falling_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 436248891C586C1A0088BB43 /* momentum_effect_falling_glucose_input.json */; };
+		436248921C586C1A0088BB43 /* momentum_effect_falling_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488A1C586C1A0088BB43 /* momentum_effect_falling_glucose_output.json */; };
+		436248931C586C1A0088BB43 /* momentum_effect_rising_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488B1C586C1A0088BB43 /* momentum_effect_rising_glucose_input.json */; };
+		436248941C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488C1C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json */; };
+		436248951C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488D1C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json */; };
+		436248961C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */; };
 		437220121C4D7E4800C5F36C /* CarbMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220111C4D7E4800C5F36C /* CarbMathTests.swift */; };
 		437220141C4D7E4800C5F36C /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; };
 		4372201C1C4D80C500C5F36C /* carb_effect_from_history_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */; };
@@ -321,7 +329,7 @@
 		430C59871C558BD4006CDB2A /* GlucoseKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GlucoseKit.h; sourceTree = "<group>"; };
 		430C59891C558BD4006CDB2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		430C598E1C558BD4006CDB2A /* GlucoseKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GlucoseKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseKitTests.swift; sourceTree = "<group>"; };
+		430C59951C558BD4006CDB2A /* GlucoseMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseMathTests.swift; sourceTree = "<group>"; };
 		430C59971C558BD4006CDB2A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		430C59A41C558CD6006CDB2A /* GlucoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseStore.swift; sourceTree = "<group>"; };
 		430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HealthKitSampleStore.swift; sourceTree = "<group>"; };
@@ -329,6 +337,7 @@
 		430C59AA1C55E9AB006CDB2A /* SampleValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleValue.swift; sourceTree = "<group>"; };
 		430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseEffect.swift; sourceTree = "<group>"; };
 		430C59AE1C55ED53006CDB2A /* LoopMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopMath.swift; sourceTree = "<group>"; };
+		430C59BB1C574635006CDB2A /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Upsurge.framework; path = Carthage/Build/iOS/Upsurge.framework; sourceTree = "<group>"; };
 		430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
 		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
 		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
@@ -346,6 +355,15 @@
 		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
+		436248871C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_bouncing_glucose_input.json; sourceTree = "<group>"; };
+		436248881C586C1A0088BB43 /* momentum_effect_bouncing_glucose_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_bouncing_glucose_output.json; sourceTree = "<group>"; };
+		436248891C586C1A0088BB43 /* momentum_effect_falling_glucose_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_falling_glucose_input.json; sourceTree = "<group>"; };
+		4362488A1C586C1A0088BB43 /* momentum_effect_falling_glucose_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_falling_glucose_output.json; sourceTree = "<group>"; };
+		4362488B1C586C1A0088BB43 /* momentum_effect_rising_glucose_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_rising_glucose_input.json; sourceTree = "<group>"; };
+		4362488C1C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_rising_glucose_output.json; sourceTree = "<group>"; };
+		4362488D1C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_stable_glucose_input.json; sourceTree = "<group>"; };
+		4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_stable_glucose_output.json; sourceTree = "<group>"; };
+		436248991C5870F50088BB43 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Upsurge.framework.dSYM; path = Carthage/Build/iOS/Upsurge.framework.dSYM; sourceTree = "<group>"; };
 		4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CarbKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		437220111C4D7E4800C5F36C /* CarbMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMathTests.swift; sourceTree = "<group>"; };
 		437220131C4D7E4800C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -581,7 +599,8 @@
 		430C59941C558BD4006CDB2A /* GlucoseKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				430C59951C558BD4006CDB2A /* GlucoseKitTests.swift */,
+				436248861C586C040088BB43 /* Fixtures */,
+				430C59951C558BD4006CDB2A /* GlucoseMathTests.swift */,
 				430C59971C558BD4006CDB2A /* Info.plist */,
 			);
 			path = GlucoseKitTests;
@@ -610,6 +629,21 @@
 				438099471C49C408009D8E26 /* UI */,
 			);
 			path = CarbKit;
+			sourceTree = "<group>";
+		};
+		436248861C586C040088BB43 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				436248871C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json */,
+				436248881C586C1A0088BB43 /* momentum_effect_bouncing_glucose_output.json */,
+				436248891C586C1A0088BB43 /* momentum_effect_falling_glucose_input.json */,
+				4362488A1C586C1A0088BB43 /* momentum_effect_falling_glucose_output.json */,
+				4362488B1C586C1A0088BB43 /* momentum_effect_rising_glucose_input.json */,
+				4362488C1C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json */,
+				4362488D1C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json */,
+				4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		437220101C4D7E4800C5F36C /* CarbKitTests */ = {
@@ -925,11 +959,13 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
-				43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
+				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
+				430C59BB1C574635006CDB2A /* Upsurge.framework */,
+				436248991C5870F50088BB43 /* Upsurge.framework.dSYM */,
 				43EDDBF11C361C75007D89B5 /* xDripG5.framework */,
+				43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1345,6 +1381,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				436248941C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json in Resources */,
+				436248951C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json in Resources */,
+				4362488F1C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json in Resources */,
+				436248961C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json in Resources */,
+				436248901C586C1A0088BB43 /* momentum_effect_bouncing_glucose_output.json in Resources */,
+				436248921C586C1A0088BB43 /* momentum_effect_falling_glucose_output.json in Resources */,
+				436248911C586C1A0088BB43 /* momentum_effect_falling_glucose_input.json in Resources */,
+				436248931C586C1A0088BB43 /* momentum_effect_rising_glucose_input.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1465,7 +1509,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				430C59961C558BD4006CDB2A /* GlucoseKitTests.swift in Sources */,
+				430C59961C558BD4006CDB2A /* GlucoseMathTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1732,6 +1776,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = GlucoseKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
@@ -1755,6 +1803,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = GlucoseKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
@@ -1771,6 +1823,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = GlucoseKitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -1783,6 +1839,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = GlucoseKitTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -2246,6 +2306,7 @@
 				430C599D1C558BD4006CDB2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		430C59A11C558BD4006CDB2A /* Build configuration list for PBXNativeTarget "GlucoseKitTests" */ = {
 			isa = XCConfigurationList;
@@ -2254,6 +2315,7 @@
 				430C599F1C558BD4006CDB2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		43298EE71C3A0F4A00F520A3 /* Build configuration list for PBXNativeTarget "CarbKit" */ = {
 			isa = XCConfigurationList;
