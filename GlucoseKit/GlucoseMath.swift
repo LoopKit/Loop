@@ -25,29 +25,47 @@ private let CalculationUnit = HKUnit.milligramsPerDeciliterUnit()
 
 
 struct GlucoseMath {
+    /**
+     Calculates slope and intercept using linear regression
+     
+     This algorithm is not suited for large datasets.
 
-    private static func linearRegression(array: [(xValue: Double, yValue: Double)]) -> (slope: Double, intercept: Double) {
+     - parameter points: An array of tuples containing x and y values
+
+     - returns: A tuple of slope and intercept values
+     */
+    private static func linearRegression(points: [(x: Double, y: Double)]) -> (slope: Double, intercept: Double) {
         var sumX = 0.0
         var sumY = 0.0
         var sumXY = 0.0
-        var sumX2 = 0.0
-        var sumY2 = 0.0
-        let numberOfItems = Double(array.count)
+        var sumX² = 0.0
+        var sumY² = 0.0
+        let count = Double(points.count)
 
-        for arrayItem in array  {
-            sumX += arrayItem.xValue
-            sumY += arrayItem.yValue
-            sumXY += (arrayItem.xValue * arrayItem.yValue)
-            sumX2 += (arrayItem.xValue * arrayItem.xValue)
-            sumY2 += (arrayItem.yValue * arrayItem.yValue)
+        for point in points  {
+            sumX += point.x
+            sumY += point.y
+            sumXY += (point.x * point.y)
+            sumX² += (point.x * point.x)
+            sumY² += (point.y * point.y)
         }
-        let slope = ((numberOfItems * sumXY) - (sumX * sumY)) / ((numberOfItems * sumX2) - (sumX * sumX))
-        let intercept = (sumY * sumX2 - (sumX * sumXY)) / (numberOfItems * sumX2 - (sumX * sumX))
+
+        let slope = ((count * sumXY) - (sumX * sumY)) / ((count * sumX²) - (sumX * sumX))
+        let intercept = (sumY * sumX² - (sumX * sumXY)) / (count * sumX² - (sumX * sumX))
 
         return (slope: slope, intercept: intercept)
     }
 
-    static func momentumEffectForGlucoseEntries(
+    /**
+     Calculates the short-term predicted trend of a sequence of glucose values using linear regression
+
+     - parameter samples:  The sequence of glucose, in chronological order
+     - parameter duration: The trend duration to return
+     - parameter delta:    The time differential for the returned values
+
+     - returns: An array of glucose effects
+     */
+    static func linearMomentumEffectForGlucoseEntries(
         samples: [GlucoseValue],  // Chronological order for now
         duration: NSTimeInterval = NSTimeInterval(minutes: 30),
         delta: NSTimeInterval = NSTimeInterval(minutes: 5)
@@ -64,7 +82,10 @@ struct GlucoseMath {
             return []
         }
 
-        let xy = samples.map { (xValue: $0.startDate.timeIntervalSinceDate(firstSample.startDate), yValue: $0.quantity.doubleValueForUnit(CalculationUnit)) }
+        let xy = samples.map { (
+            x: $0.startDate.timeIntervalSinceDate(firstSample.startDate),
+            y: $0.quantity.doubleValueForUnit(CalculationUnit)
+        ) }
 
         let (slope: slope, intercept: _) = linearRegression(xy)
 

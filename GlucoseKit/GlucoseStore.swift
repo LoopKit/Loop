@@ -29,12 +29,23 @@ public class GlucoseStore: HealthKitSampleStore {
     /// The interval before which glucose values should be purged from HealthKit.
     private var purgeAfterInterval: NSTimeInterval? = NSTimeInterval(hours: 3)
 
-    public func addGlucose(quantity: HKQuantity, date: NSDate, device: HKDevice?, resultHandler: (Bool, HKQuantitySample?, NSError?) -> Void) {
+    /**
+     Add a new glucose value to HealthKit
+
+     - parameter quantity:      The glucose sample quantity
+     - parameter date:          The date the sample was collected
+     - parameter device:        The description of the device the collected the sample
+     - parameter resultHandler: A closure called once the glucose value was saved. The closure takes three arguments:
+        - success: Whether the sample was successfully saved
+        - sample:  The sample object
+        - error:   An error object explaining why the save failed
+     */
+    public func addGlucose(quantity: HKQuantity, date: NSDate, device: HKDevice?, resultHandler: (success: Bool, sample: HKQuantitySample?, error: NSError?) -> Void) {
 
         let glucose = HKQuantitySample(type: glucoseType, quantity: quantity, startDate: date, endDate: date, device: device, metadata: nil)
 
         healthStore.saveObject(glucose) { (completed, error) -> Void in
-            resultHandler(completed, glucose, error)
+            resultHandler(success: completed, sample: glucose, error: error)
         }
 
         purgeOldGlucoseSamples()

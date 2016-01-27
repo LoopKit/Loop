@@ -43,7 +43,7 @@ class GlucoseMathTests: XCTestCase {
         let input = loadInputFixture("momentum_effect_bouncing_glucose_input")
         let output = loadOutputFixture("momentum_effect_bouncing_glucose_output")
 
-        let effects = GlucoseMath.momentumEffectForGlucoseEntries(input)
+        let effects = GlucoseMath.linearMomentumEffectForGlucoseEntries(input)
         let unit = HKUnit.milligramsPerDeciliterUnit()
 
         for (expected, calculated) in zip(output, effects) {
@@ -56,7 +56,7 @@ class GlucoseMathTests: XCTestCase {
         let input = loadInputFixture("momentum_effect_rising_glucose_input")
         let output = loadOutputFixture("momentum_effect_rising_glucose_output")
 
-        let effects = GlucoseMath.momentumEffectForGlucoseEntries(input)
+        let effects = GlucoseMath.linearMomentumEffectForGlucoseEntries(input)
         let unit = HKUnit.milligramsPerDeciliterUnit()
 
         for (expected, calculated) in zip(output, effects) {
@@ -69,7 +69,7 @@ class GlucoseMathTests: XCTestCase {
         let input = loadInputFixture("momentum_effect_falling_glucose_input")
         let output = loadOutputFixture("momentum_effect_falling_glucose_output")
 
-        let effects = GlucoseMath.momentumEffectForGlucoseEntries(input)
+        let effects = GlucoseMath.linearMomentumEffectForGlucoseEntries(input)
         let unit = HKUnit.milligramsPerDeciliterUnit()
 
         for (expected, calculated) in zip(output, effects) {
@@ -82,7 +82,7 @@ class GlucoseMathTests: XCTestCase {
         let input = loadInputFixture("momentum_effect_stable_glucose_input")
         let output = loadOutputFixture("momentum_effect_stable_glucose_output")
 
-        let effects = GlucoseMath.momentumEffectForGlucoseEntries(input)
+        let effects = GlucoseMath.linearMomentumEffectForGlucoseEntries(input)
         let unit = HKUnit.milligramsPerDeciliterUnit()
 
         for (expected, calculated) in zip(output, effects) {

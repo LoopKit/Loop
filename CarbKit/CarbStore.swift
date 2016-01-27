@@ -125,10 +125,10 @@ public class CarbStore: HealthKitSampleStore {
 
      - parameter enabled:    Whether to enable or disable background delivery
      - parameter completion: A closure called after the background delivery preference is changed. The closure takes two arguments:
-        - Whether the background delivery preference was successfully updated
-        - An error object explaining why the preference failed to update
+        - success: Whether the background delivery preference was successfully updated
+        - error:   An error object explaining why the preference failed to update
      */
-    public func setBackgroundDeliveryEnabled(enabled: Bool, completion: (Bool, NSError?) -> Void) {
+    public func setBackgroundDeliveryEnabled(enabled: Bool, completion: (success: Bool, error: NSError?) -> Void) {
         dispatch_async(dispatch_get_main_queue()) { () -> Void in
             let oldValue = self.isBackgroundDeliveryEnabled
             self.isBackgroundDeliveryEnabled = enabled
@@ -152,7 +152,7 @@ public class CarbStore: HealthKitSampleStore {
                 }
 
                 dispatch_group_notify(group, dispatch_get_main_queue()) {
-                    completion(enabled == self.isBackgroundDeliveryEnabled, lastError)
+                    completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
                 }
             case (true, false):
                 let group = dispatch_group_create()
@@ -172,10 +172,10 @@ public class CarbStore: HealthKitSampleStore {
                 }
 
                 dispatch_group_notify(group, dispatch_get_main_queue()) {
-                    completion(enabled == self.isBackgroundDeliveryEnabled, lastError)
+                    completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
                 }
             default:
-                completion(true, nil)
+                completion(success: true, error: nil)
             }
         }
     }
