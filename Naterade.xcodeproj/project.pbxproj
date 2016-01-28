@@ -99,7 +99,6 @@
 		439A30B51C53337500059771 /* StoredCarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B41C53337500059771 /* StoredCarbEntry.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
 		439FC9EC1C321C67007DE84C /* RileyLinkDevice_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 439FC9EB1C321C67007DE84C /* RileyLinkDevice_Private.h */; };
-		43A3634E1B96BA4900D0FE2E /* Log.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A3634C1B96BA4900D0FE2E /* Log.m */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
 		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
 		43A9437F1B926B7B0051FA24 /* WatchApp Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -415,8 +414,6 @@
 		439A30B41C53337500059771 /* StoredCarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredCarbEntry.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		439FC9EB1C321C67007DE84C /* RileyLinkDevice_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkDevice_Private.h; sourceTree = "<group>"; };
-		43A3634B1B96BA4900D0FE2E /* Log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Log.h; sourceTree = "<group>"; };
-		43A3634C1B96BA4900D0FE2E /* Log.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Log.m; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		43A943771B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -869,8 +866,6 @@
 				432AC0C51C2A396A00B1DC2F /* CRC8.h */,
 				432AC0C61C2A396A00B1DC2F /* CRC8.m */,
 				43A943A61B928D400051FA24 /* Info.plist */,
-				43A3634B1B96BA4900D0FE2E /* Log.h */,
-				43A3634C1B96BA4900D0FE2E /* Log.m */,
 				43E0DDFB1B9A997B007B4443 /* MessageBase.h */,
 				43E0DDFC1B9A997B007B4443 /* MessageBase.m */,
 				43E0DDF71B9A98CA007B4443 /* MessageSendOperation.h */,
@@ -1657,7 +1652,6 @@
 				43F5C2E31B937615003EB13D /* RileyLinkManager.m in Sources */,
 				43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */,
 				43E0DDFE1B9A997B007B4443 /* MessageBase.m in Sources */,
-				43A3634E1B96BA4900D0FE2E /* Log.m in Sources */,
 				432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */,
 				43F5C2E11B937615003EB13D /* RileyLinkDevice.m in Sources */,
 				43E0DDFA1B9A98CA007B4443 /* MessageSendOperation.m in Sources */,

@@ -214,8 +214,7 @@ public class CarbStore: HealthKitSampleStore {
             // Update the anchor
             self.queryAnchor = anchor
 
-            // Clear the cached calculations
-            self.carbsOnBoardCache = nil
+            self.clearCalculationCache()
 
             // Notify listeners
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification,
@@ -261,6 +260,11 @@ public class CarbStore: HealthKitSampleStore {
         let carbs = HKQuantitySample(type: carbType, quantity: quantity, startDate: entry.startDate, endDate: entry.startDate, device: nil, metadata: metadata)
 
         healthStore.saveObject(carbs) { (completed, error) -> Void in
+            if !UIApplication.sharedApplication().protectedDataAvailable {
+                self.recentSamples.insert(carbs)
+                self.clearCalculationCache()
+            }
+
             resultHandler(completed, StoredCarbEntry(sample: carbs), error)
         }
     }
@@ -309,6 +313,10 @@ public class CarbStore: HealthKitSampleStore {
 
 
     // MARK: - Math
+
+    private func clearCalculationCache() {
+        carbsOnBoardCache = nil
+    }
 
     private var carbsOnBoardCache: [CarbValue]?
 
