@@ -45,6 +45,17 @@
 		436248941C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488C1C586C1A0088BB43 /* momentum_effect_rising_glucose_output.json */; };
 		436248951C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488D1C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json */; };
 		436248961C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */; };
+		436248A81C59BC220088BB43 /* InsulinKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 436248A71C59BC220088BB43 /* InsulinKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		436248AF1C59BC220088BB43 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; };
+		436248B61C59BC220088BB43 /* InsulinKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248B51C59BC220088BB43 /* InsulinKitTests.swift */; };
+		436248BA1C59BC220088BB43 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; };
+		436248BB1C59BC220088BB43 /* InsulinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		436248C21C59BC420088BB43 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
+		436248C31C59BC480088BB43 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
+		436248C51C59BEEE0088BB43 /* DoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248C41C59BEEE0088BB43 /* DoseStore.swift */; };
+		436248C71C59C75F0088BB43 /* Fetchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248C61C59C75F0088BB43 /* Fetchable.swift */; };
+		436248CA1C59D9BF0088BB43 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */; };
+		436248CC1C59E0670088BB43 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248CB1C59E0670088BB43 /* PersistenceController.swift */; };
 		437220121C4D7E4800C5F36C /* CarbMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437220111C4D7E4800C5F36C /* CarbMathTests.swift */; };
 		437220141C4D7E4800C5F36C /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */; };
 		4372201C1C4D80C500C5F36C /* carb_effect_from_history_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 4372201B1C4D80C500C5F36C /* carb_effect_from_history_input.json */; };
@@ -195,6 +206,27 @@
 			remoteGlobalIDString = 43298EDB1C3A0F4900F520A3;
 			remoteInfo = CarbKit;
 		};
+		436248B01C59BC220088BB43 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 436248A41C59BC220088BB43;
+			remoteInfo = InsulinKit;
+		};
+		436248B21C59BC220088BB43 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
+			remoteInfo = Naterade;
+		};
+		436248B81C59BC220088BB43 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 436248A41C59BC220088BB43;
+			remoteInfo = InsulinKit;
+		};
 		437220151C4D7E4800C5F36C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -293,6 +325,7 @@
 				438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */,
 				43298EE41C3A0F4900F520A3 /* CarbKit.framework in Embed Frameworks */,
 				430C599B1C558BD4006CDB2A /* GlucoseKit.framework in Embed Frameworks */,
+				436248BB1C59BC220088BB43 /* InsulinKit.framework in Embed Frameworks */,
 				4372203B1C4D93F000C5F36C /* LoopKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -363,6 +396,16 @@
 		4362488D1C586C1A0088BB43 /* momentum_effect_stable_glucose_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_stable_glucose_input.json; sourceTree = "<group>"; };
 		4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = momentum_effect_stable_glucose_output.json; sourceTree = "<group>"; };
 		436248991C5870F50088BB43 /* Upsurge.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Upsurge.framework.dSYM; path = Carthage/Build/iOS/Upsurge.framework.dSYM; sourceTree = "<group>"; };
+		436248A51C59BC220088BB43 /* InsulinKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = InsulinKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		436248A71C59BC220088BB43 /* InsulinKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InsulinKit.h; sourceTree = "<group>"; };
+		436248A91C59BC220088BB43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		436248AE1C59BC220088BB43 /* InsulinKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		436248B51C59BC220088BB43 /* InsulinKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinKitTests.swift; sourceTree = "<group>"; };
+		436248B71C59BC220088BB43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		436248C41C59BEEE0088BB43 /* DoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseStore.swift; sourceTree = "<group>"; };
+		436248C61C59C75F0088BB43 /* Fetchable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fetchable.swift; sourceTree = "<group>"; };
+		436248C91C59D9BF0088BB43 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		436248CB1C59E0670088BB43 /* PersistenceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		4372200F1C4D7E4800C5F36C /* CarbKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CarbKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		437220111C4D7E4800C5F36C /* CarbMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbMathTests.swift; sourceTree = "<group>"; };
 		437220131C4D7E4800C5F36C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -511,6 +554,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		436248A11C59BC220088BB43 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				436248C31C59BC480088BB43 /* HealthKit.framework in Frameworks */,
+				436248C21C59BC420088BB43 /* LoopKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		436248AB1C59BC220088BB43 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				436248AF1C59BC220088BB43 /* InsulinKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4372200C1C4D7E4800C5F36C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -546,6 +606,7 @@
 				438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				43298EE31C3A0F4900F520A3 /* CarbKit.framework in Frameworks */,
+				436248BA1C59BC220088BB43 /* InsulinKit.framework in Frameworks */,
 				4372203A1C4D93F000C5F36C /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -643,6 +704,28 @@
 			path = Fixtures;
 			sourceTree = "<group>";
 		};
+		436248A61C59BC220088BB43 /* InsulinKit */ = {
+			isa = PBXGroup;
+			children = (
+				436248A71C59BC220088BB43 /* InsulinKit.h */,
+				436248A91C59BC220088BB43 /* Info.plist */,
+				436248C41C59BEEE0088BB43 /* DoseStore.swift */,
+				436248C61C59C75F0088BB43 /* Fetchable.swift */,
+				436248CB1C59E0670088BB43 /* PersistenceController.swift */,
+				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
+			);
+			path = InsulinKit;
+			sourceTree = "<group>";
+		};
+		436248B41C59BC220088BB43 /* InsulinKitTests */ = {
+			isa = PBXGroup;
+			children = (
+				436248B51C59BC220088BB43 /* InsulinKitTests.swift */,
+				436248B71C59BC220088BB43 /* Info.plist */,
+			);
+			path = InsulinKitTests;
+			sourceTree = "<group>";
+		};
 		437220101C4D7E4800C5F36C /* CarbKitTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -715,9 +798,11 @@
 				43E3449B1B9CB08800C85C07 /* Naterade.playground */,
 				43298EDD1C3A0F4900F520A3 /* CarbKit */,
 				437220101C4D7E4800C5F36C /* CarbKitTests */,
+				968DCD53F724DE56FFE51920 /* Frameworks */,
 				430C59861C558BD4006CDB2A /* GlucoseKit */,
 				430C59941C558BD4006CDB2A /* GlucoseKitTests */,
-				968DCD53F724DE56FFE51920 /* Frameworks */,
+				436248A61C59BC220088BB43 /* InsulinKit */,
+				436248B41C59BC220088BB43 /* InsulinKitTests */,
 				437220261C4D93F000C5F36C /* LoopKit */,
 				437220341C4D93F000C5F36C /* LoopKitTests */,
 				438C933B1B97F82000BE20E9 /* MinimedKit */,
@@ -746,6 +831,8 @@
 				4372202E1C4D93F000C5F36C /* LoopKitTests.xctest */,
 				430C59851C558BD4006CDB2A /* GlucoseKit.framework */,
 				430C598E1C558BD4006CDB2A /* GlucoseKitTests.xctest */,
+				436248A51C59BC220088BB43 /* InsulinKit.framework */,
+				436248AE1C59BC220088BB43 /* InsulinKitTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -984,6 +1071,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		436248A21C59BC220088BB43 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				436248A81C59BC220088BB43 /* InsulinKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		437220221C4D93F000C5F36C /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1077,6 +1172,43 @@
 			productReference = 43298EDC1C3A0F4900F520A3 /* CarbKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		436248A41C59BC220088BB43 /* InsulinKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 436248BC1C59BC220088BB43 /* Build configuration list for PBXNativeTarget "InsulinKit" */;
+			buildPhases = (
+				436248A01C59BC220088BB43 /* Sources */,
+				436248A11C59BC220088BB43 /* Frameworks */,
+				436248A21C59BC220088BB43 /* Headers */,
+				436248A31C59BC220088BB43 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InsulinKit;
+			productName = InsulinKit;
+			productReference = 436248A51C59BC220088BB43 /* InsulinKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		436248AD1C59BC220088BB43 /* InsulinKitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 436248BF1C59BC220088BB43 /* Build configuration list for PBXNativeTarget "InsulinKitTests" */;
+			buildPhases = (
+				436248AA1C59BC220088BB43 /* Sources */,
+				436248AB1C59BC220088BB43 /* Frameworks */,
+				436248AC1C59BC220088BB43 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				436248B11C59BC220088BB43 /* PBXTargetDependency */,
+				436248B31C59BC220088BB43 /* PBXTargetDependency */,
+			);
+			name = InsulinKitTests;
+			productName = InsulinKitTests;
+			productReference = 436248AE1C59BC220088BB43 /* InsulinKitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		4372200E1C4D7E4800C5F36C /* CarbKitTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 437220191C4D7E4800C5F36C /* Build configuration list for PBXNativeTarget "CarbKitTests" */;
@@ -1153,6 +1285,7 @@
 				43298EE21C3A0F4900F520A3 /* PBXTargetDependency */,
 				437220391C4D93F000C5F36C /* PBXTargetDependency */,
 				430C59991C558BD4006CDB2A /* PBXTargetDependency */,
+				436248B91C59BC220088BB43 /* PBXTargetDependency */,
 			);
 			name = Naterade;
 			productName = Naterade;
@@ -1270,6 +1403,13 @@
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = 26AMK8X5DW;
 					};
+					436248A41C59BC220088BB43 = {
+						CreatedOnToolsVersion = 7.2;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
+					436248AD1C59BC220088BB43 = {
+						CreatedOnToolsVersion = 7.2;
+					};
 					4372200E1C4D7E4800C5F36C = {
 						CreatedOnToolsVersion = 7.2;
 					};
@@ -1360,6 +1500,8 @@
 				4372202D1C4D93F000C5F36C /* LoopKitTests */,
 				430C59841C558BD4006CDB2A /* GlucoseKit */,
 				430C598D1C558BD4006CDB2A /* GlucoseKitTests */,
+				436248A41C59BC220088BB43 /* InsulinKit */,
+				436248AD1C59BC220088BB43 /* InsulinKitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1392,6 +1534,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				438099441C499199009D8E26 /* CarbKit.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		436248A31C59BC220088BB43 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		436248AC1C59BC220088BB43 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1526,6 +1682,25 @@
 				438099461C49B844009D8E26 /* CarbEntryEditViewController.swift in Sources */,
 				4380994D1C49D490009D8E26 /* NewCarbEntry.swift in Sources */,
 				4380994F1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		436248A01C59BC220088BB43 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				436248C71C59C75F0088BB43 /* Fetchable.swift in Sources */,
+				436248C51C59BEEE0088BB43 /* DoseStore.swift in Sources */,
+				436248CA1C59D9BF0088BB43 /* Model.xcdatamodeld in Sources */,
+				436248CC1C59E0670088BB43 /* PersistenceController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		436248AA1C59BC220088BB43 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				436248B61C59BC220088BB43 /* InsulinKitTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1684,6 +1859,21 @@
 			isa = PBXTargetDependency;
 			target = 43298EDB1C3A0F4900F520A3 /* CarbKit */;
 			targetProxy = 43298EE11C3A0F4900F520A3 /* PBXContainerItemProxy */;
+		};
+		436248B11C59BC220088BB43 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 436248A41C59BC220088BB43 /* InsulinKit */;
+			targetProxy = 436248B01C59BC220088BB43 /* PBXContainerItemProxy */;
+		};
+		436248B31C59BC220088BB43 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43776F8B1B8022E90074EA36 /* Naterade */;
+			targetProxy = 436248B21C59BC220088BB43 /* PBXContainerItemProxy */;
+		};
+		436248B91C59BC220088BB43 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 436248A41C59BC220088BB43 /* InsulinKit */;
+			targetProxy = 436248B81C59BC220088BB43 /* PBXContainerItemProxy */;
 		};
 		437220161C4D7E4800C5F36C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1887,6 +2077,75 @@
 				SKIP_INSTALL = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		436248BD1C59BC220088BB43 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = InsulinKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.InsulinKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		436248BE1C59BC220088BB43 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = InsulinKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.InsulinKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		436248C01C59BC220088BB43 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = InsulinKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.InsulinKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		436248C11C59BC220088BB43 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = InsulinKitTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.InsulinKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -2320,6 +2579,22 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		436248BC1C59BC220088BB43 /* Build configuration list for PBXNativeTarget "InsulinKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				436248BD1C59BC220088BB43 /* Debug */,
+				436248BE1C59BC220088BB43 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		436248BF1C59BC220088BB43 /* Build configuration list for PBXNativeTarget "InsulinKitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				436248C01C59BC220088BB43 /* Debug */,
+				436248C11C59BC220088BB43 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		437220191C4D7E4800C5F36C /* Build configuration list for PBXNativeTarget "CarbKitTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2411,6 +2686,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				436248C91C59D9BF0088BB43 /* Model.xcdatamodel */,
+			);
+			currentVersion = 436248C91C59D9BF0088BB43 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 43776F841B8022E90074EA36 /* Project object */;
 }

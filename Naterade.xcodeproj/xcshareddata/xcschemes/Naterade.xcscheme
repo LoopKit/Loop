@@ -68,6 +68,16 @@
                ReferencedContainer = "container:Naterade.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "436248AD1C59BC220088BB43"
+               BuildableName = "InsulinKitTests.xctest"
+               BlueprintName = "InsulinKitTests"
+               ReferencedContainer = "container:Naterade.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

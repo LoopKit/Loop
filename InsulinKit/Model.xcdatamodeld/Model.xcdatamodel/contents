@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Xcode 7.0">
+    <entity name="Reservoir" syncable="YES">
+        <attribute name="date" attributeType="Date" syncable="YES"/>
+        <attribute name="raw" attributeType="Binary" syncable="YES"/>
+        <attribute name="volume" attributeType="Double" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Reservoir" positionX="-63" positionY="-18" width="128" height="90"/>
+    </elements>
+</model>
