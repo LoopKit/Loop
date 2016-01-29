@@ -10,50 +10,51 @@ import CoreData
 
 class PersistenceController {
 
+    enum Error: ErrorType {
+        case ConfigurationError
+        case CoreDataError(NSError?)
+    }
+
     let managedObjectContext: NSManagedObjectContext
 
     private let privateManagedObjectContext: NSManagedObjectContext
 
-    init(readyCallback: (error: NSError?) -> Void) {
+    init(readyCallback: (error: Error?) -> Void) {
         managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
         privateManagedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
 
         initializeStack(readyCallback)
     }
 
-    func save() throws {
-        guard privateManagedObjectContext.hasChanges || managedObjectContext.hasChanges else {
-            return
-        }
-
-        var error: NSError?
-
-        managedObjectContext.performBlockAndWait { [unowned self] in
+    func save(completionHandler: (error: Error?) -> Void) {
+        managedObjectContext.performBlock { [unowned self] in
             do {
-                try self.managedObjectContext.save()
+                if self.managedObjectContext.hasChanges {
+                    try self.managedObjectContext.save()
+                }
 
                 self.privateManagedObjectContext.performBlock { [unowned self] in
                     do {
-                        try self.privateManagedObjectContext.save()
+                        if self.privateManagedObjectContext.hasChanges {
+                            try self.privateManagedObjectContext.save()
+                        }
+
+                        completionHandler(error: nil)
                     } catch let saveError as NSError {
-                        NSLog("Error saving private context: %@", saveError)
+                        completionHandler(error: .CoreDataError(saveError))
                     }
                 }
             } catch let saveError as NSError {
-                error = saveError
+                completionHandler(error: .CoreDataError(saveError))
             }
-        }
-
-        if let error = error {
-            throw error
         }
     }
 
     // MARK: - 
 
-    private func initializeStack(readyCallback: (error: NSError?) -> Void) {
+    private func initializeStack(readyCallback: (error: Error?) -> Void) {
         dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0)) {
-            var error: NSError?
+            var error: Error?
 
             let modelURL = NSBundle(forClass: self.dynamicType).URLForResource("Model", withExtension: "momd")!
             let model = NSManagedObjectModel(contentsOfURL: modelURL)!
@@ -77,10 +78,10 @@ class PersistenceController {
                         ]
                     )
                 } catch let storeError as NSError {
-                    error = storeError
+                    error = .CoreDataError(storeError)
                 }
             } else {
-                error = NSError(domain: "", code: -1, userInfo: nil)
+                error = .ConfigurationError
             }
 
             readyCallback(error: error)
