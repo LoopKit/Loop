@@ -22,7 +22,6 @@
 		430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AA1C55E9AB006CDB2A /* SampleValue.swift */; };
 		430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */; };
 		430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AE1C55ED53006CDB2A /* LoopMath.swift */; };
-		430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
 		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
 		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
@@ -82,6 +81,11 @@
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
 		43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */; };
+		4378170A1C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437817081C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift */; };
+		4378170B1C5C6FDF00190966 /* Reservoir.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437817091C5C6FDF00190966 /* Reservoir.swift */; };
+		4378170F1C5D2D1800190966 /* InsulinKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 437817111C5D2D1800190966 /* InsulinKit.storyboard */; };
+		437817131C5D30D100190966 /* ReservoirTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437817121C5D30D100190966 /* ReservoirTableViewController.swift */; };
+		437817151C5D37D900190966 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
 		437A289F1C2F66DE00009647 /* MinimedKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A289E1C2F66DE00009647 /* MinimedKitTests.swift */; };
 		437A28A11C2F66DE00009647 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
 		437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */; };
@@ -431,6 +435,10 @@
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		43776F981B8022E90074EA36 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		437817081C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Reservoir+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		437817091C5C6FDF00190966 /* Reservoir.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reservoir.swift; sourceTree = "<group>"; };
+		437817101C5D2D1800190966 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/InsulinKit.storyboard; sourceTree = "<group>"; };
+		437817121C5D30D100190966 /* ReservoirTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirTableViewController.swift; sourceTree = "<group>"; };
 		437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinimedKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		437A289E1C2F66DE00009647 /* MinimedKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimedKitTests.swift; sourceTree = "<group>"; };
 		437A28A01C2F66DE00009647 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -712,7 +720,10 @@
 				436248C41C59BEEE0088BB43 /* DoseStore.swift */,
 				436248C61C59C75F0088BB43 /* Fetchable.swift */,
 				436248CB1C59E0670088BB43 /* PersistenceController.swift */,
+				437817091C5C6FDF00190966 /* Reservoir.swift */,
+				437817081C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift */,
 				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
+				4378170C1C5D2CA500190966 /* UI */,
 			);
 			path = InsulinKit;
 			sourceTree = "<group>";
@@ -749,17 +760,18 @@
 		437220261C4D93F000C5F36C /* LoopKit */ = {
 			isa = PBXGroup;
 			children = (
-				437220271C4D93F000C5F36C /* LoopKit.h */,
-				437220291C4D93F000C5F36C /* Info.plist */,
 				430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */,
 				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
 				437220471C4D96FF00C5F36C /* HKUnit.swift */,
+				437220291C4D93F000C5F36C /* Info.plist */,
+				437220271C4D93F000C5F36C /* LoopKit.h */,
 				430C59AE1C55ED53006CDB2A /* LoopMath.swift */,
 				430D1A921C4C955D00DF5FA4 /* NSDate.swift */,
 				437220421C4D95A200C5F36C /* NSDateFormatter.swift */,
 				4372204A1C4D9B4200C5F36C /* NSTimeInterval.swift */,
 				437220451C4D96BF00C5F36C /* QuantitySchedule.swift */,
 				430C59AA1C55E9AB006CDB2A /* SampleValue.swift */,
+				437817141C5D376E00190966 /* UI */,
 			);
 			path = LoopKit;
 			sourceTree = "<group>";
@@ -856,6 +868,23 @@
 			path = Naterade;
 			sourceTree = "<group>";
 		};
+		4378170C1C5D2CA500190966 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				437817111C5D2D1800190966 /* InsulinKit.storyboard */,
+				437817121C5D30D100190966 /* ReservoirTableViewController.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		437817141C5D376E00190966 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		437A289D1C2F66DE00009647 /* MinimedKitTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -889,7 +918,6 @@
 				4380994C1C49D490009D8E26 /* NewCarbEntry.swift */,
 				438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */,
 				4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */,
-				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1541,6 +1569,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4378170F1C5D2D1800190966 /* InsulinKit.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1676,7 +1705,6 @@
 				438099531C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift in Sources */,
 				4380993E1C498935009D8E26 /* CarbEntryTableViewController.swift in Sources */,
 				439A30B51C53337500059771 /* StoredCarbEntry.swift in Sources */,
-				430D1A8B1C4B1D8E00DF5FA4 /* UIViewController.swift in Sources */,
 				43298EEA1C3A167800F520A3 /* CarbStore.swift in Sources */,
 				438099491C49C462009D8E26 /* DatePickerTableViewCell.swift in Sources */,
 				438099461C49B844009D8E26 /* CarbEntryEditViewController.swift in Sources */,
@@ -1689,10 +1717,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4378170A1C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift in Sources */,
 				436248C71C59C75F0088BB43 /* Fetchable.swift in Sources */,
 				436248C51C59BEEE0088BB43 /* DoseStore.swift in Sources */,
+				4378170B1C5C6FDF00190966 /* Reservoir.swift in Sources */,
 				436248CA1C59D9BF0088BB43 /* Model.xcdatamodeld in Sources */,
 				436248CC1C59E0670088BB43 /* PersistenceController.swift in Sources */,
+				437817131C5D30D100190966 /* ReservoirTableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1720,6 +1751,7 @@
 				4372204B1C4D9B4200C5F36C /* NSTimeInterval.swift in Sources */,
 				437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */,
 				437220461C4D96BF00C5F36C /* QuantitySchedule.swift in Sources */,
+				437817151C5D37D900190966 /* UIViewController.swift in Sources */,
 				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
 				430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */,
 				430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */,
@@ -1937,6 +1969,14 @@
 				43776F9B1B8022E90074EA36 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		437817111C5D2D1800190966 /* InsulinKit.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				437817101C5D2D1800190966 /* Base */,
+			);
+			name = InsulinKit.storyboard;
 			sourceTree = "<group>";
 		};
 		43A943741B926B7B0051FA24 /* Interface.storyboard */ = {
@@ -2586,6 +2626,7 @@
 				436248BE1C59BC220088BB43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		436248BF1C59BC220088BB43 /* Build configuration list for PBXNativeTarget "InsulinKitTests" */ = {
 			isa = XCConfigurationList;
@@ -2594,6 +2635,7 @@
 				436248C11C59BC220088BB43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		437220191C4D7E4800C5F36C /* Build configuration list for PBXNativeTarget "CarbKitTests" */ = {
 			isa = XCConfigurationList;

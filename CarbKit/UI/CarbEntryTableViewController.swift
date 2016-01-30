@@ -8,8 +8,10 @@
 
 import UIKit
 import HealthKit
+import LoopKit
 
 private let ReuseIdentifier = "CarbEntry"
+
 
 public class CarbEntryTableViewController: UITableViewController {
 
@@ -33,10 +35,6 @@ public class CarbEntryTableViewController: UITableViewController {
                 timer.invalidate()
             }
         }
-    }
-
-    public override func awakeFromNib() {
-        super.awakeFromNib()
     }
 
     public override func viewDidLoad() {
@@ -235,9 +233,9 @@ public class CarbEntryTableViewController: UITableViewController {
     }
 
     public override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
+        if editingStyle == .Delete, case .Display(let carbStore) = state {
             let entry = carbEntries.removeAtIndex(indexPath.row)
-            carbStore?.deleteCarbEntry(entry, resultHandler: { (success, error) -> Void in
+            carbStore.deleteCarbEntry(entry, resultHandler: { (success, error) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     if success {
                         tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)

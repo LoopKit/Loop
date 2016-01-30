@@ -9,6 +9,12 @@
 import CoreData
 
 
+public protocol ReservoirValue {
+    var startDate: NSDate { get }
+    var unitVolume: Double { get }
+}
+
+
 public class DoseStore {
 
     private var persistenceController: PersistenceController! = nil
@@ -25,7 +31,11 @@ public class DoseStore {
         }
     }
 
-    public init() {
+    public let pumpID: String
+
+    public init(pumpID: String) {
+        self.pumpID = pumpID
+
         persistenceController = PersistenceController(readyCallback: { [unowned self] (error) -> Void in
             if let error = error {
                 self.readyState = .Failed(error)
@@ -33,39 +43,34 @@ public class DoseStore {
                 self.readyState = .Ready
             }
         })
-
-        didEnterBackgroundNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationDidEnterBackgroundNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
-        willResignActiveNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
-        willTerminateNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationWillTerminateNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
     }
 
-    deinit {
-        for observer in [didEnterBackgroundNotificationObserver, willResignActiveNotificationObserver, willTerminateNotificationObserver] where observer != nil {
-            NSNotificationCenter.defaultCenter().removeObserver(observer!)
+    public func addReservoirVolume(unitVolume: Double, atDate date: NSDate, rawData: NSData?) {
+
+        let reservoir = Reservoir.insertNewObjectInContext(persistenceController.managedObjectContext)
+
+        reservoir.volume = unitVolume
+        reservoir.date = date
+        reservoir.raw = rawData
+        reservoir.pumpID = pumpID
+
+        persistenceController.save { (error) -> Void in
+            // TODO: Handle error
         }
     }
 
-    private var didEnterBackgroundNotificationObserver: AnyObject?
-    private var willResignActiveNotificationObserver: AnyObject?
-    private var willTerminateNotificationObserver: AnyObject?
+    public func deleteReservoirValue(value: ReservoirValue) throws {
+        let predicate = NSPredicate(format: "date = %@ && pumpID = %@", value.startDate, pumpID)
 
-    private func handleSave(note: NSNotification) {
-        save()
+        for object in try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: predicate) {
+            persistenceController.managedObjectContext.deleteObject(object)
+        }
     }
 
-    func save() {
-        var taskID: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+    public func save() {
+        persistenceController.save({ (error) -> Void in
+            // Log the error?
 
-        taskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
-            UIApplication.sharedApplication().endBackgroundTask(taskID)
-        }
-
-        if taskID != UIBackgroundTaskInvalid {
-            persistenceController.save({ (error) -> Void in
-                // Log the error?
-
-                UIApplication.sharedApplication().endBackgroundTask(taskID)
-            })
-        }
+        })
     }
 }

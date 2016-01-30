@@ -16,12 +16,13 @@ protocol Fetchable {
     static func entityName() -> String
     static func objectsInContext(context: NSManagedObjectContext, predicate: NSPredicate?, sortedBy: String?, ascending: Bool) throws -> [FetchableType]
     static func singleObjectInContext(context: NSManagedObjectContext, predicate: NSPredicate?, sortedBy: String?, ascending: Bool) throws -> FetchableType?
-    static func objectCountInContext(context: NSManagedObjectContext, predicate: NSPredicate?) -> Int
+    static func objectCountInContext(context: NSManagedObjectContext, predicate: NSPredicate?) throws -> Int
     static func fetchRequest(context: NSManagedObjectContext, predicate: NSPredicate?, sortedBy: String?, ascending: Bool) -> NSFetchRequest
 }
 
 
 extension Fetchable where Self : NSManagedObject, FetchableType == Self {
+
     static func entityName() -> String {
         return NSStringFromClass(self).componentsSeparatedByString(".").last!
     }
@@ -64,5 +65,10 @@ extension Fetchable where Self : NSManagedObject, FetchableType == Self {
         }
 
         return request
+    }
+
+    static func insertNewObjectInContext(context: NSManagedObjectContext) -> FetchableType {
+
+        return NSEntityDescription.insertNewObjectForEntityForName(entityName(), inManagedObjectContext: context) as! FetchableType
     }
 }

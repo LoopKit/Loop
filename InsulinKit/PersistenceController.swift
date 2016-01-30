@@ -24,6 +24,36 @@ class PersistenceController {
         privateManagedObjectContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
 
         initializeStack(readyCallback)
+
+        didEnterBackgroundNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationDidEnterBackgroundNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
+        willResignActiveNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
+        willTerminateNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIApplicationWillTerminateNotification, object: UIApplication.sharedApplication(), queue: nil, usingBlock: handleSave)
+    }
+
+    deinit {
+        for observer in [didEnterBackgroundNotificationObserver, willResignActiveNotificationObserver, willTerminateNotificationObserver] where observer != nil {
+            NSNotificationCenter.defaultCenter().removeObserver(observer!)
+        }
+    }
+
+    private var didEnterBackgroundNotificationObserver: AnyObject?
+    private var willResignActiveNotificationObserver: AnyObject?
+    private var willTerminateNotificationObserver: AnyObject?
+
+    private func handleSave(note: NSNotification) {
+        var taskID: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+
+        taskID = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+            UIApplication.sharedApplication().endBackgroundTask(taskID)
+        }
+
+        if taskID != UIBackgroundTaskInvalid {
+            save({ (error) -> Void in
+                // Log the error?
+
+                UIApplication.sharedApplication().endBackgroundTask(taskID)
+            })
+        }
     }
 
     func save(completionHandler: (error: Error?) -> Void) {
@@ -66,6 +96,14 @@ class PersistenceController {
             if let  bundleIdentifier = NSBundle(forClass: self.dynamicType).bundleIdentifier,
                     documentsURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first?.URLByAppendingPathComponent(bundleIdentifier, isDirectory: true)
             {
+                if !NSFileManager.defaultManager().fileExistsAtPath(documentsURL.absoluteString) {
+                    do {
+                        try NSFileManager.defaultManager().createDirectoryAtURL(documentsURL, withIntermediateDirectories: true, attributes: nil)
+                    } catch {
+                        // Ignore errors here, let Core Data explain the problem
+                    }
+                }
+
                 let storeURL = documentsURL.URLByAppendingPathComponent("Model.sqlite")
 
                 do {

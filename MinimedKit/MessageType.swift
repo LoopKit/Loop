@@ -1,5 +1,5 @@
 //
-//  case .swift
+//  MessageType.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 9/2/15.
