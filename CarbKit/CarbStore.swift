@@ -17,12 +17,6 @@ public class CarbStore: HealthKitSampleStore {
 
     public static let CarbEntriesDidUpdateNotification = "com.loudnate.CarbKit.CarbEntriesDidUpdateNotification"
 
-    /// The `CarbEntriesDidUpdateNotification` user info key for an array of new CarbEntry items
-    public static let CarbEntriesAddedUserInfoKey = "com.loudnate.CarbKit.CarbEntriesAddedKey"
-
-    /// The `CarbEntriesDidUpdateNotification` user info key for an array of removed CarbEntry items
-    public static let CarbEntriesRemovedUserInfoKey = "com.loudnate.CarbKit.CarbEntriesRemovedKey"
-
     private let carbType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierDietaryCarbohydrates)!
 
     /// All the sample types we need permission to read.
@@ -218,11 +212,7 @@ public class CarbStore: HealthKitSampleStore {
 
             // Notify listeners
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.CarbEntriesDidUpdateNotification,
-                object: self,
-                userInfo: [
-                    self.dynamicType.CarbEntriesAddedUserInfoKey: newSamples ?? [],
-                    self.dynamicType.CarbEntriesRemovedUserInfoKey: removedSamples
-                ]
+                object: self
             )
         }
     }

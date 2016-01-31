@@ -21,7 +21,7 @@ class Reservoir: NSManagedObject {
         set {
             willChangeValueForKey("volume")
             defer { didChangeValueForKey("volume") }
-            primitiveVolume = volume != nil ? NSNumber(double: volume) : nil
+            primitiveVolume = newValue != nil ? NSNumber(double: newValue) : nil
         }
     }
 

@@ -8,12 +8,12 @@
 
 import UIKit
 import CarbKit
+import InsulinKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
@@ -23,11 +23,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.tintColor = UIColor.tintColor()
 
         if let tabBarController = window?.rootViewController as? UITabBarController {
-            tabBarController.viewControllers?.flatMap({
-                $0.childViewControllers.first as? CarbEntryTableViewController
-            }).forEach({
-                $0.carbStore = PumpDataManager.sharedManager.carbStore
-            })
+            for viewController in tabBarController.viewControllers ?? [] {
+                if let vc = viewController.childViewControllers.first as? CarbEntryTableViewController {
+                    vc.carbStore = PumpDataManager.sharedManager.carbStore
+                } else if let vc = viewController.childViewControllers.first as? ReservoirTableViewController {
+                    vc.doseStore = PumpDataManager.sharedManager.doseStore
+                }
+            }
         }
 
         return true

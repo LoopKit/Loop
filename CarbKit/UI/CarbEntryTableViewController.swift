@@ -108,7 +108,7 @@ public class CarbEntryTableViewController: UITableViewController {
                 tableView.backgroundView = authorizationRequiredMessageView
                 carbStoreObserver = nil
             case .Display(let carbStore):
-                carbStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: carbStore, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (note) -> Void in
+                carbStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: carbStore, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (_) -> Void in
 
                     self.reloadData()
                 })

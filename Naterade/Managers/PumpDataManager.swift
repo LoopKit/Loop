@@ -82,8 +82,6 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
                     updatePumpStatus(body, fromDevice: device)
-
-                    doseStore?.addReservoirVolume(body.reservoirRemainingUnits, atDate: body.pumpDate, rawData: data)
                 case is MySentryAlertMessageBody:
                     break
                     // TODO: de-dupe
@@ -120,6 +118,8 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
             latestPumpStatus = status
 
 //            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
+
+            doseStore?.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate, rawData: nil)
         }
     }
 

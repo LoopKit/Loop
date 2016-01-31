@@ -17,7 +17,8 @@ public protocol ReservoirValue {
 
 public class DoseStore {
 
-    private var persistenceController: PersistenceController! = nil
+    /// Notification posted when reservoir data was modifed.
+    public static let ReservoirValuesDidUpdateNotification = "com.loudnate.InsulinKit.ReservoirValuesDidUpdateNotification"
 
     public enum ReadyState {
         case Initializing
@@ -33,6 +34,8 @@ public class DoseStore {
 
     public let pumpID: String
 
+    public let insulinActionDuration = NSTimeInterval(hours: 4)
+
     public init(pumpID: String) {
         self.pumpID = pumpID
 
@@ -45,7 +48,21 @@ public class DoseStore {
         })
     }
 
-    public func addReservoirVolume(unitVolume: Double, atDate date: NSDate, rawData: NSData?) {
+    // MARK: - Reservoir data
+
+    private var persistenceController: PersistenceController! = nil
+
+    private var recentReservoirValues: [Reservoir] = []
+
+    private var recentReservoirValuesPredicate: NSPredicate {
+        let calendar = NSCalendar.currentCalendar()
+        let startDate = min(calendar.startOfDayForDate(NSDate()), NSDate(timeIntervalSinceNow: -insulinActionDuration))
+        let predicate = NSPredicate(format: "date >= %@ && pumpID = %@", startDate, pumpID)
+
+        return predicate
+    }
+
+    public func addReservoirValue(unitVolume: Double, atDate date: NSDate, rawData: NSData?) {
 
         let reservoir = Reservoir.insertNewObjectInContext(persistenceController.managedObjectContext)
 
@@ -56,14 +73,47 @@ public class DoseStore {
 
         persistenceController.save { (error) -> Void in
             // TODO: Handle error
+            self.recentReservoirValues.insert(reservoir, atIndex: 0)
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.ReservoirValuesDidUpdateNotification, object: self)
         }
     }
 
-    public func deleteReservoirValue(value: ReservoirValue) throws {
-        let predicate = NSPredicate(format: "date = %@ && pumpID = %@", value.startDate, pumpID)
+    public func getRecentReservoirValues(resultsHandler: ([ReservoirValue]) -> Void) {
+        if recentReservoirValues.count == 0, case .Ready = readyState {
+            do {
+                recentReservoirValues += try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: recentReservoirValuesPredicate, sortedBy: "date", ascending: false)
+            } catch {
+            }
+        }
 
-        for object in try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: predicate) {
-            persistenceController.managedObjectContext.deleteObject(object)
+        resultsHandler(recentReservoirValues.map({ $0 as ReservoirValue}))
+    }
+
+    public func deleteReservoirValue(value: ReservoirValue) throws {
+        var deletedObjects = [Reservoir]()
+
+        if let object = value as? Reservoir {
+            deleteReservoirObject(object)
+            deletedObjects.append(object)
+        } else {
+            // TODO: Unecessary case handling?
+            let predicate = NSPredicate(format: "date = %@ && pumpID = %@", value.startDate, pumpID)
+
+            for object in try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: predicate) {
+                deleteReservoirObject(object)
+                deletedObjects.append(object)
+            }
+        }
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.ReservoirValuesDidUpdateNotification, object: self)
+    }
+
+    private func deleteReservoirObject(object: Reservoir) {
+        persistenceController.managedObjectContext.deleteObject(object)
+
+        if let index = recentReservoirValues.indexOf(object) {
+            recentReservoirValues.removeAtIndex(index)
         }
     }
 
