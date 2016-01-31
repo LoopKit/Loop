@@ -28,7 +28,7 @@ struct GlucoseMath {
     /**
      Calculates slope and intercept using linear regression
      
-     This algorithm is not suited for large datasets.
+     This implementation is not suited for large datasets.
 
      - parameter points: An array of tuples containing x and y values
 

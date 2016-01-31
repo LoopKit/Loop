@@ -34,7 +34,7 @@
                                                     <rect key="frame" x="39.5" y="30" width="240.5" height="20.5"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="U IOB" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dZi-Ta-IHm">
-                                                            <rect key="frame" x="0.0" y="0.0" width="240.5" height="21"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="240.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                             <nil key="highlightedColor"/>
@@ -62,7 +62,7 @@
                                                     <rect key="frame" x="39.5" y="30" width="240.5" height="20.5"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="U Total" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kys-by-14s">
-                                                            <rect key="frame" x="0.0" y="0.0" width="240.5" height="21"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="240.5" height="20.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                             <nil key="highlightedColor"/>
@@ -128,6 +128,8 @@
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="needsConfigurationMessageView" destination="Y29-PZ-u5S" id="Qxg-VM-tc5"/>
+                        <outlet property="totalDateLabel" destination="DZX-KL-BBc" id="N0E-Tz-HvM"/>
+                        <outlet property="totalValueLabel" destination="7Fy-gG-Zof" id="25M-Da-1BQ"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kcp-aB-fqr" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -16,6 +16,10 @@ public class ReservoirTableViewController: UITableViewController {
 
     @IBOutlet var needsConfigurationMessageView: UIView!
 
+    @IBOutlet weak var totalValueLabel: UILabel!
+
+    @IBOutlet weak var totalDateLabel: UILabel!
+
     public var doseStore: DoseStore? {
         didSet {
             if isViewLoaded() {
@@ -90,7 +94,25 @@ public class ReservoirTableViewController: UITableViewController {
                 }
 
                 self.tableView.reloadData()
+
+                self.updateTotal()
             })
+        }
+    }
+
+    private func updateTotal() {
+        if case .Display(let carbStore) = state {
+            carbStore.getTotalRecentUnitsDelivered { (total) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(total, numberStyle: .NoStyle)
+
+                    if let sinceDate = self.reservoirValues.last?.startDate {
+                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", tableName: "InsulinNKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(sinceDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                    } else {
+                        self.totalDateLabel.text = nil
+                    }
+                }
+            }
         }
     }
 
@@ -147,6 +169,7 @@ public class ReservoirTableViewController: UITableViewController {
                 try doseStore.deleteReservoirValue(value)
             } catch let error {
                 presentAlertControllerWithError(error)
+                reloadData()
             }
         }
     }

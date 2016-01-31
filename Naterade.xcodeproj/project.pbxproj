@@ -86,6 +86,7 @@
 		4378170F1C5D2D1800190966 /* InsulinKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 437817111C5D2D1800190966 /* InsulinKit.storyboard */; };
 		437817131C5D30D100190966 /* ReservoirTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437817121C5D30D100190966 /* ReservoirTableViewController.swift */; };
 		437817151C5D37D900190966 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */; };
+		437817171C5DB2BF00190966 /* InsulinMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437817161C5DB2BF00190966 /* InsulinMath.swift */; };
 		437A289F1C2F66DE00009647 /* MinimedKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A289E1C2F66DE00009647 /* MinimedKitTests.swift */; };
 		437A28A11C2F66DE00009647 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
 		437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */; };
@@ -439,6 +440,7 @@
 		437817091C5C6FDF00190966 /* Reservoir.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reservoir.swift; sourceTree = "<group>"; };
 		437817101C5D2D1800190966 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/InsulinKit.storyboard; sourceTree = "<group>"; };
 		437817121C5D30D100190966 /* ReservoirTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirTableViewController.swift; sourceTree = "<group>"; };
+		437817161C5DB2BF00190966 /* InsulinMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinMath.swift; sourceTree = "<group>"; };
 		437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinimedKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		437A289E1C2F66DE00009647 /* MinimedKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimedKitTests.swift; sourceTree = "<group>"; };
 		437A28A01C2F66DE00009647 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -715,14 +717,15 @@
 		436248A61C59BC220088BB43 /* InsulinKit */ = {
 			isa = PBXGroup;
 			children = (
-				436248A71C59BC220088BB43 /* InsulinKit.h */,
-				436248A91C59BC220088BB43 /* Info.plist */,
 				436248C41C59BEEE0088BB43 /* DoseStore.swift */,
 				436248C61C59C75F0088BB43 /* Fetchable.swift */,
+				436248A91C59BC220088BB43 /* Info.plist */,
+				436248A71C59BC220088BB43 /* InsulinKit.h */,
+				437817161C5DB2BF00190966 /* InsulinMath.swift */,
+				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
 				436248CB1C59E0670088BB43 /* PersistenceController.swift */,
 				437817091C5C6FDF00190966 /* Reservoir.swift */,
 				437817081C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift */,
-				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
 				4378170C1C5D2CA500190966 /* UI */,
 			);
 			path = InsulinKit;
@@ -1717,6 +1720,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				437817171C5DB2BF00190966 /* InsulinMath.swift in Sources */,
 				4378170A1C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift in Sources */,
 				436248C71C59C75F0088BB43 /* Fetchable.swift in Sources */,
 				436248C51C59BEEE0088BB43 /* DoseStore.swift in Sources */,
