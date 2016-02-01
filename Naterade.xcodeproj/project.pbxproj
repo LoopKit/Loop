@@ -46,7 +46,7 @@
 		436248961C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 4362488E1C586C1A0088BB43 /* momentum_effect_stable_glucose_output.json */; };
 		436248A81C59BC220088BB43 /* InsulinKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 436248A71C59BC220088BB43 /* InsulinKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		436248AF1C59BC220088BB43 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; };
-		436248B61C59BC220088BB43 /* InsulinKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248B51C59BC220088BB43 /* InsulinKitTests.swift */; };
+		436248B61C59BC220088BB43 /* InsulinMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436248B51C59BC220088BB43 /* InsulinMathTests.swift */; };
 		436248BA1C59BC220088BB43 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; };
 		436248BB1C59BC220088BB43 /* InsulinKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 436248A51C59BC220088BB43 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		436248C21C59BC420088BB43 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437220251C4D93F000C5F36C /* LoopKit.framework */; };
@@ -138,7 +138,10 @@
 		43A943BE1B9298BF0051FA24 /* SendDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B61B9298BF0051FA24 /* SendDataTask.m */; };
 		43A943C11B92996B0051FA24 /* NSData+Conversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943BF1B92996B0051FA24 /* NSData+Conversion.h */; };
 		43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943C01B92996B0051FA24 /* NSData+Conversion.m */; };
+		43C7924E1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 43C7924C1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json */; };
+		43C7924F1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 43C7924D1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json */; };
 		43C85FCA1C4247F1002EFBC7 /* HKQuantitySample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */; };
+		43D33C111C5EC8530041FC65 /* DoseEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D33C101C5EC8530041FC65 /* DoseEntry.swift */; };
 		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
@@ -405,7 +408,7 @@
 		436248A71C59BC220088BB43 /* InsulinKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InsulinKit.h; sourceTree = "<group>"; };
 		436248A91C59BC220088BB43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		436248AE1C59BC220088BB43 /* InsulinKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InsulinKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		436248B51C59BC220088BB43 /* InsulinKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinKitTests.swift; sourceTree = "<group>"; };
+		436248B51C59BC220088BB43 /* InsulinMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinMathTests.swift; sourceTree = "<group>"; };
 		436248B71C59BC220088BB43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		436248C41C59BEEE0088BB43 /* DoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseStore.swift; sourceTree = "<group>"; };
 		436248C61C59C75F0088BB43 /* Fetchable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fetchable.swift; sourceTree = "<group>"; };
@@ -492,7 +495,10 @@
 		43A943B61B9298BF0051FA24 /* SendDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SendDataTask.m; sourceTree = "<group>"; };
 		43A943BF1B92996B0051FA24 /* NSData+Conversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Conversion.h"; sourceTree = "<group>"; };
 		43A943C01B92996B0051FA24 /* NSData+Conversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Conversion.m"; sourceTree = "<group>"; };
+		43C7924C1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = reservoir_history_with_rewind_and_prime_input.json; sourceTree = "<group>"; };
+		43C7924D1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = reservoir_history_with_rewind_and_prime_output.json; sourceTree = "<group>"; };
 		43C85FC91C4247F1002EFBC7 /* HKQuantitySample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKQuantitySample.swift; sourceTree = "<group>"; };
+		43D33C101C5EC8530041FC65 /* DoseEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseEntry.swift; sourceTree = "<group>"; };
 		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
 		43DE925B1C547A20001FFDE1 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
@@ -717,15 +723,16 @@
 		436248A61C59BC220088BB43 /* InsulinKit */ = {
 			isa = PBXGroup;
 			children = (
-				436248C41C59BEEE0088BB43 /* DoseStore.swift */,
-				436248C61C59C75F0088BB43 /* Fetchable.swift */,
-				436248A91C59BC220088BB43 /* Info.plist */,
 				436248A71C59BC220088BB43 /* InsulinKit.h */,
+				436248A91C59BC220088BB43 /* Info.plist */,
+				436248C41C59BEEE0088BB43 /* DoseStore.swift */,
+				43D33C101C5EC8530041FC65 /* DoseEntry.swift */,
+				436248C61C59C75F0088BB43 /* Fetchable.swift */,
 				437817161C5DB2BF00190966 /* InsulinMath.swift */,
-				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
 				436248CB1C59E0670088BB43 /* PersistenceController.swift */,
 				437817091C5C6FDF00190966 /* Reservoir.swift */,
 				437817081C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift */,
+				436248C81C59D9BF0088BB43 /* Model.xcdatamodeld */,
 				4378170C1C5D2CA500190966 /* UI */,
 			);
 			path = InsulinKit;
@@ -734,7 +741,8 @@
 		436248B41C59BC220088BB43 /* InsulinKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				436248B51C59BC220088BB43 /* InsulinKitTests.swift */,
+				43C7924B1C5ECFAA00C38255 /* Fixtures */,
+				436248B51C59BC220088BB43 /* InsulinMathTests.swift */,
 				436248B71C59BC220088BB43 /* Info.plist */,
 			);
 			path = InsulinKitTests;
@@ -1006,6 +1014,15 @@
 				43A943B61B9298BF0051FA24 /* SendDataTask.m */,
 			);
 			path = RileyLinkKit;
+			sourceTree = "<group>";
+		};
+		43C7924B1C5ECFAA00C38255 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				43C7924C1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json */,
+				43C7924D1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		43DE92571C5479C3001FFDE1 /* Models */ = {
@@ -1580,6 +1597,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43C7924F1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json in Resources */,
+				43C7924E1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1721,6 +1740,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				437817171C5DB2BF00190966 /* InsulinMath.swift in Sources */,
+				43D33C111C5EC8530041FC65 /* DoseEntry.swift in Sources */,
 				4378170A1C5C6FDF00190966 /* Reservoir+CoreDataProperties.swift in Sources */,
 				436248C71C59C75F0088BB43 /* Fetchable.swift in Sources */,
 				436248C51C59BEEE0088BB43 /* DoseStore.swift in Sources */,
@@ -1735,7 +1755,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				436248B61C59BC220088BB43 /* InsulinKitTests.swift in Sources */,
+				436248B61C59BC220088BB43 /* InsulinMathTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

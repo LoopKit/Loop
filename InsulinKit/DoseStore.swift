@@ -59,11 +59,18 @@ public class DoseStore {
 
     private var persistenceController: PersistenceController! = nil
 
-    private var recentReservoirValues: [Reservoir]?
+    private var recentReservoirObjectsCache: [Reservoir]?
+
+    private var recentReservoirDoseEntriesCache: [DoseEntry]?
+
+    private var recentReservoirValuesMinDate: NSDate {
+        let calendar = NSCalendar.currentCalendar()
+
+        return min(calendar.startOfDayForDate(NSDate()), NSDate(timeIntervalSinceNow: -insulinActionDuration))
+    }
 
     private var recentReservoirValuesPredicate: NSPredicate {
-        let calendar = NSCalendar.currentCalendar()
-        let startDate = min(calendar.startOfDayForDate(NSDate()), NSDate(timeIntervalSinceNow: -insulinActionDuration))
+        let startDate = recentReservoirValuesMinDate
         let predicate = NSPredicate(format: "date >= %@ && pumpID = %@", startDate, pumpID)
 
         return predicate
@@ -78,18 +85,40 @@ public class DoseStore {
         reservoir.raw = rawData
         reservoir.pumpID = pumpID
 
-        if recentReservoirValues != nil {
+        if recentReservoirObjectsCache != nil {
             let predicate = recentReservoirValuesPredicate
 
-            for (index, value) in recentReservoirValues!.reverse().enumerate() {
+            for (index, value) in recentReservoirObjectsCache!.reverse().enumerate() {
                 if predicate.evaluateWithObject(value) {
                     break
                 } else {
-                    recentReservoirValues!.removeAtIndex(index)
+                    recentReservoirObjectsCache!.removeAtIndex(index)
                 }
             }
 
-            recentReservoirValues!.insert(reservoir, atIndex: 0)
+            if recentReservoirDoseEntriesCache != nil {
+                let minEndDate = recentReservoirValuesMinDate
+
+                for (index, entry) in recentReservoirDoseEntriesCache!.reverse().enumerate() {
+                    if entry.endDate >= minEndDate {
+                        break
+                    } else {
+                        recentReservoirDoseEntriesCache!.removeAtIndex(index)
+                    }
+                }
+
+                var newValues: [Reservoir] = []
+
+                if let previousValue = recentReservoirObjectsCache?.first {
+                    newValues.append(previousValue)
+                }
+
+                newValues.append(reservoir)
+
+                recentReservoirDoseEntriesCache! += InsulinMath.doseEntriesFromReservoirValues(newValues)
+            }
+
+            recentReservoirObjectsCache!.insert(reservoir, atIndex: 0)
         }
 
         persistenceController.save { (error) -> Void in
@@ -100,20 +129,36 @@ public class DoseStore {
     }
 
     public func getRecentReservoirValues(resultsHandler: ([ReservoirValue]) -> Void) {
-        if recentReservoirValues == nil, case .Ready = readyState {
+        getRecentReservoirObjects { (reservoirObjects) -> Void in
+            resultsHandler(reservoirObjects.map({ $0 as ReservoirValue}))
+        }
+    }
+
+    private func getRecentReservoirObjects(resultsHandler: ([Reservoir]) -> Void) {
+        if recentReservoirObjectsCache == nil, case .Ready = readyState {
             do {
                 try purgeReservoirObjects()
 
-                var recentReservoirValues: [Reservoir] = []
+                var recentReservoirObjects: [Reservoir] = []
 
-                recentReservoirValues += try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: recentReservoirValuesPredicate, sortedBy: "date", ascending: false)
+                recentReservoirObjects += try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: recentReservoirValuesPredicate, sortedBy: "date", ascending: false)
 
-                self.recentReservoirValues = recentReservoirValues
+                self.recentReservoirObjectsCache = recentReservoirObjects
             } catch {
             }
         }
 
-        resultsHandler(recentReservoirValues?.map({ $0 as ReservoirValue}) ?? [])
+        resultsHandler(recentReservoirObjectsCache ?? [])
+    }
+
+    private func getRecentReservoirDoseEntries(resultsHandler: ([DoseEntry]) -> Void) {
+        if recentReservoirDoseEntriesCache == nil, case .Ready = readyState {
+            getRecentReservoirObjects { (reservoirValues) -> Void in
+                self.recentReservoirDoseEntriesCache = InsulinMath.doseEntriesFromReservoirValues(reservoirValues)
+            }
+        }
+
+        resultsHandler(recentReservoirDoseEntriesCache ?? [])
     }
 
     public func deleteReservoirValue(value: ReservoirValue) throws {
@@ -138,8 +183,8 @@ public class DoseStore {
     private func deleteReservoirObject(object: Reservoir) {
         persistenceController.managedObjectContext.deleteObject(object)
 
-        if let index = recentReservoirValues?.indexOf(object) {
-            recentReservoirValues!.removeAtIndex(index)
+        if let index = recentReservoirObjectsCache?.indexOf(object) {
+            recentReservoirObjectsCache!.removeAtIndex(index)
         }
     }
 
@@ -151,7 +196,7 @@ public class DoseStore {
         deleteRequest.resultType = .ResultTypeCount
 
         if let result = try persistenceController.managedObjectContext.executeRequest(deleteRequest) as? NSBatchDeleteResult, count = result.result as? Int where count > 0 {
-            recentReservoirValues?.removeAll()
+            recentReservoirObjectsCache?.removeAll()
             persistenceController.managedObjectContext.reset()
         }
     }
@@ -159,8 +204,8 @@ public class DoseStore {
     // MARK: Math
 
     public func getTotalRecentUnitsDelivered(resultHandler: (Double) -> Void) {
-        let total = InsulinMath.totalUsageForReservoirValues(recentReservoirValues?.reverse() ?? [])
-
-        resultHandler(total)
+        getRecentReservoirDoseEntries { (doses) -> Void in
+            resultHandler(InsulinMath.totalDeliveryForDoses(doses))
+        }
     }
 }

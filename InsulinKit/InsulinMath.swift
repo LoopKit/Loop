@@ -57,27 +57,61 @@ struct InsulinMath {
     private static let MaximumReservoirDropPerMinute = 2.0
 
     /**
-     Calculates the total usage for a continuous range of reservoir values
+     Converts a continuous sequence of reservoir values to a sequence of doses
 
-     - parameter values: An array of reservoir values, in chronological order
+     - parameter values: A collection of reservoir values, in chronological order
 
-     - returns: The total insulin usage, in Units
+     - returns: An array of doses
      */
-    static func totalUsageForReservoirValues<T: CollectionType where T.Generator.Element: ReservoirValue>(values: T) -> Double {
+    static func doseEntriesFromReservoirValues<T: CollectionType where T.Generator.Element: ReservoirValue>(values: T) -> [DoseEntry] {
+
+        var doses: [DoseEntry] = []
         var previousValue: T.Generator.Element?
-        var total: Double = 0
+
+        let numberFormatter = NSNumberFormatter()
+        numberFormatter.numberStyle = .DecimalStyle
+        numberFormatter.maximumFractionDigits = 3
 
         for value in values {
             if let previousValue = previousValue {
                 let volumeDrop = previousValue.unitVolume - value.unitVolume
                 let duration = value.startDate.timeIntervalSinceDate(previousValue.startDate)
 
-                if 0 <= volumeDrop && volumeDrop <= MaximumReservoirDropPerMinute * duration.minutes {
-                    total += volumeDrop
+                if duration > 0 && 0 <= volumeDrop && volumeDrop <= MaximumReservoirDropPerMinute * duration.minutes {
+
+                    doses.append(DoseEntry(
+                        startDate: previousValue.startDate,
+                        endDate: value.startDate,
+                        value: volumeDrop * NSTimeInterval(hours: 1) / duration,
+                        unit: .UnitsPerHour,
+                        description: "Reservoir decreased \(numberFormatter.stringFromNumber(volumeDrop) ?? String(volumeDrop))U over \(numberFormatter.stringFromNumber(duration.minutes) ?? String(duration.minutes))min"
+                    ))
                 }
             }
 
             previousValue = value
+        }
+
+        return doses
+    }
+
+    /**
+     Calculates the total insulin delivery for a collection of doses
+
+     - parameter values: A collection of doses
+
+     - returns: The total insulin insulin, in Units
+     */
+    static func totalDeliveryForDoses<T: CollectionType where T.Generator.Element == DoseEntry>(doses: T) -> Double {
+        var total: Double = 0
+
+        for dose in doses {
+            switch dose.unit {
+            case .Units:
+                total += dose.value
+            case .UnitsPerHour:
+                total += dose.value * dose.endDate.timeIntervalSinceDate(dose.startDate) / NSTimeInterval(hours: 1)
+            }
         }
 
         return total

@@ -76,7 +76,7 @@ class CarbMathTests: XCTestCase {
 
         for (expected, calculated) in zip(output, effects) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), calculated.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), accuracy: pow(10.0, -11))
+            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), calculated.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), accuracy: pow(1, -11))
         }
     }
 
@@ -88,7 +88,7 @@ class CarbMathTests: XCTestCase {
 
         for (expected, calculated) in zip(output, cob) {
             XCTAssertEqual(expected.startDate, calculated.startDate)
-            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.gramUnit()), calculated.quantity.doubleValueForUnit(HKUnit.gramUnit()), accuracy: pow(10.0, -11))
+            XCTAssertEqualWithAccuracy(expected.quantity.doubleValueForUnit(HKUnit.gramUnit()), calculated.quantity.doubleValueForUnit(HKUnit.gramUnit()), accuracy: pow(1, -11))
         }
     }
 }
