@@ -10,7 +10,11 @@ import Foundation
 import HealthKit
 
 
-public protocol SampleValue {
+public protocol TimelineValue {
     var startDate: NSDate { get }
+}
+
+
+public protocol SampleValue: TimelineValue {
     var quantity: HKQuantity { get }
 }

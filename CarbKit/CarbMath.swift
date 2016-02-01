@@ -84,8 +84,8 @@ struct CarbMath {
         return value
     }
 
-    private static func simulationDateRangeForCarbEntries(
-        entries: [CarbEntry],
+    private static func simulationDateRangeForCarbEntries<T: CollectionType where T.Generator.Element: CarbEntry>(
+        entries: T,
         fromDate: NSDate?,
         toDate: NSDate?,
         defaultAbsorptionTime: NSTimeInterval,
@@ -100,13 +100,11 @@ struct CarbMath {
             }
         }
 
-        let samples: [SampleValue] = entries.map({ $0 })
-
-        return LoopMath.simulationDateRangeForSamples(samples as [SampleValue], fromDate: fromDate, toDate: toDate, duration: maxAbsorptionTime, delay: delay, delta: delta)
+        return LoopMath.simulationDateRangeForSamples(entries, fromDate: fromDate, toDate: toDate, duration: maxAbsorptionTime, delay: delay, delta: delta)
     }
 
-    static func carbsOnBoardForCarbEntries(
-        entries: [CarbEntry],
+    static func carbsOnBoardForCarbEntries<T: CollectionType where T.Generator.Element: CarbEntry>(
+        entries: T,
         fromDate: NSDate? = nil,
         toDate: NSDate? = nil,
         defaultAbsorptionTime: NSTimeInterval,
@@ -132,8 +130,8 @@ struct CarbMath {
         return values
     }
 
-    static func glucoseEffectsForCarbEntries(
-        entries: [CarbEntry],
+    static func glucoseEffectsForCarbEntries<T: CollectionType where T.Generator.Element: CarbEntry>(
+        entries: T,
         fromDate: NSDate? = nil,
         toDate: NSDate? = nil,
         carbRatios: CarbRatioSchedule,

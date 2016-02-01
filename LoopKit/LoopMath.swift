@@ -10,8 +10,8 @@ import Foundation
 
 
 public struct LoopMath {
-    public static func simulationDateRangeForSamples(
-        samples: [SampleValue],
+    public static func simulationDateRangeForSamples<T: CollectionType where T.Generator.Element: TimelineValue>(
+        samples: T,
         fromDate: NSDate? = nil,
         toDate: NSDate? = nil,
         duration: NSTimeInterval,

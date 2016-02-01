@@ -313,9 +313,7 @@ public class CarbStore: HealthKitSampleStore {
     public func carbsOnBoardAtDate(date: NSDate, resultHandler: (CarbValue?) -> Void) {
         dispatch_async(dataAccessQueue) { [unowned self] in
             if self.carbsOnBoardCache == nil {
-                let entries: [CarbEntry] = self.recentSamples.map({ StoredCarbEntry(sample: $0) })
-
-                self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(entries, defaultAbsorptionTime: self.defaultAbsorptionTimes.medium)
+                self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(self.recentSamples.map { StoredCarbEntry(sample: $0) }, defaultAbsorptionTime: self.defaultAbsorptionTimes.medium)
             }
 
             var closestValue: CarbValue?

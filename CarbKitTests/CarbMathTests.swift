@@ -35,7 +35,7 @@ class CarbMathTests: XCTestCase {
         )
     }
 
-    func loadInputFixture() -> [CarbEntry] {
+    func loadInputFixture() -> [NewCarbEntry] {
         let fixture: [JSONDictionary] = loadFixture("carb_effect_from_history_input")
         let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
 
