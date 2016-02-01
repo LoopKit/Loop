@@ -52,6 +52,9 @@ public class DoseStore {
         persistenceController.save({ (error) -> Void in
             // Log the error?
 
+            if let error = error {
+                print(error)
+            }
         })
     }
 
@@ -128,13 +131,29 @@ public class DoseStore {
         }
     }
 
-    public func getRecentReservoirValues(resultsHandler: ([ReservoirValue]) -> Void) {
-        getRecentReservoirObjects { (reservoirObjects) -> Void in
-            resultsHandler(reservoirObjects.map({ $0 as ReservoirValue}))
+    /**
+     Fetches recent reservoir values
+
+     - parameter resultsHandler: A closure called when the results are ready. This closure takes two arguments:
+        - objects: An array of reservoir objects in reverse-chronological order
+        - error:   An error object explaining why the results could not be fetched
+     */
+    public func getRecentReservoirValues(resultsHandler: (values: [ReservoirValue], error: ErrorType?) -> Void) {
+        getRecentReservoirObjects { (reservoirObjects, error) -> Void in
+            resultsHandler(values: reservoirObjects.map({ $0 as ReservoirValue}), error: error)
         }
     }
 
-    private func getRecentReservoirObjects(resultsHandler: ([Reservoir]) -> Void) {
+    /**
+     Note: Must be called on the main queue
+
+     - parameter resultsHandler: A closure called when the results are ready. This closure takes two arguments:
+        - objects: An array of reservoir objects
+        - error:   An error object explaining why the results could not be fetched
+     */
+    private func getRecentReservoirObjects(resultsHandler: (objects: [Reservoir], error: ErrorType?) -> Void) {
+        var error: ErrorType?
+
         if recentReservoirObjectsCache == nil, case .Ready = readyState {
             do {
                 try purgeReservoirObjects()
@@ -144,21 +163,24 @@ public class DoseStore {
                 recentReservoirObjects += try Reservoir.objectsInContext(persistenceController.managedObjectContext, predicate: recentReservoirValuesPredicate, sortedBy: "date", ascending: false)
 
                 self.recentReservoirObjectsCache = recentReservoirObjects
-            } catch {
+            } catch let fetchError {
+                error = fetchError
             }
         }
 
-        resultsHandler(recentReservoirObjectsCache ?? [])
+        resultsHandler(objects: recentReservoirObjectsCache ?? [], error: error)
     }
 
-    private func getRecentReservoirDoseEntries(resultsHandler: ([DoseEntry]) -> Void) {
+    private func getRecentReservoirDoseEntries(resultsHandler: (doses: [DoseEntry], error: ErrorType?) -> Void) {
         if recentReservoirDoseEntriesCache == nil, case .Ready = readyState {
-            getRecentReservoirObjects { (reservoirValues) -> Void in
-                self.recentReservoirDoseEntriesCache = InsulinMath.doseEntriesFromReservoirValues(reservoirValues)
-            }
-        }
+            getRecentReservoirObjects { (reservoirValues, error) -> Void in
+                self.recentReservoirDoseEntriesCache = InsulinMath.doseEntriesFromReservoirValues(reservoirValues.reverse())
 
-        resultsHandler(recentReservoirDoseEntriesCache ?? [])
+                resultsHandler(doses: self.recentReservoirDoseEntriesCache ?? [], error: error)
+            }
+        } else {
+            resultsHandler(doses: recentReservoirDoseEntriesCache ?? [], error: nil)
+        }
     }
 
     public func deleteReservoirValue(value: ReservoirValue) throws {
@@ -204,7 +226,7 @@ public class DoseStore {
     // MARK: Math
 
     public func getTotalRecentUnitsDelivered(resultHandler: (Double) -> Void) {
-        getRecentReservoirDoseEntries { (doses) -> Void in
+        getRecentReservoirDoseEntries { (doses, error) -> Void in
             resultHandler(InsulinMath.totalDeliveryForDoses(doses))
         }
     }

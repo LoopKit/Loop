@@ -78,7 +78,6 @@ struct InsulinMath {
                 let duration = value.startDate.timeIntervalSinceDate(previousValue.startDate)
 
                 if duration > 0 && 0 <= volumeDrop && volumeDrop <= MaximumReservoirDropPerMinute * duration.minutes {
-
                     doses.append(DoseEntry(
                         startDate: previousValue.startDate,
                         endDate: value.startDate,

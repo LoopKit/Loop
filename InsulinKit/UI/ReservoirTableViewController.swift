@@ -86,7 +86,11 @@ public class ReservoirTableViewController: UITableViewController {
 
     private func reloadData() {
         if case .Display(let doseStore) = state {
-            doseStore.getRecentReservoirValues({ [unowned self] (reservoirValues) -> Void in
+            doseStore.getRecentReservoirValues({ [unowned self] (reservoirValues, error) -> Void in
+                if let error = error {
+                    print("getRecentReservoirValues produced an error: \(error)")
+                }
+
                 self.reservoirValues = reservoirValues
 
                 if reservoirValues.count > 0 {
