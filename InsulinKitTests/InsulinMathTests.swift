@@ -40,7 +40,18 @@ class InsulinMathTests: XCTestCase {
         let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
 
         return fixture.map {
-            return DoseEntry(startDate: dateFormatter.dateFromString($0["start_at"] as! String)!, endDate: dateFormatter.dateFromString($0["end_at"] as! String)!, value: $0["amount"] as! Double, unit: .UnitsPerHour, description: $0["description"] as? String)
+            let unit = $0["unit"] as! String == "U/hour" ? DoseUnit.UnitsPerHour : DoseUnit.Units
+
+            return DoseEntry(startDate: dateFormatter.dateFromString($0["start_at"] as! String)!, endDate: dateFormatter.dateFromString($0["end_at"] as! String)!, value: $0["amount"] as! Double, unit: unit, description: $0["description"] as? String)
+        }
+    }
+
+    func loadInsulinValueFixture(resourceName: String) -> [InsulinValue] {
+        let fixture: [JSONDictionary] = loadFixture(resourceName)
+        let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
+
+        return fixture.map {
+            return InsulinValue(startDate: dateFormatter.dateFromString($0["date"] as! String)!, value: $0["amount"] as! Double)
         }
     }
 
@@ -55,6 +66,30 @@ class InsulinMathTests: XCTestCase {
             XCTAssertEqual(expected.endDate, calculated.endDate)
             XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(1, -14))
             XCTAssertEqual(expected.unit, calculated.unit)
+        }
+    }
+
+    func testIOBFromDoses() {
+        let input = loadDoseFixture("iob_from_doses_input")
+        let output = loadInsulinValueFixture("iob_from_doses_output")
+
+        let iob = InsulinMath.insulinOnBoardForDoses(input, actionDuration: NSTimeInterval(hours: 4))
+
+        for (expected, calculated) in zip(output, iob) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(1, -14))
+        }
+    }
+
+    func testIOBFromBolus() {
+        let input = loadDoseFixture("iob_from_bolus_input")
+        let output = loadInsulinValueFixture("iob_from_bolus_output")
+
+        let iob = InsulinMath.insulinOnBoardForDoses(input, actionDuration: NSTimeInterval(hours: 4))
+
+        for (expected, calculated) in zip(output, iob) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(1, -14))
         }
     }
 }

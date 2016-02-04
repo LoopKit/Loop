@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 
 
 enum DoseUnit {
@@ -15,7 +16,7 @@ enum DoseUnit {
 }
 
 
-struct DoseEntry {
+struct DoseEntry: TimelineValue {
     let startDate: NSDate
     let endDate: NSDate
     let value: Double

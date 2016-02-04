@@ -10,6 +10,17 @@ import Foundation
 import LoopKit
 
 
+public struct InsulinValue {
+    public let startDate: NSDate
+    public let value: Double
+
+    public init(startDate: NSDate, value: Double) {
+        self.startDate = startDate
+        self.value = value
+    }
+}
+
+
 struct InsulinMath {
 
     /**
@@ -24,7 +35,7 @@ struct InsulinMath {
 
      - returns: The percentage of total insulin effect remaining
      */
-    static func walshPercentEffectRemainingAtTime(time: NSTimeInterval, actionDuration: NSTimeInterval) -> Double? {
+    private static func walshPercentEffectRemainingAtTime(time: NSTimeInterval, actionDuration: NSTimeInterval) -> Double? {
 
         switch time {
         case let t where t <= 0:
@@ -46,6 +57,41 @@ struct InsulinMath {
             }
         }
 
+    }
+
+    private static func insulinOnBoardForContinuousDose(dose: DoseEntry, atDate date: NSDate, actionDuration: NSTimeInterval, delay: NSTimeInterval, delta: NSTimeInterval) -> Double {
+
+        let doseDuration = dose.endDate.timeIntervalSinceDate(dose.startDate)  // t1
+        let time = date.timeIntervalSinceDate(dose.startDate)
+        var iob: Double = 0
+        var doseDate = NSTimeInterval(0)  // i
+
+        repeat {
+            let segment = max(0, min(doseDate + delta, doseDuration) - doseDate) / doseDuration
+            iob += segment * walshPercentEffectRemainingAtTime(time - delay, actionDuration: actionDuration)!
+            doseDate += delta
+        } while doseDate <= min(floor((time + delay) / delta) * delta, doseDuration)
+
+        return iob
+    }
+
+    private static func insulinOnBoardForDose(dose: DoseEntry, atDate date: NSDate, actionDuration: NSTimeInterval, delay: NSTimeInterval, delta: NSTimeInterval) -> Double {
+        let time = date.timeIntervalSinceDate(dose.startDate)
+        let iob: Double
+
+        if time >= 0 {
+            if dose.unit == .Units {
+                iob = dose.value * walshPercentEffectRemainingAtTime(time - delay, actionDuration: actionDuration)!
+            } else if dose.unit == .UnitsPerHour && dose.endDate.timeIntervalSinceDate(dose.startDate) <= 1.05 * delta {
+                iob = dose.value * dose.endDate.timeIntervalSinceDate(dose.startDate) / NSTimeInterval(hours: 1) * walshPercentEffectRemainingAtTime(time - delay, actionDuration: actionDuration)!
+            } else {
+                iob = dose.value * dose.endDate.timeIntervalSinceDate(dose.startDate) / NSTimeInterval(hours: 1) * insulinOnBoardForContinuousDose(dose, atDate: date, actionDuration: actionDuration, delay: delay, delta: delta)
+            }
+        } else {
+            iob = 0
+        }
+
+        return iob
     }
 
     /**
@@ -116,4 +162,51 @@ struct InsulinMath {
         return total
     }
 
+    /**
+     Calculates the timeline of insulin remaining for a collection of doses
+
+     - parameter doses:          A collection of doses
+     - parameter actionDuration: The total time of insulin effect
+     - parameter fromDate:       The date to begin the timeline
+     - parameter toDate:         The date to end the timeline
+     - parameter delay:          The time to delay the dose effect
+     - parameter delta:          The differential between timeline entries
+
+     - returns: A sequence of insulin amount remaining
+     */
+    static func insulinOnBoardForDoses<T: CollectionType where T.Generator.Element == DoseEntry>(
+        doses: T,
+        actionDuration: NSTimeInterval,
+        fromDate: NSDate? = nil,
+        toDate: NSDate? = nil,
+        delay: NSTimeInterval = NSTimeInterval(minutes: 10),
+        delta: NSTimeInterval = NSTimeInterval(minutes: 5)
+    ) -> [InsulinValue] {
+        var validActionDuration = false
+
+        for hours in 3...6 {
+            if actionDuration == NSTimeInterval(hours: Double(hours)) {
+                validActionDuration = true
+                break
+            }
+        }
+
+        guard validActionDuration, let (startDate, endDate) = LoopMath.simulationDateRangeForSamples(doses, fromDate: fromDate, toDate: toDate, duration: actionDuration, delay: delay, delta: delta) else {
+            return []
+        }
+
+        var date = startDate
+        var values = [InsulinValue]()
+
+        repeat {
+            let value = doses.reduce(0) { (value, dose) -> Double in
+                return value + insulinOnBoardForDose(dose, atDate: date, actionDuration: actionDuration, delay: delay, delta: delta)
+            }
+
+            values.append(InsulinValue(startDate: date, value: value))
+            date = date.dateByAddingTimeInterval(delta)
+        } while date <= endDate
+
+        return values
+    }
 }

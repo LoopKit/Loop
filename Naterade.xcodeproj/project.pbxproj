@@ -23,6 +23,10 @@
 		430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */; };
 		430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C59AE1C55ED53006CDB2A /* LoopMath.swift */; };
 		430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */; };
+		431B02EC1C6316DC00E4CC41 /* iob_from_doses_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 431B02EA1C6316DC00E4CC41 /* iob_from_doses_input.json */; };
+		431B02ED1C6316DC00E4CC41 /* iob_from_doses_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 431B02EB1C6316DC00E4CC41 /* iob_from_doses_output.json */; };
+		431B02F01C631B0900E4CC41 /* iob_from_bolus_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 431B02EE1C631B0900E4CC41 /* iob_from_bolus_input.json */; };
+		431B02F11C631B0900E4CC41 /* iob_from_bolus_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 431B02EF1C631B0900E4CC41 /* iob_from_bolus_output.json */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
 		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		432884F21BB515D40028E4EB /* PumpDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432884F11BB515D40028E4EB /* PumpDataManager.swift */; };
@@ -382,6 +386,10 @@
 		430D1A8C1C4B6E6700DF5FA4 /* CarbMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbMath.swift; sourceTree = "<group>"; };
 		430D1A921C4C955D00DF5FA4 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
 		430D5CE11B9C1879002551A8 /* NSDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataTests.swift; sourceTree = "<group>"; };
+		431B02EA1C6316DC00E4CC41 /* iob_from_doses_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_doses_input.json; sourceTree = "<group>"; };
+		431B02EB1C6316DC00E4CC41 /* iob_from_doses_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_doses_output.json; sourceTree = "<group>"; };
+		431B02EE1C631B0900E4CC41 /* iob_from_bolus_input.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_bolus_input.json; sourceTree = "<group>"; };
+		431B02EF1C631B0900E4CC41 /* iob_from_bolus_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_bolus_output.json; sourceTree = "<group>"; };
 		4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateComponents.swift; sourceTree = "<group>"; };
 		4326F5061BA6292F009204C6 /* AlertType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
 		432884F11BB515D40028E4EB /* PumpDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpDataManager.swift; sourceTree = "<group>"; };
@@ -1019,6 +1027,10 @@
 		43C7924B1C5ECFAA00C38255 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				431B02EE1C631B0900E4CC41 /* iob_from_bolus_input.json */,
+				431B02EF1C631B0900E4CC41 /* iob_from_bolus_output.json */,
+				431B02EA1C6316DC00E4CC41 /* iob_from_doses_input.json */,
+				431B02EB1C6316DC00E4CC41 /* iob_from_doses_output.json */,
 				43C7924C1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json */,
 				43C7924D1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json */,
 			);
@@ -1597,7 +1609,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				431B02F01C631B0900E4CC41 /* iob_from_bolus_input.json in Resources */,
+				431B02F11C631B0900E4CC41 /* iob_from_bolus_output.json in Resources */,
+				431B02ED1C6316DC00E4CC41 /* iob_from_doses_output.json in Resources */,
 				43C7924F1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json in Resources */,
+				431B02EC1C6316DC00E4CC41 /* iob_from_doses_input.json in Resources */,
 				43C7924E1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
