@@ -10,7 +10,7 @@ import Foundation
 import LoopKit
 
 
-public struct InsulinValue {
+public struct InsulinValue: TimelineValue {
     public let startDate: NSDate
     public let value: Double
 

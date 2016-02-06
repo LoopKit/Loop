@@ -802,8 +802,8 @@
 		437220341C4D93F000C5F36C /* LoopKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				432DC7271C658D57005994B3 /* BasalRateScheduleTests.swift */,
 				437220371C4D93F000C5F36C /* Info.plist */,
+				432DC7271C658D57005994B3 /* BasalRateScheduleTests.swift */,
 				437220351C4D93F000C5F36C /* LoopKitTests.swift */,
 				437220521C4DD52D00C5F36C /* NSDateTests.swift */,
 				4372204F1C4DA86C00C5F36C /* QuantityScheduleTests.swift */,

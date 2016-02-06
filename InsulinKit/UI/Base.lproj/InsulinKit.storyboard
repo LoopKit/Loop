@@ -127,6 +127,8 @@
                     <navigationItem key="navigationItem" title="Pump Reservoir" id="vls-EW-uwI"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
+                        <outlet property="IOBDateLabel" destination="92n-81-9sl" id="Q4J-jR-RDJ"/>
+                        <outlet property="IOBValueLabel" destination="PZQ-gO-084" id="mCY-gK-Qmq"/>
                         <outlet property="needsConfigurationMessageView" destination="Y29-PZ-u5S" id="Qxg-VM-tc5"/>
                         <outlet property="totalDateLabel" destination="DZX-KL-BBc" id="N0E-Tz-HvM"/>
                         <outlet property="totalValueLabel" destination="7Fy-gG-Zof" id="25M-Da-1BQ"/>
