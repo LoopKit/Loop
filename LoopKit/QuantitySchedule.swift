@@ -10,7 +10,7 @@ import Foundation
 import HealthKit
 
 
-public struct ScheduleItem {
+public struct RepeatingScheduleValue {
     public let startTime: NSTimeInterval
     public let value: Double
 
@@ -20,11 +20,23 @@ public struct ScheduleItem {
     }
 }
 
-extension ScheduleItem: Equatable {
+public struct AbsoluteScheduleValue: TimelineValue {
+    public let startDate: NSDate
+    public let value: Double
 }
 
-public func ==(lhs: ScheduleItem, rhs: ScheduleItem) -> Bool {
+extension RepeatingScheduleValue: Equatable {
+}
+
+public func ==(lhs: RepeatingScheduleValue, rhs: RepeatingScheduleValue) -> Bool {
     return lhs.startTime == rhs.startTime && lhs.value == rhs.value
+}
+
+extension AbsoluteScheduleValue: Equatable {
+}
+
+public func ==(lhs: AbsoluteScheduleValue, rhs: AbsoluteScheduleValue) -> Bool {
+    return lhs.startDate == rhs.startDate && lhs.value == rhs.value
 }
 
 
@@ -32,10 +44,10 @@ public class DailyValueSchedule {
     private let referenceTimeInterval: NSTimeInterval
     private let repeatInterval = NSTimeInterval(hours: 24)
 
-    public let items: [ScheduleItem]
+    public let items: [RepeatingScheduleValue]
     public let timeZone: NSTimeZone
 
-    init?(dailyItems: [ScheduleItem], timeZone: NSTimeZone?) {
+    init?(dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone?) {
         self.items = dailyItems.sort { $0.startTime < $1.startTime }
         self.timeZone = timeZone ?? NSTimeZone.localTimeZone()
 
@@ -73,7 +85,7 @@ public class DailyValueSchedule {
 
      - returns: A slice of `ScheduleItem` values
      */
-    public func between(startDate: NSDate, _ endDate: NSDate) -> ArraySlice<ScheduleItem> {
+    public func between(startDate: NSDate, _ endDate: NSDate) -> [AbsoluteScheduleValue] {
         guard startDate <= endDate else {
             return []
         }
@@ -100,7 +112,13 @@ public class DailyValueSchedule {
             }
         }
 
-        return items[startIndex..<endIndex]
+        let referenceDate = startDate.dateByAddingTimeInterval(-startOffset)
+
+        return items[startIndex..<endIndex].map {
+            print(referenceDate, $0.startTime)
+
+            return AbsoluteScheduleValue(startDate: referenceDate.dateByAddingTimeInterval($0.startTime), value: $0.value)
+        }
     }
 
     public func at(time: NSDate) -> Double {
@@ -112,7 +130,7 @@ public class DailyValueSchedule {
 public class DailyQuantitySchedule: DailyValueSchedule {
     public let unit: HKUnit
 
-    public init?(unit: HKUnit, dailyItems: [ScheduleItem], timeZone: NSTimeZone?) {
+    public init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone?) {
         self.unit = unit
 
         super.init(dailyItems: dailyItems, timeZone: timeZone)
@@ -125,7 +143,7 @@ public class DailyQuantitySchedule: DailyValueSchedule {
 
 
 public class InsulinSensitivitySchedule: DailyQuantitySchedule {
-    public override init?(unit: HKUnit, dailyItems: [ScheduleItem], timeZone: NSTimeZone? = nil) {
+    public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
         super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
 
         guard unit == HKUnit.milligramsPerDeciliterUnit() || unit == HKUnit.millimolesPerLiterUnit() else {
@@ -136,7 +154,7 @@ public class InsulinSensitivitySchedule: DailyQuantitySchedule {
 
 
 public class CarbRatioSchedule: DailyQuantitySchedule {
-    public override init?(unit: HKUnit, dailyItems: [ScheduleItem], timeZone: NSTimeZone? = nil) {
+    public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
         super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
 
         guard unit == HKUnit.gramUnit() else {
@@ -147,7 +165,7 @@ public class CarbRatioSchedule: DailyQuantitySchedule {
 
 
 public class BasalRateSchedule: DailyValueSchedule {
-    public override init?(dailyItems: [ScheduleItem], timeZone: NSTimeZone? = nil) {
+    public override init?(dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
         super.init(dailyItems: dailyItems, timeZone: timeZone)
     }
 }

@@ -12,7 +12,7 @@ import HealthKit
 
 class QuantityScheduleTests: XCTestCase {
 
-    var items: [ScheduleItem]!
+    var items: [RepeatingScheduleValue]!
 
     override func setUp() {
         super.setUp()
@@ -22,7 +22,7 @@ class QuantityScheduleTests: XCTestCase {
         let schedule = fixture["schedule"] as! [JSONDictionary]
 
         items = schedule.map {
-            return ScheduleItem(startTime: NSTimeInterval(minutes: $0["offset"] as! Double), value: $0["ratio"] as! Double)
+            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["offset"] as! Double), value: $0["ratio"] as! Double)
         }
     }
 

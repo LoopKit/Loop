@@ -26,12 +26,12 @@ class CarbMathTests: XCTestCase {
         let schedule = fixture["schedule"] as! [JSONDictionary]
 
         let items = schedule.map {
-            return ScheduleItem(startTime: NSTimeInterval(minutes: $0["offset"] as! Double), value: $0["ratio"] as! Double)
+            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["offset"] as! Double), value: $0["ratio"] as! Double)
         }
 
         return (
             CarbRatioSchedule(unit: HKUnit.gramUnit(), dailyItems: items)!,
-            InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [ScheduleItem(startTime: 0.0, value: 40.0)])!
+            InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 40.0)])!
         )
     }
 

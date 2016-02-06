@@ -12,7 +12,7 @@ import XCTest
 
 class BasalRateScheduleTests: XCTestCase {
     
-    var items: [ScheduleItem]!
+    var items: [RepeatingScheduleValue]!
 
     override func setUp() {
         super.setUp()
@@ -21,7 +21,7 @@ class BasalRateScheduleTests: XCTestCase {
         let fixture = try! NSJSONSerialization.JSONObjectWithData(NSData(contentsOfFile: path)!, options: []) as! [JSONDictionary]
 
         items = fixture.map {
-            return ScheduleItem(startTime: NSTimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
+            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
         }
     }
 
@@ -31,62 +31,70 @@ class BasalRateScheduleTests: XCTestCase {
 
         let midnight = calendar.startOfDayForDate(NSDate())
 
+        var absoluteItems: [AbsoluteScheduleValue] = items[0..<items.count].map {
+            AbsoluteScheduleValue(startDate: midnight.dateByAddingTimeInterval($0.startTime), value: $0.value)
+        }
+
+        absoluteItems += items[0..<items.count].map {
+            AbsoluteScheduleValue(startDate: midnight.dateByAddingTimeInterval($0.startTime + NSTimeInterval(hours: 24)), value: $0.value)
+        }
+
         XCTAssertEqual(
-            items[0..<items.count],
+            absoluteItems[0..<items.count],
             schedule.between(
                 midnight,
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24))
-            )
+            )[0..<items.count]
         )
 
         let twentyThree30 = midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 23)).dateByAddingTimeInterval(NSTimeInterval(minutes: 30))
 
         XCTAssertEqual(
-            items[0..<items.count],
+            absoluteItems[0..<items.count],
             schedule.between(
                 midnight,
                 twentyThree30
-            )
+            )[0..<items.count]
         )
 
         XCTAssertEqual(
-            items[0..<items.count] + items[0...0],
+            absoluteItems[0..<items.count + 1],
             schedule.between(
                 midnight,
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24) + NSTimeInterval(1))
-            )
+            )[0..<items.count + 1]
         )
 
         XCTAssertEqual(
-            items[items.count - 1..<items.count] + items[0..<items.count],
+            absoluteItems[items.count - 1..<items.count * 2],
             schedule.between(
                 twentyThree30,
                 twentyThree30.dateByAddingTimeInterval(NSTimeInterval(hours: 24))
-            )
+            )[0..<items.count + 1]
         )
 
         XCTAssertEqual(
-            items[0..<1],
+            absoluteItems[0..<1],
             schedule.between(
                 midnight,
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 1))
-            )
+            )[0..<1]
         )
 
         XCTAssertEqual(
-            items[1..<3],
+            absoluteItems[1..<3],
             schedule.between(
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 4)),
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 9))
-            )
+            )[0..<2]
         )
 
         XCTAssertEqual(
-            items[5..<6],
+            absoluteItems[5..<6],
             schedule.between(
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 16)),
                 midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 20))
-            )
+            )[0..<1]
         )
 
         XCTAssertEqual(
