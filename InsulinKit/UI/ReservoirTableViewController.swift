@@ -118,12 +118,21 @@ public class ReservoirTableViewController: UITableViewController {
         updateIOB()
     }
 
+    private lazy var IOBNumberFormatter: NSNumberFormatter = {
+        let formatter = NSNumberFormatter()
+
+        formatter.numberStyle = .DecimalStyle
+        formatter.maximumFractionDigits = 2
+
+        return formatter
+    }()
+
     private func updateIOB() {
         if case .Display(let doseStore) = state {
             doseStore.insulinOnBoardAtDate(NSDate()) { (value) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     if let value = value {
-                        self.IOBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.IOBValueLabel.text = self.IOBNumberFormatter.stringFromNumber(value.value)
                         self.IOBDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", tableName: "InsulinKit", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
                     } else {
                         self.IOBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)

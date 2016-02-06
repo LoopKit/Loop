@@ -7,6 +7,7 @@
 //
 
 import CoreData
+import LoopKit
 
 
 public protocol ReservoirValue {
@@ -36,8 +37,15 @@ public class DoseStore {
 
     public let insulinActionDuration = NSTimeInterval(hours: 4)
 
-    public init(pumpID: String) {
+    public var basalProfile: BasalRateSchedule {
+        didSet {
+            clearDoseCache()
+        }
+    }
+
+    public init(pumpID: String, basalProfile: BasalRateSchedule) {
         self.pumpID = pumpID
+        self.basalProfile = basalProfile
 
         persistenceController = PersistenceController(readyCallback: { [unowned self] (error) -> Void in
             if let error = error {
@@ -118,11 +126,13 @@ public class DoseStore {
 
                 newValues.append(reservoir)
 
-                recentReservoirDoseEntriesCache! += InsulinMath.doseEntriesFromReservoirValues(newValues)
+                recentReservoirDoseEntriesCache! += InsulinMath.normalize(InsulinMath.doseEntriesFromReservoirValues(newValues), againstBasalSchedule: basalProfile)
             }
 
             recentReservoirObjectsCache!.insert(reservoir, atIndex: 0)
         }
+
+        clearCalculationCache()
 
         persistenceController.save { (error) -> Void in
             // TODO: Handle error
@@ -174,7 +184,7 @@ public class DoseStore {
     private func getRecentReservoirDoseEntries(resultsHandler: (doses: [DoseEntry], error: ErrorType?) -> Void) {
         if recentReservoirDoseEntriesCache == nil, case .Ready = readyState {
             getRecentReservoirObjects { (reservoirValues, error) -> Void in
-                self.recentReservoirDoseEntriesCache = InsulinMath.doseEntriesFromReservoirValues(reservoirValues.reverse())
+                self.recentReservoirDoseEntriesCache = InsulinMath.normalize(InsulinMath.doseEntriesFromReservoirValues(reservoirValues.reverse()), againstBasalSchedule: self.basalProfile)
 
                 resultsHandler(doses: self.recentReservoirDoseEntriesCache ?? [], error: error)
             }
@@ -224,6 +234,32 @@ public class DoseStore {
     }
 
     // MARK: Math
+
+    private func clearDoseCache() {
+        recentReservoirDoseEntriesCache = nil
+
+        clearCalculationCache()
+    }
+
+    private func clearCalculationCache() {
+        insulinOnBoardCache = nil
+    }
+
+    private var insulinOnBoardCache: [InsulinValue]?
+
+    public func insulinOnBoardAtDate(date: NSDate, resultHandler: (InsulinValue?) -> Void) {
+        if insulinOnBoardCache == nil {
+            getRecentReservoirDoseEntries { (doses, error) -> Void in
+                if error == nil {
+                    self.insulinOnBoardCache = InsulinMath.insulinOnBoardForDoses(doses, actionDuration: self.insulinActionDuration)
+                }
+
+                resultHandler(self.insulinOnBoardCache?.closestToDate(date))
+            }
+        } else {
+            resultHandler(insulinOnBoardCache?.closestToDate(date))
+        }
+    }
 
     public func getTotalRecentUnitsDelivered(resultHandler: (Double) -> Void) {
         getRecentReservoirDoseEntries { (doses, error) -> Void in

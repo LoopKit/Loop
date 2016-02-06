@@ -140,6 +140,55 @@ struct InsulinMath {
         return doses
     }
 
+    private static func normalizeBasalDose(dose: DoseEntry, againstBasalSchedule basalSchedule: BasalRateSchedule) -> [DoseEntry] {
+
+        var normalizedDoses: [DoseEntry] = []
+        let basalItems = basalSchedule.between(dose.startDate, dose.endDate)
+
+        for (index, basalItem) in basalItems.enumerate() {
+            let value = dose.value - basalItem.value
+            let startDate: NSDate
+            let endDate: NSDate
+
+            if index == 0 {
+                startDate = dose.startDate
+            } else {
+                startDate = basalItem.startDate
+            }
+
+            if index == basalItems.count - 1 {
+                endDate = dose.endDate
+            } else {
+                endDate = basalItems[index + 1].startDate
+            }
+
+            normalizedDoses.append(DoseEntry(
+                startDate: startDate,
+                endDate: endDate,
+                value: value,
+                unit: dose.unit,
+                description: dose.description
+            ))
+        }
+
+        return normalizedDoses
+    }
+
+    static func normalize<T: CollectionType where T.Generator.Element == DoseEntry>(doses: T, againstBasalSchedule basalSchedule: BasalRateSchedule) -> [DoseEntry] {
+
+        var normalizedDoses: [DoseEntry] = []
+
+        for dose in doses {
+            if dose.unit == .UnitsPerHour {
+                normalizedDoses += normalizeBasalDose(dose, againstBasalSchedule: basalSchedule)
+            } else {
+                normalizedDoses.append(dose)
+            }
+        }
+
+        return normalizedDoses
+    }
+
     /**
      Calculates the total insulin delivery for a collection of doses
 

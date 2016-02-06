@@ -115,8 +115,6 @@ public class DailyValueSchedule {
         let referenceDate = startDate.dateByAddingTimeInterval(-startOffset)
 
         return items[startIndex..<endIndex].map {
-            print(referenceDate, $0.startTime)
-
             return AbsoluteScheduleValue(startDate: referenceDate.dateByAddingTimeInterval($0.startTime), value: $0.value)
         }
     }
