@@ -16,6 +16,10 @@ public class ReservoirTableViewController: UITableViewController {
 
     @IBOutlet var needsConfigurationMessageView: UIView!
 
+    @IBOutlet weak var IOBValueLabel: UILabel!
+
+    @IBOutlet weak var IOBDateLabel: UILabel!
+
     @IBOutlet weak var totalValueLabel: UILabel!
 
     @IBOutlet weak var totalDateLabel: UILabel!
@@ -48,6 +52,12 @@ public class ReservoirTableViewController: UITableViewController {
         if tableView.editing {
             tableView.endEditing(true)
         }
+    }
+
+    public override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+
+        updateTimelyStats(nil)
     }
 
     // MARK: - Data
@@ -104,6 +114,26 @@ public class ReservoirTableViewController: UITableViewController {
         }
     }
 
+    func updateTimelyStats(_: NSTimer?) {
+        updateIOB()
+    }
+
+    private func updateIOB() {
+        if case .Display(let doseStore) = state {
+            doseStore.insulinOnBoardAtDate(NSDate()) { (value) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if let value = value {
+                        self.IOBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(value.value, numberStyle: .NoStyle)
+                        self.IOBDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", tableName: "InsulinKit", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                    } else {
+                        self.IOBValueLabel.text = NSNumberFormatter.localizedStringFromNumber(0, numberStyle: .NoStyle)
+                        self.IOBDateLabel.text = nil
+                    }
+                }
+            }
+        }
+    }
+
     private func updateTotal() {
         if case .Display(let carbStore) = state {
             carbStore.getTotalRecentUnitsDelivered { (total) -> Void in
@@ -111,7 +141,7 @@ public class ReservoirTableViewController: UITableViewController {
                     self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(total, numberStyle: .NoStyle)
 
                     if let sinceDate = self.reservoirValues.last?.startDate {
-                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", tableName: "InsulinNKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(sinceDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", tableName: "InsulinKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(sinceDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
                     } else {
                         self.totalDateLabel.text = nil
                     }
@@ -149,7 +179,7 @@ public class ReservoirTableViewController: UITableViewController {
         if case .Display = state {
             let entry = reservoirValues[indexPath.row]
             let volume = NSNumberFormatter.localizedStringFromNumber(entry.unitVolume, numberStyle: .DecimalStyle)
-            let time = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle)
+            let time = NSDateFormatter.localizedStringFromDate(entry.startDate, dateStyle: .NoStyle, timeStyle: .MediumStyle)
 
             cell.textLabel?.text = "\(volume) U"
             cell.detailTextLabel?.text = time

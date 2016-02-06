@@ -38,6 +38,8 @@
 		43298EEC1C3A1DC900F520A3 /* CarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43298EEB1C3A1DC900F520A3 /* CarbEntry.swift */; };
 		432AC0C71C2A396A00B1DC2F /* CRC8.h in Headers */ = {isa = PBXBuildFile; fileRef = 432AC0C51C2A396A00B1DC2F /* CRC8.h */; };
 		432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */ = {isa = PBXBuildFile; fileRef = 432AC0C61C2A396A00B1DC2F /* CRC8.m */; };
+		432DC7281C658D57005994B3 /* BasalRateScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432DC7271C658D57005994B3 /* BasalRateScheduleTests.swift */; };
+		432DC72A1C658D88005994B3 /* basal.json in Resources */ = {isa = PBXBuildFile; fileRef = 432DC7291C658D88005994B3 /* basal.json */; };
 		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
 		433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */; };
 		4362488F1C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json in Resources */ = {isa = PBXBuildFile; fileRef = 436248871C586C1A0088BB43 /* momentum_effect_bouncing_glucose_input.json */; };
@@ -400,6 +402,8 @@
 		43298EEB1C3A1DC900F520A3 /* CarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntry.swift; sourceTree = "<group>"; };
 		432AC0C51C2A396A00B1DC2F /* CRC8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CRC8.h; sourceTree = "<group>"; };
 		432AC0C61C2A396A00B1DC2F /* CRC8.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CRC8.m; sourceTree = "<group>"; };
+		432DC7271C658D57005994B3 /* BasalRateScheduleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateScheduleTests.swift; sourceTree = "<group>"; };
+		432DC7291C658D88005994B3 /* basal.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = basal.json; sourceTree = "<group>"; };
 		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
@@ -798,6 +802,7 @@
 		437220341C4D93F000C5F36C /* LoopKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				432DC7271C658D57005994B3 /* BasalRateScheduleTests.swift */,
 				437220371C4D93F000C5F36C /* Info.plist */,
 				437220351C4D93F000C5F36C /* LoopKitTests.swift */,
 				437220521C4DD52D00C5F36C /* NSDateTests.swift */,
@@ -810,6 +815,7 @@
 		4372204C1C4DA5EC00C5F36C /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				432DC7291C658D88005994B3 /* basal.json */,
 				4372204D1C4DA62700C5F36C /* read_carb_ratios.json */,
 			);
 			path = Fixtures;
@@ -1641,6 +1647,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4372204E1C4DA62700C5F36C /* read_carb_ratios.json in Resources */,
+				432DC72A1C658D88005994B3 /* basal.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1806,6 +1813,7 @@
 			files = (
 				437220531C4DD52D00C5F36C /* NSDateTests.swift in Sources */,
 				437220361C4D93F000C5F36C /* LoopKitTests.swift in Sources */,
+				432DC7281C658D57005994B3 /* BasalRateScheduleTests.swift in Sources */,
 				437220501C4DA86C00C5F36C /* QuantityScheduleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

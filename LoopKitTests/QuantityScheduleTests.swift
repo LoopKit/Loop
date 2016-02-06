@@ -25,7 +25,7 @@ class QuantityScheduleTests: XCTestCase {
             return ScheduleItem(startTime: NSTimeInterval(minutes: $0["offset"] as! Double), value: $0["ratio"] as! Double)
         }
     }
-    
+
     func testCarbRatioScheduleLocalTimeZone() {
         let schedule = CarbRatioSchedule(unit: HKUnit.gramUnit(), dailyItems: items)!
         let calendar = NSCalendar.currentCalendar()

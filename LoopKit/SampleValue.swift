@@ -18,3 +18,20 @@ public protocol TimelineValue {
 public protocol SampleValue: TimelineValue {
     var quantity: HKQuantity { get }
 }
+
+
+public extension SequenceType where Generator.Element: TimelineValue {
+    func closestToDate(date: NSDate) -> Generator.Element? {
+        var closestElement: Generator.Element?
+
+        for value in self {
+            if value.startDate <= date {
+                closestElement = value
+            } else {
+                break
+            }
+        }
+
+        return closestElement
+    }
+}

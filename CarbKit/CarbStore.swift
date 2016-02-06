@@ -316,19 +316,7 @@ public class CarbStore: HealthKitSampleStore {
                 self.carbsOnBoardCache = CarbMath.carbsOnBoardForCarbEntries(self.recentSamples.map { StoredCarbEntry(sample: $0) }, defaultAbsorptionTime: self.defaultAbsorptionTimes.medium)
             }
 
-            var closestValue: CarbValue?
-
-            if let values = self.carbsOnBoardCache {
-                for value in values {
-                    if value.startDate <= date {
-                        closestValue = value
-                    } else {
-                        break
-                    }
-                }
-            }
-
-            resultHandler(closestValue)
+            resultHandler(self.carbsOnBoardCache?.closestToDate(date))
         }
     }
 
