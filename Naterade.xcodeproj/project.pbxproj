@@ -166,6 +166,9 @@
 		43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */; };
 		43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A51B9E1B3300C85C07 /* NSBundle.swift */; };
 		43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
+		43E6FA3B1C66786C000755B5 /* normalized_reservoir_history_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E6FA3A1C66786C000755B5 /* normalized_reservoir_history_output.json */; };
+		43E6FA3C1C667935000755B5 /* basal.json in Resources */ = {isa = PBXBuildFile; fileRef = 432DC7291C658D88005994B3 /* basal.json */; };
+		43E6FA3E1C667C71000755B5 /* iob_from_reservoir_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E6FA3D1C667C71000755B5 /* iob_from_reservoir_output.json */; };
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43EDDBF71C361D24007D89B5 /* CommonCrypto.framework.dSYM in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */; };
@@ -528,6 +531,8 @@
 		43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		43E344A51B9E1B3300C85C07 /* NSBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSBundle.swift; sourceTree = "<group>"; };
 		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
+		43E6FA3A1C66786C000755B5 /* normalized_reservoir_history_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = normalized_reservoir_history_output.json; sourceTree = "<group>"; };
+		43E6FA3D1C667C71000755B5 /* iob_from_reservoir_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_reservoir_output.json; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
@@ -1033,10 +1038,12 @@
 		43C7924B1C5ECFAA00C38255 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				43E6FA3D1C667C71000755B5 /* iob_from_reservoir_output.json */,
 				431B02EE1C631B0900E4CC41 /* iob_from_bolus_input.json */,
 				431B02EF1C631B0900E4CC41 /* iob_from_bolus_output.json */,
 				431B02EA1C6316DC00E4CC41 /* iob_from_doses_input.json */,
 				431B02EB1C6316DC00E4CC41 /* iob_from_doses_output.json */,
+				43E6FA3A1C66786C000755B5 /* normalized_reservoir_history_output.json */,
 				43C7924C1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json */,
 				43C7924D1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json */,
 			);
@@ -1620,7 +1627,10 @@
 				431B02ED1C6316DC00E4CC41 /* iob_from_doses_output.json in Resources */,
 				43C7924F1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_output.json in Resources */,
 				431B02EC1C6316DC00E4CC41 /* iob_from_doses_input.json in Resources */,
+				43E6FA3C1C667935000755B5 /* basal.json in Resources */,
+				43E6FA3E1C667C71000755B5 /* iob_from_reservoir_output.json in Resources */,
 				43C7924E1C5ECFEF00C38255 /* reservoir_history_with_rewind_and_prime_input.json in Resources */,
+				43E6FA3B1C66786C000755B5 /* normalized_reservoir_history_output.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

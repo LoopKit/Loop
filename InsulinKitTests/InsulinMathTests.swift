@@ -55,6 +55,16 @@ class InsulinMathTests: XCTestCase {
         }
     }
 
+    func loadBasalRateScheduleFixture(resourceName: String) -> BasalRateSchedule {
+        let fixture: [JSONDictionary] = loadFixture(resourceName)
+
+        let items = fixture.map {
+            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
+        }
+
+        return BasalRateSchedule(dailyItems: items)!
+    }
+
     func testDoseEntriesFromReservoirValues() {
         let input = loadReservoirFixture("reservoir_history_with_rewind_and_prime_input")
         let output = loadDoseFixture("reservoir_history_with_rewind_and_prime_output").reverse()
@@ -84,6 +94,33 @@ class InsulinMathTests: XCTestCase {
     func testIOBFromBolus() {
         let input = loadDoseFixture("iob_from_bolus_input")
         let output = loadInsulinValueFixture("iob_from_bolus_output")
+
+        let iob = InsulinMath.insulinOnBoardForDoses(input, actionDuration: NSTimeInterval(hours: 4))
+
+        for (expected, calculated) in zip(output, iob) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(1, -14))
+        }
+    }
+
+    func testNormalizeReservoirDoses() {
+        let input = loadDoseFixture("reservoir_history_with_rewind_and_prime_output")
+        let output = loadDoseFixture("normalized_reservoir_history_output")
+        let basals = loadBasalRateScheduleFixture("basal")
+
+        let doses = InsulinMath.normalize(input, againstBasalSchedule: basals)
+
+        for (expected, calculated) in zip(output, doses) {
+            XCTAssertEqual(expected.startDate, calculated.startDate)
+            XCTAssertEqual(expected.endDate, calculated.endDate)
+            XCTAssertEqualWithAccuracy(expected.value, calculated.value, accuracy: pow(1, -14))
+            XCTAssertEqual(expected.unit, calculated.unit)
+        }
+    }
+
+    func testIOBFromReservoirDoses() {
+        let input = loadDoseFixture("normalized_reservoir_history_output")
+        let output = loadInsulinValueFixture("iob_from_reservoir_output")
 
         let iob = InsulinMath.insulinOnBoardForDoses(input, actionDuration: NSTimeInterval(hours: 4))
 
