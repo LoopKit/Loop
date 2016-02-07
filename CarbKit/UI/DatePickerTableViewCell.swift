@@ -33,10 +33,12 @@ class DatePickerTableViewCell: UITableViewCell {
 
     @IBOutlet weak var datePickerHeightConstraint: NSLayoutConstraint!
 
-    @IBOutlet weak var datePickerSpacingConstraint: NSLayoutConstraint!
+    private var datePickerExpandedHeight: CGFloat = 0
 
     override func awakeFromNib() {
         super.awakeFromNib()
+
+        datePickerExpandedHeight = datePickerHeightConstraint.constant
 
         setSelected(true, animated: false)
         dateChanged(datePicker)
@@ -49,7 +51,7 @@ class DatePickerTableViewCell: UITableViewCell {
             let closed = datePicker.hidden
 
             datePicker.hidden = !closed
-            datePickerHeightConstraint.constant = closed ? 200 : 0
+            datePickerHeightConstraint.constant = closed ? datePickerExpandedHeight : 0
         }
     }
 

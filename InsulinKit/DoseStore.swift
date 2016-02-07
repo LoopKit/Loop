@@ -93,7 +93,7 @@ public class DoseStore {
     private var recentReservoirValuesMinDate: NSDate {
         let calendar = NSCalendar.currentCalendar()
 
-        return min(calendar.startOfDayForDate(NSDate()), NSDate(timeIntervalSinceNow: -insulinActionDuration))
+        return min(calendar.startOfDayForDate(NSDate()), NSDate(timeIntervalSinceNow: -insulinActionDuration - NSTimeInterval(minutes: 5)))
     }
 
     private var recentReservoirValuesPredicate: NSPredicate {
@@ -116,7 +116,7 @@ public class DoseStore {
         if recentReservoirObjectsCache != nil {
             let predicate = recentReservoirValuesPredicate
 
-            for (index, value) in recentReservoirObjectsCache!.reverse().enumerate() {
+            for (index, value) in recentReservoirObjectsCache!.enumerate().reverse() {
                 if predicate.evaluateWithObject(value) {
                     break
                 } else {
@@ -127,7 +127,7 @@ public class DoseStore {
             if recentReservoirDoseEntriesCache != nil {
                 let minEndDate = recentReservoirValuesMinDate
 
-                for (index, entry) in recentReservoirDoseEntriesCache!.reverse().enumerate() {
+                for (index, entry) in recentReservoirDoseEntriesCache!.enumerate() {
                     if entry.endDate >= minEndDate {
                         break
                     } else {
@@ -148,7 +148,7 @@ public class DoseStore {
                 recentReservoirDoseEntriesCache! += newDoseEntries
 
                 if recentReservoirNormalizedDoseEntriesCache != nil {
-                    for (index, entry) in recentReservoirNormalizedDoseEntriesCache!.reverse().enumerate() {
+                    for (index, entry) in recentReservoirNormalizedDoseEntriesCache!.enumerate() {
                         if entry.endDate >= minEndDate {
                             break
                         } else {

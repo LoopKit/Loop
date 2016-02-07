@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="rUL-yg-cFX">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="rUL-yg-cFX">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -301,7 +301,7 @@
                                     <constraints>
                                         <constraint firstItem="51k-zq-nab" firstAttribute="leading" secondItem="F91-OJ-fDB" secondAttribute="leadingMargin" id="1p0-0V-z8v"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="51k-zq-nab" secondAttribute="trailing" id="LRB-DJ-kqV"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="OoS-gi-VDF" secondAttribute="bottom" constant="-8.5" id="M0M-we-Sfg"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="OoS-gi-VDF" secondAttribute="bottom" constant="-8" id="M0M-we-Sfg"/>
                                         <constraint firstItem="OoS-gi-VDF" firstAttribute="top" secondItem="51k-zq-nab" secondAttribute="bottom" constant="8" id="dD4-Ma-kdn"/>
                                         <constraint firstItem="OoS-gi-VDF" firstAttribute="leading" secondItem="F91-OJ-fDB" secondAttribute="leading" id="dtD-W5-Dbc"/>
                                         <constraint firstItem="51k-zq-nab" firstAttribute="top" secondItem="F91-OJ-fDB" secondAttribute="topMargin" id="oLA-cl-OGI"/>
@@ -449,6 +449,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="rV7-J1-5KP"/>
+        <segue reference="9fZ-7e-aMq"/>
     </inferredMetricsTieBreakers>
 </document>
