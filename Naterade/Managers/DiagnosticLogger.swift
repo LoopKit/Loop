@@ -31,6 +31,16 @@ class DiagnosticLogger {
         }
     }
 
+    func addError(message: ErrorType, fromSource source: String) {
+        let info = [
+            "source": source,
+            "message": String(message),
+            "reportedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
+        ]
+
+        addMessage(info, toCollection: "errors")
+    }
+
     func addMessage(message: [String: AnyObject], toCollection collection: String) {
         if let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
             let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),

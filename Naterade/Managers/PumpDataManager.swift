@@ -22,7 +22,7 @@ enum State<T> {
     case Ready(T)
 }
 
-class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
+class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -138,7 +138,7 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
 
                 glucoseStore?.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, _, error) -> Void in
                     if let error = error {
-                        NSLog("%@", error)
+                        self.logger?.addError(error, fromSource: "GlucoseStore")
                     }
                 })
 
@@ -269,17 +269,7 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
 
     // MARK: - CarbKit
 
-    let carbStore: CarbStore? = {
-        let carbStore = CarbStore()
-
-        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
-            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
-                // TODO: Log the error
-            }
-        }
-
-        return carbStore
-    }()
+    let carbStore: CarbStore?
 
     private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
@@ -290,10 +280,9 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
                 absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
             )
 
-            carbStore.addCarbEntry(newEntry, resultHandler: { (success, entry, error) -> Void in
+            carbStore.addCarbEntry(newEntry, resultHandler: { (_, _, error) -> Void in
                 if let error = error {
-                    // TODO: Remote logging
-                    NSLog("CarbKit error from watch message: \(error)")
+                    self.logger?.addError(error, fromSource: "CarbStore")
                 }
             })
         }
@@ -311,6 +300,18 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
                 store.save()
             }
         }
+    }
+
+    // MARK: DoseStoreDelegate
+
+    func doseStoreReadyStateDidChange(doseStore: DoseStore) {
+        if case .Failed = doseStore.readyState {
+            // TODO: Alert the user?
+        }
+    }
+
+    func doseStoreDidError(error: DoseStore.Error) {
+        logger?.addError(error, fromSource: "DoseStore")
     }
 
     // MARK: - WatchKit
@@ -356,8 +357,7 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
                 do {
                     try session.updateApplicationContext(userInfo)
                 } catch let error {
-                    // TODO: Remote logging
-                    NSLog("WCSession error: \(error)")
+                    self.logger?.addError(error, fromSource: "WCSession")
                 }
             }
         }
@@ -392,11 +392,20 @@ class PumpDataManager: NSObject, TransmitterDelegate, WCSessionDelegate {
 
     override init() {
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
+        carbStore = CarbStore()
 
         super.init()
 
         watchSession?.delegate = self
         watchSession?.activateSession()
+
+        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
+            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "CarbStore")
+                }
+            }
+        }
     }
 
     deinit {

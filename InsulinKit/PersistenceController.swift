@@ -11,8 +11,26 @@ import CoreData
 class PersistenceController {
 
     enum Error: ErrorType {
-        case ConfigurationError
-        case CoreDataError(NSError?)
+        case ConfigurationError(String)
+        case CoreDataError(NSError)
+
+        var description: String {
+            switch self {
+            case .ConfigurationError(let description):
+                return description
+            case .CoreDataError(let error):
+                return error.localizedDescription
+            }
+        }
+
+        var recoverySuggestion: String {
+            switch self {
+            case .ConfigurationError:
+                return "Unrecoverable Error"
+            case .CoreDataError(let error):
+                return error.localizedRecoverySuggestion ?? "Please try again later"
+            }
+        }
     }
 
     let managedObjectContext: NSManagedObjectContext
@@ -93,7 +111,9 @@ class PersistenceController {
             self.privateManagedObjectContext.persistentStoreCoordinator = coordinator
             self.managedObjectContext.parentContext = self.privateManagedObjectContext
 
-            if let  bundleIdentifier = NSBundle(forClass: self.dynamicType).bundleIdentifier,
+            let bundle = NSBundle(forClass: self.dynamicType)
+
+            if let  bundleIdentifier = bundle.bundleIdentifier,
                     documentsURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first?.URLByAppendingPathComponent(bundleIdentifier, isDirectory: true)
             {
                 if !NSFileManager.defaultManager().fileExistsAtPath(documentsURL.absoluteString) {
@@ -119,7 +139,7 @@ class PersistenceController {
                     error = .CoreDataError(storeError)
                 }
             } else {
-                error = .ConfigurationError
+                error = .ConfigurationError("Cannot configure persistent store for bundle: \(bundle.bundleIdentifier) in directory: \(NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask))")
             }
 
             readyCallback(error: error)
