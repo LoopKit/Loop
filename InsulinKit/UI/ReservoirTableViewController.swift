@@ -99,17 +99,17 @@ public class ReservoirTableViewController: UITableViewController {
             doseStore.getRecentReservoirValues({ [unowned self] (reservoirValues, error) -> Void in
                 if let error = error {
                     print("getRecentReservoirValues produced an error: \(error)")
+                } else {
+                    self.reservoirValues = reservoirValues
+
+                    if reservoirValues.count > 0 {
+                        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+                    }
+
+                    self.tableView.reloadData()
+
+                    self.updateTotal()
                 }
-
-                self.reservoirValues = reservoirValues
-
-                if reservoirValues.count > 0 {
-                    self.navigationItem.rightBarButtonItem = self.editButtonItem()
-                }
-
-                self.tableView.reloadData()
-
-                self.updateTotal()
             })
         }
     }

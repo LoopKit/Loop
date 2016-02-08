@@ -209,6 +209,7 @@ public class DoseStore {
                 self.recentReservoirObjectsCache = recentReservoirObjects
             } catch let fetchError as NSError {
                 error = .FetchError(description: fetchError.localizedDescription, recoverySuggestion: fetchError.localizedRecoverySuggestion)
+                delegate?.doseStoreDidError(error!)
             }
         }
 
