@@ -9,6 +9,11 @@
 import UIKit
 import RileyLinkKit
 
+private let ConfigCellIdentifier = "ConfigTableViewCell"
+
+private let TapToSetString = NSLocalizedString("Tap to set", comment: "The empty-state text for a configuration value")
+
+
 class SettingsTableViewController: UITableViewController, TextFieldTableViewControllerDelegate {
 
     @IBOutlet var devicesSectionTitleView: UIView!
@@ -107,7 +112,7 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return 2
+            return 3
         case 1:
             switch dataManager.rileyLinkState {
             case .Ready(manager: let manager):
@@ -127,17 +132,23 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
         case 0:
             switch indexPath.row {
             case 0:
-                let pumpIDCell = tableView.dequeueReusableCellWithIdentifier("ConfigTableViewCell", forIndexPath: indexPath)
+                let pumpIDCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
                 pumpIDCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
-                pumpIDCell.detailTextLabel?.text = dataManager.pumpID ?? NSLocalizedString("Tap to set", comment: "The empty-state text for the Pump ID value")
+                pumpIDCell.detailTextLabel?.text = dataManager.pumpID ?? TapToSetString
 
                 cell = pumpIDCell
             case 1:
-                let transmitterIDCell = tableView.dequeueReusableCellWithIdentifier("ConfigTableViewCell", forIndexPath: indexPath)
+                let transmitterIDCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
                 transmitterIDCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the transmitter ID config value")
-                transmitterIDCell.detailTextLabel?.text = dataManager.transmitterID ?? NSLocalizedString("Tap to set", comment: "The empty-state text for the Transmitter ID value")
+                transmitterIDCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
 
                 cell = transmitterIDCell
+            case 2:
+                let basalRatesCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
+                basalRatesCell.textLabel?.text = NSLocalizedString("Basal Schedule", comment: "The title text for the basal rate schedule")
+                basalRatesCell.detailTextLabel?.text = TapToSetString
+
+                cell = basalRatesCell
             default:
                 assertionFailure()
             }
@@ -172,6 +183,22 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
 
     // MARK: - UITableViewDelegate
 
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch indexPath.section {
+        case 0:
+            switch indexPath.row {
+            case 0, 1:
+                performSegueWithIdentifier("TextFieldTableViewController", sender: tableView.cellForRowAtIndexPath(indexPath))
+            case 2:
+                performSegueWithIdentifier("BasalRateScheduleTableViewController", sender: tableView.cellForRowAtIndexPath(indexPath))
+            default:
+                break
+            }
+        default:
+            break
+        }
+    }
+
     override func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch section {
         case 1:
@@ -193,24 +220,35 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
     // MARK: - Navigation
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let vc = segue.destinationViewController as? TextFieldTableViewController,
+        if let
             cell = sender as? UITableViewCell,
             indexPath = tableView.indexPathForCell(cell)
         {
-            switch indexPath.row {
-            case 0:
-                vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                vc.value = dataManager.pumpID
-            case 1:
-                vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                vc.value = dataManager.transmitterID
-            default:
-                assertionFailure()
-            }
+            switch segue.destinationViewController {
+            case let vc as TextFieldTableViewController:
+                switch indexPath.row {
+                case 0:
+                    vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                    vc.value = dataManager.pumpID
+                case 1:
+                    vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                    vc.value = dataManager.transmitterID
+                default:
+                    assertionFailure()
+                }
 
-            vc.title = cell.textLabel?.text
-            vc.indexPath = indexPath
-            vc.delegate = self
+                vc.title = cell.textLabel?.text
+                vc.indexPath = indexPath
+                vc.delegate = self
+            case let vc as BasalRateScheduleTableViewController:
+                if let profile = dataManager.doseStore?.basalProfile {
+                    vc.timeZone = profile.timeZone
+                    vc.scheduleItems = profile.items ?? []
+                    vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
+                }
+            default:
+                break
+            }
         }
     }
 
