@@ -154,7 +154,7 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
             }
 
         case 1:
-            let deviceCell = tableView.dequeueReusableCellWithIdentifier("RileyLinkDeviceTableViewCell") as! RileyLinkDeviceTableViewCell
+            let deviceCell = tableView.dequeueReusableCellWithIdentifier(RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
 
             let device = dataManager.rileyLinkManager?.devices[indexPath.row]
 
@@ -188,9 +188,9 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
         case 0:
             switch indexPath.row {
             case 0, 1:
-                performSegueWithIdentifier("TextFieldTableViewController", sender: tableView.cellForRowAtIndexPath(indexPath))
+                performSegueWithIdentifier(TextFieldTableViewController.className, sender: tableView.cellForRowAtIndexPath(indexPath))
             case 2:
-                performSegueWithIdentifier("BasalRateScheduleTableViewController", sender: tableView.cellForRowAtIndexPath(indexPath))
+                performSegueWithIdentifier(BasalRateScheduleTableViewController.className, sender: tableView.cellForRowAtIndexPath(indexPath))
             default:
                 break
             }

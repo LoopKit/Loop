@@ -7,12 +7,15 @@
 //
 
 import UIKit
+import LoopKit
+
 
 protocol TextFieldTableViewControllerDelegate: class {
     func textFieldTableViewControllerDidEndEditing(controller: TextFieldTableViewController)
 }
 
-class TextFieldTableViewController: UITableViewController, UITextFieldDelegate {
+
+class TextFieldTableViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
     @IBOutlet weak var textField: UITextField!
 

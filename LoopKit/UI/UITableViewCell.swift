@@ -9,8 +9,5 @@
 import UIKit
 
 
-extension UITableViewCell {
-    class var defaultIdentifier: String {
-        return NSStringFromClass(self).componentsSeparatedByString(".").last!
-    }
+extension UITableViewCell: IdentifiableClass {
 }

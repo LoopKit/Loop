@@ -106,11 +106,12 @@
 		438099441C499199009D8E26 /* CarbKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 438099431C499199009D8E26 /* CarbKit.storyboard */; };
 		438099461C49B844009D8E26 /* CarbEntryEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099451C49B844009D8E26 /* CarbEntryEditViewController.swift */; };
 		438099491C49C462009D8E26 /* DatePickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099481C49C462009D8E26 /* DatePickerTableViewCell.swift */; };
-		4380994B1C49C4DC009D8E26 /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */; };
 		4380994D1C49D490009D8E26 /* NewCarbEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994C1C49D490009D8E26 /* NewCarbEntry.swift */; };
 		4380994F1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */; };
 		438099511C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */; };
 		438099531C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438099521C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift */; };
+		438B040E1C6ADB100066267B /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438B040D1C6ADB100066267B /* IdentifiableClass.swift */; };
+		438B04101C6ADBB20066267B /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438B040F1C6ADBB20066267B /* UITableViewCell.swift */; };
 		438C933D1B97F82000BE20E9 /* MinimedKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 438C933C1B97F82000BE20E9 /* MinimedKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
 		438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -472,11 +473,12 @@
 		438099431C499199009D8E26 /* CarbKit.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = CarbKit.storyboard; sourceTree = "<group>"; };
 		438099451C49B844009D8E26 /* CarbEntryEditViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditViewController.swift; sourceTree = "<group>"; };
 		438099481C49C462009D8E26 /* DatePickerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatePickerTableViewCell.swift; sourceTree = "<group>"; };
-		4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		4380994C1C49D490009D8E26 /* NewCarbEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewCarbEntry.swift; sourceTree = "<group>"; };
 		4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DecimalTextFieldTableViewCell.swift; sourceTree = "<group>"; };
 		438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControlInputAccessoryView.swift; sourceTree = "<group>"; };
 		438099521C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AbsorptionTimeTextFieldTableViewCell.swift; sourceTree = "<group>"; };
+		438B040D1C6ADB100066267B /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
+		438B040F1C6ADBB20066267B /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		438C933A1B97F82000BE20E9 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		438C933C1B97F82000BE20E9 /* MinimedKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MinimedKit.h; sourceTree = "<group>"; };
 		438C933E1B97F82000BE20E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -792,11 +794,11 @@
 		437220261C4D93F000C5F36C /* LoopKit */ = {
 			isa = PBXGroup;
 			children = (
+				437220271C4D93F000C5F36C /* LoopKit.h */,
+				437220291C4D93F000C5F36C /* Info.plist */,
 				430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */,
 				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
 				437220471C4D96FF00C5F36C /* HKUnit.swift */,
-				437220291C4D93F000C5F36C /* Info.plist */,
-				437220271C4D93F000C5F36C /* LoopKit.h */,
 				430C59AE1C55ED53006CDB2A /* LoopMath.swift */,
 				430D1A921C4C955D00DF5FA4 /* NSDate.swift */,
 				437220421C4D95A200C5F36C /* NSDateFormatter.swift */,
@@ -914,6 +916,8 @@
 		437817141C5D376E00190966 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				438B040D1C6ADB100066267B /* IdentifiableClass.swift */,
+				438B040F1C6ADBB20066267B /* UITableViewCell.swift */,
 				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
 			);
 			path = UI;
@@ -951,7 +955,6 @@
 				4380994E1C49E42A009D8E26 /* DecimalTextFieldTableViewCell.swift */,
 				4380994C1C49D490009D8E26 /* NewCarbEntry.swift */,
 				438099501C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift */,
-				4380994A1C49C4DC009D8E26 /* UITableViewCell.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1760,7 +1763,6 @@
 			files = (
 				430D1A8D1C4B6E6700DF5FA4 /* CarbMath.swift in Sources */,
 				438099511C49E49F009D8E26 /* SegmentedControlInputAccessoryView.swift in Sources */,
-				4380994B1C49C4DC009D8E26 /* UITableViewCell.swift in Sources */,
 				43298EEC1C3A1DC900F520A3 /* CarbEntry.swift in Sources */,
 				43C85FCA1C4247F1002EFBC7 /* HKQuantitySample.swift in Sources */,
 				438099531C49EC9D009D8E26 /* AbsorptionTimeTextFieldTableViewCell.swift in Sources */,
@@ -1819,6 +1821,8 @@
 				430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */,
 				430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */,
 				430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */,
+				438B04101C6ADBB20066267B /* UITableViewCell.swift in Sources */,
+				438B040E1C6ADB100066267B /* IdentifiableClass.swift in Sources */,
 				437220561C4E012600C5F36C /* NSDate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

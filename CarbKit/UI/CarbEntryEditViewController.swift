@@ -92,7 +92,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         switch Row(rawValue: indexPath.row)! {
         case .Value:
-            let cell = tableView.dequeueReusableCellWithIdentifier(DecimalTextFieldTableViewCell.defaultIdentifier) as! DecimalTextFieldTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(DecimalTextFieldTableViewCell.className) as! DecimalTextFieldTableViewCell
 
             if let quantity = quantity {
                 cell.number = NSNumber(double: quantity.doubleValueForUnit(preferredUnit))
@@ -103,7 +103,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
 
             return cell
         case .Date:
-            let cell = tableView.dequeueReusableCellWithIdentifier(DatePickerTableViewCell.defaultIdentifier) as! DatePickerTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(DatePickerTableViewCell.className) as! DatePickerTableViewCell
 
             cell.date = date
             cell.datePicker.enabled = isSampleEditable
@@ -111,7 +111,7 @@ class CarbEntryEditViewController: UITableViewController, DatePickerTableViewCel
 
             return cell
         case .AbsorptionTime:
-            let cell = tableView.dequeueReusableCellWithIdentifier(AbsorptionTimeTextFieldTableViewCell.defaultIdentifier) as! AbsorptionTimeTextFieldTableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(AbsorptionTimeTextFieldTableViewCell.className) as! AbsorptionTimeTextFieldTableViewCell
 
             if let absorptionTime = absorptionTime {
                 cell.number = NSNumber(double: absorptionTime.minutes)
