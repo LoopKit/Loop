@@ -230,7 +230,10 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
             case (_, let pumpID?):
                 rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
 
-                doseStore = DoseStore(pumpID: pumpID)
+                if let basalRateSchedule = basalRateSchedule {
+                    doseStore = DoseStore(pumpID: pumpID, basalProfile: basalRateSchedule)
+                }
+
             case (.NeedsConfiguration, .None):
                 break
             case (.Ready, .None):
@@ -267,6 +270,20 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
+    var basalRateSchedule: BasalRateSchedule? {
+        didSet {
+            if let basalRateSchedule = basalRateSchedule {
+                if let doseStore = doseStore {
+                    doseStore.basalProfile = basalRateSchedule
+                } else if let pumpID = pumpID {
+                    doseStore = DoseStore(pumpID: pumpID, basalProfile: basalRateSchedule)
+                }
+            }
+
+            NSUserDefaults.standardUserDefaults().basalRateSchedule = basalRateSchedule
+        }
+    }
+
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
@@ -299,6 +316,9 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
             if let store = doseStore {
                 store.save()
             }
+        }
+        didSet {
+            doseStore?.delegate = self
         }
     }
 
@@ -391,6 +411,7 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
     static let sharedManager = PumpDataManager()
 
     override init() {
+        basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
         carbStore = CarbStore()
 

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LoopKit
 import RileyLinkKit
 
 private let ConfigCellIdentifier = "ConfigTableViewCell"
@@ -14,7 +15,7 @@ private let ConfigCellIdentifier = "ConfigTableViewCell"
 private let TapToSetString = NSLocalizedString("Tap to set", comment: "The empty-state text for a configuration value")
 
 
-class SettingsTableViewController: UITableViewController, TextFieldTableViewControllerDelegate {
+class SettingsTableViewController: UITableViewController, DailyValueScheduleTableViewControllerDelegate, TextFieldTableViewControllerDelegate {
 
     @IBOutlet var devicesSectionTitleView: UIView!
 
@@ -146,7 +147,12 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
             case 2:
                 let basalRatesCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
                 basalRatesCell.textLabel?.text = NSLocalizedString("Basal Schedule", comment: "The title text for the basal rate schedule")
-                basalRatesCell.detailTextLabel?.text = TapToSetString
+
+                if let basalRateSchedule = dataManager.basalRateSchedule {
+                    basalRatesCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
+                } else {
+                    basalRatesCell.detailTextLabel?.text = TapToSetString
+                }
 
                 cell = basalRatesCell
             default:
@@ -241,11 +247,12 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
                 vc.indexPath = indexPath
                 vc.delegate = self
             case let vc as BasalRateScheduleTableViewController:
-                if let profile = dataManager.doseStore?.basalProfile {
+                if let profile = dataManager.basalRateSchedule {
                     vc.timeZone = profile.timeZone
                     vc.scheduleItems = profile.items ?? []
-                    vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
                 }
+                vc.delegate = self
+                vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
             default:
                 break
             }
@@ -287,4 +294,11 @@ class SettingsTableViewController: UITableViewController, TextFieldTableViewCont
         tableView.reloadData()
     }
 
+    // MARK: - DailyValueScheduleTableViewControllerDelegate
+
+    func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: BasalRateScheduleTableViewController) {
+        dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+
+        tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 2, inSection: 0)], withRowAnimation: .None)
+    }
 }

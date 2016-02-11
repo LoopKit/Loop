@@ -7,14 +7,30 @@
 //
 
 import Foundation
+import LoopKit
+
 
 extension NSUserDefaults {
 
     private enum Key: String {
+        case BasalRateSchedule = "come.loudnate.Naterade.BasalRateSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "comm.loudnate.Naterade.TransmitterStartTime"
+    }
+
+    var basalRateSchedule: BasalRateSchedule? {
+        get {
+            if let rawValue = dictionaryForKey(Key.BasalRateSchedule.rawValue) {
+                return BasalRateSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            setObject(newValue?.rawValue, forKey: Key.BasalRateSchedule.rawValue)
+        }
     }
 
     var connectedPeripheralIDs: [String] {

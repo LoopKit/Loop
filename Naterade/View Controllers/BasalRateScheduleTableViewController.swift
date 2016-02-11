@@ -70,6 +70,8 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
 
+        tableView.endEditing(true)
+
         if isMovingFromParentViewController() {
             delegate?.dailyValueScheduleTableViewControllerWillFinishUpdating(self)
         }

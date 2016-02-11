@@ -39,8 +39,30 @@ public func ==(lhs: AbsoluteScheduleValue, rhs: AbsoluteScheduleValue) -> Bool {
     return lhs.startDate == rhs.startDate && lhs.value == rhs.value
 }
 
+extension RepeatingScheduleValue: RawRepresentable {
+    public typealias RawValue = [String: AnyObject]
 
-public class DailyValueSchedule {
+    public init?(rawValue: RawValue) {
+        guard let startTime = rawValue["startTime"] as? Double,
+            value = rawValue["value"] as? Double else {
+                return nil
+        }
+
+        self.init(startTime: startTime, value: value)
+    }
+
+    public var rawValue: RawValue {
+        return [
+            "startTime": startTime,
+            "value": value
+        ]
+    }
+}
+
+
+public class DailyValueSchedule: RawRepresentable {
+    public typealias RawValue = [String: AnyObject]
+
     private let referenceTimeInterval: NSTimeInterval
     private let repeatInterval = NSTimeInterval(hours: 24)
 
@@ -57,6 +79,24 @@ public class DailyValueSchedule {
         }
 
         referenceTimeInterval = firstItem.startTime
+    }
+
+    public required convenience init?(rawValue: RawValue) {
+        guard let
+            timeZoneName = rawValue["timeZone"] as? String,
+            rawItems = rawValue["items"] as? [RepeatingScheduleValue.RawValue] else
+        {
+            return nil
+        }
+
+        self.init(dailyItems: rawItems.flatMap { RepeatingScheduleValue(rawValue: $0) }, timeZone: NSTimeZone(name: timeZoneName))
+    }
+
+    public var rawValue: RawValue {
+        return [
+            "timeZone": timeZone.name,
+            "items": items.map { $0.rawValue }
+        ]
     }
 
     private var maxTimeInterval: NSTimeInterval {
@@ -122,6 +162,8 @@ public class DailyValueSchedule {
     public func at(time: NSDate) -> Double {
         return between(time, time).first!.value
     }
+
+
 }
 
 
@@ -132,6 +174,18 @@ public class DailyQuantitySchedule: DailyValueSchedule {
         self.unit = unit
 
         super.init(dailyItems: dailyItems, timeZone: timeZone)
+    }
+
+    public required convenience init?(rawValue: RawValue) {
+        guard let
+            rawUnit = rawValue["unit"] as? String,
+            timeZoneName = rawValue["timeZone"] as? String,
+            rawItems = rawValue["items"] as? [RepeatingScheduleValue.RawValue] else
+        {
+            return nil
+        }
+
+        self.init(unit: HKUnit(fromString: rawUnit), dailyItems: rawItems.flatMap { RepeatingScheduleValue(rawValue: $0) }, timeZone: NSTimeZone(name: timeZoneName))
     }
 
     public func at(time: NSDate) -> HKQuantity {
@@ -165,5 +219,26 @@ public class CarbRatioSchedule: DailyQuantitySchedule {
 public class BasalRateSchedule: DailyValueSchedule {
     public override init?(dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
         super.init(dailyItems: dailyItems, timeZone: timeZone)
+    }
+
+    /**
+     Calculates the total basal delivery for a day
+
+     - returns: The total basal delivery
+     */
+    public func total() -> Double {
+        var total: Double = 0
+
+        for (index, item) in items.enumerate() {
+            var endTime = maxTimeInterval
+
+            if index < items.endIndex - 1 {
+                endTime = items[index + 1].startTime
+            }
+
+            total += (endTime - item.startTime) / NSTimeInterval(hours: 1) * item.value
+        }
+
+        return total
     }
 }
