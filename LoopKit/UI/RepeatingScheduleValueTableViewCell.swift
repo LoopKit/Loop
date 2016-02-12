@@ -80,10 +80,6 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
 
     // MARK: - UITextFieldDelegate
 
-    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
-        return !editing
-    }
-
     func textFieldDidEndEditing(textField: UITextField) {
         configureWithDate(date, value: decimalFormatter.numberFromString(textField.text ?? "")?.doubleValue ?? 0)
 

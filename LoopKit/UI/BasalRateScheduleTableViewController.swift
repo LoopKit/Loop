@@ -7,19 +7,18 @@
 //
 
 import UIKit
-import LoopKit
 
 
-protocol DailyValueScheduleTableViewControllerDelegate: class {
+public protocol DailyValueScheduleTableViewControllerDelegate: class {
     func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: BasalRateScheduleTableViewController)
 }
 
 
-class BasalRateScheduleTableViewController: UITableViewController, IdentifiableClass, RepeatingScheduleValueTableViewCellDelegate {
+public class BasalRateScheduleTableViewController: UITableViewController, IdentifiableClass, RepeatingScheduleValueTableViewCellDelegate {
 
     private var keyboardWillShowNotificationObserver: AnyObject?
 
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
 
         self.navigationItem.rightBarButtonItem = self.editButtonItem()
@@ -40,7 +39,7 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         })
     }
 
-    override func setEditing(editing: Bool, animated: Bool) {
+    public override func setEditing(editing: Bool, animated: Bool) {
         if let indexPath = tableView.indexPathForSelectedRow {
             tableView.beginUpdates()
             tableView.deselectRowAtIndexPath(indexPath, animated: animated)
@@ -67,7 +66,7 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         }
     }
 
-    override func viewWillDisappear(animated: Bool) {
+    public override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
 
         tableView.endEditing(true)
@@ -77,13 +76,13 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         }
     }
 
-    weak var delegate: DailyValueScheduleTableViewControllerDelegate?
+    public weak var delegate: DailyValueScheduleTableViewControllerDelegate?
 
     // MARK: - State
 
-    var scheduleItems: [RepeatingScheduleValue] = []
+    public var scheduleItems: [RepeatingScheduleValue] = []
 
-    var timeZone = NSTimeZone.localTimeZone() {
+    public var timeZone = NSTimeZone.localTimeZone() {
         didSet {
             calendar.timeZone = timeZone
         }
@@ -142,15 +141,15 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
 
     // MARK: - UITableViewDataSource
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    public override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return scheduleItems.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(RepeatingScheduleValueTableViewCell.className, forIndexPath: indexPath) as! RepeatingScheduleValueTableViewCell
 
         let item = scheduleItems[indexPath.row]
@@ -177,11 +176,11 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         return cell
     }
 
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
 
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             scheduleItems.removeAtIndex(indexPath.row)
 
@@ -189,7 +188,7 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         }
     }
 
-    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+    public override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
 
         if sourceIndexPath != destinationIndexPath {
             let item = scheduleItems.removeAtIndex(sourceIndexPath.row)
@@ -210,21 +209,21 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         }
     }
 
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return indexPath.row > 0
     }
 
     // MARK: - UITableViewDelegate
 
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    public override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return tableView.indexPathForSelectedRow == indexPath ? 196 : 44
     }
 
-    override func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    public override func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return indexPath.row > 0
     }
 
-    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+    public override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
         if indexPath == tableView.indexPathForSelectedRow {
             tableView.beginUpdates()
             tableView.deselectRowAtIndexPath(indexPath, animated: false)
@@ -238,18 +237,18 @@ class BasalRateScheduleTableViewController: UITableViewController, IdentifiableC
         return indexPath
     }
 
-    override func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.beginUpdates()
         tableView.endUpdates()
     }
 
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    public override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.endEditing(false)
         tableView.beginUpdates()
         tableView.endUpdates()
     }
 
-    override func tableView(tableView: UITableView, targetIndexPathForMoveFromRowAtIndexPath sourceIndexPath: NSIndexPath, toProposedIndexPath proposedDestinationIndexPath: NSIndexPath) -> NSIndexPath {
+    public override func tableView(tableView: UITableView, targetIndexPathForMoveFromRowAtIndexPath sourceIndexPath: NSIndexPath, toProposedIndexPath proposedDestinationIndexPath: NSIndexPath) -> NSIndexPath {
 
         guard sourceIndexPath != proposedDestinationIndexPath, let cell = tableView.cellForRowAtIndexPath(sourceIndexPath) as? RepeatingScheduleValueTableViewCell else {
             return proposedDestinationIndexPath

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4304A4881C6DA6F5008610D3 /* LoopKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4304A4871C6DA6F5008610D3 /* LoopKit.storyboard */; };
+		4304A48A1C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */; };
+		4304A48C1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */; };
 		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
 		430C59881C558BD4006CDB2A /* GlucoseKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 430C59871C558BD4006CDB2A /* GlucoseKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -170,8 +173,6 @@
 		43E6FA3B1C66786C000755B5 /* normalized_reservoir_history_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E6FA3A1C66786C000755B5 /* normalized_reservoir_history_output.json */; };
 		43E6FA3C1C667935000755B5 /* basal.json in Resources */ = {isa = PBXBuildFile; fileRef = 432DC7291C658D88005994B3 /* basal.json */; };
 		43E6FA3E1C667C71000755B5 /* iob_from_reservoir_output.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E6FA3D1C667C71000755B5 /* iob_from_reservoir_output.json */; };
-		43E6FA441C66EF07000755B5 /* BasalRateScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E6FA431C66EF07000755B5 /* BasalRateScheduleTableViewController.swift */; };
-		43E6FA461C66F6AF000755B5 /* RepeatingScheduleValueTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E6FA451C66F6AF000755B5 /* RepeatingScheduleValueTableViewCell.swift */; };
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43EDDBF71C361D24007D89B5 /* CommonCrypto.framework.dSYM in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */; };
@@ -375,6 +376,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4304A4871C6DA6F5008610D3 /* LoopKit.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LoopKit.storyboard; sourceTree = "<group>"; };
+		4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateScheduleTableViewController.swift; sourceTree = "<group>"; };
+		4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingScheduleValueTableViewCell.swift; sourceTree = "<group>"; };
 		430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertMessageBody.swift; sourceTree = "<group>"; };
 		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
 		430C59851C558BD4006CDB2A /* GlucoseKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = GlucoseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -537,8 +541,6 @@
 		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
 		43E6FA3A1C66786C000755B5 /* normalized_reservoir_history_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = normalized_reservoir_history_output.json; sourceTree = "<group>"; };
 		43E6FA3D1C667C71000755B5 /* iob_from_reservoir_output.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob_from_reservoir_output.json; sourceTree = "<group>"; };
-		43E6FA431C66EF07000755B5 /* BasalRateScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateScheduleTableViewController.swift; sourceTree = "<group>"; };
-		43E6FA451C66F6AF000755B5 /* RepeatingScheduleValueTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingScheduleValueTableViewCell.swift; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
@@ -916,7 +918,10 @@
 		437817141C5D376E00190966 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				4304A4871C6DA6F5008610D3 /* LoopKit.storyboard */,
+				4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */,
 				438B040D1C6ADB100066267B /* IdentifiableClass.swift */,
+				4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */,
 				438B040F1C6ADBB20066267B /* UITableViewCell.swift */,
 				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
 			);
@@ -1094,7 +1099,6 @@
 		43F5C2CE1B92A2A0003EB13D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				43E6FA431C66EF07000755B5 /* BasalRateScheduleTableViewController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */,
@@ -1106,7 +1110,6 @@
 			isa = PBXGroup;
 			children = (
 				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
-				43E6FA451C66F6AF000755B5 /* RepeatingScheduleValueTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1658,6 +1661,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4304A4881C6DA6F5008610D3 /* LoopKit.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1820,7 +1824,9 @@
 				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
 				430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */,
 				430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */,
+				4304A48C1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift in Sources */,
 				430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */,
+				4304A48A1C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift in Sources */,
 				438B04101C6ADBB20066267B /* UITableViewCell.swift in Sources */,
 				438B040E1C6ADB100066267B /* IdentifiableClass.swift in Sources */,
 				437220561C4E012600C5F36C /* NSDate.swift in Sources */,
@@ -1843,7 +1849,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
-				43E6FA461C66F6AF000755B5 /* RepeatingScheduleValueTableViewCell.swift in Sources */,
 				43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
@@ -1851,7 +1856,6 @@
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
 				437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */,
-				43E6FA441C66EF07000755B5 /* BasalRateScheduleTableViewController.swift in Sources */,
 				43DE92511C541832001FFDE1 /* UIColor.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */,
