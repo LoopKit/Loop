@@ -1,5 +1,5 @@
 //
-//  BasalRateScheduleTableViewController.swift
+//  DailyValueScheduleTableViewController.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 2/6/16.
@@ -10,11 +10,11 @@ import UIKit
 
 
 public protocol DailyValueScheduleTableViewControllerDelegate: class {
-    func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: BasalRateScheduleTableViewController)
+    func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: DailyValueScheduleTableViewController)
 }
 
 
-public class BasalRateScheduleTableViewController: UITableViewController, IdentifiableClass, RepeatingScheduleValueTableViewCellDelegate {
+public class DailyValueScheduleTableViewController: UITableViewController, IdentifiableClass, RepeatingScheduleValueTableViewCellDelegate {
 
     private var keyboardWillShowNotificationObserver: AnyObject?
 
@@ -96,6 +96,8 @@ public class BasalRateScheduleTableViewController: UITableViewController, Identi
         }
     }
 
+    public var unitString: String = "U/hour"
+
     private var calendar = NSCalendar.currentCalendar()
 
     private var midnight: NSDate {
@@ -164,6 +166,7 @@ public class BasalRateScheduleTableViewController: UITableViewController, Identi
         let interval = cell.datePickerInterval
 
         cell.configureWithDate(midnight.dateByAddingTimeInterval(item.startTime), value: item.value)
+        cell.unitString = unitString
         cell.delegate = self
 
         if indexPath.row > 0 {

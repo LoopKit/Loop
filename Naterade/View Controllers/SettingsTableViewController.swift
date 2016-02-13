@@ -103,6 +103,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     private enum Section: Int {
         case Configuration = 0
         case Devices
+
+        static let count = 2
     }
 
     private enum ConfigurationRow: Int {
@@ -110,6 +112,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case TransmitterID
         case BasalRate
         case CarbRatio
+        case InsulinSensitivity
+
+        static let count = 5
     }
 
     // MARK: - UITableViewDataSource
@@ -117,16 +122,16 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         switch dataManager.rileyLinkState {
         case .Ready(manager: _):
-            return 2
+            return Section.count
         case .NeedsConfiguration:
-            return 1
+            return Section.count - 1
         }
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .Configuration:
-            return 3
+            return ConfigurationRow.count
         case .Devices:
             switch dataManager.rileyLinkState {
             case .Ready(manager: let manager):
@@ -164,9 +169,20 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
                 if let carbRatioSchedule = dataManager.carbRatioSchedule {
                     let unit = carbRatioSchedule.unit
-                    let value = carbRatioSchedule.quantityAt(NSDate()).doubleValueForUnit(unit)
+                    let value = carbRatioSchedule.averageQuantity().doubleValueForUnit(unit)
 
-                    configCell.detailTextLabel?.text = "\(value) \(unit)"
+                    configCell.detailTextLabel?.text = "\(value) \(unit)/U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .InsulinSensitivity:
+                configCell.textLabel?.text = NSLocalizedString("Insulin Sensitivities", comment: "The title text for the insulin sensitivity schedule")
+
+                if let insulinSensitivitySchedule = dataManager.insulinSensitivitySchedule {
+                    let unit = insulinSensitivitySchedule.unit
+                    let value = insulinSensitivitySchedule.averageQuantity().doubleValueForUnit(unit)
+
+                    configCell.detailTextLabel?.text = "\(value) \(unit)/U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -204,22 +220,75 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .Configuration:
+            let sender = tableView.cellForRowAtIndexPath(indexPath)
+
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .PumpID, .TransmitterID:
-                performSegueWithIdentifier(TextFieldTableViewController.className, sender: tableView.cellForRowAtIndexPath(indexPath))
+                performSegueWithIdentifier(TextFieldTableViewController.className, sender: sender)
             case .BasalRate:
-                let scheduleVC = BasalRateScheduleTableViewController()
+                let scheduleVC = DailyValueScheduleTableViewController()
 
                 if let profile = dataManager.basalRateSchedule {
                     scheduleVC.timeZone = profile.timeZone
-                    scheduleVC.scheduleItems = profile.items ?? []
+                    scheduleVC.scheduleItems = profile.items
                 }
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
 
-                showViewController(scheduleVC, sender: tableView.cellForRowAtIndexPath(indexPath))
+                showViewController(scheduleVC, sender: sender)
             case .CarbRatio:
-                break
+                let scheduleVC = DailyQuantityScheduleTableViewController()
+
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Carb Ratios", comment: "The title of the carb ratios schedule screen")
+
+                if let schedule = dataManager.carbRatioSchedule {
+                    scheduleVC.timeZone = schedule.timeZone
+                    scheduleVC.scheduleItems = schedule.items
+                    scheduleVC.unit = schedule.unit
+
+                    showViewController(scheduleVC, sender: sender)
+                } else if let carbStore = dataManager.carbStore {
+                    carbStore.preferredUnit({ (unit, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if let error = error {
+                                self.presentAlertControllerWithError(error)
+                            } else if let unit = unit {
+                                scheduleVC.unit = unit
+                                self.showViewController(scheduleVC, sender: sender)
+                            }
+                        }
+                    })
+                } else {
+                    showViewController(scheduleVC, sender: sender)
+                }
+            case .InsulinSensitivity:
+                let scheduleVC = DailyQuantityScheduleTableViewController()
+                let sender = tableView.cellForRowAtIndexPath(indexPath)
+
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
+
+                if let schedule = dataManager.insulinSensitivitySchedule {
+                    scheduleVC.timeZone = schedule.timeZone
+                    scheduleVC.scheduleItems = schedule.items
+                    scheduleVC.unit = schedule.unit
+
+                    showViewController(scheduleVC, sender: sender)
+                } else if let glucoseStore = dataManager.glucoseStore {
+                    glucoseStore.preferredUnit({ (unit, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if let error = error {
+                                self.presentAlertControllerWithError(error)
+                            } else if let unit = unit {
+                                scheduleVC.unit = unit
+                                self.showViewController(scheduleVC, sender: sender)
+                            }
+                        }
+                    })
+                } else {
+                    showViewController(scheduleVC, sender: sender)
+                }
             }
         case .Devices:
             break
@@ -310,15 +379,24 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     // MARK: - DailyValueScheduleTableViewControllerDelegate
 
-    func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: BasalRateScheduleTableViewController) {
+    func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: DailyValueScheduleTableViewController) {
         if let indexPath = tableView.indexPathForSelectedRow {
             switch Section(rawValue: indexPath.section)! {
             case .Configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
                 case .BasalRate:
                     dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                default:
-                    break
+                case let section:
+                    if let controller = controller as? DailyQuantityScheduleTableViewController {
+                        switch section {
+                        case .CarbRatio:
+                            dataManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        case .InsulinSensitivity:
+                            dataManager.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        default:
+                            break
+                        }
+                    }
                 }
 
                 tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)

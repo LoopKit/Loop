@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4304A48A1C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */; };
 		4304A48C1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */; };
 		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
@@ -194,6 +193,8 @@
 		43F5C2E31B937615003EB13D /* RileyLinkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DF1B937615003EB13D /* RileyLinkManager.m */; };
 		43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E51B93C685003EB13D /* PumpDataManager.swift */; };
 		43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */; };
+		43FC1CE51C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */; };
+		43FC1CE71C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */; };
 		43FF3D5E1BADE38300DE240A /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935D1B980BC000BE20E9 /* NSData.swift */; };
 		43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -382,7 +383,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateScheduleTableViewController.swift; sourceTree = "<group>"; };
 		4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RepeatingScheduleValueTableViewCell.swift; sourceTree = "<group>"; };
 		430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertMessageBody.swift; sourceTree = "<group>"; };
 		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
@@ -571,6 +571,8 @@
 		43F5C2DF1B937615003EB13D /* RileyLinkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RileyLinkManager.m; sourceTree = "<group>"; };
 		43F5C2E51B93C685003EB13D /* PumpDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpDataManager.swift; sourceTree = "<group>"; };
 		43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
+		43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DailyValueScheduleTableViewController.swift; sourceTree = "<group>"; };
+		43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DailyQuantityScheduleTableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -935,7 +937,8 @@
 		437817141C5D376E00190966 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				4304A4891C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift */,
+				43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */,
+				43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */,
 				438B040D1C6ADB100066267B /* IdentifiableClass.swift */,
 				4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */,
 				438B040F1C6ADBB20066267B /* UITableViewCell.swift */,
@@ -1842,13 +1845,14 @@
 				437817151C5D37D900190966 /* UIViewController.swift in Sources */,
 				4331ECE61C6ECBA800EBCA1E /* DailyQuantitySchedule.swift in Sources */,
 				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
+				43FC1CE71C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift in Sources */,
 				430C59AF1C55ED53006CDB2A /* LoopMath.swift in Sources */,
 				4331ECE01C6EC82900EBCA1E /* DailyValueSchedule.swift in Sources */,
 				430C59AD1C55E9E2006CDB2A /* GlucoseEffect.swift in Sources */,
 				4304A48C1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift in Sources */,
 				430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */,
-				4304A48A1C6DA7FC008610D3 /* BasalRateScheduleTableViewController.swift in Sources */,
 				438B04101C6ADBB20066267B /* UITableViewCell.swift in Sources */,
+				43FC1CE51C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift in Sources */,
 				4331ECEC1C6ED19900EBCA1E /* CarbRatioSchedule.swift in Sources */,
 				4331ECE81C6ECC8700EBCA1E /* BasalRateSchedule.swift in Sources */,
 				438B040E1C6ADB100066267B /* IdentifiableClass.swift in Sources */,

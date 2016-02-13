@@ -284,9 +284,17 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
-    var carbRatioSchedule: CarbRatioSchedule?
+    var carbRatioSchedule: CarbRatioSchedule? {
+        didSet {
+            NSUserDefaults.standardUserDefaults().carbRatioSchedule = carbRatioSchedule
+        }
+    }
 
-    var insulinSensitivitySchedule: InsulinSensitivitySchedule?
+    var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
+        didSet {
+            NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule = insulinSensitivitySchedule
+        }
+    }
 
     // MARK: - CarbKit
 

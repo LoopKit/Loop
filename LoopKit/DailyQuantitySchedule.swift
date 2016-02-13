@@ -31,6 +31,14 @@ public class DailyQuantitySchedule: DailyValueSchedule<Double> {
         self.init(unit: HKUnit(fromString: rawUnit), dailyItems: rawItems.flatMap { RepeatingScheduleValue(rawValue: $0) }, timeZone: NSTimeZone(name: timeZoneName))
     }
 
+    public override var rawValue: RawValue {
+        var rawValue = super.rawValue
+
+        rawValue["unit"] = unit.unitString
+
+        return rawValue
+    }
+
     public func quantityAt(time: NSDate) -> HKQuantity {
         return HKQuantity(unit: unit, doubleValue: valueAt(time))
     }

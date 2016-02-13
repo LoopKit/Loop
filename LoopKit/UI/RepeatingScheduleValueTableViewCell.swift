@@ -72,6 +72,15 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
         textField.text = decimalFormatter.stringFromNumber(value)
     }
 
+    var unitString: String? {
+        get {
+            return unitLabel.text
+        }
+        set {
+            unitLabel.text = newValue
+        }
+    }
+
     @IBAction func dateChanged(sender: UIDatePicker) {
         configureWithDate(sender.date, value: value)
 

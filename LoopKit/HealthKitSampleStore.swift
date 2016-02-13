@@ -57,8 +57,8 @@ public class HealthKitSampleStore {
      Initializes the HealthKit authorization flow for all required sample types
 
      - parameter completion: A closure called after authorization is completed. This closure takes two arguments:
-     - success: Whether the authorization to share was successful
-     - error:   An error object explaining why the authorization was unsuccessful
+        - success: Whether the authorization to share was successful
+        - error:   An error object explaining why the authorization was unsuccessful
      */
     public func authorize(completion: (success: Bool, error: NSError?) -> Void) {
         let parentHandler = completion
@@ -81,6 +81,38 @@ public class HealthKitSampleStore {
 
             parentHandler(success: success, error: authError)
         })
+    }
+
+    /**
+     Queries the preferred unit for the authorized share types. If more than one unit is retrieved,
+     then the completion contains just one of them.
+
+     - parameter completion: A closure called after the query is completed. This closure takes two arguments:
+        - unit:  The retrieved unit
+        - error: An error object explaining why the retrieval was unsuccessful
+     */
+    public func preferredUnit(completion: (unit: HKUnit?, error: NSError?) -> Void) {
+        let postAuthHandler = {
+            let quantityTypes = self.shareTypes.flatMap { (sampleType) -> HKQuantityType? in
+                return sampleType as? HKQuantityType
+            }
+
+            self.healthStore.preferredUnitsForQuantityTypes(Set(quantityTypes)) { (quantityToUnit, error) -> Void in
+                completion(unit: quantityToUnit.values.first, error: error)
+            }
+        }
+
+        if authorizationRequired || sharingDenied {
+            authorize({ (success, error) -> Void in
+                if error != nil {
+                    completion(unit: nil, error: error)
+                } else {
+                    postAuthHandler()
+                }
+            })
+        } else {
+            postAuthHandler()
+        }
     }
 
 }
