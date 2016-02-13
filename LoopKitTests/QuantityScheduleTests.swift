@@ -12,7 +12,7 @@ import HealthKit
 
 class QuantityScheduleTests: XCTestCase {
 
-    var items: [RepeatingScheduleValue]!
+    var items: [RepeatingScheduleValue<Double>]!
 
     override func setUp() {
         super.setUp()
@@ -32,25 +32,25 @@ class QuantityScheduleTests: XCTestCase {
 
         let midnight = calendar.startOfDayForDate(NSDate())
 
-        XCTAssertEqual(HKQuantity(unit: HKUnit.gramUnit(), doubleValue: 10), schedule.at(midnight))
+        XCTAssertEqual(HKQuantity(unit: HKUnit.gramUnit(), doubleValue: 10), schedule.quantityAt(midnight))
         XCTAssertEqual(9,
-            schedule.at(midnight.dateByAddingTimeInterval(-1)).doubleValueForUnit(schedule.unit)
+            schedule.quantityAt(midnight.dateByAddingTimeInterval(-1)).doubleValueForUnit(schedule.unit)
         )
         XCTAssertEqual(10,
-            schedule.at(midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24))).doubleValueForUnit(schedule.unit)
+            schedule.quantityAt(midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24))).doubleValueForUnit(schedule.unit)
         )
 
         let midMorning = calendar.nextDateAfterDate(NSDate(), matchingHour: 10, minute: 29, second: 4, options: [.MatchNextTime])!
 
-        XCTAssertEqual(10, schedule.at(midMorning).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(10, schedule.quantityAt(midMorning).doubleValueForUnit(schedule.unit))
 
         let lunch = calendar.nextDateAfterDate(midMorning, matchingHour: 12, minute: 01, second: 01, options: [.MatchNextTime])!
 
-        XCTAssertEqual(9, schedule.at(lunch).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(9, schedule.quantityAt(lunch).doubleValueForUnit(schedule.unit))
 
         let dinner = calendar.nextDateAfterDate(midMorning, matchingHour: 19, minute: 0, second: 0, options: [.MatchNextTime])!
 
-        XCTAssertEqual(8, schedule.at(dinner).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(8, schedule.quantityAt(dinner).doubleValueForUnit(schedule.unit))
     }
 
     func testCarbRatioScheduleUTC() {
@@ -67,28 +67,30 @@ class QuantityScheduleTests: XCTestCase {
         let midnight = calendar.startOfDayForDate(june1)
 
         // This is 7 AM the next day in the Schedule's time zone
-        XCTAssertEqual(HKQuantity(unit: HKUnit.gramUnit(), doubleValue: 10), schedule.at(midnight))
+        XCTAssertEqual(HKQuantity(unit: HKUnit.gramUnit(), doubleValue: 10), schedule.quantityAt(midnight))
         XCTAssertEqual(10,
-            schedule.at(midnight.dateByAddingTimeInterval(-1)).doubleValueForUnit(schedule.unit)
+            schedule.quantityAt(midnight.dateByAddingTimeInterval(-1)).doubleValueForUnit(schedule.unit)
         )
         XCTAssertEqual(10,
-            schedule.at(midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24))).doubleValueForUnit(schedule.unit)
+            schedule.quantityAt(midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24))).doubleValueForUnit(schedule.unit)
         )
 
         // 10:29:04 AM -> 5:29:04 PM
         let midMorning = calendar.nextDateAfterDate(june1, matchingHour: 10, minute: 29, second: 4, options: [.MatchNextTime])!
 
-        XCTAssertEqual(9, schedule.at(midMorning).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(9, schedule.quantityAt(midMorning).doubleValueForUnit(schedule.unit))
 
         // 12:01:01 PM -> 7:01:01 PM
         let lunch = calendar.nextDateAfterDate(midMorning, matchingHour: 12, minute: 01, second: 01, options: [.MatchNextTime])!
 
-        XCTAssertEqual(8, schedule.at(lunch).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(8, schedule.quantityAt(lunch).doubleValueForUnit(schedule.unit))
 
         // 7:00 PM -> 2:00 AM
         let dinner = calendar.nextDateAfterDate(midMorning, matchingHour: 19, minute: 0, second: 0, options: [.MatchNextTime])!
 
-        XCTAssertEqual(10, schedule.at(dinner).doubleValueForUnit(schedule.unit))
+        XCTAssertEqual(10, schedule.quantityAt(dinner).doubleValueForUnit(schedule.unit))
     }
+
+    
 
 }

@@ -10,33 +10,19 @@ import Foundation
 import HealthKit
 
 
-public struct RepeatingScheduleValue {
+public struct RepeatingScheduleValue<T: RawRepresentable where T.RawValue: AnyObject> {
     public let startTime: NSTimeInterval
-    public let value: Double
+    public let value: T
 
-    public init(startTime: NSTimeInterval, value: Double) {
+    public init(startTime: NSTimeInterval, value: T) {
         self.startTime = startTime
         self.value = value
     }
 }
 
-public struct AbsoluteScheduleValue: TimelineValue {
+public struct AbsoluteScheduleValue<T>: TimelineValue {
     public let startDate: NSDate
-    public let value: Double
-}
-
-extension RepeatingScheduleValue: Equatable {
-}
-
-public func ==(lhs: RepeatingScheduleValue, rhs: RepeatingScheduleValue) -> Bool {
-    return lhs.startTime == rhs.startTime && lhs.value == rhs.value
-}
-
-extension AbsoluteScheduleValue: Equatable {
-}
-
-public func ==(lhs: AbsoluteScheduleValue, rhs: AbsoluteScheduleValue) -> Bool {
-    return lhs.startDate == rhs.startDate && lhs.value == rhs.value
+    public let value: T
 }
 
 extension RepeatingScheduleValue: RawRepresentable {
@@ -44,7 +30,7 @@ extension RepeatingScheduleValue: RawRepresentable {
 
     public init?(rawValue: RawValue) {
         guard let startTime = rawValue["startTime"] as? Double,
-            value = rawValue["value"] as? Double else {
+            value = rawValue["value"] as? T else {
                 return nil
         }
 
@@ -54,22 +40,22 @@ extension RepeatingScheduleValue: RawRepresentable {
     public var rawValue: RawValue {
         return [
             "startTime": startTime,
-            "value": value
+            "value": value.rawValue
         ]
     }
 }
 
 
-public class DailyValueSchedule: RawRepresentable {
+public class DailyValueSchedule<T: RawRepresentable where T.RawValue: AnyObject>: RawRepresentable {
     public typealias RawValue = [String: AnyObject]
 
     private let referenceTimeInterval: NSTimeInterval
-    private let repeatInterval = NSTimeInterval(hours: 24)
+    let repeatInterval = NSTimeInterval(hours: 24)
 
-    public let items: [RepeatingScheduleValue]
+    public let items: [RepeatingScheduleValue<T>]
     public let timeZone: NSTimeZone
 
-    init?(dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone?) {
+    init?(dailyItems: [RepeatingScheduleValue<T>], timeZone: NSTimeZone?) {
         self.items = dailyItems.sort { $0.startTime < $1.startTime }
         self.timeZone = timeZone ?? NSTimeZone.localTimeZone()
 
@@ -99,7 +85,7 @@ public class DailyValueSchedule: RawRepresentable {
         ]
     }
 
-    private var maxTimeInterval: NSTimeInterval {
+    var maxTimeInterval: NSTimeInterval {
         return referenceTimeInterval + repeatInterval
     }
 
@@ -125,7 +111,7 @@ public class DailyValueSchedule: RawRepresentable {
 
      - returns: A slice of `ScheduleItem` values
      */
-    public func between(startDate: NSDate, _ endDate: NSDate) -> [AbsoluteScheduleValue] {
+    public func between(startDate: NSDate, _ endDate: NSDate) -> [AbsoluteScheduleValue<T>] {
         guard startDate <= endDate else {
             return []
         }
@@ -159,86 +145,8 @@ public class DailyValueSchedule: RawRepresentable {
         }
     }
 
-    public func at(time: NSDate) -> Double {
+    func valueAt(time: NSDate) -> T {
         return between(time, time).first!.value
     }
 
-
-}
-
-
-public class DailyQuantitySchedule: DailyValueSchedule {
-    public let unit: HKUnit
-
-    public init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone?) {
-        self.unit = unit
-
-        super.init(dailyItems: dailyItems, timeZone: timeZone)
-    }
-
-    public required convenience init?(rawValue: RawValue) {
-        guard let
-            rawUnit = rawValue["unit"] as? String,
-            timeZoneName = rawValue["timeZone"] as? String,
-            rawItems = rawValue["items"] as? [RepeatingScheduleValue.RawValue] else
-        {
-            return nil
-        }
-
-        self.init(unit: HKUnit(fromString: rawUnit), dailyItems: rawItems.flatMap { RepeatingScheduleValue(rawValue: $0) }, timeZone: NSTimeZone(name: timeZoneName))
-    }
-
-    public func at(time: NSDate) -> HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: at(time))
-    }
-}
-
-
-public class InsulinSensitivitySchedule: DailyQuantitySchedule {
-    public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
-        super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
-
-        guard unit == HKUnit.milligramsPerDeciliterUnit() || unit == HKUnit.millimolesPerLiterUnit() else {
-            return nil
-        }
-    }
-}
-
-
-public class CarbRatioSchedule: DailyQuantitySchedule {
-    public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
-        super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
-
-        guard unit == HKUnit.gramUnit() else {
-            return nil
-        }
-    }
-}
-
-
-public class BasalRateSchedule: DailyValueSchedule {
-    public override init?(dailyItems: [RepeatingScheduleValue], timeZone: NSTimeZone? = nil) {
-        super.init(dailyItems: dailyItems, timeZone: timeZone)
-    }
-
-    /**
-     Calculates the total basal delivery for a day
-
-     - returns: The total basal delivery
-     */
-    public func total() -> Double {
-        var total: Double = 0
-
-        for (index, item) in items.enumerate() {
-            var endTime = maxTimeInterval
-
-            if index < items.endIndex - 1 {
-                endTime = items[index + 1].startTime
-            }
-
-            total += (endTime - item.startTime) / NSTimeInterval(hours: 1) * item.value
-        }
-
-        return total
-    }
 }

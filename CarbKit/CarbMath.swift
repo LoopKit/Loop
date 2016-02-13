@@ -150,7 +150,7 @@ struct CarbMath {
 
         repeat {
             let value = entries.reduce(0.0) { (value, entry) -> Double in
-                return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatios.at(entry.startDate), insulinSensitivity: insulinSensitivities.at(entry.startDate), defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
+                return value + glucoseEffectForCarbEntry(entry, atDate: date, carbRatio: carbRatios.quantityAt(entry.startDate), insulinSensitivity: insulinSensitivities.quantityAt(entry.startDate), defaultAbsorptionTime: defaultAbsorptionTime, delay: delay)
             }
 
             values.append(GlucoseEffect(startDate: date, quantity: HKQuantity(unit: unit, doubleValue: value)))

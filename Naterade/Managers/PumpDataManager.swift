@@ -284,6 +284,10 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
+    var carbRatioSchedule: CarbRatioSchedule?
+
+    var insulinSensitivitySchedule: InsulinSensitivitySchedule?
+
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
@@ -412,7 +416,10 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
 
     override init() {
         basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule
+        carbRatioSchedule = NSUserDefaults.standardUserDefaults().carbRatioSchedule
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
+        insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
+
         carbStore = CarbStore()
 
         super.init()

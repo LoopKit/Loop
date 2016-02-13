@@ -13,8 +13,10 @@ import LoopKit
 extension NSUserDefaults {
 
     private enum Key: String {
-        case BasalRateSchedule = "come.loudnate.Naterade.BasalRateSchedule"
+        case BasalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
+        case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
+        case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "comm.loudnate.Naterade.TransmitterStartTime"
@@ -33,12 +35,38 @@ extension NSUserDefaults {
         }
     }
 
+    var carbRatioSchedule: CarbRatioSchedule? {
+        get {
+            if let rawValue = dictionaryForKey(Key.CarbRatioSchedule.rawValue) {
+                return CarbRatioSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            setObject(newValue?.rawValue, forKey: Key.CarbRatioSchedule.rawValue)
+        }
+    }
+
     var connectedPeripheralIDs: [String] {
         get {
             return arrayForKey(Key.ConnectedPeripheralIDs.rawValue) as? [String] ?? []
         }
         set {
             setObject(newValue, forKey: Key.ConnectedPeripheralIDs.rawValue)
+        }
+    }
+
+    var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
+        get {
+            if let rawValue = dictionaryForKey(Key.InsulinSensitivitySchedule.rawValue) {
+                return InsulinSensitivitySchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            setObject(newValue?.rawValue, forKey: Key.InsulinSensitivitySchedule.rawValue)
         }
     }
 

@@ -108,6 +108,7 @@ public class ReservoirTableViewController: UITableViewController {
 
                     self.tableView.reloadData()
 
+                    self.updateTimelyStats(nil)
                     self.updateTotal()
                 }
             })

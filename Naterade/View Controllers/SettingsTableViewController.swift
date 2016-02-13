@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import HealthKit
 import LoopKit
 import RileyLinkKit
 
@@ -99,6 +100,18 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         }
     }
 
+    private enum Section: Int {
+        case Configuration = 0
+        case Devices
+    }
+
+    private enum ConfigurationRow: Int {
+        case PumpID = 0
+        case TransmitterID
+        case BasalRate
+        case CarbRatio
+    }
+
     // MARK: - UITableViewDataSource
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -111,55 +124,56 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch section {
-        case 0:
+        switch Section(rawValue: section)! {
+        case .Configuration:
             return 3
-        case 1:
+        case .Devices:
             switch dataManager.rileyLinkState {
             case .Ready(manager: let manager):
                 return manager.devices.count
             case .NeedsConfiguration:
                 return 0
             }
-        default:
-            return 0
         }
     }
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell: UITableViewCell?
+        let cell: UITableViewCell
 
-        switch indexPath.section {
-        case 0:
-            switch indexPath.row {
-            case 0:
-                let pumpIDCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
-                pumpIDCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
-                pumpIDCell.detailTextLabel?.text = dataManager.pumpID ?? TapToSetString
+        switch Section(rawValue: indexPath.section)! {
+        case .Configuration:
+            let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
 
-                cell = pumpIDCell
-            case 1:
-                let transmitterIDCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
-                transmitterIDCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the transmitter ID config value")
-                transmitterIDCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
-
-                cell = transmitterIDCell
-            case 2:
-                let basalRatesCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
-                basalRatesCell.textLabel?.text = NSLocalizedString("Basal Schedule", comment: "The title text for the basal rate schedule")
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .PumpID:
+                configCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
+                configCell.detailTextLabel?.text = dataManager.pumpID ?? TapToSetString
+            case .TransmitterID:
+                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the transmitter ID config value")
+                configCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
+            case .BasalRate:
+                configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
 
                 if let basalRateSchedule = dataManager.basalRateSchedule {
-                    basalRatesCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
+                    configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
                 } else {
-                    basalRatesCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = TapToSetString
                 }
+            case .CarbRatio:
+                configCell.textLabel?.text = NSLocalizedString("Carb Ratios", comment: "The title text for the carb ratio schedule")
 
-                cell = basalRatesCell
-            default:
-                assertionFailure()
+                if let carbRatioSchedule = dataManager.carbRatioSchedule {
+                    let unit = carbRatioSchedule.unit
+                    let value = carbRatioSchedule.quantityAt(NSDate()).doubleValueForUnit(unit)
+
+                    configCell.detailTextLabel?.text = "\(value) \(unit)"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
             }
 
-        case 1:
+            cell = configCell
+        case .Devices:
             let deviceCell = tableView.dequeueReusableCellWithIdentifier(RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
 
             let device = dataManager.rileyLinkManager?.devices[indexPath.row]
@@ -172,17 +186,15 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             deviceCell.connectSwitch.addTarget(self, action: "deviceConnectionChanged:", forControlEvents: .ValueChanged)
 
             cell = deviceCell
-        default:
-            assertionFailure()
         }
-        return cell!
+        return cell
     }
 
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        switch section {
-        case 0:
+        switch Section(rawValue: section)! {
+        case .Configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
-        default:
+        case .Devices:
             return nil
         }
     }
@@ -190,35 +202,44 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     // MARK: - UITableViewDelegate
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        switch indexPath.section {
-        case 0:
-            switch indexPath.row {
-            case 0, 1:
+        switch Section(rawValue: indexPath.section)! {
+        case .Configuration:
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .PumpID, .TransmitterID:
                 performSegueWithIdentifier(TextFieldTableViewController.className, sender: tableView.cellForRowAtIndexPath(indexPath))
-            case 2:
-                performSegueWithIdentifier(BasalRateScheduleTableViewController.className, sender: tableView.cellForRowAtIndexPath(indexPath))
-            default:
+            case .BasalRate:
+                let scheduleVC = BasalRateScheduleTableViewController()
+
+                if let profile = dataManager.basalRateSchedule {
+                    scheduleVC.timeZone = profile.timeZone
+                    scheduleVC.scheduleItems = profile.items ?? []
+                }
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
+
+                showViewController(scheduleVC, sender: tableView.cellForRowAtIndexPath(indexPath))
+            case .CarbRatio:
                 break
             }
-        default:
+        case .Devices:
             break
         }
     }
 
     override func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        switch section {
-        case 1:
+        switch Section(rawValue: section)! {
+        case .Devices:
             return devicesSectionTitleView
-        default:
+        case .Configuration:
             return nil
         }
     }
 
     override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        switch section {
-        case 0:
+        switch Section(rawValue: section)! {
+        case .Configuration:
             return 55  // Give the top section extra spacing
-        default:
+        case .Devices:
             return 37
         }
     }
@@ -232,11 +253,11 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         {
             switch segue.destinationViewController {
             case let vc as TextFieldTableViewController:
-                switch indexPath.row {
-                case 0:
+                switch ConfigurationRow(rawValue: indexPath.row)! {
+                case .PumpID:
                     vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
                     vc.value = dataManager.pumpID
-                case 1:
+                case .TransmitterID:
                     vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
                     vc.value = dataManager.transmitterID
                 default:
@@ -246,13 +267,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 vc.title = cell.textLabel?.text
                 vc.indexPath = indexPath
                 vc.delegate = self
-            case let vc as BasalRateScheduleTableViewController:
-                if let profile = dataManager.basalRateSchedule {
-                    vc.timeZone = profile.timeZone
-                    vc.scheduleItems = profile.items ?? []
-                }
-                vc.delegate = self
-                vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
             default:
                 break
             }
@@ -281,10 +295,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     func textFieldTableViewControllerDidEndEditing(controller: TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
-            switch indexPath.row {
-            case 0:
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .PumpID:
                 dataManager.pumpID = controller.value
-            case 1:
+            case .TransmitterID:
                 dataManager.transmitterID = controller.value
             default:
                 assertionFailure()
@@ -297,8 +311,20 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     // MARK: - DailyValueScheduleTableViewControllerDelegate
 
     func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: BasalRateScheduleTableViewController) {
-        dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+        if let indexPath = tableView.indexPathForSelectedRow {
+            switch Section(rawValue: indexPath.section)! {
+            case .Configuration:
+                switch ConfigurationRow(rawValue: indexPath.row)! {
+                case .BasalRate:
+                    dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                default:
+                    break
+                }
 
-        tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 2, inSection: 0)], withRowAnimation: .None)
+                tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+            default:
+                break
+            }
+        }
     }
 }

@@ -87,7 +87,6 @@
                     <connections>
                         <outlet property="devicesSectionTitleView" destination="ywS-mm-GoX" id="7tF-Zf-Op2"/>
                         <segue destination="2i4-oC-7Cq" kind="show" identifier="TextFieldTableViewController" id="F2v-na-5IP"/>
-                        <segue destination="zku-Cs-ND2" kind="show" identifier="BasalRateScheduleTableViewController" id="SCs-p6-si9"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ymW-vT-DZk" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -114,14 +113,6 @@
                 </view>
             </objects>
             <point key="canvasLocation" x="1641" y="680"/>
-        </scene>
-        <!--LoopKit-->
-        <scene sceneID="Ufs-YQ-qB4">
-            <objects>
-                <viewControllerPlaceholder storyboardName="LoopKit" bundleIdentifier="com.loudnate.LoopKit" id="zku-Cs-ND2" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="yN9-nH-scS" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2197.5" y="2"/>
         </scene>
         <!--Text Field Table View Controller-->
         <scene sceneID="saf-mv-8Lg">

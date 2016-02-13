@@ -18,10 +18,21 @@ public class BasalRateScheduleTableViewController: UITableViewController, Identi
 
     private var keyboardWillShowNotificationObserver: AnyObject?
 
+    public init() {
+        super.init(style: .Plain)
+    }
+
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+
     public override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        navigationItem.rightBarButtonItems = [insertButtonItem(), editButtonItem()]
+
+        tableView.keyboardDismissMode = .OnDrag
+        tableView.registerNib(UINib(nibName: RepeatingScheduleValueTableViewCell.className, bundle: NSBundle(forClass: self.dynamicType)), forCellReuseIdentifier: RepeatingScheduleValueTableViewCell.className)
 
         keyboardWillShowNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIKeyboardWillShowNotification, object: nil, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (note) -> Void in
 
@@ -48,14 +59,7 @@ public class BasalRateScheduleTableViewController: UITableViewController, Identi
 
         tableView.endEditing(false)
 
-        if editing {
-            navigationItem.setRightBarButtonItems([
-                self.editButtonItem(),
-                UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "addScheduleItem:")
-            ], animated: animated)
-        } else {
-            navigationItem.setRightBarButtonItems([self.editButtonItem()], animated: true)
-        }
+        navigationItem.rightBarButtonItems?[0].enabled = !editing
 
         super.setEditing(editing, animated: animated)
     }
@@ -78,9 +82,13 @@ public class BasalRateScheduleTableViewController: UITableViewController, Identi
 
     public weak var delegate: DailyValueScheduleTableViewControllerDelegate?
 
+    public func insertButtonItem() -> UIBarButtonItem {
+        return UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "addScheduleItem:")
+    }
+
     // MARK: - State
 
-    public var scheduleItems: [RepeatingScheduleValue] = []
+    public var scheduleItems: [RepeatingScheduleValue<Double>] = []
 
     public var timeZone = NSTimeZone.localTimeZone() {
         didSet {
