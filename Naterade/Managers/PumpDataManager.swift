@@ -22,7 +22,7 @@ enum State<T> {
     case Ready(T)
 }
 
-class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessionDelegate {
+class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -323,6 +323,12 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
+    // MARK: CarbStoreDelegate
+
+    func carbStoreDidError(error: ErrorType) {
+        logger?.addError(error, fromSource: "CarbStore")
+    }
+
     // MARK: - GlucoseKit
 
     let glucoseStore: GlucoseStore? = GlucoseStore()
@@ -441,6 +447,8 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
 
         watchSession?.delegate = self
         watchSession?.activateSession()
+
+        carbStore?.delegate = self
 
         if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
             carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in

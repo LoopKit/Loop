@@ -48,6 +48,7 @@ public class DoseStore {
 
     public let pumpID: String
 
+    // TODO: This needs to be configurable
     public let insulinActionDuration = NSTimeInterval(hours: 4)
 
     public var basalProfile: BasalRateSchedule {

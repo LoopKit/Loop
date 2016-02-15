@@ -11,6 +11,11 @@ import HealthKit
 import LoopKit
 
 
+public protocol CarbStoreDelegate: class {
+    func carbStoreDidError(error: ErrorType)
+}
+
+
 public class CarbStore: HealthKitSampleStore {
 
     public typealias DefaultAbsorptionTimes = (fast: NSTimeInterval, medium: NSTimeInterval, slow: NSTimeInterval)
@@ -36,6 +41,8 @@ public class CarbStore: HealthKitSampleStore {
 
     /// The longest expected absorption time interval for carbohydrates. Defaults to 4 hours.
     private let maximumAbsorptionTimeInterval: NSTimeInterval
+
+    public weak var delegate: CarbStoreDelegate?
 
     /**
      Initializes a new instance of the store.
@@ -79,9 +86,9 @@ public class CarbStore: HealthKitSampleStore {
         for type in readTypes {
             let observerQuery = HKObserverQuery(sampleType: type, predicate: predicate, updateHandler: { [unowned self] (query, completionHandler, error) -> Void in
 
-                // TODO: Hand the error to the delegate
-
-                if error == nil {
+                if let error = error {
+                    self.delegate?.carbStoreDidError(error)
+                } else {
                     dispatch_async(self.dataAccessQueue) {
                         if self.anchoredObjectQueries[query] == nil {
                             let anchoredObjectQuery = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: self.queryAnchor, limit: Int(HKObjectQueryNoLimit), resultsHandler: self.processResultsFromAnchoredQuery)
@@ -138,7 +145,9 @@ public class CarbStore: HealthKitSampleStore {
                         if !enabled {
                             self.isBackgroundDeliveryEnabled = oldValue
 
-                            lastError = error
+                            if error != nil {
+                                lastError = error
+                            }
                         }
 
                         dispatch_group_leave(group)
@@ -158,7 +167,9 @@ public class CarbStore: HealthKitSampleStore {
                         if !disabled {
                             self.isBackgroundDeliveryEnabled = oldValue
 
-                            lastError = error
+                            if error != nil {
+                                lastError = error
+                            }
                         }
 
                         dispatch_group_leave(group)
