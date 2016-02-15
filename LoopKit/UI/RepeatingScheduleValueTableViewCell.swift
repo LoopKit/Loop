@@ -90,6 +90,12 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
 
     // MARK: - UITextFieldDelegate
 
+    func textFieldDidBeginEditing(textField: UITextField) {
+        dispatch_async(dispatch_get_main_queue()) {
+            textField.selectedTextRange = textField.textRangeFromPosition(textField.beginningOfDocument, toPosition: textField.endOfDocument)
+        }
+    }
+
     func textFieldDidEndEditing(textField: UITextField) {
         value = valueNumberFormatter.numberFromString(textField.text ?? "")?.doubleValue ?? 0
 
