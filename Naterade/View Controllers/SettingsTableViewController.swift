@@ -110,10 +110,11 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     private enum ConfigurationRow: Int {
         case PumpID = 0
         case TransmitterID
+        case GlucoseTargetRange
+        case InsulinActionDuration
         case BasalRate
         case CarbRatio
         case InsulinSensitivity
-        case GlucoseTargetRange
 
         static let count = 6
     }
@@ -214,6 +215,15 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+            case .InsulinActionDuration:
+                configCell.textLabel?.text = NSLocalizedString("Insulin Action Duration", comment: "The title text for the insulin action duration value")
+
+                if let insulinActionDuration = dataManager.insulinActionDuration {
+
+                    configCell.detailTextLabel?.text = "\(insulinActionDuration.hours) hours"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
             }
 
             cell = configCell
@@ -251,7 +261,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             let sender = tableView.cellForRowAtIndexPath(indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .PumpID, .TransmitterID:
+            case .PumpID, .TransmitterID, .InsulinActionDuration:
                 performSegueWithIdentifier(TextFieldTableViewController.className, sender: sender)
             case .BasalRate:
                 let scheduleVC = SingleValueScheduleTableViewController()
@@ -382,6 +392,14 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 case .TransmitterID:
                     vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
                     vc.value = dataManager.transmitterID
+                case .InsulinActionDuration:
+                    vc.placeholder = NSLocalizedString("Enter a number of hours", comment: "The placeholder text instructing users how to enter an insulin action duration")
+                    vc.keyboardType = .DecimalPad
+
+                    if let insulinActionDuration = dataManager.insulinActionDuration {
+                        valueNumberFormatter.minimumFractionDigits = 0
+                        vc.value = valueNumberFormatter.stringFromNumber(insulinActionDuration.hours)
+                    }
                 default:
                     assertionFailure()
                 }
@@ -422,6 +440,12 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 dataManager.pumpID = controller.value
             case .TransmitterID:
                 dataManager.transmitterID = controller.value
+            case .InsulinActionDuration:
+                if let value = controller.value, duration = valueNumberFormatter.numberFromString(value)?.doubleValue {
+                    dataManager.insulinActionDuration = NSTimeInterval(hours: duration)
+                } else {
+                    dataManager.insulinActionDuration = nil
+                }
             default:
                 assertionFailure()
             }

@@ -16,11 +16,12 @@ extension NSUserDefaults {
         case BasalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
+        case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
-        case TransmitterStartTime = "comm.loudnate.Naterade.TransmitterStartTime"
+        case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -55,6 +56,19 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue, forKey: Key.ConnectedPeripheralIDs.rawValue)
+        }
+    }
+
+    var insulinActionDuration: NSTimeInterval? {
+        get {
+            return doubleForKey(Key.InsulinActionDuration.rawValue)
+        }
+        set {
+            if let insulinActionDuration = newValue {
+                setDouble(insulinActionDuration, forKey: Key.InsulinActionDuration.rawValue)
+            } else {
+                setNilValueForKey(Key.InsulinActionDuration.rawValue)
+            }
         }
     }
 

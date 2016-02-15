@@ -29,12 +29,15 @@ class TextFieldTableViewController: UITableViewController, IdentifiableClass, UI
         }
     }
 
+    var keyboardType = UIKeyboardType.Default
+
     weak var delegate: TextFieldTableViewControllerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         textField.text = value
+        textField.keyboardType = keyboardType
         textField.placeholder = placeholder
     }
 

@@ -230,8 +230,8 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
             case (_, let pumpID?):
                 rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
 
-                if let basalRateSchedule = basalRateSchedule {
-                    doseStore = DoseStore(pumpID: pumpID, basalProfile: basalRateSchedule)
+                if let basalRateSchedule = basalRateSchedule, insulinActionDuration = insulinActionDuration {
+                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
                 }
 
             case (.NeedsConfiguration, .None):
@@ -275,8 +275,8 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
             if let basalRateSchedule = basalRateSchedule {
                 if let doseStore = doseStore {
                     doseStore.basalProfile = basalRateSchedule
-                } else if let pumpID = pumpID {
-                    doseStore = DoseStore(pumpID: pumpID, basalProfile: basalRateSchedule)
+                } else if let pumpID = pumpID, insulinActionDuration = insulinActionDuration {
+                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
                 }
             }
 
@@ -287,6 +287,20 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
     var carbRatioSchedule: CarbRatioSchedule? {
         didSet {
             NSUserDefaults.standardUserDefaults().carbRatioSchedule = carbRatioSchedule
+        }
+    }
+
+    var insulinActionDuration: NSTimeInterval? {
+        didSet {
+            if let insulinActionDuration = insulinActionDuration {
+                if let doseStore = doseStore {
+                    doseStore.insulinActionDuration = insulinActionDuration
+                } else if let pumpID = pumpID, basalRateSchedule = basalRateSchedule {
+                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
+                }
+            }
+
+            NSUserDefaults.standardUserDefaults().insulinActionDuration = insulinActionDuration
         }
     }
 
@@ -438,6 +452,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
         basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule
         carbRatioSchedule = NSUserDefaults.standardUserDefaults().carbRatioSchedule
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
+        insulinActionDuration = NSUserDefaults.standardUserDefaults().insulinActionDuration
         insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
         glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
 

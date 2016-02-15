@@ -49,7 +49,11 @@ public class DoseStore {
     public let pumpID: String
 
     // TODO: This needs to be configurable
-    public let insulinActionDuration = NSTimeInterval(hours: 4)
+    public var insulinActionDuration: NSTimeInterval {
+        didSet {
+            clearCalculationCache()
+        }
+    }
 
     public var basalProfile: BasalRateSchedule {
         didSet {
@@ -59,8 +63,9 @@ public class DoseStore {
 
     public weak var delegate: DoseStoreDelegate?
 
-    public init(pumpID: String, basalProfile: BasalRateSchedule) {
+    public init(pumpID: String, insulinActionDuration: NSTimeInterval, basalProfile: BasalRateSchedule) {
         self.pumpID = pumpID
+        self.insulinActionDuration = insulinActionDuration
         self.basalProfile = basalProfile
 
         persistenceController = PersistenceController(readyCallback: { [unowned self] (error) -> Void in
