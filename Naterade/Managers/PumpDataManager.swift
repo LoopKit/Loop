@@ -22,7 +22,7 @@ enum State<T> {
     case Ready(T)
 }
 
-class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, TransmitterDelegate, WCSessionDelegate {
+class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -119,7 +119,11 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
 
 //            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
 
-            doseStore?.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate, rawData: nil)
+            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate) { (_, error) -> Void in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "DoseStore")
+                }
+            }
         }
     }
 
@@ -195,7 +199,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
         }
     }
 
-    var rileyLinkState: State<RileyLinkManager> = .NeedsConfiguration {
+    var rileyLinkState: State<RileyLinkManager> {
         willSet {
             switch newValue {
             case .Ready(let manager):
@@ -229,16 +233,13 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
             switch (rileyLinkState, pumpID) {
             case (_, let pumpID?):
                 rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
-
-                if let basalRateSchedule = basalRateSchedule, insulinActionDuration = insulinActionDuration {
-                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
-                }
-
             case (.NeedsConfiguration, .None):
                 break
             case (.Ready, .None):
                 rileyLinkState = .NeedsConfiguration
             }
+
+            doseStore.pumpID = pumpID
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
         }
@@ -272,13 +273,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
 
     var basalRateSchedule: BasalRateSchedule? {
         didSet {
-            if let basalRateSchedule = basalRateSchedule {
-                if let doseStore = doseStore {
-                    doseStore.basalProfile = basalRateSchedule
-                } else if let pumpID = pumpID, insulinActionDuration = insulinActionDuration {
-                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
-                }
-            }
+            doseStore.basalProfile = basalRateSchedule
 
             NSUserDefaults.standardUserDefaults().basalRateSchedule = basalRateSchedule
         }
@@ -292,13 +287,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
 
     var insulinActionDuration: NSTimeInterval? {
         didSet {
-            if let insulinActionDuration = insulinActionDuration {
-                if let doseStore = doseStore {
-                    doseStore.insulinActionDuration = insulinActionDuration
-                } else if let pumpID = pumpID, basalRateSchedule = basalRateSchedule {
-                    doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
-                }
-            }
+            doseStore.insulinActionDuration = insulinActionDuration
 
             NSUserDefaults.standardUserDefaults().insulinActionDuration = insulinActionDuration
         }
@@ -349,28 +338,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
 
     // MARK: - InsulinKit
 
-    var doseStore: DoseStore? {
-        willSet {
-            if let store = doseStore {
-                store.save()
-            }
-        }
-        didSet {
-            doseStore?.delegate = self
-        }
-    }
-
-    // MARK: DoseStoreDelegate
-
-    func doseStoreReadyStateDidChange(doseStore: DoseStore) {
-        if case .Failed = doseStore.readyState {
-            // TODO: Alert the user?
-        }
-    }
-
-    func doseStoreDidError(error: DoseStore.Error) {
-        logger?.addError(error, fromSource: "DoseStore")
-    }
+    let doseStore: DoseStore
 
     // MARK: - WatchKit
 
@@ -455,8 +423,16 @@ class PumpDataManager: NSObject, CarbStoreDelegate, DoseStoreDelegate, Transmitt
         insulinActionDuration = NSUserDefaults.standardUserDefaults().insulinActionDuration
         insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
         glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
+        pumpID = NSUserDefaults.standardUserDefaults().pumpID
 
         carbStore = CarbStore()
+        doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
+
+        if let pumpID = pumpID {
+            rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
+        } else {
+            rileyLinkState = .NeedsConfiguration
+        }
 
         super.init()
 

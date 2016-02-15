@@ -14,7 +14,7 @@ private let ReuseIdentifier = "Reservoir"
 
 public class ReservoirTableViewController: UITableViewController {
 
-    @IBOutlet var needsConfigurationMessageView: UIView!
+    @IBOutlet var needsConfigurationMessageView: ErrorBackgroundView!
 
     @IBOutlet weak var IOBValueLabel: UILabel!
 
@@ -26,12 +26,27 @@ public class ReservoirTableViewController: UITableViewController {
 
     public var doseStore: DoseStore? {
         didSet {
-            if isViewLoaded() {
-                if let doseStore = doseStore {
-                    state = .Display(doseStore)
-                } else {
-                    state = .Unavailable
-                }
+            if let doseStore = doseStore {
+                doseStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: doseStore, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (note) -> Void in
+
+                    switch note.name {
+                    case DoseStore.ReservoirValuesDidChangeNotification:
+                        self.reloadData()
+                    case DoseStore.ReadyStateDidChangeNotification:
+                        switch doseStore.readyState {
+                        case .Ready:
+                            self.state = .Display
+                        case .Failed(let error):
+                            self.state = .Unavailable(error)
+                        default:
+                            self.state = .Unavailable(nil)
+                        }
+                    default:
+                        break
+                    }
+                })
+            } else {
+                doseStoreObserver = nil
             }
         }
     }
@@ -39,10 +54,13 @@ public class ReservoirTableViewController: UITableViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
 
-        if let doseStore = doseStore {
-            state = .Display(doseStore)
-        } else {
-            state = .Unavailable
+        switch doseStore?.readyState {
+        case .Ready?:
+            state = .Display
+        case .Failed(let error)?:
+            state = .Unavailable(error)
+        default:
+            state = .Unavailable(nil)
         }
     }
 
@@ -66,8 +84,8 @@ public class ReservoirTableViewController: UITableViewController {
 
     private enum State {
         case Unknown
-        case Unavailable
-        case Display(DoseStore)
+        case Unavailable(ErrorType?)
+        case Display
     }
 
     private var state = State.Unknown {
@@ -75,16 +93,17 @@ public class ReservoirTableViewController: UITableViewController {
             switch state {
             case .Unknown:
                 break
-            case .Unavailable:
+            case .Unavailable(let error):
+                self.tableView.tableHeaderView?.hidden = true
+                self.tableView.tableFooterView = UIView()
                 tableView.backgroundView = needsConfigurationMessageView
-            case .Display(let doseStore):
-                doseStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(DoseStore.ReservoirValuesDidUpdateNotification, object: doseStore, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (_) -> Void in
 
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.reloadData()
-                    }
-                })
-
+                if let error = error {
+                    needsConfigurationMessageView.errorDescriptionLabel.text = String(error)
+                } else {
+                    needsConfigurationMessageView.errorDescriptionLabel.text = nil
+                }
+            case .Display:
                 self.tableView.backgroundView = nil
                 self.tableView.tableHeaderView?.hidden = false
                 self.tableView.tableFooterView = nil
@@ -95,10 +114,10 @@ public class ReservoirTableViewController: UITableViewController {
     }
 
     private func reloadData() {
-        if case .Display(let doseStore) = state {
-            doseStore.getRecentReservoirValues({ [unowned self] (reservoirValues, error) -> Void in
-                if let error = error {
-                    print("getRecentReservoirValues produced an error: \(error)")
+        if case .Display = state {
+            doseStore?.getRecentReservoirValues({ [unowned self] (reservoirValues, error) -> Void in
+                if error != nil {
+                    self.state = .Unavailable(error)
                 } else {
                     self.reservoirValues = reservoirValues
 
@@ -129,10 +148,12 @@ public class ReservoirTableViewController: UITableViewController {
     }()
 
     private func updateIOB() {
-        if case .Display(let doseStore) = state {
-            doseStore.insulinOnBoardAtDate(NSDate()) { (value) -> Void in
+        if case .Display = state {
+            doseStore?.insulinOnBoardAtDate(NSDate()) { (iob, error) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
-                    if let value = value {
+                    if error != nil {
+                        self.state = .Unavailable(error)
+                    } else if let value = iob {
                         self.IOBValueLabel.text = self.IOBNumberFormatter.stringFromNumber(value.value)
                         self.IOBDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.IOBDateLabel", tableName: "InsulinKit", value: "at %1$@", comment: "The format string describing the date of an IOB value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(value.startDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
                     } else {
@@ -145,15 +166,19 @@ public class ReservoirTableViewController: UITableViewController {
     }
 
     private func updateTotal() {
-        if case .Display(let carbStore) = state {
-            carbStore.getTotalRecentUnitsDelivered { (total) -> Void in
+        if case .Display = state {
+            doseStore?.getTotalRecentUnitsDelivered { (total, error) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
-                    self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(total, numberStyle: .NoStyle)
-
-                    if let sinceDate = self.reservoirValues.last?.startDate {
-                        self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", tableName: "InsulinKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(sinceDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                    if error != nil {
+                        self.state = .Unavailable(error)
                     } else {
-                        self.totalDateLabel.text = nil
+                        self.totalValueLabel.text = NSNumberFormatter.localizedStringFromNumber(total, numberStyle: .NoStyle)
+
+                        if let sinceDate = self.reservoirValues.last?.startDate {
+                            self.totalDateLabel.text = String(format: NSLocalizedString("com.loudnate.InsulinKit.totalDateLabel", tableName: "InsulinKit", value: "since %1$@", comment: "The format string describing the starting date of a total value. The first format argument is the localized date."), NSDateFormatter.localizedStringFromDate(sinceDate, dateStyle: .NoStyle, timeStyle: .ShortStyle))
+                        } else {
+                            self.totalDateLabel.text = nil
+                        }
                     }
                 }
             }
@@ -203,17 +228,17 @@ public class ReservoirTableViewController: UITableViewController {
     }
 
     public override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete, case .Display(let doseStore) = state {
+        if editingStyle == .Delete, case .Display = state {
 
             let value = reservoirValues.removeAtIndex(indexPath.row)
 
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
 
-            do {
-                try doseStore.deleteReservoirValue(value)
-            } catch let error {
-                presentAlertControllerWithError(error)
-                reloadData()
+            doseStore?.deleteReservoirValue(value) { (_, error) -> Void in
+                if let error = error {
+                    self.presentAlertControllerWithError(error)
+                    self.reloadData()
+                }
             }
         }
     }

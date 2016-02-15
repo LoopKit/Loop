@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="jGX-GA-nlH">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="jGX-GA-nlH">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -135,7 +135,7 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kcp-aB-fqr" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" id="Y29-PZ-u5S">
+                <view contentMode="scaleToFill" id="Y29-PZ-u5S" customClass="ErrorBackgroundView" customModule="InsulinKit" customModuleProvider="target">
                     <rect key="frame" x="0.0" y="0.0" width="300" height="300"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
@@ -143,17 +143,25 @@
                             <rect key="frame" x="20" y="126" width="260" height="48.5"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No pump configured" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jSc-64-2tZ">
-                                    <rect key="frame" x="0.0" y="8" width="260" height="33"/>
+                                    <rect key="frame" x="0.0" y="8" width="260" height="32.5"/>
                                     <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lWe-YQ-Y9t">
+                                    <rect key="frame" x="130" y="48.5" width="0.0" height="0.0"/>
+                                    <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
                                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <constraints>
+                                <constraint firstAttribute="bottom" secondItem="lWe-YQ-Y9t" secondAttribute="bottom" id="BGa-JJ-GTW"/>
                                 <constraint firstItem="jSc-64-2tZ" firstAttribute="leading" secondItem="kUD-gG-MJ0" secondAttribute="leading" id="PaD-X6-foE"/>
+                                <constraint firstItem="lWe-YQ-Y9t" firstAttribute="top" secondItem="jSc-64-2tZ" secondAttribute="bottom" constant="8" symbolic="YES" id="UzB-Uu-Xgw"/>
+                                <constraint firstItem="lWe-YQ-Y9t" firstAttribute="centerX" secondItem="kUD-gG-MJ0" secondAttribute="centerX" id="Xk6-yg-x9A"/>
                                 <constraint firstItem="jSc-64-2tZ" firstAttribute="top" secondItem="kUD-gG-MJ0" secondAttribute="topMargin" id="jSV-zR-96Y"/>
-                                <constraint firstAttribute="bottomMargin" secondItem="jSc-64-2tZ" secondAttribute="bottom" id="rOf-ng-kTP"/>
                                 <constraint firstAttribute="trailing" secondItem="jSc-64-2tZ" secondAttribute="trailing" id="yhs-13-bfO"/>
                             </constraints>
                         </view>
@@ -165,6 +173,9 @@
                         <constraint firstAttribute="trailing" secondItem="kUD-gG-MJ0" secondAttribute="trailing" constant="20" symbolic="YES" id="Tep-gH-uWI"/>
                         <constraint firstItem="kUD-gG-MJ0" firstAttribute="leading" secondItem="Y29-PZ-u5S" secondAttribute="leading" constant="20" symbolic="YES" id="nqT-pj-sMb"/>
                     </constraints>
+                    <connections>
+                        <outlet property="errorDescriptionLabel" destination="lWe-YQ-Y9t" id="FcM-I8-B89"/>
+                    </connections>
                 </view>
             </objects>
             <point key="canvasLocation" x="2445" y="-810"/>

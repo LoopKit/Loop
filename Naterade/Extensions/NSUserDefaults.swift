@@ -61,13 +61,15 @@ extension NSUserDefaults {
 
     var insulinActionDuration: NSTimeInterval? {
         get {
-            return doubleForKey(Key.InsulinActionDuration.rawValue)
+            let value = doubleForKey(Key.InsulinActionDuration.rawValue)
+
+            return value > 0 ? value : nil
         }
         set {
             if let insulinActionDuration = newValue {
                 setDouble(insulinActionDuration, forKey: Key.InsulinActionDuration.rawValue)
             } else {
-                setNilValueForKey(Key.InsulinActionDuration.rawValue)
+                removeObjectForKey(Key.InsulinActionDuration.rawValue)
             }
         }
     }
@@ -109,13 +111,15 @@ extension NSUserDefaults {
 
     var transmitterStartTime: NSTimeInterval? {
         get {
-            return doubleForKey(Key.TransmitterStartTime.rawValue)
+            let value = doubleForKey(Key.TransmitterStartTime.rawValue)
+
+            return value > 0 ? value : nil
         }
         set {
             if let value = newValue {
                 setDouble(value, forKey: Key.TransmitterStartTime.rawValue)
             } else {
-                setNilValueForKey(Key.TransmitterStartTime.rawValue)
+                removeObjectForKey(Key.TransmitterStartTime.rawValue)
             }
         }
     }
