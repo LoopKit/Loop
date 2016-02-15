@@ -1,5 +1,5 @@
 //
-//  GlucoseQuantitySchedule.swift
+//  GlucoseSchedule.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 2/12/16.
@@ -10,7 +10,7 @@ import Foundation
 import HealthKit
 
 
-public class GlucoseQuantitySchedule: DailyQuantitySchedule {
+public class GlucoseSchedule: SingleQuantitySchedule {
     public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue<Double>], timeZone: NSTimeZone? = nil) {
         super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
 
@@ -21,4 +21,4 @@ public class GlucoseQuantitySchedule: DailyQuantitySchedule {
 }
 
 
-public typealias InsulinSensitivitySchedule = GlucoseQuantitySchedule
+public typealias InsulinSensitivitySchedule = GlucoseSchedule

@@ -6,16 +6,20 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import HealthKit
 
 
-public class DailyQuantityScheduleTableViewController: DailyValueScheduleTableViewController {
+public class DailyQuantityScheduleTableViewController: SingleValueScheduleTableViewController {
 
     public var unit: HKUnit = HKUnit.gramUnit() {
         didSet {
             unitString = "\(unit)/U"
         }
+    }
+
+    override func preferredValueMinimumFractionDigits() -> Int {
+        return unit.preferredMinimumFractionDigits
     }
 
 }

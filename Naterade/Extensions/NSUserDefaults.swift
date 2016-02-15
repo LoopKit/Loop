@@ -17,6 +17,7 @@ extension NSUserDefaults {
         case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
+        case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "comm.loudnate.Naterade.TransmitterStartTime"
@@ -67,6 +68,19 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue?.rawValue, forKey: Key.InsulinSensitivitySchedule.rawValue)
+        }
+    }
+
+    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? {
+        get {
+            if let rawValue = dictionaryForKey(Key.GlucoseTargetRangeSchedule.rawValue) {
+                return GlucoseRangeSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            setObject(newValue?.rawValue, forKey: Key.GlucoseTargetRangeSchedule.rawValue)
         }
     }
 

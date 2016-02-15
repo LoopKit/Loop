@@ -296,6 +296,12 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
+    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? {
+        didSet {
+            NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
+        }
+    }
+
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
@@ -427,6 +433,7 @@ class PumpDataManager: NSObject, DoseStoreDelegate, TransmitterDelegate, WCSessi
         carbRatioSchedule = NSUserDefaults.standardUserDefaults().carbRatioSchedule
         connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
         insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
+        glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
 
         carbStore = CarbStore()
 

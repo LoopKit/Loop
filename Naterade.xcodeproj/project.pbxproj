@@ -45,7 +45,6 @@
 		4331ECE21C6EC85400EBCA1E /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331ECE11C6EC85400EBCA1E /* Double.swift */; };
 		4331ECE61C6ECBA800EBCA1E /* DailyQuantitySchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331ECE51C6ECBA800EBCA1E /* DailyQuantitySchedule.swift */; };
 		4331ECE81C6ECC8700EBCA1E /* BasalRateSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331ECE71C6ECC8700EBCA1E /* BasalRateSchedule.swift */; };
-		4331ECEA1C6ED15800EBCA1E /* GlucoseQuantitySchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331ECE91C6ED15800EBCA1E /* GlucoseQuantitySchedule.swift */; };
 		4331ECEC1C6ED19900EBCA1E /* CarbRatioSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331ECEB1C6ED19900EBCA1E /* CarbRatioSchedule.swift */; };
 		4335665B1C6EA5E4000CCF29 /* RepeatingScheduleValueTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4335665A1C6EA5E4000CCF29 /* RepeatingScheduleValueTableViewCell.xib */; };
 		4335665C1C6EA7B5000CCF29 /* LoopKit.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4335665E1C6EA7B5000CCF29 /* LoopKit.storyboard */; };
@@ -195,6 +194,12 @@
 		43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */; };
 		43FC1CE51C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */; };
 		43FC1CE71C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */; };
+		43FC1CE91C6FFE170063CB9A /* GlucoseSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CE81C6FFE170063CB9A /* GlucoseSchedule.swift */; };
+		43FC1CEB1C6FFE3B0063CB9A /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CEA1C6FFE3B0063CB9A /* GlucoseRangeSchedule.swift */; };
+		43FC1CED1C7024720063CB9A /* GlucoseRangeScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CEC1C7024720063CB9A /* GlucoseRangeScheduleTableViewController.swift */; };
+		43FC1CF01C702ACF0063CB9A /* GlucoseRangeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CEE1C702ACF0063CB9A /* GlucoseRangeTableViewCell.swift */; };
+		43FC1CF11C702ACF0063CB9A /* GlucoseRangeTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 43FC1CEF1C702ACF0063CB9A /* GlucoseRangeTableViewCell.xib */; };
+		43FC1CF31C7069BE0063CB9A /* SingleValueScheduleTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FC1CF21C7069BE0063CB9A /* SingleValueScheduleTableViewController.swift */; };
 		43FF3D5E1BADE38300DE240A /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935D1B980BC000BE20E9 /* NSData.swift */; };
 		43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -423,7 +428,6 @@
 		4331ECE11C6EC85400EBCA1E /* Double.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		4331ECE51C6ECBA800EBCA1E /* DailyQuantitySchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DailyQuantitySchedule.swift; sourceTree = "<group>"; };
 		4331ECE71C6ECC8700EBCA1E /* BasalRateSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateSchedule.swift; sourceTree = "<group>"; };
-		4331ECE91C6ED15800EBCA1E /* GlucoseQuantitySchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseQuantitySchedule.swift; sourceTree = "<group>"; };
 		4331ECEB1C6ED19900EBCA1E /* CarbRatioSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbRatioSchedule.swift; sourceTree = "<group>"; };
 		4335665A1C6EA5E4000CCF29 /* RepeatingScheduleValueTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RepeatingScheduleValueTableViewCell.xib; sourceTree = "<group>"; };
 		4335665D1C6EA7B5000CCF29 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LoopKit.storyboard; sourceTree = "<group>"; };
@@ -573,6 +577,12 @@
 		43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DailyValueScheduleTableViewController.swift; sourceTree = "<group>"; };
 		43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DailyQuantityScheduleTableViewController.swift; sourceTree = "<group>"; };
+		43FC1CE81C6FFE170063CB9A /* GlucoseSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseSchedule.swift; sourceTree = "<group>"; };
+		43FC1CEA1C6FFE3B0063CB9A /* GlucoseRangeSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeSchedule.swift; sourceTree = "<group>"; };
+		43FC1CEC1C7024720063CB9A /* GlucoseRangeScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeScheduleTableViewController.swift; sourceTree = "<group>"; };
+		43FC1CEE1C702ACF0063CB9A /* GlucoseRangeTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeTableViewCell.swift; sourceTree = "<group>"; };
+		43FC1CEF1C702ACF0063CB9A /* GlucoseRangeTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GlucoseRangeTableViewCell.xib; sourceTree = "<group>"; };
+		43FC1CF21C7069BE0063CB9A /* SingleValueScheduleTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SingleValueScheduleTableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -818,7 +828,8 @@
 				4331ECDF1C6EC82900EBCA1E /* DailyValueSchedule.swift */,
 				4331ECE11C6EC85400EBCA1E /* Double.swift */,
 				430C59AC1C55E9E2006CDB2A /* GlucoseEffect.swift */,
-				4331ECE91C6ED15800EBCA1E /* GlucoseQuantitySchedule.swift */,
+				43FC1CEA1C6FFE3B0063CB9A /* GlucoseRangeSchedule.swift */,
+				43FC1CE81C6FFE170063CB9A /* GlucoseSchedule.swift */,
 				430C59A61C559407006CDB2A /* HealthKitSampleStore.swift */,
 				437220471C4D96FF00C5F36C /* HKUnit.swift */,
 				430C59AE1C55ED53006CDB2A /* LoopMath.swift */,
@@ -939,10 +950,14 @@
 			children = (
 				43FC1CE61C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift */,
 				43FC1CE41C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift */,
+				43FC1CEC1C7024720063CB9A /* GlucoseRangeScheduleTableViewController.swift */,
+				43FC1CEE1C702ACF0063CB9A /* GlucoseRangeTableViewCell.swift */,
 				438B040D1C6ADB100066267B /* IdentifiableClass.swift */,
 				4304A48B1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift */,
+				43FC1CF21C7069BE0063CB9A /* SingleValueScheduleTableViewController.swift */,
 				438B040F1C6ADBB20066267B /* UITableViewCell.swift */,
 				430D1A8A1C4B1D8E00DF5FA4 /* UIViewController.swift */,
+				43FC1CEF1C702ACF0063CB9A /* GlucoseRangeTableViewCell.xib */,
 				4335665A1C6EA5E4000CCF29 /* RepeatingScheduleValueTableViewCell.xib */,
 				4335665E1C6EA7B5000CCF29 /* LoopKit.storyboard */,
 			);
@@ -1683,6 +1698,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4335665B1C6EA5E4000CCF29 /* RepeatingScheduleValueTableViewCell.xib in Resources */,
+				43FC1CF11C702ACF0063CB9A /* GlucoseRangeTableViewCell.xib in Resources */,
 				4335665C1C6EA7B5000CCF29 /* LoopKit.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1838,11 +1854,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4331ECEA1C6ED15800EBCA1E /* GlucoseQuantitySchedule.swift in Sources */,
 				430C59A71C559407006CDB2A /* HealthKitSampleStore.swift in Sources */,
 				4372204B1C4D9B4200C5F36C /* NSTimeInterval.swift in Sources */,
+				43FC1CF31C7069BE0063CB9A /* SingleValueScheduleTableViewController.swift in Sources */,
 				437220431C4D95A200C5F36C /* NSDateFormatter.swift in Sources */,
+				43FC1CE91C6FFE170063CB9A /* GlucoseSchedule.swift in Sources */,
 				437817151C5D37D900190966 /* UIViewController.swift in Sources */,
+				43FC1CEB1C6FFE3B0063CB9A /* GlucoseRangeSchedule.swift in Sources */,
+				43FC1CED1C7024720063CB9A /* GlucoseRangeScheduleTableViewController.swift in Sources */,
 				4331ECE61C6ECBA800EBCA1E /* DailyQuantitySchedule.swift in Sources */,
 				437220481C4D96FF00C5F36C /* HKUnit.swift in Sources */,
 				43FC1CE71C6FB2600063CB9A /* DailyQuantityScheduleTableViewController.swift in Sources */,
@@ -1852,6 +1871,7 @@
 				4304A48C1C6DA829008610D3 /* RepeatingScheduleValueTableViewCell.swift in Sources */,
 				430C59AB1C55E9AB006CDB2A /* SampleValue.swift in Sources */,
 				438B04101C6ADBB20066267B /* UITableViewCell.swift in Sources */,
+				43FC1CF01C702ACF0063CB9A /* GlucoseRangeTableViewCell.swift in Sources */,
 				43FC1CE51C6FB1D50063CB9A /* DailyValueScheduleTableViewController.swift in Sources */,
 				4331ECEC1C6ED19900EBCA1E /* CarbRatioSchedule.swift in Sources */,
 				4331ECE81C6ECC8700EBCA1E /* BasalRateSchedule.swift in Sources */,

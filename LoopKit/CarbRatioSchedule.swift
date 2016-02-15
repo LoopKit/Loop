@@ -10,7 +10,7 @@ import Foundation
 import HealthKit
 
 
-public class CarbRatioSchedule: DailyQuantitySchedule {
+public class CarbRatioSchedule: SingleQuantitySchedule {
     public override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue<Double>], timeZone: NSTimeZone? = nil) {
         super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
 

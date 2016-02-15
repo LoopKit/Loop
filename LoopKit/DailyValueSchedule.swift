@@ -30,8 +30,10 @@ extension RepeatingScheduleValue: RawRepresentable {
 
     public init?(rawValue: RawValue) {
         guard let startTime = rawValue["startTime"] as? Double,
-            value = rawValue["value"] as? T else {
-                return nil
+            rawValue = rawValue["value"] as? T.RawValue,
+            value = T(rawValue: rawValue) else
+        {
+            return nil
         }
 
         self.init(startTime: startTime, value: value)

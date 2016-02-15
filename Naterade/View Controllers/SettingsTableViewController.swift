@@ -113,9 +113,20 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case BasalRate
         case CarbRatio
         case InsulinSensitivity
+        case GlucoseTargetRange
 
-        static let count = 5
+        static let count = 6
     }
+
+    private lazy var valueNumberFormatter: NSNumberFormatter = {
+        let formatter = NSNumberFormatter()
+
+        formatter.numberStyle = .DecimalStyle
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 2
+
+        return formatter
+    }()
 
     // MARK: - UITableViewDataSource
 
@@ -171,7 +182,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     let unit = carbRatioSchedule.unit
                     let value = carbRatioSchedule.averageQuantity().doubleValueForUnit(unit)
 
-                    configCell.detailTextLabel?.text = "\(value) \(unit)/U"
+                    valueNumberFormatter.minimumFractionDigits = 2
+
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value)!) \(unit)/U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -182,7 +195,22 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     let unit = insulinSensitivitySchedule.unit
                     let value = insulinSensitivitySchedule.averageQuantity().doubleValueForUnit(unit)
 
-                    configCell.detailTextLabel?.text = "\(value) \(unit)/U"
+                    valueNumberFormatter.minimumFractionDigits = unit == HKUnit.milligramsPerDeciliterUnit() ? 0 : 1
+
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value)!) \(unit)/U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .GlucoseTargetRange:
+                configCell.textLabel?.text = NSLocalizedString("Target Range", comment: "The title text for the glucose target range schedule")
+
+                if let glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule {
+                    let unit = glucoseTargetRangeSchedule.unit
+                    let value = glucoseTargetRangeSchedule.valueAt(NSDate())
+
+                    valueNumberFormatter.minimumFractionDigits = unit == HKUnit.milligramsPerDeciliterUnit() ? 0 : 1
+
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value.minValue)!) – \(valueNumberFormatter.stringFromNumber(value.maxValue)!) \(unit)"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -226,7 +254,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .PumpID, .TransmitterID:
                 performSegueWithIdentifier(TextFieldTableViewController.className, sender: sender)
             case .BasalRate:
-                let scheduleVC = DailyValueScheduleTableViewController()
+                let scheduleVC = SingleValueScheduleTableViewController()
 
                 if let profile = dataManager.basalRateSchedule {
                     scheduleVC.timeZone = profile.timeZone
@@ -264,12 +292,37 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 }
             case .InsulinSensitivity:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
-                let sender = tableView.cellForRowAtIndexPath(indexPath)
 
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
 
                 if let schedule = dataManager.insulinSensitivitySchedule {
+                    scheduleVC.timeZone = schedule.timeZone
+                    scheduleVC.scheduleItems = schedule.items
+                    scheduleVC.unit = schedule.unit
+
+                    showViewController(scheduleVC, sender: sender)
+                } else if let glucoseStore = dataManager.glucoseStore {
+                    glucoseStore.preferredUnit({ (unit, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if let error = error {
+                                self.presentAlertControllerWithError(error)
+                            } else if let unit = unit {
+                                scheduleVC.unit = unit
+                                self.showViewController(scheduleVC, sender: sender)
+                            }
+                        }
+                    })
+                } else {
+                    showViewController(scheduleVC, sender: sender)
+                }
+            case .GlucoseTargetRange:
+                let scheduleVC = GlucoseRangeScheduleTableViewController()
+
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Target Range", comment: "The title of the glucose target range schedule screen")
+
+                if let schedule = dataManager.glucoseTargetRangeSchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
@@ -385,7 +438,13 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .Configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
                 case .BasalRate:
-                    dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                    if let controller = controller as? SingleValueScheduleTableViewController {
+                        dataManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                    }
+                case .GlucoseTargetRange:
+                    if let controller = controller as? GlucoseRangeScheduleTableViewController {
+                        dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                    }
                 case let section:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {
                         switch section {

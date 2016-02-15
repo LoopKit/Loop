@@ -14,7 +14,27 @@ public protocol DailyValueScheduleTableViewControllerDelegate: class {
 }
 
 
-public class DailyValueScheduleTableViewController: UITableViewController, IdentifiableClass, RepeatingScheduleValueTableViewCellDelegate {
+func insertableIndicesForScheduleItems<T>(scheduleItems: [RepeatingScheduleValue<T>], byRemovingRow row: Int, withInterval interval: NSTimeInterval) -> [Bool] {
+
+    let insertableIndices = scheduleItems.enumerate().map { (index, item) -> Bool in
+        if row == index {
+            return true
+        } else if index == 0 {
+            return false
+        } else if index == scheduleItems.endIndex - 1 {
+            return item.startTime < NSTimeInterval(hours: 24) - interval
+        } else if index > row {
+            return scheduleItems[index + 1].startTime - item.startTime > interval
+        } else {
+            return item.startTime - scheduleItems[index - 1].startTime > interval
+        }
+    }
+
+    return insertableIndices
+}
+
+
+public class DailyValueScheduleTableViewController: UITableViewController, IdentifiableClass {
 
     private var keyboardWillShowNotificationObserver: AnyObject?
 
@@ -32,7 +52,6 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
         navigationItem.rightBarButtonItems = [insertButtonItem(), editButtonItem()]
 
         tableView.keyboardDismissMode = .OnDrag
-        tableView.registerNib(UINib(nibName: RepeatingScheduleValueTableViewCell.className, bundle: NSBundle(forClass: self.dynamicType)), forCellReuseIdentifier: RepeatingScheduleValueTableViewCell.className)
 
         keyboardWillShowNotificationObserver = NSNotificationCenter.defaultCenter().addObserverForName(UIKeyboardWillShowNotification, object: nil, queue: NSOperationQueue.mainQueue(), usingBlock: { [unowned self] (note) -> Void in
 
@@ -88,8 +107,6 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
 
     // MARK: - State
 
-    public var scheduleItems: [RepeatingScheduleValue<Double>] = []
-
     public var timeZone = NSTimeZone.localTimeZone() {
         didSet {
             calendar.timeZone = timeZone
@@ -100,53 +117,18 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
 
     private var calendar = NSCalendar.currentCalendar()
 
-    private var midnight: NSDate {
+    var midnight: NSDate {
         return calendar.startOfDayForDate(NSDate(timeIntervalSinceReferenceDate: 0))
     }
 
     func addScheduleItem(sender: AnyObject?) {
-        var startTime = NSTimeInterval(0)
-        var value = 0.0
+        // Updates the table view state. Subclasses should update their data model before calling super
 
-        if scheduleItems.count > 0, let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: scheduleItems.count - 1, inSection: 0)) as? RepeatingScheduleValueTableViewCell {
-            let lastItem = scheduleItems.last!
-            let interval = cell.datePickerInterval
-
-            startTime = lastItem.startTime + interval
-            value = lastItem.value
-
-            if startTime >= NSTimeInterval(hours: 24) {
-                return
-            }
-        }
-
-        scheduleItems.append(
-            RepeatingScheduleValue(
-                startTime: min(NSTimeInterval(hours: 23.5), startTime),
-                value: value
-            )
-        )
-
-        tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: scheduleItems.count - 1, inSection: 0)], withRowAnimation: .Automatic)
+        tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: tableView.numberOfRowsInSection(0), inSection: 0)], withRowAnimation: .Automatic)
     }
 
-    private func insertableIndicesByRemovingRow(row: Int, withInterval interval: NSTimeInterval) -> [Bool] {
-
-        let insertableIndices = scheduleItems.enumerate().map { (index, item) -> Bool in
-            if row == index {
-                return true
-            } else if index == 0 {
-                return false
-            } else if index == scheduleItems.endIndex - 1 {
-                return item.startTime < NSTimeInterval(hours: 24) - interval
-            } else if index > row {
-                return scheduleItems[index + 1].startTime - item.startTime > interval
-            } else {
-                return item.startTime - scheduleItems[index - 1].startTime > interval
-            }
-        }
-
-        return insertableIndices
+    func insertableIndiciesByRemovingRow(row: Int, withInterval timeInterval: NSTimeInterval) -> [Bool] {
+        fatalError("Subclasses must override __FUNCTION__")
     }
 
     // MARK: - UITableViewDataSource
@@ -156,72 +138,27 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
     }
 
     public override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return scheduleItems.count
-    }
-
-    public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(RepeatingScheduleValueTableViewCell.className, forIndexPath: indexPath) as! RepeatingScheduleValueTableViewCell
-
-        let item = scheduleItems[indexPath.row]
-        let interval = cell.datePickerInterval
-
-        cell.configureWithDate(midnight.dateByAddingTimeInterval(item.startTime), value: item.value)
-        cell.unitString = unitString
-        cell.delegate = self
-
-        if indexPath.row > 0 {
-            let lastItem = scheduleItems[indexPath.row - 1]
-
-            cell.datePicker.minimumDate = midnight.dateByAddingTimeInterval(lastItem.startTime).dateByAddingTimeInterval(interval)
-        }
-
-        if indexPath.row < scheduleItems.endIndex - 1 {
-            let nextItem = scheduleItems[indexPath.row + 1]
-
-            cell.datePicker.maximumDate = midnight.dateByAddingTimeInterval(nextItem.startTime).dateByAddingTimeInterval(-interval)
-        } else {
-            cell.datePicker.maximumDate = midnight.dateByAddingTimeInterval(NSTimeInterval(hours: 24) - interval)
-
-        }
-
-        return cell
+        fatalError("Subclasses must override __FUNCTION__")
     }
 
     public override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
 
+    public override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return indexPath.row > 0
+    }
+
+    public override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        fatalError("Subclasses must override __FUNCTION__")
+    }
+
     public override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            scheduleItems.removeAtIndex(indexPath.row)
+            // Updates the table view state. Subclasses should update their data model before calling super
 
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
         }
-    }
-
-    public override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-
-        if sourceIndexPath != destinationIndexPath {
-            let item = scheduleItems.removeAtIndex(sourceIndexPath.row)
-            scheduleItems.insert(item, atIndex: destinationIndexPath.row)
-
-            guard destinationIndexPath.row > 0, let cell = tableView.cellForRowAtIndexPath(destinationIndexPath) as? RepeatingScheduleValueTableViewCell else {
-                return
-            }
-
-            let interval = cell.datePickerInterval
-            let startTime = scheduleItems[destinationIndexPath.row - 1].startTime + interval
-
-            scheduleItems[destinationIndexPath.row] = RepeatingScheduleValue(startTime: startTime, value: scheduleItems[destinationIndexPath.row].value)
-
-            dispatch_async(dispatch_get_main_queue()) {
-                tableView.reloadData()
-            }
-        }
-    }
-
-    public override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return indexPath.row > 0
     }
 
     // MARK: - UITableViewDelegate
@@ -266,7 +203,7 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
         }
 
         let interval = cell.datePickerInterval
-        let insertableIndices = insertableIndicesByRemovingRow(sourceIndexPath.row, withInterval: interval)
+        let insertableIndices = insertableIndiciesByRemovingRow(sourceIndexPath.row, withInterval: interval)
 
         if insertableIndices[proposedDestinationIndexPath.row] {
             return proposedDestinationIndexPath
@@ -286,13 +223,9 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
     // MARK: - RepeatingScheduleValueTableViewCellDelegate
 
     func repeatingScheduleValueTableViewCellDidUpdateDate(cell: RepeatingScheduleValueTableViewCell) {
-        if let indexPath = tableView.indexPathForCell(cell) {
-            let currentItem = scheduleItems[indexPath.row]
 
-            scheduleItems[indexPath.row] = RepeatingScheduleValue(
-                startTime: cell.date.timeIntervalSinceDate(midnight),
-                value: currentItem.value
-            )
+        // Updates the TableView state. Subclasses should update their data model
+        if let indexPath = tableView.indexPathForCell(cell) {
 
             var indexPaths: [NSIndexPath] = []
 
@@ -300,7 +233,7 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
                 indexPaths.append(NSIndexPath(forRow: indexPath.row - 1, inSection: indexPath.section))
             }
 
-            if indexPath.row < scheduleItems.endIndex - 1 {
+            if indexPath.row < tableView.numberOfRowsInSection(0) - 1 {
                 indexPaths.append(NSIndexPath(forRow: indexPath.row + 1, inSection: indexPath.section))
             }
 
@@ -310,11 +243,4 @@ public class DailyValueScheduleTableViewController: UITableViewController, Ident
         }
     }
 
-    func repeatingScheduleValueTableViewCellDidUpdateValue(cell: RepeatingScheduleValueTableViewCell) {
-        if let indexPath = tableView.indexPathForCell(cell) {
-            let currentItem = scheduleItems[indexPath.row]
-
-            scheduleItems[indexPath.row] = RepeatingScheduleValue(startTime: currentItem.startTime, value: cell.value)
-        }
-    }
 }

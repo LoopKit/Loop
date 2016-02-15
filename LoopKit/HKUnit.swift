@@ -17,4 +17,13 @@ public extension HKUnit {
     static func millimolesPerLiterUnit() -> HKUnit {
         return HKUnit.moleUnitWithMetricPrefix(.Milli, molarMass: HKUnitMolarMassBloodGlucose).unitDividedByUnit(HKUnit.literUnit())
     }
+
+    /// A formatting helper for determining the preferred decimal style for a given unit
+    var preferredMinimumFractionDigits: Int {
+        if self == HKUnit.milligramsPerDeciliterUnit() {
+            return 0
+        } else {
+            return 1
+        }
+    }
 }

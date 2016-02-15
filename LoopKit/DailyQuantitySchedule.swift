@@ -10,10 +10,10 @@ import Foundation
 import HealthKit
 
 
-public class DailyQuantitySchedule: DailyValueSchedule<Double> {
+public class DailyQuantitySchedule<T: RawRepresentable where T.RawValue: AnyObject>: DailyValueSchedule<T> {
     public let unit: HKUnit
 
-    init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue<Double>], timeZone: NSTimeZone?) {
+    init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue<T>], timeZone: NSTimeZone?) {
         self.unit = unit
 
         super.init(dailyItems: dailyItems, timeZone: timeZone)
@@ -38,9 +38,16 @@ public class DailyQuantitySchedule: DailyValueSchedule<Double> {
 
         return rawValue
     }
+}
 
+
+public class SingleQuantitySchedule: DailyQuantitySchedule<Double> {
     public func quantityAt(time: NSDate) -> HKQuantity {
         return HKQuantity(unit: unit, doubleValue: valueAt(time))
+    }
+
+    override init?(unit: HKUnit, dailyItems: [RepeatingScheduleValue<Double>], timeZone: NSTimeZone?) {
+        super.init(unit: unit, dailyItems: dailyItems, timeZone: timeZone)
     }
 
     func averageValue() -> Double {

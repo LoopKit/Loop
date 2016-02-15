@@ -20,15 +20,27 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
 
     weak var delegate: RepeatingScheduleValueTableViewCellDelegate?
 
-    private(set) var date: NSDate = NSDate()
+    var date: NSDate = NSDate() {
+        didSet {
+            dateLabel.text = NSDateFormatter.localizedStringFromDate(date, dateStyle: .NoStyle, timeStyle: .ShortStyle)
 
-    private(set) var value: Double = 0
+            if datePicker.date != date {
+                datePicker.date = date
+            }
+        }
+    }
+
+    var value: Double = 0 {
+        didSet {
+            textField.text = valueNumberFormatter.stringFromNumber(value)
+        }
+    }
 
     var datePickerInterval: NSTimeInterval {
         return NSTimeInterval(minutes: Double(datePicker.minuteInterval))
     }
 
-    private lazy var decimalFormatter: NSNumberFormatter = {
+    lazy var valueNumberFormatter: NSNumberFormatter = {
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .DecimalStyle
         formatter.minimumFractionDigits = 1
@@ -52,8 +64,6 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
         super.awakeFromNib()
 
         datePickerExpandedHeight = datePickerHeightConstraint.constant
-
-        dateChanged(datePicker)
     }
 
     override func setSelected(selected: Bool, animated: Bool) {
@@ -61,15 +71,6 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
 
         datePicker.hidden = !selected
         datePickerHeightConstraint.constant = selected ? datePickerExpandedHeight : 0
-    }
-
-    func configureWithDate(date: NSDate, value: Double) {
-        self.date = date
-        self.value = value
-
-        dateLabel.text = NSDateFormatter.localizedStringFromDate(date, dateStyle: .NoStyle, timeStyle: .ShortStyle)
-        datePicker.date = date
-        textField.text = decimalFormatter.stringFromNumber(value)
     }
 
     var unitString: String? {
@@ -82,7 +83,7 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
     }
 
     @IBAction func dateChanged(sender: UIDatePicker) {
-        configureWithDate(sender.date, value: value)
+        date = sender.date
 
         delegate?.repeatingScheduleValueTableViewCellDidUpdateDate(self)
     }
@@ -90,7 +91,7 @@ class RepeatingScheduleValueTableViewCell: UITableViewCell, UITextFieldDelegate 
     // MARK: - UITextFieldDelegate
 
     func textFieldDidEndEditing(textField: UITextField) {
-        configureWithDate(date, value: decimalFormatter.numberFromString(textField.text ?? "")?.doubleValue ?? 0)
+        value = valueNumberFormatter.numberFromString(textField.text ?? "")?.doubleValue ?? 0
 
         delegate?.repeatingScheduleValueTableViewCellDidUpdateValue(self)
     }
