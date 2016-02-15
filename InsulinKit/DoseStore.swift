@@ -116,24 +116,12 @@ public class DoseStore {
         if recentReservoirObjectsCache != nil {
             let predicate = recentReservoirValuesPredicate
 
-            for (index, value) in recentReservoirObjectsCache!.enumerate().reverse() {
-                if predicate.evaluateWithObject(value) {
-                    break
-                } else {
-                    recentReservoirObjectsCache!.removeAtIndex(index)
-                }
-            }
+            recentReservoirObjectsCache = recentReservoirObjectsCache!.filter { predicate.evaluateWithObject($0) }
 
             if recentReservoirDoseEntriesCache != nil {
                 let minEndDate = recentReservoirValuesMinDate
 
-                for (index, entry) in recentReservoirDoseEntriesCache!.enumerate() {
-                    if entry.endDate >= minEndDate {
-                        break
-                    } else {
-                        recentReservoirDoseEntriesCache!.removeAtIndex(index)
-                    }
-                }
+                recentReservoirDoseEntriesCache = recentReservoirDoseEntriesCache!.filter { $0.endDate >= minEndDate }
 
                 var newValues: [Reservoir] = []
 
@@ -148,17 +136,10 @@ public class DoseStore {
                 recentReservoirDoseEntriesCache! += newDoseEntries
 
                 if recentReservoirNormalizedDoseEntriesCache != nil {
-                    for (index, entry) in recentReservoirNormalizedDoseEntriesCache!.enumerate() {
-                        if entry.endDate >= minEndDate {
-                            break
-                        } else {
-                            recentReservoirNormalizedDoseEntriesCache!.removeAtIndex(index)
-                        }
-                    }
+                    recentReservoirNormalizedDoseEntriesCache = recentReservoirNormalizedDoseEntriesCache!.filter { $0.endDate > minEndDate }
 
                     recentReservoirNormalizedDoseEntriesCache! += InsulinMath.normalize(newDoseEntries, againstBasalSchedule: basalProfile)
                 }
-
             }
 
             recentReservoirObjectsCache!.insert(reservoir, atIndex: 0)
