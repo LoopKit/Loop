@@ -307,7 +307,25 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: - CarbKit
 
-    let carbStore: CarbStore?
+    let carbStore: CarbStore? = CarbStore()
+
+    var carbStoreObserver: AnyObject? {
+        willSet {
+            if let observer = carbStoreObserver {
+                NSNotificationCenter.defaultCenter().removeObserver(observer)
+            }
+        }
+    }
+
+    private func enableCarbStoreBackgroundDelivery() {
+        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
+            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "CarbStore")
+                }
+            }
+        }
+    }
 
     private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
@@ -425,7 +443,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
         pumpID = NSUserDefaults.standardUserDefaults().pumpID
 
-        carbStore = CarbStore()
         doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
 
         if let pumpID = pumpID {
@@ -439,18 +456,17 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         watchSession?.delegate = self
         watchSession?.activateSession()
 
-        carbStore?.delegate = self
-
-        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
-            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "CarbStore")
-                }
-            }
+        if let carbStore = carbStore {
+            carbStore.delegate = self
+            carbStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(CarbStore.AuthorizationStatusDidChangeNotification, object: carbStore, queue: nil, usingBlock: { [unowned self] (_) -> Void in
+                self.enableCarbStoreBackgroundDelivery()
+            })
+            enableCarbStoreBackgroundDelivery()
         }
     }
 
     deinit {
+        carbStoreObserver = nil
         rileyLinkManagerObserver = nil
         rileyLinkDeviceObserver = nil
     }

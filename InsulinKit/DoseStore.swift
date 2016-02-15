@@ -99,7 +99,7 @@ public class DoseStore {
 
     private func initializePersistenceController() {
         if persistenceController == nil, case .NeedsConfiguration = readyState {
-            self.readyState = .Initializing
+            readyState = .Initializing
 
             persistenceController = PersistenceController(readyCallback: { [unowned self] (error) -> Void in
                 if let error = error {
@@ -108,6 +108,8 @@ public class DoseStore {
                     self.readyState = .Ready
                 }
             })
+        } else {
+            readyState = .Ready
         }
     }
 

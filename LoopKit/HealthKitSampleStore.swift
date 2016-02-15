@@ -12,6 +12,8 @@ import HealthKit
 
 public class HealthKitSampleStore {
 
+    public static let AuthorizationStatusDidChangeNotification = "com.loudnate.LoopKit.AuthorizationStatusDidChangeNotification"
+
     /// All the sample types we need permission to read
     public var readTypes: Set<HKSampleType> {
         return Set()
@@ -26,7 +28,7 @@ public class HealthKitSampleStore {
     public let healthStore = HKHealthStore()
 
     public init?() {
-        guard HKHealthStore.isHealthDataAvailable() && !sharingDenied else {
+        guard HKHealthStore.isHealthDataAvailable() else {
             return nil
         }
     }
@@ -80,6 +82,8 @@ public class HealthKitSampleStore {
             }
 
             parentHandler(success: success, error: authError)
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.AuthorizationStatusDidChangeNotification, object: self)
         })
     }
 

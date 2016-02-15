@@ -123,6 +123,8 @@ public class CarbStore: HealthKitSampleStore {
      Enables the background delivery of updates to carbohydrate data.
      
      This is necessary if carbohydrate data is used in a long-running task (like automated dosing) and new entries are expected from other apps or input sources.
+     
+     This operation is performed asynchronously and the completion will be executed on an arbitrary background queue.
 
      - parameter enabled:    Whether to enable or disable background delivery
      - parameter completion: A closure called after the background delivery preference is changed. The closure takes two arguments:
@@ -130,7 +132,7 @@ public class CarbStore: HealthKitSampleStore {
         - error:   An error object explaining why the preference failed to update
      */
     public func setBackgroundDeliveryEnabled(enabled: Bool, completion: (success: Bool, error: NSError?) -> Void) {
-        dispatch_async(dispatch_get_main_queue()) { () -> Void in
+        dispatch_async(self.dataAccessQueue) { () -> Void in
             let oldValue = self.isBackgroundDeliveryEnabled
             self.isBackgroundDeliveryEnabled = enabled
 
@@ -154,9 +156,8 @@ public class CarbStore: HealthKitSampleStore {
                     })
                 }
 
-                dispatch_group_notify(group, dispatch_get_main_queue()) {
-                    completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
-                }
+                dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+                completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
             case (true, false):
                 let group = dispatch_group_create()
                 var lastError: NSError?
@@ -176,9 +177,8 @@ public class CarbStore: HealthKitSampleStore {
                     })
                 }
 
-                dispatch_group_notify(group, dispatch_get_main_queue()) {
-                    completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
-                }
+                dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+                completion(success: enabled == self.isBackgroundDeliveryEnabled, error: lastError)
             default:
                 completion(success: true, error: nil)
             }
@@ -189,9 +189,13 @@ public class CarbStore: HealthKitSampleStore {
     // MARK: - Data fetching
 
     private func processResultsFromAnchoredQuery(query: HKAnchoredObjectQuery, newSamples: [HKSample]?, deletedSamples: [HKDeletedObject]?, anchor: HKQueryAnchor?, error: NSError?) {
-        // TODO: Hand the error to the delegate
 
-        dispatch_async(self.dataAccessQueue) {
+        if let error = error {
+            self.delegate?.carbStoreDidError(error)
+            return
+        }
+
+        dispatch_async(dataAccessQueue) {
             // Prune the sample data based on the startDate and deletedSamples array
             var removedSamples: [HKQuantitySample] = []
 

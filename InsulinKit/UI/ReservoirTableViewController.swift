@@ -78,6 +78,10 @@ public class ReservoirTableViewController: UITableViewController {
         updateTimelyStats(nil)
     }
 
+    deinit {
+        doseStoreObserver = nil
+    }
+
     // MARK: - Data
 
     private var reservoirValues: [ReservoirValue] = []
@@ -90,31 +94,31 @@ public class ReservoirTableViewController: UITableViewController {
 
     private var state = State.Unknown {
         didSet {
-            switch state {
-            case .Unknown:
-                break
-            case .Unavailable(let error):
-                self.tableView.tableHeaderView?.hidden = true
-                self.tableView.tableFooterView = UIView()
-                tableView.backgroundView = needsConfigurationMessageView
-
-                if let error = error {
-                    needsConfigurationMessageView.errorDescriptionLabel.text = String(error)
-                } else {
-                    needsConfigurationMessageView.errorDescriptionLabel.text = nil
-                }
-            case .Display:
-                self.tableView.backgroundView = nil
-                self.tableView.tableHeaderView?.hidden = false
-                self.tableView.tableFooterView = nil
-
+            if isViewLoaded() {
                 reloadData()
             }
         }
     }
 
     private func reloadData() {
-        if case .Display = state {
+        switch state {
+        case .Unknown:
+            break
+        case .Unavailable(let error):
+            self.tableView.tableHeaderView?.hidden = true
+            self.tableView.tableFooterView = UIView()
+            tableView.backgroundView = needsConfigurationMessageView
+
+            if let error = error {
+                needsConfigurationMessageView.errorDescriptionLabel.text = String(error)
+            } else {
+                needsConfigurationMessageView.errorDescriptionLabel.text = nil
+            }
+        case .Display:
+            self.tableView.backgroundView = nil
+            self.tableView.tableHeaderView?.hidden = false
+            self.tableView.tableFooterView = nil
+
             doseStore?.getRecentReservoirValues({ [unowned self] (reservoirValues, error) -> Void in
                 if error != nil {
                     self.state = .Unavailable(error)
