@@ -1,2 +1,3 @@
 github "soffes/Crypto" "v0.3.0"
+github "loudnate/LoopKit" "6f3735d9c134f438156b425c5e610830da0476b7"
 github "loudnate/xDripG5" "0.2.1"
