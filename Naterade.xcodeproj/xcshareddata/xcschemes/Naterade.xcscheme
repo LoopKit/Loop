@@ -38,46 +38,6 @@
                ReferencedContainer = "container:Naterade.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4372202D1C4D93F000C5F36C"
-               BuildableName = "LoopKitTests.xctest"
-               BlueprintName = "LoopKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4372200E1C4D7E4800C5F36C"
-               BuildableName = "CarbKitTests.xctest"
-               BlueprintName = "CarbKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "430C598D1C558BD4006CDB2A"
-               BuildableName = "GlucoseKitTests.xctest"
-               BlueprintName = "GlucoseKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "436248AD1C59BC220088BB43"
-               BuildableName = "InsulinKitTests.xctest"
-               BlueprintName = "InsulinKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

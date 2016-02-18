@@ -62,10 +62,6 @@
 		43A943BE1B9298BF0051FA24 /* SendDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943B61B9298BF0051FA24 /* SendDataTask.m */; };
 		43A943C11B92996B0051FA24 /* NSData+Conversion.h in Headers */ = {isa = PBXBuildFile; fileRef = 43A943BF1B92996B0051FA24 /* NSData+Conversion.h */; };
 		43A943C21B92996B0051FA24 /* NSData+Conversion.m in Sources */ = {isa = PBXBuildFile; fileRef = 43A943C01B92996B0051FA24 /* NSData+Conversion.m */; };
-		43D8FF011C72B6DD0073BE78 /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D8FEFD1C72B6DD0073BE78 /* CarbKit.framework */; };
-		43D8FF021C72B6DD0073BE78 /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D8FEFE1C72B6DD0073BE78 /* GlucoseKit.framework */; };
-		43D8FF031C72B6DD0073BE78 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D8FEFF1C72B6DD0073BE78 /* InsulinKit.framework */; };
-		43D8FF041C72B6DD0073BE78 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D8FF001C72B6DD0073BE78 /* LoopKit.framework */; };
 		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
@@ -251,10 +247,6 @@
 		43A943B61B9298BF0051FA24 /* SendDataTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SendDataTask.m; sourceTree = "<group>"; };
 		43A943BF1B92996B0051FA24 /* NSData+Conversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Conversion.h"; sourceTree = "<group>"; };
 		43A943C01B92996B0051FA24 /* NSData+Conversion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Conversion.m"; sourceTree = "<group>"; };
-		43D8FEFD1C72B6DD0073BE78 /* CarbKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarbKit.framework; path = Carthage/Build/iOS/CarbKit.framework; sourceTree = "<group>"; };
-		43D8FEFE1C72B6DD0073BE78 /* GlucoseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlucoseKit.framework; path = Carthage/Build/iOS/GlucoseKit.framework; sourceTree = "<group>"; };
-		43D8FEFF1C72B6DD0073BE78 /* InsulinKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = InsulinKit.framework; path = Carthage/Build/iOS/InsulinKit.framework; sourceTree = "<group>"; };
-		43D8FF001C72B6DD0073BE78 /* LoopKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKit.framework; path = Carthage/Build/iOS/LoopKit.framework; sourceTree = "<group>"; };
 		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
 		43DE925B1C547A20001FFDE1 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
@@ -304,10 +296,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43D8FF011C72B6DD0073BE78 /* CarbKit.framework in Frameworks */,
-				43D8FF021C72B6DD0073BE78 /* GlucoseKit.framework in Frameworks */,
-				43D8FF031C72B6DD0073BE78 /* InsulinKit.framework in Frameworks */,
-				43D8FF041C72B6DD0073BE78 /* LoopKit.framework in Frameworks */,
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
 				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
 				43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */,
@@ -582,10 +570,6 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				43D8FEFD1C72B6DD0073BE78 /* CarbKit.framework */,
-				43D8FEFE1C72B6DD0073BE78 /* GlucoseKit.framework */,
-				43D8FEFF1C72B6DD0073BE78 /* InsulinKit.framework */,
-				43D8FF001C72B6DD0073BE78 /* LoopKit.framework */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
