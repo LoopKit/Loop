@@ -199,7 +199,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
-    var rileyLinkState: State<RileyLinkManager> {
+    var rileyLinkState: State<RileyLinkManager> = .NeedsConfiguration {
         willSet {
             switch newValue {
             case .Ready(let manager):
@@ -445,12 +445,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
         doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
 
-        if let pumpID = pumpID {
-            rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
-        } else {
-            rileyLinkState = .NeedsConfiguration
-        }
-
         super.init()
 
         watchSession?.delegate = self
@@ -462,6 +456,16 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
                 self.enableCarbStoreBackgroundDelivery()
             })
             enableCarbStoreBackgroundDelivery()
+        }
+
+        defer {
+            if let pumpID = pumpID {
+                rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
+            } else {
+                rileyLinkState = .NeedsConfiguration
+            }
+
+            transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
         }
     }
 

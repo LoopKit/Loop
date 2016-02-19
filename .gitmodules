@@ -1,9 +1,0 @@
-[submodule "Carthage/Checkouts/Crypto"]
-	path = Carthage/Checkouts/Crypto
-	url = https://github.com/soffes/Crypto.git
-[submodule "Carthage/Checkouts/LoopKit"]
-	path = Carthage/Checkouts/LoopKit
-	url = git@github.com:loudnate/LoopKit.git
-[submodule "Carthage/Checkouts/xDripG5"]
-	path = Carthage/Checkouts/xDripG5
-	url = git@github.com:loudnate/xDripG5.git

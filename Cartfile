@@ -1,2 +1,2 @@
-github "loudnate/LoopKit" "master"
+git "file:///Users/nate/src/github.com/loudnate/LoopKit" "master"
 github "loudnate/xDripG5"

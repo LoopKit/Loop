@@ -17,8 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
-        PumpDataManager.sharedManager.transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
-
         window?.tintColor = UIColor.tintColor()
 
         if let tabBarController = window?.rootViewController as? UITabBarController {

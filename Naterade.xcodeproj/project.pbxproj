@@ -358,15 +358,15 @@
 			isa = PBXGroup;
 			children = (
 				43E3449B1B9CB08800C85C07 /* Naterade.playground */,
-				968DCD53F724DE56FFE51920 /* Frameworks */,
 				438C933B1B97F82000BE20E9 /* MinimedKit */,
 				437A289D1C2F66DE00009647 /* MinimedKitTests */,
 				43776F8E1B8022E90074EA36 /* Naterade */,
-				43776F8D1B8022E90074EA36 /* Products */,
 				437A28AF1C2FB60C00009647 /* PumpCommandKit */,
 				43A943A31B928D400051FA24 /* RileyLinkKit */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
+				968DCD53F724DE56FFE51920 /* Frameworks */,
+				43776F8D1B8022E90074EA36 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -883,7 +883,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage copy-frameworks";
+			shellScript = "/usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" \"$SRCROOT\"\n/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
