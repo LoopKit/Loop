@@ -133,20 +133,24 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         if glucose != latestGlucose {
             latestGlucose = glucose
 
-            if glucose.glucose >= 20, let transmitterStartTime = transmitterStartTime {
+            if glucose.glucose >= 20, let transmitterStartTime = transmitterStartTime, glucoseStore = glucoseStore {
                 let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose.glucose))
 
                 let startDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
 
                 let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000224")
 
-                glucoseStore?.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, _, error) -> Void in
+                glucoseStore.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, _, error) -> Void in
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
                     }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
                 })
 
                 updateWatch()
+            } else {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             }
         }
     }
@@ -176,11 +180,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
-    var latestGlucose: GlucoseRxMessage? {
-        didSet {
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-        }
-    }
+    var latestGlucose: GlucoseRxMessage?
 
     var latestPumpStatus: MySentryPumpStatusMessageBody? {
         didSet {
