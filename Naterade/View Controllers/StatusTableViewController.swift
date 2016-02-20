@@ -108,7 +108,7 @@ class StatusTableViewController: UITableViewController {
             dispatch_async(dispatch_get_main_queue()) {
                 if let error = error {
                     self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
-                    self.needsRefresh = true
+                    // TODO: Display error in the cell
                 } else {
                     self.glucoseValues = values
 
