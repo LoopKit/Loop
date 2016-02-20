@@ -16,6 +16,13 @@
 		432AC0C81C2A396A00B1DC2F /* CRC8.m in Sources */ = {isa = PBXBuildFile; fileRef = 432AC0C61C2A396A00B1DC2F /* CRC8.m */; };
 		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
 		433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */; };
+		4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */; };
+		4346D1EB1C77FF0E00ABAFE3 /* predict_glucose_from_dose.json in Resources */ = {isa = PBXBuildFile; fileRef = 4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */; };
+		4346D1EC1C77FF0E00ABAFE3 /* clean_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */; };
+		4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
+		4346D1F21C7833CE00ABAFE3 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F11C7833CE00ABAFE3 /* Chart.swift */; };
+		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
+		4346D1F81C785CA600ABAFE3 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F71C785CA600ABAFE3 /* SampleData.swift */; };
 		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
@@ -200,6 +207,13 @@
 		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D051C2F453500F754CE /* CarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarelinkMessageBody.swift; sourceTree = "<group>"; };
 		433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
+		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartTableViewCell.swift; sourceTree = "<group>"; };
+		4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predict_glucose_from_dose.json; sourceTree = "<group>"; };
+		4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = clean_glucose.json; sourceTree = "<group>"; };
+		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
+		4346D1F11C7833CE00ABAFE3 /* Chart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
+		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
+		4346D1F71C785CA600ABAFE3 /* SampleData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLKComplicationTemplate.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Naterade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naterade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -296,6 +310,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */,
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
 				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
 				43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */,
@@ -346,6 +361,16 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		4346D1E81C77FEF100ABAFE3 /* Sample Data */ = {
+			isa = PBXGroup;
+			children = (
+				4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */,
+				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
+				4346D1F71C785CA600ABAFE3 /* SampleData.swift */,
+			);
+			path = "Sample Data";
+			sourceTree = "<group>";
+		};
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -386,16 +411,17 @@
 		43776F8E1B8022E90074EA36 /* Naterade */ = {
 			isa = PBXGroup;
 			children = (
+				43F5C2C71B929BFF003EB13D /* Naterade.entitlements */,
+				43F5C2D41B92A4A6003EB13D /* Info.plist */,
+				43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				43776F981B8022E90074EA36 /* Assets.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
-				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
 				43757D131C06F26C00910CB9 /* Models */,
-				43F5C2C71B929BFF003EB13D /* Naterade.entitlements */,
-				43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */,
+				4346D1E81C77FEF100ABAFE3 /* Sample Data */,
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
@@ -536,6 +562,8 @@
 				43E344A51B9E1B3300C85C07 /* NSBundle.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
+				4346D1F11C7833CE00ABAFE3 /* Chart.swift */,
+				4346D1F51C78501000ABAFE3 /* ChartPoint.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -554,6 +582,7 @@
 			isa = PBXGroup;
 			children = (
 				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
+				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -570,6 +599,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
@@ -821,6 +851,8 @@
 				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
+				4346D1EB1C77FF0E00ABAFE3 /* predict_glucose_from_dose.json in Resources */,
+				4346D1EC1C77FF0E00ABAFE3 /* clean_glucose.json in Resources */,
 				43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -878,12 +910,13 @@
 				"$(SRCROOT)/Carthage/Build/iOS/GlucoseKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/InsulinKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" \"$SRCROOT\"\n/usr/local/bin/carthage copy-frameworks";
+			shellScript = "# /usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" \"$SRCROOT\"\n/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -900,10 +933,14 @@
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
 				437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */,
+				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				43DE92511C541832001FFDE1 /* UIColor.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
+				4346D1F81C785CA600ABAFE3 /* SampleData.swift in Sources */,
 				43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
+				4346D1F21C7833CE00ABAFE3 /* Chart.swift in Sources */,
+				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
 				43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */,

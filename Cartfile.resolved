@@ -1,3 +1,4 @@
 github "loudnate/Crypto" "3e9fd522eba2b95c648229f9804b34773bb340a0"
-git "file:///Users/nate/src/github.com/loudnate/LoopKit" "f7e89f7b701fa698112998a3ca7cd63ffa2745f6"
+git "file:///Users/nate/src/github.com/loudnate/LoopKit" "2b577c7a4d92a2d04099f9bafde053719da8bf3f"
+github "i-schuetz/SwiftCharts" "0.3"
 github "loudnate/xDripG5" "0.2.2"

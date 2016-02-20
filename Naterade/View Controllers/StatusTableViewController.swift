@@ -7,6 +7,10 @@
 //
 
 import UIKit
+import HealthKit
+import LoopKit
+import SwiftCharts
+
 
 class StatusTableViewController: UITableViewController {
 
@@ -17,8 +21,6 @@ class StatusTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.rowHeight = 44
-
         dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: NSOperationQueue.mainQueue()) { (note) -> Void in
             self.tableView.reloadData()
         }
@@ -28,6 +30,14 @@ class StatusTableViewController: UITableViewController {
         if let observer = dataManagerObserver {
             NSNotificationCenter.defaultCenter().removeObserver(observer)
         }
+    }
+
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+
+        coordinator.animateAlongsideTransition({ (_) -> Void in
+            self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
+        }, completion: nil)
     }
 
     // MARK: - Table view data source
@@ -59,10 +69,18 @@ class StatusTableViewController: UITableViewController {
     }()
 
     private enum Section: Int {
-        case Pump = 0
+        case Charts = 0
+        case Pump
         case Sensor
 
-        static let count = 2
+        static let count = 3
+    }
+
+    private enum ChartRow: Int {
+        case Glucose = 0
+
+        static let count = 1
+        static let height: CGFloat = 170
     }
 
     private enum PumpRow: Int {
@@ -94,6 +112,8 @@ class StatusTableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
+        case .Charts:
+            return ChartRow.count
         case .Pump:
             switch dataManager.latestPumpStatus {
             case .None:
@@ -106,13 +126,34 @@ class StatusTableViewController: UITableViewController {
         }
     }
 
+    private var glucoseChart: Chart?
+
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
         let locale = NSLocale.currentLocale()
 
         switch Section(rawValue: indexPath.section)! {
+        case .Charts:
+            let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath)
+
+            switch ChartRow(rawValue: indexPath.row)! {
+            case .Glucose:
+                // Get glucose data
+                let frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: ChartRow.height)
+                if let chart = glucoseChart {
+                    chart.view.removeFromSuperview()
+                }
+
+                if let chart = Chart.chartWithGlucoseData(dataManager.recentGlucoseData, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame) {
+                    cell.contentView.addSubview(chart.view)
+                    glucoseChart = chart
+                }
+            }
+
+            return cell
         case .Pump:
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+
             switch PumpRow(rawValue: indexPath.row)! {
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Updated", comment: "The title of the cell containing the last updated date")
@@ -160,7 +201,11 @@ class StatusTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = emptyValueString
                 }
             }
+
+            return cell
         case .Sensor:
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+
             switch SensorRow(rawValue: indexPath.row)! {
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Read", comment: "The title of the cell containing the last updated sensor date")
@@ -214,8 +259,19 @@ class StatusTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = nil
                 }
             }
-        }
 
-        return cell
+            return cell
+        }
+    }
+
+    // MARK: - UITableViewDelegate
+
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        switch Section(rawValue: indexPath.section)! {
+        case .Charts:
+            return ChartRow.height
+        case .Pump, .Sensor:
+            return 44
+        }
     }
 }
