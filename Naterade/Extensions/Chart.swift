@@ -30,7 +30,7 @@ extension Chart {
             )
         })
 
-        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.blackColor())
+        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
 
         // The axes, derived from the glucose data
         let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: { ChartAxisValueDate(date: ChartAxisValueDate.dateFromScalar($0), formatter: timeFormatter, labelSettings: axisLabelSettings)
@@ -38,27 +38,33 @@ extension Chart {
         xAxisValues.first?.hidden = true
         xAxisValues.last?.hidden = true
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 3, maxSegmentCount: 8, multiple: 50, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 4, maxSegmentCount: 8, multiple: 50, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        yAxisValues.first?.hidden = true
 
         let xAxisModel = ChartAxisModel(axisValues: xAxisValues)
-        let yAxisModel = ChartAxisModel(axisValues: yAxisValues)
+        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: UIColor.clearColor())
 
-        // The chart display settings
+        // The chart display settings. We do two passes of the coords calculation to sit the y-axis labels inside the inner space.
         let chartSettings = ChartSettings()
-        chartSettings.top = 8
+        chartSettings.top = 12
         chartSettings.trailing = 8
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
+
         let (xAxis, yAxis, innerFrame) = (coordsSpace.xAxis, coordsSpace.yAxis, coordsSpace.chartInnerFrame)
 
         // The glucose targets
         var targetLayer: ChartPointsAreaLayer? = nil
 
         if let targets = targets {
-            let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, onAxisValues: xAxisValues, dateFormatter: timeFormatter)
+            let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues, yAxisValues: yAxisValues, dateFormatter: timeFormatter)
 
             targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
+
+        // Grid lines
+
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor), onlyVisibleX: true, onlyVisibleY: false)
 
         // TODO: Add a line tracker layer
 
@@ -66,6 +72,7 @@ extension Chart {
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
 
         let layers: [ChartLayer?] = [
+            gridLayer,
             targetLayer,
             xAxis,
             yAxis,

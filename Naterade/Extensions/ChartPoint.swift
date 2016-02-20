@@ -12,7 +12,7 @@ import SwiftCharts
 
 
 extension ChartPoint {
-    static func pointsForGlucoseRangeSchedule(glucoseRangeSchedule: GlucoseRangeSchedule, onAxisValues xAxisValues: [ChartAxisValue], dateFormatter: NSDateFormatter) -> [ChartPoint] {
+    static func pointsForGlucoseRangeSchedule(glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue], yAxisValues: [ChartAxisValue], dateFormatter: NSDateFormatter) -> [ChartPoint] {
         let targetRanges = glucoseRangeSchedule.between(
             ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
             ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
@@ -35,26 +35,17 @@ extension ChartPoint {
                 endDate = ChartAxisValueDate(date: targetRanges[index + 1].startDate, formatter: dateFormatter)
             }
 
+            let minValue = ChartAxisValueDouble(max(range.value.minValue, yAxisValues.first?.scalar ?? DBL_MIN))
+            let maxValue = ChartAxisValueDouble(min(range.value.maxValue, yAxisValues.last?.scalar ?? DBL_MAX))
+
             maxPoints += [
-                ChartPoint(
-                    x: startDate,
-                    y: ChartAxisValueDouble(range.value.maxValue)
-                ),
-                ChartPoint(
-                    x: endDate,
-                    y: ChartAxisValueDouble(range.value.maxValue)
-                )
+                ChartPoint(x: startDate, y: maxValue),
+                ChartPoint(x: endDate, y: maxValue)
             ]
 
             minPoints += [
-                ChartPoint(
-                    x: startDate,
-                    y: ChartAxisValueDouble(range.value.minValue)
-                ),
-                ChartPoint(
-                    x: endDate,
-                    y: ChartAxisValueDouble(range.value.minValue)
-                )
+                ChartPoint(x: startDate, y: minValue),
+                ChartPoint(x: endDate, y: minValue)
             ]
         }
 
