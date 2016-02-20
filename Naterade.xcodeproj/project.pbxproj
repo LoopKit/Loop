@@ -361,14 +361,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		4346D1E81C77FEF100ABAFE3 /* Sample Data */ = {
+		4346D1E81C77FEF100ABAFE3 /* Fixture Data */ = {
 			isa = PBXGroup;
 			children = (
 				4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */,
 				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
 				4346D1F71C785CA600ABAFE3 /* SampleData.swift */,
 			);
-			path = "Sample Data";
+			path = "Fixture Data";
 			sourceTree = "<group>";
 		};
 		43757D131C06F26C00910CB9 /* Models */ = {
@@ -421,7 +421,7 @@
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
 				43757D131C06F26C00910CB9 /* Models */,
-				4346D1E81C77FEF100ABAFE3 /* Sample Data */,
+				4346D1E81C77FEF100ABAFE3 /* Fixture Data */,
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
