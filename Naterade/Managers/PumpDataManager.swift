@@ -354,10 +354,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     let glucoseStore: GlucoseStore? = GlucoseStore()
 
-    var recentGlucoseData: [GlucoseValue] {
-        return SampleData.recentGlucoseData
-    }
-
     // MARK: - InsulinKit
 
     let doseStore: DoseStore

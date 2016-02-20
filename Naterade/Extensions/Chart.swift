@@ -15,7 +15,7 @@ import SwiftCharts
 
 extension Chart {
     static func chartWithGlucoseData(data: [GlucoseValue], targets: GlucoseRangeSchedule?, inFrame frame: CGRect) -> Chart? {
-        guard data.count > 0 else {
+        guard data.count > 1 else {
             return nil
         }
 

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GlucoseKit
 import HealthKit
 import LoopKit
 import SwiftCharts
@@ -14,16 +15,26 @@ import SwiftCharts
 
 class StatusTableViewController: UITableViewController {
 
-    private var dataManagerObserver: AnyObject?
-
-    unowned let dataManager = PumpDataManager.sharedManager
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: NSOperationQueue.mainQueue()) { (note) -> Void in
-            self.tableView.reloadData()
+        let notificationCenter = NSNotificationCenter.defaultCenter()
+        let mainQueue = NSOperationQueue.mainQueue()
+        let application = UIApplication.sharedApplication()
+
+        dataManagerObserver = notificationCenter.addObserverForName(nil, object: dataManager, queue: mainQueue) { (note) -> Void in
+            self.needsRefresh = true
         }
+
+        resignObserver = notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+            self.active = false
+        }
+
+        notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+            self.active = true
+        }
+
+        updateGlucoseValues()
     }
 
     deinit {
@@ -32,15 +43,80 @@ class StatusTableViewController: UITableViewController {
         }
     }
 
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+
+        visible = true
+    }
+
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        visible = false
+    }
+
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
 
         coordinator.animateAlongsideTransition({ (_) -> Void in
-            self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
+            self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .Fade)
         }, completion: nil)
     }
 
-    // MARK: - Table view data source
+    // MARK: - State
+
+    private var dataManagerObserver: AnyObject?
+
+    private var resignObserver: AnyObject?
+
+    unowned let dataManager = PumpDataManager.sharedManager
+
+    private var glucoseChart: Chart?
+
+    private var glucoseValues: [GlucoseValue] = []
+
+    private var active = true {
+        didSet {
+            reloadData()
+        }
+    }
+
+    private var needsRefresh = false {
+        didSet {
+            reloadData()
+        }
+    }
+
+    private var visible = false {
+        didSet {
+            reloadData()
+        }
+    }
+
+    private func reloadData() {
+        if active && visible && needsRefresh {
+            needsRefresh = false
+
+            tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
+                ), withRowAnimation: visible ? .Automatic : .None)
+            self.updateGlucoseValues()
+        }
+    }
+
+    private func updateGlucoseValues() {
+        dataManager.glucoseStore?.getRecentGlucoseValues { (values, error) -> Void in
+            dispatch_async(dispatch_get_main_queue()) {
+                if let error = error {
+                    self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                    self.needsRefresh = true
+                } else {
+                    self.glucoseValues = values
+
+                    self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: self.visible ? .Automatic : .None)
+                }
+            }
+        }
+    }
 
     private lazy var emptyDateString: String = NSLocalizedString("Never", comment: "The detail value of a date cell with no value")
 
@@ -101,13 +177,10 @@ class StatusTableViewController: UITableViewController {
         static let count = 4
     }
 
+    // MARK: - Table view data source
+
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.latestGlucose {
-        case .None:
-            return Section.count - 1
-        case .Some:
-            return Section.count
-        }
+        return Section.count
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -126,8 +199,6 @@ class StatusTableViewController: UITableViewController {
         }
     }
 
-    private var glucoseChart: Chart?
-
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
         let locale = NSLocale.currentLocale()
@@ -144,7 +215,7 @@ class StatusTableViewController: UITableViewController {
                     chart.view.removeFromSuperview()
                 }
 
-                if let chart = Chart.chartWithGlucoseData(dataManager.recentGlucoseData, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame) {
+                if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame) {
                     cell.contentView.addSubview(chart.view)
                     glucoseChart = chart
                 }
