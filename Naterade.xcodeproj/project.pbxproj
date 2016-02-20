@@ -22,7 +22,7 @@
 		4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4346D1F21C7833CE00ABAFE3 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F11C7833CE00ABAFE3 /* Chart.swift */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
-		4346D1F81C785CA600ABAFE3 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F71C785CA600ABAFE3 /* SampleData.swift */; };
+		4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */; };
 		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
@@ -213,7 +213,7 @@
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F11C7833CE00ABAFE3 /* Chart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
-		4346D1F71C785CA600ABAFE3 /* SampleData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
+		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
 		43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLKComplicationTemplate.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Naterade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naterade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -366,7 +366,7 @@
 			children = (
 				4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */,
 				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
-				4346D1F71C785CA600ABAFE3 /* SampleData.swift */,
+				4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */,
 			);
 			path = "Fixture Data";
 			sourceTree = "<group>";
@@ -930,13 +930,13 @@
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
+				4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
 				437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */,
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				43DE92511C541832001FFDE1 /* UIColor.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
-				4346D1F81C785CA600ABAFE3 /* SampleData.swift in Sources */,
 				43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
 				4346D1F21C7833CE00ABAFE3 /* Chart.swift in Sources */,

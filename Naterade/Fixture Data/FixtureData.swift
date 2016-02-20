@@ -11,7 +11,13 @@ import GlucoseKit
 import HealthKit
 
 
-struct SampleData {
+struct GlucoseFixtureValue: GlucoseValue {
+    let startDate: NSDate
+    let quantity: HKQuantity
+}
+
+
+struct FixtureData {
     private typealias JSONDictionary = [String: AnyObject]
 
     private static func loadFixture<T>(resourceName: String) -> T {
@@ -24,7 +30,7 @@ struct SampleData {
         let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
 
         return glucose.reverse().map({ (entry) -> GlucoseValue in
-            return GlucoseValue(
+            return GlucoseFixtureValue(
                 startDate: dateFormatter.dateFromString(entry["display_time"] as! String)!,
                 quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: entry["glucose"] as! Double)
             )
