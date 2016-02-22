@@ -38,10 +38,10 @@ extension Chart {
         xAxisValues.first?.hidden = true
         xAxisValues.last?.hidden = true
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 4, maxSegmentCount: 8, multiple: 50, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 7, multiple: 50, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
         yAxisValues.first?.hidden = true
 
-        let xAxisModel = ChartAxisModel(axisValues: xAxisValues)
+        let xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: UIColor.clearColor())
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: UIColor.clearColor())
 
         // The chart display settings. We do two passes of the coords calculation to sit the y-axis labels inside the inner space.
@@ -66,16 +66,33 @@ extension Chart {
 
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor), onlyVisibleX: true, onlyVisibleY: false)
 
-        // TODO: Add a line tracker layer
-
         // The glucose values
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
+
+        // TODO: Provide a pan gesture recognizer
+        let highlightLayer = ChartPointsTouchHighlightLayer(
+            xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points,
+            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
+                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
+                    return chartPointModels[index]
+                } else {
+                    return nil
+                }
+            },
+            viewGenerator: { (chartPointModel, layer, chart) -> UIView? in
+                let view = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
+                view.fillColor = UIColor.glucoseTintColor.colorWithAlphaComponent(0.5)
+
+                return view
+            }
+        )
 
         let layers: [ChartLayer?] = [
             gridLayer,
             targetLayer,
             xAxis,
             yAxis,
+            highlightLayer,
             circles
         ]
 

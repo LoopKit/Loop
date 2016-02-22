@@ -346,7 +346,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: CarbStoreDelegate
 
-    func carbStoreDidError(error: ErrorType) {
+    func carbStore(_: CarbStore, didError error: ErrorType) {
         logger?.addError(error, fromSource: "CarbStore")
     }
 

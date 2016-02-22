@@ -73,7 +73,11 @@ class StatusTableViewController: UITableViewController {
 
     private var glucoseChart: Chart?
 
-    private var glucoseValues: [GlucoseValue] = []
+    private var glucoseValues: [GlucoseValue] = [] {
+        didSet {
+            tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: oldValue.count > 1 ? .None : .Automatic)
+        }
+    }
 
     private var active = true {
         didSet {
@@ -111,8 +115,6 @@ class StatusTableViewController: UITableViewController {
                     // TODO: Display error in the cell
                 } else {
                     self.glucoseValues = values
-
-                    self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: self.visible ? .Automatic : .None)
                 }
             }
         }

@@ -23,6 +23,7 @@
 		4346D1F21C7833CE00ABAFE3 /* Chart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F11C7833CE00ABAFE3 /* Chart.swift */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
 		4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */; };
+		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
@@ -214,6 +215,7 @@
 		4346D1F11C7833CE00ABAFE3 /* Chart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chart.swift; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
+		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
 		43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLKComplicationTemplate.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Naterade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naterade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -559,11 +561,12 @@
 		43E344A01B9E144300C85C07 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				4346D1F11C7833CE00ABAFE3 /* Chart.swift */,
+				4346D1F51C78501000ABAFE3 /* ChartPoint.swift */,
+				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				43E344A51B9E1B3300C85C07 /* NSBundle.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
-				4346D1F11C7833CE00ABAFE3 /* Chart.swift */,
-				4346D1F51C78501000ABAFE3 /* ChartPoint.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -930,6 +933,7 @@
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
+				43649A631C7A347F00523D7F /* CollectionType.swift in Sources */,
 				4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
