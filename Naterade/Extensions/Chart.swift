@@ -14,7 +14,7 @@ import SwiftCharts
 
 
 extension Chart {
-    static func chartWithGlucoseData(data: [GlucoseValue], targets: GlucoseRangeSchedule?, inFrame frame: CGRect) -> Chart? {
+    static func chartWithGlucoseData(data: [GlucoseValue], targets: GlucoseRangeSchedule?, inFrame frame: CGRect, gestureRecognizer: UIPanGestureRecognizer? = nil) -> Chart? {
         guard data.count > 1 else {
             return nil
         }
@@ -38,8 +38,8 @@ extension Chart {
         xAxisValues.first?.hidden = true
         xAxisValues.last?.hidden = true
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 7, multiple: 50, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
-        yAxisValues.first?.hidden = true
+        // TODO: The segment/multiple values are unit-specific
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: UIColor.clearColor())
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: UIColor.clearColor())
@@ -69,9 +69,12 @@ extension Chart {
         // The glucose values
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
 
-        // TODO: Provide a pan gesture recognizer
         let highlightLayer = ChartPointsTouchHighlightLayer(
-            xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points,
+            xAxis: xAxis,
+            yAxis: yAxis,
+            innerFrame: innerFrame,
+            chartPoints: points,
+            gestureRecognizer: gestureRecognizer,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
                     return chartPointModels[index]

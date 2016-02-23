@@ -13,7 +13,9 @@ import LoopKit
 import SwiftCharts
 
 
-class StatusTableViewController: UITableViewController {
+class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
+
+    private var chartPanGestureRecognizer: UIPanGestureRecognizer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +35,10 @@ class StatusTableViewController: UITableViewController {
         notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
             self.active = true
         }
+
+        chartPanGestureRecognizer = TouchAndPanGestureRecognizer()
+        chartPanGestureRecognizer?.delegate = self
+        tableView.addGestureRecognizer(chartPanGestureRecognizer!)
 
         updateGlucoseValues()
     }
@@ -217,7 +223,7 @@ class StatusTableViewController: UITableViewController {
                     chart.view.removeFromSuperview()
                 }
 
-                if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame) {
+                if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
                     cell.contentView.addSubview(chart.view)
                     glucoseChart = chart
                 }
@@ -346,5 +352,11 @@ class StatusTableViewController: UITableViewController {
         case .Pump, .Sensor:
             return 44
         }
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return gestureRecognizer === chartPanGestureRecognizer
     }
 }
