@@ -25,9 +25,11 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Glucose data on Apple Watch is retrieved from HealthKit</string>
+	<string>Meal data from the Health database is used to determine glucose effects.
+Glucose data from the Health database is used for graphing and momentum calculation.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Historical glucose data is stored securely in HealthKit for later analysis</string>
+	<string>Carbhydrate meal data entered in the app and on the watch is stored in the Health database.
+Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

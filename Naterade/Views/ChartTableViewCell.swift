@@ -10,4 +10,16 @@ import UIKit
 
 class ChartTableViewCell: UITableViewCell {
 
+    var chartView: UIView? {
+        didSet {
+            if let view = oldValue {
+                view.removeFromSuperview()
+            }
+
+            if let view = chartView {
+                contentView.addSubview(view)
+            }
+        }
+    }
+
 }

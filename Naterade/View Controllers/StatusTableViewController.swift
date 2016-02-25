@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import CarbKit
 import GlucoseKit
 import HealthKit
+import InsulinKit
 import LoopKit
 import SwiftCharts
 
@@ -77,14 +79,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     unowned let dataManager = PumpDataManager.sharedManager
 
-    private var glucoseChart: Chart?
-
-    private var glucoseValues: [GlucoseValue] = [] {
-        didSet {
-            tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: oldValue.count > 1 ? .None : .Automatic)
-        }
-    }
-
     private var active = true {
         didSet {
             reloadData()
@@ -113,6 +107,35 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
+    private enum Section: Int {
+        case Charts = 0
+        case Pump
+        case Sensor
+
+        static let count = 3
+    }
+
+    // MARK: - Chart Section Data
+
+    private enum ChartRow: Int {
+        case Glucose = 0
+        case IOB
+        case Dose
+        case COB
+
+        static let count = 1
+        static let height: CGFloat = 170
+    }
+
+    private var glucoseChart: Chart?
+
+    private var glucoseValues: [GlucoseValue] = [] {
+        didSet {
+            glucoseChart = nil
+            tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: oldValue.count > 1 ? .None : .Automatic)
+        }
+    }
+
     private func updateGlucoseValues() {
         dataManager.glucoseStore?.getRecentGlucoseValues { (values, error) -> Void in
             dispatch_async(dispatch_get_main_queue()) {
@@ -124,6 +147,38 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
         }
+    }
+
+    private var iobChart: Chart?
+
+    private var iobValues: [InsulinValue] = []
+
+    private var doseChart: Chart?
+
+    private var doses: [DoseEntry] = []
+
+    private var cobChart: Chart?
+
+    private var carbEntries: [CarbEntry] = []
+
+    // MARK: - Pump/Sensor Section Data
+
+    private enum PumpRow: Int {
+        case Date = 0
+        case Battery
+        case ReservoirRemaining
+        case InsulinOnBoard
+
+        static let count = 4
+    }
+
+    private enum SensorRow: Int {
+        case Date
+        case Glucose
+        case Trend
+        case State
+
+        static let count = 4
     }
 
     private lazy var emptyDateString: String = NSLocalizedString("Never", comment: "The detail value of a date cell with no value")
@@ -151,39 +206,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         formatter.numberStyle = .PercentStyle
         return formatter
     }()
-
-    private enum Section: Int {
-        case Charts = 0
-        case Pump
-        case Sensor
-
-        static let count = 3
-    }
-
-    private enum ChartRow: Int {
-        case Glucose = 0
-
-        static let count = 1
-        static let height: CGFloat = 170
-    }
-
-    private enum PumpRow: Int {
-        case Date = 0
-        case Battery
-        case ReservoirRemaining
-        case InsulinOnBoard
-
-        static let count = 4
-    }
-
-    private enum SensorRow: Int {
-        case Date
-        case Glucose
-        case Trend
-        case State
-
-        static let count = 4
-    }
 
     // MARK: - Table view data source
 
@@ -213,20 +235,24 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
         switch Section(rawValue: indexPath.section)! {
         case .Charts:
-            let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath) as! ChartTableViewCell
+            let frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: ChartRow.height)
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                // Get glucose data
-                let frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: ChartRow.height)
                 if let chart = glucoseChart {
-                    chart.view.removeFromSuperview()
-                }
+                    cell.chartView = chart.view
+                } else if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
 
-                if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
-                    cell.contentView.addSubview(chart.view)
+                    cell.chartView = chart.view
                     glucoseChart = chart
                 }
+            case .IOB:
+                break
+            case .Dose:
+                break
+            case .COB:
+                break
             }
 
             return cell

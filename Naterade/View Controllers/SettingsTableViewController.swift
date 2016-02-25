@@ -116,7 +116,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case CarbRatio
         case InsulinSensitivity
 
-        static let count = 6
+        static let count = 7
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
