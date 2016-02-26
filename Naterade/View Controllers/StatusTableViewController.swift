@@ -28,6 +28,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
         dataManagerObserver = notificationCenter.addObserverForName(nil, object: dataManager, queue: mainQueue) { (note) -> Void in
             self.needsRefresh = true
+            self.reloadData()
         }
 
         resignObserver = notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
@@ -42,7 +43,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         chartPanGestureRecognizer?.delegate = self
         tableView.addGestureRecognizer(chartPanGestureRecognizer!)
 
-        updateGlucoseValues()
+        needsRefresh = true
     }
 
     deinit {
@@ -85,11 +86,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
-    private var needsRefresh = false {
-        didSet {
-            reloadData()
-        }
-    }
+    private var needsRefresh = false
 
     private var visible = false {
         didSet {
@@ -103,7 +100,41 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
                 ), withRowAnimation: visible ? .Automatic : .None)
-            self.updateGlucoseValues()
+
+            chartStartDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            let reloadGroup = dispatch_group_create()
+
+            dispatch_group_enter(reloadGroup)
+            dataManager.glucoseStore?.getRecentGlucoseValues(startDate: chartStartDate) { (values, error) -> Void in
+                if let error = error {
+                    self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                    self.needsRefresh = true
+                    // TODO: Display error in the cell
+                } else {
+                    self.glucoseValues = values  // FixtureData.recentGlucoseData
+                }
+
+                dispatch_group_leave(reloadGroup)
+            }
+
+            dispatch_group_enter(reloadGroup)
+            dataManager.doseStore.getInsulinOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
+                if let error = error {
+                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.needsRefresh = true
+                    // TODO: Display error in the cell
+                } else {
+                    self.iobValues = values  // FixtureData.recentIOBData
+                }
+
+                dispatch_group_leave(reloadGroup)
+            }
+
+            dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
+                // TODO: Calculate X-axis range
+
+                self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
+            }
         }
     }
 
@@ -127,31 +158,23 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         static let height: CGFloat = 170
     }
 
+    private var chartStartDate = NSDate()
+
     private var glucoseChart: Chart?
 
     private var glucoseValues: [GlucoseValue] = [] {
         didSet {
             glucoseChart = nil
-            tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: oldValue.count > 1 ? .None : .Automatic)
-        }
-    }
-
-    private func updateGlucoseValues() {
-        dataManager.glucoseStore?.getRecentGlucoseValues { (values, error) -> Void in
-            dispatch_async(dispatch_get_main_queue()) {
-                if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
-                    // TODO: Display error in the cell
-                } else {
-                    self.glucoseValues = values
-                }
-            }
         }
     }
 
     private var iobChart: Chart?
 
-    private var iobValues: [InsulinValue] = []
+    private var iobValues: [InsulinValue] = [] {
+        didSet {
+            iobChart = nil
+        }
+    }
 
     private var doseChart: Chart?
 

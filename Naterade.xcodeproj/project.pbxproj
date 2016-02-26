@@ -39,6 +39,7 @@
 		437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */; };
 		437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B21C2FC16700009647 /* PowerOnCommand.swift */; };
 		437A28B51C2FC41700009647 /* PowerOnCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */; };
+		438C5D491C7FFC8D00FCCEC5 /* iob.json in Resources */ = {isa = PBXBuildFile; fileRef = 438C5D481C7FFC8D00FCCEC5 /* iob.json */; };
 		438C933D1B97F82000BE20E9 /* MinimedKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 438C933C1B97F82000BE20E9 /* MinimedKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		438C934F1B97F82000BE20E9 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; };
 		438C93501B97F82000BE20E9 /* MinimedKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 438C933A1B97F82000BE20E9 /* MinimedKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -231,6 +232,7 @@
 		437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCommand.swift; sourceTree = "<group>"; };
 		437A28B21C2FC16700009647 /* PowerOnCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerOnCommand.swift; sourceTree = "<group>"; };
 		437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PowerOnCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		438C5D481C7FFC8D00FCCEC5 /* iob.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob.json; sourceTree = "<group>"; };
 		438C933A1B97F82000BE20E9 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		438C933C1B97F82000BE20E9 /* MinimedKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MinimedKit.h; sourceTree = "<group>"; };
 		438C933E1B97F82000BE20E9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -369,6 +371,7 @@
 			isa = PBXGroup;
 			children = (
 				4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */,
+				438C5D481C7FFC8D00FCCEC5 /* iob.json */,
 				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
 				4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */,
 			);
@@ -855,6 +858,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
+				438C5D491C7FFC8D00FCCEC5 /* iob.json in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				4346D1EB1C77FF0E00ABAFE3 /* predict_glucose_from_dose.json in Resources */,

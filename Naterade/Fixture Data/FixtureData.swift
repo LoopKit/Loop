@@ -9,6 +9,7 @@
 import Foundation
 import GlucoseKit
 import HealthKit
+import InsulinKit
 
 
 struct GlucoseFixtureValue: GlucoseValue {
@@ -33,6 +34,18 @@ struct FixtureData {
             return GlucoseFixtureValue(
                 startDate: dateFormatter.dateFromString(entry["display_time"] as! String)!,
                 quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: entry["glucose"] as! Double)
+            )
+        })
+    }
+
+    static var recentIOBData: [InsulinValue] {
+        let values: [JSONDictionary] = loadFixture("iob")
+        let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
+
+        return values.map({ (entry) in
+            return InsulinValue(
+                startDate: dateFormatter.dateFromString(entry["date"] as! String)!,
+                value: entry["amount"] as! Double
             )
         })
     }
