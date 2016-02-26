@@ -131,7 +131,26 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
-                // TODO: Calculate X-axis range
+                let timeFormatter = NSDateFormatter()
+                timeFormatter.dateFormat = "h a"
+
+                self.glucosePoints = self.glucoseValues.map({
+                    return ChartPoint(
+                        x: ChartAxisValueDate(date: $0.startDate, formatter: timeFormatter),
+                        y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
+                    )
+                })
+
+                self.iobPoints = self.iobValues.map {
+                    return ChartPoint(
+                        x: ChartAxisValueDate(date: $0.startDate, formatter: timeFormatter),
+                        y: ChartAxisValueDouble($0.value)
+                    )
+                }
+
+                let allPoints = self.glucosePoints + self.iobPoints
+
+                self.xAxisValues = Chart.generateXAxisValuesWithChartPoints(allPoints)
 
                 self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
             }
@@ -160,6 +179,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var chartStartDate = NSDate()
 
+    private var xAxisValues: [ChartAxisValue] = []
+
     private var glucoseChart: Chart?
 
     private var glucoseValues: [GlucoseValue] = [] {
@@ -168,6 +189,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
+    private var glucosePoints: [ChartPoint] = []
+
     private var iobChart: Chart?
 
     private var iobValues: [InsulinValue] = [] {
@@ -175,6 +198,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             iobChart = nil
         }
     }
+
+    private var iobPoints: [ChartPoint] = []
 
     private var doseChart: Chart?
 
@@ -265,7 +290,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Glucose:
                 if let chart = glucoseChart {
                     cell.chartView = chart.view
-                } else if let chart = Chart.chartWithGlucoseData(self.glucoseValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
+                } else if let chart = Chart.chartWithGlucosePoints(self.glucosePoints, xAxisValues: self.xAxisValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
 
                     cell.chartView = chart.view
                     glucoseChart = chart

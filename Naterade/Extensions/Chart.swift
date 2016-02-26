@@ -14,29 +14,30 @@ import SwiftCharts
 
 
 extension Chart {
-    static func chartWithGlucoseData(data: [GlucoseValue], targets: GlucoseRangeSchedule?, inFrame frame: CGRect, gestureRecognizer: UIPanGestureRecognizer? = nil) -> Chart? {
-        guard data.count > 1 else {
-            return nil
+    static func generateXAxisValuesWithChartPoints(points: [ChartPoint]) -> [ChartAxisValue] {
+        guard points.count > 1 else {
+            return []
         }
 
         let timeFormatter = NSDateFormatter()
         timeFormatter.dateFormat = "h a"
 
-        // The actual data points
-        let points = data.map({
-            return ChartPoint(
-                x: ChartAxisValueDate(date: $0.startDate, formatter: timeFormatter),
-                y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
-            )
-        })
-
         let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
 
-        // The axes, derived from the glucose data
         let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: { ChartAxisValueDate(date: ChartAxisValueDate.dateFromScalar($0), formatter: timeFormatter, labelSettings: axisLabelSettings)
             }, addPaddingSegmentIfEdge: true)
         xAxisValues.first?.hidden = true
         xAxisValues.last?.hidden = true
+
+        return xAxisValues
+    }
+
+    static func chartWithGlucosePoints(points: [ChartPoint], xAxisValues: [ChartAxisValue], targets: GlucoseRangeSchedule?, inFrame frame: CGRect, gestureRecognizer: UIPanGestureRecognizer? = nil) -> Chart? {
+        guard points.count > 1 && xAxisValues.count > 0 else {
+            return nil
+        }
+
+        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
 
         // TODO: The segment/multiple values are unit-specific
         let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
@@ -57,7 +58,7 @@ extension Chart {
         var targetLayer: ChartPointsAreaLayer? = nil
 
         if let targets = targets {
-            let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues, yAxisValues: yAxisValues, dateFormatter: timeFormatter)
+            let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues, yAxisValues: yAxisValues)
 
             targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }

@@ -12,11 +12,12 @@ import SwiftCharts
 
 
 extension ChartPoint {
-    static func pointsForGlucoseRangeSchedule(glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue], yAxisValues: [ChartAxisValue], dateFormatter: NSDateFormatter) -> [ChartPoint] {
+    static func pointsForGlucoseRangeSchedule(glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue], yAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let targetRanges = glucoseRangeSchedule.between(
             ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
             ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
         )
+        let dateFormatter = NSDateFormatter()
 
         var maxPoints: [ChartPoint] = []
         var minPoints: [ChartPoint] = []
