@@ -67,6 +67,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
 
+        self.glucoseChart = nil
+        self.iobChart = nil
+        self.doseChart = nil
+        self.cobChart = nil
+
         coordinator.animateAlongsideTransition({ (_) -> Void in
             self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .Fade)
         }, completion: nil)
@@ -99,7 +104,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             needsRefresh = false
 
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
-                ), withRowAnimation: visible ? .Automatic : .None)
+            ), withRowAnimation: visible ? .Automatic : .None)
 
             chartStartDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
@@ -111,7 +116,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.glucoseValues = values  // FixtureData.recentGlucoseData
+                    self.glucoseValues = values // FixtureData.recentGlucoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
@@ -124,7 +129,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.iobValues = values  // FixtureData.recentIOBData
+                    self.iobValues = values // FixtureData.recentIOBData
                 }
 
                 dispatch_group_leave(reloadGroup)
@@ -173,8 +178,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case Dose
         case COB
 
-        static let count = 1
-        static let height: CGFloat = 170
+        static let count = 2
     }
 
     private var chartStartDate = NSDate()
@@ -284,19 +288,25 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         switch Section(rawValue: indexPath.section)! {
         case .Charts:
             let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath) as! ChartTableViewCell
-            let frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: ChartRow.height)
+            let frame = cell.contentView.frame
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
                 if let chart = glucoseChart {
                     cell.chartView = chart.view
-                } else if let chart = Chart.chartWithGlucosePoints(self.glucosePoints, xAxisValues: self.xAxisValues, targets: dataManager.glucoseTargetRangeSchedule, inFrame: frame, gestureRecognizer: chartPanGestureRecognizer) {
+                } else if let chart = Chart.chartWithGlucosePoints(self.glucosePoints, xAxisValues: self.xAxisValues, targets: dataManager.glucoseTargetRangeSchedule, frame: frame, gestureRecognizer: chartPanGestureRecognizer) {
 
                     cell.chartView = chart.view
                     glucoseChart = chart
                 }
             case .IOB:
-                break
+                if let chart = iobChart {
+                    cell.chartView = chart.view
+                } else if let chart = Chart.chartWithIOBPoints(self.iobPoints, xAxisValues: self.xAxisValues, frame: frame, gestureRecognizer: chartPanGestureRecognizer) {
+
+                    cell.chartView = chart.view
+                    iobChart = chart
+                }
             case .Dose:
                 break
             case .COB:
@@ -422,7 +432,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .Charts:
-            return ChartRow.height
+            switch ChartRow(rawValue: indexPath.row)! {
+            case .Glucose:
+                return 170
+            case .IOB, .Dose, .COB:
+                return 85
+            }
         case .Pump, .Sensor:
             return 44
         }

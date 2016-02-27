@@ -24,6 +24,8 @@ extension UIColor {
 
     @nonobjc static let glucoseTintColor: UIColor = UIColor.HIGLightBlueColor()
 
+    @nonobjc static let IOBTintColor: UIColor = UIColor.HIGOrangeColor()
+
     // MARK: - HIG colors
     // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/ColorImagesText.html
 

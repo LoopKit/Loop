@@ -309,24 +309,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     let carbStore: CarbStore? = CarbStore()
 
-    var carbStoreObserver: AnyObject? {
-        willSet {
-            if let observer = carbStoreObserver {
-                NSNotificationCenter.defaultCenter().removeObserver(observer)
-            }
-        }
-    }
-
-    private func enableCarbStoreBackgroundDelivery() {
-        if let carbStore = carbStore where !carbStore.authorizationRequired && !carbStore.isBackgroundDeliveryEnabled {
-            carbStore.setBackgroundDeliveryEnabled(true) { (enabled, error) in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "CarbStore")
-                }
-            }
-        }
-    }
-
     private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
             let newEntry = NewCarbEntry(
@@ -452,10 +434,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
         if let carbStore = carbStore {
             carbStore.delegate = self
-            carbStoreObserver = NSNotificationCenter.defaultCenter().addObserverForName(CarbStore.AuthorizationStatusDidChangeNotification, object: carbStore, queue: nil, usingBlock: { [unowned self] (_) -> Void in
-                self.enableCarbStoreBackgroundDelivery()
-            })
-            enableCarbStoreBackgroundDelivery()
         }
 
         defer {
@@ -470,7 +448,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
     }
 
     deinit {
-        carbStoreObserver = nil
         rileyLinkManagerObserver = nil
         rileyLinkDeviceObserver = nil
     }
