@@ -9,46 +9,122 @@
 import Foundation
 import GlucoseKit
 import HealthKit
+import InsulinKit
 import LoopKit
 import SwiftCharts
 
 
-extension Chart {
-    static func generateXAxisValuesWithChartPoints(points: [ChartPoint]) -> [ChartAxisValue] {
-        guard points.count > 1 else {
-            return []
-        }
+class StatusChartsManager {
 
-        let timeFormatter = NSDateFormatter()
-        timeFormatter.dateFormat = "h a"
+    // MARK: - Configuration
 
-        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
-
-        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: { ChartAxisValueDate(date: ChartAxisValueDate.dateFromScalar($0), formatter: timeFormatter, labelSettings: axisLabelSettings)
-            }, addPaddingSegmentIfEdge: true)
-        xAxisValues.first?.hidden = true
-        xAxisValues.last?.hidden = true
-
-        return xAxisValues
-    }
-
-    static func chartWithGlucosePoints(points: [ChartPoint], xAxisValues: [ChartAxisValue], targets: GlucoseRangeSchedule?, frame: CGRect, gestureRecognizer: UIPanGestureRecognizer? = nil) -> Chart? {
-        guard points.count > 1 && xAxisValues.count > 0 else {
-            return nil
-        }
-
-        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
-
-        // TODO: The segment/multiple values are unit-specific
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: true)
-
-        let xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: UIColor.clearColor())
-        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: UIColor.clearColor())
-
-        // The chart display settings. We do two passes of the coords calculation to sit the y-axis labels inside the inner space.
+    private lazy var chartSettings: ChartSettings = {
         let chartSettings = ChartSettings()
         chartSettings.top = 12
         chartSettings.trailing = 8
+        chartSettings.labelsWidthY = 25
+
+        return chartSettings
+    }()
+
+    private lazy var dateFormatter: NSDateFormatter = {
+        let timeFormatter = NSDateFormatter()
+        timeFormatter.dateFormat = "h a"
+
+        return timeFormatter
+    }()
+
+    private lazy var axisLineColor = UIColor.clearColor()
+
+    private lazy var axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
+
+    private lazy var guideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor)
+
+    var panGestureRecognizer: UIPanGestureRecognizer?
+
+    // MARK: - Data
+
+    var startDate = NSDate()
+
+    var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
+
+    var glucoseValues: [GlucoseValue] = [] {
+        didSet {
+            glucosePoints = self.glucoseValues.map({
+                return ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
+                )
+            })
+        }
+    }
+
+    var IOBValues: [InsulinValue] = [] {
+        didSet {
+            IOBPoints = self.IOBValues.map {
+                return ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDouble($0.value)
+                )
+            }
+        }
+    }
+
+    // MARK: - State
+
+    private var glucosePoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+            xAxisValues = nil
+        }
+    }
+
+    private var IOBPoints: [ChartPoint] = [] {
+        didSet {
+            IOBChart = nil
+            xAxisValues = nil
+        }
+    }
+
+    private var xAxisValues: [ChartAxisValue]? {
+        didSet {
+            if let xAxisValues = xAxisValues {
+                xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: axisLineColor)
+            } else {
+                xAxisModel = nil
+            }
+        }
+    }
+
+    private var xAxisModel: ChartAxisModel?
+
+    private var glucoseChart: Chart?
+
+    private var IOBChart: Chart?
+
+    // MARK: - Generators
+
+    func glucoseChartWithFrame(frame: CGRect) -> Chart? {
+        if let chart = glucoseChart where chart.frame != frame {
+            self.glucoseChart = nil
+        }
+
+        if glucoseChart == nil {
+            glucoseChart = generateGlucoseChartWithFrame(frame)
+        }
+
+        return glucoseChart
+    }
+
+    private func generateGlucoseChartWithFrame(frame: CGRect) -> Chart? {
+        guard glucosePoints.count > 1, let xAxisValues = xAxisValues, xAxisModel = xAxisModel else {
+            return nil
+        }
+
+        // TODO: The segment/multiple values are unit-specific
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(glucosePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+
+        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
 
@@ -57,25 +133,22 @@ extension Chart {
         // The glucose targets
         var targetLayer: ChartPointsAreaLayer? = nil
 
-        if let targets = targets {
+        if let targets = glucoseTargetRangeSchedule {
             let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues, yAxisValues: yAxisValues)
 
             targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
-        // Grid lines
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor), onlyVisibleX: true, onlyVisibleY: false)
-
-        // The glucose values
-        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
+        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: glucosePoints, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
 
         let highlightLayer = ChartPointsTouchHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: points,
-            gestureRecognizer: gestureRecognizer,
+            chartPoints: glucosePoints,
+            gestureRecognizer: panGestureRecognizer,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
                     return chartPointModels[index]
@@ -103,40 +176,68 @@ extension Chart {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    static func chartWithIOBPoints(points: [ChartPoint], xAxisValues: [ChartAxisValue], frame: CGRect, gestureRecognizer: UIPanGestureRecognizer? = nil) -> Chart? {
-        guard points.count > 1 && xAxisValues.count > 0 else {
+    func IOBChartWithFrame(frame: CGRect) -> Chart? {
+        if let chart = IOBChart where chart.frame != frame {
+            self.IOBChart = nil
+        }
+
+        if IOBChart == nil {
+            IOBChart = generateIOBChartWithFrame(frame)
+        }
+
+        return IOBChart
+    }
+
+    private func generateIOBChartWithFrame(frame: CGRect) -> Chart? {
+        guard IOBPoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
 
-        let axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
+        var containerPoints = IOBPoints
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points, minSegmentCount: 2, maxSegmentCount: 4, multiple: 0.25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: axisLabelSettings) }, addPaddingSegmentIfEdge: false)
+        // Create a container line at 0
+        if let first = IOBPoints.first {
+            containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), atIndex: 0)
+        }
 
-        let xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: UIColor.clearColor())
-        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: UIColor.clearColor())
+        if let last = IOBPoints.last {
+            containerPoints.append(ChartPoint(x: last.x, y: ChartAxisValueInt(0)))
+        }
 
-        // The chart display settings. We do two passes of the coords calculation to sit the y-axis labels inside the inner space.
-        let chartSettings = ChartSettings()
-        chartSettings.top = 12
-        chartSettings.trailing = 8
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(IOBPoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: 0.5, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: false)
+
+        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
 
         let (xAxis, yAxis, innerFrame) = (coordsSpace.xAxis, coordsSpace.yAxis, coordsSpace.chartInnerFrame)
 
         // The IOB area
-        let iobLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: points, areaColor: UIColor.IOBTintColor, animDuration: 0, animDelay: 0, addContainerPoints: true)
+        let lineModel = ChartLineModel(chartPoints: IOBPoints, lineColor: UIColor.IOBTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
+        let IOBLine = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
+
+        let IOBArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: containerPoints, areaColor: UIColor.IOBTintColor.colorWithAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
 
         // Grid lines
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor), onlyVisibleX: true, onlyVisibleY: false)
+        // 0-line
+        let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
+        let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
+            let width: CGFloat = 0.5
+            let viewFrame = CGRectMake(innerFrame.origin.x, chartPointModel.screenLoc.y - width / 2, innerFrame.size.width, width)
+
+            let v = UIView(frame: viewFrame)
+            v.backgroundColor = UIColor.IOBTintColor
+            return v
+        })
 
         let highlightLayer = ChartPointsTouchHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: points,
-            gestureRecognizer: gestureRecognizer,
+            chartPoints: IOBPoints,
+            gestureRecognizer: panGestureRecognizer,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
                     return chartPointModels[index]
@@ -156,10 +257,38 @@ extension Chart {
             gridLayer,
             xAxis,
             yAxis,
-            iobLayer,
+            zeroGuidelineLayer,
+            IOBArea,
+            IOBLine,
             highlightLayer
         ]
-        
+
         return Chart(frame: frame, layers: layers.flatMap { $0 })
+    }
+
+    private func generateXAxisValues() {
+        let points = glucosePoints + IOBPoints
+
+        guard points.count > 1 else {
+            self.xAxisValues = []
+            return
+        }
+
+        let timeFormatter = NSDateFormatter()
+        timeFormatter.dateFormat = "h a"
+
+        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: { ChartAxisValueDate(date: ChartAxisValueDate.dateFromScalar($0), formatter: timeFormatter, labelSettings: self.axisLabelSettings)
+            }, addPaddingSegmentIfEdge: true)
+        xAxisValues.first?.hidden = true
+        xAxisValues.last?.hidden = true
+
+        self.xAxisValues = xAxisValues
+    }
+
+    func prerender() {
+        glucoseChart = nil
+        IOBChart = nil
+
+        generateXAxisValues()
     }
 }

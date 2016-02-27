@@ -17,8 +17,6 @@ import SwiftCharts
 
 class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
-    private var chartPanGestureRecognizer: UIPanGestureRecognizer?
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -39,9 +37,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             self.active = true
         }
 
-        chartPanGestureRecognizer = TouchAndPanGestureRecognizer()
-        chartPanGestureRecognizer?.delegate = self
-        tableView.addGestureRecognizer(chartPanGestureRecognizer!)
+        let chartPanGestureRecognizer = TouchAndPanGestureRecognizer()
+        chartPanGestureRecognizer.delegate = self
+        tableView.addGestureRecognizer(chartPanGestureRecognizer)
+        charts.panGestureRecognizer = chartPanGestureRecognizer
 
         needsRefresh = true
     }
@@ -67,14 +66,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
 
-        self.glucoseChart = nil
-        self.iobChart = nil
-        self.doseChart = nil
-        self.cobChart = nil
-
-        coordinator.animateAlongsideTransition({ (_) -> Void in
-            self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .Fade)
-        }, completion: nil)
+        if visible {
+            coordinator.animateAlongsideTransition({ (_) -> Void in
+                self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .Fade)
+            }, completion: nil)
+        } else {
+            needsRefresh = true
+        }
     }
 
     // MARK: - State
@@ -106,56 +104,39 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
 
-            chartStartDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
 
             dispatch_group_enter(reloadGroup)
-            dataManager.glucoseStore?.getRecentGlucoseValues(startDate: chartStartDate) { (values, error) -> Void in
+            dataManager.glucoseStore?.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
                 if let error = error {
                     self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.glucoseValues = values // FixtureData.recentGlucoseData
+                    self.charts.glucoseValues = values  // FixtureData.recentGlucoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.doseStore.getInsulinOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
+            dataManager.doseStore.getInsulinOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
                 if let error = error {
                     self.dataManager.logger?.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.iobValues = values // FixtureData.recentIOBData
+                    self.charts.IOBValues = values  // FixtureData.recentIOBData
                 }
 
                 dispatch_group_leave(reloadGroup)
             }
 
+            charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
-                let timeFormatter = NSDateFormatter()
-                timeFormatter.dateFormat = "h a"
-
-                self.glucosePoints = self.glucoseValues.map({
-                    return ChartPoint(
-                        x: ChartAxisValueDate(date: $0.startDate, formatter: timeFormatter),
-                        y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
-                    )
-                })
-
-                self.iobPoints = self.iobValues.map {
-                    return ChartPoint(
-                        x: ChartAxisValueDate(date: $0.startDate, formatter: timeFormatter),
-                        y: ChartAxisValueDouble($0.value)
-                    )
-                }
-
-                let allPoints = self.glucosePoints + self.iobPoints
-
-                self.xAxisValues = Chart.generateXAxisValuesWithChartPoints(allPoints)
+                self.charts.prerender()
 
                 self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
             }
@@ -181,37 +162,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         static let count = 2
     }
 
-    private var chartStartDate = NSDate()
-
-    private var xAxisValues: [ChartAxisValue] = []
-
-    private var glucoseChart: Chart?
-
-    private var glucoseValues: [GlucoseValue] = [] {
-        didSet {
-            glucoseChart = nil
-        }
-    }
-
-    private var glucosePoints: [ChartPoint] = []
-
-    private var iobChart: Chart?
-
-    private var iobValues: [InsulinValue] = [] {
-        didSet {
-            iobChart = nil
-        }
-    }
-
-    private var iobPoints: [ChartPoint] = []
-
-    private var doseChart: Chart?
-
-    private var doses: [DoseEntry] = []
-
-    private var cobChart: Chart?
-
-    private var carbEntries: [CarbEntry] = []
+    private let charts = StatusChartsManager()
 
     // MARK: - Pump/Sensor Section Data
 
@@ -292,20 +243,18 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                if let chart = glucoseChart {
+                if let chart = charts.glucoseChartWithFrame(frame) {
                     cell.chartView = chart.view
-                } else if let chart = Chart.chartWithGlucosePoints(self.glucosePoints, xAxisValues: self.xAxisValues, targets: dataManager.glucoseTargetRangeSchedule, frame: frame, gestureRecognizer: chartPanGestureRecognizer) {
-
-                    cell.chartView = chart.view
-                    glucoseChart = chart
+                } else {
+                    cell.chartView = nil
+                    // TODO: Display empty state
                 }
             case .IOB:
-                if let chart = iobChart {
+                if let chart = charts.IOBChartWithFrame(frame) {
                     cell.chartView = chart.view
-                } else if let chart = Chart.chartWithIOBPoints(self.iobPoints, xAxisValues: self.xAxisValues, frame: frame, gestureRecognizer: chartPanGestureRecognizer) {
-
-                    cell.chartView = chart.view
-                    iobChart = chart
+                } else {
+                    cell.chartView = nil
+                    // TODO: Display empty state
                 }
             case .Dose:
                 break
@@ -446,6 +395,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // MARK: - UIGestureRecognizerDelegate
 
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return gestureRecognizer === chartPanGestureRecognizer
+        return gestureRecognizer === charts.panGestureRecognizer
     }
 }
