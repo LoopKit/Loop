@@ -31,14 +31,14 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
             [_device enableIdleListeningOnChannel:0];
         }
 
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(packetReceived:) name:RILEYLINK_EVENT_PACKET_RECEIVED object:device];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceNotificationReceived:) name:nil object:device];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:RILEYLINK_EVENT_PACKET_RECEIVED object:self.device];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:nil object:self.device];
 }
 
 - (NSString *)name
@@ -58,9 +58,13 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
 
 #pragma mark -
 
-- (void)packetReceived:(NSNotification *)note
+- (void)deviceNotificationReceived:(NSNotification *)note
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:RileyLinkDeviceDidReceivePacketNotification object:self userInfo:@{RileyLinkDevicePacketKey: note.userInfo[@"packet"]}];
+    if ([note.name isEqualToString:RILEYLINK_EVENT_PACKET_RECEIVED]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:RileyLinkDeviceDidReceivePacketNotification object:self userInfo:@{RileyLinkDevicePacketKey: note.userInfo[@"packet"]}];
+    } else if ([note.name isEqualToString:RILEYLINK_EVENT_DEVICE_CONNECTED]) {
+        [self.device enableIdleListeningOnChannel:0];
+    }
 }
 
 @end

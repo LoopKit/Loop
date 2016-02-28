@@ -94,7 +94,7 @@ class StatusChartsManager {
 
     private var IOBPoints: [ChartPoint] = [] {
         didSet {
-            COBChart = nil
+            IOBChart = nil
             xAxisValues = nil
         }
     }
@@ -199,15 +199,15 @@ class StatusChartsManager {
     }
 
     func IOBChartWithFrame(frame: CGRect) -> Chart? {
-        if let chart = COBChart where chart.frame != frame {
-            self.COBChart = nil
+        if let chart = IOBChart where chart.frame != frame {
+            self.IOBChart = nil
         }
 
-        if COBChart == nil {
-            COBChart = generateIOBChartWithFrame(frame)
+        if IOBChart == nil {
+            IOBChart = generateIOBChartWithFrame(frame)
         }
 
-        return COBChart
+        return IOBChart
     }
 
     private func generateIOBChartWithFrame(frame: CGRect) -> Chart? {
@@ -388,6 +388,7 @@ class StatusChartsManager {
 
     func prerender() {
         glucoseChart = nil
+        IOBChart = nil
         COBChart = nil
 
         generateXAxisValues()
