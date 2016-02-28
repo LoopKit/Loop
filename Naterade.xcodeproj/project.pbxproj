@@ -98,6 +98,8 @@
 		43EB40B81C828ACB00472A8C /* RileyLinkDevice_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EB40B31C828ACB00472A8C /* RileyLinkDevice_Private.h */; };
 		43EB40BB1C828AFF00472A8C /* MessageBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40B91C828AFF00472A8C /* MessageBase.m */; };
 		43EB40BC1C828AFF00472A8C /* MessageBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EB40BA1C828AFF00472A8C /* MessageBase.h */; };
+		43EB40BE1C839DC400472A8C /* normalize_history.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BD1C839DC400472A8C /* normalize_history.json */; };
+		43EB40C01C839DFB00472A8C /* predict_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BF1C839DFB00472A8C /* predict_glucose.json */; };
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43F2756C1BAA7BA9006A5B6A /* UnknownMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */; };
@@ -296,6 +298,8 @@
 		43EB40B31C828ACB00472A8C /* RileyLinkDevice_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RileyLinkDevice_Private.h; sourceTree = "<group>"; };
 		43EB40B91C828AFF00472A8C /* MessageBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageBase.m; sourceTree = "<group>"; };
 		43EB40BA1C828AFF00472A8C /* MessageBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBase.h; sourceTree = "<group>"; };
+		43EB40BD1C839DC400472A8C /* normalize_history.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = normalize_history.json; sourceTree = "<group>"; };
+		43EB40BF1C839DFB00472A8C /* predict_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predict_glucose.json; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
@@ -382,6 +386,8 @@
 				438C5D481C7FFC8D00FCCEC5 /* iob.json */,
 				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
 				4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */,
+				43EB40BD1C839DC400472A8C /* normalize_history.json */,
+				43EB40BF1C839DFB00472A8C /* predict_glucose.json */,
 			);
 			path = "Fixture Data";
 			sourceTree = "<group>";
@@ -871,9 +877,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43EB40BE1C839DC400472A8C /* normalize_history.json in Resources */,
 				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
 				438C5D491C7FFC8D00FCCEC5 /* iob.json in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
+				43EB40C01C839DFB00472A8C /* predict_glucose.json in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				4346D1EB1C77FF0E00ABAFE3 /* predict_glucose_from_dose.json in Resources */,
 				4346D1EC1C77FF0E00ABAFE3 /* clean_glucose.json in Resources */,

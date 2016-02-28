@@ -28,6 +28,8 @@ extension UIColor {
 
     @nonobjc static let COBTintColor: UIColor = UIColor.HIGYellowColor()
 
+    @nonobjc static let doseTintColor: UIColor = UIColor.HIGGreenColor()
+
     // MARK: - HIG colors
     // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/ColorImagesText.html
 

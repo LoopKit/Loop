@@ -133,7 +133,20 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.charts.IOBValues = values  // FixtureData.recentIOBData
+                    self.charts.IOBValues = values  //FixtureData.recentIOBData
+                }
+
+                dispatch_group_leave(reloadGroup)
+            }
+
+            dispatch_group_enter(reloadGroup)
+            dataManager.doseStore.getRecentNormalizedReservoirDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
+                if let error = error {
+                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.needsRefresh = true
+                    // TODO: Display error in the cell
+                } else {
+                    self.charts.doseEntries = doses  //FixtureData.recentDoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
@@ -171,10 +184,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     private enum ChartRow: Int {
         case Glucose = 0
         case IOB
-        case COB
         case Dose
+        case COB
 
-        static let count = 3
+        static let count = 4
     }
 
     private let charts = StatusChartsManager()
@@ -234,7 +247,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .Charts:
-            return ChartRow.count
+            if charts.COBValues.count > 0 {
+                return ChartRow.count
+            } else {
+                return ChartRow.count - 1
+            }
         case .Pump:
             switch dataManager.latestPumpStatus {
             case .None:
@@ -272,7 +289,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     // TODO: Display empty state
                 }
             case .Dose:
-                break
+                if let chart = charts.doseChartWithFrame(frame) {
+                    cell.chartView = chart.view
+                } else {
+                    cell.chartView = nil
+                    // TODO: Display empty state
+                }
             case .COB:
                 if let chart = charts.COBChartWithFrame(frame) {
                     cell.chartView = chart.view
