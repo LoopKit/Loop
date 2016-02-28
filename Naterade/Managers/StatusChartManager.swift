@@ -61,6 +61,17 @@ class StatusChartsManager {
         }
     }
 
+    var predictedGlucoseValues: [GlucoseValue] = [] {
+        didSet {
+            predictedGlucosePoints = predictedGlucoseValues.map({
+                return ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
+                )
+            })
+        }
+    }
+
     var IOBValues: [InsulinValue] = [] {
         didSet {
             IOBPoints = IOBValues.map {
@@ -110,6 +121,13 @@ class StatusChartsManager {
     // MARK: - State
 
     private var glucosePoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+            xAxisValues = nil
+        }
+    }
+
+    private var predictedGlucosePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
             xAxisValues = nil
@@ -176,8 +194,10 @@ class StatusChartsManager {
             return nil
         }
 
+        let allPoints = glucosePoints + predictedGlucosePoints
+
         // TODO: The segment/multiple values are unit-specific
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(glucosePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
@@ -196,13 +216,19 @@ class StatusChartsManager {
 
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
-        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: glucosePoints, displayDelay: 1, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
+        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: glucosePoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
+
+        var prediction: ChartLayer?
+
+        if predictedGlucosePoints.count > 1 {
+            prediction = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: predictedGlucosePoints, displayDelay: 0, itemSize: CGSize(width: 2, height: 2), itemFillColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.75))
+        }
 
         let highlightLayer = ChartPointsTouchHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: glucosePoints,
+            chartPoints: allPoints,
             gestureRecognizer: panGestureRecognizer,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
@@ -225,6 +251,7 @@ class StatusChartsManager {
             xAxis,
             yAxis,
             highlightLayer,
+            prediction,
             circles
         ]
 
@@ -473,7 +500,7 @@ class StatusChartsManager {
     }
 
     private func generateXAxisValues() {
-        let points = glucosePoints + IOBPoints + COBPoints + dosePoints
+        let points = glucosePoints + predictedGlucosePoints + IOBPoints + COBPoints + dosePoints
 
         guard points.count > 1 else {
             self.xAxisValues = []

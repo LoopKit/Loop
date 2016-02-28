@@ -120,7 +120,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.charts.glucoseValues = values  // FixtureData.recentGlucoseData
+                    self.charts.glucoseValues = values // FixtureData.recentGlucoseData
+//                    self.charts.predictedGlucoseValues = FixtureData.predictedGlucoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
@@ -146,7 +147,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 } else {
-                    self.charts.doseEntries = doses  //FixtureData.recentDoseData
+                    self.charts.doseEntries = doses  // FixtureData.recentDoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
