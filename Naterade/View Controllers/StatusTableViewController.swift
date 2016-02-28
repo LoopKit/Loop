@@ -24,17 +24,24 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         let mainQueue = NSOperationQueue.mainQueue()
         let application = UIApplication.sharedApplication()
 
-        dataManagerObserver = notificationCenter.addObserverForName(nil, object: dataManager, queue: mainQueue) { (note) -> Void in
-            self.needsRefresh = true
-            self.reloadData()
-        }
+        notificationObservers += [
+            notificationCenter.addObserverForName(nil, object: dataManager, queue: mainQueue) { (note) -> Void in
+                self.needsRefresh = true
+                self.reloadData()
+            },
+            notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+                self.active = false
+            },
+            notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+                self.active = true
+            }
+        ]
 
-        resignObserver = notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
-            self.active = false
-        }
-
-        notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
-            self.active = true
+        if let carbStore = dataManager.carbStore {
+            notificationObservers.append(notificationCenter.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: carbStore, queue: mainQueue) { (note) -> Void in
+                self.needsRefresh = true
+                self.reloadData()
+            })
         }
 
         let chartPanGestureRecognizer = TouchAndPanGestureRecognizer()
@@ -46,7 +53,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     }
 
     deinit {
-        if let observer = dataManagerObserver {
+        for observer in notificationObservers {
             NSNotificationCenter.defaultCenter().removeObserver(observer)
         }
     }
@@ -77,9 +84,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     // MARK: - State
 
-    private var dataManagerObserver: AnyObject?
-
-    private var resignObserver: AnyObject?
+    // References to registered notification center observers
+    private var notificationObservers: [AnyObject] = []
 
     unowned let dataManager = PumpDataManager.sharedManager
 
@@ -133,6 +139,15 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 dispatch_group_leave(reloadGroup)
             }
 
+            if let carbStore = dataManager.carbStore {
+                dispatch_group_enter(reloadGroup)
+                carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values) -> Void in
+                    self.charts.COBValues = values
+
+                    dispatch_group_leave(reloadGroup)
+                }
+            }
+
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
@@ -156,10 +171,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     private enum ChartRow: Int {
         case Glucose = 0
         case IOB
-        case Dose
         case COB
+        case Dose
 
-        static let count = 2
+        static let count = 3
     }
 
     private let charts = StatusChartsManager()
@@ -259,7 +274,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Dose:
                 break
             case .COB:
-                break
+                if let chart = charts.COBChartWithFrame(frame) {
+                    cell.chartView = chart.view
+                } else {
+                    cell.chartView = nil
+                    // TODO: Display empty state
+                }
             }
 
             return cell
