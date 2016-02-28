@@ -7,6 +7,8 @@
 //
 
 import Foundation
+
+import CarbKit
 import GlucoseKit
 import HealthKit
 import InsulinKit
@@ -67,6 +69,18 @@ class StatusChartsManager {
                     y: ChartAxisValueDouble($0.value)
                 )
             }
+        }
+    }
+
+    var doseEntries: [DoseEntry] = [] {
+        didSet {
+            
+        }
+    }
+
+    var COBValues: [CarbValue] = [] {
+        didSet {
+
         }
     }
 

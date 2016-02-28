@@ -222,7 +222,7 @@
             </objects>
             <point key="canvasLocation" x="1314" y="-681"/>
         </scene>
-        <!--Status Table View Controller-->
+        <!--Status-->
         <scene sceneID="dRe-fy-po5">
             <objects>
                 <tableViewController id="1zR-tC-i50" customClass="StatusTableViewController" customModule="Naterade" customModuleProvider="target" sceneMemberID="viewController">
@@ -269,7 +269,7 @@
                             <outlet property="delegate" destination="1zR-tC-i50" id="OUg-z9-1ra"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="3kU-n2-fha"/>
+                    <navigationItem key="navigationItem" title="Status" id="3kU-n2-fha"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Tc-kF-7yT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

@@ -17,10 +17,6 @@ extern NSString * const RileyLinkDevicePacketKey;
 
 @interface RileyLinkDevice : NSObject
 
-- (void)executeCommand:(nonnull id)command withCompletionHandler:(void (^ _Nonnull)(id _Nonnull command))completionHandler;
-
-- (void)sendMessageData:(nonnull NSData *)messageData;
-
 @property (copy, nonatomic, nullable, readonly) NSString *name;
 
 @property (copy, nonatomic, nullable, readonly) NSNumber *RSSI;
