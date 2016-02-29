@@ -22,7 +22,7 @@ class StatusChartsManager {
 
     private lazy var chartSettings: ChartSettings = {
         let chartSettings = ChartSettings()
-        chartSettings.top = 12
+        chartSettings.top = 15
         chartSettings.trailing = 8
         chartSettings.labelsWidthY = 25
 
@@ -224,25 +224,14 @@ class StatusChartsManager {
             prediction = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: predictedGlucosePoints, displayDelay: 0, itemSize: CGSize(width: 2, height: 2), itemFillColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.75))
         }
 
-        let highlightLayer = ChartPointsTouchHighlightLayer(
+        let highlightLayer = StatusChartHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
             chartPoints: allPoints,
-            gestureRecognizer: panGestureRecognizer,
-            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
-                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
-                    return chartPointModels[index]
-                } else {
-                    return nil
-                }
-            },
-            viewGenerator: { (chartPointModel, layer, chart) -> UIView? in
-                let view = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
-                view.fillColor = UIColor.glucoseTintColor.colorWithAlphaComponent(0.5)
-
-                return view
-            }
+            tintColor: UIColor.glucoseTintColor,
+            labelCenterY: chartSettings.top,
+            gestureRecognizer: panGestureRecognizer
         )
 
         let layers: [ChartLayer?] = [
@@ -314,25 +303,14 @@ class StatusChartsManager {
             return v
         })
 
-        let highlightLayer = ChartPointsTouchHighlightLayer(
+        let highlightLayer = StatusChartHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
             chartPoints: IOBPoints,
-            gestureRecognizer: panGestureRecognizer,
-            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
-                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
-                    return chartPointModels[index]
-                } else {
-                    return nil
-                }
-            },
-            viewGenerator: { (chartPointModel, layer, chart) -> UIView? in
-                let view = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
-                view.fillColor = UIColor.IOBTintColor.colorWithAlphaComponent(0.5)
-
-                return view
-            }
+            tintColor: UIColor.IOBTintColor,
+            labelCenterY: chartSettings.top,
+            gestureRecognizer: panGestureRecognizer
         )
 
         let layers: [ChartLayer?] = [
@@ -340,9 +318,9 @@ class StatusChartsManager {
             xAxis,
             yAxis,
             zeroGuidelineLayer,
+            highlightLayer,
             IOBArea,
             IOBLine,
-            highlightLayer
         ]
 
         return Chart(frame: frame, layers: layers.flatMap { $0 })
@@ -394,34 +372,23 @@ class StatusChartsManager {
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
 
-        let highlightLayer = ChartPointsTouchHighlightLayer(
+        let highlightLayer = StatusChartHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
             chartPoints: COBPoints,
-            gestureRecognizer: panGestureRecognizer,
-            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
-                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
-                    return chartPointModels[index]
-                } else {
-                    return nil
-                }
-            },
-            viewGenerator: { (chartPointModel, layer, chart) -> UIView? in
-                let view = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
-                view.fillColor = UIColor.COBTintColor.colorWithAlphaComponent(0.5)
-
-                return view
-            }
+            tintColor: UIColor.COBTintColor,
+            labelCenterY: chartSettings.top,
+            gestureRecognizer: panGestureRecognizer
         )
 
         let layers: [ChartLayer?] = [
             gridLayer,
             xAxis,
             yAxis,
+            highlightLayer,
             COBArea,
-            COBLine,
-            highlightLayer
+            COBLine
         ]
 
         return Chart(frame: frame, layers: layers.flatMap { $0 })
@@ -461,39 +428,23 @@ class StatusChartsManager {
         // Grid lines
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
-
-        let highlightLayer = ChartPointsTouchHighlightLayer(
+        let highlightLayer = StatusChartHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: dosePoints,
-            gestureRecognizer: panGestureRecognizer,
-            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
-                let nonZeroModels = chartPointModels.filter({ model in
-                    return model.chartPoint.y.scalar != 0
-                })
-
-                if let index = nonZeroModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
-                    return nonZeroModels[index]
-                } else {
-                    return nil
-                }
-            },
-            viewGenerator: { (chartPointModel, layer, chart) -> UIView? in
-                let view = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
-                view.fillColor = UIColor.doseTintColor.colorWithAlphaComponent(0.5)
-
-                return view
-            }
+            chartPoints: dosePoints.filter { $0.y.scalar != 0 },
+            tintColor: UIColor.doseTintColor,
+            labelCenterY: chartSettings.top,
+            gestureRecognizer: panGestureRecognizer
         )
 
         let layers: [ChartLayer?] = [
             gridLayer,
             xAxis,
             yAxis,
+            highlightLayer,
             doseArea,
-            doseLine,
-            highlightLayer
+            doseLine
         ]
         
         return Chart(frame: frame, layers: layers.flatMap { $0 })

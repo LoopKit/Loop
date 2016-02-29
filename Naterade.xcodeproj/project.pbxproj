@@ -100,6 +100,7 @@
 		43EB40BC1C828AFF00472A8C /* MessageBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 43EB40BA1C828AFF00472A8C /* MessageBase.h */; };
 		43EB40BE1C839DC400472A8C /* normalize_history.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BD1C839DC400472A8C /* normalize_history.json */; };
 		43EB40C01C839DFB00472A8C /* predict_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BF1C839DFB00472A8C /* predict_glucose.json */; };
+		43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */; };
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43F2756C1BAA7BA9006A5B6A /* UnknownMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */; };
@@ -300,6 +301,7 @@
 		43EB40BA1C828AFF00472A8C /* MessageBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageBase.h; sourceTree = "<group>"; };
 		43EB40BD1C839DC400472A8C /* normalize_history.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = normalize_history.json; sourceTree = "<group>"; };
 		43EB40BF1C839DFB00472A8C /* predict_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predict_glucose.json; sourceTree = "<group>"; };
+		43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartHighlightLayer.swift; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
@@ -609,6 +611,7 @@
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
 				434422B01C7C32B700D7EB3E /* TouchAndPanGestureRecognizer.swift */,
+				43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -972,6 +975,7 @@
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43F5C2E61B93C685003EB13D /* PumpDataManager.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
+				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				434422B11C7C32B700D7EB3E /* TouchAndPanGestureRecognizer.swift in Sources */,
