@@ -22,18 +22,36 @@ class StatusChartsManager {
 
     private lazy var chartSettings: ChartSettings = {
         let chartSettings = ChartSettings()
-        chartSettings.top = 15
+        chartSettings.top = 12
         chartSettings.trailing = 8
-        chartSettings.labelsWidthY = 25
+        chartSettings.labelsWidthY = 30
 
         return chartSettings
     }()
 
     private lazy var dateFormatter: NSDateFormatter = {
         let timeFormatter = NSDateFormatter()
-        timeFormatter.dateFormat = "h a"
+        timeFormatter.dateStyle = .NoStyle
+        timeFormatter.timeStyle = .ShortStyle
 
         return timeFormatter
+    }()
+
+    private lazy var decimalFormatter: NSNumberFormatter = {
+        let numberFormatter = NSNumberFormatter()
+        numberFormatter.numberStyle = .DecimalStyle
+        numberFormatter.minimumFractionDigits = 2
+        numberFormatter.maximumFractionDigits = 2
+
+        return numberFormatter
+    }()
+
+    private lazy var integerFormatter: NSNumberFormatter = {
+        let numberFormatter = NSNumberFormatter()
+        numberFormatter.numberStyle = .NoStyle
+        numberFormatter.maximumFractionDigits = 0
+
+        return numberFormatter
     }()
 
     private lazy var axisLineColor = UIColor.clearColor()
@@ -66,7 +84,7 @@ class StatusChartsManager {
             predictedGlucosePoints = predictedGlucoseValues.map({
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()))
+                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit()), formatter: integerFormatter)
                 )
             })
         }
@@ -77,7 +95,7 @@ class StatusChartsManager {
             IOBPoints = IOBValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDouble($0.value)
+                    y: ChartAxisValueDouble($0.value, formatter: decimalFormatter)
                 )
             }
         }
@@ -88,7 +106,7 @@ class StatusChartsManager {
             COBPoints = COBValues.map {
                 ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.gramUnit()))
+                    y: ChartAxisValueDouble($0.quantity.doubleValueForUnit(HKUnit.gramUnit()), formatter: integerFormatter)
                 )
             }
         }
@@ -99,9 +117,9 @@ class StatusChartsManager {
             dosePoints = doseEntries.reduce([], combine: { (points, entry) -> [ChartPoint] in
                 if entry.unit == .UnitsPerHour {
                     let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
-                    let endX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
+                    let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
                     let zero = ChartAxisValueInt(0)
-                    let value = ChartAxisValueDouble(entry.value)
+                    let value = ChartAxisValueDouble(entry.value, formatter: decimalFormatter)
 
                     let newPoints = [
                         ChartPoint(x: startX, y: zero),
@@ -411,7 +429,7 @@ class StatusChartsManager {
             return nil
         }
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(dosePoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: 1, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: false)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(dosePoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: 0.5, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 

@@ -29,27 +29,48 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                 }
             },
             viewGenerator: { (chartPointModel, layer, chart) -> U? in
-                let overlayView = U(frame: chart.frame)
+                let containerView = U(frame: chart.frame)
+
+                let xAxisOverlayView = UIView(frame: xAxis.rect.offsetBy(dx: 0, dy: 1))
+                xAxisOverlayView.backgroundColor = UIColor.whiteColor()
+                xAxisOverlayView.opaque = true
+                containerView.addSubview(xAxisOverlayView)
+
+                let yAxisOverlayView = UIView(frame: CGRect(x: yAxis.rect.origin.x, y: 0, width: yAxis.rect.width, height: chart.frame.height))
+                yAxisOverlayView.backgroundColor = UIColor.whiteColor()
+                yAxisOverlayView.opaque = true
+                containerView.addSubview(yAxisOverlayView)
 
                 let point = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
                 point.fillColor = tintColor.colorWithAlphaComponent(0.5)
 
                 if let text = chartPointModel.chartPoint.y.labels.first?.text {
                     let label = UILabel()
-                    label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+                    label.font = UIFont.monospacedDigitSystemFontOfSize(12, weight: UIFontWeightBold)
+
                     label.text = text
                     label.textColor = tintColor
-                    label.backgroundColor = UIColor.whiteColor()
-                    label.opaque = true
                     label.sizeToFit()
-                    label.center = CGPoint(x: chartPointModel.screenLoc.x, y: labelCenterY)
+                    label.center.y = chartPointModel.screenLoc.y
+                    label.frame.origin.x = yAxisOverlayView.frame.width - label.frame.width - 2
                     
-                    overlayView.addSubview(label)
+                    containerView.addSubview(label)
                 }
 
-                overlayView.addSubview(point)
+                if let text = chartPointModel.chartPoint.x.labels.first?.text {
+                    let label = UILabel()
+                    label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+                    label.text = text
+                    label.textColor = UIColor.secondaryLabelColor
+                    label.sizeToFit()
+                    label.center = CGPoint(x: chartPointModel.screenLoc.x, y: xAxisOverlayView.center.y)
+
+                    containerView.addSubview(label)
+                }
+
+                containerView.addSubview(point)
                 
-                return overlayView
+                return containerView
             }
         )
 
