@@ -272,7 +272,7 @@
     "end_at": "2016-02-28T10:51:44"
   }, 
   {
-    "amount": 1.475, 
+    "amount": 12.475,
     "start_at": "2016-02-28T10:46:46", 
     "description": "TempBasal: 2.325U/hour over 5min", 
     "type": "TempBasal", 

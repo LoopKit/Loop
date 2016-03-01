@@ -129,7 +129,19 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: - Transmitter
 
-    private func updateGlucose(glucose: GlucoseRxMessage) {
+    // MARK: TransmitterDelegate
+
+    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
+        logger?.addMessage([
+            "error": "\(error)",
+            "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
+            ], toCollection: "g5"
+        )
+    }
+
+    func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
+        transmitterStartTime = transmitter.startTimeInterval
+
         if glucose != latestGlucose {
             latestGlucose = glucose
 
@@ -153,21 +165,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             }
         }
-    }
-
-    // MARK: TransmitterDelegate
-
-    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
-        logger?.addMessage([
-            "error": "\(error)",
-            "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
-            ], toCollection: "g5"
-        )
-    }
-
-    func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
-        transmitterStartTime = transmitter.startTimeInterval
-        updateGlucose(glucose)
     }
 
     // MARK: - Managed state
