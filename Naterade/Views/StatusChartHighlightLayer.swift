@@ -53,6 +53,7 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                     label.sizeToFit()
                     label.center.y = chartPointModel.screenLoc.y
                     label.frame.origin.x = yAxisOverlayView.frame.width - label.frame.width - 2
+                    label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
                     
                     containerView.addSubview(label)
                 }
@@ -64,6 +65,7 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                     label.textColor = UIColor.secondaryLabelColor
                     label.sizeToFit()
                     label.center = CGPoint(x: chartPointModel.screenLoc.x, y: xAxisOverlayView.center.y)
+                    label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
 
                     containerView.addSubview(label)
                 }

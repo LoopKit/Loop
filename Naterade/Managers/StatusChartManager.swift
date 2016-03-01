@@ -23,7 +23,10 @@ class StatusChartsManager {
     private lazy var chartSettings: ChartSettings = {
         let chartSettings = ChartSettings()
         chartSettings.top = 12
+        chartSettings.bottom = 0
         chartSettings.trailing = 8
+        chartSettings.axisTitleLabelsToLabelsSpacing = 0
+        chartSettings.labelsToAxisSpacingX = 6
         chartSettings.labelsWidthY = 30
 
         return chartSettings
