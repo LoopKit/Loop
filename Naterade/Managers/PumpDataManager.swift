@@ -122,8 +122,38 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
             doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate) { (_, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
+                } else {
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 }
             }
+        }
+    }
+
+    func getPredictedGlucose(resultsHandler: (values: [GlucoseValue], error: NSError?) -> Void) {
+
+        if let glucose = latestGlucose {
+            let dataGroup = dispatch_group_create()
+            var momentum: [GlucoseEffect] = []
+            var lastError: NSError?
+
+            dispatch_group_enter(dataGroup)
+            glucoseStore?.getRecentMomentumEffect { (effects, error) -> Void in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "GlucoseStore")
+                    lastError = error
+                }
+
+                momentum = effects
+                dispatch_group_leave(dataGroup)
+            }
+
+            dispatch_group_notify(dataGroup, dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) { () -> Void in
+                let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: [])
+
+                resultsHandler(values: prediction, error: lastError)
+            }
+        } else {
+            resultsHandler(values: [], error: nil)
         }
     }
 
@@ -142,19 +172,21 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
 
-        if glucose != latestGlucose {
-            latestGlucose = glucose
+        if glucose != latestGlucoseMessage {
+            latestGlucoseMessage = glucose
 
             if glucose.glucose >= 20, let transmitterStartTime = transmitterStartTime, glucoseStore = glucoseStore {
                 let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose.glucose))
 
                 let startDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
 
-                let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000224")
+                let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-                glucoseStore.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, _, error) -> Void in
+                glucoseStore.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, value, error) -> Void in
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
+                    } else if let value = value {
+                        self.latestGlucose = value
                     }
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -177,13 +209,11 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
-    var latestGlucose: GlucoseRxMessage?
+    var latestGlucoseMessage: GlucoseRxMessage?
 
-    var latestPumpStatus: MySentryPumpStatusMessageBody? {
-        didSet {
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-        }
-    }
+    var latestGlucose: GlucoseValue?
+
+    var latestPumpStatus: MySentryPumpStatusMessageBody?
 
     var transmitterState: State<Transmitter> = .NeedsConfiguration {
         didSet {
@@ -363,17 +393,17 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     private func sendWatchContext() {
         if let session = watchSession where session.paired && session.watchAppInstalled {
-            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucose, transmitterStartTime: transmitterStartTime).rawValue
+            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucoseMessage, transmitterStartTime: transmitterStartTime).rawValue
 
             let complicationShouldUpdate: Bool
 
-            if let complicationGlucose = latestComplicationGlucose, glucose = latestGlucose {
+            if let complicationGlucose = latestComplicationGlucose, glucose = latestGlucoseMessage {
                 complicationShouldUpdate = Int(glucose.timestamp) - Int(complicationGlucose.timestamp) >= 30 * 60 || abs(Int(glucose.glucose) - Int(complicationGlucose.glucose)) >= 20
             } else {
                 complicationShouldUpdate = true
             }
 
-            if session.complicationEnabled && complicationShouldUpdate, let glucose = latestGlucose {
+            if session.complicationEnabled && complicationShouldUpdate, let glucose = latestGlucoseMessage {
                 session.transferCurrentComplicationUserInfo(userInfo)
                 latestComplicationGlucose = glucose
             } else {

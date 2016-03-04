@@ -113,15 +113,27 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
 
+            if let glucoseStore = dataManager.glucoseStore {
+                dispatch_group_enter(reloadGroup)
+                glucoseStore.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                        self.needsRefresh = true
+                        // TODO: Display error in the cell
+                    } else {
+                        self.charts.glucoseValues = values // FixtureData.recentGlucoseData
+                    }
+
+                    dispatch_group_leave(reloadGroup)
+                }
+            }
+
             dispatch_group_enter(reloadGroup)
-            dataManager.glucoseStore?.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
-                if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+            dataManager.getPredictedGlucose { (values, error) -> Void in
+                if error != nil {
                     self.needsRefresh = true
-                    // TODO: Display error in the cell
                 } else {
-                    self.charts.glucoseValues = values // FixtureData.recentGlucoseData
-//                    self.charts.predictedGlucoseValues = FixtureData.predictedGlucoseData
+                    self.charts.predictedGlucoseValues = values  // FixtureData.predictedGlucoseData
                 }
 
                 dispatch_group_leave(reloadGroup)
@@ -365,7 +377,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Read", comment: "The title of the cell containing the last updated sensor date")
 
-                if let glucose = dataManager.latestGlucose, startTime = dataManager.transmitterStartTime {
+                if let glucose = dataManager.latestGlucoseMessage, startTime = dataManager.transmitterStartTime {
                     let date = NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
 
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
@@ -375,7 +387,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Glucose:
                 cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
 
-                if let glucose = dataManager.latestGlucose {
+                if let glucose = dataManager.latestGlucoseMessage {
                     let numberString = NSNumber(unsignedShort: glucose.glucose).descriptionWithLocale(locale)
                     cell.detailTextLabel?.text = "\(numberString) mg/dL"
                 } else {
@@ -384,7 +396,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Trend:
                 cell.textLabel?.text = NSLocalizedString("Trend", comment: "The title of the cell containing the current glucose trend")
 
-                if let glucose = dataManager.latestGlucose where glucose.state > 5 {
+                if let glucose = dataManager.latestGlucoseMessage where glucose.state > 5 {
                     let direction: String
 
                     switch glucose.trend {
@@ -408,7 +420,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .State:
                 cell.textLabel?.text = NSLocalizedString("Calibration state", comment: "The title of the cell containing the current sensor state")
 
-                if let glucose = dataManager.latestGlucose {
+                if let glucose = dataManager.latestGlucoseMessage {
                     cell.detailTextLabel?.text = String(format: "%02x", glucose.state)
                 } else {
                     cell.detailTextLabel?.text = nil

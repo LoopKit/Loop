@@ -10,6 +10,7 @@ import Foundation
 import GlucoseKit
 import HealthKit
 import InsulinKit
+import LoopKit
 
 
 struct GlucoseFixtureValue: GlucoseValue {
