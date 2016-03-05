@@ -22,6 +22,12 @@ enum State<T> {
     case Ready(T)
 }
 
+enum Error: ErrorType {
+    case MissingDataError
+    case StaleDataError
+}
+
+
 class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
@@ -130,72 +136,84 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
     }
 
     func getPredictedGlucose(resultsHandler: (values: [GlucoseValue], error: ErrorType?) -> Void) {
+        guard let
+            glucose = latestGlucose ?? glucoseStore?.latestGlucose,
+            pumpStatus = latestPumpStatus
+            else
+        {
+            resultsHandler(values: [], error: Error.MissingDataError)
+            return
+        }
+
         let startDate = NSDate()
-        let glucose = latestGlucose ?? glucoseStore?.latestGlucose
+        let recencyInterval = NSTimeInterval(minutes: 15)
 
-        // TODO: enforce preconditions like recency
-        if let glucose = glucose {
-            let dataGroup = dispatch_group_create()
-            var momentum: [GlucoseEffect] = []
-            var carbEffect: [GlucoseEffect] = []
-            var insulinEffect: [GlucoseEffect] = []
-            var lastError: ErrorType?
+        guard   startDate.timeIntervalSinceDate(glucose.startDate) <= recencyInterval &&
+                startDate.timeIntervalSinceDate(pumpStatus.pumpDate) <= recencyInterval
+            else
+        {
+            resultsHandler(values: [], error: Error.StaleDataError)
+            return
+        }
 
+        let dataGroup = dispatch_group_create()
+        var momentum: [GlucoseEffect] = []
+        var carbEffect: [GlucoseEffect] = []
+        var insulinEffect: [GlucoseEffect] = []
+        var lastError: ErrorType?
+
+        dispatch_group_enter(dataGroup)
+        glucoseStore?.getRecentMomentumEffect { (effects, error) -> Void in
+            if let error = error {
+                self.logger?.addError(error, fromSource: "GlucoseStore")
+                lastError = error
+            }
+
+            momentum = effects
+            dispatch_group_leave(dataGroup)
+        }
+
+        if let carbStore = carbStore {
             dispatch_group_enter(dataGroup)
-            glucoseStore?.getRecentMomentumEffect { (effects, error) -> Void in
+            carbStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
                 if let error = error {
-                    self.logger?.addError(error, fromSource: "GlucoseStore")
+                    self.logger?.addError(error, fromSource: "CarbStore")
                     lastError = error
                 }
 
-                momentum = effects
+                carbEffect = effects
                 dispatch_group_leave(dataGroup)
             }
+        }
 
-            if let carbStore = carbStore {
-                dispatch_group_enter(dataGroup)
-                carbStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
-                    if let error = error {
-                        self.logger?.addError(error, fromSource: "CarbStore")
-                        lastError = error
-                    }
-
-                    carbEffect = effects
-                    dispatch_group_leave(dataGroup)
-                }
+        dispatch_group_enter(dataGroup)
+        doseStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
+            if let error = error {
+                self.logger?.addError(error, fromSource: "DoseStore")
+                lastError = error
             }
 
-            dispatch_group_enter(dataGroup)
-            doseStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "DoseStore")
-                    lastError = error
-                }
+            insulinEffect = effects
+            dispatch_group_leave(dataGroup)
+        }
 
-                insulinEffect = effects
-                dispatch_group_leave(dataGroup)
-            }
+        dispatch_group_notify(dataGroup, dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) { () -> Void in
+            let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
 
-            dispatch_group_notify(dataGroup, dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) { () -> Void in
-                let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
+            self.logger?.addLoopStatus(
+                startDate: startDate,
+                endDate: NSDate(),
+                glucose: glucose,
+                effects: [
+                    "momentum": momentum,
+                    "carbs": carbEffect,
+                    "insulin": insulinEffect
+                ],
+                error: lastError,
+                prediction: prediction
+            )
 
-                self.logger?.addLoopStatus(
-                    startDate: startDate,
-                    endDate: NSDate(),
-                    glucose: glucose,
-                    effects: [
-                        "momentum": momentum,
-                        "carbs": carbEffect,
-                        "insulin": insulinEffect
-                    ],
-                    error: lastError,
-                    prediction: prediction
-                )
-
-                resultsHandler(values: prediction, error: lastError)
-            }
-        } else {
-            resultsHandler(values: [], error: nil)
+            resultsHandler(values: prediction, error: lastError)
         }
     }
 
