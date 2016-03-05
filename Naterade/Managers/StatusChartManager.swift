@@ -456,7 +456,7 @@ class StatusChartsManager {
         // 0-line
         let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
         let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
-            let width: CGFloat = 0.5
+            let width: CGFloat = 1
             let viewFrame = CGRectMake(innerFrame.origin.x, chartPointModel.screenLoc.y - width / 2, innerFrame.size.width, width)
 
             let v = UIView(frame: viewFrame)
