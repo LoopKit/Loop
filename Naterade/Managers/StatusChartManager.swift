@@ -155,6 +155,12 @@ class StatusChartsManager {
         }
     }
 
+    private var targetGlucosePoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+        }
+    }
+
     private var IOBPoints: [ChartPoint] = [] {
         didSet {
             IOBChart = nil
@@ -211,14 +217,14 @@ class StatusChartsManager {
     }
 
     private func generateGlucoseChartWithFrame(frame: CGRect) -> Chart? {
-        guard glucosePoints.count > 1, let xAxisValues = xAxisValues, xAxisModel = xAxisModel else {
+        guard glucosePoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
 
         let allPoints = glucosePoints + predictedGlucosePoints
 
         // TODO: The segment/multiple values are unit-specific
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
@@ -229,10 +235,8 @@ class StatusChartsManager {
         // The glucose targets
         var targetLayer: ChartPointsAreaLayer? = nil
 
-        if let targets = glucoseTargetRangeSchedule {
-            let targetPoints: [ChartPoint] = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues, yAxisValues: yAxisValues)
-
-            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        if targetGlucosePoints.count > 1 {
+            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetGlucosePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
@@ -449,6 +453,17 @@ class StatusChartsManager {
         // Grid lines
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
+        // 0-line
+        let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
+        let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
+            let width: CGFloat = 0.5
+            let viewFrame = CGRectMake(innerFrame.origin.x, chartPointModel.screenLoc.y - width / 2, innerFrame.size.width, width)
+
+            let v = UIView(frame: viewFrame)
+            v.backgroundColor = UIColor.doseTintColor
+            return v
+        })
+
         let highlightLayer = StatusChartHighlightLayer(
             xAxis: xAxis,
             yAxis: yAxis,
@@ -463,6 +478,7 @@ class StatusChartsManager {
             gridLayer,
             xAxis,
             yAxis,
+            zeroGuidelineLayer,
             highlightLayer,
             doseArea,
             doseLine
@@ -496,5 +512,9 @@ class StatusChartsManager {
         COBChart = nil
 
         generateXAxisValues()
+
+        if let xAxisValues = xAxisValues, targets = glucoseTargetRangeSchedule {
+            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues)
+        }
     }
 }
