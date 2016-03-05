@@ -129,12 +129,17 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
-    func getPredictedGlucose(resultsHandler: (values: [GlucoseValue], error: NSError?) -> Void) {
+    func getPredictedGlucose(resultsHandler: (values: [GlucoseValue], error: ErrorType?) -> Void) {
+        let startDate = NSDate()
+        let glucose = latestGlucose ?? glucoseStore?.latestGlucose
 
-        if let glucose = latestGlucose {
+        // TODO: fetch latest glucose from HealthKit
+        if let glucose = glucose {
             let dataGroup = dispatch_group_create()
             var momentum: [GlucoseEffect] = []
-            var lastError: NSError?
+            var carbEffect: [GlucoseEffect] = []
+            var insulinEffect: [GlucoseEffect] = []
+            var lastError: ErrorType?
 
             dispatch_group_enter(dataGroup)
             glucoseStore?.getRecentMomentumEffect { (effects, error) -> Void in
@@ -147,8 +152,45 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
                 dispatch_group_leave(dataGroup)
             }
 
+            if let carbStore = carbStore {
+                dispatch_group_enter(dataGroup)
+                carbStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
+                    if let error = error {
+                        self.logger?.addError(error, fromSource: "CarbStore")
+                        lastError = error
+                    }
+
+                    carbEffect = effects
+                    dispatch_group_leave(dataGroup)
+                }
+            }
+
+            dispatch_group_enter(dataGroup)
+            doseStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "DoseStore")
+                    lastError = error
+                }
+
+                insulinEffect = effects
+                dispatch_group_leave(dataGroup)
+            }
+
             dispatch_group_notify(dataGroup, dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) { () -> Void in
-                let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: [])
+                let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
+
+                self.logger?.addLoopStatus(
+                    startDate: startDate,
+                    endDate: NSDate(),
+                    glucose: glucose,
+                    effects: [
+                        "momentum": momentum,
+                        "carbs": carbEffect,
+                        "insulin": insulinEffect
+                    ],
+                    error: lastError,
+                    prediction: prediction
+                )
 
                 resultsHandler(values: prediction, error: lastError)
             }
@@ -308,6 +350,8 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     var carbRatioSchedule: CarbRatioSchedule? {
         didSet {
+            carbStore?.carbRatioSchedule = carbRatioSchedule
+
             NSUserDefaults.standardUserDefaults().carbRatioSchedule = carbRatioSchedule
         }
     }
@@ -322,6 +366,9 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
         didSet {
+            carbStore?.insulinSensitivitySchedule = insulinSensitivitySchedule
+            doseStore.insulinSensitivitySchedule = insulinSensitivitySchedule
+
             NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule = insulinSensitivitySchedule
         }
     }
@@ -334,7 +381,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: - CarbKit
 
-    let carbStore: CarbStore? = CarbStore()
+    let carbStore: CarbStore?
 
     private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
@@ -355,7 +402,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: CarbStoreDelegate
 
-    func carbStore(_: CarbStore, didError error: ErrorType) {
+    func carbStore(_: CarbStore, didError error: CarbStore.Error) {
         logger?.addError(error, fromSource: "CarbStore")
     }
 
@@ -452,16 +499,16 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
         pumpID = NSUserDefaults.standardUserDefaults().pumpID
 
-        doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule)
+        doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)
+
+        carbStore = CarbStore(carbRatioSchedule: carbRatioSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)
 
         super.init()
 
         watchSession?.delegate = self
         watchSession?.activateSession()
 
-        if let carbStore = carbStore {
-            carbStore.delegate = self
-        }
+        carbStore?.delegate = self
 
         defer {
             if let pumpID = pumpID {

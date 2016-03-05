@@ -167,8 +167,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             if let carbStore = dataManager.carbStore {
                 dispatch_group_enter(reloadGroup)
-                carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values) -> Void in
-                    self.charts.COBValues = values
+                carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger?.addError(error, fromSource: "CarbStore")
+                        self.needsRefresh = true
+                        // TODO: Display error in the cell
+                    } else {
+                        self.charts.COBValues = values
+                    }
 
                     dispatch_group_leave(reloadGroup)
                 }

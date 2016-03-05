@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import HealthKit
+import LoopKit
 
 
 class DiagnosticLogger {
@@ -41,6 +43,46 @@ class DiagnosticLogger {
         addMessage(info, toCollection: "errors")
     }
 
+    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue]) {
+
+        let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
+        let unit = HKUnit.milligramsPerDeciliterUnit()
+
+        var message: [String: AnyObject] = [
+            "startDate": dateFormatter.stringFromDate(startDate),
+            "duration": endDate.timeIntervalSinceDate(startDate),
+            "glucose": [
+                "startDate": dateFormatter.stringFromDate(glucose.startDate),
+                "value": glucose.quantity.doubleValueForUnit(unit),
+                "unit": unit.unitString
+            ],
+            "input": effects.reduce([:], combine: { (previous, item) -> [String: AnyObject] in
+                var input = previous
+                input[item.0] = item.1.map {
+                    [
+                        "startDate": dateFormatter.stringFromDate($0.startDate),
+                        "value": $0.quantity.doubleValueForUnit(unit),
+                        "unit": unit.unitString
+                    ]
+                }
+                return input
+            }),
+            "prediction": prediction.map({ (value) -> [String: AnyObject] in
+                [
+                    "startDate": dateFormatter.stringFromDate(value.startDate),
+                    "value": value.quantity.doubleValueForUnit(unit),
+                    "unit": unit.unitString
+                ]
+            })
+        ]
+
+        if let error = error {
+            message["error"] = String(error)
+        }
+
+        addMessage(message, toCollection: "loop")
+    }
+
     func addMessage(message: [String: AnyObject], toCollection collection: String) {
         if let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
             let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),
@@ -65,3 +107,4 @@ class DiagnosticLogger {
         }
     }
 }
+
