@@ -133,7 +133,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         let startDate = NSDate()
         let glucose = latestGlucose ?? glucoseStore?.latestGlucose
 
-        // TODO: fetch latest glucose from HealthKit
+        // TODO: enforce preconditions like recency
         if let glucose = glucose {
             let dataGroup = dispatch_group_create()
             var momentum: [GlucoseEffect] = []

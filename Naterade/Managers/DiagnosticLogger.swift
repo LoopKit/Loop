@@ -80,7 +80,7 @@ class DiagnosticLogger {
             message["error"] = String(error)
         }
 
-        addMessage(message, toCollection: "loop")
+//        addMessage(message, toCollection: "loop")
     }
 
     func addMessage(message: [String: AnyObject], toCollection collection: String) {
