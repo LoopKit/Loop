@@ -28,6 +28,7 @@ xcuserdata
 *.ipa
 
 ## Playgrounds
+*.playground
 timeline.xctimeline
 playground.xcworkspace
 

@@ -59,6 +59,14 @@
 		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
 		43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; };
 		43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43DC87C61C8B68A9005BC30D /* PumpStatusMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */; };
+		43DC87C71C8B68A9005BC30D /* PumpStatusMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */; };
+		43DC87CA1C8B6903005BC30D /* DeviceLinkMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */; };
+		43DC87CB1C8B6903005BC30D /* DeviceLinkMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87C91C8B6903005BC30D /* DeviceLinkMessage.m */; };
+		43DC87CE1C8B6917005BC30D /* FindDeviceMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87CC1C8B6917005BC30D /* FindDeviceMessage.h */; };
+		43DC87CF1C8B6917005BC30D /* FindDeviceMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87CD1C8B6917005BC30D /* FindDeviceMessage.m */; };
+		43DC87D21C8B6920005BC30D /* MeterMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87D01C8B6920005BC30D /* MeterMessage.h */; };
+		43DC87D31C8B6920005BC30D /* MeterMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87D11C8B6920005BC30D /* MeterMessage.m */; };
 		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
@@ -262,6 +270,14 @@
 		43A9438F1B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43A943A21B928D400051FA24 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PumpStatusMessage.h; sourceTree = "<group>"; };
+		43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PumpStatusMessage.m; sourceTree = "<group>"; };
+		43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceLinkMessage.h; sourceTree = "<group>"; };
+		43DC87C91C8B6903005BC30D /* DeviceLinkMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceLinkMessage.m; sourceTree = "<group>"; };
+		43DC87CC1C8B6917005BC30D /* FindDeviceMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FindDeviceMessage.h; sourceTree = "<group>"; };
+		43DC87CD1C8B6917005BC30D /* FindDeviceMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FindDeviceMessage.m; sourceTree = "<group>"; };
+		43DC87D01C8B6920005BC30D /* MeterMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeterMessage.h; sourceTree = "<group>"; };
+		43DC87D11C8B6920005BC30D /* MeterMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MeterMessage.m; sourceTree = "<group>"; };
 		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
 		43DE925B1C547A20001FFDE1 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
@@ -533,35 +549,52 @@
 		43A943A31B928D400051FA24 /* RileyLinkKit */ = {
 			isa = PBXGroup;
 			children = (
-				43EB408E1C82843100472A8C /* CmdBase.h */,
-				43EB408D1C82843100472A8C /* CmdBase.m */,
-				43EB408C1C82843100472A8C /* CRC8.h */,
-				43EB408B1C82843100472A8C /* CRC8.m */,
-				43EB40A81C8286E900472A8C /* GetPacketCmd.h */,
-				43EB40A71C8286E900472A8C /* GetPacketCmd.m */,
-				43EB40A61C8286E900472A8C /* GetVersionCmd.h */,
-				43EB40A51C8286E900472A8C /* GetVersionCmd.m */,
+				43DC87C31C8B6791005BC30D /* RileyLink */,
 				43EB40A31C82865200472A8C /* Info.plist */,
-				43EB40BA1C828AFF00472A8C /* MessageBase.h */,
-				43EB40B91C828AFF00472A8C /* MessageBase.m */,
-				43EB40981C8285B700472A8C /* MinimedPacket.h */,
-				43EB40971C8285B700472A8C /* MinimedPacket.m */,
-				43EB409C1C8285D600472A8C /* NSData+Conversion.h */,
-				43EB409B1C8285D600472A8C /* NSData+Conversion.m */,
-				43EB408A1C82843100472A8C /* RileyLinkBLEDevice.h */,
-				43EB40891C82843100472A8C /* RileyLinkBLEDevice.m */,
-				43EB40881C82843100472A8C /* RileyLinkBLEManager.h */,
-				43EB40871C82843100472A8C /* RileyLinkBLEManager.m */,
 				43EB40B31C828ACB00472A8C /* RileyLinkDevice_Private.h */,
 				43EB40B21C828ACB00472A8C /* RileyLinkDevice.h */,
 				43EB40B11C828ACB00472A8C /* RileyLinkDevice.m */,
 				43EB40AD1C8287B200472A8C /* RileyLinkKit.h */,
 				43EB40B01C828ACB00472A8C /* RileyLinkManager.h */,
 				43EB40AF1C828ACB00472A8C /* RileyLinkManager.m */,
+			);
+			path = RileyLinkKit;
+			sourceTree = "<group>";
+		};
+		43DC87C31C8B6791005BC30D /* RileyLink */ = {
+			isa = PBXGroup;
+			children = (
+				43EB408E1C82843100472A8C /* CmdBase.h */,
+				43EB408D1C82843100472A8C /* CmdBase.m */,
+				43EB408C1C82843100472A8C /* CRC8.h */,
+				43EB408B1C82843100472A8C /* CRC8.m */,
+				43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */,
+				43DC87C91C8B6903005BC30D /* DeviceLinkMessage.m */,
+				43DC87CC1C8B6917005BC30D /* FindDeviceMessage.h */,
+				43DC87CD1C8B6917005BC30D /* FindDeviceMessage.m */,
+				43EB40A81C8286E900472A8C /* GetPacketCmd.h */,
+				43EB40A71C8286E900472A8C /* GetPacketCmd.m */,
+				43EB40A61C8286E900472A8C /* GetVersionCmd.h */,
+				43EB40A51C8286E900472A8C /* GetVersionCmd.m */,
+				43EB40BA1C828AFF00472A8C /* MessageBase.h */,
+				43EB40B91C828AFF00472A8C /* MessageBase.m */,
+				43DC87D01C8B6920005BC30D /* MeterMessage.h */,
+				43DC87D11C8B6920005BC30D /* MeterMessage.m */,
+				43EB40981C8285B700472A8C /* MinimedPacket.h */,
+				43EB40971C8285B700472A8C /* MinimedPacket.m */,
+				43EB409C1C8285D600472A8C /* NSData+Conversion.h */,
+				43EB409B1C8285D600472A8C /* NSData+Conversion.m */,
+				43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */,
+				43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */,
+				43EB408A1C82843100472A8C /* RileyLinkBLEDevice.h */,
+				43EB40891C82843100472A8C /* RileyLinkBLEDevice.m */,
+				43EB40881C82843100472A8C /* RileyLinkBLEManager.h */,
+				43EB40871C82843100472A8C /* RileyLinkBLEManager.m */,
 				43EB40A01C82864200472A8C /* SendAndListenCmd.h */,
 				43EB409F1C82864200472A8C /* SendAndListenCmd.m */,
 			);
-			path = RileyLinkKit;
+			name = RileyLink;
+			path = ../../../ps2/rileylink_ios/RileyLink;
 			sourceTree = "<group>";
 		};
 		43DE92571C5479C3001FFDE1 /* Models */ = {
@@ -660,7 +693,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43DC87CE1C8B6917005BC30D /* FindDeviceMessage.h in Headers */,
 				43EB40AC1C8286E900472A8C /* GetPacketCmd.h in Headers */,
+				43DC87C61C8B68A9005BC30D /* PumpStatusMessage.h in Headers */,
 				43EB40A21C82864200472A8C /* SendAndListenCmd.h in Headers */,
 				43EB40921C82843100472A8C /* RileyLinkBLEDevice.h in Headers */,
 				43EB40BC1C828AFF00472A8C /* MessageBase.h in Headers */,
@@ -671,8 +706,10 @@
 				43EB409E1C8285D600472A8C /* NSData+Conversion.h in Headers */,
 				43EB40B51C828ACB00472A8C /* RileyLinkManager.h in Headers */,
 				43EB40961C82843100472A8C /* CmdBase.h in Headers */,
+				43DC87CA1C8B6903005BC30D /* DeviceLinkMessage.h in Headers */,
 				43EB40901C82843100472A8C /* RileyLinkBLEManager.h in Headers */,
 				43EB40B71C828ACB00472A8C /* RileyLinkDevice.h in Headers */,
+				43DC87D21C8B6920005BC30D /* MeterMessage.h in Headers */,
 				43EB40AA1C8286E900472A8C /* GetVersionCmd.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1058,13 +1095,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				43EB40BB1C828AFF00472A8C /* MessageBase.m in Sources */,
+				43DC87C71C8B68A9005BC30D /* PumpStatusMessage.m in Sources */,
 				43EB409D1C8285D600472A8C /* NSData+Conversion.m in Sources */,
 				43EB408F1C82843100472A8C /* RileyLinkBLEManager.m in Sources */,
+				43DC87CF1C8B6917005BC30D /* FindDeviceMessage.m in Sources */,
 				43EB40991C8285B700472A8C /* MinimedPacket.m in Sources */,
+				43DC87CB1C8B6903005BC30D /* DeviceLinkMessage.m in Sources */,
 				43EB40B61C828ACB00472A8C /* RileyLinkDevice.m in Sources */,
 				43EB40A11C82864200472A8C /* SendAndListenCmd.m in Sources */,
 				43EB40A91C8286E900472A8C /* GetVersionCmd.m in Sources */,
 				43EB40B41C828ACB00472A8C /* RileyLinkManager.m in Sources */,
+				43DC87D31C8B6920005BC30D /* MeterMessage.m in Sources */,
 				43EB40911C82843100472A8C /* RileyLinkBLEDevice.m in Sources */,
 				43EB40931C82843100472A8C /* CRC8.m in Sources */,
 				43EB40AB1C8286E900472A8C /* GetPacketCmd.m in Sources */,
