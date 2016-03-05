@@ -91,6 +91,8 @@ NSString * const RileyLinkDeviceKey = @"com.ps2.RileyLinkKit.RileyLinkDevice";
 
     if (BLEDevice) {
         RileyLinkDevice *device = [[RileyLinkDevice alloc] initWithBLEDevice:BLEDevice];
+
+        device.pumpID = self.pumpID;
         [self.mutableDevices addObject:device];
 
         [[NSNotificationCenter defaultCenter] postNotificationName:RileyLinkManagerDidDiscoverDeviceNotification

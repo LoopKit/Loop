@@ -72,17 +72,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
         if context == &peripheralStateChangeContext {
-            if let peripheral = object as? CBPeripheral,
-                deviceManager = dataManager.rileyLinkManager
-            {
-                tableView.beginUpdates()
-                for (index, device) in deviceManager.devices.enumerate() {
-                    if device.peripheral == peripheral {
-                        tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 1)], withRowAnimation: .Automatic)
-                    }
-                }
-                tableView.endUpdates()
-            }
+            tableView.beginUpdates()
+            tableView.reloadSections(NSIndexSet(index: Section.Devices.rawValue), withRowAnimation: .None)
+            tableView.endUpdates()
         } else {
             super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
         }
@@ -407,6 +399,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 vc.title = cell.textLabel?.text
                 vc.indexPath = indexPath
                 vc.delegate = self
+            case let vc as RileyLinkDeviceTableViewController:
+                vc.device = dataManager.rileyLinkManager?.devices[indexPath.row]
             default:
                 break
             }

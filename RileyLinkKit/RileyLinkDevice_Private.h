@@ -12,4 +12,6 @@
 
 - (nonnull instancetype)initWithBLEDevice:(nonnull RileyLinkBLEDevice *)device;
 
+@property (copy, nonatomic, nullable) NSString *pumpID;
+
 @end

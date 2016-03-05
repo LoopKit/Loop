@@ -75,7 +75,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
         if visible {
             coordinator.animateAlongsideTransition({ (_) -> Void in
+                self.tableView.beginUpdates()
                 self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .Fade)
+                self.tableView.endUpdates()
             }, completion: nil)
         } else {
             needsRefresh = true
@@ -103,12 +105,17 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
+    private var reloading = false
+
     private func reloadData() {
         if active && visible && needsRefresh {
             needsRefresh = false
+            reloading = true
 
+            tableView.beginUpdates()
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
+            tableView.endUpdates()
 
             charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
@@ -185,7 +192,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
                 self.charts.prerender()
 
+                self.tableView.beginUpdates()
                 self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
+                self.tableView.endUpdates()
+
+                self.reloading = false
             }
         }
     }
@@ -266,11 +277,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .Charts:
-            if charts.COBValues.count > 0 {
-                return ChartRow.count
-            } else {
-                return ChartRow.count - 1
-            }
+            return ChartRow.count
         case .Pump:
             switch dataManager.latestPumpStatus {
             case .None:

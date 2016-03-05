@@ -8,18 +8,24 @@
 
 #import "RileyLinkDevice.h"
 #import "RileyLinkBLEManager.h"
+#import "PumpOps.h"
 
 NSString * const RileyLinkDeviceDidReceivePacketNotification = @"com.ps2.RileyLinkKit.RileyLinkDeviceDidReceivePacketNotification";
 
 NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevicePacket";
 
-@interface RileyLinkDevice ()
+@interface RileyLinkDevice () {
+    PumpOps * _Nullable _ops;
+}
 
 @property (nonatomic, nonnull, strong) RileyLinkBLEDevice *device;
 
 @end
 
 @implementation RileyLinkDevice
+
+@synthesize radioFrequency = _radioFrequency;
+@synthesize lastTuned = _lastTuned;
 
 - (instancetype)initWithBLEDevice:(RileyLinkBLEDevice *)device
 {
@@ -56,6 +62,25 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
     return self.device.peripheral;
 }
 
+- (void)setPumpID:(NSString *)pumpID
+{
+    if (_ops == nil || ![_ops.pump.pumpId isEqualToString:pumpID]) {
+        PumpState *state = [[PumpState alloc] initWithPumpId:pumpID];
+        _ops = [[PumpOps alloc] initWithPumpState:state andDevice:self.device];
+    }
+}
+
+- (PumpState *)pumpState
+{
+    // TODO: Return a copy
+    return _ops.pump;
+}
+
+- (NSString *)pumpID
+{
+    return [self.pumpState.pumpId copy];
+}
+
 #pragma mark -
 
 - (void)deviceNotificationReceived:(NSNotification *)note
@@ -64,6 +89,23 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
         [[NSNotificationCenter defaultCenter] postNotificationName:RileyLinkDeviceDidReceivePacketNotification object:self userInfo:@{RileyLinkDevicePacketKey: note.userInfo[@"packet"]}];
     } else if ([note.name isEqualToString:RILEYLINK_EVENT_DEVICE_CONNECTED]) {
         [self.device enableIdleListeningOnChannel:0];
+    }
+}
+
+#pragma mark - Pump commands
+
+- (void)tunePumpWithCompletionHandler:(void (^ _Nullable)(NSDictionary<NSString *, id> * _Nonnull))completionHandler {
+    if (_ops != nil) {
+        [_ops tunePump:^(NSDictionary * _Nonnull result) {
+            if (result[@"bestFreq"] != nil && [result[@"bestFreq"] isKindOfClass:[NSNumber class]]) {
+                _radioFrequency = result[@"bestFreq"];
+                _lastTuned = [NSDate date];
+            }
+
+            completionHandler(result);
+        }];
+    } else {
+        completionHandler(@{@"error": @"ConfigurationError: No pump configured"});
     }
 }
 

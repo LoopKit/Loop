@@ -531,8 +531,6 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         defer {
             if let pumpID = pumpID {
                 rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
-            } else {
-                rileyLinkState = .NeedsConfiguration
             }
 
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
