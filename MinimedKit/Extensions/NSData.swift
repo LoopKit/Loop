@@ -62,7 +62,7 @@ public extension NSData {
         return subdataWithRange(NSRange(range))
     }
 
-    public convenience init?(hexadecimalString: String) {
+    convenience init?(hexadecimalString: String) {
         if let
             chars = hexadecimalString.cStringUsingEncoding(NSUTF8StringEncoding),
             mutableData = NSMutableData(capacity: chars.count / 2)
@@ -98,7 +98,7 @@ public extension NSData {
         }
     }
 
-    public var hexadecimalString: String {
+    var hexadecimalString: String {
         let bytesCollection = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(bytes), count: length)
 
         let string = NSMutableString(capacity: length * 2)
