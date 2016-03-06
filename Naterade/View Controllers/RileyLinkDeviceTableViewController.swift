@@ -79,8 +79,9 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
     private enum CommandRow: Int {
         case Tune
+        case Bolus
 
-        static let count = 1
+        static let count = 2
     }
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -155,6 +156,10 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = nil
                 }
                 cell.accessoryType = .DisclosureIndicator
+            case .Bolus:
+                cell.textLabel?.text = "Bolus 0.1 U"
+                cell.detailTextLabel?.text = nil
+                cell.accessoryType = .DisclosureIndicator
             }
         }
 
@@ -186,23 +191,46 @@ class RileyLinkDeviceTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .Commands:
-            let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
-                self.device.tunePumpWithCompletionHandler({ (response) -> Void in
-                    if let data = try? NSJSONSerialization.dataWithJSONObject(response, options: .PrettyPrinted) {
-                        let string = String(data: data, encoding: NSUTF8StringEncoding)
+            switch CommandRow(rawValue: indexPath.row)! {
+            case .Tune:
+                let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
+                    self.device.tunePumpWithCompletionHandler({ (response) -> Void in
+                        if let data = try? NSJSONSerialization.dataWithJSONObject(response, options: .PrettyPrinted) {
+                            let string = String(data: data, encoding: NSUTF8StringEncoding)
 
-                        completionHandler(responseText: string ?? "No response found")
-                    } else {
-                        completionHandler(responseText: "An Unknown Issue Occured")
-                    }
+                            completionHandler(responseText: string ?? "No response found")
+                        } else {
+                            completionHandler(responseText: "An Unknown Issue Occured")
+                        }
+                    })
+
+                    return "Tuning radio..."
                 })
 
-                return "Tuning radio..."
-            })
+                vc.title = "Tuning device radio"
 
-            vc.title = "Tuning device radio"
+                self.showViewController(vc, sender: indexPath)
+            case .Bolus:
+                let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
+                    self.device.sendBolusDose(0.1) { (success, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if success {
+                                completionHandler(responseText: "Succeeded")
+                            } else if let error = error {
+                                completionHandler(responseText: "Failed: \(error)")
+                            } else {
+                                completionHandler(responseText: "Failed")
+                            }
+                        }
+                    }
 
-            self.showViewController(vc, sender: indexPath)
+                    return "Sending bolus..."
+                })
+
+                vc.title = "Bolus"
+                
+                self.showViewController(vc, sender: indexPath)
+            }
         case .Device, .Pump:
             break
         }

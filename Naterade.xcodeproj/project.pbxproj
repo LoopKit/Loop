@@ -50,6 +50,7 @@
 		43971A311C8BB1D50013154F /* BolusCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A301C8BB1D50013154F /* BolusCarelinkMessageBody.swift */; };
 		43971A331C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A321C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift */; };
 		43971A361C8BC1150013154F /* BolusCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A341C8BBC520013154F /* BolusCommand.swift */; };
+		43971A381C8BC5A00013154F /* RileyLinkDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A371C8BC5A00013154F /* RileyLinkDevice.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
 		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
@@ -276,6 +277,7 @@
 		43971A301C8BB1D50013154F /* BolusCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		43971A321C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
 		43971A341C8BBC520013154F /* BolusCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusCommand.swift; sourceTree = "<group>"; };
+		43971A371C8BC5A00013154F /* RileyLinkDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDevice.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
@@ -523,6 +525,7 @@
 				43971A341C8BBC520013154F /* BolusCommand.swift */,
 				437A28B21C2FC16700009647 /* PowerOnCommand.swift */,
 				437A28B01C2FB65800009647 /* ReadSettingsCommand.swift */,
+				43971A371C8BC5A00013154F /* RileyLinkDevice.swift */,
 			);
 			path = PumpCommandKit;
 			sourceTree = "<group>";
@@ -1079,6 +1082,7 @@
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
+				43971A381C8BC5A00013154F /* RileyLinkDevice.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				434422B11C7C32B700D7EB3E /* TouchAndPanGestureRecognizer.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,

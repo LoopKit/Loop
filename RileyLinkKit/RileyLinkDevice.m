@@ -9,6 +9,7 @@
 #import "RileyLinkDevice.h"
 #import "RileyLinkBLEManager.h"
 #import "PumpOps.h"
+#import "PumpOpsSynchronous.h"
 
 NSString * const RileyLinkDeviceDidReceivePacketNotification = @"com.ps2.RileyLinkKit.RileyLinkDeviceDidReceivePacketNotification";
 
@@ -106,6 +107,24 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
         }];
     } else {
         completionHandler(@{@"error": @"ConfigurationError: No pump configured"});
+    }
+}
+
+- (void)runCommandWithShortMessage:(NSData *)firstMessage firstResponse:(uint8_t)firstResponse secondMessage:(NSData *)secondMessage secondResponse:(uint8_t)secondResponse completionHandler:(void (^)(NSData * _Nullable, NSString * _Nullable))completionHandler
+{
+    if (self.pumpState != nil) {
+        [self.device runSession:^(RileyLinkCmdSession * _Nonnull session) {
+            PumpOpsSynchronous *ops = [[PumpOpsSynchronous alloc] initWithPump:self.pumpState andSession:session];
+            NSData *response;
+
+            if ([ops sendData:firstMessage andListenForResponseType:firstResponse] != nil) {
+                response = [ops sendData:secondMessage andListenForResponseType:secondResponse];
+            }
+
+            completionHandler(response, nil);
+        }];
+    } else {
+        completionHandler(nil, @"ConfigurationError: No pump configured");
     }
 }
 

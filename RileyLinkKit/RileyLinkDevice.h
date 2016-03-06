@@ -34,6 +34,8 @@ extern NSString * const RileyLinkDevicePacketKey;
 
 - (void)tunePumpWithCompletionHandler:(void (^ _Nullable)(NSDictionary<NSString *, id> * _Nonnull))completionHandler;
 
+- (void)runCommandWithShortMessage:(NSData *)firstMessage firstResponse:(uint8_t)firstResponse secondMessage:(NSData *)secondMessage secondResponse:(uint8_t)secondResponse completionHandler:(void (^ _Nullable)(NSData * _Nullable response, NSString * _Nullable errorString))completionHandler;
+
 @end
 
 NS_ASSUME_NONNULL_END
