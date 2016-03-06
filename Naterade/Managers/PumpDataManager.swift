@@ -242,7 +242,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
                 let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-                glucoseStore.addGlucose(quantity, date: startDate, device: device, resultHandler: { (_, value, error) -> Void in
+                glucoseStore.addGlucose(quantity, date: startDate, displayOnly: glucose.glucoseIsDisplayOnly, device: device, resultHandler: { (_, value, error) -> Void in
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
                     } else if let value = value {
