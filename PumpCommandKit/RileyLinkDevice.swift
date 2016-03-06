@@ -36,16 +36,28 @@ extension RileyLinkDevice {
 
         let command = BolusCommand(units: units, address: pumpID)
 
+        sendTwoStepCommand(command) { (response, error) -> Void in
+            if response != nil {
+                completionHandler(success: true, error: nil)
+            } else {
+                completionHandler(success: false, error: error)
+            }
+        }
+    }
+
+    func sendTwoStepCommand(command: TwoStepCommand, completionHandler: (response: NSData?, error: CommandError?) -> Void) {
+
         runCommandWithShortMessage(command.firstMessage.txData,
             firstResponse: command.firstResponse.rawValue,
             secondMessage: command.secondMessage.txData,
             secondResponse: command.secondResponse.rawValue)
         { (response, error) -> Void in
             if response != nil {
-                completionHandler(success: true, error: nil)
+                completionHandler(response: response, error: nil)
             } else {
-                completionHandler(success: false, error: .CommunicationError(error ?? ""))
+                completionHandler(response: nil, error: .CommunicationError(error ?? ""))
             }
         }
+
     }
 }

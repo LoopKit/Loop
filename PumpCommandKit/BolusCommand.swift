@@ -10,7 +10,7 @@ import Foundation
 import MinimedKit
 
 
-class BolusCommand {
+class BolusCommand: TwoStepCommand {
 
     let firstMessage: PumpMessage
     let firstResponse: MessageType
