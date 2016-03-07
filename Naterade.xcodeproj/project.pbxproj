@@ -52,6 +52,8 @@
 		43971A361C8BC1150013154F /* BolusCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A341C8BBC520013154F /* BolusCommand.swift */; };
 		43971A381C8BC5A00013154F /* RileyLinkDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A371C8BC5A00013154F /* RileyLinkDevice.swift */; };
 		43971A3C1C8BC9750013154F /* TwoStepCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A3B1C8BC9750013154F /* TwoStepCommand.swift */; };
+		43971A441C8D0D3C0013154F /* TempBasalCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A431C8D0D3C0013154F /* TempBasalCarelinkMessageBody.swift */; };
+		43971A461C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A451C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
 		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
@@ -280,6 +282,8 @@
 		43971A341C8BBC520013154F /* BolusCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusCommand.swift; sourceTree = "<group>"; };
 		43971A371C8BC5A00013154F /* RileyLinkDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDevice.swift; sourceTree = "<group>"; };
 		43971A3B1C8BC9750013154F /* TwoStepCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwoStepCommand.swift; sourceTree = "<group>"; };
+		43971A431C8D0D3C0013154F /* TempBasalCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempBasalCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		43971A451C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempBasalCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
@@ -517,6 +521,7 @@
 				43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */,
 				430D5CE11B9C1879002551A8 /* NSDataTests.swift */,
 				433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */,
+				43971A451C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift */,
 			);
 			path = MinimedKitTests;
 			sourceTree = "<group>";
@@ -667,6 +672,7 @@
 				43E0DE061B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift */,
 				437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */,
 				433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */,
+				43971A431C8D0D3C0013154F /* TempBasalCarelinkMessageBody.swift */,
 				43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */,
 			);
 			path = Messages;
@@ -1099,6 +1105,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43971A461C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift in Sources */,
 				437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */,
 				437A28A91C2F677100009647 /* ReadSettingsCarelinkMessageBodyTests.swift in Sources */,
 				43971A331C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift in Sources */,
@@ -1119,6 +1126,7 @@
 				438C935C1B9801DC00BE20E9 /* PumpMessage.swift in Sources */,
 				438C935E1B980BC000BE20E9 /* NSData.swift in Sources */,
 				433C8D061C2F453500F754CE /* CarelinkMessageBody.swift in Sources */,
+				43971A441C8D0D3C0013154F /* TempBasalCarelinkMessageBody.swift in Sources */,
 				43971A311C8BB1D50013154F /* BolusCarelinkMessageBody.swift in Sources */,
 				4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */,
 				43E0DE041B9AB6F6007B4443 /* MessageBody.swift in Sources */,

@@ -16,6 +16,7 @@ public enum MessageType: UInt8 {
     case FindDevice     = 0x09
     case DeviceLink     = 0x0A
     case Bolus          = 0x42
+    case TempBasal      = 0x4c
     case PowerOn        = 0x5d
     case GetBattery     = 0x72
     case GetPumpModel   = 0x8d
