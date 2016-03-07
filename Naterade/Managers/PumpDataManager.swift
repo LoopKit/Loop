@@ -397,6 +397,18 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         }
     }
 
+    var maximumBasalRatePerHour: Double? {
+        didSet {
+            NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour = maximumBasalRatePerHour
+        }
+    }
+
+    var maximumBolus: Double? {
+        didSet {
+            NSUserDefaults.standardUserDefaults().maximumBolus = maximumBolus
+        }
+    }
+
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
@@ -515,6 +527,8 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
         insulinActionDuration = NSUserDefaults.standardUserDefaults().insulinActionDuration
         insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
         glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
+        maximumBasalRatePerHour = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour
+        maximumBolus = NSUserDefaults.standardUserDefaults().maximumBolus
         pumpID = NSUserDefaults.standardUserDefaults().pumpID
 
         doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)

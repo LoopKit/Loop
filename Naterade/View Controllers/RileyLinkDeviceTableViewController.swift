@@ -80,8 +80,9 @@ class RileyLinkDeviceTableViewController: UITableViewController {
     private enum CommandRow: Int {
         case Tune
         case Bolus
+        case TempBasal
 
-        static let count = 2
+        static let count = 3
     }
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -157,8 +158,12 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 }
                 cell.accessoryType = .DisclosureIndicator
             case .Bolus:
-                cell.textLabel?.text = "Bolus 0.1 U"
-                cell.detailTextLabel?.text = nil
+                cell.textLabel?.text = "Bolus"
+                cell.detailTextLabel?.text = "0.1 U"
+                cell.accessoryType = .DisclosureIndicator
+            case .TempBasal:
+                cell.textLabel?.text = "Set Temporary Basal"
+                cell.detailTextLabel?.text = "0.5 U/hour"
                 cell.accessoryType = .DisclosureIndicator
             }
         }
@@ -229,6 +234,26 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
                 vc.title = "Bolus"
                 
+                self.showViewController(vc, sender: indexPath)
+            case .TempBasal:
+                let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
+                    self.device.sendTempBasalDose(0.5, duration: NSTimeInterval(minutes: 30)) { (success, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if success {
+                                completionHandler(responseText: "Succeeded")
+                            } else if let error = error {
+                                completionHandler(responseText: "Failed: \(error)")
+                            } else {
+                                completionHandler(responseText: "Failed")
+                            }
+                        }
+                    }
+
+                    return "Setting temp basal..."
+                })
+
+                vc.title = "Set Temp Basal"
+
                 self.showViewController(vc, sender: indexPath)
             }
         case .Device, .Pump:

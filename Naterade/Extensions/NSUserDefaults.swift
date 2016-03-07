@@ -19,6 +19,8 @@ extension NSUserDefaults {
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
+        case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
+        case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
@@ -97,6 +99,36 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue?.rawValue, forKey: Key.GlucoseTargetRangeSchedule.rawValue)
+        }
+    }
+
+    var maximumBasalRatePerHour: Double? {
+        get {
+            let value = doubleForKey(Key.MaximumBasalRatePerHour.rawValue)
+
+            return value > 0 ? value : nil
+        }
+        set {
+            if let maximumBasalRatePerHour = newValue {
+                setDouble(maximumBasalRatePerHour, forKey: Key.MaximumBasalRatePerHour.rawValue)
+            } else {
+                removeObjectForKey(Key.MaximumBasalRatePerHour.rawValue)
+            }
+        }
+    }
+
+    var maximumBolus: Double? {
+        get {
+            let value = doubleForKey(Key.MaximumBolus.rawValue)
+
+            return value > 0 ? value : nil
+        }
+        set {
+            if let maximumBolus = newValue {
+                setDouble(maximumBolus, forKey: Key.MaximumBolus.rawValue)
+            } else {
+                removeObjectForKey(Key.MaximumBolus.rawValue)
+            }
         }
     }
 

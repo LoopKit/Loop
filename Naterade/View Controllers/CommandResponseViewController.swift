@@ -33,8 +33,8 @@ class CommandResponseViewController: UIViewController {
         super.viewDidLoad()
 
         textView.font = UIFont(name: "Menlo-Regular", size: 14)
-        textView.text = command { [unowned self] (responseText) -> Void in
-            self.textView.text = responseText
+        textView.text = command { [weak self] (responseText) -> Void in
+            self?.textView.text = responseText
         }
     }
 

@@ -45,7 +45,34 @@ extension RileyLinkDevice {
         }
     }
 
-    func sendTwoStepCommand(command: TwoStepCommand, completionHandler: (response: NSData?, error: CommandError?) -> Void) {
+    /**
+     Send a temp basal using the existing PumpOps infrastructure
+
+     - parameter unitsPerHour:      The rate to deliver, in Units per hour
+     - parameter duration:          The length of time to run the dose
+     - parameter completionHandler: A closure called after the dose command was run. The closure takes two arguments:
+        - success: Whether the command was successfully executed
+        - error:   An error describing why the command failed to execute
+     */
+    func sendTempBasalDose(unitsPerHour: Double, duration: NSTimeInterval, completionHandler: (success: Bool, error: CommandError?) -> Void) {
+        guard let pumpID = pumpState?.pumpId else {
+            completionHandler(success: false, error: .ConfigurationError)
+            return
+        }
+
+        let command = TempBasalCommand(unitsPerHour: unitsPerHour, duration: duration, address: pumpID)
+
+        // TODO: Validate after send
+        sendTwoStepCommand(command) { (response, error) -> Void in
+            if response != nil {
+                completionHandler(success: true, error: nil)
+            } else {
+                completionHandler(success: false, error: error)
+            }
+        }
+    }
+
+    private func sendTwoStepCommand(command: TwoStepCommand, completionHandler: (response: NSData?, error: CommandError?) -> Void) {
 
         runCommandWithShortMessage(command.firstMessage.txData,
             firstResponse: command.firstResponse.rawValue,
