@@ -6,6 +6,7 @@
 //  Copyright © 2015 Pete Schwamb. All rights reserved.
 //
 
+#import "MinimedPacket.h"
 #import "RileyLinkDevice.h"
 #import "RileyLinkBLEManager.h"
 #import "PumpOps.h"
@@ -115,13 +116,52 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
     if (self.pumpState != nil) {
         [self.device runSession:^(RileyLinkCmdSession * _Nonnull session) {
             PumpOpsSynchronous *ops = [[PumpOpsSynchronous alloc] initWithPump:self.pumpState andSession:session];
-            NSData *response;
+            NSData *response = [ops sendData:firstMessage andListenForResponseType:firstResponse];
 
-            if ([ops sendData:firstMessage andListenForResponseType:firstResponse] != nil) {
+            if (response != nil && secondMessage != nil) {
                 response = [ops sendData:secondMessage andListenForResponseType:secondResponse];
             }
 
-            completionHandler(response, nil);
+            if (completionHandler != nil) {
+                completionHandler(response, nil);
+            }
+        }];
+    } else if (completionHandler != nil) {
+        completionHandler(nil, @"ConfigurationError: No pump configured");
+    }
+}
+
+- (void)runCommandWithShortMessage:(NSData *)firstMessage firstResponse:(uint8_t)firstRresponse completionHandler:(void (^)(NSData * _Nullable, NSString * _Nullable))completionHandler
+{
+    [self runCommandWithShortMessage:firstMessage firstResponse:firstRresponse secondMessage:nil secondResponse:0 completionHandler:completionHandler];
+}
+
+- (void)sendTempBasalMessage:(NSData *)firstMessage secondMessage:(NSData *)secondMessage thirdMessage:(NSData *)thirdMessage withCompletionHandler:(void (^)(NSData * _Nullable, NSString * _Nullable))completionHandler
+{
+    if (self.pumpState != nil) {
+        [self.device runSession:^(RileyLinkCmdSession * _Nonnull session) {
+            PumpOpsSynchronous *ops = [[PumpOpsSynchronous alloc] initWithPump:self.pumpState andSession:session];
+
+            // Send the prelude
+            NSData *response = [ops sendData:firstMessage andListenForResponseType:MESSAGE_TYPE_ACK];
+
+            // Send the args
+            if (response != nil) {
+                // The pump does not ACK a temp basal. We'll check manually below if it was successful.
+                // TODO: No sense use the SendAndListenCommand here.
+                [ops sendData:secondMessage retryCount:1 andListenForResponseType:MESSAGE_TYPE_ACK];
+
+                // Read the temp basal
+                response = [ops sendData:thirdMessage andListenForResponseType:MESSAGE_TYPE_READ_TEMP_BASAL];
+
+                if (response != nil) {
+                    completionHandler(response, nil);
+                } else {
+                    completionHandler(nil, @"CommunicationError");
+                }
+            } else {
+                completionHandler(nil, @"CommunicationError");
+            }
         }];
     } else {
         completionHandler(nil, @"ConfigurationError: No pump configured");

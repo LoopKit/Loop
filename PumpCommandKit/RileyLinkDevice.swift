@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MinimedKit
 import RileyLinkKit
 
 
@@ -60,14 +61,14 @@ extension RileyLinkDevice {
             return
         }
 
-        let command = TempBasalCommand(unitsPerHour: unitsPerHour, duration: duration, address: pumpID)
+        let writeCommand = SetTempBasalCommand(unitsPerHour: unitsPerHour, duration: duration, address: pumpID)
+        let readCommand = ReadTempBasalCommand(address: pumpID)
 
-        // TODO: Validate after send
-        sendTwoStepCommand(command) { (response, error) -> Void in
-            if response != nil {
-                completionHandler(success: true, error: nil)
+        sendTempBasalMessage(writeCommand.firstMessage.txData, secondMessage: writeCommand.secondMessage.txData, thirdMessage: readCommand.message.txData) { (response, error) -> Void in
+            if let response = response, message = PumpMessage(rxData: response), body = message.messageBody as? ReadTempBasalCarelinkMessageBody {
+                completionHandler(success: body.timeRemaining == duration, error: nil)
             } else {
-                completionHandler(success: false, error: error)
+                completionHandler(success: false, error: .CommunicationError(error ?? ""))
             }
         }
     }
