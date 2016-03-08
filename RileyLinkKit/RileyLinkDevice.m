@@ -149,7 +149,7 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
             if (response != nil) {
                 // The pump does not ACK a temp basal. We'll check manually below if it was successful.
                 // TODO: No sense use the SendAndListenCommand here.
-                [ops sendData:secondMessage retryCount:1 andListenForResponseType:MESSAGE_TYPE_ACK];
+                [ops sendData:secondMessage retryCount:0 andListenForResponseType:MESSAGE_TYPE_ACK];
 
                 // Read the temp basal
                 response = [ops sendData:thirdMessage andListenForResponseType:MESSAGE_TYPE_READ_TEMP_BASAL];
