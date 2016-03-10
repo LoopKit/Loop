@@ -513,7 +513,8 @@ class StatusChartsManager {
 
         generateXAxisValues()
 
-        if let xAxisValues = xAxisValues, targets = glucoseTargetRangeSchedule {
+        if let xAxisValues = xAxisValues where xAxisValues.count > 1,
+            let targets = glucoseTargetRangeSchedule {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues)
         }
     }
