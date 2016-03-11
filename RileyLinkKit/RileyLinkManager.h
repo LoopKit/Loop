@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString * const RileyLinkManagerDidDiscoverDeviceNotification;
+extern NSString * const RileyLinkDeviceConnectionStateDidChangeNotification;
 
 extern NSString * const RileyLinkDeviceKey;
 

@@ -20,18 +20,21 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     @IBOutlet var devicesSectionTitleView: UIView!
 
-    private var peripheralStateChangeContext = 0
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkManagerDidDiscoverDeviceNotification, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
-            if let strongSelf = self,
-                deviceManager = strongSelf.dataManager.rileyLinkManager
-            {
-                strongSelf.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: deviceManager.devices.count - 1, inSection: 1)], withRowAnimation: .Automatic)
-
-                deviceManager.devices.last?.peripheral.addObserver(strongSelf, forKeyPath: "state", options: [], context: &(strongSelf.peripheralStateChangeContext))
+        dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
+            if let deviceManager = self?.dataManager.rileyLinkManager {
+                switch note.name {
+                case RileyLinkManagerDidDiscoverDeviceNotification:
+                    self?.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: deviceManager.devices.count - 1, inSection: Section.Devices.rawValue)], withRowAnimation: .Automatic)
+                case RileyLinkDeviceConnectionStateDidChangeNotification:
+                    if let device = note.userInfo?[RileyLinkDeviceKey] as? RileyLinkDevice, index = deviceManager.devices.indexOf(device) {
+                        self?.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: Section.Devices.rawValue)], withRowAnimation: .None)
+                    }
+                default:
+                    break
+                }
             }
         }
     }
@@ -41,10 +44,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
         if let deviceManager = dataManager.rileyLinkManager {
             deviceManager.deviceScanningEnabled = true
-
-            deviceManager.devices.forEach { device in
-                device.peripheral.addObserver(self, forKeyPath: "state", options: [], context: &peripheralStateChangeContext)
-            }
         }
 
         if dataManager.transmitterID != nil, let glucoseStore = dataManager.glucoseStore where glucoseStore.authorizationRequired {
@@ -54,30 +53,20 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         }
     }
 
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
 
         if let deviceManager = dataManager.rileyLinkManager {
             deviceManager.deviceScanningEnabled = false
-
-            deviceManager.devices.forEach { device in
-                device.peripheral.removeObserver(self, forKeyPath: "state", context: &peripheralStateChangeContext)
-            }
         }
+    }
+
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
     }
 
     deinit {
         dataManagerObserver = nil
-    }
-
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-        if context == &peripheralStateChangeContext {
-            tableView.beginUpdates()
-            tableView.reloadSections(NSIndexSet(index: Section.Devices.rawValue), withRowAnimation: .None)
-            tableView.endUpdates()
-        } else {
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
-        }
     }
 
     private var dataManager: PumpDataManager {
