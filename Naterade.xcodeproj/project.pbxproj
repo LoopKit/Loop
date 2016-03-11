@@ -144,6 +144,26 @@
 		43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */; };
 		43F78D201C8E919E002152D1 /* ReadTempBasalCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D1F1C8E919E002152D1 /* ReadTempBasalCarelinkMessageBody.swift */; };
 		43F78D221C8E960A002152D1 /* ReadTempBasalCarelinkMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D211C8E960A002152D1 /* ReadTempBasalCarelinkMessageBodyTests.swift */; };
+		43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
+		43F78D2E1C8FC58F002152D1 /* DoseMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */; };
+		43F78D391C8FCC7B002152D1 /* read_selected_basal_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */; };
+		43F78D3F1C911D2F002152D1 /* NateradeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D3E1C911D2F002152D1 /* NateradeTests.swift */; };
+		43F78D411C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D401C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json */; };
+		43F78D431C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D421C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json */; };
+		43F78D451C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D441C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json */; };
+		43F78D471C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D461C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json */; };
+		43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D481C914197002152D1 /* CarbKit.framework */; };
+		43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D491C914197002152D1 /* GlucoseKit.framework */; };
+		43F78D4E1C914197002152D1 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
+		43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
+		43F78D501C9141D3002152D1 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
+		43F78D511C914444002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
+		43F78D531C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D521C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json */; };
+		43F78D551C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D541C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json */; };
+		43F78D571C914BD1002152D1 /* recommend_temp_basal_flat_and_high.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D561C914BD1002152D1 /* recommend_temp_basal_flat_and_high.json */; };
+		43F78D591C914C57002152D1 /* recommend_temp_basal_high_and_falling.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D581C914C57002152D1 /* recommend_temp_basal_high_and_falling.json */; };
+		43F78D5B1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D5A1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json */; };
+		43F78D5D1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D5C1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json */; };
 		43FF3D5E1BADE38300DE240A /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438C935D1B980BC000BE20E9 /* NSData.swift */; };
 		43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
@@ -189,6 +209,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 43A943A11B928D400051FA24;
 			remoteInfo = RileyLinkKit;
+		};
+		43F78D301C8FC58F002152D1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
+			remoteInfo = Naterade;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -384,6 +411,26 @@
 		43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		43F78D1F1C8E919E002152D1 /* ReadTempBasalCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTempBasalCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		43F78D211C8E960A002152D1 /* ReadTempBasalCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTempBasalCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
+		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
+		43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NateradeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseMathTests.swift; sourceTree = "<group>"; };
+		43F78D2F1C8FC58F002152D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = read_selected_basal_profile.json; sourceTree = "<group>"; };
+		43F78D3E1C911D2F002152D1 /* NateradeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NateradeTests.swift; sourceTree = "<group>"; };
+		43F78D401C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_no_change_glucose.json; sourceTree = "<group>"; };
+		43F78D421C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_high_end_in_range.json; sourceTree = "<group>"; };
+		43F78D441C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_low_end_in_range.json; sourceTree = "<group>"; };
+		43F78D461C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_correct_low_at_min.json; sourceTree = "<group>"; };
+		43F78D481C914197002152D1 /* CarbKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarbKit.framework; path = Carthage/Build/iOS/CarbKit.framework; sourceTree = "<group>"; };
+		43F78D491C914197002152D1 /* GlucoseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlucoseKit.framework; path = Carthage/Build/iOS/GlucoseKit.framework; sourceTree = "<group>"; };
+		43F78D4A1C914197002152D1 /* InsulinKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = InsulinKit.framework; path = Carthage/Build/iOS/InsulinKit.framework; sourceTree = "<group>"; };
+		43F78D4B1C914197002152D1 /* LoopKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKit.framework; path = Carthage/Build/iOS/LoopKit.framework; sourceTree = "<group>"; };
+		43F78D521C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_high_end_low.json; sourceTree = "<group>"; };
+		43F78D541C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_low_end_high.json; sourceTree = "<group>"; };
+		43F78D561C914BD1002152D1 /* recommend_temp_basal_flat_and_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_flat_and_high.json; sourceTree = "<group>"; };
+		43F78D581C914C57002152D1 /* recommend_temp_basal_high_and_falling.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_high_and_falling.json; sourceTree = "<group>"; };
+		43F78D5A1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_in_range_and_rising.json; sourceTree = "<group>"; };
+		43F78D5C1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_high_and_rising.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -398,6 +445,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
+				43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */,
+				43F78D4E1C914197002152D1 /* InsulinKit.framework in Frameworks */,
+				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
 				4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */,
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
 				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
@@ -433,6 +484,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		43F78D281C8FC58F002152D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43F78D501C9141D3002152D1 /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,6 +541,7 @@
 				43A943A31B928D400051FA24 /* RileyLinkKit */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
+				43F78D2C1C8FC58F002152D1 /* NateradeTests */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 			);
@@ -496,6 +556,7 @@
 				43A943A21B928D400051FA24 /* RileyLinkKit.framework */,
 				438C933A1B97F82000BE20E9 /* MinimedKit.framework */,
 				437A289C1C2F66DD00009647 /* MinimedKitTests.xctest */,
+				43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -733,13 +794,47 @@
 				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
 				43F5C2E51B93C685003EB13D /* PumpDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
+				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 			);
 			path = Managers;
+			sourceTree = "<group>";
+		};
+		43F78D2C1C8FC58F002152D1 /* NateradeTests */ = {
+			isa = PBXGroup;
+			children = (
+				43F78D2F1C8FC58F002152D1 /* Info.plist */,
+				43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */,
+				43F78D3E1C911D2F002152D1 /* NateradeTests.swift */,
+				43F78D351C8FCC47002152D1 /* Fixtures */,
+			);
+			path = NateradeTests;
+			sourceTree = "<group>";
+		};
+		43F78D351C8FCC47002152D1 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */,
+				43F78D461C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json */,
+				43F78D561C914BD1002152D1 /* recommend_temp_basal_flat_and_high.json */,
+				43F78D581C914C57002152D1 /* recommend_temp_basal_high_and_falling.json */,
+				43F78D5C1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json */,
+				43F78D5A1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json */,
+				43F78D401C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json */,
+				43F78D421C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json */,
+				43F78D521C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json */,
+				43F78D541C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json */,
+				43F78D441C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				43F78D481C914197002152D1 /* CarbKit.framework */,
+				43F78D491C914197002152D1 /* GlucoseKit.framework */,
+				43F78D4A1C914197002152D1 /* InsulinKit.framework */,
+				43F78D4B1C914197002152D1 /* LoopKit.framework */,
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
@@ -907,6 +1002,24 @@
 			productReference = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		43F78D2A1C8FC58F002152D1 /* NateradeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "NateradeTests" */;
+			buildPhases = (
+				43F78D271C8FC58F002152D1 /* Sources */,
+				43F78D281C8FC58F002152D1 /* Frameworks */,
+				43F78D291C8FC58F002152D1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				43F78D311C8FC58F002152D1 /* PBXTargetDependency */,
+			);
+			name = NateradeTests;
+			productName = NateradeTests;
+			productReference = 43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -970,6 +1083,10 @@
 						CreatedOnToolsVersion = 7.0;
 						DevelopmentTeam = 26AMK8X5DW;
 					};
+					43F78D2A1C8FC58F002152D1 = {
+						CreatedOnToolsVersion = 7.2.1;
+						TestTargetID = 43776F8B1B8022E90074EA36;
+					};
 				};
 			};
 			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */;
@@ -991,6 +1108,7 @@
 				43A943A11B928D400051FA24 /* RileyLinkKit */,
 				438C93391B97F82000BE20E9 /* MinimedKit */,
 				437A289B1C2F66DD00009647 /* MinimedKitTests */,
+				43F78D2A1C8FC58F002152D1 /* NateradeTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1050,6 +1168,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		43F78D291C8FC58F002152D1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43F78D391C8FCC7B002152D1 /* read_selected_basal_profile.json in Resources */,
+				43F78D411C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json in Resources */,
+				43F78D551C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json in Resources */,
+				43F78D431C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json in Resources */,
+				43F78D471C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json in Resources */,
+				43F78D531C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json in Resources */,
+				43F78D591C914C57002152D1 /* recommend_temp_basal_high_and_falling.json in Resources */,
+				43F78D5B1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json in Resources */,
+				43F78D451C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json in Resources */,
+				43F78D571C914BD1002152D1 /* recommend_temp_basal_flat_and_high.json in Resources */,
+				43F78D5D1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -1104,6 +1240,7 @@
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
 				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,
+				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,
 				43971A381C8BC5A00013154F /* RileyLinkDevice.swift in Sources */,
@@ -1209,6 +1346,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		43F78D271C8FC58F002152D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				43F78D511C914444002152D1 /* DoseMath.swift in Sources */,
+				43F78D2E1C8FC58F002152D1 /* DoseMathTests.swift in Sources */,
+				43F78D3F1C911D2F002152D1 /* NateradeTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1236,6 +1383,11 @@
 			isa = PBXTargetDependency;
 			target = 43A943A11B928D400051FA24 /* RileyLinkKit */;
 			targetProxy = 43A943A71B928D400051FA24 /* PBXContainerItemProxy */;
+		};
+		43F78D311C8FC58F002152D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43776F8B1B8022E90074EA36 /* Naterade */;
+			targetProxy = 43F78D301C8FC58F002152D1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1574,6 +1726,40 @@
 			};
 			name = Release;
 		};
+		43F78D331C8FC58F002152D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = NateradeTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.NateradeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naterade.app/Naterade";
+			};
+			name = Debug;
+		};
+		43F78D341C8FC58F002152D1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = NateradeTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.NateradeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naterade.app/Naterade";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1636,6 +1822,15 @@
 			buildConfigurations = (
 				43A943AC1B928D400051FA24 /* Debug */,
 				43A943AD1B928D400051FA24 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "NateradeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				43F78D331C8FC58F002152D1 /* Debug */,
+				43F78D341C8FC58F002152D1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

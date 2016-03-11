@@ -134,8 +134,26 @@ class RecommendTempBasalTests: XCTestCase {
             allowPredictiveTempBelowRange: true
         )
 
-        XCTAssertEqual(0.8, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertNil(dose)
+
+        let lastTempBasal = TempBasalHistoryRecord(
+            rate: 1.225,
+            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
+            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19))
+        )
+
+        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+            atDate: glucose.first!.startDate,
+            lastTempBasal: lastTempBasal,
+            maxBasalRate: maxBasalRate,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: true
+        )
+
+        XCTAssertEqual(0, dose!.rate)
+        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
     }
 
     func testCorrectLowAtMin() {
@@ -220,8 +238,26 @@ class RecommendTempBasalTests: XCTestCase {
             allowPredictiveTempBelowRange: true
         )
 
-        XCTAssertEqual(0.8, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertNil(dose)
+
+        lastTempBasal = TempBasalHistoryRecord(
+            rate: 0.125,
+            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -21)),
+            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 9))
+        )
+
+        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+            atDate: glucose.first!.startDate,
+            lastTempBasal: lastTempBasal,
+            maxBasalRate: maxBasalRate,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: true
+        )
+
+        XCTAssertEqual(0, dose!.rate)
+        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
     }
 
     func testStartHighEndLow() {
@@ -266,8 +302,26 @@ class RecommendTempBasalTests: XCTestCase {
             allowPredictiveTempBelowRange: true
         )
 
-        XCTAssertEqual(0.8, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertNil(dose)
+
+        let lastTempBasal = TempBasalHistoryRecord(
+            rate: 1.225,
+            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
+            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19))
+        )
+
+        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+            atDate: glucose.first!.startDate,
+            lastTempBasal: lastTempBasal,
+            maxBasalRate: maxBasalRate,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: true
+        )
+
+        XCTAssertEqual(0, dose!.rate)
+        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
     }
 
     func testFlatAndHigh() {
