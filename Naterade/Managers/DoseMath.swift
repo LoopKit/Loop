@@ -23,7 +23,9 @@ class DoseMath {
         let unit = HKUnit.milligramsPerDeciliterUnit()
         let doseUnits = (currentGlucose.doubleValueForUnit(unit) - targetGlucose.doubleValueForUnit(unit)) / insulinSensitivity.doubleValueForUnit(unit)
 
-        return min(maxBasalRate, max(0, doseUnits / (duration / NSTimeInterval(hours: 1)) + currentBasalRate))
+        let rate = min(maxBasalRate, max(0, doseUnits / (duration / NSTimeInterval(hours: 1)) + currentBasalRate))
+
+        return round(rate * basalStrokes) / basalStrokes
     }
 
     static let basalStrokes: Double = 40
@@ -85,7 +87,7 @@ class DoseMath {
         if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > date {
             if let determinedRate = rate {
                 // Ignore the dose if the current dose is the same rate and has more than 10 minutes remaining
-                if round(determinedRate * basalStrokes) / basalStrokes == lastTempBasal.rate && lastTempBasal.endDate.timeIntervalSinceDate(date) > NSTimeInterval(minutes: 11) {
+                if determinedRate == lastTempBasal.rate && lastTempBasal.endDate.timeIntervalSinceDate(date) > NSTimeInterval(minutes: 11) {
                     rate = nil
                 }
             } else {
