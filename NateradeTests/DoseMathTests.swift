@@ -53,7 +53,7 @@ class RecommendTempBasalTests: XCTestCase {
     }
 
     var glucoseTargetRange: GlucoseRangeSchedule {
-        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: NSTimeInterval(0), value: DoubleRange(minValue: 80, maxValue: 120))])!
+        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: NSTimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))])!
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
@@ -168,7 +168,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(0.125, dose!.rate)
+        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
 
         // Ignore due to existing dose
@@ -205,7 +205,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(0.125, dose!.rate)
+        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
 
         // Continue existing dose
@@ -224,7 +224,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(0.125, dose!.rate)
+        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
 
         // Allow predictive temp below range
@@ -352,7 +352,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(1.425, dose!.rate)
+        XCTAssertEqualWithAccuracy(1.425, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -368,7 +368,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(3.0, dose!.rate)
+        XCTAssertEqualWithAccuracy(1.475, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -399,7 +399,7 @@ class RecommendTempBasalTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(2.975, dose!.rate)
+        XCTAssertEqualWithAccuracy(2.975, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
     }
 
