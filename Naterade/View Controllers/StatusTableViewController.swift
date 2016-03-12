@@ -463,6 +463,47 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // MARK: - UIGestureRecognizerDelegate
 
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return gestureRecognizer === charts.panGestureRecognizer
+        return true
+    }
+
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
+        if let headerView = tableView.tableHeaderView where touch.view?.isDescendantOfView(headerView) == true {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    // MARK: - Actions
+
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        super.prepareForSegue(segue, sender: sender)
+
+        if let carbVC = segue.destinationViewController as? CarbEntryEditViewController, carbStore = dataManager.carbStore {
+            carbVC.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
+            carbVC.preferredUnit = carbStore.preferredUnit
+        }
+    }
+
+    @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
+        if let carbVC = segue.sourceViewController as? CarbEntryEditViewController, carbStore = dataManager.carbStore, updatedEntry = carbVC.updatedCarbEntry {
+            carbStore.addCarbEntry(updatedEntry) { (_, _, error) -> Void in
+                if let error = error {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.presentAlertControllerWithError(error)
+                    }
+                }
+            }
+        }
+    }
+
+    @IBAction func unwindFromBolusViewController(segue: UIStoryboardSegue) {
+        if let bolusViewController = segue.sourceViewController as? BolusViewController {
+            if let bolus = bolusViewController.bolus {
+                print("Now bolusing \(bolus) Units")
+            } else {
+                print("Bolus cancelled")
+            }
+        }
     }
 }

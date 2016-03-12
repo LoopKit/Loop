@@ -69,6 +69,8 @@
 		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
 		43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; };
 		43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */; };
+		43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */; };
 		43DC87C61C8B68A9005BC30D /* PumpStatusMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */; };
 		43DC87C71C8B68A9005BC30D /* PumpStatusMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */; };
 		43DC87CA1C8B6903005BC30D /* DeviceLinkMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */; };
@@ -331,6 +333,8 @@
 		43A9438F1B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43A943A21B928D400051FA24 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
+		43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverInNavigationControllerSegue.swift; sourceTree = "<group>"; };
 		43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PumpStatusMessage.h; sourceTree = "<group>"; };
 		43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PumpStatusMessage.m; sourceTree = "<group>"; };
 		43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceLinkMessage.h; sourceTree = "<group>"; };
@@ -570,11 +574,12 @@
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				43776F981B8022E90074EA36 /* Assets.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
+				4346D1E81C77FEF100ABAFE3 /* Fixture Data */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
 				43757D131C06F26C00910CB9 /* Models */,
-				4346D1E81C77FEF100ABAFE3 /* Fixture Data */,
+				43DBF04F1C93C10F00B3C386 /* Transitions */,
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
@@ -678,6 +683,14 @@
 			path = RileyLinkKit;
 			sourceTree = "<group>";
 		};
+		43DBF04F1C93C10F00B3C386 /* Transitions */ = {
+			isa = PBXGroup;
+			children = (
+				43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */,
+			);
+			path = Transitions;
+			sourceTree = "<group>";
+		};
 		43DC87C31C8B6791005BC30D /* RileyLink */ = {
 			isa = PBXGroup;
 			children = (
@@ -768,6 +781,7 @@
 		43F5C2CE1B92A2A0003EB13D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */,
 				43971A2C1C8B94010013154F /* CommandResponseViewController.swift */,
 				43DC87E81C8B7818005BC30D /* RileyLinkDeviceTableViewController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
@@ -792,9 +806,9 @@
 			isa = PBXGroup;
 			children = (
 				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
+				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 				43F5C2E51B93C685003EB13D /* PumpDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
-				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1240,6 +1254,8 @@
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
 				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,
+				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
+				43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				437A28B31C2FC16700009647 /* PowerOnCommand.swift in Sources */,

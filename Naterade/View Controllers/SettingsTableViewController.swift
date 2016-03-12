@@ -96,8 +96,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case BasalRate
         case CarbRatio
         case InsulinSensitivity
+        case MaxBasal
+        case MaxBolus
 
-        static let count = 7
+        static let count = 9
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
@@ -164,8 +166,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     let unit = carbRatioSchedule.unit
                     let value = carbRatioSchedule.averageQuantity().doubleValueForUnit(unit)
 
-                    valueNumberFormatter.minimumFractionDigits = 2
-
                     configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value)!) \(unit)/U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
@@ -176,8 +176,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 if let insulinSensitivitySchedule = dataManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
                     let value = insulinSensitivitySchedule.averageQuantity().doubleValueForUnit(unit)
-
-                    valueNumberFormatter.minimumFractionDigits = unit == HKUnit.milligramsPerDeciliterUnit() ? 0 : 1
 
                     configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value)!) \(unit)/U"
                 } else {
@@ -190,8 +188,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     let unit = glucoseTargetRangeSchedule.unit
                     let value = glucoseTargetRangeSchedule.valueAt(NSDate())
 
-                    valueNumberFormatter.minimumFractionDigits = unit == HKUnit.milligramsPerDeciliterUnit() ? 0 : 1
-
                     configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(value.minValue)!) – \(valueNumberFormatter.stringFromNumber(value.maxValue)!) \(unit)"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
@@ -202,6 +198,22 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 if let insulinActionDuration = dataManager.insulinActionDuration {
 
                     configCell.detailTextLabel?.text = "\(insulinActionDuration.hours) hours"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .MaxBasal:
+                configCell.textLabel?.text = NSLocalizedString("Maximum Basal Rate", comment: "The title text for the maximum basal rate value")
+
+                if let maxBasal = dataManager.maximumBasalRatePerHour {
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(maxBasal)!) U/hour"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .MaxBolus:
+                configCell.textLabel?.text = NSLocalizedString("Maximum Bolus", comment: "The title text for the maximum bolus value")
+
+                if let maxBolus = dataManager.maximumBolus {
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.stringFromNumber(maxBolus)!) U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -242,7 +254,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             let sender = tableView.cellForRowAtIndexPath(indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .PumpID, .TransmitterID, .InsulinActionDuration:
+            case .PumpID, .TransmitterID, .InsulinActionDuration, .MaxBasal, .MaxBolus:
                 performSegueWithIdentifier(TextFieldTableViewController.className, sender: sender)
             case .BasalRate:
                 let scheduleVC = SingleValueScheduleTableViewController()
@@ -378,8 +390,21 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     vc.keyboardType = .DecimalPad
 
                     if let insulinActionDuration = dataManager.insulinActionDuration {
-                        valueNumberFormatter.minimumFractionDigits = 0
                         vc.value = valueNumberFormatter.stringFromNumber(insulinActionDuration.hours)
+                    }
+                case .MaxBasal:
+                    vc.placeholder = NSLocalizedString("Enter a rate in units per hour", comment: "The placeholder text instructing users how to enter a maximum basal rate")
+                    vc.keyboardType = .DecimalPad
+
+                    if let maxBasal = dataManager.maximumBasalRatePerHour {
+                        vc.value = valueNumberFormatter.stringFromNumber(maxBasal)
+                    }
+                case .MaxBolus:
+                    vc.placeholder = NSLocalizedString("Enter a number of units", comment: "The placeholder text instructing users how to enter a maximum bolus")
+                    vc.keyboardType = .DecimalPad
+
+                    if let maxBolus = dataManager.maximumBolus {
+                        vc.value = valueNumberFormatter.stringFromNumber(maxBolus)
                     }
                 default:
                     assertionFailure()
@@ -428,6 +453,18 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     dataManager.insulinActionDuration = NSTimeInterval(hours: duration)
                 } else {
                     dataManager.insulinActionDuration = nil
+                }
+            case .MaxBasal:
+                if let value = controller.value, rate = valueNumberFormatter.numberFromString(value)?.doubleValue {
+                    dataManager.maximumBasalRatePerHour = rate
+                } else {
+                    dataManager.maximumBasalRatePerHour = nil
+                }
+            case .MaxBolus:
+                if let value = controller.value, units = valueNumberFormatter.numberFromString(value)?.doubleValue {
+                    dataManager.maximumBolus = units
+                } else {
+                    dataManager.maximumBolus = nil
                 }
             default:
                 assertionFailure()
