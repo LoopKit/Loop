@@ -12,13 +12,33 @@ import LoopKit
 
 
 struct TempBasalHistoryRecord {
+    /// The basal rate, in Units/hour
     let rate: Double
+    /// The starting date of the dose
     let startDate: NSDate
+    /// The ending date of the dose
     let endDate: NSDate
 }
 
 
 class DoseMath {
+    /// The allowed precision
+    static let basalStrokes: Double = 40
+
+    /**
+     Calculates the necessary temporary basal rate to transform a glucose value to a target.
+     
+     This assumes a constant insulin sensitivity, independent of current glucose or insulin-on-board.
+
+     - parameter currentGlucose:     The current glucose
+     - parameter targetGlucose:      The desired glucose
+     - parameter insulinSensitivity: The insulin sensitivity, in Units of insulin per glucose-unit
+     - parameter currentBasalRate:   The normally-scheduled basal rate
+     - parameter maxBasalRate:       The maximum basal rate, used to constrain the output
+     - parameter duration:           The temporary duration to run the basal
+
+     - returns: The determined basal rate, in Units/hour
+     */
     private static func calculateTempBasalRateForGlucose(currentGlucose: HKQuantity, toTargetGlucose targetGlucose: HKQuantity, insulinSensitivity: HKQuantity, currentBasalRate: Double, maxBasalRate: Double, duration: NSTimeInterval) -> Double {
         let unit = HKUnit.milligramsPerDeciliterUnit()
         let doseUnits = (currentGlucose.doubleValueForUnit(unit) - targetGlucose.doubleValueForUnit(unit)) / insulinSensitivity.doubleValueForUnit(unit)
@@ -28,9 +48,22 @@ class DoseMath {
         return round(rate * basalStrokes) / basalStrokes
     }
 
-    static let basalStrokes: Double = 40
+    /**
+     Recommends a temporary basal rate to conform a glucose prediction timeline to a target range
 
-    // Assumes absolute TempBasal
+     Returns nil if the normal scheduled basal, or active temporary basal, is sufficient.
+
+     - parameter glucose:                       The ascending timeline of predicted glucose values
+     - parameter date:                          The date at which the temporary basal rate would start. Defaults to the current date.
+     - parameter lastTempBasal:                 The last-set temporary basal
+     - parameter maxBasalRate:                  The maximum basal rate, in Units/hour, used to constrain the output
+     - parameter glucoseTargetRange:            The schedule of target glucose ranges
+     - parameter insulinSensitivity:            The schedule of insulin sensitivities, in Units of insulin per glucose-unit
+     - parameter basalRateSchedule:             The schedule of basal rates
+     - parameter allowPredictiveTempBelowRange: Whether to allow a higher basal rate, up to the normal scheduled rate, than is necessary to correct the lowest predicted value, if the eventual predicted value is in or above the target range. Defaults to false.
+
+     - returns: The recommended basal rate and duration
+     */
     static func recommendTempBasalFromPredictedGlucose(glucose: [GlucoseValue],
         atDate date: NSDate = NSDate(),
         lastTempBasal: TempBasalHistoryRecord?,
@@ -102,5 +135,56 @@ class DoseMath {
         } else {
             return nil
         }
+    }
+
+    /**
+     Recommends a bolus to conform a glucose prediction timeline to a target range
+
+     - parameter glucose:            The ascending timeline of predicted glucose values
+     - parameter date:               The date at which the bolus would apply. Defaults to the current date.
+     - parameter lastTempBasal:      The last-set temporary basal
+     - parameter maxBolus:           The maximum bolus, used to constrain the output
+     - parameter glucoseTargetRange: The schedule of target glucose ranges
+     - parameter insulinSensitivity: The schedule of insulin sensitivities, in Units of insulin per glucose-unit
+     - parameter basalRateSchedule:  The schedule of basal rates
+
+     - returns: The recommended bolus
+     */
+    static func recommendBolusFromPredictedGlucose(glucose: [GlucoseValue],
+        atDate date: NSDate = NSDate(),
+        lastTempBasal: TempBasalHistoryRecord?,
+        maxBolus: Double,
+        glucoseTargetRange: GlucoseRangeSchedule,
+        insulinSensitivity: InsulinSensitivitySchedule,
+        basalRateSchedule: BasalRateSchedule
+    ) -> Double {
+        guard glucose.count > 1 else {
+            return 0
+        }
+
+        let eventualGlucose = glucose.last!
+        let minGlucose = glucose.minElement { $0.quantity < $1.quantity }!
+
+        let eventualGlucoseTargets = glucoseTargetRange.valueAt(eventualGlucose.startDate)
+        let minGlucoseTargets = glucoseTargetRange.valueAt(minGlucose.startDate)
+
+        guard minGlucose.quantity.doubleValueForUnit(glucoseTargetRange.unit) >= minGlucoseTargets.minValue else {
+            return 0
+        }
+
+        let targetGlucose = (eventualGlucoseTargets.minValue + eventualGlucoseTargets.maxValue) / 2
+        let currentSensitivity = insulinSensitivity.quantityAt(date).doubleValueForUnit(glucoseTargetRange.unit)
+
+        var doseUnits = (eventualGlucose.quantity.doubleValueForUnit(glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
+
+        if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > date {
+            let normalBasalRate = basalRateSchedule.valueAt(date)
+            let remainingTime = lastTempBasal.endDate.timeIntervalSinceDate(date)
+            let remainingUnits = (lastTempBasal.rate - normalBasalRate) * remainingTime / NSTimeInterval(hours: 1)
+
+            doseUnits -= max(0, remainingUnits)
+        }
+
+        return max(0, doseUnits)
     }
 }
