@@ -1,5 +1,5 @@
 //
-//  PumpDataManager.swift
+//  DeviceDataManager.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 8/30/15.
@@ -28,7 +28,7 @@ enum Error: ErrorType {
 }
 
 
-class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
+class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
@@ -518,7 +518,7 @@ class PumpDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessi
 
     // MARK: - Initialization
 
-    static let sharedManager = PumpDataManager()
+    static let sharedManager = DeviceDataManager()
 
     override init() {
         basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule

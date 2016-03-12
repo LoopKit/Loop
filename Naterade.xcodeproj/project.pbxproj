@@ -11,7 +11,6 @@
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
 		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
-		432884F21BB515D40028E4EB /* PumpDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432884F11BB515D40028E4EB /* PumpDataManager.swift */; };
 		4331E0781C85302200FBE832 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0771C85302200FBE832 /* CGPoint.swift */; };
 		4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */; };
 		433C8D041C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */; };
@@ -72,6 +71,7 @@
 		43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */; };
 		43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */; };
 		43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */; };
+		43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */; };
 		43DC87C61C8B68A9005BC30D /* PumpStatusMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */; };
 		43DC87C71C8B68A9005BC30D /* PumpStatusMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */; };
 		43DC87CA1C8B6903005BC30D /* DeviceLinkMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */; };
@@ -274,7 +274,6 @@
 		430D5CE11B9C1879002551A8 /* NSDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataTests.swift; sourceTree = "<group>"; };
 		4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateComponents.swift; sourceTree = "<group>"; };
 		4326F5061BA6292F009204C6 /* AlertType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
-		432884F11BB515D40028E4EB /* PumpDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpDataManager.swift; sourceTree = "<group>"; };
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadSettingsCarelinkMessageBody.swift; sourceTree = "<group>"; };
@@ -336,6 +335,7 @@
 		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
 		43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverInNavigationControllerSegue.swift; sourceTree = "<group>"; };
 		43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDataManager.swift; sourceTree = "<group>"; };
+		43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDataManager.swift; sourceTree = "<group>"; };
 		43DC87C41C8B68A9005BC30D /* PumpStatusMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PumpStatusMessage.h; sourceTree = "<group>"; };
 		43DC87C51C8B68A9005BC30D /* PumpStatusMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PumpStatusMessage.m; sourceTree = "<group>"; };
 		43DC87C81C8B6903005BC30D /* DeviceLinkMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceLinkMessage.h; sourceTree = "<group>"; };
@@ -648,11 +648,11 @@
 				439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */,
 				43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */,
 				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
+				43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */,
 				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
 				43A9438B1B926B7B0051FA24 /* GlanceController.swift */,
 				43A943851B926B7B0051FA24 /* InterfaceController.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
-				432884F11BB515D40028E4EB /* PumpDataManager.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				43DE92571C5479C3001FFDE1 /* Models */,
 				43A943831B926B7B0051FA24 /* Supporting Files */,
@@ -1312,6 +1312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */,
 				43FF3D661BADE39000DE240A /* UnknownMessageBody.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
@@ -1322,7 +1323,6 @@
 				439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */,
 				43FF3D611BADE38C00DE240A /* MessageBody.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
-				432884F21BB515D40028E4EB /* PumpDataManager.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */,
 				43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */,

@@ -89,7 +89,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // References to registered notification center observers
     private var notificationObservers: [AnyObject] = []
 
-    unowned let dataManager = PumpDataManager.sharedManager
+    unowned let dataManager = DeviceDataManager.sharedManager
 
     private var active = true {
         didSet {

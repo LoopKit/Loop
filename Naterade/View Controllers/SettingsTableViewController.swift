@@ -69,8 +69,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         dataManagerObserver = nil
     }
 
-    private var dataManager: PumpDataManager {
-        return PumpDataManager.sharedManager
+    private var dataManager: DeviceDataManager {
+        return DeviceDataManager.sharedManager
     }
 
     private var dataManagerObserver: AnyObject? {
