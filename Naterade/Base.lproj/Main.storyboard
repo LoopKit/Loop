@@ -157,7 +157,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rmT-xF-Cm1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2453" y="373"/>
+            <point key="canvasLocation" x="2453" y="333"/>
         </scene>
         <!--Text Field Table View Controller-->
         <scene sceneID="saf-mv-8Lg">
@@ -208,7 +208,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FiZ-Zn-A0F" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2453" y="1266"/>
+            <point key="canvasLocation" x="2453" y="1056"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="yl2-sM-qoP">
@@ -221,31 +221,12 @@
                     </tabBar>
                     <connections>
                         <segue destination="74s-IX-WF0" kind="relationship" relationship="viewControllers" id="Bum-EM-yy8"/>
-                        <segue destination="Yp9-9O-oyH" kind="relationship" relationship="viewControllers" id="KDa-OE-iv9"/>
-                        <segue destination="Qd1-Lw-FJu" kind="relationship" relationship="viewControllers" id="kpj-aF-HEl"/>
                         <segue destination="Ndo-W4-z7b" kind="relationship" relationship="viewControllers" id="n8G-Jk-DLG"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-241" y="111"/>
-        </scene>
-        <!--Food-->
-        <scene sceneID="3jv-HV-NY5">
-            <objects>
-                <navigationController id="Qd1-Lw-FJu" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Food" id="fkp-NL-wTM"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="j0T-C2-iuv">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <connections>
-                        <segue destination="Ykd-EQ-C1J" kind="relationship" relationship="rootViewController" id="Iyg-3K-2xP"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="mBv-vH-OGv" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="821" y="-681"/>
         </scene>
         <!--InsulinKit-->
         <scene sceneID="n8N-hY-V0o">
@@ -255,7 +236,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1320" y="2"/>
+            <point key="canvasLocation" x="2198" y="-1014"/>
         </scene>
         <!--CarbKit-->
         <scene sceneID="4Ej-lH-3ai">
@@ -265,7 +246,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="erV-pI-Wmo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1314" y="-681"/>
+            <point key="canvasLocation" x="2192" y="-1117"/>
         </scene>
         <!--Status-->
         <scene sceneID="dRe-fy-po5">
@@ -297,7 +278,7 @@
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                             <state key="normal" title="Bolus"/>
                                             <connections>
-                                                <segue destination="WhH-Np-jCn" kind="popoverPresentation" identifier="bolus" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorView="lM0-sw-pZ9" id="Ff6-iD-qGO">
+                                                <segue destination="WhH-Np-jCn" kind="popoverPresentation" identifier="BolusViewController" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorView="lM0-sw-pZ9" id="Ff6-iD-qGO">
                                                     <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                                 </segue>
                                             </connections>
@@ -353,10 +334,14 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Status" id="3kU-n2-fha"/>
+                    <connections>
+                        <segue destination="Ykd-EQ-C1J" kind="show" identifier="CarbEntryTableViewController" id="cwl-Xe-ims"/>
+                        <segue destination="a8v-ef-RZZ" kind="show" identifier="ReservoirTableViewController" id="TZE-My-lqn"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Tc-kF-7yT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1633" y="-1362"/>
+            <point key="canvasLocation" x="1633" y="-452"/>
         </scene>
         <!--Bolus-->
         <scene sceneID="MwC-nE-tVX">
@@ -496,7 +481,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KEH-mi-7Jf" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="xgn-H5-ghO" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2453" y="-1362"/>
+            <point key="canvasLocation" x="2453" y="-452"/>
         </scene>
         <!--Settings-->
         <scene sceneID="Y9V-uE-m8v">
@@ -517,25 +502,6 @@
             </objects>
             <point key="canvasLocation" x="821" y="680"/>
         </scene>
-        <!--Doses-->
-        <scene sceneID="YxR-xx-LLL">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Yp9-9O-oyH" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Doses" id="RIU-LL-iMr"/>
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="PYW-rr-X0l">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="a8v-ef-RZZ" kind="relationship" relationship="rootViewController" id="Tvn-61-T3r"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="uoc-px-cB5" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="821" y="2"/>
-        </scene>
         <!--Navigation Controller-->
         <scene sceneID="1UI-1d-xLb">
             <objects>
@@ -553,7 +519,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AMI-Xa-bA4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="821" y="-1362"/>
+            <point key="canvasLocation" x="821" y="-452"/>
         </scene>
         <!--CarbEntryEditViewController-->
         <scene sceneID="efd-D7-aOf">
@@ -563,7 +529,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hft-ry-meg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1633" y="-1955"/>
+            <point key="canvasLocation" x="2256.5" y="-919"/>
         </scene>
     </scenes>
     <resources>

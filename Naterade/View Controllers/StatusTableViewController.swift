@@ -44,7 +44,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             })
         }
 
-        let chartPanGestureRecognizer = TouchAndPanGestureRecognizer()
+        let chartPanGestureRecognizer = UIPanGestureRecognizer()
         chartPanGestureRecognizer.delegate = self
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
@@ -460,18 +460,26 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch Section(rawValue: indexPath.section)! {
+        case .Charts:
+            switch ChartRow(rawValue: indexPath.row)! {
+            case .Glucose:
+                break
+            case .IOB, .Dose:
+                performSegueWithIdentifier(ReservoirTableViewController.className, sender: indexPath)
+            case .COB:
+                performSegueWithIdentifier(CarbEntryTableViewController.className, sender: indexPath)
+            }
+        case .Pump, .Sensor:
+            break
+        }
+    }
+
     // MARK: - UIGestureRecognizerDelegate
 
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
-    }
-
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
-        if let headerView = tableView.tableHeaderView where touch.view?.isDescendantOfView(headerView) == true {
-            return false
-        } else {
-            return true
-        }
     }
 
     // MARK: - Actions
@@ -479,9 +487,18 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         super.prepareForSegue(segue, sender: sender)
 
-        if let carbVC = segue.destinationViewController as? CarbEntryEditViewController, carbStore = dataManager.carbStore {
-            carbVC.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
-            carbVC.preferredUnit = carbStore.preferredUnit
+        switch segue.destinationViewController {
+        case let vc as CarbEntryTableViewController:
+            vc.carbStore = dataManager.carbStore
+        case let vc as CarbEntryEditViewController:
+            if let carbStore = dataManager.carbStore {
+                vc.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
+                vc.preferredUnit = carbStore.preferredUnit
+            }
+        case let vc as ReservoirTableViewController:
+            vc.doseStore = dataManager.doseStore
+        default:
+            break
         }
     }
 
