@@ -18,7 +18,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineStartDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
-        if let date = PumpDataManager.sharedManager.lastContextData?.glucoseDate {
+        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -26,7 +26,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineEndDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
-        if let date = PumpDataManager.sharedManager.lastContextData?.glucoseDate {
+        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
             handler(date.dateByAddingTimeInterval(15 * 60))
         } else {
             handler(nil)
@@ -42,7 +42,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: ((CLKComplicationTimelineEntry?) -> Void)) {
         switch complication.family {
         case .ModularSmall:
-            if let context = PumpDataManager.sharedManager.lastContextData,
+            if let context = DeviceDataManager.sharedManager.lastContextData,
                 date = context.glucoseDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
                 let template = CLKComplicationTemplateModularSmallStackText(context: context)
             {
@@ -63,7 +63,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     func getTimelineEntriesForComplication(complication: CLKComplication, afterDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
 
-        if let context = PumpDataManager.sharedManager.lastContextData,
+        if let context = DeviceDataManager.sharedManager.lastContextData,
             glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
             let template = CLKComplicationTemplateModularSmallStackText(context: context)
         {

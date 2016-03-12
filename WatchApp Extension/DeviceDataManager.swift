@@ -1,5 +1,5 @@
 //
-//  PumpDataManager.swift
+//  DeviceDataManager.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 9/24/15.
@@ -11,7 +11,7 @@ import Foundation
 import WatchConnectivity
 
 
-class PumpDataManager: NSObject, WCSessionDelegate {
+class DeviceDataManager: NSObject, WCSessionDelegate {
 
     private var connectSession: WCSession?
 
@@ -92,7 +92,7 @@ class PumpDataManager: NSObject, WCSessionDelegate {
 
     // MARK: - Initialization
 
-    static let sharedManager = PumpDataManager()
+    static let sharedManager = DeviceDataManager()
 
     override init() {
         super.init()

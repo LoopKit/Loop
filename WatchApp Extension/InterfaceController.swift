@@ -28,7 +28,7 @@ class InterfaceController: WKInterfaceController {
     @IBOutlet var IOBLabel: WKInterfaceLabel!
     @IBOutlet var reservoirLabel: WKInterfaceLabel!
 
-    let dataManager = PumpDataManager.sharedManager
+    let dataManager = DeviceDataManager.sharedManager
 
     let dateFormatter: NSDateComponentsFormatter = {
         let dateFormatter = NSDateComponentsFormatter()

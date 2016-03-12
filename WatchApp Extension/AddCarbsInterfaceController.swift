@@ -100,7 +100,7 @@ class AddCarbsInterfaceController: WKInterfaceController {
         if carbValue > 0 {
             let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: NSDate())
 
-            PumpDataManager.sharedManager.sendCarbEntry(entry)
+            DeviceDataManager.sharedManager.sendCarbEntry(entry)
         }
 
         popController()
