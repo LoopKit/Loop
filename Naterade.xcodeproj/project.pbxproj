@@ -55,6 +55,7 @@
 		43971A501C8E6B580013154F /* ReadTempBasalCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A4F1C8E6B580013154F /* ReadTempBasalCommand.swift */; };
 		43971A521C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A511C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
+		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
 		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
 		43A9437F1B926B7B0051FA24 /* WatchApp Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -319,6 +320,7 @@
 		43971A4F1C8E6B580013154F /* ReadTempBasalCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTempBasalCommand.swift; sourceTree = "<group>"; };
 		43971A511C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetTempBasalCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
+		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		43A943771B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -811,6 +813,7 @@
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
+				43A567681C94880B00334FAC /* LoopDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
 			);
 			path = Managers;
@@ -1241,6 +1244,7 @@
 				43971A3C1C8BC9750013154F /* TwoStepCommand.swift in Sources */,
 				43971A361C8BC1150013154F /* BolusCommand.swift in Sources */,
 				43DC87EB1C8B82BE005BC30D /* CBPeripheralState.swift in Sources */,
+				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
 				43971A501C8E6B580013154F /* ReadTempBasalCommand.swift in Sources */,
 				43649A631C7A347F00523D7F /* CollectionType.swift in Sources */,

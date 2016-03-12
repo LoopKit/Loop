@@ -136,7 +136,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.getPredictedGlucose { (values, error) -> Void in
+            dataManager.loopManager.getPredictedGlucose { (values, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 } else {

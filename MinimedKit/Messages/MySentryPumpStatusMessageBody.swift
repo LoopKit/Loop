@@ -95,6 +95,7 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     private static let iobSigificantDigit = 0.025
     public static let length = 36
 
+    // TODO: Use date components, not date.
     public let pumpDate: NSDate
     public let batteryRemainingPercent: Int
     public let iob: Double
@@ -103,11 +104,13 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     public let reservoirRemainingMinutes: Int
 
     public let glucoseTrend: GlucoseTrend
+    // TODO: Use date components, not date
     public let glucoseDate: NSDate?
     public let glucose: SensorReading
     public let previousGlucose: SensorReading
     public let sensorAgeHours: Int
     public let sensorRemainingHours: Int
+    // TODO: Use date components, not date
     public let nextSensorCalibration: NSDate?
 
     private let rxData: NSData

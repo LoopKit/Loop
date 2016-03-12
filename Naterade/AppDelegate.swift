@@ -19,16 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         window?.tintColor = UIColor.tintColor()
 
-        if let tabBarController = window?.rootViewController as? UITabBarController {
-            for viewController in tabBarController.viewControllers ?? [] {
-                if let vc = viewController.childViewControllers.first as? CarbEntryTableViewController {
-                    vc.carbStore = DeviceDataManager.sharedManager.carbStore
-                } else if let vc = viewController.childViewControllers.first as? ReservoirTableViewController {
-                    vc.doseStore = DeviceDataManager.sharedManager.doseStore
-                }
-            }
-        }
-
         return true
     }
 

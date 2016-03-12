@@ -22,11 +22,6 @@ enum State<T> {
     case Ready(T)
 }
 
-enum Error: ErrorType {
-    case MissingDataError
-    case StaleDataError
-}
-
 
 class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
@@ -123,8 +118,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         if status != latestPumpStatus {
             latestPumpStatus = status
 
-//            logger?.addMessage(status.dictionaryRepresentation, toCollection: "sentryMessage")
-
             doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate) { (_, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
@@ -132,88 +125,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 }
             }
-        }
-    }
-
-    func getPredictedGlucose(resultsHandler: (values: [GlucoseValue], error: ErrorType?) -> Void) {
-        guard let
-            glucose = latestGlucose ?? glucoseStore?.latestGlucose,
-            pumpStatus = latestPumpStatus
-            else
-        {
-            resultsHandler(values: [], error: Error.MissingDataError)
-            return
-        }
-
-        let startDate = NSDate()
-        let recencyInterval = NSTimeInterval(minutes: 15)
-
-        guard   startDate.timeIntervalSinceDate(glucose.startDate) <= recencyInterval &&
-                startDate.timeIntervalSinceDate(pumpStatus.pumpDate) <= recencyInterval
-            else
-        {
-            resultsHandler(values: [], error: Error.StaleDataError)
-            return
-        }
-
-        let dataGroup = dispatch_group_create()
-        var momentum: [GlucoseEffect] = []
-        var carbEffect: [GlucoseEffect] = []
-        var insulinEffect: [GlucoseEffect] = []
-        var lastError: ErrorType?
-
-        dispatch_group_enter(dataGroup)
-        glucoseStore?.getRecentMomentumEffect { (effects, error) -> Void in
-            if let error = error {
-                self.logger?.addError(error, fromSource: "GlucoseStore")
-                lastError = error
-            }
-
-            momentum = effects
-            dispatch_group_leave(dataGroup)
-        }
-
-        if let carbStore = carbStore {
-            dispatch_group_enter(dataGroup)
-            carbStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "CarbStore")
-                    lastError = error
-                }
-
-                carbEffect = effects
-                dispatch_group_leave(dataGroup)
-            }
-        }
-
-        dispatch_group_enter(dataGroup)
-        doseStore.getGlucoseEffects(startDate: glucose.startDate) { (effects, error) -> Void in
-            if let error = error {
-                self.logger?.addError(error, fromSource: "DoseStore")
-                lastError = error
-            }
-
-            insulinEffect = effects
-            dispatch_group_leave(dataGroup)
-        }
-
-        dispatch_group_notify(dataGroup, dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0)) { () -> Void in
-            let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
-
-            self.logger?.addLoopStatus(
-                startDate: startDate,
-                endDate: NSDate(),
-                glucose: glucose,
-                effects: [
-                    "momentum": momentum,
-                    "carbs": carbEffect,
-                    "insulin": insulinEffect
-                ],
-                error: lastError,
-                prediction: prediction
-            )
-
-            resultsHandler(values: prediction, error: lastError)
         }
     }
 
@@ -245,8 +156,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 glucoseStore.addGlucose(quantity, date: startDate, displayOnly: glucose.glucoseIsDisplayOnly, device: device, resultHandler: { (_, value, error) -> Void in
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
-                    } else if let value = value {
-                        self.latestGlucose = value
                     }
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -270,8 +179,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     }
 
     var latestGlucoseMessage: GlucoseRxMessage?
-
-    var latestGlucose: GlucoseValue?
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
@@ -520,6 +427,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     static let sharedManager = DeviceDataManager()
 
+    private(set) var loopManager: LoopDataManager!
+
     override init() {
         basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule
         carbRatioSchedule = NSUserDefaults.standardUserDefaults().carbRatioSchedule
@@ -536,6 +445,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         carbStore = CarbStore(carbRatioSchedule: carbRatioSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)
 
         super.init()
+
+        loopManager = LoopDataManager(deviceDataManager: self)
 
         watchSession?.delegate = self
         watchSession?.activateSession()
