@@ -8,17 +8,8 @@
 
 import Foundation
 import HealthKit
+import InsulinKit
 import LoopKit
-
-
-struct TempBasalHistoryRecord {
-    /// The basal rate, in Units/hour
-    let rate: Double
-    /// The starting date of the dose
-    let startDate: NSDate
-    /// The ending date of the dose
-    let endDate: NSDate
-}
 
 
 class DoseMath {
@@ -66,7 +57,7 @@ class DoseMath {
      */
     static func recommendTempBasalFromPredictedGlucose(glucose: [GlucoseValue],
         atDate date: NSDate = NSDate(),
-        lastTempBasal: TempBasalHistoryRecord?,
+        lastTempBasal: DoseEntry?,
         maxBasalRate: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
@@ -117,10 +108,10 @@ class DoseMath {
             rate = nil
         }
 
-        if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > date {
+        if let lastTempBasal = lastTempBasal where lastTempBasal.unit == .UnitsPerHour && lastTempBasal.endDate > date {
             if let determinedRate = rate {
                 // Ignore the dose if the current dose is the same rate and has more than 10 minutes remaining
-                if determinedRate == lastTempBasal.rate && lastTempBasal.endDate.timeIntervalSinceDate(date) > NSTimeInterval(minutes: 11) {
+                if determinedRate == lastTempBasal.value && lastTempBasal.endDate.timeIntervalSinceDate(date) > NSTimeInterval(minutes: 11) {
                     rate = nil
                 }
             } else {
@@ -152,7 +143,7 @@ class DoseMath {
      */
     static func recommendBolusFromPredictedGlucose(glucose: [GlucoseValue],
         atDate date: NSDate = NSDate(),
-        lastTempBasal: TempBasalHistoryRecord?,
+        lastTempBasal: DoseEntry?,
         maxBolus: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
@@ -177,10 +168,10 @@ class DoseMath {
 
         var doseUnits = (eventualGlucose.quantity.doubleValueForUnit(glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
 
-        if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > date {
+        if let lastTempBasal = lastTempBasal where lastTempBasal.unit == .UnitsPerHour && lastTempBasal.endDate > date {
             let normalBasalRate = basalRateSchedule.valueAt(date)
             let remainingTime = lastTempBasal.endDate.timeIntervalSinceDate(date)
-            let remainingUnits = (lastTempBasal.rate - normalBasalRate) * remainingTime / NSTimeInterval(hours: 1)
+            let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / NSTimeInterval(hours: 1)
 
             doseUnits -= max(0, remainingUnits)
         }
