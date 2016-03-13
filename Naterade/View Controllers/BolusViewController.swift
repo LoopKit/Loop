@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import LoopKit
 
-class BolusViewController: UITableViewController, UITextFieldDelegate {
+
+class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,17 +18,13 @@ class BolusViewController: UITableViewController, UITextFieldDelegate {
         bolusAmountTextField.becomeFirstResponder()
     }
 
-    var recommendedBolus: Double?
+    var recommendedBolus: Double = 0
 
     private(set) var bolus: Double?
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel! {
         didSet {
-            if let recommendedBolus = recommendedBolus {
-                recommendedBolusAmountLabel.text = decimalFormatter.stringFromNumber(recommendedBolus)
-            } else {
-                recommendedBolusAmountLabel.text = "–"
-            }
+            recommendedBolusAmountLabel.text = decimalFormatter.stringFromNumber(recommendedBolus)
         }
     }
 

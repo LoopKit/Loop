@@ -16,6 +16,8 @@ class DiagnosticLogger {
     let APIHost: String
     let APIPath: String
 
+    private lazy var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
+
     init?() {
         if let
             settingsPath = NSBundle.mainBundle().pathForResource("RemoteSettings", ofType: "plist"),
@@ -43,7 +45,7 @@ class DiagnosticLogger {
         addMessage(info, toCollection: "errors")
     }
 
-    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue]) {
+    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
 
         let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
         let unit = HKUnit.milligramsPerDeciliterUnit()
@@ -80,11 +82,19 @@ class DiagnosticLogger {
             message["error"] = String(error)
         }
 
+        if let recommendedTempBasal = recommendedTempBasal {
+            message["recommendedTempBasal"] = [
+                "rate": recommendedTempBasal.rate,
+                "minutes": recommendedTempBasal.duration.minutes
+            ]
+        }
+
         addMessage(message, toCollection: "loop")
     }
 
     func addMessage(message: [String: AnyObject], toCollection collection: String) {
-        if let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
+        if !isSimulator,
+            let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
             let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),
             components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
         {

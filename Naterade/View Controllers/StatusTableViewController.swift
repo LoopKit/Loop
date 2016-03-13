@@ -25,7 +25,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         let application = UIApplication.sharedApplication()
 
         notificationObservers += [
-            notificationCenter.addObserverForName(nil, object: dataManager, queue: mainQueue) { (note) -> Void in
+            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: mainQueue) { (note) -> Void in
                 self.needsRefresh = true
                 self.reloadData()
             },
@@ -37,19 +37,15 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         ]
 
-        if let carbStore = dataManager.carbStore {
-            notificationObservers.append(notificationCenter.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: carbStore, queue: mainQueue) { (note) -> Void in
-                self.needsRefresh = true
-                self.reloadData()
-            })
-        }
-
         let chartPanGestureRecognizer = UIPanGestureRecognizer()
         chartPanGestureRecognizer.delegate = self
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
 
-        needsRefresh = true
+        dataManager.loopManager.update { (error) -> Void in
+            self.needsRefresh = true
+            self.reloadData()
+        }
     }
 
     deinit {
@@ -99,6 +95,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var needsRefresh = false
 
+    private var needsBolus = false
+
     private var visible = false {
         didSet {
             reloadData()
@@ -117,6 +115,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             ), withRowAnimation: visible ? .Automatic : .None)
             tableView.endUpdates()
 
+            var recommendedBolus: Double?
             charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
 
@@ -136,12 +135,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getPredictedGlucose { (values, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
-                } else {
-                    self.charts.predictedGlucoseValues = values  // FixtureData.predictedGlucoseData
                 }
+
+                self.charts.predictedGlucoseValues = predictedGlucose ?? []  // FixtureData.predictedGlucoseData
+                self.recommendedTempBasal = recommendedTempBasal
+                self.lastTempBasal = lastTempBasal
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -152,9 +153,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.dataManager.logger?.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
-                } else {
-                    self.charts.IOBValues = values  //FixtureData.recentIOBData
                 }
+
+                self.charts.IOBValues = values  //FixtureData.recentIOBData
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -165,9 +166,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.dataManager.logger?.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
-                } else {
-                    self.charts.doseEntries = doses  // FixtureData.recentDoseData
                 }
+
+                self.charts.doseEntries = doses  // FixtureData.recentDoseData
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -179,8 +180,23 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         self.dataManager.logger?.addError(error, fromSource: "CarbStore")
                         self.needsRefresh = true
                         // TODO: Display error in the cell
+                    }
+
+                    self.charts.COBValues = values
+
+                    dispatch_group_leave(reloadGroup)
+                }
+            }
+
+            if needsBolus {
+                needsBolus = false
+
+                dispatch_group_enter(reloadGroup)
+                self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger?.addError(error, fromSource: "LoopDataManager")
                     } else {
-                        self.charts.COBValues = values
+                        recommendedBolus = units
                     }
 
                     dispatch_group_leave(reloadGroup)
@@ -193,20 +209,27 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 self.charts.prerender()
 
                 self.tableView.beginUpdates()
-                self.tableView.reloadSections(NSIndexSet(index: Section.Charts.rawValue), withRowAnimation: .None)
+                self.tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Charts.rawValue, 2)),
+                    withRowAnimation: .None
+                )
                 self.tableView.endUpdates()
 
                 self.reloading = false
+
+                if self.active && self.visible, let bolus = recommendedBolus where bolus > 0 {
+                    self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
+                }
             }
         }
     }
 
     private enum Section: Int {
         case Charts = 0
+        case Status
         case Pump
         case Sensor
 
-        static let count = 3
+        static let count = 4
     }
 
     // MARK: - Chart Section Data
@@ -221,6 +244,19 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     }
 
     private let charts = StatusChartsManager()
+
+    // MARK: - Loop Status Section Data
+
+    private enum StatusRow: Int {
+        case RecommendedBasal = 0
+        case LastBasal
+
+        static let count = 2
+    }
+
+    private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
+
+    private var lastTempBasal: DoseEntry?
 
     // MARK: - Pump/Sensor Section Data
 
@@ -262,6 +298,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         return formatter
     }()
 
+    private lazy var timeFormatter: NSDateFormatter = {
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = .NoStyle
+        formatter.timeStyle = .ShortStyle
+
+        return formatter
+    }()
+
     private lazy var percentFormatter: NSNumberFormatter = {
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .PercentStyle
@@ -278,6 +322,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         switch Section(rawValue: section)! {
         case .Charts:
             return ChartRow.count
+        case .Status:
+            return StatusRow.count
         case .Pump:
             switch dataManager.latestPumpStatus {
             case .None:
@@ -328,6 +374,37 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     cell.chartView = nil
                     // TODO: Display empty state
                 }
+            }
+
+            return cell
+        case .Status:
+            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+
+            switch StatusRow(rawValue: indexPath.row)! {
+            case .RecommendedBasal:
+                cell.textLabel?.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell containing the recommended basal")
+
+                if let recommendedTempBasal = recommendedTempBasal {
+                    cell.detailTextLabel?.text = "\(NSNumber(double: recommendedTempBasal.rate).descriptionWithLocale(locale)) U/hour @ \(timeFormatter.stringFromDate(recommendedTempBasal.recommendedDate))"
+                } else {
+                    cell.detailTextLabel?.text = emptyValueString
+                }
+            case .LastBasal:
+                cell.textLabel?.text = NSLocalizedString("Current Basal", comment: "The title of the cell containing the last delivered basal")
+                let basalRate: Double
+                let date: NSDate
+
+                if let lastTempBasal = lastTempBasal {
+                    basalRate = lastTempBasal.value
+                    date = lastTempBasal.startDate
+                } else if let basalSchedule = dataManager.basalRateSchedule {
+                    date = NSDate()
+                    basalRate = basalSchedule.valueAt(date)
+                } else {
+                    return cell
+                }
+
+                cell.detailTextLabel?.text = "\(NSNumber(double: basalRate).descriptionWithLocale(locale)) U/hour @ \(timeFormatter.stringFromDate(date))"
             }
 
             return cell
@@ -455,7 +532,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .IOB, .Dose, .COB:
                 return 85
             }
-        case .Pump, .Sensor:
+        case .Status, .Pump, .Sensor:
             return 44
         }
     }
@@ -471,7 +548,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .COB:
                 performSegueWithIdentifier(CarbEntryTableViewController.className, sender: indexPath)
             }
-        case .Pump, .Sensor:
+        case .Status, .Pump, .Sensor:
             break
         }
     }
@@ -497,6 +574,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         case let vc as ReservoirTableViewController:
             vc.doseStore = dataManager.doseStore
+        case let vc as BolusViewController:
+            if let bolus = sender as? Double {
+                vc.recommendedBolus = bolus
+            }
         default:
             break
         }
@@ -504,6 +585,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
         if let carbVC = segue.sourceViewController as? CarbEntryEditViewController, carbStore = dataManager.carbStore, updatedEntry = carbVC.updatedCarbEntry {
+
+            needsBolus = true
             carbStore.addCarbEntry(updatedEntry) { (_, _, error) -> Void in
                 if let error = error {
                     dispatch_async(dispatch_get_main_queue()) {
