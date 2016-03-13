@@ -25,8 +25,16 @@ class LoopDataManager {
 
     unowned let deviceDataManager: DeviceDataManager
 
+    var dosingEnabled: Bool {
+        didSet {
+            NSUserDefaults.standardUserDefaults().dosingEnabled = dosingEnabled
+        }
+    }
+
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
+
+        dosingEnabled = NSUserDefaults.standardUserDefaults().dosingEnabled
 
         observe()
     }

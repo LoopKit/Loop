@@ -82,10 +82,17 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     }
 
     private enum Section: Int {
-        case Configuration = 0
+        case Loop = 0
+        case Configuration
         case Devices
 
-        static let count = 2
+        static let count = 3
+    }
+
+    private enum LoopRow: Int {
+        case Dosing = 0
+
+        static let count = 1
     }
 
     private enum ConfigurationRow: Int {
@@ -125,6 +132,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
+        case .Loop:
+            return LoopRow.count
         case .Configuration:
             return ConfigurationRow.count
         case .Devices:
@@ -141,6 +150,18 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         let cell: UITableViewCell
 
         switch Section(rawValue: indexPath.section)! {
+        case .Loop:
+            switch LoopRow(rawValue: indexPath.section)! {
+            case .Dosing:
+                let switchCell = tableView.dequeueReusableCellWithIdentifier(SwitchTableViewCell.className, forIndexPath: indexPath) as! SwitchTableViewCell
+
+                switchCell.`switch`?.on = dataManager.loopManager.dosingEnabled
+                switchCell.titleLabel.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
+
+                switchCell.`switch`?.addTarget(self, action: "dosingEnabledChanged:", forControlEvents: .ValueChanged)
+
+                return switchCell
+            }
         case .Configuration:
             let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
 
@@ -239,6 +260,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
+        case .Loop:
+            return nil
         case .Configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
@@ -346,7 +369,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     showViewController(scheduleVC, sender: sender)
                 }
             }
-        case .Devices:
+        case .Loop, .Devices:
             break
         }
     }
@@ -355,17 +378,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         switch Section(rawValue: section)! {
         case .Devices:
             return devicesSectionTitleView
-        case .Configuration:
+        case .Loop, .Configuration:
             return nil
-        }
-    }
-
-    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        switch Section(rawValue: section)! {
-        case .Configuration:
-            return 55  // Give the top section extra spacing
-        case .Devices:
-            return 37
         }
     }
 
@@ -422,6 +436,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     }
 
     // MARK: - Device mangement
+
+    func dosingEnabledChanged(sender: UISwitch) {
+        dataManager.loopManager.dosingEnabled = sender.on
+    }
 
     func deviceConnectionChanged(connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convertPoint(.zero, toView: tableView)

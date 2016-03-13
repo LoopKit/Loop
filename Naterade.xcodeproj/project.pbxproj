@@ -56,6 +56,7 @@
 		43971A521C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A511C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
 		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
+		43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
 		43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A943771B926B7B0051FA24 /* Assets.xcassets */; };
 		43A9437F1B926B7B0051FA24 /* WatchApp Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -321,6 +322,7 @@
 		43971A511C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetTempBasalCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
+		43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchTableViewCell.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		43A943771B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -803,6 +805,7 @@
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
 				43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */,
+				43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1241,6 +1244,7 @@
 				43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
+				43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */,
 				43971A3C1C8BC9750013154F /* TwoStepCommand.swift in Sources */,
 				43971A361C8BC1150013154F /* BolusCommand.swift in Sources */,
 				43DC87EB1C8B82BE005BC30D /* CBPeripheralState.swift in Sources */,

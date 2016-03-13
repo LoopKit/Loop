@@ -42,4 +42,10 @@ class RileyLinkDeviceTableViewCell: UITableViewCell {
 
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        connectSwitch.removeTarget(nil, action: nil, forControlEvents: .ValueChanged)
+    }
+
 }

@@ -16,6 +16,7 @@ extension NSUserDefaults {
         case BasalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
+        case DosingEnabled = "com.loudnate.Naterade.DosingEnabled"
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
@@ -58,6 +59,15 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue, forKey: Key.ConnectedPeripheralIDs.rawValue)
+        }
+    }
+
+    var dosingEnabled: Bool {
+        get {
+            return boolForKey(Key.DosingEnabled.rawValue)
+        }
+        set {
+            setBool(newValue, forKey: Key.DosingEnabled.rawValue)
         }
     }
 
