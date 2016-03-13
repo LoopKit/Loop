@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_END
 
 @property (nonatomic, nonnull, readonly, strong) NSArray<RileyLinkDevice *>* devices;
 
+@property (nonatomic, nullable, readonly) RileyLinkDevice *firstConnectedDevice;
+
 @property (nonatomic, readwrite) BOOL deviceScanningEnabled;
 
 - (void)connectDevice:(nonnull RileyLinkDevice *)device;

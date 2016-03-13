@@ -79,6 +79,17 @@ NSString * const RileyLinkDeviceKey = @"com.ps2.RileyLinkKit.RileyLinkDevice";
     return self.mutableDevices;
 }
 
+- (RileyLinkDevice *)firstConnectedDevice
+{
+    for (RileyLinkDevice *device in self.mutableDevices) {
+        if (device.peripheral.state == CBPeripheralStateConnected) {
+            return device;
+        }
+    }
+
+    return nil;
+}
+
 - (BOOL)deviceScanningEnabled
 {
     return self.BLEManager.isScanningEnabled;
