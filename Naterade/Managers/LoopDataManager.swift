@@ -47,29 +47,29 @@ class LoopDataManager {
 
         notificationObservers = [
             center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
-                self.updateGlucoseMomentumEffect(self.observationUpdateHandler)
+                self.updateGlucoseMomentumEffect(self.observationUpdateHandlerWithDose(true))
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
-                self.updateInsulinEffect(self.observationUpdateHandler)
+                self.updateInsulinEffect(self.observationUpdateHandlerWithDose(false))
             }
         ]
 
         if let carbStore = deviceDataManager.carbStore {
             notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: carbStore, queue: nil) { (note) -> Void in
 
-                self.updateCarbEffect(self.observationUpdateHandler)
+                self.updateCarbEffect(self.observationUpdateHandlerWithDose(false))
             })
         }
     }
 
-    private func observationUpdateHandler(error: ErrorType?) {
+    private func observationUpdateHandlerWithDose(dose: Bool)(error: ErrorType?) {
         if let error = error {
             self.lastLoopError = error
         } else {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
 
-                if dosingEnabled {
+                if dosingEnabled && dose {
                     enactRecommendedTempBasal { (success, error) -> Void in
                         self.lastLoopError = error
 
