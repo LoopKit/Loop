@@ -23,6 +23,7 @@ extension NSUserDefaults {
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PumpID = "com.loudnate.Naterade.PumpID"
+        case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
     }
@@ -148,6 +149,22 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue, forKey: Key.PumpID.rawValue)
+        }
+    }
+
+    var pumpTimeZone: NSTimeZone? {
+        get {
+            if let offset = objectForKey(Key.PumpTimeZone.rawValue) as? NSNumber {
+                return NSTimeZone(forSecondsFromGMT: offset.integerValue)
+            } else {
+                return nil
+            }
+        } set {
+            if let value = newValue {
+                setObject(NSNumber(integer: value.secondsFromGMT), forKey: Key.PumpTimeZone.rawValue)
+            } else {
+                removeObjectForKey(Key.PumpTimeZone.rawValue)
+            }
         }
     }
 

@@ -20,6 +20,6 @@ extension NSDateComponents {
         month = Int(mySentryBytes[4])
         day = Int(mySentryBytes[5])
 
-        calendar = NSCalendar.currentCalendar()
+        calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
     }
 }

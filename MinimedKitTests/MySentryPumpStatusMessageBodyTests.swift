@@ -67,11 +67,11 @@ class MySentryPumpStatusMessageBodyTests: XCTestCase {
         dateComponents.minute = 3
         dateComponents.second = 49
 
-        XCTAssertEqual(dateComponents.date, body.pumpDate)
+        XCTAssertEqual(dateComponents, body.pumpDateComponents)
 
         dateComponents.second = 0
 
-        XCTAssertEqual(dateComponents.date, body.glucoseDate)
+        XCTAssertEqual(dateComponents, body.glucoseDateComponents)
 
         XCTAssertEqual(GlucoseTrend.Flat, body.glucoseTrend)
     }
@@ -104,12 +104,12 @@ class MySentryPumpStatusMessageBodyTests: XCTestCase {
         dateComponents.minute = 39
         dateComponents.second = 7
 
-        XCTAssertEqual(dateComponents.date, body.pumpDate)
+        XCTAssertEqual(dateComponents, body.pumpDateComponents)
 
         dateComponents.minute = 38
         dateComponents.second = 0
 
-        XCTAssertEqual(dateComponents.date, body.glucoseDate)
+        XCTAssertEqual(dateComponents, body.glucoseDateComponents)
 
         XCTAssertEqual(GlucoseTrend.Flat, body.glucoseTrend)
     }
@@ -142,8 +142,8 @@ class MySentryPumpStatusMessageBodyTests: XCTestCase {
         dateComponents.minute = 5
         dateComponents.second = 0
 
-        XCTAssertEqual(dateComponents.date, body.pumpDate)
-        XCTAssertEqual(dateComponents.date, body.glucoseDate)
+        XCTAssertEqual(dateComponents, body.pumpDateComponents)
+        XCTAssertEqual(dateComponents, body.glucoseDateComponents)
 
         XCTAssertEqual(GlucoseTrend.Flat, body.glucoseTrend)
     }
@@ -176,8 +176,8 @@ class MySentryPumpStatusMessageBodyTests: XCTestCase {
         dateComponents.minute = 25
         dateComponents.second = 0
 
-        XCTAssertEqual(dateComponents.date, body.pumpDate)
-        XCTAssertNil(body.glucoseDate)
+        XCTAssertEqual(dateComponents, body.pumpDateComponents)
+        XCTAssertNil(body.glucoseDateComponents)
 
         XCTAssertEqual(GlucoseTrend.Flat, body.glucoseTrend)
     }
@@ -210,8 +210,8 @@ class MySentryPumpStatusMessageBodyTests: XCTestCase {
         dateComponents.minute = 35
         dateComponents.second = 0
 
-        XCTAssertEqual(dateComponents.date, body.pumpDate)
-        XCTAssertNil(body.glucoseDate)
+        XCTAssertEqual(dateComponents, body.pumpDateComponents)
+        XCTAssertNil(body.glucoseDateComponents)
 
         XCTAssertEqual(GlucoseTrend.Flat, body.glucoseTrend)
     }

@@ -227,7 +227,7 @@ class LoopDataManager {
     private func updatePredictedGlucoseAndRecommendedBasal() throws {
         guard let
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
-            pumpStatus = self.deviceDataManager.latestPumpStatus
+            pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date
             else
         {
             self.predictedGlucose = nil
@@ -238,7 +238,7 @@ class LoopDataManager {
         let recencyInterval = NSTimeInterval(minutes: 15)
 
         guard   startDate.timeIntervalSinceDate(glucose.startDate) <= recencyInterval &&
-            startDate.timeIntervalSinceDate(pumpStatus.pumpDate) <= recencyInterval
+            startDate.timeIntervalSinceDate(pumpStatusDate) <= recencyInterval
             else
         {
             self.predictedGlucose = nil

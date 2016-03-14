@@ -447,7 +447,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Updated", comment: "The title of the cell containing the last updated date")
 
-                if let date = dataManager.latestPumpStatus?.pumpDate {
+                if let date = dataManager.latestPumpStatus?.pumpDateComponents.date {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyDateString

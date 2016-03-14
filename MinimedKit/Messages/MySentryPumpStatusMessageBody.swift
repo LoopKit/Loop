@@ -95,8 +95,7 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     private static let iobSigificantDigit = 0.025
     public static let length = 36
 
-    // TODO: Use date components, not date.
-    public let pumpDate: NSDate
+    public let pumpDateComponents: NSDateComponents
     public let batteryRemainingPercent: Int
     public let iob: Double
     public let reservoirRemainingUnits: Double
@@ -104,80 +103,93 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
     public let reservoirRemainingMinutes: Int
 
     public let glucoseTrend: GlucoseTrend
-    // TODO: Use date components, not date
-    public let glucoseDate: NSDate?
+    public let glucoseDateComponents: NSDateComponents?
     public let glucose: SensorReading
     public let previousGlucose: SensorReading
     public let sensorAgeHours: Int
     public let sensorRemainingHours: Int
-    // TODO: Use date components, not date
-    public let nextSensorCalibration: NSDate?
+
+    public let nextSensorCalibrationDateComponents: NSDateComponents?
 
     private let rxData: NSData
 
     public init?(rxData: NSData) {
-        if rxData.length == self.dynamicType.length,
-            let
-            trend = GlucoseTrend(byte: rxData[1]),
-            pumpDate = NSDateComponents(mySentryBytes: rxData[2...7]).date
-        {
-            self.rxData = rxData
-
-            self.glucoseTrend = trend
-            self.pumpDate = pumpDate
-
-            reservoirRemainingUnits = Double(Int(bigEndianBytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
-
-            let reservoirRemainingPercent: UInt8 = rxData[15]
-            self.reservoirRemainingPercent = Int(round(Double(reservoirRemainingPercent) / 4.0 * 100))
-
-            reservoirRemainingMinutes = Int(bigEndianBytes: [rxData[16], rxData[17]])
-
-            iob = Double(Int(bigEndianBytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
-
-            let batteryRemainingPercent: UInt8 = rxData[14]
-            self.batteryRemainingPercent = Int(round(Double(batteryRemainingPercent) / 4.0 * 100))
-
-            let glucoseValue = Int(bigEndianBytes: [rxData[9], rxData[24] << 7]) >> 7
-            let previousGlucoseValue = Int(bigEndianBytes: [rxData[10], rxData[24] << 6]) >> 7
-
-            glucose = SensorReading(glucose: glucoseValue)
-            previousGlucose = SensorReading(glucose: previousGlucoseValue)
-
-            switch glucose {
-            case .Off:
-                glucoseDate = nil
-            default:
-                glucoseDate = NSDateComponents(mySentryBytes: rxData[28...33]).date
-            }
-
-            let sensorAgeHours: UInt8 = rxData[18]
-            self.sensorAgeHours = Int(sensorAgeHours)
-
-            let sensorRemainingHours: UInt8 = rxData[19]
-            self.sensorRemainingHours = Int(sensorRemainingHours)
-
-            let matchingHour: UInt8 = rxData[20]
-            nextSensorCalibration = NSCalendar.currentCalendar().nextDateAfterDate(pumpDate,
-                matchingHour: Int(matchingHour),
-                minute: Int(13),
-                second: 0,
-                options: [.MatchNextTime]
-            )
-        } else {
+        guard rxData.length == self.dynamicType.length, let trend = GlucoseTrend(byte: rxData[1]) else {
             return nil
         }
+
+        self.rxData = rxData
+
+        let pumpDateComponents = NSDateComponents(mySentryBytes: rxData[2...7])
+
+        guard let calendar = pumpDateComponents.calendar where pumpDateComponents.isValidDateInCalendar(calendar) else {
+            return nil
+        }
+
+        self.pumpDateComponents = pumpDateComponents
+
+        self.glucoseTrend = trend
+
+        reservoirRemainingUnits = Double(Int(bigEndianBytes: rxData[12...13])) * self.dynamicType.reservoirSignificantDigit
+
+        let reservoirRemainingPercent: UInt8 = rxData[15]
+        self.reservoirRemainingPercent = Int(round(Double(reservoirRemainingPercent) / 4.0 * 100))
+
+        reservoirRemainingMinutes = Int(bigEndianBytes: [rxData[16], rxData[17]])
+
+        iob = Double(Int(bigEndianBytes: rxData[22...23])) * self.dynamicType.iobSigificantDigit
+
+        let batteryRemainingPercent: UInt8 = rxData[14]
+        self.batteryRemainingPercent = Int(round(Double(batteryRemainingPercent) / 4.0 * 100))
+
+        let glucoseValue = Int(bigEndianBytes: [rxData[9], rxData[24] << 7]) >> 7
+        let previousGlucoseValue = Int(bigEndianBytes: [rxData[10], rxData[24] << 6]) >> 7
+
+        glucose = SensorReading(glucose: glucoseValue)
+        previousGlucose = SensorReading(glucose: previousGlucoseValue)
+
+        switch glucose {
+        case .Off:
+            glucoseDateComponents = nil
+        default:
+            let glucoseDateComponents = NSDateComponents(mySentryBytes: rxData[28...33])
+
+            if glucoseDateComponents.isValidDateInCalendar(calendar) {
+                self.glucoseDateComponents = glucoseDateComponents
+            } else {
+                self.glucoseDateComponents = nil
+            }
+        }
+
+        let sensorAgeHours: UInt8 = rxData[18]
+        self.sensorAgeHours = Int(sensorAgeHours)
+
+        let sensorRemainingHours: UInt8 = rxData[19]
+        self.sensorRemainingHours = Int(sensorRemainingHours)
+
+        let matchingHour: UInt8 = rxData[20]
+        nextSensorCalibrationDateComponents = NSDateComponents()
+        nextSensorCalibrationDateComponents?.hour = Int(matchingHour)
+        nextSensorCalibrationDateComponents?.minute = Int(rxData[21] as UInt8)
+        nextSensorCalibrationDateComponents?.calendar = calendar
     }
 
     public var dictionaryRepresentation: [String: AnyObject] {
-        let dateFormatter = NSDateFormatter()
-
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        let dateComponentsString = { (components: NSDateComponents) -> String in
+            String(
+                format: "%04d-%02d-%02dT%02d:%02d:%02d",
+                components.year,
+                components.month,
+                components.day,
+                components.hour,
+                components.minute,
+                components.second
+            )
+        }
 
         var dict: [String: AnyObject] = [
             "glucoseTrend": String(glucoseTrend),
-            "pumpDate": dateFormatter.stringFromDate(pumpDate),
+            "pumpDate": dateComponentsString(pumpDateComponents),
             "reservoirRemaining": reservoirRemainingUnits,
             "reservoirRemainingPercent": reservoirRemainingPercent,
             "reservoirRemainingMinutes": reservoirRemainingMinutes,
@@ -191,8 +203,8 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
             break
         }
 
-        if let glucoseDate = glucoseDate {
-            dict["glucoseDate"] = dateFormatter.stringFromDate(glucoseDate)
+        if let glucoseDateComponents = glucoseDateComponents {
+            dict["glucoseDate"] = dateComponentsString(glucoseDateComponents)
         }
         dict["sensorStatus"] = String(glucose)
 
@@ -206,8 +218,8 @@ public struct MySentryPumpStatusMessageBody: MessageBody, DictionaryRepresentabl
 
         dict["sensorAgeHours"] = sensorAgeHours
         dict["sensorRemainingHours"] = sensorRemainingHours
-        if let nextSensorCalibration = nextSensorCalibration {
-            dict["nextSensorCalibration"] = dateFormatter.stringFromDate(nextSensorCalibration)
+        if let components = nextSensorCalibrationDateComponents {
+            dict["nextSensorCalibration"] = String(format: "%02d:%02d", components.hour, components.minute)
         }
 
         dict["batteryRemainingPercent"] = batteryRemainingPercent
@@ -240,6 +252,6 @@ extension MySentryPumpStatusMessageBody: Equatable {
 }
 
 public func ==(lhs: MySentryPumpStatusMessageBody, rhs: MySentryPumpStatusMessageBody) -> Bool {
-    return lhs.pumpDate == rhs.pumpDate && lhs.glucoseDate == rhs.glucoseDate
+    return lhs.pumpDateComponents == rhs.pumpDateComponents && lhs.glucoseDateComponents == rhs.glucoseDateComponents
 }
 

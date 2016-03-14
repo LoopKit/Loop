@@ -115,10 +115,12 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     }
 
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
-        if status != latestPumpStatus {
+        status.pumpDateComponents.timeZone = pumpTimeZone
+
+        if status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date {
             latestPumpStatus = status
 
-            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: status.pumpDate) { (_, error) -> Void in
+            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (_, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
                 } else {
@@ -182,6 +184,12 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
+    var pumpTimeZone: NSTimeZone? = NSUserDefaults.standardUserDefaults().pumpTimeZone {
+        didSet {
+            NSUserDefaults.standardUserDefaults().pumpTimeZone = pumpTimeZone
+        }
+    }
+
     var transmitterState: State<Transmitter> = .NeedsConfiguration {
         didSet {
             switch transmitterState {
@@ -212,13 +220,13 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var connectedPeripheralIDs: Set<String> {
+    var connectedPeripheralIDs: Set<String> = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs) {
         didSet {
             NSUserDefaults.standardUserDefaults().connectedPeripheralIDs = Array(connectedPeripheralIDs)
         }
     }
 
-    var pumpID: String? {
+    var pumpID: String? = NSUserDefaults.standardUserDefaults().pumpID {
         didSet {
             if pumpID?.characters.count != 6 {
                 pumpID = nil
@@ -265,7 +273,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var basalRateSchedule: BasalRateSchedule? {
+    var basalRateSchedule: BasalRateSchedule? = NSUserDefaults.standardUserDefaults().basalRateSchedule {
         didSet {
             doseStore.basalProfile = basalRateSchedule
 
@@ -273,7 +281,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var carbRatioSchedule: CarbRatioSchedule? {
+    var carbRatioSchedule: CarbRatioSchedule? = NSUserDefaults.standardUserDefaults().carbRatioSchedule {
         didSet {
             carbStore?.carbRatioSchedule = carbRatioSchedule
 
@@ -281,7 +289,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var insulinActionDuration: NSTimeInterval? {
+    var insulinActionDuration: NSTimeInterval? = NSUserDefaults.standardUserDefaults().insulinActionDuration {
         didSet {
             doseStore.insulinActionDuration = insulinActionDuration
 
@@ -289,7 +297,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
+    var insulinSensitivitySchedule: InsulinSensitivitySchedule? = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule {
         didSet {
             carbStore?.insulinSensitivitySchedule = insulinSensitivitySchedule
             doseStore.insulinSensitivitySchedule = insulinSensitivitySchedule
@@ -298,19 +306,19 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? {
+    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
         }
     }
 
-    var maximumBasalRatePerHour: Double? {
+    var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour = maximumBasalRatePerHour
         }
     }
 
-    var maximumBolus: Double? {
+    var maximumBolus: Double? = NSUserDefaults.standardUserDefaults().maximumBolus {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBolus = maximumBolus
         }
@@ -430,19 +438,16 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     private(set) var loopManager: LoopDataManager!
 
     override init() {
-        basalRateSchedule = NSUserDefaults.standardUserDefaults().basalRateSchedule
-        carbRatioSchedule = NSUserDefaults.standardUserDefaults().carbRatioSchedule
-        connectedPeripheralIDs = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs)
-        insulinActionDuration = NSUserDefaults.standardUserDefaults().insulinActionDuration
-        insulinSensitivitySchedule = NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule
-        glucoseTargetRangeSchedule = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule
-        maximumBasalRatePerHour = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour
-        maximumBolus = NSUserDefaults.standardUserDefaults().maximumBolus
-        pumpID = NSUserDefaults.standardUserDefaults().pumpID
-
-        doseStore = DoseStore(pumpID: pumpID, insulinActionDuration: insulinActionDuration, basalProfile: basalRateSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)
-
-        carbStore = CarbStore(carbRatioSchedule: carbRatioSchedule, insulinSensitivitySchedule: insulinSensitivitySchedule)
+        doseStore = DoseStore(
+            pumpID: pumpID,
+            insulinActionDuration: insulinActionDuration,
+            basalProfile: basalRateSchedule,
+            insulinSensitivitySchedule: insulinSensitivitySchedule
+        )
+        carbStore = CarbStore(
+            carbRatioSchedule: carbRatioSchedule,
+            insulinSensitivitySchedule: insulinSensitivitySchedule
+        )
 
         super.init()
 
@@ -479,10 +484,10 @@ extension WatchContext {
             glucoseDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
         }
 
-        if let status = pumpStatus {
+        if let status = pumpStatus, date = status.pumpDateComponents.date {
             IOB = status.iob
             reservoir = status.reservoirRemainingUnits
-            pumpDate = status.pumpDate
+            pumpDate = date
         }
     }
 }
