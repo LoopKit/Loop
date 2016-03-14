@@ -52,12 +52,13 @@ extension RileyLinkDevice {
      - parameter unitsPerHour:      The rate to deliver, in Units per hour
      - parameter duration:          The length of time to run the dose
      - parameter completionHandler: A closure called after the dose command was run. The closure takes two arguments:
-        - success: Whether the command was successfully executed
-        - error:   An error describing why the command failed to execute
+        - success:     Whether the command was successfully executed
+        - doseMessage: The pump response message, describing the new temp basal
+        - error:       An error describing why the command failed to execute
      */
-    func sendTempBasalDose(unitsPerHour: Double, duration: NSTimeInterval, completionHandler: (success: Bool, error: CommandError?) -> Void) {
+    func sendTempBasalDose(unitsPerHour: Double, duration: NSTimeInterval, completionHandler: (success: Bool, doseMessage: PumpMessage?, error: CommandError?) -> Void) {
         guard let pumpID = pumpState?.pumpId else {
-            completionHandler(success: false, error: .ConfigurationError)
+            completionHandler(success: false, doseMessage: nil, error: .ConfigurationError)
             return
         }
 
@@ -66,9 +67,9 @@ extension RileyLinkDevice {
 
         sendTempBasalMessage(writeCommand.firstMessage.txData, secondMessage: writeCommand.secondMessage.txData, thirdMessage: readCommand.message.txData) { (response, error) -> Void in
             if let response = response, message = PumpMessage(rxData: response), body = message.messageBody as? ReadTempBasalCarelinkMessageBody {
-                completionHandler(success: body.timeRemaining == duration, error: nil)
+                completionHandler(success: body.timeRemaining == duration, doseMessage: message, error: nil)
             } else {
-                completionHandler(success: false, error: .CommunicationError(error ?? ""))
+                completionHandler(success: false, doseMessage: nil, error: .CommunicationError(error ?? ""))
             }
         }
     }

@@ -258,6 +258,20 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var lastTempBasal: DoseEntry?
 
+    private var settingTempBasal: Bool = false {
+        didSet {
+            if let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: StatusRow.RecommendedBasal.rawValue, inSection: Section.Status.rawValue)) {
+                if settingTempBasal {
+                    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+                    indicatorView.startAnimating()
+                    cell.accessoryView = indicatorView
+                } else {
+                    cell.accessoryView = nil
+                }
+            }
+        }
+    }
+
     // MARK: - Pump/Sensor Section Data
 
     private enum PumpRow: Int {
@@ -378,7 +392,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             return cell
         case .Status:
-            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
+            cell.selectionStyle = .None
 
             switch StatusRow(rawValue: indexPath.row)! {
             case .RecommendedBasal:
@@ -386,20 +401,36 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
                 if let recommendedTempBasal = recommendedTempBasal {
                     cell.detailTextLabel?.text = "\(NSNumber(double: recommendedTempBasal.rate).descriptionWithLocale(locale)) U/hour @ \(timeFormatter.stringFromDate(recommendedTempBasal.recommendedDate))"
+                    cell.selectionStyle = .Default
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
+                }
+
+                if settingTempBasal {
+                    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+                    indicatorView.startAnimating()
+                    cell.accessoryView = indicatorView
+                } else {
+                    cell.accessoryView = nil
                 }
             case .LastBasal:
                 cell.textLabel?.text = NSLocalizedString("Current Basal", comment: "The title of the cell containing the last delivered basal")
                 let basalRate: Double
                 let date: NSDate
 
-                if let lastTempBasal = lastTempBasal {
+                if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > NSDate() {
                     basalRate = lastTempBasal.value
                     date = lastTempBasal.startDate
                 } else if let basalSchedule = dataManager.basalRateSchedule {
-                    date = NSDate()
-                    basalRate = basalSchedule.valueAt(date)
+                    let scheduledBasal = basalSchedule.between(NSDate(), NSDate()).first!
+
+                    basalRate = scheduledBasal.value
+
+                    if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > scheduledBasal.startDate {
+                        date = lastTempBasal.endDate
+                    } else {
+                        date = scheduledBasal.startDate
+                    }
                 } else {
                     return cell
                 }
@@ -409,7 +440,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             return cell
         case .Pump:
-            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
+            cell.selectionStyle = .None
 
             switch PumpRow(rawValue: indexPath.row)! {
             case .Date:
@@ -461,7 +493,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             return cell
         case .Sensor:
-            let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
+            cell.selectionStyle = .None
 
             switch SensorRow(rawValue: indexPath.row)! {
             case .Date:
@@ -548,7 +581,31 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .COB:
                 performSegueWithIdentifier(CarbEntryTableViewController.className, sender: indexPath)
             }
-        case .Status, .Pump, .Sensor:
+        case .Status:
+            switch StatusRow(rawValue: indexPath.row)! {
+            case .RecommendedBasal:
+                tableView.deselectRowAtIndexPath(indexPath, animated: true)
+
+                if recommendedTempBasal != nil && !settingTempBasal {
+                    settingTempBasal = true
+                    self.dataManager.loopManager.enactRecommendedTempBasal { (success, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            self.settingTempBasal = false
+
+                            if let error = error {
+                                self.dataManager.logger?.addError(error, fromSource: "TempBasal")
+                                self.presentAlertControllerWithError(error)
+                            } else if success {
+                                self.needsRefresh = true
+                                self.reloadData()
+                            }
+                        }
+                    }
+                }
+            case .LastBasal:
+                break
+            }
+        case .Pump, .Sensor:
             break
         }
     }

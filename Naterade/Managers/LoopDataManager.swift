@@ -10,6 +10,7 @@ import Foundation
 import CarbKit
 import InsulinKit
 import LoopKit
+import MinimedKit
 
 
 class LoopDataManager {
@@ -67,6 +68,16 @@ class LoopDataManager {
         } else {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
+
+                if dosingEnabled {
+                    enactRecommendedTempBasal { (success, error) -> Void in
+                        self.lastLoopError = error
+
+                        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                    }
+
+                    return
+                }
             } catch let error {
                 self.lastLoopError = error
             }
@@ -314,6 +325,49 @@ class LoopDataManager {
             )
 
             resultsHandler(units: units, error: nil)
+        }
+    }
+
+    func enactRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
+        dispatch_async(dataAccessQueue) {
+            guard let recommendedTempBasal = self.recommendedTempBasal else {
+                resultsHandler(success: false, error: Error.MissingDataError)
+                return
+            }
+
+            guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
+                resultsHandler(success: false, error: Error.StaleDataError)
+                return
+            }
+
+            guard let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
+                resultsHandler(success: false, error: Error.CommunicationError)
+                return
+            }
+
+            device.sendTempBasalDose(recommendedTempBasal.rate, duration: recommendedTempBasal.duration) { (success, message, error) -> Void in
+                if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody where body.rateType == .Absolute {
+                    dispatch_async(self.dataAccessQueue) {
+                        let now = NSDate()
+                        let endDate = now.dateByAddingTimeInterval(body.timeRemaining)
+                        let startDate = endDate.dateByAddingTimeInterval(-recommendedTempBasal.duration)
+
+                        self.lastTempBasal = DoseEntry(startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
+
+                        var error: ErrorType? = error
+
+                        do {
+                            try self.updatePredictedGlucoseAndRecommendedBasal()
+                        } catch let updateError {
+                            error = updateError
+                        }
+
+                        resultsHandler(success: success, error: error)
+                    }
+                } else {
+                    resultsHandler(success: success, error: error)
+                }
+            }
         }
     }
 }

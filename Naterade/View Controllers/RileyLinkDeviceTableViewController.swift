@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MinimedKit
 import RileyLinkKit
 
 
@@ -237,10 +238,10 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 self.showViewController(vc, sender: indexPath)
             case .TempBasal:
                 let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
-                    self.device.sendTempBasalDose(0.5, duration: NSTimeInterval(minutes: 30)) { (success, error) -> Void in
+                    self.device.sendTempBasalDose(0.5, duration: NSTimeInterval(minutes: 30)) { (success, message, error) -> Void in
                         dispatch_async(dispatch_get_main_queue()) {
-                            if success {
-                                completionHandler(responseText: "Succeeded")
+                            if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody {
+                                completionHandler(responseText: "Succeeded: \(body.rate) U, \(body.timeRemaining.minutes) minutes remaining")
                             } else if let error = error {
                                 completionHandler(responseText: "Failed: \(error)")
                             } else {
