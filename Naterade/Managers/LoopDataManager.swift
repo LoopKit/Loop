@@ -73,6 +73,10 @@ class LoopDataManager {
                     enactRecommendedTempBasal { (success, error) -> Void in
                         self.lastLoopError = error
 
+                        if let error = error {
+                            self.deviceDataManager.logger?.addError(error, fromSource: "TempBasal")
+                        }
+
                         NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
                     }
 
