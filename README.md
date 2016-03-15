@@ -28,4 +28,4 @@ Your physiology, habits, and risk-tolerance are not the same as mine.
 
 ## Finally
 
-Please read the [LICENSE]() and [CODE_OF_CONDUCT]()
+Please read the [LICENSE](https://github.com/loudnate/naterade-ios/blob/master/LICENSE) and [CODE_OF_CONDUCT](https://github.com/loudnate/naterade-ios/blob/master/CODE_OF_CONDUCT.md)
