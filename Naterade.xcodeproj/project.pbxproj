@@ -21,6 +21,9 @@
 		4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
 		4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */; };
+		434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
 		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
@@ -215,16 +218,20 @@
 			remoteGlobalIDString = 43A943A11B928D400051FA24;
 			remoteInfo = RileyLinkKit;
 		};
-		43F78D301C8FC58F002152D1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 43776F8B1B8022E90074EA36;
-			remoteInfo = Naterade;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		434B2A0B1C97B1F600BC3003 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */,
+				434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43A943981B926B7B0051FA24 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -501,6 +508,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */,
 				43F78D501C9141D3002152D1 /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1032,11 +1040,11 @@
 				43F78D271C8FC58F002152D1 /* Sources */,
 				43F78D281C8FC58F002152D1 /* Frameworks */,
 				43F78D291C8FC58F002152D1 /* Resources */,
+				434B2A0B1C97B1F600BC3003 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				43F78D311C8FC58F002152D1 /* PBXTargetDependency */,
 			);
 			name = NateradeTests;
 			productName = NateradeTests;
@@ -1108,7 +1116,6 @@
 					};
 					43F78D2A1C8FC58F002152D1 = {
 						CreatedOnToolsVersion = 7.2.1;
-						TestTargetID = 43776F8B1B8022E90074EA36;
 					};
 				};
 			};
@@ -1411,11 +1418,6 @@
 			isa = PBXTargetDependency;
 			target = 43A943A11B928D400051FA24 /* RileyLinkKit */;
 			targetProxy = 43A943A71B928D400051FA24 /* PBXContainerItemProxy */;
-		};
-		43F78D311C8FC58F002152D1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 43776F8B1B8022E90074EA36 /* Naterade */;
-			targetProxy = 43F78D301C8FC58F002152D1 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1767,7 +1769,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.NateradeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naterade.app/Naterade";
 			};
 			name = Debug;
 		};
@@ -1784,7 +1785,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.NateradeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Naterade.app/Naterade";
 			};
 			name = Release;
 		};
