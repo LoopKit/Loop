@@ -5,3 +5,8 @@ xcode_project: Naterade.xcodeproj
 xcode_scheme: 
     - NateradeTests
     - MinimedKit
+before_script:
+    - carthage bootstrap
+script:
+    - xctool -project Naterade.xcodeproj -scheme NateradeTests -sdk iphonesimulator9.2 test
+    - xctool -project Naterade.xcodeproj -scheme MinimedKit -sdk iphonesimulator9.2 test
