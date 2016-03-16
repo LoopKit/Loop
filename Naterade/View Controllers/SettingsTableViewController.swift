@@ -444,7 +444,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     func deviceConnectionChanged(connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convertPoint(.zero, toView: tableView)
 
-        if let indexPath = tableView.indexPathForRowAtPoint(switchOrigin) where indexPath.section == 1,
+        if let indexPath = tableView.indexPathForRowAtPoint(switchOrigin) where indexPath.section == 2,
             let deviceManager = dataManager.rileyLinkManager
         {
             let device = deviceManager.devices[indexPath.row]
