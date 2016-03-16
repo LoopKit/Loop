@@ -12,7 +12,7 @@ It exists as an example, so you can build one too.
 
 ### LoopKit
 
-Naterade is built using a set of frameworks known as [LoopKit](https://github.com/loudnate/LoopKit). LoopKit is a set of tools to speed up development of your own app. It provides data storage, retrieval, and calcluation, as well as boilerplate view controllers. Most of all, it is agnostic to treatment decisions and input sources.
+Naterade is built on top of [LoopKit](https://github.com/loudnate/LoopKit). LoopKit is a set of tools to speed up development of your own app. It provides data storage, retrieval, and calcluation, as well as boilerplate view controllers. Most of all, it is agnostic to treatment decisions and input sources.
 
 ## Can I run Naterade?
 
