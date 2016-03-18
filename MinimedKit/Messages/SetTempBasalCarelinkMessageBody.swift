@@ -1,5 +1,5 @@
 //
-//  SetTempBasalCarelinkMessageBody.swift
+//  ChangeTempBasalCarelinkMessageBody.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 3/6/16.
@@ -9,7 +9,7 @@
 import Foundation
 
 
-public class SetTempBasalCarelinkMessageBody: CarelinkLongMessageBody {
+public class ChangeTempBasalCarelinkMessageBody: CarelinkLongMessageBody {
 
     public convenience init(unitsPerHour: Double, duration: NSTimeInterval) {
 

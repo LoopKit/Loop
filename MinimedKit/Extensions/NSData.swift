@@ -9,7 +9,7 @@
 import Foundation
 
 
-public extension NSData {
+extension NSData {
     @nonobjc subscript(index: Int) -> Int8 {
         let bytes: [Int8] = self[index...index]
 

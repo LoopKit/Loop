@@ -24,6 +24,10 @@
 		434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
+		435F354E1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F354D1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift */; };
+		435F35501C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F354F1C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift */; };
+		435F35521C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F35511C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift */; };
+		435F35541C9BC8B100C204D2 /* ReadTimeCarelinkMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F35531C9BC8B100C204D2 /* ReadTimeCarelinkMessageBodyTests.swift */; };
 		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
@@ -295,6 +299,10 @@
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
+		435F354D1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeTimeCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		435F354F1C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTimeCarelinkMessageBody.swift; sourceTree = "<group>"; };
+		435F35511C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeTimeCarelinMessageBodyTests.swift; sourceTree = "<group>"; };
+		435F35531C9BC8B100C204D2 /* ReadTimeCarelinkMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTimeCarelinkMessageBodyTests.swift; sourceTree = "<group>"; };
 		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
 		43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLKComplicationTemplate.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Naterade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Naterade.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -605,11 +613,13 @@
 			children = (
 				437A28A01C2F66DE00009647 /* Info.plist */,
 				43971A321C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift */,
+				435F35511C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift */,
 				437A289E1C2F66DE00009647 /* MinimedKitTests.swift */,
 				43E3449C1B9D1B4100C85C07 /* MySentryPumpStatusMessageBodyTests.swift */,
 				430D5CE11B9C1879002551A8 /* NSDataTests.swift */,
 				433C8D071C2F5FC200F754CE /* ReadSettingsCarelinkMessageBodyTests.swift */,
 				43F78D211C8E960A002152D1 /* ReadTempBasalCarelinkMessageBodyTests.swift */,
+				435F35531C9BC8B100C204D2 /* ReadTimeCarelinkMessageBodyTests.swift */,
 				43971A451C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift */,
 			);
 			path = MinimedKitTests;
@@ -770,8 +780,10 @@
 				430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */,
 				43E0DE061B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift */,
 				437A28B41C2FC41700009647 /* PowerOnCarelinkMessageBody.swift */,
+				435F354F1C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift */,
 				433C8D031C2F42DD00F754CE /* ReadSettingsCarelinkMessageBody.swift */,
 				43F78D1F1C8E919E002152D1 /* ReadTempBasalCarelinkMessageBody.swift */,
+				435F354D1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift */,
 				43971A511C8E6C8D0013154F /* SetTempBasalCarelinkMessageBody.swift */,
 				43F2756B1BAA7BA9006A5B6A /* UnknownMessageBody.swift */,
 			);
@@ -1294,7 +1306,9 @@
 				43971A461C8D10B90013154F /* TempBasalCarelinkMessageBodyTests.swift in Sources */,
 				43F78D221C8E960A002152D1 /* ReadTempBasalCarelinkMessageBodyTests.swift in Sources */,
 				437A28A71C2F676C00009647 /* MySentryPumpStatusMessageBodyTests.swift in Sources */,
+				435F35521C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift in Sources */,
 				437A28A91C2F677100009647 /* ReadSettingsCarelinkMessageBodyTests.swift in Sources */,
+				435F35541C9BC8B100C204D2 /* ReadTimeCarelinkMessageBodyTests.swift in Sources */,
 				43971A331C8BB73A0013154F /* BolusCarelinkMessageBodyTests.swift in Sources */,
 				437A28A81C2F676F00009647 /* NSDataTests.swift in Sources */,
 				437A289F1C2F66DE00009647 /* MinimedKitTests.swift in Sources */,
@@ -1309,6 +1323,8 @@
 				43E0DE071B9B51EE007B4443 /* MySentryPumpStatusMessageBody.swift in Sources */,
 				437A28B51C2FC41700009647 /* PowerOnCarelinkMessageBody.swift in Sources */,
 				438C93581B97FE5300BE20E9 /* PacketType.swift in Sources */,
+				435F35501C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift in Sources */,
+				435F354E1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift in Sources */,
 				43F2756C1BAA7BA9006A5B6A /* UnknownMessageBody.swift in Sources */,
 				438C935C1B9801DC00BE20E9 /* PumpMessage.swift in Sources */,
 				438C935E1B980BC000BE20E9 /* NSData.swift in Sources */,

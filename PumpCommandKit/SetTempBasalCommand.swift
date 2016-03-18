@@ -10,7 +10,7 @@ import Foundation
 import MinimedKit
 
 
-class SetTempBasalCommand: TwoStepCommand {
+class ChangeTempBasalCommand: TwoStepCommand {
 
     let firstMessage: PumpMessage
     let firstResponse: MessageType
@@ -19,9 +19,9 @@ class SetTempBasalCommand: TwoStepCommand {
 
     init(unitsPerHour: Double, duration: NSTimeInterval, address: String) {
 
-        firstMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .SetTempBasal, messageBody: CarelinkShortMessageBody())
+        firstMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .ChangeTempBasal, messageBody: CarelinkShortMessageBody())
         firstResponse = .PumpStatusAck
-        secondMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .SetTempBasal, messageBody: SetTempBasalCarelinkMessageBody(unitsPerHour: unitsPerHour, duration: duration))
+        secondMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .ChangeTempBasal, messageBody: ChangeTempBasalCarelinkMessageBody(unitsPerHour: unitsPerHour, duration: duration))
         secondResponse = .PumpStatusAck
     }
     

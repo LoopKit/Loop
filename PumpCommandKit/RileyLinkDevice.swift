@@ -62,7 +62,7 @@ extension RileyLinkDevice {
             return
         }
 
-        let writeCommand = SetTempBasalCommand(unitsPerHour: unitsPerHour, duration: duration, address: pumpID)
+        let writeCommand = ChangeTempBasalCommand(unitsPerHour: unitsPerHour, duration: duration, address: pumpID)
         let readCommand = ReadTempBasalCommand(address: pumpID)
 
         sendTempBasalMessage(writeCommand.firstMessage.txData, secondMessage: writeCommand.secondMessage.txData, thirdMessage: readCommand.message.txData) { (response, error) -> Void in
