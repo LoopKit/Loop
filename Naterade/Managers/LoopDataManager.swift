@@ -18,7 +18,7 @@ class LoopDataManager {
 
     enum Error: ErrorType {
         case CommunicationError
-        case MissingDataError
+        case MissingDataError(String)
         case StaleDataError
     }
 
@@ -84,6 +84,8 @@ class LoopDataManager {
                 }
             } catch let error {
                 self.lastLoopError = error
+
+                self.deviceDataManager.logger?.addError(error, fromSource: "PredictGlucose")
             }
 
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
@@ -179,7 +181,7 @@ class LoopDataManager {
                 }
             }
         } else {
-            completionHandler(error: Error.MissingDataError)
+            completionHandler(error: Error.MissingDataError("CarbStore not available"))
         }
     }
 
@@ -215,7 +217,7 @@ class LoopDataManager {
                 }
             }
         } else {
-            completionHandler(error: Error.MissingDataError)
+            completionHandler(error: Error.MissingDataError("GlucoseStore not available"))
         }
     }
 
@@ -231,7 +233,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError
+            throw Error.MissingDataError("Cannot predict glucose due to missing input data")
         }
 
         let startDate = NSDate()
@@ -251,7 +253,7 @@ class LoopDataManager {
             insulinEffect = self.insulinEffect else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError
+            throw Error.MissingDataError("Cannot predict glucose due to missing effect data")
         }
 
         var error: ErrorType?
@@ -282,7 +284,7 @@ class LoopDataManager {
             insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
             basalRates = deviceDataManager.basalRateSchedule
         else {
-            error = Error.MissingDataError
+            error = Error.MissingDataError("Loop configuration data not set")
             throw error!
         }
 
@@ -309,7 +311,7 @@ class LoopDataManager {
                 insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
                 basalRates = self.deviceDataManager.basalRateSchedule
             else {
-                resultsHandler(units: nil, error: Error.MissingDataError)
+                resultsHandler(units: nil, error: Error.MissingDataError("Bolus prediction and configuration data found"))
                 return
             }
 
@@ -335,7 +337,7 @@ class LoopDataManager {
     func enactRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             guard let recommendedTempBasal = self.recommendedTempBasal else {
-                resultsHandler(success: false, error: Error.MissingDataError)
+                resultsHandler(success: true, error: nil)
                 return
             }
 

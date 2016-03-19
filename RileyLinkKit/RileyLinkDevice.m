@@ -16,6 +16,10 @@ NSString * const RileyLinkDeviceDidReceivePacketNotification = @"com.ps2.RileyLi
 
 NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevicePacket";
 
+NSString * const RileyLinkDeviceDidChangeTimeNotification = @"com.ps2.RileyLinkKit.RileyLInkDeviceDidChangeTimeNotification";
+
+NSString * const RileyLinkDeviceTimeKey = @"com.ps2.RileyLinkKit.RileyLinkDeviceTime";
+
 @interface RileyLinkDevice () {
     PumpOps * _Nullable _ops;
 }
@@ -138,30 +142,40 @@ NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevi
 
 - (void)sendTempBasalMessage:(NSData *)firstMessage secondMessage:(NSData *)secondMessage thirdMessage:(NSData *)thirdMessage withCompletionHandler:(void (^)(NSData * _Nullable, NSString * _Nullable))completionHandler
 {
+    NSInteger retryCount = 3;
+
     if (self.pumpState != nil) {
         [self.device runSession:^(RileyLinkCmdSession * _Nonnull session) {
             PumpOpsSynchronous *ops = [[PumpOpsSynchronous alloc] initWithPump:self.pumpState andSession:session];
 
-            // Send the prelude
-            NSData *response = [ops sendData:firstMessage andListenForResponseType:MESSAGE_TYPE_ACK];
+            NSInteger attempt = 0;
+            NSString *error;
+            NSData *response;
 
-            // Send the args
-            if (response != nil) {
-                // The pump does not ACK a temp basal. We'll check manually below if it was successful.
-                // TODO: No sense use the SendAndListenCommand here.
-                [ops sendData:secondMessage retryCount:0 andListenForResponseType:MESSAGE_TYPE_ACK];
+            while (response == nil && attempt < retryCount) {
+                attempt += 1;
 
-                // Read the temp basal
-                response = [ops sendData:thirdMessage andListenForResponseType:MESSAGE_TYPE_READ_TEMP_BASAL];
+                // Send the prelude
+                NSData *firstResponse = [ops sendData:firstMessage andListenForResponseType:MESSAGE_TYPE_ACK];
 
-                if (response != nil) {
-                    completionHandler(response, nil);
+                // Send the args
+                if (firstResponse != nil) {
+                    // The pump does not ACK a temp basal. We'll check manually below if it was successful.
+                    // TODO: No sense use the SendAndListenCommand here.
+                    [ops sendData:secondMessage retryCount:0 andListenForResponseType:MESSAGE_TYPE_ACK];
+
+                    // Read the temp basal
+                    response = [ops sendData:thirdMessage andListenForResponseType:MESSAGE_TYPE_READ_TEMP_BASAL];
+
+                    if (response == nil) {
+                        error = [NSString stringWithFormat:@"Attempt %zd: Verify response failed", attempt];
+                    }
                 } else {
-                    completionHandler(nil, @"CommunicationError");
+                    error = [NSString stringWithFormat:@"Attempt %zd: Prelude response failed", attempt];
                 }
-            } else {
-                completionHandler(nil, @"CommunicationError");
             }
+
+            completionHandler(response, response == nil ? error : nil);
         }];
     } else {
         completionHandler(nil, @"ConfigurationError: No pump configured");

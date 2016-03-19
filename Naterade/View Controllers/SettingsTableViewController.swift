@@ -507,9 +507,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
                         dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                     }
-                case let section:
+                case let row:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {
-                        switch section {
+                        switch row {
                         case .CarbRatio:
                             dataManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                         case .InsulinSensitivity:

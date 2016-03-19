@@ -16,6 +16,10 @@ extern NSString * const RileyLinkDeviceDidReceivePacketNotification;
 
 extern NSString * const RileyLinkDevicePacketKey;
 
+extern NSString * const RileyLinkDeviceDidChangeTimeNotification;
+
+extern NSString * const RileyLinkDeviceTimeKey;
+
 @interface RileyLinkDevice : NSObject
 
 @property (copy, nonatomic, nullable, readonly) NSString *name;

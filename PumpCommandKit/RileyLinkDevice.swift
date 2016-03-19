@@ -67,7 +67,9 @@ extension RileyLinkDevice {
 
         sendTempBasalMessage(writeCommand.firstMessage.txData, secondMessage: writeCommand.secondMessage.txData, thirdMessage: readCommand.message.txData) { (response, error) -> Void in
             if let response = response, message = PumpMessage(rxData: response), body = message.messageBody as? ReadTempBasalCarelinkMessageBody {
-                completionHandler(success: body.timeRemaining == duration, doseMessage: message, error: nil)
+                let success = body.timeRemaining == duration
+
+                completionHandler(success: success, doseMessage: message, error: success ? nil : .CommunicationError("Dose did not verify"))
             } else {
                 completionHandler(success: false, doseMessage: nil, error: .CommunicationError(error ?? ""))
             }
