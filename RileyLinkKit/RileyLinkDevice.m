@@ -182,4 +182,22 @@ NSString * const RileyLinkDeviceTimeKey = @"com.ps2.RileyLinkKit.RileyLinkDevice
     }
 }
 
+- (void)sendChangeTimeMessage:(NSData *)firstMessage secondMessageGenerator:(NSData * _Nonnull (^)())secondMessageGenerator completionHandler:(void (^)(NSData * _Nullable, NSString * _Nullable))completionHandler
+{
+    if (self.pumpState != nil) {
+        [self.device runSession:^(RileyLinkCmdSession * _Nonnull session) {
+            PumpOpsSynchronous *ops = [[PumpOpsSynchronous alloc] initWithPump:self.pumpState andSession:session];
+            NSData *response = [ops sendData:firstMessage andListenForResponseType:MESSAGE_TYPE_ACK];
+
+            if (response != nil) {
+                response = [ops sendData:secondMessageGenerator() andListenForResponseType:MESSAGE_TYPE_ACK];
+            }
+
+            completionHandler(response, nil);
+        }];
+    } else {
+        completionHandler(nil, @"ConfigurationError: No pump configured");
+    }
+}
+
 @end

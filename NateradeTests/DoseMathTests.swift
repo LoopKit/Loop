@@ -569,7 +569,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(1.583, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(1.333, dose, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndFalling() {
@@ -584,7 +584,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(0.32, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.067, dose, accuracy: 1.0 / 40.0)
     }
 
     func testInRangeAndRising() {
@@ -599,7 +599,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(0.333, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
 
         // Less existing temp
         var lastTempBasal = DoseEntry(
@@ -618,7 +618,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(0.19875, dose, accuracy: 1e-13)
+        XCTAssertEqualWithAccuracy(0, dose, accuracy: 1e-13)
 
         // But not a finished temp
         lastTempBasal = DoseEntry(
@@ -637,7 +637,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(0.333, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndRising() {
@@ -652,7 +652,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqual(1.25, dose)
+        XCTAssertEqual(1.0, dose)
 
         // Use mmol sensitivity value
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
@@ -666,7 +666,7 @@ class RecommendBolusTests: XCTestCase {
             basalRateSchedule: basalRateSchedule
         )
 
-        XCTAssertEqualWithAccuracy(1.25, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(1.0, dose, accuracy: 1.0 / 40.0)
     }
 
     func testNoInputGlucose() {

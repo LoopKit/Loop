@@ -41,11 +41,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         chartPanGestureRecognizer.delegate = self
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
-
-        dataManager.loopManager.update { (error) -> Void in
-            self.needsRefresh = true
-            self.reloadData()
-        }
     }
 
     deinit {
@@ -93,7 +88,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
-    private var needsRefresh = false
+    private var needsRefresh = true
 
     private var needsBolus = false
 
@@ -115,7 +110,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             ), withRowAnimation: visible ? .Automatic : .None)
             tableView.endUpdates()
 
-            var recommendedBolus: Double?
             charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()
 
@@ -188,36 +182,27 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
 
-            if needsBolus {
-                needsBolus = false
-
-                dispatch_group_enter(reloadGroup)
-                self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
-                    if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "LoopDataManager")
-                    } else {
-                        recommendedBolus = units
-                    }
-
-                    dispatch_group_leave(reloadGroup)
-                }
-            }
-
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
                 self.charts.prerender()
 
-                self.tableView.beginUpdates()
                 self.tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Charts.rawValue, 2)),
                     withRowAnimation: .None
                 )
-                self.tableView.endUpdates()
 
                 self.reloading = false
 
-                if self.active && self.visible, let bolus = recommendedBolus where bolus > 0 {
-                    self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
+                if self.needsBolus {
+                    self.needsBolus = false
+
+                    self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
+                        if let error = error {
+                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                        } else if self.active && self.visible, let bolus = units where bolus > 0 {
+                            self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
+                        }
+                    }
                 }
             }
         }
@@ -634,6 +619,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case let vc as BolusViewController:
             if let bolus = sender as? Double {
                 vc.recommendedBolus = bolus
+            } else {
+                self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                    } else if let bolus = units {
+                        vc.recommendedBolus = bolus
+                    }
+                }
             }
         default:
             break

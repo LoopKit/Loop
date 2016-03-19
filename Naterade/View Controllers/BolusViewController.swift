@@ -18,13 +18,17 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
         bolusAmountTextField.becomeFirstResponder()
     }
 
-    var recommendedBolus: Double = 0
+    var recommendedBolus: Double = 0 {
+        didSet {
+            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
+        }
+    }
 
     private(set) var bolus: Double?
 
-    @IBOutlet weak var recommendedBolusAmountLabel: UILabel! {
+    @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
-            recommendedBolusAmountLabel.text = decimalFormatter.stringFromNumber(recommendedBolus)
+            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
         }
     }
 

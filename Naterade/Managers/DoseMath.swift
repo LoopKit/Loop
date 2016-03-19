@@ -163,7 +163,7 @@ class DoseMath {
             return 0
         }
 
-        let targetGlucose = (eventualGlucoseTargets.minValue + eventualGlucoseTargets.maxValue) / 2
+        let targetGlucose = eventualGlucoseTargets.maxValue
         let currentSensitivity = insulinSensitivity.quantityAt(date).doubleValueForUnit(glucoseTargetRange.unit)
 
         var doseUnits = (eventualGlucose.quantity.doubleValueForUnit(glucoseTargetRange.unit) - targetGlucose) / currentSensitivity

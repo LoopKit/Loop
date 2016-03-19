@@ -15,6 +15,8 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
     var device: RileyLinkDevice!
 
+    var pumpTimeZone: NSTimeZone?
+
     private var appeared = false
 
     override func viewDidLoad() {
@@ -80,10 +82,11 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
     private enum CommandRow: Int {
         case Tune
+        case ChangeTime
         case Bolus
         case TempBasal
 
-        static let count = 3
+        static let count = 4
     }
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -158,6 +161,23 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                     cell.detailTextLabel?.text = nil
                 }
                 cell.accessoryType = .DisclosureIndicator
+            case .ChangeTime:
+                cell.textLabel?.text = "Change Time"
+                cell.accessoryType = .DisclosureIndicator
+
+                let localTimeZone = NSTimeZone.localTimeZone()
+                let localTimeZoneName = localTimeZone.localizedName(localTimeZone.daylightSavingTime ? .ShortDaylightSaving : .ShortStandard, locale: NSLocale.currentLocale()) ?? localTimeZone.name
+
+                if let pumpTimeZone = pumpTimeZone {
+                    let timeZoneDiff = NSTimeInterval(pumpTimeZone.secondsFromGMT - localTimeZone.secondsFromGMT)
+                    let formatter = NSDateComponentsFormatter()
+                    formatter.allowedUnits = [.Hour, .Minute]
+                    let diffString = formatter.stringFromTimeInterval(abs(timeZoneDiff)) ?? String(abs(timeZoneDiff))
+
+                    cell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@%2$@%3$@", comment: "The format string for displaying an offset from a time zone: (1: GMT)(2: -)(3: 4:00)"), localTimeZoneName, timeZoneDiff < 0 ? "-" : "+", diffString)
+                } else {
+                    cell.detailTextLabel?.text = localTimeZoneName
+                }
             case .Bolus:
                 cell.textLabel?.text = "Bolus"
                 cell.detailTextLabel?.text = "0.1 U"
@@ -213,7 +233,28 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                     return "Tuning radio..."
                 })
 
-                vc.title = "Tuning device radio"
+                vc.title = "Tune device radio"
+
+                self.showViewController(vc, sender: indexPath)
+            case .ChangeTime:
+                let vc = CommandResponseViewController { [unowned self] (completionHandler) -> String in
+                    self.device.changeTime { (success, error) -> Void in
+                        dispatch_async(dispatch_get_main_queue()) {
+                            if success {
+                                self.pumpTimeZone = NSTimeZone.localTimeZone()
+                                completionHandler(responseText: "Succeeded")
+                            } else if let error = error {
+                                completionHandler(responseText: "Failed: \(error)")
+                            } else {
+                                completionHandler(responseText: "Failed")
+                            }
+                        }
+                    }
+
+                    return "Changing time..."
+                }
+
+                vc.title = "Change Time"
 
                 self.showViewController(vc, sender: indexPath)
             case .Bolus:

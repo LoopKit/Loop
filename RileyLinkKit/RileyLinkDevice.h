@@ -44,6 +44,8 @@ extern NSString * const RileyLinkDeviceTimeKey;
 
 - (void)sendTempBasalMessage:(NSData *)firstMessage secondMessage:(NSData *)secondMessage thirdMessage:(NSData *)thirdMessage withCompletionHandler:(void (^)(NSData * _Nullable response, NSString * _Nullable errorString))completionHandler;
 
+- (void)sendChangeTimeMessage:(NSData *)firstMessage secondMessageGenerator:(NSData *(^)())secondMessageGenerator completionHandler:(void (^)(NSData * _Nullable response, NSString * _Nullable errorString))completionHandler;
+
 @end
 
 NS_ASSUME_NONNULL_END

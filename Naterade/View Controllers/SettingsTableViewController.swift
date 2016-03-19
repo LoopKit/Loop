@@ -429,6 +429,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 vc.delegate = self
             case let vc as RileyLinkDeviceTableViewController:
                 vc.device = dataManager.rileyLinkManager?.devices[indexPath.row]
+                vc.pumpTimeZone = dataManager.pumpTimeZone
             default:
                 break
             }

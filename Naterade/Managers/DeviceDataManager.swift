@@ -59,9 +59,17 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var rileyLinkDeviceObserver: AnyObject? {
+    var rileyLinkDevicePacketObserver: AnyObject? {
         willSet {
-            if let observer = rileyLinkDeviceObserver {
+            if let observer = rileyLinkDevicePacketObserver {
+                NSNotificationCenter.defaultCenter().removeObserver(observer)
+            }
+        }
+    }
+
+    var rileyLinkDeviceTimeObserver: AnyObject? {
+        willSet {
+            if let observer = rileyLinkDeviceTimeObserver {
                 NSNotificationCenter.defaultCenter().removeObserver(observer)
             }
         }
@@ -187,6 +195,24 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     var pumpTimeZone: NSTimeZone? = NSUserDefaults.standardUserDefaults().pumpTimeZone {
         didSet {
             NSUserDefaults.standardUserDefaults().pumpTimeZone = pumpTimeZone
+
+            if let pumpTimeZone = pumpTimeZone {
+                if let basalRateSchedule = basalRateSchedule {
+                    self.basalRateSchedule = BasalRateSchedule(dailyItems: basalRateSchedule.items, timeZone: pumpTimeZone)
+                }
+
+                if let carbRatioSchedule = carbRatioSchedule {
+                    self.carbRatioSchedule = CarbRatioSchedule(unit: carbRatioSchedule.unit, dailyItems: carbRatioSchedule.items, timeZone: pumpTimeZone)
+                }
+
+                if let insulinSensitivitySchedule = insulinSensitivitySchedule {
+                    self.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: insulinSensitivitySchedule.unit, dailyItems: insulinSensitivitySchedule.items, timeZone: pumpTimeZone)
+                }
+
+                if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
+                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
+                }
+            }
         }
     }
 
@@ -205,17 +231,20 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         willSet {
             switch newValue {
             case .Ready(let manager):
-                rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self = self] (note) -> Void in
+                rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self] (note) -> Void in
                     self?.receivedRileyLinkManagerNotification(note)
                 }
 
-                rileyLinkDeviceObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil, usingBlock: { [weak self = self] (note) -> Void in
+                rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil, usingBlock: { [weak self] (note) -> Void in
                     self?.receivedRileyLinkPacketNotification(note)
                 })
 
+                rileyLinkDeviceTimeObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidChangeTimeNotification, object: nil, queue: nil, usingBlock: { [weak self] (note) -> Void in
+                    self?.pumpTimeZone = NSTimeZone.localTimeZone()
+                })
             case .NeedsConfiguration:
                 rileyLinkManagerObserver = nil
-                rileyLinkDeviceObserver = nil
+                rileyLinkDevicePacketObserver = nil
             }
         }
     }
@@ -469,7 +498,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     deinit {
         rileyLinkManagerObserver = nil
-        rileyLinkDeviceObserver = nil
+        rileyLinkDevicePacketObserver = nil
     }
 }
 
