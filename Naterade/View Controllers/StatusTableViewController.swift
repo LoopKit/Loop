@@ -105,10 +105,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             needsRefresh = false
             reloading = true
 
-            tableView.beginUpdates()
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
-            tableView.endUpdates()
 
             charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
             let reloadGroup = dispatch_group_create()

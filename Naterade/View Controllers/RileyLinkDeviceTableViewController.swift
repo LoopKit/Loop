@@ -165,8 +165,8 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 cell.textLabel?.text = "Change Time"
                 cell.accessoryType = .DisclosureIndicator
 
-                let localTimeZone = NSTimeZone.localTimeZone()
-                let localTimeZoneName = localTimeZone.localizedName(localTimeZone.daylightSavingTime ? .ShortDaylightSaving : .ShortStandard, locale: NSLocale.currentLocale()) ?? localTimeZone.name
+                let localTimeZone = NSTimeZone.defaultTimeZone()
+                let localTimeZoneName = localTimeZone.abbreviation ?? localTimeZone.name
 
                 if let pumpTimeZone = pumpTimeZone {
                     let timeZoneDiff = NSTimeInterval(pumpTimeZone.secondsFromGMT - localTimeZone.secondsFromGMT)
@@ -241,7 +241,7 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                     self.device.changeTime { (success, error) -> Void in
                         dispatch_async(dispatch_get_main_queue()) {
                             if success {
-                                self.pumpTimeZone = NSTimeZone.localTimeZone()
+                                self.pumpTimeZone = NSTimeZone.defaultTimeZone()
                                 completionHandler(responseText: "Succeeded")
                             } else if let error = error {
                                 completionHandler(responseText: "Failed: \(error)")

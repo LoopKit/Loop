@@ -240,7 +240,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 })
 
                 rileyLinkDeviceTimeObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidChangeTimeNotification, object: nil, queue: nil, usingBlock: { [weak self] (note) -> Void in
-                    self?.pumpTimeZone = NSTimeZone.localTimeZone()
+                    self?.pumpTimeZone = NSTimeZone.defaultTimeZone()
                 })
             case .NeedsConfiguration:
                 rileyLinkManagerObserver = nil
