@@ -50,11 +50,11 @@ class LoopDataManager {
         notificationObservers = [
             center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: queue) { (note) -> Void in
                 self.glucoseMomentumEffect = nil
-                self.loop()
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: queue) { (note) -> Void in
                 self.insulinEffect = nil
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                self.loop()
             }
         ]
 
@@ -67,11 +67,13 @@ class LoopDataManager {
     }
 
     private func loop() {
-        self.update { (error) -> Void in
-            self.lastLoopError = error
+        lastLoopError = nil
 
-            if error == nil && self.dosingEnabled {
-                self.enactRecommendedTempBasal { (success, error) -> Void in
+        do {
+            try self.update()
+
+            if dosingEnabled {
+                setRecommendedTempBasal { (success, error) -> Void in
                     self.lastLoopError = error
 
                     if let error = error {
@@ -80,10 +82,15 @@ class LoopDataManager {
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
                 }
-            } else {
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+
+                // Delay the notification until we know the result of the temp basal
+                return
             }
+        } catch let error {
+            lastLoopError = error
         }
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
     }
 
     // References to registered notification center observers
@@ -95,63 +102,69 @@ class LoopDataManager {
         }
     }
 
-    private func update(completionHandler: (error: ErrorType?) -> Void) {
+    private func update() throws {
         let updateGroup = dispatch_group_create()
-        var lastError: ErrorType?
 
         if glucoseMomentumEffect == nil {
             dispatch_group_enter(updateGroup)
-            updateGlucoseMomentumEffect { (error) -> Void in
-                if let error = error {
-                    lastError = error
+            updateGlucoseMomentumEffect { (effects, error) -> Void in
+                if error == nil {
+                    self.glucoseMomentumEffect = effects
+                } else {
+                    self.glucoseMomentumEffect = nil
                 }
-
                 dispatch_group_leave(updateGroup)
             }
         }
 
         if carbEffect == nil {
             dispatch_group_enter(updateGroup)
-            updateCarbEffect { (error) -> Void in
-                if let error = error {
-                    lastError = error
+            updateCarbEffect { (effects, error) -> Void in
+                if error == nil {
+                    self.carbEffect = effects
+                } else {
+                    self.carbEffect = nil
                 }
-
                 dispatch_group_leave(updateGroup)
             }
         }
 
         if insulinEffect == nil {
             dispatch_group_enter(updateGroup)
-            updateInsulinEffect { (error) -> Void in
-                if let error = error {
-                    lastError = error
+            updateInsulinEffect { (effects, error) -> Void in
+                if error == nil {
+                    self.insulinEffect = effects
+                } else {
+                    self.insulinEffect = nil
                 }
-
                 dispatch_group_leave(updateGroup)
             }
         }
 
-        dispatch_group_notify(updateGroup, dataAccessQueue) { () -> Void in
-            if self.predictedGlucose == nil {
-                do {
-                    try self.updatePredictedGlucoseAndRecommendedBasal()
-                } catch let error {
-                    lastError = error
+        dispatch_group_wait(updateGroup, DISPATCH_TIME_FOREVER)
 
-                    self.deviceDataManager.logger?.addError(error, fromSource: "PredictGlucose")
-                }
+        if self.predictedGlucose == nil {
+            do {
+                try self.updatePredictedGlucoseAndRecommendedBasal()
+            } catch let error {
+                self.deviceDataManager.logger?.addError(error, fromSource: "PredictGlucose")
+
+                throw error
             }
-
-            completionHandler(error: lastError)
         }
     }
 
     func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
-            self.update { (error) -> Void in
-                resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, error: error)
+            var error: ErrorType?
+
+            do {
+                try self.update()
+            } catch let updateError {
+                error = updateError
             }
+
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, error: error)
         }
     }
 
@@ -183,59 +196,45 @@ class LoopDataManager {
     private var lastTempBasal: DoseEntry?
     private var lastLoopError: ErrorType?
 
-    private func updateCarbEffect(completionHandler: (error: ErrorType?) -> Void) {
+    private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
 
         if let carbStore = deviceDataManager.carbStore {
             carbStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
-                dispatch_async(self.dataAccessQueue) {
-                    if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "CarbStore")
-                        self.carbEffect = nil
-                    } else {
-                        self.carbEffect = effects
-                    }
-                    completionHandler(error: error)
+                if let error = error {
+                    self.deviceDataManager.logger?.addError(error, fromSource: "CarbStore")
                 }
+
+                completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(error: Error.MissingDataError("CarbStore not available"))
+            completionHandler(effects: nil, error: Error.MissingDataError("CarbStore not available"))
         }
     }
 
-    private func updateInsulinEffect(completionHandler: (error: ErrorType?) -> Void) {
+    private func updateInsulinEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
 
         deviceDataManager.doseStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
-            dispatch_async(self.dataAccessQueue) {
-                if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "DoseStore")
-                    self.insulinEffect = nil
-                } else {
-                    self.insulinEffect = effects
-                }
-
-                completionHandler(error: error)
+            if let error = error {
+                self.deviceDataManager.logger?.addError(error, fromSource: "DoseStore")
             }
+
+            completionHandler(effects: effects, error: error)
         }
     }
 
-    private func updateGlucoseMomentumEffect(completionHandler: (error: ErrorType?) -> Void) {
+    private func updateGlucoseMomentumEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         if let glucoseStore = deviceDataManager.glucoseStore {
             glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
-                dispatch_async(self.dataAccessQueue) {
-                    if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "GlucoseStore")
-                        self.glucoseMomentumEffect = nil
-                    } else {
-                        self.glucoseMomentumEffect = effects
-                    }
-
-                    completionHandler(error: error)
+                if let error = error {
+                    self.deviceDataManager.logger?.addError(error, fromSource: "GlucoseStore")
                 }
+
+                completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(error: Error.MissingDataError("GlucoseStore not available"))
+            completionHandler(effects: nil, error: Error.MissingDataError("GlucoseStore not available"))
         }
     }
 
@@ -352,39 +351,43 @@ class LoopDataManager {
         }
     }
 
-    func enactRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
-        dispatch_async(dataAccessQueue) {
-            guard let recommendedTempBasal = self.recommendedTempBasal else {
-                resultsHandler(success: true, error: nil)
-                return
-            }
+    private func setRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
+        guard let recommendedTempBasal = self.recommendedTempBasal else {
+            resultsHandler(success: true, error: nil)
+            return
+        }
 
-            guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
-                resultsHandler(success: false, error: Error.StaleDataError)
-                return
-            }
+        guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
+            resultsHandler(success: false, error: Error.StaleDataError)
+            return
+        }
 
-            guard let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
-                resultsHandler(success: false, error: Error.CommunicationError)
-                return
-            }
+        guard let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
+            resultsHandler(success: false, error: Error.CommunicationError)
+            return
+        }
 
-            device.sendTempBasalDose(recommendedTempBasal.rate, duration: recommendedTempBasal.duration) { (success, message, error) -> Void in
-                if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody where body.rateType == .Absolute {
-                    dispatch_async(self.dataAccessQueue) {
-                        let now = NSDate()
-                        let endDate = now.dateByAddingTimeInterval(body.timeRemaining)
-                        let startDate = endDate.dateByAddingTimeInterval(-recommendedTempBasal.duration)
+        device.sendTempBasalDose(recommendedTempBasal.rate, duration: recommendedTempBasal.duration) { (success, message, error) -> Void in
+            if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody where body.rateType == .Absolute {
+                dispatch_async(self.dataAccessQueue) {
+                    let now = NSDate()
+                    let endDate = now.dateByAddingTimeInterval(body.timeRemaining)
+                    let startDate = endDate.dateByAddingTimeInterval(-recommendedTempBasal.duration)
 
-                        self.lastTempBasal = DoseEntry(startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
-                        self.recommendedTempBasal = nil
+                    self.lastTempBasal = DoseEntry(startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
+                    self.recommendedTempBasal = nil
 
-                        resultsHandler(success: success, error: error)
-                    }
-                } else {
                     resultsHandler(success: success, error: error)
                 }
+            } else {
+                resultsHandler(success: success, error: error)
             }
+        }
+    }
+
+    func enactRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
+        dispatch_async(dataAccessQueue) {
+            self.setRecommendedTempBasal(resultsHandler)
         }
     }
 }
