@@ -31,6 +31,8 @@
 		435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400371C9F970500D5819C /* WKAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400361C9F970500D5819C /* WKAlertAction.swift */; };
+		435400391C9FB7FC00D5819C /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400381C9FB7FC00D5819C /* UIColor.swift */; };
+		4354003A1C9FB81100D5819C /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		435F354E1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F354D1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift */; };
 		435F35501C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F354F1C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift */; };
 		435F35521C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F35511C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift */; };
@@ -109,8 +111,6 @@
 		43DC87E71C8B726A005BC30D /* UpdateRegisterCmd.m in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87E51C8B726A005BC30D /* UpdateRegisterCmd.m */; };
 		43DC87E91C8B7818005BC30D /* RileyLinkDeviceTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87E81C8B7818005BC30D /* RileyLinkDeviceTableViewController.swift */; };
 		43DC87EB1C8B82BE005BC30D /* CBPeripheralState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DC87EA1C8B82BE005BC30D /* CBPeripheralState.swift */; };
-		43DE92511C541832001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
-		43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
 		43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
 		43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE925B1C547A20001FFDE1 /* WatchContext.swift */; };
@@ -311,6 +311,7 @@
 		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		435400361C9F970500D5819C /* WKAlertAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WKAlertAction.swift; sourceTree = "<group>"; };
+		435400381C9FB7FC00D5819C /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		435F354D1C9BBE9A00C204D2 /* ChangeTimeCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeTimeCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		435F354F1C9BC44B00C204D2 /* ReadTimeCarelinkMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadTimeCarelinkMessageBody.swift; sourceTree = "<group>"; };
 		435F35511C9BC8A100C204D2 /* ChangeTimeCarelinMessageBodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeTimeCarelinMessageBodyTests.swift; sourceTree = "<group>"; };
@@ -691,10 +692,11 @@
 				4354002E1C9F718600D5819C /* IdentifiableClass.swift */,
 				43A943851B926B7B0051FA24 /* InterfaceController.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
+				435400381C9FB7FC00D5819C /* UIColor.swift */,
+				435400361C9F970500D5819C /* WKAlertAction.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				43DE92571C5479C3001FFDE1 /* Models */,
 				43A943831B926B7B0051FA24 /* Supporting Files */,
-				435400361C9F970500D5819C /* WKAlertAction.swift */,
 			);
 			path = "WatchApp Extension";
 			sourceTree = "<group>";
@@ -1296,7 +1298,6 @@
 				437A28B11C2FB65800009647 /* ReadSettingsCommand.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
-				43DE92511C541832001FFDE1 /* UIColor.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
@@ -1305,6 +1306,7 @@
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
+				4354003A1C9FB81100D5819C /* UIColor.swift in Sources */,
 				43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
@@ -1384,7 +1386,7 @@
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */,
 				43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */,
-				43DE92531C541D36001FFDE1 /* UIColor.swift in Sources */,
+				435400391C9FB7FC00D5819C /* UIColor.swift in Sources */,
 				43FF3D5F1BADE38800DE240A /* NSData.swift in Sources */,
 				43DE925D1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43FF3D601BADE38800DE240A /* NSDateComponents.swift in Sources */,

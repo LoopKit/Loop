@@ -16,17 +16,17 @@ class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
     private var absorptionTime = AbsorptionTimeType.Medium {
         didSet {
-            absorptionButtonA.setBackgroundColor(UIColor.darkTintColor())
-            absorptionButtonB.setBackgroundColor(UIColor.darkTintColor())
-            absorptionButtonC.setBackgroundColor(UIColor.darkTintColor())
+            absorptionButtonA.setBackgroundColor(UIColor.darkTintColor)
+            absorptionButtonB.setBackgroundColor(UIColor.darkTintColor)
+            absorptionButtonC.setBackgroundColor(UIColor.darkTintColor)
 
             switch absorptionTime {
             case .Fast:
-                absorptionButtonA.setBackgroundColor(UIColor.tintColor())
+                absorptionButtonA.setBackgroundColor(UIColor.tintColor)
             case .Medium:
-                absorptionButtonB.setBackgroundColor(UIColor.tintColor())
+                absorptionButtonB.setBackgroundColor(UIColor.tintColor)
             case .Slow:
-                absorptionButtonC.setBackgroundColor(UIColor.tintColor())
+                absorptionButtonC.setBackgroundColor(UIColor.tintColor)
             }
         }
     }

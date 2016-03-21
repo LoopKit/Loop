@@ -10,13 +10,7 @@ import UIKit
 
 
 extension UIColor {
-    static func tintColor() -> UIColor {
-        return UIColor(red: 1, green: 149 / 255, blue: 0, alpha: 1)
-    }
-
-    static func darkTintColor() -> UIColor {
-        return tintColor().colorWithAlphaComponent(0.15)
-    }
+    @nonobjc static var tintColor = UIColor.HIGOrangeColor()
 
     @nonobjc static let secondaryLabelColor: UIColor = UIColor(red: 142 / 255, green: 142 / 255, blue: 147 / 255, alpha: 1)
 
