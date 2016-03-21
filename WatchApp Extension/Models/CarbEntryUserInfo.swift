@@ -61,9 +61,10 @@ extension CarbEntryUserInfo: RawRepresentable {
     typealias RawValue = [String: AnyObject]
 
     static let version = 1
+    static let name = "CarbEntryUserInfo"
 
     init?(rawValue: RawValue) {
-        guard rawValue["v"] as? Int == self.dynamicType.version,
+        guard rawValue["v"] as? Int == self.dynamicType.version && rawValue["name"] as? String == CarbEntryUserInfo.name,
             let value = rawValue["cv"] as? Double,
             absorptionTimeRaw = rawValue["ca"] as? Int,
             absorptionTime = AbsorptionTimeType(rawValue: absorptionTimeRaw),
@@ -80,6 +81,7 @@ extension CarbEntryUserInfo: RawRepresentable {
     var rawValue: RawValue {
         return [
             "v": self.dynamicType.version,
+            "name": CarbEntryUserInfo.name,
             "cv": value,
             "ca": absorptionTimeType.rawValue,
             "sd": startDate

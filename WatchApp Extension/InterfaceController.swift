@@ -127,4 +127,14 @@ class InterfaceController: WKInterfaceController {
             super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
         }
     }
+
+    // MARK: - Menu Items
+
+    @IBAction func addCarbs() {
+        presentControllerWithName(AddCarbsInterfaceController.className, context: nil)
+    }
+
+    @IBAction func setBolus() {
+        presentControllerWithName(BolusInterfaceController.className, context: nil)
+    }
 }

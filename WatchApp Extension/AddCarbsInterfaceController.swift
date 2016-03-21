@@ -10,11 +10,11 @@ import WatchKit
 import Foundation
 
 
-class AddCarbsInterfaceController: WKInterfaceController {
+class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    var carbValue: Int = 15
+    private var carbValue: Int = 15
 
-    var absorptionTime = AbsorptionTimeType.Medium {
+    private var absorptionTime = AbsorptionTimeType.Medium {
         didSet {
             absorptionButtonA.setBackgroundColor(UIColor.darkTintColor())
             absorptionButtonB.setBackgroundColor(UIColor.darkTintColor())
@@ -34,8 +34,6 @@ class AddCarbsInterfaceController: WKInterfaceController {
     @IBOutlet var valueLabel: WKInterfaceLabel!
 
     @IBOutlet var valuePicker: WKInterfacePicker!
-
-    @IBOutlet var incrementButton: WKInterfaceButton!
 
     @IBOutlet var absorptionButtonA: WKInterfaceButton!
 
@@ -103,7 +101,7 @@ class AddCarbsInterfaceController: WKInterfaceController {
             DeviceDataManager.sharedManager.sendCarbEntry(entry)
         }
 
-        popController()
+        dismissController()
     }
 
 }

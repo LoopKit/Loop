@@ -357,23 +357,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     let carbStore: CarbStore?
 
-    private func addCarbEntryFromWatchMessage(message: [String: AnyObject]) {
-        if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
-            let newEntry = NewCarbEntry(
-                quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
-                startDate: carbEntry.startDate,
-                foodType: nil,
-                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
-            )
-
-            carbStore.addCarbEntry(newEntry, resultHandler: { (_, _, error) -> Void in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "CarbStore")
-                }
-            })
-        }
-    }
-
     // MARK: CarbStoreDelegate
 
     func carbStore(_: CarbStore, didError error: CarbStore.Error) {
@@ -437,10 +420,60 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
+    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((success: Bool) -> Void)? = nil) {
+        if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
+            let newEntry = NewCarbEntry(
+                quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
+                startDate: carbEntry.startDate,
+                foodType: nil,
+                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
+            )
+
+            carbStore.addCarbEntry(newEntry, resultHandler: { (success, _, error) -> Void in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "CarbStore")
+                }
+
+                completionHandler?(success: success)
+            })
+        } else {
+            completionHandler?(success: false)
+        }
+    }
+
     // MARK: WCSessionDelegate
 
-    func session(session: WCSession, didReceiveMessage message: [String : AnyObject]) {
-        addCarbEntryFromWatchMessage(message)
+    func session(session: WCSession, didReceiveMessage message: [String : AnyObject], replyHandler: ([String: AnyObject]) -> Void) {
+        switch message["name"] as? String {
+        case CarbEntryUserInfo.name?:
+            addCarbEntryFromWatchMessage(message) { (success) in
+                self.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, error) -> Void in
+                    self.loopManager.getRecommendedBolus { (units, error) -> Void in
+                        var recommendedBolus: Double = 0
+
+                        if let error = error {
+                            self.logger?.addError(error, fromSource: "Bolus")
+                        } else if let bolus = units {
+                            recommendedBolus = bolus
+                        }
+
+                        replyHandler(BolusSuggestionUserInfo(recommendedBolus: recommendedBolus).rawValue)
+                    }
+                }
+            }
+        case SetBolusUserInfo.name?:
+            if let bolus = SetBolusUserInfo(rawValue: message), device = rileyLinkManager?.firstConnectedDevice {
+                device.sendBolusDose(bolus.value) { (success, error) -> Void in
+                    if let error = error {
+                        self.logger?.addError(error, fromSource: "Bolus")
+
+                        // TODO: Send push notification
+                    }
+                }
+            }
+        default:
+            break
+        }
     }
 
     func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
