@@ -102,7 +102,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
                 let server = CLKComplicationServer.sharedInstance()
 
-                for complication in server.activeComplications {
+                for complication in server.activeComplications ?? [] {
                     server.extendTimelineForComplication(complication)
                 }
             }

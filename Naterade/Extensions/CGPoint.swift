@@ -15,7 +15,9 @@ extension CGPoint {
 
      - parameter scale: The display scale to use. Defaults to the main screen scale.
      */
-    mutating func makeIntegralInPlaceWithDisplayScale(var scale: CGFloat = 0) {
+    mutating func makeIntegralInPlaceWithDisplayScale(scale: CGFloat = 0) {
+        var scale = scale
+
         // It's possible for scale values retrieved from traitCollection objects to be 0.
         if scale == 0 {
             scale = UIScreen.mainScreen().scale

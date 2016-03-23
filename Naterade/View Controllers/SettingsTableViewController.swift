@@ -158,7 +158,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 switchCell.`switch`?.on = dataManager.loopManager.dosingEnabled
                 switchCell.titleLabel.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
-                switchCell.`switch`?.addTarget(self, action: "dosingEnabledChanged:", forControlEvents: .ValueChanged)
+                switchCell.`switch`?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), forControlEvents: .ValueChanged)
 
                 return switchCell
             }
@@ -251,7 +251,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 peripheralState: device?.peripheral.state
             )
 
-            deviceCell.connectSwitch.addTarget(self, action: "deviceConnectionChanged:", forControlEvents: .ValueChanged)
+            deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), forControlEvents: .ValueChanged)
 
             cell = deviceCell
         }
