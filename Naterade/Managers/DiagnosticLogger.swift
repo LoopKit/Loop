@@ -35,14 +35,18 @@ class DiagnosticLogger {
         }
     }
 
-    func addError(message: ErrorType, fromSource source: String) {
+    func addError(message: String, fromSource source: String) {
         let info = [
             "source": source,
-            "message": String(message),
+            "message": message,
             "reportedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
         ]
 
         addMessage(info, toCollection: "errors")
+    }
+
+    func addError(message: ErrorType, fromSource source: String) {
+        addError(String(message), fromSource: source)
     }
 
     func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {

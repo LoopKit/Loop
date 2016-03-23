@@ -83,8 +83,10 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
     // MARK: - WCSessionDelegate
 
-// TODO: iOS 9.3
-//    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) { }
+    @available(watchOSApplicationExtension 2.2, *)
+    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
+
+    }
 
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
         if let context = WatchContext(rawValue: applicationContext) {

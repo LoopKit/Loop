@@ -382,14 +382,13 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     }()
 
     private func updateWatch() {
-        // TODO: Check session.activationState as of iOS 9.3
-        if let _ = watchSession {
-//            switch session.activationState {
-//            case .NotActivated, .Inactive:
-//                session.activateSession()
-//            case .Activated:
+        if let session = watchSession {
+            switch session.activationState {
+            case .NotActivated, .Inactive:
+                session.activateSession()
+            case .Activated:
                 sendWatchContext()
-//            }
+            }
         }
     }
 
@@ -480,8 +479,14 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         addCarbEntryFromWatchMessage(userInfo)
     }
 
-    // TODO: iOS 9.3
-    //    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) { }
+    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
+        switch activationState {
+        case .Activated:
+            self.logger?.addError("activationDidCompleteWithState", fromSource: "WCSession")
+        case .Inactive, .NotActivated:
+            break
+        }
+    }
 
     func sessionDidBecomeInactive(session: WCSession) {
         // Nothing to do here
