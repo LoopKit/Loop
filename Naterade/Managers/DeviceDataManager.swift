@@ -419,7 +419,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((success: Bool) -> Void)? = nil) {
+    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((units: Double?, error: ErrorType?) -> Void)? = nil) {
         if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
             let newEntry = NewCarbEntry(
                 quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
@@ -428,15 +428,15 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
             )
 
-            carbStore.addCarbEntry(newEntry, resultHandler: { (success, _, error) -> Void in
+            loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
                 if let error = error {
-                    self.logger?.addError(error, fromSource: "CarbStore")
+                    self.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
                 }
 
-                completionHandler?(success: success)
-            })
+                completionHandler?(units: units, error: error)
+            }
         } else {
-            completionHandler?(success: false)
+            completionHandler?(units: nil, error: CarbStore.Error.ConfigurationError)
         }
     }
 
@@ -445,20 +445,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     func session(session: WCSession, didReceiveMessage message: [String : AnyObject], replyHandler: ([String: AnyObject]) -> Void) {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
-            addCarbEntryFromWatchMessage(message) { (success) in
-                self.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, error) -> Void in
-                    self.loopManager.getRecommendedBolus { (units, error) -> Void in
-                        var recommendedBolus: Double = 0
-
-                        if let error = error {
-                            self.logger?.addError(error, fromSource: "Bolus")
-                        } else if let bolus = units {
-                            recommendedBolus = bolus
-                        }
-
-                        replyHandler(BolusSuggestionUserInfo(recommendedBolus: recommendedBolus).rawValue)
-                    }
-                }
+            addCarbEntryFromWatchMessage(message) { (units, error) in
+                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message), device = rileyLinkManager?.firstConnectedDevice {

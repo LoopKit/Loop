@@ -90,8 +90,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var needsRefresh = true
 
-    private var needsBolus = false
-
     private var visible = false {
         didSet {
             reloadData()
@@ -190,18 +188,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 )
 
                 self.reloading = false
-
-                if self.needsBolus {
-                    self.needsBolus = false
-
-                    self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
-                        if let error = error {
-                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
-                        } else if self.active && self.visible, let bolus = units where bolus > 0 {
-                            self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
-                        }
-                    }
-                }
             }
         }
     }
@@ -607,6 +593,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         switch segue.destinationViewController {
         case let vc as CarbEntryTableViewController:
             vc.carbStore = dataManager.carbStore
+            self.needsRefresh = true
         case let vc as CarbEntryEditViewController:
             if let carbStore = dataManager.carbStore {
                 vc.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
@@ -632,15 +619,22 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     }
 
     @IBAction func unwindFromEditing(segue: UIStoryboardSegue) {
-        if let carbVC = segue.sourceViewController as? CarbEntryEditViewController, carbStore = dataManager.carbStore, updatedEntry = carbVC.updatedCarbEntry {
+        if let carbVC = segue.sourceViewController as? CarbEntryEditViewController, updatedEntry = carbVC.updatedCarbEntry {
 
-            carbStore.addCarbEntry(updatedEntry) { (_, _, error) -> Void in
-                self.needsBolus = true
-
-                if let error = error {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.presentAlertControllerWithError(error)
+            dataManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (units, error) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    if let error = error {
+                        // Ignore bolus wizard errors
+                        if error is CarbStore.Error {
+                            self.presentAlertControllerWithError(error)
+                        } else {
+                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                        }
+                    } else if self.active && self.visible, let bolus = units where bolus > 0 {
+                        self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
                     }
+
+                    self.needsRefresh = true
                 }
             }
         }

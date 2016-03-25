@@ -58,12 +58,10 @@ class LoopDataManager {
             }
         ]
 
-        if let carbStore = deviceDataManager.carbStore {
-            notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: carbStore, queue: queue) { (note) -> Void in
-                self.carbEffect = nil
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
-            })
-        }
+        notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: queue) { (note) -> Void in
+            self.carbEffect = nil
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+        })
     }
 
     private func loop() {
@@ -319,35 +317,64 @@ class LoopDataManager {
         }
     }
 
+    func addCarbEntryAndRecommendBolus(carbEntry: CarbEntry, resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
+        if let carbStore = deviceDataManager.carbStore {
+            carbStore.addCarbEntry(carbEntry) { (success, _, error) in
+                dispatch_async(self.dataAccessQueue) {
+                    if success {
+                        self.carbEffect = nil
+
+                        do {
+                            try self.update()
+
+                            resultsHandler(units: try self.recommendBolus(), error: nil)
+                        } catch let error {
+                            resultsHandler(units: nil, error: error)
+                        }
+                    } else {
+                        resultsHandler(units: nil, error: error)
+                    }
+                }
+            }
+        } else {
+            resultsHandler(units: nil, error: Error.MissingDataError("CarbStore not configured"))
+        }
+    }
+
+    private func recommendBolus() throws -> Double {
+        guard let
+            glucose = self.predictedGlucose,
+            maxBolus = self.deviceDataManager.maximumBolus,
+            glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
+            insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
+            basalRates = self.deviceDataManager.basalRateSchedule
+        else {
+            throw Error.MissingDataError("Bolus prediction and configuration data not found")
+        }
+
+        let recencyInterval = NSTimeInterval(minutes: 15)
+
+        guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow where abs(predictedInterval) <= recencyInterval else {
+            throw Error.StaleDataError
+        }
+
+        return DoseMath.recommendBolusFromPredictedGlucose(glucose,
+            lastTempBasal: self.lastTempBasal,
+            maxBolus: maxBolus,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivity,
+            basalRateSchedule: basalRates
+        )
+    }
+
     func getRecommendedBolus(resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
-            guard let
-                glucose = self.predictedGlucose,
-                maxBolus = self.deviceDataManager.maximumBolus,
-                glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
-                insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
-                basalRates = self.deviceDataManager.basalRateSchedule
-            else {
-                resultsHandler(units: nil, error: Error.MissingDataError("Bolus prediction and configuration data not found"))
-                return
+            do {
+                let units = try self.recommendBolus()
+                resultsHandler(units: units, error: nil)
+            } catch let error {
+                resultsHandler(units: nil, error: error)
             }
-
-            let recencyInterval = NSTimeInterval(minutes: 15)
-
-            guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow where abs(predictedInterval) <= recencyInterval else {
-                resultsHandler(units: nil, error: Error.StaleDataError)
-                return
-            }
-
-            let units = DoseMath.recommendBolusFromPredictedGlucose(glucose,
-                lastTempBasal: self.lastTempBasal,
-                maxBolus: maxBolus,
-                glucoseTargetRange: glucoseTargetRange,
-                insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates
-            )
-
-            resultsHandler(units: units, error: nil)
         }
     }
 
