@@ -60,8 +60,8 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
                         WKExtension.sharedExtension().rootInterfaceController?.presentControllerWithName(BolusInterfaceController.className, context: suggestion)
                     }
                 },
-                errorHandler: { (_) -> Void in
-                    session.transferUserInfo(carbEntry.rawValue)
+                errorHandler: { (error) -> Void in
+                    WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
                 }
             )
         } else {

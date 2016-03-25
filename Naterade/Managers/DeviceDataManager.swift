@@ -456,7 +456,11 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
                         // TODO: Send push notification
                     }
+
+                    replyHandler([:])
                 }
+            } else {
+                replyHandler([:])
             }
         default:
             break
