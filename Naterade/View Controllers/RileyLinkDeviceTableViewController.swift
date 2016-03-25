@@ -172,9 +172,9 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                     let timeZoneDiff = NSTimeInterval(pumpTimeZone.secondsFromGMT - localTimeZone.secondsFromGMT)
                     let formatter = NSDateComponentsFormatter()
                     formatter.allowedUnits = [.Hour, .Minute]
-                    let diffString = formatter.stringFromTimeInterval(abs(timeZoneDiff)) ?? String(abs(timeZoneDiff))
+                    let diffString = timeZoneDiff != 0 ? formatter.stringFromTimeInterval(abs(timeZoneDiff)) ?? String(abs(timeZoneDiff)) : ""
 
-                    cell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@%2$@%3$@", comment: "The format string for displaying an offset from a time zone: (1: GMT)(2: -)(3: 4:00)"), localTimeZoneName, timeZoneDiff < 0 ? "-" : "+", diffString)
+                    cell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@%2$@%3$@", comment: "The format string for displaying an offset from a time zone: (1: GMT)(2: -)(3: 4:00)"), localTimeZoneName, timeZoneDiff != 0 ? (timeZoneDiff < 0 ? "-" : "+") : "", diffString)
                 } else {
                     cell.detailTextLabel?.text = localTimeZoneName
                 }
