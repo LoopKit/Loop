@@ -27,24 +27,24 @@ class WatchContext: NSObject, NSSecureCoding, RawRepresentable {
     required init?(rawValue: RawValue) {
         super.init()
 
-        if rawValue["v"] as? Int == version {
-            glucoseValue = rawValue["gv"] as? Int
-            glucoseTrend = rawValue["gt"] as? Int
-            glucoseDate = rawValue["gd"] as? NSDate
-            IOB = rawValue["iob"] as? Double
-            reservoir = rawValue["r"] as? Double
-            pumpDate = rawValue["pd"] as? NSDate
-        } else {
+        guard rawValue["v"] as? Int == version else {
             return nil
         }
+
+        glucoseValue = rawValue["gv"] as? Int
+        glucoseTrend = rawValue["gt"] as? Int
+        glucoseDate = rawValue["gd"] as? NSDate
+        IOB = rawValue["iob"] as? Double
+        reservoir = rawValue["r"] as? Double
+        pumpDate = rawValue["pd"] as? NSDate
     }
 
     required convenience init?(coder: NSCoder) {
-        if let rawValue = coder.decodeObjectOfClass(NSDictionary.self, forKey: "rawValue") as? [String: AnyObject] {
-            self.init(rawValue: rawValue)
-        } else {
+        guard let rawValue = coder.decodeObjectOfClass(NSDictionary.self, forKey: "rawValue") as? [String: AnyObject] else {
             return nil
         }
+
+        self.init(rawValue: rawValue)
     }
 
     func encodeWithCoder(coder: NSCoder) {

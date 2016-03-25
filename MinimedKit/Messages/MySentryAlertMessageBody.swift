@@ -27,16 +27,16 @@ public struct MySentryAlertMessageBody: MessageBody, DictionaryRepresentable {
     private let rxData: NSData
 
     public init?(rxData: NSData) {
-        if rxData.length == self.dynamicType.length, let
+        guard rxData.length == self.dynamicType.length, let
             alertDate = NSDateComponents(mySentryBytes: rxData[2...7]).date
-        {
-            self.rxData = rxData
-
-            alertType = AlertType(rawValue: rxData[1])
-            self.alertDate = alertDate
-        } else {
+        else {
             return nil
         }
+
+        self.rxData = rxData
+
+        alertType = AlertType(rawValue: rxData[1])
+        self.alertDate = alertDate
     }
 
     public var txData: NSData {

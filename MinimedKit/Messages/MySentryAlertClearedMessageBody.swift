@@ -26,13 +26,13 @@ public struct MySentryAlertClearedMessageBody: MessageBody, DictionaryRepresenta
     private let rxData: NSData
 
     public init?(rxData: NSData) {
-        if rxData.length == self.dynamicType.length {
-            self.rxData = rxData
-
-            alertType = AlertType(rawValue: rxData[1])
-        } else {
+        guard rxData.length == self.dynamicType.length else {
             return nil
         }
+
+        self.rxData = rxData
+
+        alertType = AlertType(rawValue: rxData[1])
     }
 
     public var txData: NSData {

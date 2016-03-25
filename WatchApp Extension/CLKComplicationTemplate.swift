@@ -13,14 +13,14 @@ import Foundation
 extension CLKComplicationTemplateModularSmallStackText {
 
     convenience init?(context: WatchContext) {
-        if let value = context.glucoseValue, date = context.glucoseDate {
-            self.init()
-
-            line1TextProvider = CLKSimpleTextProvider(text: "\(value)")
-            line2TextProvider = CLKTimeTextProvider(date: date)
-        } else {
+        guard let value = context.glucoseValue, date = context.glucoseDate else {
             return nil
         }
+
+        self.init()
+
+        line1TextProvider = CLKSimpleTextProvider(text: "\(value)")
+        line2TextProvider = CLKTimeTextProvider(date: date)
     }
 
 }

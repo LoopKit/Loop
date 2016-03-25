@@ -15,7 +15,6 @@ public class ReadTimeCarelinkMessageBody: CarelinkLongMessageBody {
 
     public required init?(rxData: NSData) {
         guard rxData.length == self.dynamicType.length else {
-            super.init(rxData: rxData)
             return nil
         }
 

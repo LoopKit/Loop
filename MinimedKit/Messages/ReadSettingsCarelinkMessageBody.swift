@@ -50,12 +50,6 @@ public class ReadSettingsCarelinkMessageBody: CarelinkLongMessageBody {
 
     public required init?(rxData: NSData) {
         guard rxData.length == self.dynamicType.length else {
-            maxBolus = 0
-            maxBasal = 0
-            selectedBasalProfile = .Standard
-            insulinActionCurveHours = 0
-
-            super.init(rxData: rxData)
             return nil
         }
 

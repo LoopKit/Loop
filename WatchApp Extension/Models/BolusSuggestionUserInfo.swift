@@ -26,7 +26,6 @@ class BolusSuggestionUserInfo: RawRepresentable {
         guard rawValue["v"] as? Int == self.dynamicType.version && rawValue["name"] as? String == BolusSuggestionUserInfo.name,
             let recommendedBolus = rawValue["br"] as? Double else
         {
-            self.recommendedBolus = 0
             return nil
         }
 

@@ -25,10 +25,6 @@ public class ReadTempBasalCarelinkMessageBody: CarelinkLongMessageBody {
 
     public required init?(rxData: NSData) {
         guard rxData.length == self.dynamicType.length else {
-            timeRemaining = 0
-            rate = 0
-            rateType = .Absolute
-            super.init(rxData: rxData)
             return nil
         }
 
