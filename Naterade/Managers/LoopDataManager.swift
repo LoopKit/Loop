@@ -60,7 +60,10 @@ class LoopDataManager {
 
         notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: queue) { (note) -> Void in
             self.carbEffect = nil
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+
+            dispatch_async(dispatch_get_main_queue()) {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+            }
         })
     }
 
