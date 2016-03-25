@@ -544,7 +544,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                break
+                if let URL = NSURL(string: "dexcomcgm://") {
+                    UIApplication.sharedApplication().openURL(URL)
+                }
             case .IOB, .Dose:
                 performSegueWithIdentifier(ReservoirTableViewController.className, sender: indexPath)
             case .COB:
@@ -574,7 +576,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .LastBasal:
                 break
             }
-        case .Pump, .Sensor:
+        case .Sensor:
+            if let URL = NSURL(string: "dexcomcgm://") {
+                UIApplication.sharedApplication().openURL(URL)
+            }
+        case .Pump:
             break
         }
     }
