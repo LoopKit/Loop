@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
+		4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
 		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		4331E0781C85302200FBE832 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0771C85302200FBE832 /* CGPoint.swift */; };
@@ -293,6 +294,7 @@
 		430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertMessageBody.swift; sourceTree = "<group>"; };
 		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
 		430D5CE11B9C1879002551A8 /* NSDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataTests.swift; sourceTree = "<group>"; };
+		4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditTableViewController.swift; sourceTree = "<group>"; };
 		4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateComponents.swift; sourceTree = "<group>"; };
 		4326F5061BA6292F009204C6 /* AlertType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
@@ -827,6 +829,7 @@
 			isa = PBXGroup;
 			children = (
 				43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */,
+				4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */,
 				43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */,
 				43971A2C1C8B94010013154F /* CommandResponseViewController.swift */,
 				43DBF0561C93F6EB00B3C386 /* ReservoirTableViewController.swift */,
@@ -1302,6 +1305,7 @@
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
 				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
+				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,

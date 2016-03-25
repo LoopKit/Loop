@@ -587,6 +587,21 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     // MARK: - Actions
 
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        if identifier == CarbEntryEditViewController.className, let carbStore = dataManager.carbStore {
+            if carbStore.authorizationRequired {
+                carbStore.authorize { (success, error) in
+                    if success {
+                        self.performSegueWithIdentifier(CarbEntryEditViewController.className, sender: sender)
+                    }
+                }
+                return false
+            }
+        }
+
+        return true
+    }
+
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         super.prepareForSegue(segue, sender: sender)
 
@@ -629,12 +644,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                             self.presentAlertControllerWithError(error)
                         } else {
                             self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                            self.needsRefresh = true
+                            self.reloadData()
                         }
                     } else if self.active && self.visible, let bolus = units where bolus > 0 {
                         self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
+                        self.needsRefresh = true
                     }
-
-                    self.needsRefresh = true
                 }
             }
         }
