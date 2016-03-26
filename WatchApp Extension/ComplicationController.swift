@@ -74,7 +74,15 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
         handler(nil)
     }
-    
+
+    func requestedUpdateDidBegin() {
+        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
+    }
+
+    func requestedUpdateBudgetExhausted() {
+        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
+    }
+
     // MARK: - Update Scheduling
     
     func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {

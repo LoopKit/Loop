@@ -10,6 +10,11 @@
 		430B2F841B9C9F97005DCF14 /* MySentryAlertMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F831B9C9F97005DCF14 /* MySentryAlertMessageBody.swift */; };
 		430B2F861B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */; };
 		4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */; };
+		4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */; };
+		4315D28B1CA5F48100589052 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
+		4315D28D1CA5F55F00589052 /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D28C1CA5F55F00589052 /* NSDateFormatter.swift */; };
+		4315D28F1CA5F60000589052 /* DiagnosticLogger+Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D28E1CA5F60000589052 /* DiagnosticLogger+Error.swift */; };
+		4315D2901CA6332F00589052 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
 		4326F5051BA5EC8F009204C6 /* NSDateComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */; };
 		4326F5071BA6292F009204C6 /* AlertType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326F5061BA6292F009204C6 /* AlertType.swift */; };
 		4331E0781C85302200FBE832 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0771C85302200FBE832 /* CGPoint.swift */; };
@@ -295,6 +300,9 @@
 		430B2F851B9CA2D4005DCF14 /* MySentryAlertClearedMessageBody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MySentryAlertClearedMessageBody.swift; sourceTree = "<group>"; };
 		430D5CE11B9C1879002551A8 /* NSDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDataTests.swift; sourceTree = "<group>"; };
 		4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditTableViewController.swift; sourceTree = "<group>"; };
+		4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLogger+LoopKit.swift"; sourceTree = "<group>"; };
+		4315D28C1CA5F55F00589052 /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
+		4315D28E1CA5F60000589052 /* DiagnosticLogger+Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLogger+Error.swift"; sourceTree = "<group>"; };
 		4326F5041BA5EC8F009204C6 /* NSDateComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateComponents.swift; sourceTree = "<group>"; };
 		4326F5061BA6292F009204C6 /* AlertType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertType.swift; sourceTree = "<group>"; };
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
@@ -689,11 +697,13 @@
 				43757D171C07DA6D00910CB9 /* CLKComplicationTemplate.swift */,
 				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
 				43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */,
+				4315D28E1CA5F60000589052 /* DiagnosticLogger+Error.swift */,
 				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
 				43A9438B1B926B7B0051FA24 /* GlanceController.swift */,
 				4354002E1C9F718600D5819C /* IdentifiableClass.swift */,
 				43A943851B926B7B0051FA24 /* InterfaceController.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
+				4315D28C1CA5F55F00589052 /* NSDateFormatter.swift */,
 				435400381C9FB7FC00D5819C /* UIColor.swift */,
 				435400361C9F970500D5819C /* WKAlertAction.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
@@ -857,6 +867,7 @@
 			children = (
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
+				4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */,
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
@@ -1222,6 +1233,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
+				4315D2901CA6332F00589052 /* RemoteSettings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1281,6 +1293,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43971A2D1C8B94010013154F /* CommandResponseViewController.swift in Sources */,
+				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
@@ -1375,11 +1388,13 @@
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */,
 				43FF3D661BADE39000DE240A /* UnknownMessageBody.swift in Sources */,
+				4315D28D1CA5F55F00589052 /* NSDateFormatter.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				4354002D1C9F66C000D5819C /* BolusInterfaceController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				435400371C9F970500D5819C /* WKAlertAction.swift in Sources */,
 				43FF3D631BADE39000DE240A /* MySentryAlertClearedMessageBody.swift in Sources */,
+				4315D28B1CA5F48100589052 /* DiagnosticLogger.swift in Sources */,
 				43FF3D681BADE39400DE240A /* PacketType.swift in Sources */,
 				43757D181C07DA6D00910CB9 /* CLKComplicationTemplate.swift in Sources */,
 				4354002F1C9F718600D5819C /* IdentifiableClass.swift in Sources */,
@@ -1387,6 +1402,7 @@
 				439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */,
 				43FF3D611BADE38C00DE240A /* MessageBody.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
+				4315D28F1CA5F60000589052 /* DiagnosticLogger+Error.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */,
 				43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */,

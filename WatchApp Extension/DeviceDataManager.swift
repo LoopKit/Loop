@@ -85,7 +85,9 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
     @available(watchOSApplicationExtension 2.2, *)
     func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
-
+        if let error = error {
+            DiagnosticLogger()?.addError(String(error), fromSource: "WCSession")
+        }
     }
 
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
