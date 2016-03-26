@@ -478,7 +478,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
         switch activationState {
         case .Activated:
-            self.logger?.addError("activationDidCompleteWithState", fromSource: "WCSession")
+            if let error = error {
+                logger?.addError(error, fromSource: "WCSession")
+            }
         case .Inactive, .NotActivated:
             break
         }
