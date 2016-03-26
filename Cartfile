@@ -1,4 +1,4 @@
-# github "loudnate/LoopKit" "dev"
-git "~/src/github.com/loudnate/LoopKit" "error-display"
+github "loudnate/LoopKit" "error-display"
+# git "~/src/github.com/loudnate/LoopKit" "error-display"
 github "loudnate/xDripG5" "higher-qos"
 github "loudnate/SwiftCharts" "loudnate/naterade"
