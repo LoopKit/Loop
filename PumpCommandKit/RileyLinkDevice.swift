@@ -12,7 +12,7 @@ import RileyLinkKit
 
 
 enum CommandError: ErrorType {
-    case ConfigurationError
+    case ConfigurationError(String)
     case CommunicationError(String)
 }
 
@@ -31,7 +31,7 @@ extension RileyLinkDevice {
     func sendBolusDose(units: Double, completionHandler: (success: Bool, error: CommandError?) -> Void) {
 
         guard let pumpID = pumpState?.pumpId else {
-            completionHandler(success: false, error: .ConfigurationError)
+            completionHandler(success: false, error: .ConfigurationError("Pump ID not found"))
             return
         }
 
@@ -58,7 +58,7 @@ extension RileyLinkDevice {
      */
     func sendTempBasalDose(unitsPerHour: Double, duration: NSTimeInterval, completionHandler: (success: Bool, doseMessage: PumpMessage?, error: CommandError?) -> Void) {
         guard let pumpID = pumpState?.pumpId else {
-            completionHandler(success: false, doseMessage: nil, error: .ConfigurationError)
+            completionHandler(success: false, doseMessage: nil, error: .ConfigurationError("Pump ID not found"))
             return
         }
 
@@ -78,7 +78,7 @@ extension RileyLinkDevice {
 
     func changeTime(completionHandler: (success: Bool, error: CommandError?) -> Void) {
         guard let pumpID = pumpState?.pumpId else {
-            completionHandler(success: false, error: .ConfigurationError)
+            completionHandler(success: false, error: .ConfigurationError("Pump ID not found"))
             return
         }
 

@@ -27,6 +27,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
+    enum Error: ErrorType {
+        case ValueError(String)
+    }
+
     // MARK: - Observed state
 
     lazy var logger = DiagnosticLogger()
@@ -436,7 +440,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 completionHandler?(units: units, error: error)
             }
         } else {
-            completionHandler?(units: nil, error: CarbStore.Error.ConfigurationError)
+            completionHandler?(units: nil, error: Error.ValueError("Unable to parse CarbEntryUserInfo: \(message)"))
         }
     }
 

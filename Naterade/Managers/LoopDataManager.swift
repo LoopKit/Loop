@@ -19,7 +19,7 @@ class LoopDataManager {
     enum Error: ErrorType {
         case CommunicationError
         case MissingDataError(String)
-        case StaleDataError
+        case StaleDataError(String)
     }
 
     typealias TempBasalRecommendation = (recommendedDate: NSDate, rate: Double, duration: NSTimeInterval)
@@ -262,7 +262,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.StaleDataError
+            throw Error.StaleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
         }
 
         guard let
@@ -357,8 +357,12 @@ class LoopDataManager {
 
         let recencyInterval = NSTimeInterval(minutes: 15)
 
-        guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow where abs(predictedInterval) <= recencyInterval else {
-            throw Error.StaleDataError
+        guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow else {
+            throw Error.MissingDataError("No glucose data found")
+        }
+
+        guard abs(predictedInterval) <= recencyInterval else {
+            throw Error.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
         }
 
         return DoseMath.recommendBolusFromPredictedGlucose(glucose,
@@ -388,7 +392,7 @@ class LoopDataManager {
         }
 
         guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
-            resultsHandler(success: false, error: Error.StaleDataError)
+            resultsHandler(success: false, error: Error.StaleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
             return
         }
 
