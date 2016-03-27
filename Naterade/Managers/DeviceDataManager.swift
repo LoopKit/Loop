@@ -88,7 +88,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             device = note.object as? RileyLinkDevice,
             packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true,
             let data = packet.data,
-            message = PumpMessage(rxData: data)
+            message = PumpMessage(rxData: data) where message.address == pumpID
         {
             switch message.packetType {
             case .MySentry:
