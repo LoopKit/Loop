@@ -152,6 +152,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
             ], toCollection: "g5"
         )
+
+        self.rileyLinkManager?.firstConnectedDevice?.assertIdleListening()
     }
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
@@ -180,6 +182,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             }
         }
+
+        self.rileyLinkManager?.firstConnectedDevice?.assertIdleListening()
     }
 
     // MARK: - Managed state

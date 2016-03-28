@@ -36,6 +36,10 @@ extern NSString * const RileyLinkDeviceTimeKey;
 
 @property (nonatomic, nullable, readonly) NSDate *lastIdle;
 
+#pragma mark - Device commands
+
+- (void)assertIdleListening;
+
 #pragma mark - Pump commands
 
 - (void)tunePumpWithCompletionHandler:(void (^ _Nullable)(NSDictionary<NSString *, id> * _Nonnull))completionHandler;

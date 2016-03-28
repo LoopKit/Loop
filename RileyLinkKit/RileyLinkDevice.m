@@ -94,6 +94,11 @@ NSString * const RileyLinkDeviceTimeKey = @"com.ps2.RileyLinkKit.RileyLinkDevice
 
 #pragma mark -
 
+- (void)assertIdleListening
+{
+    [self.device assertIdleListening];
+}
+
 - (void)deviceNotificationReceived:(NSNotification *)note
 {
     if ([note.name isEqualToString:RILEYLINK_EVENT_PACKET_RECEIVED]) {
