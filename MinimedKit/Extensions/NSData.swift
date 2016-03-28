@@ -86,6 +86,7 @@ extension NSData {
                 case 97...102:  // 'a'-'f'
                     offset = 97 - 10         // 10 since 'a' is 10, not 0
                 default:
+                    self.init()
                     return nil
                 }
 
