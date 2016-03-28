@@ -48,6 +48,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             {
                 handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
             } else {
+                DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
                 handler(nil)
             }
         default:
@@ -69,10 +70,9 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
         } else {
+            DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
             handler(nil)
         }
-
-        handler(nil)
     }
 
     func requestedUpdateDidBegin() {
