@@ -477,7 +477,7 @@
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                                     <state key="normal" title="Deliver"/>
                                                     <connections>
-                                                        <action selector="deliverBolus:" destination="WhH-Np-jCn" eventType="touchUpInside" id="CYx-BY-Fho"/>
+                                                        <action selector="authenticateBolus:" destination="WhH-Np-jCn" eventType="touchUpInside" id="ThV-l5-bFE"/>
                                                     </connections>
                                                 </button>
                                             </subviews>

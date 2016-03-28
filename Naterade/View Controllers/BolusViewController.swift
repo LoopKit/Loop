@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LocalAuthentication
 import LoopKit
 
 
@@ -36,9 +37,25 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
 
     // MARK: - Actions
 
-    @IBAction func deliverBolus(sender: AnyObject) {
+    @IBAction func authenticateBolus(sender: AnyObject) {
         bolusAmountTextField.resignFirstResponder()
 
+        let context = LAContext()
+
+        if context.canEvaluatePolicy(.DeviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.DeviceOwnerAuthentication,
+                                   localizedReason: NSLocalizedString("Please authenticate to bolus", comment: "The message displayed during a device authentication prompt for bolus specification"),
+                                   reply: { (success, error) in
+                if success {
+                    self.setBolusAndClose(sender)
+                }
+            })
+        } else {
+            setBolusAndClose(sender)
+        }
+    }
+
+    private func setBolusAndClose(sender: AnyObject) {
         if let text = bolusAmountTextField?.text, bolus = decimalFormatter.numberFromString(text)?.doubleValue {
             self.bolus = bolus
 
