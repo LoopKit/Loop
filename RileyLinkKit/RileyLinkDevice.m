@@ -87,6 +87,11 @@ NSString * const RileyLinkDeviceTimeKey = @"com.ps2.RileyLinkKit.RileyLinkDevice
     return [self.pumpState.pumpId copy];
 }
 
+- (NSDate *)lastIdle
+{
+    return self.device.lastIdle;
+}
+
 #pragma mark -
 
 - (void)deviceNotificationReceived:(NSNotification *)note

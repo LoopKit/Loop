@@ -69,8 +69,9 @@ class RileyLinkDeviceTableViewController: UITableViewController {
     private enum DeviceRow: Int {
         case RSSI
         case Connection
+        case IdleStatus
 
-        static let count = 2
+        static let count = 3
     }
 
     private enum PumpRow: Int {
@@ -123,6 +124,14 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 cell.textLabel?.text = NSLocalizedString("Signal strength", comment: "The title of the cell showing signal strength (RSSI)")
                 if let RSSI = device.RSSI?.integerValue {
                     cell.detailTextLabel?.text = "\(RSSI) dB"
+                } else {
+                    cell.detailTextLabel?.text = "–"
+                }
+            case .IdleStatus:
+                cell.textLabel?.text = NSLocalizedString("On Idle", comment: "The title of the cell showing the last idle")
+
+                if let idleDate = device.lastIdle {
+                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(idleDate)
                 } else {
                     cell.detailTextLabel?.text = "–"
                 }
