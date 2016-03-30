@@ -27,7 +27,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEndDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
         if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
-            handler(date.dateByAddingTimeInterval(15 * 60))
+            handler(date)
         } else {
             handler(nil)
         }
@@ -70,7 +70,6 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
         } else {
-            DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
             handler(nil)
         }
     }
@@ -87,7 +86,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {
         // Call the handler with the date when you would next like to be given the opportunity to update your complication content
-        handler(NSDate(timeIntervalSinceNow: NSTimeInterval(60 * 60 * 6)))
+        handler(nil)
     }
     
     // MARK: - Placeholder Templates

@@ -20,26 +20,12 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
     private var connectSession: WCSession?
 
-    private static var lastContextDataFilename = "lastContextData.data"
-
-    private func getDataPath(filename: String) -> String? {
-        return NSFileManager.defaultManager().URLsForDirectory(.CachesDirectory, inDomains: .UserDomainMask).first?.URLByAppendingPathComponent(filename).path
-    }
-
     private func readContext() -> WatchContext? {
-        if let cacheFilePath = getDataPath(self.dynamicType.lastContextDataFilename) {
-            return NSKeyedUnarchiver.unarchiveObjectWithFile(cacheFilePath) as? WatchContext
-        } else {
-            return nil
-        }
+        return NSUserDefaults.standardUserDefaults().watchContext
     }
 
     private func saveContext(context: WatchContext) {
-        if let cacheFilePath = getDataPath(self.dynamicType.lastContextDataFilename) {
-            let data = NSKeyedArchiver.archivedDataWithRootObject(context)
-
-            NSFileManager.defaultManager().createFileAtPath(cacheFilePath, contents: data, attributes: [NSFileProtectionKey: NSFileProtectionComplete])
-        }
+        NSUserDefaults.standardUserDefaults().watchContext = context
     }
 
     dynamic var lastContextData: WatchContext? {

@@ -91,6 +91,7 @@
 		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
 		43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; };
 		43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43C094481CAB9A21001F6403 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094471CAB9A21001F6403 /* NSUserDefaults.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* NSDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */; };
 		43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */; };
 		43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */; };
@@ -375,6 +376,7 @@
 		43A9438F1B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43A943A21B928D400051FA24 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		43C094471CAB9A21001F6403 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
 		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
 		43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverInNavigationControllerSegue.swift; sourceTree = "<group>"; };
@@ -711,6 +713,7 @@
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				43DE92571C5479C3001FFDE1 /* Models */,
 				43A943831B926B7B0051FA24 /* Supporting Files */,
+				43C094471CAB9A21001F6403 /* NSUserDefaults.swift */,
 			);
 			path = "WatchApp Extension";
 			sourceTree = "<group>";
@@ -1408,6 +1411,7 @@
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				4315D28F1CA5F60000589052 /* DiagnosticLogger+Error.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
+				43C094481CAB9A21001F6403 /* NSUserDefaults.swift in Sources */,
 				43FF3D641BADE39000DE240A /* MySentryAlertMessageBody.swift in Sources */,
 				43A943861B926B7B0051FA24 /* InterfaceController.swift in Sources */,
 				435400391C9FB7FC00D5819C /* UIColor.swift in Sources */,
