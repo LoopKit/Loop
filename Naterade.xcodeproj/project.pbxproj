@@ -92,6 +92,7 @@
 		43A943A91B928D400051FA24 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; };
 		43A943AA1B928D400051FA24 /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 43A943A21B928D400051FA24 /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		43C094481CAB9A21001F6403 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094471CAB9A21001F6403 /* NSUserDefaults.swift */; };
+		43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094491CACCC73001F6403 /* NotificationManager.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* NSDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */; };
 		43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */; };
 		43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */; };
@@ -377,6 +378,7 @@
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43A943A21B928D400051FA24 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43C094471CAB9A21001F6403 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
+		43C094491CACCC73001F6403 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
 		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
 		43DBF0501C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverInNavigationControllerSegue.swift; sourceTree = "<group>"; };
@@ -876,6 +878,7 @@
 				4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */,
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
+				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
 			);
 			path = Managers;
@@ -1324,6 +1327,7 @@
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
+				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
 				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,

@@ -462,7 +462,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     if let error = error {
                         self.logger?.addError(error, fromSource: "Bolus")
 
-                        // TODO: Send push notification
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
                     }
 
                     replyHandler([:])

@@ -182,6 +182,10 @@ class LoopDataManager {
     }
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
+            if let bolusDate = lastBolus?.1 where bolusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -5) {
+                lastBolus = nil
+            }
+
             predictedGlucose = nil
         }
     }
@@ -197,6 +201,7 @@ class LoopDataManager {
     }
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
+    private var lastBolus: (Double, NSDate)?
     private var lastLoopError: ErrorType?
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
