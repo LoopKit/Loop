@@ -12,6 +12,7 @@ import Foundation
 extension NSUserDefaults {
     private enum Key: String {
         case WatchContext = "com.loudnate.Naterade.WatchContext"
+        case WatchContextReadyForComplication = "com.loudnate.Naterade.WatchContextReadyForComplication"
     }
 
     var watchContext: WatchContext? {
@@ -24,6 +25,17 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue?.rawValue, forKey: Key.WatchContext.rawValue)
+
+            watchContextReadyForComplication = newValue != nil
+        }
+    }
+
+    var watchContextReadyForComplication: Bool {
+        get {
+            return boolForKey(Key.WatchContextReadyForComplication.rawValue)
+        }
+        set {
+            setBool(newValue, forKey: Key.WatchContextReadyForComplication.rawValue)
         }
     }
 }

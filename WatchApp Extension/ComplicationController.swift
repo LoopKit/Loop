@@ -63,6 +63,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEntriesForComplication(complication: CLKComplication, afterDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
+        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
 
         if let context = DeviceDataManager.sharedManager.lastContextData,
             glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
@@ -76,6 +77,8 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
 
     func requestedUpdateDidBegin() {
         DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
+
+        DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 
     func requestedUpdateBudgetExhausted() {

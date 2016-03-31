@@ -107,10 +107,7 @@ class InterfaceController: WKInterfaceController {
             }
         }
 
-        let server = CLKComplicationServer.sharedInstance()
-        for complication in server.activeComplications ?? [] {
-            server.extendTimelineForComplication(complication)
-        }
+        DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 
     // MARK: - KVO
