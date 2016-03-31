@@ -708,12 +708,12 @@
 				43A943851B926B7B0051FA24 /* InterfaceController.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
 				4315D28C1CA5F55F00589052 /* NSDateFormatter.swift */,
+				43C094471CAB9A21001F6403 /* NSUserDefaults.swift */,
 				435400381C9FB7FC00D5819C /* UIColor.swift */,
 				435400361C9F970500D5819C /* WKAlertAction.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				43DE92571C5479C3001FFDE1 /* Models */,
 				43A943831B926B7B0051FA24 /* Supporting Files */,
-				43C094471CAB9A21001F6403 /* NSUserDefaults.swift */,
 			);
 			path = "WatchApp Extension";
 			sourceTree = "<group>";

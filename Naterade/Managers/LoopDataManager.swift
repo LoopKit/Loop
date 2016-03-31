@@ -44,24 +44,26 @@ class LoopDataManager {
 
     private func observe() {
         let center = NSNotificationCenter.defaultCenter()
-        let queue = NSOperationQueue()
-        queue.underlyingQueue = dataAccessQueue
 
         notificationObservers = [
-            center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: queue) { (note) -> Void in
-                self.glucoseMomentumEffect = nil
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+            center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
+                dispatch_async(self.dataAccessQueue) {
+                    self.glucoseMomentumEffect = nil
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                }
             },
-            center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: queue) { (note) -> Void in
-                self.insulinEffect = nil
-                self.loop()
+            center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
+                dispatch_async(self.dataAccessQueue) {
+                    self.insulinEffect = nil
+                    self.loop()
+                }
             }
         ]
 
-        notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: queue) { (note) -> Void in
-            self.carbEffect = nil
+        notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: nil) { (note) -> Void in
+            dispatch_async(self.dataAccessQueue) {
+                self.carbEffect = nil
 
-            dispatch_async(dispatch_get_main_queue()) {
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
             }
         })

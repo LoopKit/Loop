@@ -25,9 +25,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         let application = UIApplication.sharedApplication()
 
         notificationObservers += [
-            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: mainQueue) { (note) -> Void in
-                self.needsRefresh = true
-                self.reloadData()
+            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: nil) { (note) -> Void in
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.needsRefresh = true
+                    self.reloadData()
+                }
             },
             notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
                 self.active = false
@@ -594,13 +596,17 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // MARK: - Actions
 
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
-        if identifier == CarbEntryEditViewController.className, let carbStore = dataManager.carbStore {
-            if carbStore.authorizationRequired {
-                carbStore.authorize { (success, error) in
-                    if success {
-                        self.performSegueWithIdentifier(CarbEntryEditViewController.className, sender: sender)
+        if identifier == CarbEntryEditViewController.className {
+            if let carbStore = dataManager.carbStore {
+                if carbStore.authorizationRequired {
+                    carbStore.authorize { (success, error) in
+                        if success {
+                            self.performSegueWithIdentifier(CarbEntryEditViewController.className, sender: sender)
+                        }
                     }
+                    return false
                 }
+            } else {
                 return false
             }
         }

@@ -1,4 +1,4 @@
-github "loudnate/LoopKit" "dev"
+github "loudnate/LoopKit" "dose-store-reentrancy"
 # git "~/src/github.com/loudnate/LoopKit" "dev"
 github "loudnate/xDripG5" "higher-qos"
 github "loudnate/SwiftCharts" "loudnate/naterade"
