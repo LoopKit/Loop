@@ -104,7 +104,7 @@ class LoopDataManager {
                     if let frequency = result["bestFreq"] as? NSNumber {
                         self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
                     } else {
-                        self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: <#T##String#>)
+                        self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: "RileyLink")
                     }
                 }
             }
