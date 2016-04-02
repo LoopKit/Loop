@@ -79,7 +79,7 @@ struct NotificationManager {
 
         for minutes: Double in [20, 40, 60, 120] {
             let notification = UILocalNotification()
-            let failureInterval = NSTimeInterval(minutes)
+            let failureInterval = NSTimeInterval(minutes: minutes)
 
             let formatter = NSDateComponentsFormatter()
             formatter.maximumUnitCount = 1
