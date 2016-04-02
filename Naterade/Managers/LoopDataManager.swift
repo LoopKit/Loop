@@ -82,6 +82,8 @@ class LoopDataManager {
 
                     if let error = error {
                         self.deviceDataManager.logger?.addError(error, fromSource: "TempBasal")
+                    } else {
+                        self.lastLoopCompleted = NSDate()
                     }
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
@@ -89,9 +91,23 @@ class LoopDataManager {
 
                 // Delay the notification until we know the result of the temp basal
                 return
+            } else {
+                lastLoopCompleted = NSDate()
             }
         } catch let error {
             lastLoopError = error
+
+            // Try to troubleshoot communications errors
+            if  let pumpStatusDate = deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
+                let device = deviceDataManager.rileyLinkManager?.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
+                device.tunePumpWithCompletionHandler { (result) in
+                    if let frequency = result["bestFreq"] as? NSNumber {
+                        self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
+                    } else {
+                        self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: <#T##String#>)
+                    }
+                }
+            }
         }
 
         NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
@@ -204,6 +220,11 @@ class LoopDataManager {
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
     private var lastLoopError: ErrorType?
+    private var lastLoopCompleted: NSDate? {
+        didSet {
+            NotificationManager.scheduleLoopNotRunningNotifications()
+        }
+    }
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose

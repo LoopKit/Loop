@@ -107,6 +107,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
             break
         default:
             if let context = WatchContext(rawValue: userInfo) {
+                DiagnosticLogger()?.addError("Received new complication userInfo", fromSource: "WCSession")
                 lastContextData = context
             }
         }

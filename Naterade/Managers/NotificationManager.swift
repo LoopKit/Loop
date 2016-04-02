@@ -12,6 +12,7 @@ import UIKit
 struct NotificationManager {
     enum Category: String {
         case BolusFailure
+        case LoopNotRunning
     }
 
     enum Action: String {
@@ -68,5 +69,34 @@ struct NotificationManager {
         ]
 
         UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+    }
+
+    static func scheduleLoopNotRunningNotifications() {
+        let app = UIApplication.sharedApplication()
+
+        // Cancel any previous scheduled notifications
+        app.scheduledLocalNotifications?.filter({ $0.category == Category.LoopNotRunning.rawValue }).forEach({ app.cancelLocalNotification($0) })
+
+        for minutes: Double in [20, 40, 60, 120] {
+            let notification = UILocalNotification()
+            let failureInterval = NSTimeInterval(minutes)
+
+            let formatter = NSDateComponentsFormatter()
+            formatter.maximumUnitCount = 1
+            formatter.allowedUnits = [.Hour, .Minute]
+            formatter.unitsStyle = .Full
+            formatter.stringFromTimeInterval(failureInterval)?.localizedLowercaseString
+
+            if let failueIntervalString = formatter.stringFromTimeInterval(failureInterval) {
+                notification.alertBody = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failueIntervalString)
+            }
+
+            notification.alertTitle = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
+            notification.fireDate = NSDate(timeIntervalSinceNow: failureInterval)
+            notification.soundName = UILocalNotificationDefaultSoundName
+            notification.category = Category.LoopNotRunning.rawValue
+
+            app.scheduleLocalNotification(notification)
+        }
     }
 }
