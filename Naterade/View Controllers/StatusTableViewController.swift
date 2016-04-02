@@ -671,19 +671,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     @IBAction func unwindFromBolusViewController(segue: UIStoryboardSegue) {
         if let bolusViewController = segue.sourceViewController as? BolusViewController {
             if let bolus = bolusViewController.bolus where bolus > 0 {
-                if let device = dataManager.rileyLinkManager?.firstConnectedDevice {
-                    device.sendBolusDose(bolus) { (success, error) -> Void in
-                        if let error = error {
-                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
-
-                            dispatch_async(dispatch_get_main_queue()) {
-                                self.presentAlertControllerWithError(error)
-                            }
-                        }
-                    }
-                } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.presentAlertControllerWithError(LoopDataManager.Error.CommunicationError)
+                let startDate = NSDate()
+                dataManager.loopManager.enactBolus(bolus) { (success, error) in
+                    if !success {
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus, atDate: startDate)
                     }
                 }
             }

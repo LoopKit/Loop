@@ -54,14 +54,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - Notifications
 
     func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
-
-    }
-
-    func application(application: UIApplication, handleActionWithIdentifier identifier: String?, forLocalNotification notification: UILocalNotification, completionHandler: () -> Void) {
-        completionHandler()
+        if application.applicationState == .Active {
+            if let message = notification.alertBody {
+                window?.rootViewController?.presentAlertControllerWithTitle(notification.alertTitle, message: message, animated: true, completion: nil)
+            }
+        }
     }
 
     func application(application: UIApplication, handleActionWithIdentifier identifier: String?, forLocalNotification notification: UILocalNotification, withResponseInfo responseInfo: [NSObject : AnyObject], completionHandler: () -> Void) {
+
+        switch identifier {
+        case NotificationManager.Action.RetryBolus.rawValue?:
+            if let units = notification.userInfo?[NotificationManager.UserInfoKey.BolusAmount.rawValue] as? Double,
+                startDate = notification.userInfo?[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? NSDate where
+                startDate.timeIntervalSinceNow >= NSTimeInterval(minutes: -5)
+            {
+                DeviceDataManager.sharedManager.loopManager.enactBolus(units) { (success, error) in
+                    if !success {
+                        NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)
+                    }
+
+                    completionHandler()
+                }
+                return
+            }
+        default:
+            break
+        }
+
         completionHandler()
     }
 
@@ -71,4 +91,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         completionHandler(false)
     }
 }
-

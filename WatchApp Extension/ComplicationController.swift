@@ -78,6 +78,10 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     func requestedUpdateDidBegin() {
         DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
 
+        if !DeviceDataManager.sharedManager.hasNewComplicationData {
+            DiagnosticLogger()?.addError("requestedUpdateDidBegin() called with no new complication data", fromSource: "ClockKit")
+        }
+
         DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 

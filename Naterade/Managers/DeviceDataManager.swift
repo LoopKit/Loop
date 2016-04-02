@@ -457,11 +457,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
             }
         case SetBolusUserInfo.name?:
-            if let bolus = SetBolusUserInfo(rawValue: message), device = rileyLinkManager?.firstConnectedDevice {
-                device.sendBolusDose(bolus.value) { (success, error) -> Void in
-                    if let error = error {
-                        self.logger?.addError(error, fromSource: "Bolus")
-
+            if let bolus = SetBolusUserInfo(rawValue: message) {
+                self.loopManager.enactBolus(bolus.value) { (success, error) in
+                    if !success {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
                     }
 

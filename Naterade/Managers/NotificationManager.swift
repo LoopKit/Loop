@@ -27,6 +27,7 @@ struct NotificationManager {
         let retryBolusAction = UIMutableUserNotificationAction()
         retryBolusAction.title = NSLocalizedString("Retry", comment: "The title of the notification action to retry a bolus command")
         retryBolusAction.identifier = Action.RetryBolus.rawValue
+        retryBolusAction.activationMode = .Background
 
         let bolusFailureCategory = UIMutableUserNotificationCategory()
         bolusFailureCategory.identifier = Category.BolusFailure.rawValue
@@ -56,7 +57,10 @@ struct NotificationManager {
         notification.alertTitle = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
         notification.alertBody = String(format: NSLocalizedString("%@ U bolus may have failed.", comment: "The notification alert describing a possible bolus failure. The substitution parameter is the size of the bolus in units."), NSNumberFormatter.localizedStringFromNumber(units, numberStyle: .DecimalStyle))
         notification.soundName = UILocalNotificationDefaultSoundName
-        notification.category = Category.BolusFailure.rawValue
+
+        if startDate.timeIntervalSinceNow >= NSTimeInterval(minutes: -5) {
+            notification.category = Category.BolusFailure.rawValue
+        }
 
         notification.userInfo = [
             UserInfoKey.BolusAmount.rawValue: units,

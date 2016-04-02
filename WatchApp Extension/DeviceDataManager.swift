@@ -28,7 +28,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
         NSUserDefaults.standardUserDefaults().watchContext = context
     }
 
-    private var hasNewComplicationData: Bool {
+    var hasNewComplicationData: Bool {
         get {
             return NSUserDefaults.standardUserDefaults().watchContextReadyForComplication
         }

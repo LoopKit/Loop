@@ -18,6 +18,7 @@ class LoopDataManager {
 
     enum Error: ErrorType {
         case CommunicationError
+        case ConnectionError
         case MissingDataError(String)
         case StaleDataError(String)
     }
@@ -182,7 +183,7 @@ class LoopDataManager {
     }
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
-            if let bolusDate = lastBolus?.1 where bolusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -5) {
+            if let bolusDate = lastBolus?.date where bolusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -5) {
                 lastBolus = nil
             }
 
@@ -201,7 +202,7 @@ class LoopDataManager {
     }
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
-    private var lastBolus: (Double, NSDate)?
+    private var lastBolus: (units: Double, date: NSDate)?
     private var lastLoopError: ErrorType?
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
@@ -372,13 +373,15 @@ class LoopDataManager {
             throw Error.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
         }
 
+        let pendingBolusAmount: Double = lastBolus?.units ?? 0
+
         return DoseMath.recommendBolusFromPredictedGlucose(glucose,
             lastTempBasal: self.lastTempBasal,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates
-        )
+        ) - pendingBolusAmount
     }
 
     func getRecommendedBolus(resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
@@ -404,7 +407,7 @@ class LoopDataManager {
         }
 
         guard let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
-            resultsHandler(success: false, error: Error.CommunicationError)
+            resultsHandler(success: false, error: Error.ConnectionError)
             return
         }
 
@@ -429,6 +432,41 @@ class LoopDataManager {
     func enactRecommendedTempBasal(resultsHandler: (success: Bool, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             self.setRecommendedTempBasal(resultsHandler)
+        }
+    }
+
+    func enactBolus(units: Double, resultsHandler: (success: Bool, error: Error?) -> Void) {
+        guard units > 0 else {
+            resultsHandler(success: true, error: nil)
+            return
+        }
+
+        guard let device = deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
+            resultsHandler(success: false, error: .ConnectionError)
+            return
+        }
+
+        device.sendBolusDose(units) { (success, error) in
+            if success {
+                self.lastBolus = (units: units, date: NSDate())
+
+                resultsHandler(success: success, error: nil)
+            } else {
+                var loopError: Error?
+
+                if let error = error {
+                    self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+
+                    switch error {
+                    case .ConfigurationError:
+                        loopError = .ConnectionError
+                    case .CommunicationError:
+                        loopError = .CommunicationError
+                    }
+                }
+
+                resultsHandler(success: success, error: loopError)
+            }
         }
     }
 }
