@@ -59,14 +59,20 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
         guard let session = connectSession else { return }
 
         if session.reachable {
+            var replied = false
+
             session.sendMessage(carbEntry.rawValue,
                 replyHandler: { (reply) -> Void in
+                    replied = true
+
                     if let suggestion = BolusSuggestionUserInfo(rawValue: reply) where suggestion.recommendedBolus > 0 {
                         WKExtension.sharedExtension().rootInterfaceController?.presentControllerWithName(BolusInterfaceController.className, context: suggestion)
                     }
                 },
                 errorHandler: { (error) -> Void in
-                    WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+                    if !replied {
+                        WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+                    }
                 }
             )
         } else {
@@ -80,7 +86,6 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
         }
 
         session.sendMessage(userInfo.rawValue, replyHandler: { (reply) -> Void in
-
         }, errorHandler: { (error) -> Void in
             WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
         })

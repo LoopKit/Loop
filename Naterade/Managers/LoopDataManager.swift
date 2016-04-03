@@ -396,13 +396,13 @@ class LoopDataManager {
 
         let pendingBolusAmount: Double = lastBolus?.units ?? 0
 
-        return DoseMath.recommendBolusFromPredictedGlucose(glucose,
+        return max(0, DoseMath.recommendBolusFromPredictedGlucose(glucose,
             lastTempBasal: self.lastTempBasal,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates
-        ) - pendingBolusAmount
+        ) - pendingBolusAmount)
     }
 
     func getRecommendedBolus(resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
