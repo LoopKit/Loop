@@ -71,6 +71,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
         } else {
+            DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
             handler(nil)
         }
     }
