@@ -28,6 +28,15 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
         NSUserDefaults.standardUserDefaults().watchContext = context
     }
 
+    internal private(set) var complicationDataLastRefreshed: NSDate {
+        get {
+            return NSUserDefaults.standardUserDefaults().complicationDataLastRefreshed
+        }
+        set {
+            NSUserDefaults.standardUserDefaults().complicationDataLastRefreshed = newValue
+        }
+    }
+
     var hasNewComplicationData: Bool {
         get {
             return NSUserDefaults.standardUserDefaults().watchContextReadyForComplication
@@ -50,7 +59,11 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
             DeviceDataManager.sharedManager.hasNewComplicationData = false
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
-                server.extendTimelineForComplication(complication)
+                if complicationDataLastRefreshed.timeIntervalSinceNow < NSTimeInterval(-24 * 60 * 60) {
+                    server.extendTimelineForComplication(complication)
+                } else {
+                    server.extendTimelineForComplication(complication)
+                }
             }
         }
     }

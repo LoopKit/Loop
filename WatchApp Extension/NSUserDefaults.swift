@@ -11,8 +11,18 @@ import Foundation
 
 extension NSUserDefaults {
     private enum Key: String {
+        case ComplicationDataLastRefreshed = "com.loudnate.Naterade.ComplicationDataLastRefreshed"
         case WatchContext = "com.loudnate.Naterade.WatchContext"
         case WatchContextReadyForComplication = "com.loudnate.Naterade.WatchContextReadyForComplication"
+    }
+
+    var complicationDataLastRefreshed: NSDate {
+        get {
+            return objectForKey(Key.ComplicationDataLastRefreshed.rawValue) as? NSDate ?? NSDate.distantPast()
+        }
+        set {
+            setObject(newValue, forKey: Key.ComplicationDataLastRefreshed.rawValue)
+        }
     }
 
     var watchContext: WatchContext? {

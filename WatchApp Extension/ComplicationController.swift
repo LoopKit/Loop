@@ -40,10 +40,11 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Population
     
     func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: ((CLKComplicationTimelineEntry?) -> Void)) {
+        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
         switch complication.family {
         case .ModularSmall:
             if let context = DeviceDataManager.sharedManager.lastContextData,
-                date = context.glucoseDate where NSDate().timeIntervalSinceDate(date) <= 15.minutes,
+                date = context.glucoseDate where date.timeIntervalSinceNow <= -15.minutes,
                 let template = CLKComplicationTemplateModularSmallStackText(context: context)
             {
                 handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
