@@ -139,6 +139,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 }
             }
+
+            if status.batteryRemainingPercent == 0 {
+                NotificationManager.sendPumpBatteryLowNotification()
+            }
         }
     }
 

@@ -13,6 +13,8 @@ struct NotificationManager {
     enum Category: String {
         case BolusFailure
         case LoopNotRunning
+        case PumpBatteryLow
+        case PumpReservoirLow
     }
 
     enum Action: String {
@@ -98,5 +100,16 @@ struct NotificationManager {
 
             app.scheduleLocalNotification(notification)
         }
+    }
+
+    static func sendPumpBatteryLowNotification() {
+        let notification = UILocalNotification()
+
+        notification.alertTitle = NSLocalizedString("Pump Battery Low", comment: "The notification title for a low pump battery")
+        notification.alertBody = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
+        notification.soundName = UILocalNotificationDefaultSoundName
+        notification.category = Category.PumpBatteryLow.rawValue
+
+        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
 }
