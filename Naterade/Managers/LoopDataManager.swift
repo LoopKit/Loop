@@ -51,6 +51,18 @@ class LoopDataManager {
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+
+                    // Try to troubleshoot communications errors
+                    if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
+                        let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
+                        device.tunePumpWithCompletionHandler { (result) in
+                            if let frequency = result["bestFreq"] as? NSNumber {
+                                self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
+                            } else {
+                                self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: "RileyLink")
+                            }
+                        }
+                    }
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
@@ -96,18 +108,6 @@ class LoopDataManager {
             }
         } catch let error {
             lastLoopError = error
-
-            // Try to troubleshoot communications errors
-            if  let pumpStatusDate = deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
-                let device = deviceDataManager.rileyLinkManager?.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
-                device.tunePumpWithCompletionHandler { (result) in
-                    if let frequency = result["bestFreq"] as? NSNumber {
-                        self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
-                    } else {
-                        self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: "RileyLink")
-                    }
-                }
-            }
         }
 
         NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
