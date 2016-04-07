@@ -107,9 +107,6 @@ class InterfaceController: WKInterfaceController {
             }
         }
 
-        if DeviceDataManager.sharedManager.hasNewComplicationData {
-            DiagnosticLogger()?.addError("Manually updating complication data from \(#function)", fromSource: "ClockKit")
-        }
         DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 
