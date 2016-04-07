@@ -112,4 +112,8 @@ struct NotificationManager {
 
         UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
+
+    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval) {
+
+    }
 }
