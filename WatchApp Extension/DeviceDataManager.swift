@@ -59,7 +59,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
             DeviceDataManager.sharedManager.hasNewComplicationData = false
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
-                if complicationDataLastRefreshed.timeIntervalSinceNow < NSTimeInterval(-24 * 60 * 60) {
+                if complicationDataLastRefreshed.timeIntervalSinceNow < NSTimeInterval(-12 * 60 * 60) {
                     complicationDataLastRefreshed = NSDate()
                     server.reloadTimelineForComplication(complication)
                 } else {
