@@ -20,9 +20,9 @@ class BolusCommand: TwoStepCommand {
     init(units: Double, address: String) {
 
         firstMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .Bolus, messageBody: CarelinkShortMessageBody())
-        firstResponse = .PumpStatusAck
+        firstResponse = .PumpAck
         secondMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .Bolus, messageBody: BolusCarelinkMessageBody(units: units))
-        secondResponse = .PumpStatusAck
+        secondResponse = .PumpAck
 
     }
     
