@@ -54,7 +54,7 @@ class LoopDataManager {
 
                     // Try to troubleshoot communications errors
                     if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
-                        let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
+                        let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
                         device.tunePumpWithCompletionHandler { (result) in
                             if let frequency = result["bestFreq"] as? NSNumber {
                                 self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
@@ -427,7 +427,7 @@ class LoopDataManager {
             return
         }
 
-        guard let device = self.deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
+        guard let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice else {
             resultsHandler(success: false, error: Error.ConnectionError)
             return
         }
@@ -462,7 +462,7 @@ class LoopDataManager {
             return
         }
 
-        guard let device = deviceDataManager.rileyLinkManager?.firstConnectedDevice else {
+        guard let device = deviceDataManager.rileyLinkManager.firstConnectedDevice else {
             resultsHandler(success: false, error: .ConnectionError)
             return
         }

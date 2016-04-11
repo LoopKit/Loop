@@ -21,6 +21,18 @@
 		4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
 		4346D1FA1C790F6F00ABAFE3 /* FixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */; };
+		434AB0A71CBB4C0700422F4A /* RileyLinkKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 434AB0A61CBB4C0700422F4A /* RileyLinkKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		434AB0AB1CBB4C0700422F4A /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0A41CBB4C0700422F4A /* RileyLinkKit.framework */; };
+		434AB0AC1CBB4C0700422F4A /* RileyLinkKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0A41CBB4C0700422F4A /* RileyLinkKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		434AB0B01CBB4C3200422F4A /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43CA93361CB98079000026B5 /* MinimedKit.framework */; };
+		434AB0B21CBB4C3300422F4A /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */; };
+		434AB0B81CBB4C6A00422F4A /* Either.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B31CBB4C6A00422F4A /* Either.swift */; };
+		434AB0B91CBB4C6A00422F4A /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B41CBB4C6A00422F4A /* NSTimeInterval.swift */; };
+		434AB0BA1CBB4C6A00422F4A /* PumpOps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B51CBB4C6A00422F4A /* PumpOps.swift */; };
+		434AB0BB1CBB4C6A00422F4A /* PumpOpsSynchronous.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B61CBB4C6A00422F4A /* PumpOpsSynchronous.swift */; };
+		434AB0BC1CBB4C6A00422F4A /* PumpState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B71CBB4C6A00422F4A /* PumpState.swift */; };
+		434AB0C01CBB4E5A00422F4A /* RileyLinkDeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0BF1CBB4E5A00422F4A /* RileyLinkDeviceManager.swift */; };
+		434AB0C21CBB683200422F4A /* RileyLinkDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0C11CBB683200422F4A /* RileyLinkDevice.swift */; };
 		434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
@@ -109,6 +121,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		434AB0A91CBB4C0700422F4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 434AB0A31CBB4C0700422F4A;
+			remoteInfo = RileyLinkKit;
+		};
 		43A943801B926B7B0051FA24 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -165,6 +184,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				434AB0AC1CBB4C0700422F4A /* RileyLinkKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -194,6 +214,17 @@
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
+		434AB0A41CBB4C0700422F4A /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		434AB0A61CBB4C0700422F4A /* RileyLinkKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RileyLinkKit.h; sourceTree = "<group>"; };
+		434AB0A81CBB4C0700422F4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkBLEKit.framework; path = Carthage/Build/iOS/RileyLinkBLEKit.framework; sourceTree = "<group>"; };
+		434AB0B31CBB4C6A00422F4A /* Either.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Either.swift; sourceTree = "<group>"; };
+		434AB0B41CBB4C6A00422F4A /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
+		434AB0B51CBB4C6A00422F4A /* PumpOps.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpOps.swift; sourceTree = "<group>"; };
+		434AB0B61CBB4C6A00422F4A /* PumpOpsSynchronous.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpOpsSynchronous.swift; sourceTree = "<group>"; };
+		434AB0B71CBB4C6A00422F4A /* PumpState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpState.swift; sourceTree = "<group>"; };
+		434AB0BF1CBB4E5A00422F4A /* RileyLinkDeviceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDeviceManager.swift; sourceTree = "<group>"; };
+		434AB0C11CBB683200422F4A /* RileyLinkDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDevice.swift; sourceTree = "<group>"; };
 		4354002C1C9F66C000D5819C /* BolusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusInterfaceController.swift; sourceTree = "<group>"; };
 		4354002E1C9F718600D5819C /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
@@ -296,6 +327,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		434AB0A01CBB4C0700422F4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				434AB0B21CBB4C3300422F4A /* RileyLinkBLEKit.framework in Frameworks */,
+				434AB0B01CBB4C3200422F4A /* MinimedKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43776F891B8022E90074EA36 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -307,6 +347,7 @@
 				43F78D4E1C914197002152D1 /* InsulinKit.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
 				43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */,
+				434AB0AB1CBB4C0700422F4A /* RileyLinkKit.framework in Frameworks */,
 				4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */,
 				43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */,
 			);
@@ -344,6 +385,23 @@
 			path = "Fixture Data";
 			sourceTree = "<group>";
 		};
+		434AB0A51CBB4C0700422F4A /* RileyLinkKit */ = {
+			isa = PBXGroup;
+			children = (
+				434AB0A61CBB4C0700422F4A /* RileyLinkKit.h */,
+				434AB0A81CBB4C0700422F4A /* Info.plist */,
+				434AB0B31CBB4C6A00422F4A /* Either.swift */,
+				434AB0B41CBB4C6A00422F4A /* NSTimeInterval.swift */,
+				434AB0B51CBB4C6A00422F4A /* PumpOps.swift */,
+				434AB0B61CBB4C6A00422F4A /* PumpOpsSynchronous.swift */,
+				434AB0B71CBB4C6A00422F4A /* PumpState.swift */,
+				434AB0C11CBB683200422F4A /* RileyLinkDevice.swift */,
+				434AB0BF1CBB4E5A00422F4A /* RileyLinkDeviceManager.swift */,
+			);
+			name = RileyLinkKit;
+			path = ../../ps2/rileylink_ios/RileyLinkKit;
+			sourceTree = "<group>";
+		};
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,10 +416,11 @@
 			children = (
 				43E3449B1B9CB08800C85C07 /* Naterade.playground */,
 				43776F8E1B8022E90074EA36 /* Naterade */,
-				43A943A31B928D400051FA24 /* RileyLinkKit */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
 				43F78D2C1C8FC58F002152D1 /* NateradeTests */,
+				43A943A31B928D400051FA24 /* RileyLinkKit */,
+				434AB0A51CBB4C0700422F4A /* RileyLinkKit */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 			);
@@ -374,6 +433,7 @@
 				43A943721B926B7B0051FA24 /* WatchApp.app */,
 				43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */,
 				43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */,
+				434AB0A41CBB4C0700422F4A /* RileyLinkKit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -562,6 +622,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */,
 				43CA93361CB98079000026B5 /* MinimedKit.framework */,
 				43F78D481C914197002152D1 /* CarbKit.framework */,
 				43F78D491C914197002152D1 /* GlucoseKit.framework */,
@@ -579,7 +640,36 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		434AB0A11CBB4C0700422F4A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				434AB0A71CBB4C0700422F4A /* RileyLinkKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		434AB0A31CBB4C0700422F4A /* RileyLinkKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 434AB0AD1CBB4C0700422F4A /* Build configuration list for PBXNativeTarget "RileyLinkKit" */;
+			buildPhases = (
+				434AB09F1CBB4C0700422F4A /* Sources */,
+				434AB0A01CBB4C0700422F4A /* Frameworks */,
+				434AB0A11CBB4C0700422F4A /* Headers */,
+				434AB0A21CBB4C0700422F4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RileyLinkKit;
+			productName = RileyLinkKit;
+			productReference = 434AB0A41CBB4C0700422F4A /* RileyLinkKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		43776F8B1B8022E90074EA36 /* Naterade */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43776FB61B8022E90074EA36 /* Build configuration list for PBXNativeTarget "Naterade" */;
@@ -595,6 +685,7 @@
 			);
 			dependencies = (
 				43A943931B926B7B0051FA24 /* PBXTargetDependency */,
+				434AB0AA1CBB4C0700422F4A /* PBXTargetDependency */,
 			);
 			name = Naterade;
 			productName = Naterade;
@@ -661,10 +752,14 @@
 		43776F841B8022E90074EA36 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0720;
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Nathan Racklyeft";
 				TargetAttributes = {
+					434AB0A31CBB4C0700422F4A = {
+						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = 26AMK8X5DW;
+					};
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
 						DevelopmentTeam = 26AMK8X5DW;
@@ -729,11 +824,19 @@
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
 				43F78D2A1C8FC58F002152D1 /* NateradeTests */,
+				434AB0A31CBB4C0700422F4A /* RileyLinkKit */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		434AB0A21CBB4C0700422F4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43776F8A1B8022E90074EA36 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -813,6 +916,20 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		434AB09F1CBB4C0700422F4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				434AB0B91CBB4C6A00422F4A /* NSTimeInterval.swift in Sources */,
+				434AB0C21CBB683200422F4A /* RileyLinkDevice.swift in Sources */,
+				434AB0B81CBB4C6A00422F4A /* Either.swift in Sources */,
+				434AB0BB1CBB4C6A00422F4A /* PumpOpsSynchronous.swift in Sources */,
+				434AB0C01CBB4E5A00422F4A /* RileyLinkDeviceManager.swift in Sources */,
+				434AB0BC1CBB4C6A00422F4A /* PumpState.swift in Sources */,
+				434AB0BA1CBB4C6A00422F4A /* PumpOps.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43776F881B8022E90074EA36 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -897,6 +1014,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		434AB0AA1CBB4C0700422F4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 434AB0A31CBB4C0700422F4A /* RileyLinkKit */;
+			targetProxy = 434AB0A91CBB4C0700422F4A /* PBXContainerItemProxy */;
+		};
 		43A943811B926B7B0051FA24 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43A9437D1B926B7B0051FA24 /* WatchApp Extension */;
@@ -937,6 +1059,61 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		434AB0AE1CBB4C0700422F4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		434AB0AF1CBB4C0700422F4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		43776FB41B8022E90074EA36 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1164,6 +1341,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		434AB0AD1CBB4C0700422F4A /* Build configuration list for PBXNativeTarget "RileyLinkKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				434AB0AE1CBB4C0700422F4A /* Debug */,
+				434AB0AF1CBB4C0700422F4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
