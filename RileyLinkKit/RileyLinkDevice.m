@@ -16,7 +16,7 @@ NSString * const RileyLinkDeviceDidReceivePacketNotification = @"com.ps2.RileyLi
 
 NSString * const RileyLinkDevicePacketKey = @"com.ps2.RileyLinkKit.RileyLinkDevicePacket";
 
-NSString * const RileyLinkDeviceDidChangeTimeNotification = @"com.ps2.RileyLinkKit.RileyLInkDeviceDidChangeTimeNotification";
+NSString * const RileyLinkDeviceDidChangeTimeNotification = @"com.ps2.RileyLinkKit.RileyLinkDeviceDidChangeTimeNotification";
 
 NSString * const RileyLinkDeviceTimeKey = @"com.ps2.RileyLinkKit.RileyLinkDeviceTime";
 
