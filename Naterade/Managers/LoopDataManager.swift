@@ -18,6 +18,7 @@ class LoopDataManager {
 
     enum Error: ErrorType {
         case CommunicationError
+        case ConfigurationError
         case ConnectionError
         case MissingDataError(String)
         case StaleDataError(String)
@@ -55,7 +56,7 @@ class LoopDataManager {
                     // Try to troubleshoot communications errors
                     if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
                         let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
-                        device.tunePumpWithCompletionHandler { (result) in
+                        device.tunePumpWithResultHandler { (result) in
                             if let frequency = result["bestFreq"] as? NSNumber {
                                 self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
                             } else {
@@ -432,8 +433,14 @@ class LoopDataManager {
             return
         }
 
-        device.sendTempBasalDose(recommendedTempBasal.rate, duration: recommendedTempBasal.duration) { (success, message, error) -> Void in
-            if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody where body.rateType == .Absolute {
+        guard let ops = device.ops else {
+            resultsHandler(success: false, error: Error.ConfigurationError)
+            return
+        }
+
+        ops.setTempBasal(recommendedTempBasal.rate, duration: recommendedTempBasal.duration) { (result) -> Void in
+            switch result {
+            case .Success(let body):
                 dispatch_async(self.dataAccessQueue) {
                     let now = NSDate()
                     let endDate = now.dateByAddingTimeInterval(body.timeRemaining)
@@ -442,10 +449,10 @@ class LoopDataManager {
                     self.lastTempBasal = DoseEntry(startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
                     self.recommendedTempBasal = nil
 
-                    resultsHandler(success: success, error: error)
+                    resultsHandler(success: true, error: nil)
                 }
-            } else {
-                resultsHandler(success: success, error: error)
+            case .Failure(let error):
+                resultsHandler(success: false, error: error)
             }
         }
     }
@@ -467,26 +474,20 @@ class LoopDataManager {
             return
         }
 
-        device.sendBolusDose(units) { (success, error) in
-            if success {
+        guard let ops = device.ops else {
+            resultsHandler(success: false, error: .ConfigurationError)
+            return
+        }
+
+        ops.setNormalBolus(units) { (error) in
+            if let error = error {
+                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+
+                resultsHandler(success: false, error: .CommunicationError)
+            } else {
                 self.lastBolus = (units: units, date: NSDate())
 
-                resultsHandler(success: success, error: nil)
-            } else {
-                var loopError: Error?
-
-                if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-
-                    switch error {
-                    case .ConfigurationError:
-                        loopError = .ConnectionError
-                    case .CommunicationError:
-                        loopError = .CommunicationError
-                    }
-                }
-
-                resultsHandler(success: success, error: loopError)
+                resultsHandler(success: true, error: nil)
             }
         }
     }

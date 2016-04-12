@@ -33,6 +33,7 @@
 		434AB0BC1CBB4C6A00422F4A /* PumpState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0B71CBB4C6A00422F4A /* PumpState.swift */; };
 		434AB0C01CBB4E5A00422F4A /* RileyLinkDeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0BF1CBB4E5A00422F4A /* RileyLinkDeviceManager.swift */; };
 		434AB0C21CBB683200422F4A /* RileyLinkDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434AB0C11CBB683200422F4A /* RileyLinkDevice.swift */; };
+		434AB0C81CBCB77400422F4A /* NSDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */; };
 		434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
@@ -926,6 +927,7 @@
 				434AB0BB1CBB4C6A00422F4A /* PumpOpsSynchronous.swift in Sources */,
 				434AB0C01CBB4E5A00422F4A /* RileyLinkDeviceManager.swift in Sources */,
 				434AB0BC1CBB4C6A00422F4A /* PumpState.swift in Sources */,
+				434AB0C81CBCB77400422F4A /* NSDate.swift in Sources */,
 				434AB0BA1CBB4C6A00422F4A /* PumpOps.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1075,7 +1077,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INFOPLIST_FILE = ../../ps2/rileylink_ios/RileyLinkKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
@@ -1103,7 +1105,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = RileyLinkKit/Info.plist;
+				INFOPLIST_FILE = ../../ps2/rileylink_ios/RileyLinkKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.RileyLinkKit;
@@ -1348,6 +1350,7 @@
 				434AB0AF1CBB4C0700422F4A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */ = {
 			isa = XCConfigurationList;

@@ -64,14 +64,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var rileyLinkDeviceTimeObserver: AnyObject? {
-        willSet {
-            if let observer = rileyLinkDeviceTimeObserver {
-                NSNotificationCenter.defaultCenter().removeObserver(observer)
-            }
-        }
-    }
-
     func receivedRileyLinkManagerNotification(note: NSNotification) {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
     }
@@ -79,9 +71,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     func receivedRileyLinkPacketNotification(note: NSNotification) {
         if let
             device = note.object as? RileyLinkDevice,
-            packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true,
-            let data = packet.data,
-            message = PumpMessage(rxData: data) where message.address.hexadecimalString == pumpID
+            data = note.userInfo?[RileyLinkDevice.IdleMessageDataKey] as? NSData,
+            message = PumpMessage(rxData: data)
         {
             switch message.packetType {
             case .MySentry:
@@ -197,6 +188,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
+    // TODO: Keep a single copy of this value in PumpState
     var pumpTimeZone: NSTimeZone? = NSUserDefaults.standardUserDefaults().pumpTimeZone {
         didSet {
             NSUserDefaults.standardUserDefaults().pumpTimeZone = pumpTimeZone
@@ -218,7 +210,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
                 }
 
-                if case .Ready(let pumpState) = rileyLinkManager.readyState {
+                if let pumpState = rileyLinkManager.pumpState {
                     pumpState.timeZone = pumpTimeZone
                 }
             }
@@ -242,6 +234,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
+    // TODO: Store this in PumpState
     var pumpID: String? = NSUserDefaults.standardUserDefaults().pumpID {
         didSet {
             if pumpID?.characters.count != 6 {
@@ -255,9 +248,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     pumpState.timeZone = timeZone
                 }
 
-                rileyLinkManager.readyState = .Ready(pumpState)
+                rileyLinkManager.pumpState = pumpState
             } else {
-                rileyLinkManager.readyState = .NeedsConfiguration
+                rileyLinkManager.pumpState = nil
             }
 
             doseStore.pumpID = pumpID
@@ -506,6 +499,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             if let timeZone = pumpTimeZone {
                 pumpState?.timeZone = timeZone
             }
+        } else {
+            pumpState = nil
         }
 
         rileyLinkManager = RileyLinkDeviceManager(
@@ -520,12 +515,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
 
         // TODO: Use delegation instead.
-        rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
+        rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkPacketNotification(note)
-        }
-
-        rileyLinkDeviceTimeObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidChangeTimeNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
-            self?.pumpTimeZone = NSTimeZone.defaultTimeZone()
         }
 
         loopManager = LoopDataManager(deviceDataManager: self)

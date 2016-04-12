@@ -29,7 +29,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 case RileyLinkDeviceManager.DidDiscoverDeviceNotification:
                     self?.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: deviceManager.devices.count - 1, inSection: Section.Devices.rawValue)], withRowAnimation: .Automatic)
                 case RileyLinkDeviceManager.ConnectionStateDidChangeNotification:
-                    if let device = note.userInfo?[RileyLinkDeviceKey] as? RileyLinkDevice, index = deviceManager.devices.indexOf(device) {
+                  if let device = note.userInfo?[RileyLinkDeviceManager.RileyLinkDeviceKey] as? RileyLinkDevice, index = deviceManager.devices.indexOf({ $0 === device }) {
                         self?.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: Section.Devices.rawValue)], withRowAnimation: .None)
                     }
                 default:
@@ -118,10 +118,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     // MARK: - UITableViewDataSource
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.rileyLinkState {
-        case .Ready(manager: _):
+        switch dataManager.rileyLinkManager.pumpState {
+        case .Some:
             return Section.count
-        case .NeedsConfiguration:
+        case .None:
             return Section.count - 1
         }
     }
@@ -238,8 +238,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             let device = dataManager.rileyLinkManager.devices[indexPath.row]
 
             deviceCell.configureCellWithName(device.name,
-                signal: device.RSSI?.integerValue,
-                peripheralState: device?.peripheral.state
+                signal: device.RSSI,
+                peripheralState: device.peripheral.state
             )
 
             deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), forControlEvents: .ValueChanged)
@@ -419,7 +419,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 vc.indexPath = indexPath
                 vc.delegate = self
             case let vc as RileyLinkDeviceTableViewController:
-                vc.device = dataManager.rileyLinkManager?.devices[indexPath.row]
+                vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
                 vc.pumpTimeZone = dataManager.pumpTimeZone
             default:
                 break
