@@ -57,10 +57,11 @@ class LoopDataManager {
                     if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
                         let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
                         device.tunePumpWithResultHandler { (result) in
-                            if let frequency = result["bestFreq"] as? NSNumber {
-                                self.deviceDataManager.logger?.addError("Device auto-tuned to \(frequency.descriptionWithLocale(NSLocale.currentLocale())) MHz)", fromSource: "RileyLink")
-                            } else {
-                                self.deviceDataManager.logger?.addError("Device auto-tune failed", fromSource: "RileyLink")
+                            switch result {
+                            case .Success(let scanResult):
+                                self.deviceDataManager.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                            case .Failure(let error):
+                                self.deviceDataManager.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
                             }
                         }
                     }

@@ -230,12 +230,28 @@ class RileyLinkDeviceTableViewController: UITableViewController {
             case .Tune:
                 let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
                     self.device.tunePumpWithResultHandler({ (response) -> Void in
-                        if let data = try? NSJSONSerialization.dataWithJSONObject(response, options: .PrettyPrinted) {
-                            let string = String(data: data, encoding: NSUTF8StringEncoding)
+                        switch response {
+                        case .Success(let scanResult):
+                            var resultDict: [String: AnyObject] = [:]
+                            let decimalFormatter = NSNumberFormatter()
+                            decimalFormatter.minimumSignificantDigits = 5
 
-                            completionHandler(responseText: string ?? "No response found")
-                        } else {
-                            completionHandler(responseText: "An Unknown Issue Occured")
+                            resultDict["Best Frequency"] = scanResult.bestFrequency
+                            resultDict["Trials"] = scanResult.trials.map({ (trial) -> String in
+                                return "\(decimalFormatter.stringFromNumber(trial.frequencyMHz)) MHz  \(trial.successes)/\(trial.tries)  \(trial.avgRSSI)"
+                            })
+
+                            var responseText: String
+
+                            if let data = try? NSJSONSerialization.dataWithJSONObject(resultDict, options: .PrettyPrinted), string = String(data: data, encoding: NSUTF8StringEncoding) {
+                                responseText = string
+                            } else {
+                                responseText = "No response"
+                            }
+
+                            completionHandler(responseText: responseText)
+                        case .Failure(let error):
+                            completionHandler(responseText: String(error))
                         }
                     })
 
