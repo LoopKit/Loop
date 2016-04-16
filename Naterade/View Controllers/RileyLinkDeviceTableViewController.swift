@@ -238,7 +238,7 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
                             resultDict["Best Frequency"] = scanResult.bestFrequency
                             resultDict["Trials"] = scanResult.trials.map({ (trial) -> String in
-                                return "\(decimalFormatter.stringFromNumber(trial.frequencyMHz)) MHz  \(trial.successes)/\(trial.tries)  \(trial.avgRSSI)"
+                                return "\(decimalFormatter.stringFromNumber(trial.frequencyMHz)!) MHz  \(trial.successes)/\(trial.tries)  \(trial.avgRSSI)"
                             })
 
                             var responseText: String

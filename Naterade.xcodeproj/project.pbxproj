@@ -907,6 +907,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkBLEKit.framework",
 			);
 			outputPaths = (
 			);

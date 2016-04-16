@@ -510,6 +510,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
         super.init()
 
+        rileyLinkManager.timerTickEnabled = false
         rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkManagerNotification(note)
         }
