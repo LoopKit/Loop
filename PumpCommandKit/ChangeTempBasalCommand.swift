@@ -20,9 +20,9 @@ class ChangeTempBasalCommand: TwoStepCommand {
     init(unitsPerHour: Double, duration: NSTimeInterval, address: String) {
 
         firstMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .ChangeTempBasal, messageBody: CarelinkShortMessageBody())
-        firstResponse = .PumpStatusAck
+        firstResponse = .PumpAck
         secondMessage = PumpMessage(packetType: .Carelink, address: address, messageType: .ChangeTempBasal, messageBody: ChangeTempBasalCarelinkMessageBody(unitsPerHour: unitsPerHour, duration: duration))
-        secondResponse = .PumpStatusAck
+        secondResponse = .PumpAck
     }
     
 }
