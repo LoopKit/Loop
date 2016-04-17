@@ -1,5 +1,5 @@
 github "loudnate/Crypto" "3e9fd522eba2b95c648229f9804b34773bb340a0"
 github "loudnate/LoopKit" "ffd56d63f4d1971795fa5b9a8ff3898b4ae5ccb8"
 github "loudnate/SwiftCharts" "1b8fd6d6b73a7143aefde590a191c7622b01e8f0"
-git "~/src/github.com/ps2/rileylink_ios" "e37ac857e093bfea4c49a336da3206e1d3f1b6e2"
+github "ps2/rileylink_ios" "ace54db1d3cd7885a5937c4e3fe1e3e574df913f"
 github "loudnate/xDripG5" "937a5d55af1e4871b27476282ddb48a5b03e131f"
