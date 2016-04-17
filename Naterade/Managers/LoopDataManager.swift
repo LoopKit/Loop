@@ -68,7 +68,8 @@ class LoopDataManager {
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
-                dispatch_async(self.dataAccessQueue) {
+                // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), self.dataAccessQueue) {
                     self.insulinEffect = nil
                     self.loop()
                 }
