@@ -35,14 +35,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     lazy var logger = DiagnosticLogger()
 
-    var rileyLinkManager: RileyLinkManager? {
-        switch rileyLinkState {
-        case .Ready(let manager):
-            return manager
-        case .NeedsConfiguration:
-            return nil
-        }
-    }
+    let rileyLinkManager: RileyLinkDeviceManager
 
     var transmitter: Transmitter? {
         switch transmitterState {
@@ -71,14 +64,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var rileyLinkDeviceTimeObserver: AnyObject? {
-        willSet {
-            if let observer = rileyLinkDeviceTimeObserver {
-                NSNotificationCenter.defaultCenter().removeObserver(observer)
-            }
-        }
-    }
-
     func receivedRileyLinkManagerNotification(note: NSNotification) {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
     }
@@ -86,9 +71,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     func receivedRileyLinkPacketNotification(note: NSNotification) {
         if let
             device = note.object as? RileyLinkDevice,
-            packet = note.userInfo?[RileyLinkDevicePacketKey] as? MinimedPacket where packet.valid == true,
-            let data = packet.data,
-            message = PumpMessage(rxData: data) where message.address.hexadecimalString == pumpID
+            data = note.userInfo?[RileyLinkDevice.IdleMessageDataKey] as? NSData,
+            message = PumpMessage(rxData: data)
         {
             switch message.packetType {
             case .MySentry:
@@ -117,13 +101,13 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     func connectToRileyLink(device: RileyLinkDevice) {
         connectedPeripheralIDs.insert(device.peripheral.identifier.UUIDString)
 
-        rileyLinkManager?.connectDevice(device)
+        rileyLinkManager.connectDevice(device)
     }
 
     func disconnectFromRileyLink(device: RileyLinkDevice) {
         connectedPeripheralIDs.remove(device.peripheral.identifier.UUIDString)
 
-        rileyLinkManager?.disconnectDevice(device)
+        rileyLinkManager.disconnectDevice(device)
     }
 
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
@@ -157,7 +141,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             ], toCollection: "g5"
         )
 
-        self.rileyLinkManager?.firstConnectedDevice?.assertIdleListening()
+        self.rileyLinkManager.firstConnectedDevice?.assertIdleListening()
     }
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
@@ -187,7 +171,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             }
         }
 
-        self.rileyLinkManager?.firstConnectedDevice?.assertIdleListening()
+        self.rileyLinkManager.firstConnectedDevice?.assertIdleListening()
     }
 
     // MARK: - Managed state
@@ -204,6 +188,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
+    // TODO: Keep a single copy of this value in PumpState
     var pumpTimeZone: NSTimeZone? = NSUserDefaults.standardUserDefaults().pumpTimeZone {
         didSet {
             NSUserDefaults.standardUserDefaults().pumpTimeZone = pumpTimeZone
@@ -224,6 +209,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
                     self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
                 }
+
+                if let pumpState = rileyLinkManager.pumpState {
+                    pumpState.timeZone = pumpTimeZone
+                }
             }
         }
     }
@@ -239,47 +228,29 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var rileyLinkState: State<RileyLinkManager> = .NeedsConfiguration {
-        willSet {
-            switch newValue {
-            case .Ready(let manager):
-                rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: manager, queue: nil) { [weak self] (note) -> Void in
-                    self?.receivedRileyLinkManagerNotification(note)
-                }
-
-                rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidReceivePacketNotification, object: nil, queue: nil, usingBlock: { [weak self] (note) -> Void in
-                    self?.receivedRileyLinkPacketNotification(note)
-                })
-
-                rileyLinkDeviceTimeObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDeviceDidChangeTimeNotification, object: nil, queue: nil, usingBlock: { [weak self] (note) -> Void in
-                    self?.pumpTimeZone = NSTimeZone.defaultTimeZone()
-                })
-            case .NeedsConfiguration:
-                rileyLinkManagerObserver = nil
-                rileyLinkDevicePacketObserver = nil
-            }
-        }
-    }
-
     var connectedPeripheralIDs: Set<String> = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs) {
         didSet {
             NSUserDefaults.standardUserDefaults().connectedPeripheralIDs = Array(connectedPeripheralIDs)
         }
     }
 
+    // TODO: Store this in PumpState
     var pumpID: String? = NSUserDefaults.standardUserDefaults().pumpID {
         didSet {
             if pumpID?.characters.count != 6 {
                 pumpID = nil
             }
 
-            switch (rileyLinkState, pumpID) {
-            case (_, let pumpID?):
-                rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
-            case (.NeedsConfiguration, .None):
-                break
-            case (.Ready, .None):
-                rileyLinkState = .NeedsConfiguration
+            if let pumpID = pumpID {
+                let pumpState = PumpState(pumpID: pumpID)
+
+                if let timeZone = pumpTimeZone {
+                    pumpState.timeZone = timeZone
+                }
+
+                rileyLinkManager.pumpState = pumpState
+            } else {
+                rileyLinkManager.pumpState = nil
             }
 
             doseStore.pumpID = pumpID
@@ -520,7 +491,34 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
 
+        let pumpState: PumpState?
+
+        if let pumpID = pumpID {
+            pumpState = PumpState(pumpID: pumpID)
+
+            if let timeZone = pumpTimeZone {
+                pumpState?.timeZone = timeZone
+            }
+        } else {
+            pumpState = nil
+        }
+
+        rileyLinkManager = RileyLinkDeviceManager(
+            pumpState: pumpState,
+            autoConnectIDs: connectedPeripheralIDs
+        )
+
         super.init()
+
+        rileyLinkManager.timerTickEnabled = false
+        rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
+            self?.receivedRileyLinkManagerNotification(note)
+        }
+
+        // TODO: Use delegation instead.
+        rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
+            self?.receivedRileyLinkPacketNotification(note)
+        }
 
         loopManager = LoopDataManager(deviceDataManager: self)
 
@@ -530,10 +528,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         carbStore?.delegate = self
 
         defer {
-            if let pumpID = pumpID {
-                rileyLinkState = .Ready(RileyLinkManager(pumpID: pumpID, autoconnectIDs: connectedPeripheralIDs))
-            }
-
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
         }
     }

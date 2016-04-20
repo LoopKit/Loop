@@ -26,10 +26,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
             if let deviceManager = self?.dataManager.rileyLinkManager {
                 switch note.name {
-                case RileyLinkManagerDidDiscoverDeviceNotification:
+                case RileyLinkDeviceManager.DidDiscoverDeviceNotification:
                     self?.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: deviceManager.devices.count - 1, inSection: Section.Devices.rawValue)], withRowAnimation: .Automatic)
-                case RileyLinkDeviceConnectionStateDidChangeNotification:
-                    if let device = note.userInfo?[RileyLinkDeviceKey] as? RileyLinkDevice, index = deviceManager.devices.indexOf(device) {
+                case RileyLinkDeviceManager.ConnectionStateDidChangeNotification:
+                  if let device = note.userInfo?[RileyLinkDeviceManager.RileyLinkDeviceKey] as? RileyLinkDevice, index = deviceManager.devices.indexOf({ $0 === device }) {
                         self?.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: Section.Devices.rawValue)], withRowAnimation: .None)
                     }
                 default:
@@ -42,9 +42,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        if let deviceManager = dataManager.rileyLinkManager {
-            deviceManager.deviceScanningEnabled = true
-        }
+        dataManager.rileyLinkManager.deviceScanningEnabled = true
 
         if dataManager.transmitterID != nil, let glucoseStore = dataManager.glucoseStore where glucoseStore.authorizationRequired {
             glucoseStore.authorize({ (success, error) -> Void in
@@ -56,9 +54,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
 
-        if let deviceManager = dataManager.rileyLinkManager {
-            deviceManager.deviceScanningEnabled = false
-        }
+        dataManager.rileyLinkManager.deviceScanningEnabled = false
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -122,10 +118,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     // MARK: - UITableViewDataSource
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.rileyLinkState {
-        case .Ready(manager: _):
+        switch dataManager.rileyLinkManager.pumpState {
+        case .Some:
             return Section.count
-        case .NeedsConfiguration:
+        case .None:
             return Section.count - 1
         }
     }
@@ -137,12 +133,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case .Configuration:
             return ConfigurationRow.count
         case .Devices:
-            switch dataManager.rileyLinkState {
-            case .Ready(manager: let manager):
-                return manager.devices.count
-            case .NeedsConfiguration:
-                return 0
-            }
+            return dataManager.rileyLinkManager.devices.count
         }
     }
 
@@ -244,11 +235,11 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case .Devices:
             let deviceCell = tableView.dequeueReusableCellWithIdentifier(RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
 
-            let device = dataManager.rileyLinkManager?.devices[indexPath.row]
+            let device = dataManager.rileyLinkManager.devices[indexPath.row]
 
-            deviceCell.configureCellWithName(device?.name,
-                signal: device?.RSSI?.integerValue,
-                peripheralState: device?.peripheral.state
+            deviceCell.configureCellWithName(device.name,
+                signal: device.RSSI,
+                peripheralState: device.peripheral.state
             )
 
             deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), forControlEvents: .ValueChanged)
@@ -428,7 +419,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 vc.indexPath = indexPath
                 vc.delegate = self
             case let vc as RileyLinkDeviceTableViewController:
-                vc.device = dataManager.rileyLinkManager?.devices[indexPath.row]
+                vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
                 vc.pumpTimeZone = dataManager.pumpTimeZone
             default:
                 break
@@ -445,10 +436,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     func deviceConnectionChanged(connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convertPoint(.zero, toView: tableView)
 
-        if let indexPath = tableView.indexPathForRowAtPoint(switchOrigin) where indexPath.section == Section.Devices.rawValue,
-            let deviceManager = dataManager.rileyLinkManager
+        if let indexPath = tableView.indexPathForRowAtPoint(switchOrigin) where indexPath.section == Section.Devices.rawValue
         {
-            let device = deviceManager.devices[indexPath.row]
+            let device = dataManager.rileyLinkManager.devices[indexPath.row]
 
             if connectSwitch.on {
                 dataManager.connectToRileyLink(device)

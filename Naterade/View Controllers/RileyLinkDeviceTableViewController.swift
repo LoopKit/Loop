@@ -122,7 +122,7 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 cell.detailTextLabel?.text = device.peripheral.state.description
             case .RSSI:
                 cell.textLabel?.text = NSLocalizedString("Signal strength", comment: "The title of the cell showing signal strength (RSSI)")
-                if let RSSI = device.RSSI?.integerValue {
+                if let RSSI = device.RSSI {
                     cell.detailTextLabel?.text = "\(RSSI) dB"
                 } else {
                     cell.detailTextLabel?.text = "–"
@@ -140,7 +140,7 @@ class RileyLinkDeviceTableViewController: UITableViewController {
             switch PumpRow(rawValue: indexPath.row)! {
             case .ID:
                 cell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title of the cell showing pump ID")
-                if let pumpID = device.pumpState?.pumpId {
+                if let pumpID = device.pumpState?.pumpID {
                     cell.detailTextLabel?.text = pumpID
                 } else {
                     cell.detailTextLabel?.text = "–"
@@ -229,13 +229,29 @@ class RileyLinkDeviceTableViewController: UITableViewController {
             switch CommandRow(rawValue: indexPath.row)! {
             case .Tune:
                 let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
-                    self.device.tunePumpWithCompletionHandler({ (response) -> Void in
-                        if let data = try? NSJSONSerialization.dataWithJSONObject(response, options: .PrettyPrinted) {
-                            let string = String(data: data, encoding: NSUTF8StringEncoding)
+                    self.device.tunePumpWithResultHandler({ (response) -> Void in
+                        switch response {
+                        case .Success(let scanResult):
+                            var resultDict: [String: AnyObject] = [:]
+                            let decimalFormatter = NSNumberFormatter()
+                            decimalFormatter.minimumSignificantDigits = 5
 
-                            completionHandler(responseText: string ?? "No response found")
-                        } else {
-                            completionHandler(responseText: "An Unknown Issue Occured")
+                            resultDict["Best Frequency"] = scanResult.bestFrequency
+                            resultDict["Trials"] = scanResult.trials.map({ (trial) -> String in
+                                return "\(decimalFormatter.stringFromNumber(trial.frequencyMHz)!) MHz  \(trial.successes)/\(trial.tries)  \(trial.avgRSSI)"
+                            })
+
+                            var responseText: String
+
+                            if let data = try? NSJSONSerialization.dataWithJSONObject(resultDict, options: .PrettyPrinted), string = String(data: data, encoding: NSUTF8StringEncoding) {
+                                responseText = string
+                            } else {
+                                responseText = "No response"
+                            }
+
+                            completionHandler(responseText: responseText)
+                        case .Failure(let error):
+                            completionHandler(responseText: String(error))
                         }
                     })
 
@@ -247,15 +263,12 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 self.showViewController(vc, sender: indexPath)
             case .ChangeTime:
                 let vc = CommandResponseViewController { [unowned self] (completionHandler) -> String in
-                    self.device.changeTime { (success, error) -> Void in
+                    self.device.syncPumpTime { (error) -> Void in
                         dispatch_async(dispatch_get_main_queue()) {
-                            if success {
-                                self.pumpTimeZone = NSTimeZone.defaultTimeZone()
-                                completionHandler(responseText: "Succeeded")
-                            } else if let error = error {
+                            if let error = error {
                                 completionHandler(responseText: "Failed: \(error)")
                             } else {
-                                completionHandler(responseText: "Failed")
+                                completionHandler(responseText: "Succeeded")
                             }
                         }
                     }
@@ -268,14 +281,12 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 self.showViewController(vc, sender: indexPath)
             case .Bolus:
                 let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
-                    self.device.sendBolusDose(0.1) { (success, error) -> Void in
+                    self.device.ops?.setNormalBolus(0.1) { (error) -> Void in
                         dispatch_async(dispatch_get_main_queue()) {
-                            if success {
-                                completionHandler(responseText: "Succeeded")
-                            } else if let error = error {
+                            if let error = error {
                                 completionHandler(responseText: "Failed: \(error)")
                             } else {
-                                completionHandler(responseText: "Failed")
+                                completionHandler(responseText: "Succeeded")
                             }
                         }
                     }
@@ -288,14 +299,13 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 self.showViewController(vc, sender: indexPath)
             case .TempBasal:
                 let vc = CommandResponseViewController(command: { [unowned self] (completionHandler) -> String in
-                    self.device.sendTempBasalDose(0.5, duration: NSTimeInterval(minutes: 30)) { (success, message, error) -> Void in
+                    self.device.ops?.setTempBasal(0.5, duration: NSTimeInterval(minutes: 30)) { (result) -> Void in
                         dispatch_async(dispatch_get_main_queue()) {
-                            if success, let body = message?.messageBody as? ReadTempBasalCarelinkMessageBody {
+                            switch result {
+                            case .Success(let body):
                                 completionHandler(responseText: "Succeeded: \(body.rate) U, \(body.timeRemaining.minutes) minutes remaining")
-                            } else if let error = error {
+                            case .Failure(let error):
                                 completionHandler(responseText: "Failed: \(error)")
-                            } else {
-                                completionHandler(responseText: "Failed")
                             }
                         }
                     }
