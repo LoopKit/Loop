@@ -92,6 +92,7 @@ class RecommendTempBasalTests: XCTestCase {
 
         // Cancel existing temp basal
         let lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 0.125,
@@ -139,6 +140,7 @@ class RecommendTempBasalTests: XCTestCase {
         XCTAssertNil(dose)
 
         let lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 1.225,
@@ -176,6 +178,7 @@ class RecommendTempBasalTests: XCTestCase {
 
         // Ignore due to existing dose
         var lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 0.125,
@@ -195,6 +198,7 @@ class RecommendTempBasalTests: XCTestCase {
 
         // Cancel existing dose
         lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 1.225,
@@ -215,6 +219,7 @@ class RecommendTempBasalTests: XCTestCase {
 
         // Continue existing dose
         lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -21)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 9)),
             value: 0.125,
@@ -247,6 +252,7 @@ class RecommendTempBasalTests: XCTestCase {
         XCTAssertNil(dose)
 
         lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -21)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 9)),
             value: 0.125,
@@ -312,6 +318,7 @@ class RecommendTempBasalTests: XCTestCase {
         XCTAssertNil(dose)
 
         let lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 1.225,
@@ -494,6 +501,7 @@ class RecommendBolusTests: XCTestCase {
 
         // Don't consider net-negative temp basal
         let lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 0.01,
@@ -603,6 +611,7 @@ class RecommendBolusTests: XCTestCase {
 
         // Less existing temp
         var lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
             value: 1.225,
@@ -622,6 +631,7 @@ class RecommendBolusTests: XCTestCase {
 
         // But not a finished temp
         lastTempBasal = DoseEntry(
+            type: .TempBasal,
             startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -35)),
             endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -5)),
             value: 1.225,
