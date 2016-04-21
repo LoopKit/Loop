@@ -116,16 +116,37 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         if status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date {
             latestPumpStatus = status
 
-            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (_, error) -> Void in
+            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (newValue, previousValue, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
                 } else {
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 }
+
+                if let newVolume = newValue?.unitVolume, previousVolume = previousValue?.unitVolume {
+                    self.checkPumpReservoirForAmount(newVolume, previousAmount: previousVolume, timeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
+                }
             }
 
             if status.batteryRemainingPercent == 0 {
                 NotificationManager.sendPumpBatteryLowNotification()
+            }
+        }
+    }
+
+    private func checkPumpReservoirForAmount(newAmount: Double, previousAmount: Double, timeLeft: NSTimeInterval) {
+
+        guard newAmount > 0 else {
+            NotificationManager.sendPumpReservoirEmptyNotification()
+            return
+        }
+
+        let warningThresholds: [Double] = [10, 20, 30]
+
+        for threshold in warningThresholds {
+            if newAmount <= threshold && previousAmount > threshold {
+                NotificationManager.sendPumpReservoirLowNotificationForAmount(newAmount, andTimeRemaining: timeLeft)
+                return
             }
         }
     }

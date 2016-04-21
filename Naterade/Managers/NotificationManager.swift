@@ -14,6 +14,7 @@ struct NotificationManager {
         case BolusFailure
         case LoopNotRunning
         case PumpBatteryLow
+        case PumpReservoirEmpty
         case PumpReservoirLow
     }
 
@@ -113,7 +114,38 @@ struct NotificationManager {
         UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
 
-    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval) {
+    static func sendPumpReservoirEmptyNotification() {
+        let notification = UILocalNotification()
 
+        notification.alertTitle = NSLocalizedString("Pump Reservoir Empty", comment: "The notification title for an empty pump reservoir")
+        notification.alertBody = NSLocalizedString("Change the pump reservoir now", comment: "The notification alert describing an empty pump reservoir")
+        notification.soundName = UILocalNotificationDefaultSoundName
+        notification.category = Category.PumpReservoirEmpty.rawValue
+
+        // TODO: Add an action to Suspend the pump
+
+        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+    }
+
+    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval) {
+        let notification = UILocalNotification()
+
+        notification.alertTitle = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
+
+        let unitsString = NSNumberFormatter.localizedStringFromNumber(units, numberStyle: .DecimalStyle)
+
+        let intervalFormatter = NSDateComponentsFormatter()
+        intervalFormatter.allowedUnits = [.Hour, .Minute]
+        intervalFormatter.maximumUnitCount = 1
+        intervalFormatter.includesApproximationPhrase = true
+        intervalFormatter.includesTimeRemainingPhrase = true
+        let timeString = intervalFormatter.stringFromTimeInterval(remaining)
+
+        notification.alertBody = NSLocalizedString("\(unitsString) U left: \(timeString)", comment: "")
+
+        notification.soundName = UILocalNotificationDefaultSoundName
+        notification.category = Category.PumpReservoirLow.rawValue
+
+        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
 }
