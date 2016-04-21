@@ -65,6 +65,7 @@ struct FixtureData {
         return history.reverse().flatMap({ (entry) -> DoseEntry? in
             let unitString = entry["unit"] as! String
             let unit: DoseUnit
+            let type = PumpEventType(rawValue: entry["type"] as! String) ?? .Other
 
             switch unitString {
             case "U/hour":
@@ -75,7 +76,7 @@ struct FixtureData {
                 return nil
             }
 
-            return DoseEntry(startDate: dateFormatter.dateFromString(entry["start_at"] as! String)!, endDate: dateFormatter.dateFromString(entry["end_at"] as! String)!, value: entry["amount"] as! Double, unit: unit, description: nil)
+            return DoseEntry(type: type, startDate: dateFormatter.dateFromString(entry["start_at"] as! String)!, endDate: dateFormatter.dateFromString(entry["end_at"] as! String)!, value: entry["amount"] as! Double, unit: unit, description: nil)
         })
     }
 }

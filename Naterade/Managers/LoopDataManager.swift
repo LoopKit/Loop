@@ -448,7 +448,7 @@ class LoopDataManager {
                     let endDate = now.dateByAddingTimeInterval(body.timeRemaining)
                     let startDate = endDate.dateByAddingTimeInterval(-recommendedTempBasal.duration)
 
-                    self.lastTempBasal = DoseEntry(startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
+                    self.lastTempBasal = DoseEntry(type: .TempBasal, startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
                     self.recommendedTempBasal = nil
 
                     resultsHandler(success: true, error: nil)
