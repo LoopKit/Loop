@@ -59,10 +59,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 window?.rootViewController?.presentAlertControllerWithTitle(notification.alertTitle, message: message, animated: true, completion: nil)
             }
         }
-
-        if notification.category == NotificationManager.Category.LoopNotRunning.rawValue {
-            print("LoopNotRunning")
-        }
     }
 
     func application(application: UIApplication, handleActionWithIdentifier identifier: String?, forLocalNotification notification: UILocalNotification, withResponseInfo responseInfo: [NSObject : AnyObject], completionHandler: () -> Void) {
