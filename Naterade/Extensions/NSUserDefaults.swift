@@ -23,6 +23,7 @@ extension NSUserDefaults {
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PumpID = "com.loudnate.Naterade.PumpID"
+        case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
@@ -149,6 +150,15 @@ extension NSUserDefaults {
         }
         set {
             setObject(newValue, forKey: Key.PumpID.rawValue)
+        }
+    }
+
+    var pumpModelNumber: String? {
+        get {
+            return stringForKey(Key.PumpModelNumber.rawValue)
+        }
+        set {
+            setObject(newValue, forKey: Key.PumpModelNumber.rawValue)
         }
     }
 

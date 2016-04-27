@@ -15,8 +15,6 @@ class RileyLinkDeviceTableViewController: UITableViewController {
 
     var device: RileyLinkDevice!
 
-    var pumpTimeZone: NSTimeZone?
-
     private var appeared = false
 
     override func viewDidLoad() {
@@ -177,7 +175,7 @@ class RileyLinkDeviceTableViewController: UITableViewController {
                 let localTimeZone = NSTimeZone.defaultTimeZone()
                 let localTimeZoneName = localTimeZone.abbreviation ?? localTimeZone.name
 
-                if let pumpTimeZone = pumpTimeZone {
+                if let pumpTimeZone = device.pumpState?.timeZone {
                     let timeZoneDiff = NSTimeInterval(pumpTimeZone.secondsFromGMT - localTimeZone.secondsFromGMT)
                     let formatter = NSDateComponentsFormatter()
                     formatter.allowedUnits = [.Hour, .Minute]
