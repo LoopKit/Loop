@@ -12,6 +12,18 @@ import InsulinKit
 import LoopKit
 
 
+extension NSDateFormatter {
+    static func ISO8601LocalTimeDateFormatter() -> Self {
+        let dateFormatter = self.init()
+
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+
+        return dateFormatter
+    }
+}
+
+
 struct GlucoseFixtureValue: GlucoseValue {
     let startDate: NSDate
     let quantity: HKQuantity

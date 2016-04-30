@@ -1,4 +1,4 @@
-github "loudnate/LoopKit" "public-extensions"
+github "loudnate/LoopKit" "dev"
 # git "~/src/github.com/loudnate/LoopKit" "reservoir-previous-entry"
 github "loudnate/xDripG5" "dev"
 github "loudnate/SwiftCharts" "loudnate/naterade"
