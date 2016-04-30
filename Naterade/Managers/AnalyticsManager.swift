@@ -24,12 +24,12 @@ class AnalyticsManager {
         return nil
     }
 
-    private static func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil) {
+    private static func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
         guard amplitudeAPIKey != nil else {
             return
         }
 
-        Amplitude.instance().logEvent(name, withEventProperties: properties)
+        Amplitude.instance().logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
     }
 
     // MARK: - UIApplicationDelegate
@@ -96,22 +96,22 @@ class AnalyticsManager {
     // MARK: - Loop Events
 
     static func didAddCarbsFromWatch(carbs: Double) {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs])
+        logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
     }
 
     static func didRetryBolus() {
-        logEvent("Bolus Retry")
+        logEvent("Bolus Retry", outOfSession: true)
     }
 
     static func didSetBolusFromWatch(units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units])
+        logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
     }
 
     static func loopDidSucceed() {
-        logEvent("Loop success")
+        logEvent("Loop success", outOfSession: true)
     }
 
     static func loopDidError() {
-        logEvent("Loop error")
+        logEvent("Loop error", outOfSession: true)
     }
 }
