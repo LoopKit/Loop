@@ -137,9 +137,13 @@ struct NotificationManager {
         let intervalFormatter = NSDateComponentsFormatter()
         intervalFormatter.allowedUnits = [.Hour, .Minute]
         intervalFormatter.maximumUnitCount = 1
+        intervalFormatter.unitsStyle = .Full
         intervalFormatter.includesApproximationPhrase = true
         intervalFormatter.includesTimeRemainingPhrase = true
-        let timeString = intervalFormatter.stringFromTimeInterval(remaining)
+
+        guard let timeString = intervalFormatter.stringFromTimeInterval(remaining) else {
+            return
+        }
 
         notification.alertBody = NSLocalizedString("\(unitsString) U left: \(timeString)", comment: "")
 
