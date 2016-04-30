@@ -1,5 +1,6 @@
+github "mpurland/Amplitude-iOS" "934536d24cb9ce5c567c74ff12e2955faed74bc3"
 github "loudnate/Crypto" "3e9fd522eba2b95c648229f9804b34773bb340a0"
-github "loudnate/LoopKit" "af804e41e064245bc6bee8d59069c84108b2ffc4"
+github "loudnate/LoopKit" "2263a45f3e6f93e876c94f90a84d7fcb3462251e"
 github "loudnate/SwiftCharts" "1b8fd6d6b73a7143aefde590a191c7622b01e8f0"
-github "ps2/rileylink_ios" "f67cb6fe52aa12368fc49482aa3cbf2422e66a74"
+github "ps2/rileylink_ios" "f471307dd64faac277f611807f72511fb6ab1ba9"
 github "loudnate/xDripG5" "937a5d55af1e4871b27476282ddb48a5b03e131f"

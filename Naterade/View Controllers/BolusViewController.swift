@@ -19,6 +19,12 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
         bolusAmountTextField.becomeFirstResponder()
     }
 
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+
+        AnalyticsManager.didDisplayBolusScreen()
+    }
+
     var recommendedBolus: Double = 0 {
         didSet {
             recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)

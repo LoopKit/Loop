@@ -20,6 +20,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         NotificationManager.authorize()
 
+        AnalyticsManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+
         return true
     }
 
@@ -69,6 +71,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 startDate = notification.userInfo?[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? NSDate where
                 startDate.timeIntervalSinceNow >= NSTimeInterval(minutes: -5)
             {
+                AnalyticsManager.didRetryBolus()
+
                 DeviceDataManager.sharedManager.loopManager.enactBolus(units) { (success, error) in
                     if !success {
                         NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)

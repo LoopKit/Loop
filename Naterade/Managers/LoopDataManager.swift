@@ -222,10 +222,18 @@ class LoopDataManager {
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
-    private var lastLoopError: ErrorType?
+    private var lastLoopError: ErrorType? {
+        didSet {
+            if lastLoopError != nil {
+                AnalyticsManager.loopDidError()
+            }
+        }
+    }
     private var lastLoopCompleted: NSDate? {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
+
+            AnalyticsManager.loopDidSucceed()
         }
     }
 

@@ -39,6 +39,10 @@
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
 		43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */; };
 		43971A2D1C8B94010013154F /* CommandResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A2C1C8B94010013154F /* CommandResponseViewController.swift */; };
+		439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
+		439897391CD2F82C00223065 /* AmplitudeFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 439897381CD2F82C00223065 /* AmplitudeFramework.framework */; };
+		4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4398973A1CD2FC2000223065 /* NSDateFormatter.swift */; };
 		439A30B71C540CF600059771 /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */; };
 		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
 		43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */; };
@@ -207,6 +211,10 @@
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		438C5D481C7FFC8D00FCCEC5 /* iob.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob.json; sourceTree = "<group>"; };
 		43971A2C1C8B94010013154F /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
+		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
+		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
+		439897381CD2F82C00223065 /* AmplitudeFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AmplitudeFramework.framework; path = Carthage/Build/iOS/AmplitudeFramework.framework; sourceTree = "<group>"; };
+		4398973A1CD2FC2000223065 /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
 		439A30B61C540CF600059771 /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchTableViewCell.swift; sourceTree = "<group>"; };
@@ -293,6 +301,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				439897391CD2F82C00223065 /* AmplitudeFramework.framework in Frameworks */,
 				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
 				43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */,
@@ -464,9 +473,11 @@
 				4346D1F51C78501000ABAFE3 /* ChartPoint.swift */,
 				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				43E344A51B9E1B3300C85C07 /* NSBundle.swift */,
+				43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */,
+				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
+				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
-				43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -501,6 +512,7 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				439897361CD2F80600223065 /* AnalyticsManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */,
 				4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */,
@@ -544,6 +556,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				439897381CD2F82C00223065 /* AmplitudeFramework.framework */,
 				43F78D481C914197002152D1 /* CarbKit.framework */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
@@ -784,6 +797,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkBLEKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/AmplitudeFramework.framework",
 			);
 			outputPaths = (
 			);
@@ -827,12 +841,15 @@
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				4354003A1C9FB81100D5819C /* UIColor.swift in Sources */,
+				4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */,
 				43DBF0511C93C14100B3C386 /* PopoverInNavigationControllerSegue.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
+				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
 				43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
+				439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */,
 				43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

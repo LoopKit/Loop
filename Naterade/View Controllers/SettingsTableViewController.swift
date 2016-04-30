@@ -49,6 +49,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 // Do nothing for now
             })
         }
+
+        AnalyticsManager.didDisplaySettingsScreen()
     }
 
     override func viewDidDisappear(animated: Bool) {

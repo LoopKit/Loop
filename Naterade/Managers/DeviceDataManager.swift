@@ -102,12 +102,16 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         connectedPeripheralIDs.insert(device.peripheral.identifier.UUIDString)
 
         rileyLinkManager.connectDevice(device)
+
+        AnalyticsManager.didChangeRileyLinkConnectionState()
     }
 
     func disconnectFromRileyLink(device: RileyLinkDevice) {
         connectedPeripheralIDs.remove(device.peripheral.identifier.UUIDString)
 
         rileyLinkManager.disconnectDevice(device)
+
+        AnalyticsManager.didChangeRileyLinkConnectionState()
     }
 
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
@@ -201,6 +205,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         didSet {
             if oldValue != transmitterStartTime {
                 NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
+
+                if let transmitterStartTime = transmitterStartTime, drift = oldValue?.distanceTo(transmitterStartTime) where abs(drift) > 1 {
+                    AnalyticsManager.transmitterTimeDidDrift(drift)
+                }
             }
         }
     }
@@ -331,6 +339,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             doseStore.basalProfile = basalRateSchedule
 
             NSUserDefaults.standardUserDefaults().basalRateSchedule = basalRateSchedule
+
+            AnalyticsManager.didChangeBasalRateSchedule()
         }
     }
 
@@ -339,6 +349,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             carbStore?.carbRatioSchedule = carbRatioSchedule
 
             NSUserDefaults.standardUserDefaults().carbRatioSchedule = carbRatioSchedule
+
+            AnalyticsManager.didChangeCarbRatioSchedule()
         }
     }
 
@@ -347,6 +359,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             doseStore.insulinActionDuration = insulinActionDuration
 
             NSUserDefaults.standardUserDefaults().insulinActionDuration = insulinActionDuration
+
+            if oldValue != insulinActionDuration {
+                AnalyticsManager.didChangeInsulinActionDuration()
+            }
         }
     }
 
@@ -356,24 +372,32 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             doseStore.insulinSensitivitySchedule = insulinSensitivitySchedule
 
             NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule = insulinSensitivitySchedule
+
+            AnalyticsManager.didChangeInsulinSensitivitySchedule()
         }
     }
 
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule? = NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
+
+            AnalyticsManager.didChangeGlucoseTargetRangeSchedule()
         }
     }
 
     var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour = maximumBasalRatePerHour
+
+            AnalyticsManager.didChangeMaximumBasalRate()
         }
     }
 
     var maximumBolus: Double? = NSUserDefaults.standardUserDefaults().maximumBolus {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBolus = maximumBolus
+
+            AnalyticsManager.didChangeMaximumBolus()
         }
     }
 
@@ -455,6 +479,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
                 if let error = error {
                     self.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
+                } else {
+                    AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
                 }
 
                 completionHandler?(units: units, error: error)
@@ -477,6 +503,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 self.loopManager.enactBolus(bolus.value) { (success, error) in
                     if !success {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
+                    } else {
+                        AnalyticsManager.didSetBolusFromWatch(bolus.value)
                     }
 
                     replyHandler([:])
