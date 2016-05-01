@@ -626,6 +626,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         switch segue.destinationViewController {
         case let vc as CarbEntryTableViewController:
             vc.carbStore = dataManager.carbStore
+            vc.hidesBottomBarWhenPushed = true
             self.needsRefresh = true
         case let vc as CarbEntryEditViewController:
             if let carbStore = dataManager.carbStore {
@@ -634,6 +635,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         case let vc as ReservoirTableViewController:
             vc.doseStore = dataManager.doseStore
+            vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
             if let bolus = sender as? Double {
                 vc.recommendedBolus = bolus
@@ -685,5 +687,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
         }
+    }
+
+    @IBAction func unwindFromSettings(segue: UIStoryboardSegue) {
+        
     }
 }

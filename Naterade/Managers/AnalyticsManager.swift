@@ -14,6 +14,8 @@ class AnalyticsManager {
 
     // MARK: - Helpers
 
+    private static var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
+
     private static var amplitudeAPIKey: String? {
         if let settingsPath = NSBundle.mainBundle().pathForResource("RemoteSettings", ofType: "plist"),
             settings = NSDictionary(contentsOfFile: settingsPath)
@@ -29,7 +31,12 @@ class AnalyticsManager {
             return
         }
 
-        Amplitude.instance().logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
+        if isSimulator {
+            NSLog("\(name) \(properties ?? [:])")
+        } else {
+            Amplitude.instance().logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
+        }
+
     }
 
     // MARK: - UIApplicationDelegate

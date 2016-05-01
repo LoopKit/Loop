@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="74s-IX-WF0">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -115,13 +115,21 @@
                             <outlet property="delegate" destination="4cb-Yq-02o" id="VIi-cT-TDQ"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Settings" id="dmB-PQ-B44"/>
+                    <navigationItem key="navigationItem" title="Settings" id="dmB-PQ-B44">
+                        <barButtonItem key="rightBarButtonItem" style="done" systemItem="done" id="UQ4-6W-0S2">
+                            <connections>
+                                <segue destination="VsH-x7-Sqg" kind="unwind" unwindAction="unwindFromSettings:" id="Uee-6M-6sQ"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="devicesSectionTitleView" destination="ywS-mm-GoX" id="7tF-Zf-Op2"/>
                         <segue destination="2i4-oC-7Cq" kind="show" identifier="TextFieldTableViewController" id="F2v-na-5IP"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ymW-vT-DZk" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="VsH-x7-Sqg" userLabel="Exit" sceneMemberID="exit"/>
                 <view contentMode="scaleToFill" id="ywS-mm-GoX">
                     <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -241,24 +249,6 @@
             </objects>
             <point key="canvasLocation" x="2453" y="1056"/>
         </scene>
-        <!--Tab Bar Controller-->
-        <scene sceneID="yl2-sM-qoP">
-            <objects>
-                <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController">
-                    <tabBar key="tabBar" contentMode="scaleToFill" id="W28-zg-YXA">
-                        <rect key="frame" x="0.0" y="975" width="768" height="49"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                    </tabBar>
-                    <connections>
-                        <segue destination="74s-IX-WF0" kind="relationship" relationship="viewControllers" id="Bum-EM-yy8"/>
-                        <segue destination="Ndo-W4-z7b" kind="relationship" relationship="viewControllers" id="n8G-Jk-DLG"/>
-                    </connections>
-                </tabBarController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-241" y="111"/>
-        </scene>
         <!--InsulinKit-->
         <scene sceneID="n8N-hY-V0o">
             <objects>
@@ -267,7 +257,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2198" y="-1014"/>
+            <point key="canvasLocation" x="1386" y="-766"/>
         </scene>
         <!--CarbKit-->
         <scene sceneID="4Ej-lH-3ai">
@@ -277,7 +267,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="erV-pI-Wmo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2192" y="-1117"/>
+            <point key="canvasLocation" x="1380" y="-869"/>
         </scene>
         <!--Status-->
         <scene sceneID="dRe-fy-po5">
@@ -287,47 +277,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
-                        <view key="tableHeaderView" contentMode="scaleToFill" id="zaR-XD-rm0">
-                            <rect key="frame" x="0.0" y="64" width="600" height="44"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <subviews>
-                                <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="QJ2-zz-iCv">
-                                    <rect key="frame" x="8" y="0.0" width="584" height="44"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yuD-E6-o10">
-                                            <rect key="frame" x="0.0" y="0.0" width="292" height="44"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
-                                            <state key="normal" title="Add Meal"/>
-                                            <connections>
-                                                <segue destination="Td9-bv-106" kind="popoverPresentation" identifier="CarbEntryEditViewController" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorView="yuD-E6-o10" id="bWg-CS-zai">
-                                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                                </segue>
-                                            </connections>
-                                        </button>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lM0-sw-pZ9">
-                                            <rect key="frame" x="292" y="0.0" width="292" height="44"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
-                                            <state key="normal" title="Bolus"/>
-                                            <connections>
-                                                <segue destination="WhH-Np-jCn" kind="popoverPresentation" identifier="BolusViewController" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorView="lM0-sw-pZ9" id="Ff6-iD-qGO">
-                                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                                </segue>
-                                            </connections>
-                                        </button>
-                                    </subviews>
-                                </stackView>
-                            </subviews>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            <constraints>
-                                <constraint firstItem="QJ2-zz-iCv" firstAttribute="leading" secondItem="zaR-XD-rm0" secondAttribute="leadingMargin" id="0IQ-ST-g4e"/>
-                                <constraint firstItem="QJ2-zz-iCv" firstAttribute="top" secondItem="zaR-XD-rm0" secondAttribute="top" id="bAT-uw-hPw"/>
-                                <constraint firstAttribute="trailingMargin" secondItem="QJ2-zz-iCv" secondAttribute="trailing" id="bQW-jO-WHa"/>
-                                <constraint firstAttribute="bottom" secondItem="QJ2-zz-iCv" secondAttribute="bottom" id="pZY-Ku-0Sz"/>
-                            </constraints>
-                        </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="UITableViewCell" textLabel="LXC-eC-kw9" detailTextLabel="LjQ-f8-8VW" style="IBUITableViewCellStyleValue1" id="zTq-QB-XNu">
-                                <rect key="frame" x="0.0" y="157.5" width="600" height="44"/>
+                                <rect key="frame" x="0.0" y="113.5" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zTq-QB-XNu" id="vD6-31-qVz">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
@@ -351,7 +303,7 @@
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartTableViewCell" rowHeight="170" id="FEV-fX-i48" customClass="ChartTableViewCell" customModule="Naterade" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="201.5" width="600" height="170"/>
+                                <rect key="frame" x="0.0" y="157.5" width="600" height="170"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="FEV-fX-i48" id="lS6-Qa-Lw7">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="169.5"/>
@@ -364,7 +316,33 @@
                             <outlet property="delegate" destination="1zR-tC-i50" id="OUg-z9-1ra"/>
                         </connections>
                     </tableView>
+                    <toolbarItems>
+                        <barButtonItem title="Add Meal" id="lpE-RX-jWF">
+                            <connections>
+                                <segue destination="Td9-bv-106" kind="popoverPresentation" identifier="CarbEntryEditViewController" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorBarButtonItem="lpE-RX-jWF" id="viB-eQ-p7y">
+                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
+                                </segue>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="ava-EZ-v6i"/>
+                        <barButtonItem title="Bolus" id="2kb-DB-Vag">
+                            <connections>
+                                <segue destination="WhH-Np-jCn" kind="popoverPresentation" identifier="BolusViewController" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorBarButtonItem="2kb-DB-Vag" id="PC7-vP-CUY">
+                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
+                                </segue>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
+                        <barButtonItem title="Settings" id="PHJ-4n-qiF">
+                            <connections>
+                                <segue destination="4cb-Yq-02o" kind="popoverPresentation" customClass="PopoverInNavigationControllerSegue" customModule="Naterade" customModuleProvider="target" popoverAnchorBarButtonItem="PHJ-4n-qiF" id="JAY-Kf-UMv">
+                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
+                                </segue>
+                            </connections>
+                        </barButtonItem>
+                    </toolbarItems>
                     <navigationItem key="navigationItem" title="Status" id="3kU-n2-fha"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <segue destination="Ykd-EQ-C1J" kind="show" identifier="CarbEntryTableViewController" id="cwl-Xe-ims"/>
                         <segue destination="a8v-ef-RZZ" kind="show" identifier="ReservoirTableViewController" id="TZE-My-lqn"/>
@@ -372,7 +350,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Tc-kF-7yT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1633" y="-452"/>
+            <point key="canvasLocation" x="827" y="-452"/>
         </scene>
         <!--Bolus-->
         <scene sceneID="MwC-nE-tVX">
@@ -393,7 +371,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" distribution="fillEqually" alignment="firstBaseline" spacing="2" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HaB-FA-5xa">
-                                                    <rect key="frame" x="8" y="0.0" width="584" height="43"/>
+                                                    <rect key="frame" x="8" y="0.0" width="584" height="44"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Recommended" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ywT-OR-NnU">
                                                             <rect key="frame" x="0.0" y="0.0" width="194" height="20"/>
@@ -402,7 +380,7 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5QS-Yf-Pua">
-                                                            <rect key="frame" x="196" y="-11" width="193" height="54"/>
+                                                            <rect key="frame" x="196" y="-11" width="193" height="55"/>
                                                             <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                             <nil key="highlightedColor"/>
@@ -512,31 +490,12 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KEH-mi-7Jf" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="xgn-H5-ghO" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2453" y="-452"/>
-        </scene>
-        <!--Settings-->
-        <scene sceneID="Y9V-uE-m8v">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Ndo-W4-z7b" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Settings" image="icon-settings" selectedImage="icon-settings-active" id="dGy-DQ-HO2"/>
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="64h-OU-P3p">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="4cb-Yq-02o" kind="relationship" relationship="rootViewController" id="CYL-LN-JPZ"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="7fc-WD-Jlz" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="821" y="680"/>
+            <point key="canvasLocation" x="1641" y="-204"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="1UI-1d-xLb">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="74s-IX-WF0" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="74s-IX-WF0" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" systemItem="mostRecent" id="bDY-ie-wv9"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Jzc-8D-hlF">
@@ -544,13 +503,17 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="tBa-QS-CwE">
+                        <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="1zR-tC-i50" kind="relationship" relationship="rootViewController" id="l2O-0P-j5J"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AMI-Xa-bA4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="821" y="-452"/>
+            <point key="canvasLocation" x="15" y="-452"/>
         </scene>
         <!--CarbEntryEditViewController-->
         <scene sceneID="efd-D7-aOf">
@@ -560,11 +523,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hft-ry-meg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2256.5" y="-919"/>
+            <point key="canvasLocation" x="1444.5" y="-671"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="icon-settings" width="30" height="30"/>
-        <image name="icon-settings-active" width="30" height="30"/>
-    </resources>
 </document>
