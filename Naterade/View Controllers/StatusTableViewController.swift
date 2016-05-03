@@ -359,12 +359,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case .Status:
             return StatusRow.count
         case .Pump:
-            switch dataManager.latestPumpStatus {
-            case .None:
-                return 1
-            case .Some:
-                return PumpRow.count
-            }
+            return PumpRow.count
         case .Sensor:
             return SensorRow.count
         }
