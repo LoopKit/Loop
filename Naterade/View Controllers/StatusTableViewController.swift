@@ -133,7 +133,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 }
@@ -141,6 +141,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 self.charts.predictedGlucoseValues = predictedGlucose ?? []  // FixtureData.predictedGlucoseData
                 self.recommendedTempBasal = recommendedTempBasal
                 self.lastTempBasal = lastTempBasal
+                self.lastLoopCompleted = lastLoopCompleted
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -184,6 +185,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
                     dispatch_group_leave(reloadGroup)
                 }
+            }
+
+            if let status = dataManager.latestPumpStatus {
+                reservoirVolume = status.reservoirRemainingUnits
+                batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
@@ -233,7 +239,52 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
-    private var lastTempBasal: DoseEntry?
+    private var lastTempBasal: DoseEntry? {
+        didSet {
+            guard let scheduledBasal = dataManager.basalRateSchedule?.between(NSDate(), NSDate()).first else {
+                return
+            }
+
+            let netBasalRate: Double
+            let basalStartDate: NSDate
+
+            if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > NSDate() {
+                netBasalRate = lastTempBasal.value - scheduledBasal.value
+                basalStartDate = lastTempBasal.startDate
+            } else {
+                netBasalRate = 0
+
+                if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > scheduledBasal.startDate {
+                    basalStartDate = lastTempBasal.endDate
+                } else {
+                    basalStartDate = scheduledBasal.startDate
+                }
+            }
+
+            dispatch_async(dispatch_get_main_queue()) {
+                self.basalRateHUD.setNetBasalRate(netBasalRate, atDate: basalStartDate)
+            }
+        }
+    }
+
+    private var lastLoopCompleted: NSDate? {
+        didSet {
+            // This will schedule a timer on the main run loop, so no need to dispatch
+            loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+        }
+    }
+
+    private var reservoirVolume: Double? {
+        didSet {
+            self.reservoirVolumeHUD.reservoirVolume = self.reservoirVolume
+        }
+    }
+
+    private var batteryLevel: Double? {
+        didSet {
+            self.batteryLevelHUD.batteryLevel = self.batteryLevel
+        }
+    }
 
     private var settingTempBasal: Bool = false {
         didSet {
@@ -253,8 +304,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private enum PumpRow: Int {
         case Date = 0
-        case Battery
-        case ReservoirRemaining
         case InsulinOnBoard
 
         static let count = 4
@@ -294,12 +343,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         formatter.dateStyle = .NoStyle
         formatter.timeStyle = .ShortStyle
 
-        return formatter
-    }()
-
-    private lazy var percentFormatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .PercentStyle
         return formatter
     }()
 
@@ -409,6 +452,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         date = scheduledBasal.startDate
                     }
                 } else {
+                    cell.detailTextLabel?.text = nil
                     return cell
                 }
 
@@ -428,34 +472,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyDateString
-                }
-            case .Battery:
-                cell.textLabel?.text = NSLocalizedString("Battery", comment: "The title of the cell containing the remaining battery level")
-
-                if let batteryRemainingPercent = dataManager.latestPumpStatus?.batteryRemainingPercent {
-                    cell.detailTextLabel?.text = percentFormatter.stringFromNumber(Double(batteryRemainingPercent) / 100.0)
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            case .ReservoirRemaining:
-                cell.textLabel?.text = NSLocalizedString("Reservoir", comment: "The title of the cell containing the amount of remaining insulin in the reservoir")
-
-                if let status = dataManager.latestPumpStatus {
-                    let components = NSDateComponents()
-                    components.minute = status.reservoirRemainingMinutes
-
-                    let componentsFormatter = NSDateComponentsFormatter()
-                    componentsFormatter.unitsStyle = .Short
-                    componentsFormatter.allowedUnits = [.Day, .Hour, .Minute]
-                    componentsFormatter.includesApproximationPhrase = components.day > 0
-                    componentsFormatter.includesTimeRemainingPhrase = true
-
-                    let numberValue = NSNumber(double: status.reservoirRemainingUnits).descriptionWithLocale(locale)
-                    let daysValue = componentsFormatter.stringFromDateComponents(components) ?? ""
-
-                    cell.detailTextLabel?.text = "\(numberValue) Units (\(daysValue))"
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
                 }
             case .InsulinOnBoard:
                 cell.textLabel?.text = NSLocalizedString("Insulin on Board", comment: "The title of the cell containing the estimated amount of active insulin in the body")
@@ -692,4 +708,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     @IBAction func unwindFromSettings(segue: UIStoryboardSegue) {
         
     }
+
+    // MARK: - HUDs
+
+    @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
+
+    @IBOutlet var basalRateHUD: BasalRateHUDView!
+
+    @IBOutlet var reservoirVolumeHUD: ReservoirVolumeHUDView!
+
+    @IBOutlet var batteryLevelHUD: BatteryLevelHUDView!
 }

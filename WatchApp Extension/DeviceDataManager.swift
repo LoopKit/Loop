@@ -85,7 +85,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
                 },
                 errorHandler: { (error) -> Void in
                     if !replied {
-                        WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+                        WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(#function, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
                     }
                 }
             )
@@ -101,7 +101,7 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
         session.sendMessage(userInfo.rawValue, replyHandler: { (reply) -> Void in
         }, errorHandler: { (error) -> Void in
-            WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+            WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(#function, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
         })
     }
 

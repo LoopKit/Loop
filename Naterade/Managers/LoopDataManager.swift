@@ -177,7 +177,7 @@ class LoopDataManager {
         }
     }
 
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -187,7 +187,7 @@ class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, error: error)
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, error: error)
         }
     }
 

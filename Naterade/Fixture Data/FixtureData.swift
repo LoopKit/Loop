@@ -65,7 +65,9 @@ struct FixtureData {
         return history.reverse().flatMap({ (entry) -> DoseEntry? in
             let unitString = entry["unit"] as! String
             let unit: DoseUnit
-            let type = PumpEventType(rawValue: entry["type"] as! String) ?? .Other
+            guard let type = PumpEventType(rawValue: entry["type"] as! String) else {
+                return nil
+            }
 
             switch unitString {
             case "U/hour":
@@ -78,5 +80,17 @@ struct FixtureData {
 
             return DoseEntry(type: type, startDate: dateFormatter.dateFromString(entry["start_at"] as! String)!, endDate: dateFormatter.dateFromString(entry["end_at"] as! String)!, value: entry["amount"] as! Double, unit: unit, description: nil)
         })
+    }
+}
+
+
+private extension NSDateFormatter {
+    static func ISO8601LocalTimeDateFormatter() -> Self {
+        let dateFormatter = self.init()
+
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+
+        return dateFormatter
     }
 }
