@@ -306,7 +306,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case Date = 0
         case InsulinOnBoard
 
-        static let count = 4
+        static let count = 2
     }
 
     private enum SensorRow: Int {
