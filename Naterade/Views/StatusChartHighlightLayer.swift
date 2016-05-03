@@ -36,25 +36,29 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                 xAxisOverlayView.opaque = true
                 containerView.addSubview(xAxisOverlayView)
 
-                let yAxisOverlayView = UIView(frame: CGRect(x: yAxis.rect.origin.x, y: 0, width: yAxis.rect.width, height: chart.frame.height))
-                yAxisOverlayView.backgroundColor = UIColor.whiteColor()
-                yAxisOverlayView.opaque = true
-                containerView.addSubview(yAxisOverlayView)
-
                 let point = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
                 point.fillColor = tintColor.colorWithAlphaComponent(0.5)
+                containerView.addSubview(point)
 
                 if let text = chartPointModel.chartPoint.y.labels.first?.text {
                     let label = UILabel()
-                    label.font = UIFont.monospacedDigitSystemFontOfSize(12, weight: UIFontWeightBold)
+                    label.font = UIFont.monospacedDigitSystemFontOfSize(15, weight: UIFontWeightBold)
 
                     label.text = text
                     label.textColor = tintColor
+                    label.textAlignment = .Center
                     label.sizeToFit()
-                    label.center.y = chartPointModel.screenLoc.y
-                    label.frame.origin.x = max(yAxisOverlayView.bounds.width - label.frame.width - 2, yAxisOverlayView.bounds.origin.x + 2)
+                    label.frame.size.height += 4
+                    label.frame.size.width += label.frame.size.height / 2
+                    label.center.y = innerFrame.origin.y - 1
+                    label.center.x = chartPointModel.screenLoc.x
+                    label.frame.origin.x = min(max(label.frame.origin.x, innerFrame.origin.x), innerFrame.maxX - label.frame.size.width)
                     label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
-                    
+                    label.layer.borderColor = tintColor.CGColor
+                    label.layer.borderWidth = 1 / chart.view.traitCollection.displayScale
+                    label.layer.cornerRadius = label.frame.size.height / 2
+                    label.backgroundColor = UIColor.whiteColor()
+
                     containerView.addSubview(label)
                 }
 
@@ -69,8 +73,6 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
 
                     containerView.addSubview(label)
                 }
-
-                containerView.addSubview(point)
                 
                 return containerView
             }
