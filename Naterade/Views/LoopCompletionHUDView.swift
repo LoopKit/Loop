@@ -14,17 +14,19 @@ class LoopCompletionHUDView: HUDView {
         super.awakeFromNib()
 
         updateCaption(nil)
-
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(didEnterBackground(_:)), name: UIApplicationDidEnterBackgroundNotification, object: UIApplication.sharedApplication())
     }
 
     var lastLoopCompleted: NSDate? {
         didSet {
-            if window != nil, let date = lastLoopCompleted {
-                initTimer(date)
-            } else {
-                updateTimer = nil
-            }
+            assertTimer()
+        }
+    }
+
+    func assertTimer() {
+        if window != nil && updateTimer == nil, let date = lastLoopCompleted {
+            initTimer(date)
+        } else {
+            updateTimer = nil
         }
     }
 
@@ -70,17 +72,9 @@ class LoopCompletionHUDView: HUDView {
         }
     }
 
-    @objc private func didEnterBackground(_: NSNotification) {
-        updateTimer = nil
-    }
-
     override func didMoveToWindow() {
         super.didMoveToWindow()
 
-        if window == nil {
-            updateTimer = nil
-        } else if updateTimer == nil, let date = lastLoopCompleted {
-            initTimer(date)
-        }
+        assertTimer()
     }
 }

@@ -93,6 +93,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     private var active = true {
         didSet {
             reloadData()
+            loopCompletionHUD.assertTimer()
         }
     }
 
@@ -681,6 +682,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     } else if self.active && self.visible, let bolus = units where bolus > 0 {
                         self.performSegueWithIdentifier(BolusViewController.className, sender: bolus)
                         self.needsRefresh = true
+                    } else {
+                        self.needsRefresh = true
+                        self.reloadData()
                     }
                 }
             }
