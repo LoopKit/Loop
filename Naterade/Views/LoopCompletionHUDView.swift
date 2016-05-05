@@ -18,12 +18,13 @@ class LoopCompletionHUDView: HUDView {
 
     var lastLoopCompleted: NSDate? {
         didSet {
+            updateTimer = nil
             assertTimer()
         }
     }
 
-    func assertTimer() {
-        if window != nil && updateTimer == nil, let date = lastLoopCompleted {
+    func assertTimer(active: Bool = true) {
+        if active && window != nil, let date = lastLoopCompleted {
             initTimer(date)
         } else {
             updateTimer = nil
