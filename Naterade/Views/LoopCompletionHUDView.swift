@@ -10,16 +10,30 @@ import UIKit
 
 class LoopCompletionHUDView: HUDView {
 
+    @IBOutlet private var loopStateView: LoopStateView!
+
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        updateCaption(nil)
+        updateDisplay(nil)
+    }
+
+    var dosingEnabled = false {
+        didSet {
+            loopStateView.open = !dosingEnabled
+        }
     }
 
     var lastLoopCompleted: NSDate? {
         didSet {
             updateTimer = nil
             assertTimer()
+        }
+    }
+
+    var loopInProgress = false {
+        didSet {
+            loopStateView.animated = loopInProgress
         }
     }
 
@@ -38,7 +52,7 @@ class LoopCompletionHUDView: HUDView {
             fireDate: startDate.dateByAddingTimeInterval(2),
             interval: updateInterval,
             target: self,
-            selector: #selector(updateCaption(_:)),
+            selector: #selector(updateDisplay(_:)),
             userInfo: nil,
             repeats: true
         )
@@ -65,11 +79,26 @@ class LoopCompletionHUDView: HUDView {
         return formatter
     }()
 
-    @objc private func updateCaption(_: NSTimer?) {
-        if let date = lastLoopCompleted, ago = formatter.stringFromTimeInterval(abs(min(0, date.timeIntervalSinceNow))) {
-            caption.text = String(format: NSLocalizedString("%@ ago", comment: "The description of the time interval since the last completion date. The format string"), ago)
+    @objc private func updateDisplay(_: NSTimer?) {
+        if let date = lastLoopCompleted {
+            let ago = abs(min(0, date.timeIntervalSinceNow))
+
+            switch ago {
+            case let t where t.minutes <= 5:
+                loopStateView.freshness = .Fresh
+            case let t where t.minutes <= 15:
+                loopStateView.freshness = .Aging
+            default:
+                loopStateView.freshness = .Stale
+            }
+
+            if let timeString = formatter.stringFromTimeInterval(ago) {
+                caption.text = String(format: NSLocalizedString("%@ ago", comment: "The description of the time interval since the last completion date. The format string"), timeString)
+            } else {
+                caption.text = "—"
+            }
         } else {
-            caption.text = nil
+            caption.text = "—"
         }
     }
 

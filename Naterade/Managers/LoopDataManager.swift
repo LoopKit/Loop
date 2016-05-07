@@ -31,6 +31,8 @@ class LoopDataManager {
     var dosingEnabled: Bool {
         didSet {
             NSUserDefaults.standardUserDefaults().dosingEnabled = dosingEnabled
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
         }
     }
 

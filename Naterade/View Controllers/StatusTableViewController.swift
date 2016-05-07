@@ -190,8 +190,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             if let status = dataManager.latestPumpStatus {
                 reservoirVolume = status.reservoirRemainingUnits
+                reservoirLevel = Double(status.reservoirRemainingPercent) / 100
                 batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
+
+            loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
@@ -271,6 +274,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     private var lastLoopCompleted: NSDate? {
         didSet {
             loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+        }
+    }
+
+    private var reservoirLevel: Double? {
+        didSet {
+            reservoirVolumeHUD.reservoirLevel = reservoirLevel
         }
     }
 

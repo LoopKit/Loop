@@ -24,6 +24,14 @@ extension UIColor {
 
     @nonobjc static let doseTintColor: UIColor = UIColor.HIGGreenColor()
 
+    @nonobjc static let freshColor: UIColor = UIColor.HIGGreenColor()
+
+    @nonobjc static let agingColor: UIColor = UIColor.HIGYellowColor()
+
+    @nonobjc static let staleColor: UIColor = UIColor.HIGRedColor()
+
+    @nonobjc static let unknownColor: UIColor = UIColor.HIGGrayColor().colorWithAlphaComponent(0.5)
+
     // MARK: - HIG colors
     // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/ColorImagesText.html
 
@@ -54,4 +62,9 @@ extension UIColor {
     private static func HIGRedColor() -> UIColor {
         return UIColor(red: 253 / 255, green: 61 / 255, blue: 57 / 255, alpha: 1)
     }
+
+    private static func HIGGrayColor() -> UIColor {
+        return UIColor(red: 142 / 255, green: 143 / 255, blue: 147 / 255, alpha: 1)
+    }
+
 }

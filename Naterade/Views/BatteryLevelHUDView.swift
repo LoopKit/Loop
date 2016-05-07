@@ -10,6 +10,8 @@ import UIKit
 
 class BatteryLevelHUDView: HUDView {
 
+    @IBOutlet private var imageView: UIImageView!
+
     private lazy var numberFormatter: NSNumberFormatter = {
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .PercentStyle
@@ -25,6 +27,8 @@ class BatteryLevelHUDView: HUDView {
             } else {
                 caption.text = nil
             }
+
+            imageView.image = UIImage.batteryHUDImageWithLevel(batteryLevel)
         }
     }
 

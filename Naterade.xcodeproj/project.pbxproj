@@ -49,6 +49,8 @@
 		437CEECE1CD86169003C8C80 /* normalize_history.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BD1C839DC400472A8C /* normalize_history.json */; };
 		437CEECF1CD8616C003C8C80 /* predict_glucose_from_dose.json in Resources */ = {isa = PBXBuildFile; fileRef = 4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */; };
 		437CEED01CD86170003C8C80 /* predict_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BF1C839DFB00472A8C /* predict_glucose.json */; };
+		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
+		438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438DADC71CDE8F8B007697A5 /* LoopStateView.swift */; };
 		43971A2D1C8B94010013154F /* CommandResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A2C1C8B94010013154F /* CommandResponseViewController.swift */; };
 		439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
@@ -226,7 +228,9 @@
 		437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateHUDView.swift; sourceTree = "<group>"; };
 		437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirVolumeHUDView.swift; sourceTree = "<group>"; };
 		437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryLevelHUDView.swift; sourceTree = "<group>"; };
+		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		438C5D481C7FFC8D00FCCEC5 /* iob.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob.json; sourceTree = "<group>"; };
+		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		43971A2C1C8B94010013154F /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
 		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
@@ -495,6 +499,7 @@
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
+				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -523,6 +528,7 @@
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */,
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
+				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
 				43F5C2D81B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift */,
 				43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */,
@@ -858,6 +864,7 @@
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
+				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
@@ -881,6 +888,7 @@
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
+				438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */,
 				43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */,
 				43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */,

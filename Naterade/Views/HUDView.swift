@@ -12,7 +12,7 @@ class HUDView: UIView {
 
     @IBOutlet var caption: UILabel! {
         didSet {
-            caption?.text = nil
+            caption?.text = "—"
         }
     }
 

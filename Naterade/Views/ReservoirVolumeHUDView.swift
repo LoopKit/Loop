@@ -10,6 +10,8 @@ import UIKit
 
 class ReservoirVolumeHUDView: HUDView {
 
+    @IBOutlet private var imageView: UIImageView!
+
     private lazy var numberFormatter: NSNumberFormatter = {
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .DecimalStyle
@@ -25,6 +27,12 @@ class ReservoirVolumeHUDView: HUDView {
             } else {
                 caption.text = nil
             }
+        }
+    }
+
+    var reservoirLevel: Double? {
+        didSet {
+            imageView.image = UIImage.reservoirHUDImageWithLevel(reservoirLevel)
         }
     }
 
