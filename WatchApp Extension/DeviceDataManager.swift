@@ -99,9 +99,14 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
             throw Error.ReachabilityError
         }
 
+        var replied = false
+
         session.sendMessage(userInfo.rawValue, replyHandler: { (reply) -> Void in
+            replied = true
         }, errorHandler: { (error) -> Void in
-            WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(#function, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+            if !replied {
+                WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion ?? error.localizedFailureReason, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+            }
         })
     }
 
