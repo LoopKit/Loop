@@ -40,7 +40,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     // MARK: - Timeline Population
     
     func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: ((CLKComplicationTimelineEntry?) -> Void)) {
-        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
+
         switch complication.family {
         case .ModularSmall:
             if let context = DeviceDataManager.sharedManager.lastContextData,
@@ -49,7 +49,6 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             {
                 handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
             } else {
-                DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
                 handler(nil)
             }
         default:
@@ -64,22 +63,17 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEntriesForComplication(complication: CLKComplication, afterDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
-        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
-
         if let context = DeviceDataManager.sharedManager.lastContextData,
             glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
             let template = CLKComplicationTemplateModularSmallStackText(context: context)
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
         } else {
-            DiagnosticLogger()?.addError("\(#function) returned nil", fromSource: "ClockKit")
             handler(nil)
         }
     }
 
     func requestedUpdateDidBegin() {
-        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
-
         DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 

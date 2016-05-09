@@ -37,6 +37,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     let rileyLinkManager: RileyLinkDeviceManager
 
+    let shareClient: ShareClient?
+
     var transmitter: Transmitter? {
         switch transmitterState {
         case .Ready(let transmitter):
@@ -123,6 +125,33 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (newValue, previousValue, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
+                } else if self.latestGlucoseMessageDate == nil ||
+                          self.latestGlucoseMessageDate!.timeIntervalSinceNow < -NSTimeInterval(minutes: 5),
+                    let shareClient = self.shareClient,
+                        glucoseStore = self.glucoseStore,
+                        lastGlucose = glucoseStore.latestGlucose
+                    where lastGlucose.startDate.timeIntervalSinceNow < -NSTimeInterval(minutes: 5)
+                {
+                    // Load glucose from Share if our xDripG5 connection is stale
+                    shareClient.fetchLast(1) { (error, glucose) in
+                        if let error = error {
+                            self.logger?.addError(error, fromSource: "ShareClient")
+                        }
+
+                        guard let glucose = glucose?.first else {
+                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                            return
+                        }
+
+                        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: true, device: nil) { (_, value, error) -> Void in
+                            if let error = error {
+                                self.logger?.addError(error, fromSource: "GlucoseStore")
+                            }
+
+                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                        }
+                    }
                 } else {
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 }
@@ -175,10 +204,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         if glucose != latestGlucoseMessage {
             latestGlucoseMessage = glucose
 
-            if glucose.glucose >= 20, let transmitterStartTime = transmitterStartTime, glucoseStore = glucoseStore {
+            if glucose.glucose >= 20, let startDate = latestGlucoseMessageDate, glucoseStore = glucoseStore {
                 let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose.glucose))
-
-                let startDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
 
                 let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
@@ -214,6 +241,14 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     }
 
     var latestGlucoseMessage: GlucoseRxMessage?
+
+    var latestGlucoseMessageDate: NSDate? {
+        guard let glucose = latestGlucoseMessage, startTime = transmitterStartTime else {
+            return nil
+        }
+
+        return NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
+    }
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
@@ -444,7 +479,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     private func sendWatchContext() {
         if let session = watchSession where session.paired && session.watchAppInstalled {
-            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucoseMessage, transmitterStartTime: transmitterStartTime).rawValue
+            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucoseMessage, glucoseMessageDate: latestGlucoseMessageDate).rawValue
 
             let complicationShouldUpdate: Bool
 
@@ -581,6 +616,15 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             autoConnectIDs: connectedPeripheralIDs
         )
 
+        if let  settings = NSBundle.mainBundle().remoteSettings,
+                username = settings["ShareAccountName"],
+                password = settings["ShareAccountPassword"]
+        {
+            shareClient = ShareClient(username: username, password: password)
+        } else {
+            shareClient = nil
+        }
+
         super.init()
 
         rileyLinkManager.timerTickEnabled = false
@@ -613,13 +657,13 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
 
 extension WatchContext {
-    convenience init(pumpStatus: MySentryPumpStatusMessageBody?, glucose: GlucoseRxMessage?, transmitterStartTime: NSTimeInterval?) {
+    convenience init(pumpStatus: MySentryPumpStatusMessageBody?, glucose: GlucoseRxMessage?, glucoseMessageDate: NSDate?) {
         self.init()
 
-        if let glucose = glucose, transmitterStartTime = transmitterStartTime where glucose.state > 5 {
+        if let glucose = glucose, date = glucoseMessageDate where glucose.state > 5 {
             glucoseValue = Int(glucose.glucose)
             glucoseTrend = Int(glucose.trend)
-            glucoseDate = NSDate(timeIntervalSince1970: transmitterStartTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
+            glucoseDate = date
         }
 
         if let status = pumpStatus, date = status.pumpDateComponents.date {

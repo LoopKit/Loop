@@ -12,4 +12,16 @@ extension NSBundle {
     var shortVersionString: String! {
         return objectForInfoDictionaryKey("CFBundleShortVersionString") as? String
     }
+
+    private var remoteSettingsPath: String? {
+        return NSBundle.mainBundle().pathForResource("RemoteSettings", ofType: "plist")
+    }
+
+    var remoteSettings: [String: String]? {
+        guard let path = remoteSettingsPath else {
+            return nil
+        }
+
+        return NSDictionary(contentsOfFile: path) as? [String: String]
+    }
 }
