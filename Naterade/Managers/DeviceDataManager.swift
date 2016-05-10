@@ -125,20 +125,19 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (newValue, previousValue, error) -> Void in
                 if let error = error {
                     self.logger?.addError(error, fromSource: "DoseStore")
-                } else if self.latestGlucoseMessageDate == nil ||
-                          self.latestGlucoseMessageDate!.timeIntervalSinceNow < -NSTimeInterval(minutes: 5),
+                } else if self.latestGlucoseMessageDate == nil,
                     let shareClient = self.shareClient,
                         glucoseStore = self.glucoseStore,
                         lastGlucose = glucoseStore.latestGlucose
                     where lastGlucose.startDate.timeIntervalSinceNow < -NSTimeInterval(minutes: 5)
                 {
-                    // Load glucose from Share if our xDripG5 connection is stale
+                    // Load glucose from Share if our xDripG5 connection hasn't started
                     shareClient.fetchLast(1) { (error, glucose) in
                         if let error = error {
                             self.logger?.addError(error, fromSource: "ShareClient")
                         }
 
-                        guard let glucose = glucose?.first else {
+                        guard let glucose = glucose?.first where lastGlucose.startDate.timeIntervalSinceDate(glucose.startDate) < -NSTimeInterval(minutes: 1) else {
                             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                             return
                         }
