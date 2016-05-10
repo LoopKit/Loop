@@ -16,6 +16,8 @@ import MinimedKit
 class LoopDataManager {
     static let LoopDataUpdatedNotification = "com.loudnate.Naterade.notification.LoopDataUpdated"
 
+    static let LoopRunningNotification = "com.loudnate.Naterade.notification.LoopRunning"
+
     enum Error: ErrorType {
         case CommunicationError
         case ConfigurationError
@@ -70,6 +72,8 @@ class LoopDataManager {
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
+
                 // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), self.dataAccessQueue) {
                     self.insulinEffect = nil
