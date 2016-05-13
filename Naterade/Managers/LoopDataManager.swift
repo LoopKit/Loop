@@ -34,7 +34,7 @@ class LoopDataManager {
         didSet {
             NSUserDefaults.standardUserDefaults().dosingEnabled = dosingEnabled
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+            notify()
         }
     }
 
@@ -55,7 +55,7 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                    self.notify()
 
                     // Try to troubleshoot communications errors
                     if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
@@ -72,10 +72,13 @@ class LoopDataManager {
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
+                self.waitingForSentryPackets = true
+
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
 
                 // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), self.dataAccessQueue) {
+                    self.waitingForSentryPackets = false
                     self.insulinEffect = nil
                     self.loop()
                 }
@@ -85,8 +88,7 @@ class LoopDataManager {
         notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: nil) { (note) -> Void in
             dispatch_async(self.dataAccessQueue) {
                 self.carbEffect = nil
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                self.notify()
             }
         })
     }
@@ -107,7 +109,7 @@ class LoopDataManager {
                         self.lastLoopCompleted = NSDate()
                     }
 
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+                    self.notify()
                 }
 
                 // Delay the notification until we know the result of the temp basal
@@ -119,7 +121,7 @@ class LoopDataManager {
             lastLoopError = error
         }
 
-        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+        notify()
     }
 
     // References to registered notification center observers
@@ -183,6 +185,24 @@ class LoopDataManager {
         }
     }
 
+    private func notify() {
+        if !waitingForSentryPackets {
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+        }
+    }
+
+    /**
+     Retrieves the current state of the loop, calculating
+     
+     This operation is performed asynchronously and the completion will be executed on an arbitrary background queue.
+
+     - parameter resultsHandler: A closure called once the values have been retrieved. The closure takes the following arguments:
+        - predictedGlucose:     The calculated timeline of predicted glucose values
+        - recommendedTempBasal: The recommended temp basal based on predicted glucose
+        - lastTempBasal:        The last set temp basal
+        - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
+        - error:                An error object explaining why the retrieval failed
+     */
     func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
@@ -242,6 +262,7 @@ class LoopDataManager {
             AnalyticsManager.loopDidSucceed()
         }
     }
+    private var waitingForSentryPackets = false
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
