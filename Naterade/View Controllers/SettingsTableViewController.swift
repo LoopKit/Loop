@@ -120,12 +120,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     // MARK: - UITableViewDataSource
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        switch dataManager.rileyLinkManager.pumpState {
-        case .Some:
-            return Section.count
-        case .None:
-            return Section.count - 1
-        }
+        return Section.count
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
