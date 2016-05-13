@@ -14,6 +14,7 @@ import InsulinKit
 import LoopKit
 import MinimedKit
 import RileyLinkKit
+import ShareClient
 import WatchConnectivity
 import xDripG5
 

@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import ShareClient
 
 
 extension ShareGlucose: GlucoseValue {
