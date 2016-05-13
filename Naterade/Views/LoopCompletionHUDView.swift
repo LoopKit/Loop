@@ -27,6 +27,7 @@ class LoopCompletionHUDView: HUDView {
     var lastLoopCompleted: NSDate? {
         didSet {
             updateTimer = nil
+            loopInProgress = false
             assertTimer()
         }
     }

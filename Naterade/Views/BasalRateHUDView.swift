@@ -10,8 +10,12 @@ import UIKit
 
 class BasalRateHUDView: HUDView {
 
-    func setNetBasalRate(rate: Double, atDate date: NSDate) {
+    @IBOutlet private var basalStateView: BasalStateView!
+
+    func setNetBasalRate(rate: Double, percent: Double, atDate date: NSDate) {
         caption?.text = timeFormatter.stringFromDate(date)
+
+        basalStateView.netBasalPercent = percent
     }
 
     private lazy var timeFormatter: NSDateFormatter = {

@@ -28,7 +28,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: nil) { (note) -> Void in
                 dispatch_async(dispatch_get_main_queue()) {
                     self.needsRefresh = true
+                    self.loopCompletionHUD.loopInProgress = false
                     self.reloadData()
+                }
+            },
+            notificationCenter.addObserverForName(LoopDataManager.LoopRunningNotification, object: dataManager.loopManager, queue: nil) { (note) in
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.loopCompletionHUD.loopInProgress = true
                 }
             },
             notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
@@ -250,13 +256,21 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             let netBasalRate: Double
+            let netBasalPercent: Double
             let basalStartDate: NSDate
 
-            if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > NSDate() {
+            if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > NSDate(), let maxBasal = dataManager.maximumBasalRatePerHour {
                 netBasalRate = lastTempBasal.value - scheduledBasal.value
                 basalStartDate = lastTempBasal.startDate
+
+                if netBasalRate < 0 {
+                    netBasalPercent = netBasalRate / scheduledBasal.value
+                } else {
+                    netBasalPercent = netBasalRate / (maxBasal - scheduledBasal.value)
+                }
             } else {
                 netBasalRate = 0
+                netBasalPercent = 0
 
                 if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > scheduledBasal.startDate {
                     basalStartDate = lastTempBasal.endDate
@@ -266,7 +280,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
 
             dispatch_async(dispatch_get_main_queue()) {
-                self.basalRateHUD.setNetBasalRate(netBasalRate, atDate: basalStartDate)
+                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, atDate: basalStartDate)
             }
         }
     }

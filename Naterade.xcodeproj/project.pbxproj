@@ -70,6 +70,7 @@
 		43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A9438F1B926B7B0051FA24 /* Assets.xcassets */; };
 		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
 		43B1E3DE1CD48B6B00A46274 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		43B371861CE583890013C5A6 /* BasalStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B371851CE583890013C5A6 /* BasalStateView.swift */; };
 		43C094481CAB9A21001F6403 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094471CAB9A21001F6403 /* NSUserDefaults.swift */; };
 		43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094491CACCC73001F6403 /* NotificationManager.swift */; };
 		43C418B21CE04C0200405B6A /* ShareClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C418B11CE04C0200405B6A /* ShareClient.swift */; };
@@ -254,6 +255,7 @@
 		43A9438D1B926B7B0051FA24 /* ComplicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
 		43A9438F1B926B7B0051FA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		43B371851CE583890013C5A6 /* BasalStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalStateView.swift; sourceTree = "<group>"; };
 		43C094471CAB9A21001F6403 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		43C094491CACCC73001F6403 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		43C418B11CE04C0200405B6A /* ShareClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareClient.swift; sourceTree = "<group>"; };
@@ -540,6 +542,7 @@
 			isa = PBXGroup;
 			children = (
 				437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */,
+				43B371851CE583890013C5A6 /* BasalStateView.swift */,
 				437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */,
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */,
@@ -869,6 +872,7 @@
 				43F5C2D91B92A58F003EB13D /* RileyLinkDeviceTableViewCell.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
+				43B371861CE583890013C5A6 /* BasalStateView.swift in Sources */,
 				43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */,
 				43DC87EB1C8B82BE005BC30D /* CBPeripheralState.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
