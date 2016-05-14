@@ -143,7 +143,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                             return
                         }
 
-                        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: true, device: nil) { (_, value, error) -> Void in
+                        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
                             if let error = error {
                                 self.logger?.addError(error, fromSource: "GlucoseStore")
                             }

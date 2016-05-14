@@ -80,6 +80,9 @@ struct NotificationManager {
         // Cancel any previous scheduled notifications
         app.scheduledLocalNotifications?.filter({ $0.category == Category.LoopNotRunning.rawValue }).forEach({ app.cancelLocalNotification($0) })
 
+        // Give a little extra time for a loop-in-progress to complete
+        let gracePeriod = NSTimeInterval(minutes: 0.5)
+
         for minutes: Double in [20, 40, 60, 120] {
             let notification = UILocalNotification()
             let failureInterval = NSTimeInterval(minutes: minutes)
@@ -95,7 +98,7 @@ struct NotificationManager {
             }
 
             notification.alertTitle = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            notification.fireDate = NSDate(timeIntervalSinceNow: failureInterval)
+            notification.fireDate = NSDate(timeIntervalSinceNow: failureInterval + gracePeriod)
             notification.soundName = UILocalNotificationDefaultSoundName
             notification.category = Category.LoopNotRunning.rawValue
 
