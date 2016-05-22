@@ -1,8 +1,6 @@
 github "loudnate/LoopKit" "dev"
-# git "~/src/github.com/loudnate/LoopKit" "reservoir-previous-entry"
 github "loudnate/xDripG5" "dev"
 github "loudnate/SwiftCharts" "loudnate/naterade"
-github "loudnate/dexcom-share-client-swift" "framework-project"
-github "ps2/rileylink_ios" "fix-framework-deps"
-# git "~/src/github.com/ps2/rileylink_ios" "loudnate/naterade-embedded-0.8"
+github "mddub/dexcom-share-client-swift" ~> 0.1
+github "ps2/rileylink_ios" "dev"
 github "mpurland/Amplitude-iOS" "framework"
