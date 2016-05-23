@@ -17,7 +17,7 @@
                BlueprintIdentifier = "43A943711B926B7B0051FA24"
                BuildableName = "WatchApp.app"
                BlueprintName = "WatchApp"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,7 +31,7 @@
                BlueprintIdentifier = "43776F8B1B8022E90074EA36"
                BuildableName = "Naterade.app"
                BlueprintName = "Naterade"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "43A9437D1B926B7B0051FA24"
                BuildableName = "WatchApp Extension.appex"
                BlueprintName = "WatchApp Extension"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -63,7 +63,7 @@
                BlueprintIdentifier = "437A289B1C2F66DD00009647"
                BuildableName = "MinimedKitTests.xctest"
                BlueprintName = "MinimedKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -73,7 +73,7 @@
                BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -83,7 +83,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -110,7 +110,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
@@ -119,7 +119,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -142,7 +142,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
@@ -151,7 +151,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

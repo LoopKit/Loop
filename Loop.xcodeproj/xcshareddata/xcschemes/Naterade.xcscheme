@@ -17,7 +17,7 @@
                BlueprintIdentifier = "43776F8B1B8022E90074EA36"
                BuildableName = "Naterade.app"
                BlueprintName = "Naterade"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,20 +33,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "437A289B1C2F66DD00009647"
-               BuildableName = "MinimedKitTests.xctest"
-               BlueprintName = "MinimedKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -56,7 +46,7 @@
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
             BuildableName = "Naterade.app"
             BlueprintName = "Naterade"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -79,7 +69,7 @@
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
             BuildableName = "Naterade.app"
             BlueprintName = "Naterade"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -98,7 +88,7 @@
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
             BuildableName = "Naterade.app"
             BlueprintName = "Naterade"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
@@ -120,7 +110,7 @@
                      BlueprintIdentifier = "43776F8B1B8022E90074EA36"
                      BuildableName = "Naterade.app"
                      BlueprintName = "Naterade"
-                     ReferencedContainer = "container:Naterade.xcodeproj">
+                     ReferencedContainer = "container:Loop.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>

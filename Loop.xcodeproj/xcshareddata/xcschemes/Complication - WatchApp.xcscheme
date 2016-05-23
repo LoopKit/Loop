@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "0700"
-   version = "1.3">
+   version = "2.0">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -17,7 +17,7 @@
                BlueprintIdentifier = "43A943711B926B7B0051FA24"
                BuildableName = "WatchApp.app"
                BlueprintName = "WatchApp"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,7 +31,7 @@
                BlueprintIdentifier = "43776F8B1B8022E90074EA36"
                BuildableName = "Naterade.app"
                BlueprintName = "Naterade"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "43A9437D1B926B7B0051FA24"
                BuildableName = "WatchApp Extension.appex"
                BlueprintName = "WatchApp Extension"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -60,20 +60,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "437A289B1C2F66DD00009647"
-               BuildableName = "MinimedKitTests.xctest"
-               BlueprintName = "MinimedKitTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -83,7 +73,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -99,7 +89,7 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      notificationPayloadFile = "WatchApp Extension/PushNotificationPayload.apns">
+      launchAutomaticallySubstyle = "32">
       <RemoteRunnable
          runnableDebuggingMode = "2"
          BundleIdentifier = "com.apple.carousel"
@@ -109,7 +99,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
@@ -118,7 +108,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -130,7 +120,7 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES"
-      notificationPayloadFile = "WatchApp Extension/PushNotificationPayload.apns">
+      launchAutomaticallySubstyle = "32">
       <RemoteRunnable
          runnableDebuggingMode = "2"
          BundleIdentifier = "com.apple.carousel"
@@ -140,7 +130,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </RemoteRunnable>
       <MacroExpansion>
@@ -149,7 +139,7 @@
             BlueprintIdentifier = "43A943711B926B7B0051FA24"
             BuildableName = "WatchApp.app"
             BlueprintName = "WatchApp"
-            ReferencedContainer = "container:Naterade.xcodeproj">
+            ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

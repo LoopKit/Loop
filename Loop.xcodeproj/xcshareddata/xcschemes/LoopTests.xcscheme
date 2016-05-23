@@ -19,7 +19,7 @@
                BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
-               ReferencedContainer = "container:Naterade.xcodeproj">
+               ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
