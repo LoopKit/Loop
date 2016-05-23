@@ -471,6 +471,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         tableView.reloadData()
     }
 
+    func textFieldTableViewControllerDidReturn(controller: TextFieldTableViewController) {
+        navigationController?.popViewControllerAnimated(true)
+    }
+
     // MARK: - DailyValueScheduleTableViewControllerDelegate
 
     func dailyValueScheduleTableViewControllerWillFinishUpdating(controller: DailyValueScheduleTableViewController) {

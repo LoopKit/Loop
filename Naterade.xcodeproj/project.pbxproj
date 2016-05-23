@@ -21,8 +21,6 @@
 		434B2A0C1C97B20F00BC3003 /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0D1C97B22D00BC3003 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		434B2A0E1C97B24000BC3003 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
-		434FF1D91CF265C0000DB779 /* TextFieldTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 434FF1D81CF265C0000DB779 /* TextFieldTableViewCell.xib */; };
-		434FF1DB1CF26602000DB779 /* TextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1DA1CF26602000DB779 /* TextFieldTableViewCell.swift */; };
 		434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */; };
 		434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */; };
 		43523ED91CC35082001850F1 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */; };
@@ -104,7 +102,6 @@
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
-		43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */; };
 		43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
 		43F78D2E1C8FC58F002152D1 /* DoseMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */; };
 		43F78D391C8FCC7B002152D1 /* read_selected_basal_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */; };
@@ -214,8 +211,6 @@
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
 		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkBLEKit.framework; path = Carthage/Build/iOS/RileyLinkBLEKit.framework; sourceTree = "<group>"; };
-		434FF1D81CF265C0000DB779 /* TextFieldTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TextFieldTableViewCell.xib; sourceTree = "<group>"; };
-		434FF1DA1CF26602000DB779 /* TextFieldTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewCell.swift; sourceTree = "<group>"; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKit.framework; path = Carthage/Build/iOS/RileyLinkKit.framework; sourceTree = "<group>"; };
@@ -296,7 +291,6 @@
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
-		43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
 		43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NateradeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseMathTests.swift; sourceTree = "<group>"; };
@@ -526,7 +520,6 @@
 				43DBF0561C93F6EB00B3C386 /* ReservoirTableViewController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
-				43F5C2E71B93DE9A003EB13D /* TextFieldTableViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -544,8 +537,6 @@
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
 				43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */,
 				43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */,
-				434FF1D81CF265C0000DB779 /* TextFieldTableViewCell.xib */,
-				434FF1DA1CF26602000DB779 /* TextFieldTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -784,7 +775,6 @@
 				437CEED01CD86170003C8C80 /* predict_glucose.json in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */,
-				434FF1D91CF265C0000DB779 /* TextFieldTableViewCell.xib in Resources */,
 				437CEECC1CD86163003C8C80 /* clean_glucose.json in Resources */,
 				437CEECF1CD8616C003C8C80 /* predict_glucose_from_dose.json in Resources */,
 			);
@@ -867,7 +857,6 @@
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* NSDate.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
-				43F5C2E81B93DE9A003EB13D /* TextFieldTableViewController.swift in Sources */,
 				43B371861CE583890013C5A6 /* BasalStateView.swift in Sources */,
 				434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */,
 				43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */,
@@ -875,7 +864,6 @@
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
 				43649A631C7A347F00523D7F /* CollectionType.swift in Sources */,
 				437CEEBE1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift in Sources */,
-				434FF1DB1CF26602000DB779 /* TextFieldTableViewCell.swift in Sources */,
 				435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */,
