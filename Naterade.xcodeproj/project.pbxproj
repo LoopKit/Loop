@@ -100,6 +100,7 @@
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43EDEE6A1CF2E08900393BE3 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EDEE691CF2E08900393BE3 /* LoopTests.swift */; };
+		43EDEE6C1CF2E12A00393BE3 /* Loop.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */; };
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
@@ -285,8 +286,8 @@
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
 		43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = xDripG5.framework.dSYM; path = Carthage/Build/iOS/xDripG5.framework.dSYM; sourceTree = "<group>"; };
 		43EDEE691CF2E08900393BE3 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
+		43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Loop.entitlements; sourceTree = "<group>"; };
 		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
-		43F5C2C71B929BFF003EB13D /* Naterade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Naterade.entitlements; sourceTree = "<group>"; };
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -385,7 +386,7 @@
 		43776F831B8022E90074EA36 = {
 			isa = PBXGroup;
 			children = (
-				43776F8E1B8022E90074EA36 /* Naterade */,
+				43776F8E1B8022E90074EA36 /* Loop */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
 				43F78D2C1C8FC58F002152D1 /* LoopTests */,
@@ -405,10 +406,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		43776F8E1B8022E90074EA36 /* Naterade */ = {
+		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
-				43F5C2C71B929BFF003EB13D /* Naterade.entitlements */,
+				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
@@ -423,7 +424,7 @@
 				43F5C2CE1B92A2A0003EB13D /* View Controllers */,
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
-			path = Naterade;
+			path = Loop;
 			sourceTree = "<group>";
 		};
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
@@ -805,6 +806,7 @@
 				43F78D551C914B19002152D1 /* recommend_temp_basal_start_low_end_high.json in Resources */,
 				43F78D431C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json in Resources */,
 				43F78D471C913CF8002152D1 /* recommend_temp_basal_correct_low_at_min.json in Resources */,
+				43EDEE6C1CF2E12A00393BE3 /* Loop.entitlements in Resources */,
 				43F78D531C914AE4002152D1 /* recommend_temp_basal_start_high_end_low.json in Resources */,
 				43F78D591C914C57002152D1 /* recommend_temp_basal_high_and_falling.json in Resources */,
 				43F78D5B1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json in Resources */,
@@ -1073,14 +1075,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Naterade/Naterade.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = Naterade/Info.plist;
+				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1092,14 +1094,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Naterade/Naterade.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = Naterade/Info.plist;
+				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
