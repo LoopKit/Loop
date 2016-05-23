@@ -45,12 +45,6 @@
 		437CEEC01CD6FCD8003C8C80 /* BasalRateHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */; };
 		437CEEC81CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */; };
 		437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */; };
-		437CEECB1CD85C5C003C8C80 /* FixtureData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */; };
-		437CEECC1CD86163003C8C80 /* clean_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */; };
-		437CEECD1CD86165003C8C80 /* iob.json in Resources */ = {isa = PBXBuildFile; fileRef = 438C5D481C7FFC8D00FCCEC5 /* iob.json */; };
-		437CEECE1CD86169003C8C80 /* normalize_history.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BD1C839DC400472A8C /* normalize_history.json */; };
-		437CEECF1CD8616C003C8C80 /* predict_glucose_from_dose.json in Resources */ = {isa = PBXBuildFile; fileRef = 4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */; };
-		437CEED01CD86170003C8C80 /* predict_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43EB40BF1C839DFB00472A8C /* predict_glucose.json */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
 		438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438DADC71CDE8F8B007697A5 /* LoopStateView.swift */; };
 		43971A2D1C8B94010013154F /* CommandResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43971A2C1C8B94010013154F /* CommandResponseViewController.swift */; };
@@ -206,11 +200,8 @@
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartTableViewCell.swift; sourceTree = "<group>"; };
-		4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predict_glucose_from_dose.json; sourceTree = "<group>"; };
-		4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = clean_glucose.json; sourceTree = "<group>"; };
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
-		4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FixtureData.swift; sourceTree = "<group>"; };
 		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkBLEKit.framework; path = Carthage/Build/iOS/RileyLinkBLEKit.framework; sourceTree = "<group>"; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
@@ -234,7 +225,6 @@
 		437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirVolumeHUDView.swift; sourceTree = "<group>"; };
 		437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryLevelHUDView.swift; sourceTree = "<group>"; };
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
-		438C5D481C7FFC8D00FCCEC5 /* iob.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iob.json; sourceTree = "<group>"; };
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		43971A2C1C8B94010013154F /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
@@ -278,8 +268,6 @@
 		43E344A51B9E1B3300C85C07 /* NSBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSBundle.swift; sourceTree = "<group>"; };
 		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
 		43EB40851C82646A00472A8C /* StatusChartManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartManager.swift; sourceTree = "<group>"; };
-		43EB40BD1C839DC400472A8C /* normalize_history.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = normalize_history.json; sourceTree = "<group>"; };
-		43EB40BF1C839DFB00472A8C /* predict_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = predict_glucose.json; sourceTree = "<group>"; };
 		43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartHighlightLayer.swift; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
@@ -360,19 +348,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		4346D1E81C77FEF100ABAFE3 /* Fixture Data */ = {
-			isa = PBXGroup;
-			children = (
-				4346D1EA1C77FF0E00ABAFE3 /* clean_glucose.json */,
-				438C5D481C7FFC8D00FCCEC5 /* iob.json */,
-				43EB40BD1C839DC400472A8C /* normalize_history.json */,
-				4346D1E91C77FF0E00ABAFE3 /* predict_glucose_from_dose.json */,
-				43EB40BF1C839DFB00472A8C /* predict_glucose.json */,
-				4346D1F91C790F6F00ABAFE3 /* FixtureData.swift */,
-			);
-			path = "Fixture Data";
-			sourceTree = "<group>";
-		};
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -415,7 +390,6 @@
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				43776F981B8022E90074EA36 /* Assets.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
-				4346D1E81C77FEF100ABAFE3 /* Fixture Data */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
@@ -741,7 +715,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */;
+			buildConfigurationList = 43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Loop" */;
 			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -767,15 +741,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				437CEECE1CD86169003C8C80 /* normalize_history.json in Resources */,
 				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
-				437CEECD1CD86165003C8C80 /* iob.json in Resources */,
-				437CEED01CD86170003C8C80 /* predict_glucose.json in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */,
-				437CEECC1CD86163003C8C80 /* clean_glucose.json in Resources */,
-				437CEECF1CD8616C003C8C80 /* predict_glucose_from_dose.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -882,7 +851,6 @@
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
-				437CEECB1CD85C5C003C8C80 /* FixtureData.swift in Sources */,
 				437CEEBC1CD6DE6A003C8C80 /* HUDView.swift in Sources */,
 				4354003A1C9FB81100D5819C /* UIColor.swift in Sources */,
 				4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */,
@@ -1212,7 +1180,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Naterade" */ = {
+		43776F871B8022E90074EA36 /* Build configuration list for PBXProject "Loop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43776FB41B8022E90074EA36 /* Debug */,
