@@ -23,6 +23,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.registerNib(RileyLinkDeviceTableViewCell.nib(), forCellReuseIdentifier: RileyLinkDeviceTableViewCell.className)
+
         dataManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
             if let deviceManager = self?.dataManager.rileyLinkManager {
                 switch note.name {
@@ -139,7 +141,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
         switch Section(rawValue: indexPath.section)! {
         case .Loop:
-            switch LoopRow(rawValue: indexPath.section)! {
+            switch LoopRow(rawValue: indexPath.row)! {
             case .Dosing:
                 let switchCell = tableView.dequeueReusableCellWithIdentifier(SwitchTableViewCell.className, forIndexPath: indexPath) as! SwitchTableViewCell
 
@@ -231,7 +233,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             cell = configCell
         case .Devices:
             let deviceCell = tableView.dequeueReusableCellWithIdentifier(RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
-
             let device = dataManager.rileyLinkManager.devices[indexPath.row]
 
             deviceCell.configureCellWithName(device.name,
@@ -263,10 +264,48 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         switch Section(rawValue: indexPath.section)! {
         case .Configuration:
             let sender = tableView.cellForRowAtIndexPath(indexPath)
-
-            switch ConfigurationRow(rawValue: indexPath.row)! {
+            let row = ConfigurationRow(rawValue: indexPath.row)!
+            switch row {
             case .PumpID, .TransmitterID, .InsulinActionDuration, .MaxBasal, .MaxBolus:
-                performSegueWithIdentifier(TextFieldTableViewController.className, sender: sender)
+                let vc = TextFieldTableViewController()
+
+                switch row {
+                case .PumpID:
+                    vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                    vc.value = dataManager.pumpID
+                case .TransmitterID:
+                    vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
+                    vc.value = dataManager.transmitterID
+                case .InsulinActionDuration:
+                    vc.placeholder = NSLocalizedString("Enter a number of hours", comment: "The placeholder text instructing users how to enter an insulin action duration")
+                    vc.keyboardType = .DecimalPad
+
+                    if let insulinActionDuration = dataManager.insulinActionDuration {
+                        vc.value = valueNumberFormatter.stringFromNumber(insulinActionDuration.hours)
+                    }
+                case .MaxBasal:
+                    vc.placeholder = NSLocalizedString("Enter a rate in units per hour", comment: "The placeholder text instructing users how to enter a maximum basal rate")
+                    vc.keyboardType = .DecimalPad
+
+                    if let maxBasal = dataManager.maximumBasalRatePerHour {
+                        vc.value = valueNumberFormatter.stringFromNumber(maxBasal)
+                    }
+                case .MaxBolus:
+                    vc.placeholder = NSLocalizedString("Enter a number of units", comment: "The placeholder text instructing users how to enter a maximum bolus")
+                    vc.keyboardType = .DecimalPad
+
+                    if let maxBolus = dataManager.maximumBolus {
+                        vc.value = valueNumberFormatter.stringFromNumber(maxBolus)
+                    }
+                default:
+                    assertionFailure()
+                }
+
+                vc.title = sender?.textLabel?.text
+                vc.indexPath = indexPath
+                vc.delegate = self
+
+                showViewController(vc, sender: indexPath)
             case .BasalRate:
                 let scheduleVC = SingleValueScheduleTableViewController()
 
@@ -357,7 +396,12 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     showViewController(scheduleVC, sender: sender)
                 }
             }
-        case .Loop, .Devices:
+        case .Devices:
+            let vc = RileyLinkDeviceTableViewController()
+            vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
+
+            showViewController(vc, sender: indexPath)
+        case .Loop:
             break
         }
     }
@@ -368,58 +412,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             return devicesSectionTitleView
         case .Loop, .Configuration:
             return nil
-        }
-    }
-
-    // MARK: - Navigation
-
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if let
-            cell = sender as? UITableViewCell,
-            indexPath = tableView.indexPathForCell(cell)
-        {
-            switch segue.destinationViewController {
-            case let vc as TextFieldTableViewController:
-                switch ConfigurationRow(rawValue: indexPath.row)! {
-                case .PumpID:
-                    vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                    vc.value = dataManager.pumpID
-                case .TransmitterID:
-                    vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                    vc.value = dataManager.transmitterID
-                case .InsulinActionDuration:
-                    vc.placeholder = NSLocalizedString("Enter a number of hours", comment: "The placeholder text instructing users how to enter an insulin action duration")
-                    vc.keyboardType = .DecimalPad
-
-                    if let insulinActionDuration = dataManager.insulinActionDuration {
-                        vc.value = valueNumberFormatter.stringFromNumber(insulinActionDuration.hours)
-                    }
-                case .MaxBasal:
-                    vc.placeholder = NSLocalizedString("Enter a rate in units per hour", comment: "The placeholder text instructing users how to enter a maximum basal rate")
-                    vc.keyboardType = .DecimalPad
-
-                    if let maxBasal = dataManager.maximumBasalRatePerHour {
-                        vc.value = valueNumberFormatter.stringFromNumber(maxBasal)
-                    }
-                case .MaxBolus:
-                    vc.placeholder = NSLocalizedString("Enter a number of units", comment: "The placeholder text instructing users how to enter a maximum bolus")
-                    vc.keyboardType = .DecimalPad
-
-                    if let maxBolus = dataManager.maximumBolus {
-                        vc.value = valueNumberFormatter.stringFromNumber(maxBolus)
-                    }
-                default:
-                    assertionFailure()
-                }
-
-                vc.title = cell.textLabel?.text
-                vc.indexPath = indexPath
-                vc.delegate = self
-            case let vc as RileyLinkDeviceTableViewController:
-                vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
-            default:
-                break
-            }
         }
     }
 

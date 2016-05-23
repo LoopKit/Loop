@@ -17,7 +17,7 @@ protocol TextFieldTableViewControllerDelegate: class {
 
 class TextFieldTableViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
-    @IBOutlet weak var textField: UITextField!
+    private weak var textField: UITextField?
 
     var indexPath: NSIndexPath?
 
@@ -33,18 +33,39 @@ class TextFieldTableViewController: UITableViewController, IdentifiableClass, UI
 
     weak var delegate: TextFieldTableViewControllerDelegate?
 
+    convenience init() {
+        self.init(style: .Grouped)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        textField.text = value
-        textField.keyboardType = keyboardType
-        textField.placeholder = placeholder
+        tableView.registerNib(TextFieldTableViewCell.nib(), forCellReuseIdentifier: TextFieldTableViewCell.className)
     }
 
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
 
-        textField.becomeFirstResponder()
+        textField?.becomeFirstResponder()
+    }
+
+    // MARK: - UITableViewDataSource
+
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier(TextFieldTableViewCell.className, forIndexPath: indexPath) as! TextFieldTableViewCell
+
+        textField = cell.textField
+
+        cell.textField.delegate = self
+        cell.textField.text = value
+        cell.textField.keyboardType = keyboardType
+        cell.textField.placeholder = placeholder
+
+        return cell
     }
 
     // MARK: - UITextFieldDelegate
