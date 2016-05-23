@@ -17,13 +17,17 @@ class DiagnosticLogger {
     private lazy var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
     init?() {
-        guard let settings = NSBundle.mainBundle().remoteSettings else {
+        guard let settings = NSBundle.mainBundle().remoteSettings,
+            APIKey = settings["mLabAPIKey"],
+            APIHost = settings["mLabAPIHost"],
+            APIPath = settings["mLabAPIPath"] where !APIKey.isEmpty
+        else {
             return nil
         }
 
-        APIKey = settings["mLabAPIKey"]!
-        APIHost = settings["mLabAPIHost"]!
-        APIPath = settings["mLabAPIPath"]!
+        self.APIKey = APIKey
+        self.APIHost = APIHost
+        self.APIPath = APIPath
     }
 
     func addMessage(message: [String: AnyObject], toCollection collection: String) {

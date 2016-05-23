@@ -17,8 +17,8 @@ class AnalyticsManager {
     private static var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
     private static var amplitudeAPIKey: String? {
-        if let settings = NSBundle.mainBundle().remoteSettings {
-            return settings["AmplitudeAPIKey"]
+        if let settings = NSBundle.mainBundle().remoteSettings, key = settings["AmplitudeAPIKey"] where !key.isEmpty {
+            return key
         }
 
         return nil

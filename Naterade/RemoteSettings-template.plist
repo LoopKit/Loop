@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>mLabAPIKey</key>
+	<string></string>
+	<key>mLabAPIHost</key>
+	<string>https://api.mongolab.com/api/1</string>
+	<key>mLabAPIPath</key>
+	<string>databases/YOUR_DB_NAME/collections</string>
+	<key>AmplitudeAPIKey</key>
+	<string></string>
+	<key>ShareAccountName</key>
+	<string></string>
+	<key>ShareAccountPassword</key>
+	<string></string>
+</dict>
+</plist>

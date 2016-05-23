@@ -619,6 +619,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         if let  settings = NSBundle.mainBundle().remoteSettings,
                 username = settings["ShareAccountName"],
                 password = settings["ShareAccountPassword"]
+            where !username.isEmpty && !password.isEmpty
         {
             shareClient = ShareClient(username: username, password: password)
         } else {
