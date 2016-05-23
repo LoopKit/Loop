@@ -4,11 +4,5 @@
 <dict>
 	<key>com.apple.developer.healthkit</key>
 	<true/>
-	<key>com.apple.security.application-groups</key>
-	<array/>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.loudnate.Naterade.Keychain</string>
-	</array>
 </dict>
 </plist>
