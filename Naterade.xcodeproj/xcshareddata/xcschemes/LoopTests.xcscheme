@@ -17,8 +17,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
-               BuildableName = "NateradeTests.xctest"
-               BlueprintName = "NateradeTests"
+               BuildableName = "LoopTests.xctest"
+               BlueprintName = "LoopTests"
                ReferencedContainer = "container:Naterade.xcodeproj">
             </BuildableReference>
          </TestableReference>

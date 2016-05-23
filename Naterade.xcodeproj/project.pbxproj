@@ -99,13 +99,13 @@
 		43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */; };
 		43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
+		43EDEE6A1CF2E08900393BE3 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EDEE691CF2E08900393BE3 /* LoopTests.swift */; };
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
 		43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
 		43F78D2E1C8FC58F002152D1 /* DoseMathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */; };
 		43F78D391C8FCC7B002152D1 /* read_selected_basal_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */; };
-		43F78D3F1C911D2F002152D1 /* NateradeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D3E1C911D2F002152D1 /* NateradeTests.swift */; };
 		43F78D411C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D401C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json */; };
 		43F78D431C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D421C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json */; };
 		43F78D451C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D441C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json */; };
@@ -284,6 +284,7 @@
 		43EDDBF11C361C75007D89B5 /* xDripG5.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = xDripG5.framework; path = Carthage/Build/iOS/xDripG5.framework; sourceTree = "<group>"; };
 		43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CommonCrypto.framework.dSYM; path = Carthage/Build/iOS/CommonCrypto.framework.dSYM; sourceTree = "<group>"; };
 		43EDDBF61C361D24007D89B5 /* xDripG5.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = xDripG5.framework.dSYM; path = Carthage/Build/iOS/xDripG5.framework.dSYM; sourceTree = "<group>"; };
+		43EDEE691CF2E08900393BE3 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
 		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		43F5C2C71B929BFF003EB13D /* Naterade.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Naterade.entitlements; sourceTree = "<group>"; };
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
@@ -291,11 +292,10 @@
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
 		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
-		43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NateradeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		43F78D2B1C8FC58F002152D1 /* LoopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseMathTests.swift; sourceTree = "<group>"; };
 		43F78D2F1C8FC58F002152D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F78D381C8FCC7B002152D1 /* read_selected_basal_profile.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = read_selected_basal_profile.json; sourceTree = "<group>"; };
-		43F78D3E1C911D2F002152D1 /* NateradeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NateradeTests.swift; sourceTree = "<group>"; };
 		43F78D401C911F70002152D1 /* recommend_temp_basal_no_change_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_no_change_glucose.json; sourceTree = "<group>"; };
 		43F78D421C9131E0002152D1 /* recommend_temp_basal_start_high_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_high_end_in_range.json; sourceTree = "<group>"; };
 		43F78D441C9133D7002152D1 /* recommend_temp_basal_start_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_low_end_in_range.json; sourceTree = "<group>"; };
@@ -388,7 +388,7 @@
 				43776F8E1B8022E90074EA36 /* Naterade */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
-				43F78D2C1C8FC58F002152D1 /* NateradeTests */,
+				43F78D2C1C8FC58F002152D1 /* LoopTests */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
 			);
@@ -400,7 +400,7 @@
 				43776F8C1B8022E90074EA36 /* Naterade.app */,
 				43A943721B926B7B0051FA24 /* WatchApp.app */,
 				43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */,
-				43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */,
+				43F78D2B1C8FC58F002152D1 /* LoopTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -554,15 +554,15 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		43F78D2C1C8FC58F002152D1 /* NateradeTests */ = {
+		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
 				43F78D2F1C8FC58F002152D1 /* Info.plist */,
 				43F78D2D1C8FC58F002152D1 /* DoseMathTests.swift */,
-				43F78D3E1C911D2F002152D1 /* NateradeTests.swift */,
+				43EDEE691CF2E08900393BE3 /* LoopTests.swift */,
 				43F78D351C8FCC47002152D1 /* Fixtures */,
 			);
-			path = NateradeTests;
+			path = LoopTests;
 			sourceTree = "<group>";
 		};
 		43F78D351C8FCC47002152D1 /* Fixtures */ = {
@@ -665,9 +665,9 @@
 			productReference = 43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */;
 			productType = "com.apple.product-type.watchkit2-extension";
 		};
-		43F78D2A1C8FC58F002152D1 /* NateradeTests */ = {
+		43F78D2A1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "NateradeTests" */;
+			buildConfigurationList = 43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "LoopTests" */;
 			buildPhases = (
 				43F78D271C8FC58F002152D1 /* Sources */,
 				43F78D281C8FC58F002152D1 /* Frameworks */,
@@ -678,9 +678,9 @@
 			);
 			dependencies = (
 			);
-			name = NateradeTests;
+			name = LoopTests;
 			productName = NateradeTests;
-			productReference = 43F78D2B1C8FC58F002152D1 /* NateradeTests.xctest */;
+			productReference = 43F78D2B1C8FC58F002152D1 /* LoopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -756,7 +756,7 @@
 				43776F8B1B8022E90074EA36 /* Naterade */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
-				43F78D2A1C8FC58F002152D1 /* NateradeTests */,
+				43F78D2A1C8FC58F002152D1 /* LoopTests */,
 			);
 		};
 /* End PBXProject section */
@@ -934,7 +934,7 @@
 				43B1E3DE1CD48B6B00A46274 /* NSTimeInterval.swift in Sources */,
 				43F78D511C914444002152D1 /* DoseMath.swift in Sources */,
 				43F78D2E1C8FC58F002152D1 /* DoseMathTests.swift in Sources */,
-				43F78D3F1C911D2F002152D1 /* NateradeTests.swift in Sources */,
+				43EDEE6A1CF2E08900393BE3 /* LoopTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1185,7 +1185,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = NateradeTests/Info.plist;
+				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).$(PRODUCT_NAME)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1200,7 +1200,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = NateradeTests/Info.plist;
+				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).$(PRODUCT_NAME)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1246,7 +1246,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "NateradeTests" */ = {
+		43F78D321C8FC58F002152D1 /* Build configuration list for PBXNativeTarget "LoopTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				43F78D331C8FC58F002152D1 /* Debug */,
