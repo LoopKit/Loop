@@ -1,6 +1,6 @@
 # Naterade
 
-![App Icon](https://raw.githubusercontent.com/loudnate/naterade-ios/master/Naterade/Assets.xcassets/AppIcon.appiconset/40%402x.png) ![WatchApp Icon](https://raw.githubusercontent.com/loudnate/naterade-ios/master/WatchApp/Assets.xcassets/AppIcon.appiconset/watch-40%402x.png)
+![App Icon](https://raw.githubusercontent.com/loudnate/naterade-ios/master/Loop/Assets.xcassets/AppIcon.appiconset/40%402x.png) ![WatchApp Icon](https://raw.githubusercontent.com/loudnate/naterade-ios/master/WatchApp/Assets.xcassets/AppIcon.appiconset/watch-40%402x.png)
 
 [![Build Status](https://travis-ci.org/loudnate/naterade-ios.svg?branch=master)](https://travis-ci.org/loudnate/naterade-ios)
 
