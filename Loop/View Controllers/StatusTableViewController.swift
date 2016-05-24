@@ -340,8 +340,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         static let count = 4
     }
 
-    private lazy var emptyDateString: String = NSLocalizedString("Never", comment: "The detail value of a date cell with no value")
-
     private lazy var emptyValueString: String = NSLocalizedString("––",
         comment: "The detail value of a numeric cell with no value"
     )
@@ -464,7 +462,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 if let date = dataManager.latestPumpStatus?.pumpDateComponents.date {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
-                    cell.detailTextLabel?.text = emptyDateString
+                    cell.detailTextLabel?.text = emptyValueString
                 }
             case .InsulinOnBoard:
                 cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
