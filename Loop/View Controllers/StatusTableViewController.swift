@@ -132,7 +132,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         self.needsRefresh = true
                         // TODO: Display error in the cell
                     } else {
-                        self.charts.glucoseValues = values // FixtureData.recentGlucoseData
+                        self.charts.glucoseValues = values
                     }
 
                     dispatch_group_leave(reloadGroup)
@@ -145,7 +145,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     self.needsRefresh = true
                 }
 
-                self.charts.predictedGlucoseValues = predictedGlucose ?? []  // FixtureData.predictedGlucoseData
+                self.charts.predictedGlucoseValues = predictedGlucose ?? []
                 self.recommendedTempBasal = recommendedTempBasal
                 self.lastTempBasal = lastTempBasal
                 self.lastLoopCompleted = lastLoopCompleted
@@ -161,7 +161,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     // TODO: Display error in the cell
                 }
 
-                self.charts.IOBValues = values  //FixtureData.recentIOBData
+                self.charts.IOBValues = values
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -174,7 +174,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     // TODO: Display error in the cell
                 }
 
-                self.charts.doseEntries = doses  // FixtureData.recentDoseData
+                self.charts.doseEntries = doses
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -242,9 +242,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private enum StatusRow: Int {
         case RecommendedBasal = 0
-        case LastBasal
 
-        static let count = 2
+        static let count = 1
     }
 
     private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
@@ -451,30 +450,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 } else {
                     cell.accessoryView = nil
                 }
-            case .LastBasal:
-                cell.textLabel?.text = NSLocalizedString("Current Basal", comment: "The title of the cell containing the last delivered basal")
-                let basalRate: Double
-                let date: NSDate
-
-                if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > NSDate() {
-                    basalRate = lastTempBasal.value
-                    date = lastTempBasal.startDate
-                } else if let basalSchedule = dataManager.basalRateSchedule {
-                    let scheduledBasal = basalSchedule.between(NSDate(), NSDate()).first!
-
-                    basalRate = scheduledBasal.value
-
-                    if let lastTempBasal = lastTempBasal where lastTempBasal.endDate > scheduledBasal.startDate {
-                        date = lastTempBasal.endDate
-                    } else {
-                        date = scheduledBasal.startDate
-                    }
-                } else {
-                    cell.detailTextLabel?.text = nil
-                    return cell
-                }
-
-                cell.detailTextLabel?.text = "\(NSNumber(double: basalRate).descriptionWithLocale(locale)) U/hour @ \(timeFormatter.stringFromDate(date))"
             }
 
             return cell
@@ -484,7 +459,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             switch PumpRow(rawValue: indexPath.row)! {
             case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last Updated", comment: "The title of the cell containing the last updated date")
+                cell.textLabel?.text = NSLocalizedString("Last Sentry", comment: "The title of the cell containing the last updated date")
 
                 if let date = dataManager.latestPumpStatus?.pumpDateComponents.date {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
@@ -492,7 +467,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     cell.detailTextLabel?.text = emptyDateString
                 }
             case .InsulinOnBoard:
-                cell.textLabel?.text = NSLocalizedString("Insulin on Board", comment: "The title of the cell containing the estimated amount of active insulin in the body")
+                cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
 
                 if let iob = dataManager.latestPumpStatus?.iob {
                     let numberValue = NSNumber(double: iob).descriptionWithLocale(locale)
@@ -509,7 +484,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             switch SensorRow(rawValue: indexPath.row)! {
             case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last Read", comment: "The title of the cell containing the last updated sensor date")
+                cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
 
                 if let glucose = dataManager.latestGlucoseMessage, startTime = dataManager.transmitterStartTime {
                     let date = NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
@@ -615,8 +590,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         }
                     }
                 }
-            case .LastBasal:
-                break
             }
         case .Sensor:
             if let URL = NSURL(string: "dexcomcgm://") {

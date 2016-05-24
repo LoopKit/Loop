@@ -7,7 +7,6 @@
 //
 
 import CarbKit
-import LoopKit
 
 
 extension CarbEntryEditViewController: IdentifiableClass {

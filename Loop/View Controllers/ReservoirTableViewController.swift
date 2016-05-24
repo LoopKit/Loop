@@ -6,9 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import Foundation
 import InsulinKit
-import LoopKit
 
 
 extension ReservoirTableViewController: IdentifiableClass {
