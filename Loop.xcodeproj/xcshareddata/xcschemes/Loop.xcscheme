@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-               BuildableName = "Naterade.app"
-               BlueprintName = "Naterade"
+               BuildableName = "Loop.app"
+               BlueprintName = "Loop"
                ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -44,8 +44,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-            BuildableName = "Naterade.app"
-            BlueprintName = "Naterade"
+            BuildableName = "Loop.app"
+            BlueprintName = "Loop"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -67,8 +67,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-            BuildableName = "Naterade.app"
-            BlueprintName = "Naterade"
+            BuildableName = "Loop.app"
+            BlueprintName = "Loop"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -86,8 +86,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-            BuildableName = "Naterade.app"
-            BlueprintName = "Naterade"
+            BuildableName = "Loop.app"
+            BlueprintName = "Loop"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -108,8 +108,8 @@
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-                     BuildableName = "Naterade.app"
-                     BlueprintName = "Naterade"
+                     BuildableName = "Loop.app"
+                     BlueprintName = "Loop"
                      ReferencedContainer = "container:Loop.xcodeproj">
                   </BuildableReference>
                </EnvironmentBuildable>
