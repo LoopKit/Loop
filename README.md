@@ -23,13 +23,13 @@ Fork and clone this repository so you can commit the changes you'll make below.
 
 ### Assigning a Bundle Identifier
 
-[![Assigning a bundle identifier](https://raw.githubusercontent.com/loudnate/Loop/Documentation/Assigning%20a%20bundle%20identifier.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)
+[![Assigning a bundle identifier](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)
 
 In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to something unique. Usually this means replacing `com.loudnate` with a reverse-domain name of your choosing.
 
 ### Renaming The Target
 
-[![Changing the target name](https://raw.githubusercontent.com/loudnate/Loop/Documentation/Changing%20the%20target%20name.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)
+[![Changing the target name](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)
 
 In the Targets list, rename "Loop" to anything you like. This has the side-effect of changing the display name of the app as well, though you can choose to decouple those if you like later by reading more about Xcode target configuration.
 
