@@ -33,6 +33,18 @@ In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENT
 
 In the Targets list, rename "Loop" to anything you like. This has the side-effect of changing the display name of the app as well, though you can choose to decouple those if you like later by reading more about Xcode target configuration.
 
+### Configuring RemoteSettings.plist
+
+After a fresh clone of the repository, you'll need to run
+
+```bash
+$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
+```
+
+`RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
+
+TODO: Document the keys
+
 ## Changing the code
 
 TODO: Write more documentation!
