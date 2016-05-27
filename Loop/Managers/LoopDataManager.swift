@@ -516,15 +516,30 @@ class LoopDataManager {
             return
         }
 
-        ops.setNormalBolus(units) { (error) in
-            if let error = error {
+        ops.readRemainingInsulin { (result) in
+            switch result {
+            case .Success(let unitVolume):
+                self.deviceDataManager.doseStore.addReservoirValue(unitVolume, atDate: NSDate()) { (_, _, error) in
+                    if let error = error {
+                        self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+                        resultsHandler(success: false, error: .CommunicationError)
+                    } else {
+                        ops.setNormalBolus(units) { (error) in
+                            if let error = error {
+                                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+                                resultsHandler(success: false, error: .CommunicationError)
+                            } else {
+                                self.lastBolus = (units: units, date: NSDate())
+                                resultsHandler(success: true, error: nil)
+                            }
+
+                            self.notify()
+                        }
+                    }
+                }
+            case .Failure(let error):
                 self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-
                 resultsHandler(success: false, error: .CommunicationError)
-            } else {
-                self.lastBolus = (units: units, date: NSDate())
-
-                resultsHandler(success: true, error: nil)
             }
         }
     }
