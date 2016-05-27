@@ -6,5 +6,4 @@ xcode_scheme: Loop
 before_script:
     - carthage bootstrap
 script:
-    - xctool -project Loop.xcodeproj -scheme Loop -sdk iphonesimulator9.3 build
     - xctool -project Loop.xcodeproj -scheme LoopTests -sdk iphonesimulator9.3 test
