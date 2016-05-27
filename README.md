@@ -35,15 +35,37 @@ In the Targets list, rename "Loop" to anything you like. This has the side-effec
 
 ### Configuring RemoteSettings.plist
 
-After a fresh clone of the repository, you'll need to run
+Loop supports select third-party remote services. They are all technically optional. However, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
+
+After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
 
 ```bash
-$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
+Loop$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 ```
 
 `RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
+Every one of these values is technically optional.
 
-TODO: Document the keys
+| Key                    | Description
+| ---------------------- | -------------
+| `mLabAPIKey`           | Your mLab API Key (for tracking errors and diagnostic info)
+| `mLabAPIHost`          | The mLab API host
+| `mLabAPIPath`          | Your mLab database path
+| `AmplitudeAPIKey`      | Your Amplitude analytics API Key (for optional, private behavior tracking)
+| `ShareAccountName`     | Your username for Dexcom share (for backfilling glucose data)
+| `ShareAccountPassword` | Your password for Dexcom share
+
+### Setting up Carthage
+
+[Carthage](https://github.com/carthage/carthage) is used to manage dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
+
+After a fresh clone of the repository, you'll need do an checkout and build of the dependencies:
+
+```bash
+Loop$ carthage bootstrap
+```
+
+After pulling new changes, you'll need to run the same command again.
 
 ## Changing the code
 
