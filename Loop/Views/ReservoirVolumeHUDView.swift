@@ -24,8 +24,6 @@ class ReservoirVolumeHUDView: HUDView {
         didSet {
             if let volume = reservoirVolume, units = numberFormatter.stringFromNumber(volume) {
                 caption.text = "\(units) U"
-            } else {
-                caption.text = nil
             }
         }
     }
