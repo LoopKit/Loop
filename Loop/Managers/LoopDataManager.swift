@@ -56,19 +56,6 @@ class LoopDataManager {
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
                     self.notify()
-
-                    // Try to troubleshoot communications errors with the pump
-                    if  let pumpStatusDate = self.deviceDataManager.latestReservoirValue?.startDate where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
-                        let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
-                        device.tunePumpWithResultHandler { (result) in
-                            switch result {
-                            case .Success(let scanResult):
-                                self.deviceDataManager.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
-                            case .Failure(let error):
-                                self.deviceDataManager.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
-                            }
-                        }
-                    }
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in

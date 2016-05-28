@@ -187,7 +187,51 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
+    /**
+     Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
+     */
+    private func assertCurrentPumpData() {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
+            return
+        }
+
+        // TODO: Allow RileyLinkManager to enable/disable idle listening
+        device.assertIdleListening()
+
+        // How long should we wait before we poll for new reservoir data?
+        let reservoirTolerance = sentryEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 1)
+
+        // If we don't yet have reservoir data, or it's old, poll for it.
+        if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -reservoirTolerance {
+            device.ops?.readRemainingInsulin { (result) in
+                switch result {
+                case .Success(let units):
+                    self.updateReservoirVolume(units, atDate: NSDate(), withTimeLeft: nil)
+                case .Failure:
+                    // Try to troubleshoot communications errors with the pump
+
+                    // How long should we wait before we re-tune the RileyLink?
+                    let tuneTolerance = NSTimeInterval(minutes: 14)
+
+                    if device.lastTuned?.timeIntervalSinceNow <= -tuneTolerance {
+                        device.tunePumpWithResultHandler { (result) in
+                            switch result {
+                            case .Success(let scanResult):
+                                self.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                            case .Failure(let error):
+                                self.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - G5 Transmitter
+    /**
+     The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
+     */
 
     // MARK: TransmitterDelegate
 
@@ -198,7 +242,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             ], toCollection: "g5"
         )
 
-        rileyLinkManager.firstConnectedDevice?.assertIdleListening()
+        assertCurrentPumpData()
     }
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
@@ -226,7 +270,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             }
         }
 
-        rileyLinkManager.firstConnectedDevice?.assertIdleListening()
+        assertCurrentPumpData()
     }
 
     // MARK: G5 data
@@ -371,6 +415,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 }
             }
         case "pumpModel"?:
+            if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
+                sentryEnabled = false
+            }
+
             NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
         case "lastHistoryDump"?, "awakeUntil"?:
             break
@@ -471,6 +519,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             AnalyticsManager.didChangeMaximumBolus()
         }
     }
+
+    /// Whether the RileyLink should listen for sentry packets.
+    var sentryEnabled: Bool = true
 
     // MARK: - CarbKit
 
