@@ -727,6 +727,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             self?.receivedRileyLinkPacketNotification(note)
         }
 
+        if let pumpState = pumpState {
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(pumpStateValuesDidChange(_:)), name: PumpState.ValuesDidChangeNotification, object: pumpState)
+        }
+
         loopManager = LoopDataManager(deviceDataManager: self)
 
         watchSession?.delegate = self
