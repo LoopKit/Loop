@@ -354,7 +354,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             return pumpState?.pumpID
         }
         set {
-            guard newValue?.characters.count == 6 else {
+            guard newValue?.characters.count == 6 && newValue != pumpState?.pumpID else {
                 return
             }
 
@@ -364,8 +364,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 if let timeZone = self.pumpState?.timeZone {
                     pumpState.timeZone = timeZone
                 }
-
-                pumpState.pumpModel = self.pumpState?.pumpModel
 
                 self.pumpState = pumpState
             } else {
@@ -692,7 +690,11 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             }
 
             if let pumpModelNumber = NSUserDefaults.standardUserDefaults().pumpModelNumber {
-                pumpState.pumpModel = PumpModel(rawValue: pumpModelNumber)
+                if let model = PumpModel(rawValue: pumpModelNumber) {
+                    pumpState.pumpModel = model
+
+                    sentryEnabled = model.larger
+                }
             }
 
             self.pumpState = pumpState
