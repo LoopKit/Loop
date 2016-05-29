@@ -11,6 +11,19 @@ Please understand that this project:
 - Is highly experimental
 - Is not approved for therapy
 
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Graphs.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Graphs.png" alt="Screenshot of status screen" target="_blank" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Bolus.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Bolus.png" alt="Screenshot of bolus screen" target="_blank" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Battery.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Battery.png" alt="Screenshot of battery change notification" target="_blank" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Loop%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Loop%20Failure.png" alt="Screenshot of loop failure notification" target="_blank" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Bolus%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Bolus%20Failure.png" alt="Screenshot of bolus failure notification" target="_blank" width="170"></a>
+
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Complication.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Complication.png" alt="Screenshot of glucose complication on Apple Watch" target="_blank" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Carb%20Entry.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Carb%20Entry.png" alt="Screenshot of carb entry on Apple Watch" target="_blank" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Bolus.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Bolus.png" alt="Screenshot of bolus entry on Apple Watch" target="_blank" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Battery.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Battery.png" alt="Screenshot of bolus failure notification on Apple Watch" target="_blank" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png" alt="Screenshot of bolus failure notification on Apple Watch" target="_blank" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png" alt="Screenshot of bolus failure notification on Apple Watch" target="_blank" width="141"></a>
+
 ### LoopKit
 
 Loop is built on top of [LoopKit](https://github.com/loudnate/LoopKit). LoopKit is a set of frameworks that provide data storage, retrieval, and calcluation, as well as boilerplate view controllers used in Loop.
