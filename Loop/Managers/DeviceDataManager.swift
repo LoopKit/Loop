@@ -337,8 +337,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             switch transmitterState {
             case .Ready(let transmitter):
                 transmitter.delegate = self
+                rileyLinkManager.timerTickEnabled = false
             case .NeedsConfiguration:
-                break
+                rileyLinkManager.timerTickEnabled = true
             }
         }
     }
@@ -717,7 +718,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
         super.init()
 
-        rileyLinkManager.timerTickEnabled = false
         rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkManagerNotification(note)
         }

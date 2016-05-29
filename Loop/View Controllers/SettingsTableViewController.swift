@@ -160,7 +160,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 configCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
                 configCell.detailTextLabel?.text = dataManager.pumpID ?? TapToSetString
             case .TransmitterID:
-                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the transmitter ID config value")
+                configCell.textLabel?.text = NSLocalizedString("G5 Transmitter ID", comment: "The title text for the Dexcom G5 transmitter ID config value")
                 configCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
             case .BasalRate:
                 configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
