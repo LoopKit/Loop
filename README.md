@@ -63,7 +63,7 @@ Loop$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 
 [Carthage](https://github.com/carthage/carthage) is used to manage dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
 
-After a fresh clone of the repository, you'll need do an checkout and build of the dependencies:
+After a fresh clone of the repository, you'll need to do a checkout and build of the dependencies:
 
 ```bash
 Loop$ carthage bootstrap
