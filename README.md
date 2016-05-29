@@ -40,7 +40,7 @@ In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENT
 
 ## Configuring RemoteSettings.plist
 
-Loop supports select third-party remote services. They are all technically optional. However, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
+Loop optionally supports select third-party remote services. While none of them are required to run the app, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
 
 After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
 
@@ -49,7 +49,6 @@ Loop$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 ```
 
 `RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
-Every one of these values is technically optional.
 
 | Key                    | Description
 | ---------------------- | -------------
