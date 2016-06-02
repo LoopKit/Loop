@@ -38,14 +38,19 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     // MARK: - Timeline Population
-    
+
+    private lazy var formatter = NSNumberFormatter()
+
     func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: ((CLKComplicationTimelineEntry?) -> Void)) {
 
         switch complication.family {
         case .ModularSmall:
             if let context = DeviceDataManager.sharedManager.lastContextData,
-                date = context.glucoseDate where date.timeIntervalSinceNow >= -15.minutes,
-                let template = CLKComplicationTemplateModularSmallStackText(context: context)
+                glucose = context.glucose,
+                unit = context.preferredGlucoseUnit,
+                glucoseString = formatter.stringFromNumber(glucose.doubleValueForUnit(unit)),
+                date = context.glucoseDate where date.timeIntervalSinceNow.minutes >= -15,
+                let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: date)
             {
                 handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
             } else {
@@ -64,8 +69,11 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     func getTimelineEntriesForComplication(complication: CLKComplication, afterDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
         if let context = DeviceDataManager.sharedManager.lastContextData,
+            glucose = context.glucose,
+            unit = context.preferredGlucoseUnit,
+            glucoseString = formatter.stringFromNumber(glucose.doubleValueForUnit(unit)),
             glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
-            let template = CLKComplicationTemplateModularSmallStackText(context: context)
+            let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: glucoseDate)
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
         } else {
@@ -103,5 +111,5 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
             handler(nil)
         }
     }
-    
+
 }
