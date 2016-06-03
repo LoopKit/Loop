@@ -45,7 +45,7 @@ Loop optionally supports select third-party remote services. While none of them 
 After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
 
 ```bash
-Loop$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
+Loop$ cp RemoteSettings-template.plist RemoteSettings.plist
 ```
 
 `RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
