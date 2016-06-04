@@ -11,31 +11,38 @@ Please understand that this project:
 - Is highly experimental
 - Is not approved for therapy
 
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Graphs.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Graphs.png" alt="Screenshot of status screen" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Bolus.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Bolus.png" alt="Screenshot of bolus screen" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Battery.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Battery.png" alt="Screenshot of battery change notification" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Loop%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Loop%20Failure.png" alt="Screenshot of loop failure notification" width="170"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Bolus%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Phone%20Notification%20Bolus%20Failure.png" alt="Screenshot of bolus failure notification" width="170"></a>
+
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Complication.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Complication.png" alt="Screenshot of glucose complication on Apple Watch" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Carb%20Entry.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Carb%20Entry.png" alt="Screenshot of carb entry on Apple Watch" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Bolus.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Bolus.png" alt="Screenshot of bolus entry on Apple Watch" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Battery.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Battery.png" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
+<a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
+
 ### LoopKit
 
 Loop is built on top of [LoopKit](https://github.com/loudnate/LoopKit). LoopKit is a set of frameworks that provide data storage, retrieval, and calcluation, as well as boilerplate view controllers used in Loop.
 
 # Getting Started
 
-## Making It Your Own
-
 Fork and clone this repository so you can commit the changes you'll make below.
 
-### Assigning a Bundle Identifier
+## Assigning a Bundle Identifier
 
 [![Assigning a bundle identifier](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Assigning%20a%20bundle%20identifier.png)
 
 In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to something unique. Usually this means replacing `com.loudnate` with a reverse-domain name of your choosing.
 
-### Renaming The Target
+## Configuring RemoteSettings.plist
 
-[![Changing the target name](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)
+Loop optionally supports select third-party remote services. While none of them are required to run the app, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
 
-In the Targets list, rename "Loop" to anything you like. This has the side-effect of changing the display name of the app as well, though you can choose to decouple those if you like later by reading more about Xcode target configuration.
-
-### Configuring RemoteSettings.plist
-
-After a fresh clone of the repository, you'll need to run
+After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
 
 ```bash
 $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
@@ -43,9 +50,46 @@ $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 
 `RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
 
-TODO: Document the keys
+| Key                    | Description
+| ---------------------- | -------------
+| `mLabAPIKey`           | Your mLab API Key (for tracking errors and diagnostic info)
+| `mLabAPIHost`          | The mLab API host
+| `mLabAPIPath`          | Your mLab database path
+| `AmplitudeAPIKey`      | Your Amplitude analytics API Key (for optional, private behavior tracking)
+| `ShareAccountName`     | Your username for Dexcom share (for backfilling glucose data)
+| `ShareAccountPassword` | Your password for Dexcom share
 
-## Changing the code
+## Setting up Carthage
+
+[Carthage](https://github.com/carthage/carthage) is used to manage dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
+
+After a fresh clone of the repository, you'll need to do a checkout and build of the dependencies:
+
+```bash
+$ carthage bootstrap
+```
+
+After pulling new changes, you'll need to run the same command again.
+
+# Making it Your Own
+
+You might open this app a lot. Make it the most personal app on your iPhone by changing the name and icon.
+
+### Renaming the Target
+
+[![Changing the target name](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20target%20name.png)
+
+In the Targets list, rename "Loop" to anything you like. This has the side-effect of changing the display name of the app as well, though you can choose to decouple those if you like later by reading more about Xcode target configuration.
+
+### Changing the Icon
+
+[![Changing the app icon](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20app%20icon.png)](https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Changing%20the%20app%20icon.png)
+
+1. Select the application asset library from the Project Navigator
+2. Select the image set named AppIcon
+3. Replace each image size with your own icon
+
+# Changing the code
 
 TODO: Write more documentation!
 

@@ -194,8 +194,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
 
+            reservoirVolume = dataManager.latestReservoirValue?.unitVolume
+
             if let status = dataManager.latestPumpStatus {
-                reservoirVolume = status.reservoirRemainingUnits
                 reservoirLevel = Double(status.reservoirRemainingPercent) / 100
                 batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
@@ -484,9 +485,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
 
-                if let glucose = dataManager.latestGlucoseMessage, startTime = dataManager.transmitterStartTime {
-                    let date = NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
-
+                if let date = dataManager.latestGlucoseMessageDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString

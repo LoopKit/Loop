@@ -25,21 +25,27 @@ enum State<T> {
 
 
 class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
+    /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
+
+    /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
     enum Error: ErrorType {
         case ValueError(String)
     }
 
-    // MARK: - Observed state
+    // MARK: - Utilities
 
     lazy var logger = DiagnosticLogger()
 
+    /// Manages all the RileyLinks
     let rileyLinkManager: RileyLinkDeviceManager
 
-    let shareClient: ShareClient?
+    /// The share server client
+    private let shareClient: ShareClient?
 
+    /// The G5 transmitter object
     var transmitter: Transmitter? {
         switch transmitterState {
         case .Ready(let transmitter):
@@ -51,7 +57,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     // MARK: - RileyLink
 
-    var rileyLinkManagerObserver: AnyObject? {
+    private var rileyLinkManagerObserver: AnyObject? {
         willSet {
             if let observer = rileyLinkManagerObserver {
                 NSNotificationCenter.defaultCenter().removeObserver(observer)
@@ -59,7 +65,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    var rileyLinkDevicePacketObserver: AnyObject? {
+    private var rileyLinkDevicePacketObserver: AnyObject? {
         willSet {
             if let observer = rileyLinkDevicePacketObserver {
                 NSNotificationCenter.defaultCenter().removeObserver(observer)
@@ -67,11 +73,11 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    func receivedRileyLinkManagerNotification(note: NSNotification) {
+    private func receivedRileyLinkManagerNotification(note: NSNotification) {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
     }
 
-    func receivedRileyLinkPacketNotification(note: NSNotification) {
+    private func receivedRileyLinkPacketNotification(note: NSNotification) {
         if let
             device = note.object as? RileyLinkDevice,
             data = note.userInfo?[RileyLinkDevice.IdleMessageDataKey] as? NSData,
@@ -82,18 +88,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
                     updatePumpStatus(body, fromDevice: device)
-                case is MySentryAlertMessageBody:
+                case is MySentryAlertMessageBody, is MySentryAlertClearedMessageBody:
                     break
-                    // TODO: de-dupe
-//                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
-                case is MySentryAlertClearedMessageBody:
-                    break
-                    // TODO: de-dupe
-//                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryAlert")
-                case let body as UnknownMessageBody:
-                    logger?.addMessage(body.dictionaryRepresentation, toCollection: "sentryOther")
-                default:
-                    break
+                case let body:
+                    logger?.addMessage(["messageType": Int(message.messageType.rawValue), "messageBody": body.txData.hexadecimalString], toCollection: "sentryOther")
                 }
             default:
                 break
@@ -117,74 +115,123 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         AnalyticsManager.didChangeRileyLinkConnectionState()
     }
 
+    // MARK: Pump data
+
+    var latestPumpStatus: MySentryPumpStatusMessageBody?
+
+    var latestReservoirValue: ReservoirValue?
+
+    /**
+     Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
+     
+     This message has two important pieces of info about the pump: reservoir volume and battery.
+
+     Because the RileyLink must actively listen for these packets, they are not the most reliable heartbeat. However, we can still use them to assert glucose data is current.
+
+     - parameter status: The status message body
+     - parameter device: The RileyLink that received the message
+     */
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
         status.pumpDateComponents.timeZone = pumpState?.timeZone
 
-        if status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date {
-            latestPumpStatus = status
-
-            doseStore.addReservoirValue(status.reservoirRemainingUnits, atDate: pumpDate) { (newValue, previousValue, error) -> Void in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: "DoseStore")
-                } else if self.latestGlucoseMessageDate == nil,
-                    let shareClient = self.shareClient,
-                        glucoseStore = self.glucoseStore,
-                        lastGlucose = glucoseStore.latestGlucose
-                    where lastGlucose.startDate.timeIntervalSinceNow < -NSTimeInterval(minutes: 5)
-                {
-                    // Load glucose from Share if our xDripG5 connection hasn't started
-                    shareClient.fetchLast(1) { (error, glucose) in
-                        if let error = error {
-                            self.logger?.addError(error, fromSource: "ShareClient")
-                        }
-
-                        guard let glucose = glucose?.first where lastGlucose.startDate.timeIntervalSinceDate(glucose.startDate) < -NSTimeInterval(minutes: 1) else {
-                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                            return
-                        }
-
-                        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
-                            if let error = error {
-                                self.logger?.addError(error, fromSource: "GlucoseStore")
-                            }
-
-                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-                            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                        }
-                    }
-                } else {
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                }
-
-                if let newVolume = newValue?.unitVolume, previousVolume = previousValue?.unitVolume {
-                    self.checkPumpReservoirForAmount(newVolume, previousAmount: previousVolume, timeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
-                }
-            }
-
-            if status.batteryRemainingPercent == 0 {
-                NotificationManager.sendPumpBatteryLowNotification()
-            }
-        }
-    }
-
-    private func checkPumpReservoirForAmount(newAmount: Double, previousAmount: Double, timeLeft: NSTimeInterval) {
-
-        guard newAmount > 0 else {
-            NotificationManager.sendPumpReservoirEmptyNotification()
+        // The pump sends the same message 3x, so ignore it if we've already seen it.
+        guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
             return
         }
 
-        let warningThresholds: [Double] = [10, 20, 30]
+        latestPumpStatus = status
 
-        for threshold in warningThresholds {
-            if newAmount <= threshold && previousAmount > threshold {
-                NotificationManager.sendPumpReservoirLowNotificationForAmount(newAmount, andTimeRemaining: timeLeft)
+        backfillGlucoseFromShareIfNeeded()
+
+        updateReservoirVolume(status.reservoirRemainingUnits, atDate: pumpDate, withTimeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
+
+        // Check for an empty battery. Sentry packets are still broadcast for a few hours after this value reaches 0.
+        if status.batteryRemainingPercent == 0 {
+            NotificationManager.sendPumpBatteryLowNotification()
+        }
+    }
+
+    /**
+     Store a new reservoir volume and notify observers of new pump data.
+
+     - parameter units:    The number of units remaining
+     - parameter date:     The date the reservoir was read
+     - parameter timeLeft: The approximate time before the reservoir is empty
+     */
+    private func updateReservoirVolume(units: Double, atDate date: NSDate, withTimeLeft timeLeft: NSTimeInterval?) {
+        doseStore.addReservoirValue(units, atDate: date) { (newValue, previousValue, error) -> Void in
+            if let error = error {
+                self.logger?.addError(error, fromSource: "DoseStore")
                 return
+            }
+
+            self.latestReservoirValue = newValue
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+
+            // Send notifications for low reservoir if necessary
+            if let newVolume = newValue?.unitVolume, previousVolume = previousValue?.unitVolume {
+                guard newVolume > 0 else {
+                    NotificationManager.sendPumpReservoirEmptyNotification()
+                    return
+                }
+
+                let warningThresholds: [Double] = [10, 20, 30]
+
+                for threshold in warningThresholds {
+                    if newVolume <= threshold && previousVolume > threshold {
+                        NotificationManager.sendPumpReservoirLowNotificationForAmount(newVolume, andTimeRemaining: timeLeft)
+                    }
+                }
             }
         }
     }
 
-    // MARK: - Transmitter
+    /**
+     Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
+     */
+    private func assertCurrentPumpData() {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
+            return
+        }
+
+        // TODO: Allow RileyLinkManager to enable/disable idle listening
+        device.assertIdleListening()
+
+        // How long should we wait before we poll for new reservoir data?
+        let reservoirTolerance = sentryEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 1)
+
+        // If we don't yet have reservoir data, or it's old, poll for it.
+        if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -reservoirTolerance {
+            device.ops?.readRemainingInsulin { (result) in
+                switch result {
+                case .Success(let units):
+                    self.updateReservoirVolume(units, atDate: NSDate(), withTimeLeft: nil)
+                case .Failure:
+                    // Try to troubleshoot communications errors with the pump
+
+                    // How long should we wait before we re-tune the RileyLink?
+                    let tuneTolerance = NSTimeInterval(minutes: 14)
+
+                    if device.lastTuned?.timeIntervalSinceNow <= -tuneTolerance {
+                        device.tunePumpWithResultHandler { (result) in
+                            switch result {
+                            case .Success(let scanResult):
+                                self.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                            case .Failure(let error):
+                                self.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - G5 Transmitter
+    /**
+     The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
+     */
 
     // MARK: TransmitterDelegate
 
@@ -195,7 +242,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             ], toCollection: "g5"
         )
 
-        self.rileyLinkManager.firstConnectedDevice?.assertIdleListening()
+        assertCurrentPumpData()
     }
 
     func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
@@ -223,12 +270,12 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             }
         }
 
-        self.rileyLinkManager.firstConnectedDevice?.assertIdleListening()
+        assertCurrentPumpData()
     }
 
-    // MARK: - Managed state
+    // MARK: G5 data
 
-    var transmitterStartTime: NSTimeInterval? = NSUserDefaults.standardUserDefaults().transmitterStartTime {
+    private var transmitterStartTime: NSTimeInterval? = NSUserDefaults.standardUserDefaults().transmitterStartTime {
         didSet {
             if oldValue != transmitterStartTime {
                 NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
@@ -250,20 +297,54 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         return NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
     }
 
-    var latestPumpStatus: MySentryPumpStatusMessageBody?
+    /**
+     Attempts to backfill glucose data from the share servers if the G5 connection hasn't been established.
+     */
+    private func backfillGlucoseFromShareIfNeeded() {
+        if self.latestGlucoseMessageDate == nil,
+            let shareClient = self.shareClient, glucoseStore = self.glucoseStore
+        {
+            // Load glucose from Share if our xDripG5 connection hasn't started
+            shareClient.fetchLast(1) { (error, glucose) in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "ShareClient")
+                }
 
-    var transmitterState: State<Transmitter> = .NeedsConfiguration {
-        didSet {
-            switch transmitterState {
-            case .Ready(let transmitter):
-                transmitter.delegate = self
-            case .NeedsConfiguration:
-                break
+                guard let glucose = glucose?.first else {
+                    return
+                }
+
+                // Ignore glucose values that are less than a minute newer than our previous value
+                if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceDate(glucose.startDate) > -NSTimeInterval(minutes: 1)  {
+                    return
+                }
+
+                glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
+                    if let error = error {
+                        self.logger?.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
             }
         }
     }
 
-    var connectedPeripheralIDs: Set<String> = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs) {
+    // MARK: - Configuration
+
+    private var transmitterState: State<Transmitter> = .NeedsConfiguration {
+        didSet {
+            switch transmitterState {
+            case .Ready(let transmitter):
+                transmitter.delegate = self
+                rileyLinkManager.timerTickEnabled = false
+            case .NeedsConfiguration:
+                rileyLinkManager.timerTickEnabled = true
+            }
+        }
+    }
+
+    private var connectedPeripheralIDs: Set<String> = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs) {
         didSet {
             NSUserDefaults.standardUserDefaults().connectedPeripheralIDs = Array(connectedPeripheralIDs)
         }
@@ -274,7 +355,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             return pumpState?.pumpID
         }
         set {
-            guard newValue?.characters.count == 6 else {
+            guard newValue?.characters.count == 6 && newValue != pumpState?.pumpID else {
                 return
             }
 
@@ -284,8 +365,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 if let timeZone = self.pumpState?.timeZone {
                     pumpState.timeZone = timeZone
                 }
-
-                pumpState.pumpModel = self.pumpState?.pumpModel
 
                 self.pumpState = pumpState
             } else {
@@ -312,7 +391,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
     }
 
-    func pumpStateValuesDidChange(note: NSNotification) {
+    @objc private func pumpStateValuesDidChange(note: NSNotification) {
         switch note.userInfo?[PumpState.PropertyKey] as? String {
         case "timeZone"?:
             NSUserDefaults.standardUserDefaults().pumpTimeZone = pumpState?.timeZone
@@ -335,6 +414,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                 }
             }
         case "pumpModel"?:
+            if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
+                sentryEnabled = false
+            }
+
             NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
         case "lastHistoryDump"?, "awakeUntil"?:
             break
@@ -435,6 +518,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             AnalyticsManager.didChangeMaximumBolus()
         }
     }
+
+    /// Whether the RileyLink should listen for sentry packets.
+    var sentryEnabled: Bool = true
 
     // MARK: - CarbKit
 
@@ -605,7 +691,11 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             }
 
             if let pumpModelNumber = NSUserDefaults.standardUserDefaults().pumpModelNumber {
-                pumpState.pumpModel = PumpModel(rawValue: pumpModelNumber)
+                if let model = PumpModel(rawValue: pumpModelNumber) {
+                    pumpState.pumpModel = model
+
+                    sentryEnabled = model.larger
+                }
             }
 
             self.pumpState = pumpState
@@ -628,7 +718,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
         super.init()
 
-        rileyLinkManager.timerTickEnabled = false
         rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkManagerNotification(note)
         }
@@ -636,6 +725,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         // TODO: Use delegation instead.
         rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkPacketNotification(note)
+        }
+
+        if let pumpState = pumpState {
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(pumpStateValuesDidChange(_:)), name: PumpState.ValuesDidChangeNotification, object: pumpState)
         }
 
         loopManager = LoopDataManager(deviceDataManager: self)
