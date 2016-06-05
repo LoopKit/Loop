@@ -9,13 +9,13 @@
 import Foundation
 
 
-public protocol IdentifiableClass: class {
+protocol IdentifiableClass: class {
     static var className: String { get }
 }
 
 
 extension IdentifiableClass {
-    public static var className: String {
+    static var className: String {
         return NSStringFromClass(self).componentsSeparatedByString(".").last!
     }
 }

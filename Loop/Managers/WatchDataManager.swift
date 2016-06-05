@@ -1,0 +1,201 @@
+//
+//  WatchDataManager.swift
+//  Loop
+//
+//  Created by Nathan Racklyeft on 5/29/16.
+//  Copyright © 2016 Nathan Racklyeft. All rights reserved.
+//
+
+import HealthKit
+import UIKit
+import WatchConnectivity
+import CarbKit
+import LoopKit
+import xDripG5
+
+
+class WatchDataManager: NSObject, WCSessionDelegate {
+
+    unowned let deviceDataManager: DeviceDataManager
+
+    init(deviceDataManager: DeviceDataManager) {
+        self.deviceDataManager = deviceDataManager
+
+        super.init()
+
+        watchSession?.delegate = self
+        watchSession?.activateSession()
+    }
+
+    private var watchSession: WCSession? = {
+        if WCSession.isSupported() {
+            return WCSession.defaultSession()
+        } else {
+            return nil
+        }
+    }()
+
+    func updateWatch() {
+        if let session = watchSession {
+            switch session.activationState {
+            case .NotActivated, .Inactive:
+                session.activateSession()
+            case .Activated:
+                createWatchContext { (context) in
+                    if let context = context {
+                        self.sendWatchContext(context)
+                    }
+                }
+            }
+        }
+    }
+
+    private var lastComplicationContext: WatchContext?
+
+    private let minTrendDrift: Double = 20
+    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliterUnit()
+
+    private func sendWatchContext(context: WatchContext) {
+        if let session = watchSession where session.paired && session.watchAppInstalled {
+
+            let complicationShouldUpdate: Bool
+
+            if let lastContext = lastComplicationContext,
+                lastGlucose = lastContext.glucose, lastGlucoseDate = lastContext.glucoseDate,
+                newGlucose = context.glucose, newGlucoseDate = context.glucoseDate
+            {
+                let enoughTimePassed = newGlucoseDate.timeIntervalSinceDate(lastGlucoseDate).minutes >= 30
+                let enoughTrendDrift = abs(newGlucose.doubleValueForUnit(minTrendUnit) - lastGlucose.doubleValueForUnit(minTrendUnit)) >= minTrendDrift
+
+                complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
+            } else {
+                complicationShouldUpdate = true
+            }
+
+            if session.complicationEnabled && complicationShouldUpdate {
+                session.transferCurrentComplicationUserInfo(context.rawValue)
+                lastComplicationContext = context
+            } else {
+                do {
+                    try session.updateApplicationContext(context.rawValue)
+                } catch let error {
+                    deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+                }
+            }
+        }
+    }
+
+    private func createWatchContext(completionHandler: (context: WatchContext?) -> Void) {
+
+        guard let glucoseStore = self.deviceDataManager.glucoseStore else {
+            completionHandler(context: nil)
+            return
+        }
+
+        let glucose = deviceDataManager.latestGlucoseValue
+        let reservoir = deviceDataManager.latestReservoirValue
+
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) in
+
+            let eventualGlucose = predictedGlucose?.last
+
+            self.deviceDataManager.loopManager.getRecommendedBolus { (units, error) in
+                glucoseStore.preferredUnit { (unit, error) in
+                    let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
+                    context.reservoir = reservoir?.unitVolume
+
+                    context.loopLastRunDate = lastLoopCompleted
+                    context.recommendedBolusDose = units
+
+                    if let trend = self.deviceDataManager.latestGlucoseMessage?.trend {
+                        context.glucoseTrend = Int(trend)
+                    }
+
+                    completionHandler(context: context)
+                }
+            }
+        }
+    }
+
+    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((units: Double?, error: ErrorType?) -> Void)? = nil) {
+        if let carbStore = deviceDataManager.carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
+            let newEntry = NewCarbEntry(
+                quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
+                startDate: carbEntry.startDate,
+                foodType: nil,
+                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
+            )
+
+            deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
+                if let error = error {
+                    self.deviceDataManager.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
+                } else {
+                    AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
+                }
+
+                completionHandler?(units: units, error: error)
+            }
+        } else {
+            completionHandler?(units: nil, error: DeviceDataManager.Error.ValueError("Unable to parse CarbEntryUserInfo: \(message)"))
+        }
+    }
+
+    // MARK: WCSessionDelegate
+
+    func session(session: WCSession, didReceiveMessage message: [String : AnyObject], replyHandler: ([String: AnyObject]) -> Void) {
+        switch message["name"] as? String {
+        case CarbEntryUserInfo.name?:
+            addCarbEntryFromWatchMessage(message) { (units, error) in
+                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
+            }
+        case SetBolusUserInfo.name?:
+            if let bolus = SetBolusUserInfo(rawValue: message) {
+                self.deviceDataManager.loopManager.enactBolus(bolus.value) { (success, error) in
+                    if !success {
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
+                    } else {
+                        AnalyticsManager.didSetBolusFromWatch(bolus.value)
+                    }
+
+                    replyHandler([:])
+                }
+            } else {
+                replyHandler([:])
+            }
+        default:
+            replyHandler([:])
+        }
+    }
+
+    func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
+        addCarbEntryFromWatchMessage(userInfo)
+    }
+
+    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
+        switch activationState {
+        case .Activated:
+            if let error = error {
+                deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+            }
+        case .Inactive, .NotActivated:
+            break
+        }
+    }
+
+    func session(session: WCSession, didFinishUserInfoTransfer userInfoTransfer: WCSessionUserInfoTransfer, error: NSError?) {
+        if let error = error {
+            deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+        }
+    }
+
+    func sessionDidBecomeInactive(session: WCSession) {
+        // Nothing to do here
+    }
+
+    func sessionDidDeactivate(session: WCSession) {
+        watchSession = WCSession.defaultSession()
+        watchSession?.delegate = self
+        watchSession?.activateSession()
+    }
+
+}
