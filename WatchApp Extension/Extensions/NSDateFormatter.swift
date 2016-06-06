@@ -9,7 +9,7 @@
 import Foundation
 
 
-public extension NSDateFormatter {
+extension NSDateFormatter {
     static func ISO8601StrictDateFormatter() -> Self {
         let dateFormatter = self.init()
 

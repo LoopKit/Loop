@@ -15,7 +15,6 @@ import LoopKit
 import MinimedKit
 import RileyLinkKit
 import ShareClient
-import WatchConnectivity
 import xDripG5
 
 enum State<T> {
@@ -24,7 +23,7 @@ enum State<T> {
 }
 
 
-class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSessionDelegate {
+class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 
@@ -245,32 +244,33 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: Transmitter, didReadGlucose glucose: GlucoseRxMessage) {
+    func transmitter(transmitter: Transmitter, didReadGlucose glucoseMessage: GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
 
-        if glucose != latestGlucoseMessage {
-            latestGlucoseMessage = glucose
+        assertCurrentPumpData()
 
-            if glucose.glucose >= 20, let startDate = latestGlucoseMessageDate, glucoseStore = glucoseStore {
-                let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose.glucose))
-
-                let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
-
-                glucoseStore.addGlucose(quantity, date: startDate, displayOnly: glucose.glucoseIsDisplayOnly, device: device, resultHandler: { (_, value, error) -> Void in
-                    if let error = error {
-                        self.logger?.addError(error, fromSource: "GlucoseStore")
-                    }
-
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-                })
-
-                updateWatch()
-            } else {
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-            }
+        guard glucoseMessage != latestGlucoseMessage else {
+            return
         }
 
-        assertCurrentPumpData()
+        latestGlucoseMessage = glucoseMessage
+
+        guard let glucose = TransmitterGlucose(glucoseMessage: glucoseMessage, startTime: transmitter.startTimeInterval), glucoseStore = glucoseStore else {
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+            return
+        }
+
+        latestGlucoseValue = glucose
+
+        let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
+
+        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
+            if let error = error {
+                self.logger?.addError(error, fromSource: "GlucoseStore")
+            }
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+        })
     }
 
     // MARK: G5 data
@@ -289,19 +289,13 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     var latestGlucoseMessage: GlucoseRxMessage?
 
-    var latestGlucoseMessageDate: NSDate? {
-        guard let glucose = latestGlucoseMessage, startTime = transmitterStartTime else {
-            return nil
-        }
-
-        return NSDate(timeIntervalSince1970: startTime).dateByAddingTimeInterval(NSTimeInterval(glucose.timestamp))
-    }
+    var latestGlucoseValue: GlucoseValue?
 
     /**
      Attempts to backfill glucose data from the share servers if the G5 connection hasn't been established.
      */
     private func backfillGlucoseFromShareIfNeeded() {
-        if self.latestGlucoseMessageDate == nil,
+        if latestGlucoseMessage == nil,
             let shareClient = self.shareClient, glucoseStore = self.glucoseStore
         {
             // Load glucose from Share if our xDripG5 connection hasn't started
@@ -323,6 +317,8 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
                     }
+
+                    self.latestGlucoseValue = value
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
                 }
@@ -542,125 +538,10 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     // MARK: - WatchKit
 
-    private var watchSession: WCSession? = {
-        if WCSession.isSupported() {
-            return WCSession.defaultSession()
-        } else {
-            return nil
-        }
-    }()
+    private(set) var watchManager: WatchDataManager!
 
-    private func updateWatch() {
-        if let session = watchSession {
-            switch session.activationState {
-            case .NotActivated, .Inactive:
-                session.activateSession()
-            case .Activated:
-                sendWatchContext()
-            }
-        }
-    }
-
-    private var latestComplicationGlucose: GlucoseRxMessage?
-
-    private func sendWatchContext() {
-        if let session = watchSession where session.paired && session.watchAppInstalled {
-            let userInfo = WatchContext(pumpStatus: latestPumpStatus, glucose: latestGlucoseMessage, glucoseMessageDate: latestGlucoseMessageDate).rawValue
-
-            let complicationShouldUpdate: Bool
-
-            if let complicationGlucose = latestComplicationGlucose, glucose = latestGlucoseMessage {
-                complicationShouldUpdate = Int(glucose.timestamp) - Int(complicationGlucose.timestamp) >= 30 * 60 || abs(Int(glucose.glucose) - Int(complicationGlucose.glucose)) >= 20
-            } else {
-                complicationShouldUpdate = true
-            }
-
-            if session.complicationEnabled && complicationShouldUpdate, let glucose = latestGlucoseMessage {
-                session.transferCurrentComplicationUserInfo(userInfo)
-                latestComplicationGlucose = glucose
-            } else {
-                do {
-                    try session.updateApplicationContext(userInfo)
-                } catch let error {
-                    self.logger?.addError(error, fromSource: "WCSession")
-                }
-            }
-        }
-    }
-
-    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((units: Double?, error: ErrorType?) -> Void)? = nil) {
-        if let carbStore = carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
-            let newEntry = NewCarbEntry(
-                quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
-                startDate: carbEntry.startDate,
-                foodType: nil,
-                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
-            )
-
-            loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
-                if let error = error {
-                    self.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
-                } else {
-                    AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
-                }
-
-                completionHandler?(units: units, error: error)
-            }
-        } else {
-            completionHandler?(units: nil, error: Error.ValueError("Unable to parse CarbEntryUserInfo: \(message)"))
-        }
-    }
-
-    // MARK: WCSessionDelegate
-
-    func session(session: WCSession, didReceiveMessage message: [String : AnyObject], replyHandler: ([String: AnyObject]) -> Void) {
-        switch message["name"] as? String {
-        case CarbEntryUserInfo.name?:
-            addCarbEntryFromWatchMessage(message) { (units, error) in
-                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
-            }
-        case SetBolusUserInfo.name?:
-            if let bolus = SetBolusUserInfo(rawValue: message) {
-                self.loopManager.enactBolus(bolus.value) { (success, error) in
-                    if !success {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
-                    } else {
-                        AnalyticsManager.didSetBolusFromWatch(bolus.value)
-                    }
-
-                    replyHandler([:])
-                }
-            } else {
-                replyHandler([:])
-            }
-        default:
-            break
-        }
-    }
-
-    func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
-        addCarbEntryFromWatchMessage(userInfo)
-    }
-
-    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
-        switch activationState {
-        case .Activated:
-            if let error = error {
-                logger?.addError(error, fromSource: "WCSession")
-            }
-        case .Inactive, .NotActivated:
-            break
-        }
-    }
-
-    func sessionDidBecomeInactive(session: WCSession) {
-        // Nothing to do here
-    }
-
-    func sessionDidDeactivate(session: WCSession) {
-        watchSession = WCSession.defaultSession()
-        watchSession?.delegate = self
-        watchSession?.activateSession()
+    @objc private func loopDataDidUpdateNotification(_: NSNotification) {
+        watchManager.updateWatch()
     }
 
     // MARK: - Initialization
@@ -669,7 +550,7 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
 
     private(set) var loopManager: LoopDataManager!
 
-    override init() {
+    init() {
         let pumpID = NSUserDefaults.standardUserDefaults().pumpID
 
         doseStore = DoseStore(
@@ -716,8 +597,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
             shareClient = nil
         }
 
-        super.init()
-
         rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
             self?.receivedRileyLinkManagerNotification(note)
         }
@@ -732,9 +611,9 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
         }
 
         loopManager = LoopDataManager(deviceDataManager: self)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataDidUpdateNotification(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: loopManager)
 
-        watchSession?.delegate = self
-        watchSession?.activateSession()
+        watchManager = WatchDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
 
@@ -746,25 +625,6 @@ class DeviceDataManager: NSObject, CarbStoreDelegate, TransmitterDelegate, WCSes
     deinit {
         rileyLinkManagerObserver = nil
         rileyLinkDevicePacketObserver = nil
-    }
-}
-
-
-extension WatchContext {
-    convenience init(pumpStatus: MySentryPumpStatusMessageBody?, glucose: GlucoseRxMessage?, glucoseMessageDate: NSDate?) {
-        self.init()
-
-        if let glucose = glucose, date = glucoseMessageDate where glucose.state > 5 {
-            glucoseValue = Int(glucose.glucose)
-            glucoseTrend = Int(glucose.trend)
-            glucoseDate = date
-        }
-
-        if let status = pumpStatus, date = status.pumpDateComponents.date {
-            IOB = status.iob
-            reservoir = status.reservoirRemainingUnits
-            pumpDate = date
-        }
     }
 }
 
