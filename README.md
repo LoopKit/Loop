@@ -121,6 +121,10 @@ In the Targets list, rename "Loop" to anything you like. This has the side-effec
 2. Select the image set named AppIcon
 3. Replace each image size with your own icon
 
+Below are some example icons from other Loop users:
+
+![Icon A](/Documentation/User Icons/LoopingPump.png?raw=true)
+
 # Changing the code
 
 TODO: Write more documentation!
