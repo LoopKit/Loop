@@ -24,6 +24,38 @@ Please understand that this project:
 <a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Reservoir.png" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 <a href="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="https://raw.githubusercontent.com/loudnate/Loop/master/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 
+### Hardware
+
+<table>
+  <thead>
+    <tr>
+      <td colspan="2" rowspan="2"></td>
+      <th colspan="2">Insulin Pump</th>
+    </tr>
+    <tr>
+      <th>MM 522/722</th>
+      <th>MM 523/723</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2">CGM</th>
+      <th>Dexcom G4 + Share</th>
+      <td>❌<sup><a href="#hw1">1</a> <a href="#hw2">2</a> <a href="#hw3">3</a></sup></td>
+      <td>✅<sup><a href="#hw2">2</a></sup></td>
+    </tr>
+    <tr>
+      <th>Dexcom G5</th>
+      <td>✅<sup><a href="#hw3">3</a></sup></td>
+      <td>✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<a name="hw1">1</a>. Follow [#10](https://github.com/loudnate/Loop/issues/10) for updates
+<br/><a name="hw2">2</a>. Internet connection required to retrieve glucose
+<br/><a name="hw3">3</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
+
 ### LoopKit
 
 Loop is built on top of [LoopKit](https://github.com/loudnate/LoopKit). LoopKit is a set of frameworks that provide data storage, retrieval, and calcluation, as well as boilerplate view controllers used in Loop.
