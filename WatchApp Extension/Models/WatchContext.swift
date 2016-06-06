@@ -7,18 +7,31 @@
 //
 
 import Foundation
+import HealthKit
 
 
-class WatchContext: NSObject, NSSecureCoding, RawRepresentable {
+class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: AnyObject]
 
-    let version = 1
-    var glucoseValue: Int?
+    private let version = 2
+
+    var preferredGlucoseUnit: HKUnit?
+
+    var glucose: HKQuantity?
     var glucoseTrend: Int?
+    var eventualGlucose: HKQuantity?
     var glucoseDate: NSDate?
+
+    var loopLastRunDate: NSDate?
+    var lastNetTempBasalDose: Double?
+    var lastNetTempBasalDate: NSDate?
+    var recommendedBolusDose: Double?
+
+    var COB: Double?
     var IOB: Double?
     var reservoir: Double?
-    var pumpDate: NSDate?
+    var reservoirPercentage: Double?
+    var batteryPercentage: Double?
 
     override init() {
         super.init()
@@ -31,28 +44,31 @@ class WatchContext: NSObject, NSSecureCoding, RawRepresentable {
             return nil
         }
 
-        glucoseValue = rawValue["gv"] as? Int
+        if let unitString = rawValue["gu"] as? String {
+            let unit = HKUnit(fromString: unitString)
+            preferredGlucoseUnit = unit
+
+            if let glucoseValue = rawValue["gv"] as? Double {
+                glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
+            }
+
+            if let glucoseValue = rawValue["egv"] as? Double {
+                eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
+            }
+        }
         glucoseTrend = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? NSDate
+
         IOB = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
-        pumpDate = rawValue["pd"] as? NSDate
-    }
+        reservoirPercentage = rawValue["rp"] as? Double
+        batteryPercentage = rawValue["bp"] as? Double
 
-    required convenience init?(coder: NSCoder) {
-        guard let rawValue = coder.decodeObjectOfClass(NSDictionary.self, forKey: "rawValue") as? [String: AnyObject] else {
-            return nil
-        }
-
-        self.init(rawValue: rawValue)
-    }
-
-    func encodeWithCoder(coder: NSCoder) {
-        coder.encodeObject(rawValue, forKey: "rawValue")
-    }
-
-    static func supportsSecureCoding() -> Bool {
-        return true
+        loopLastRunDate = rawValue["ld"] as? NSDate
+        lastNetTempBasalDose = rawValue["ba"] as? Double
+        lastNetTempBasalDate = rawValue["bad"] as? NSDate
+        recommendedBolusDose = rawValue["rbo"] as? Double
+        COB = rawValue["cob"] as? Double
     }
 
     var rawValue: RawValue {
@@ -60,13 +76,43 @@ class WatchContext: NSObject, NSSecureCoding, RawRepresentable {
             "v": version
         ]
 
-        raw["gv"] = glucoseValue
+        raw["ba"] = lastNetTempBasalDose
+        raw["bad"] = lastNetTempBasalDate
+        raw["bp"] = batteryPercentage
+        raw["cob"] = COB
+
+        if let unit = preferredGlucoseUnit {
+            raw["egv"] = eventualGlucose?.doubleValueForUnit(unit)
+            raw["gu"] = unit.unitString
+            raw["gv"] = glucose?.doubleValueForUnit(unit)
+        }
+
         raw["gt"] = glucoseTrend
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
+        raw["ld"] = loopLastRunDate
         raw["r"] = reservoir
-        raw["pd"] = pumpDate
+        raw["rbo"] = recommendedBolusDose
+        raw["rp"] = reservoirPercentage
 
         return raw
+    }
+
+    var glucoseTrendDescription: String {
+        let direction: String
+        switch glucoseTrend {
+        case let x? where x < -10:
+            direction = "⇊"
+        case let x? where x < 0:
+            direction = "↓"
+        case let x? where x > 10:
+            direction = "⇈"
+        case let x? where x > 0:
+            direction = "↑"
+        default:
+            direction = "→"
+        }
+
+        return direction
     }
 }
