@@ -552,7 +552,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                if let URL = NSURL(string: "dexcomcgm://") {
+                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
+                    UIApplication.sharedApplication().openURL(URL)
+                }
+                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
                     UIApplication.sharedApplication().openURL(URL)
                 }
             case .IOB, .Dose:
