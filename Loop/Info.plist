@@ -23,6 +23,7 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>dexcomcgm</string>
+		<string>dexcomshare</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
