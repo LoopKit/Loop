@@ -2,5 +2,5 @@ github "loudnate/LoopKit" ~> 0.3
 github "loudnate/xDripG5" ~> 0.4
 github "loudnate/SwiftCharts" "loudnate/naterade"
 github "mddub/dexcom-share-client-swift" ~> 0.1
-github "ps2/rileylink_ios" "timer-tick-notification" # ~> 0.3.2
+github "ps2/rileylink_ios" "dev" # ~> 0.3.2
 github "mpurland/Amplitude-iOS" "framework"
