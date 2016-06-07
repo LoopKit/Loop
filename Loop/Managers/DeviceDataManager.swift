@@ -56,27 +56,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     // MARK: - RileyLink
 
-    private var rileyLinkManagerObserver: AnyObject? {
-        willSet {
-            if let observer = rileyLinkManagerObserver {
-                NSNotificationCenter.defaultCenter().removeObserver(observer)
-            }
-        }
-    }
-
-    private var rileyLinkDevicePacketObserver: AnyObject? {
-        willSet {
-            if let observer = rileyLinkDevicePacketObserver {
-                NSNotificationCenter.defaultCenter().removeObserver(observer)
-            }
-        }
-    }
-
-    private func receivedRileyLinkManagerNotification(note: NSNotification) {
+    @objc private func receivedRileyLinkManagerNotification(note: NSNotification) {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
     }
 
-    private func receivedRileyLinkPacketNotification(note: NSNotification) {
+    @objc private func receivedRileyLinkPacketNotification(note: NSNotification) {
         if let
             device = note.object as? RileyLinkDevice,
             data = note.userInfo?[RileyLinkDevice.IdleMessageDataKey] as? NSData,
@@ -96,6 +80,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 break
             }
         }
+    }
+
+    @objc private func receivedRileyLinkTimerTickNotification(note: NSNotification) {
+        assertCurrentPumpData()
+
+        backfillGlucoseFromShareIfNeeded()
     }
 
     func connectToRileyLink(device: RileyLinkDevice) {
@@ -194,11 +184,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             return
         }
 
-        // TODO: Allow RileyLinkManager to enable/disable idle listening
         device.assertIdleListening()
 
         // How long should we wait before we poll for new reservoir data?
-        let reservoirTolerance = sentryEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 1)
+        let reservoirTolerance = rileyLinkManager.idleListeningEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 4)
 
         // If we don't yet have reservoir data, or it's old, poll for it.
         if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -reservoirTolerance {
@@ -411,7 +400,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             }
         case "pumpModel"?:
             if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
-                sentryEnabled = false
+                rileyLinkManager.idleListeningEnabled = false
             }
 
             NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
@@ -515,9 +504,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
-    /// Whether the RileyLink should listen for sentry packets.
-    var sentryEnabled: Bool = true
-
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
@@ -564,6 +550,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
 
+        var idleListeningEnabled = true
+
         if let pumpID = pumpID {
             let pumpState = PumpState(pumpID: pumpID)
 
@@ -575,7 +563,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 if let model = PumpModel(rawValue: pumpModelNumber) {
                     pumpState.pumpModel = model
 
-                    sentryEnabled = model.larger
+                    idleListeningEnabled = model.larger
                 }
             }
 
@@ -586,6 +574,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             pumpState: self.pumpState,
             autoConnectIDs: connectedPeripheralIDs
         )
+        rileyLinkManager.idleListeningEnabled = idleListeningEnabled
 
         if let  settings = NSBundle.mainBundle().remoteSettings,
                 username = settings["ShareAccountName"],
@@ -597,14 +586,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             shareClient = nil
         }
 
-        rileyLinkManagerObserver = NSNotificationCenter.defaultCenter().addObserverForName(nil, object: rileyLinkManager, queue: nil) { [weak self] (note) -> Void in
-            self?.receivedRileyLinkManagerNotification(note)
-        }
-
-        // TODO: Use delegation instead.
-        rileyLinkDevicePacketObserver = NSNotificationCenter.defaultCenter().addObserverForName(RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil, queue: nil) { [weak self] (note) -> Void in
-            self?.receivedRileyLinkPacketNotification(note)
-        }
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkManagerNotification(_:)), name: nil, object: rileyLinkManager)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkPacketNotification(_:)), name: RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkTimerTickNotification(_:)), name: RileyLinkDevice.DidUpdateTimerTickNotification, object: nil)
 
         if let pumpState = pumpState {
             NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(pumpStateValuesDidChange(_:)), name: PumpState.ValuesDidChangeNotification, object: pumpState)
@@ -620,11 +604,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         defer {
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
         }
-    }
-
-    deinit {
-        rileyLinkManagerObserver = nil
-        rileyLinkDevicePacketObserver = nil
     }
 }
 
