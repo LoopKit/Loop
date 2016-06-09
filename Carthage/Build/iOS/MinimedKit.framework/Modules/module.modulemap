@@ -1,0 +1,10 @@
+framework module MinimedKit {
+  umbrella header "MinimedKit.h"
+
+  export *
+  module * { export * }
+}
+
+module MinimedKit.Swift {
+    header "MinimedKit-Swift.h"
+}
