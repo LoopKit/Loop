@@ -1,0 +1,10 @@
+framework module GlucoseKit {
+  umbrella header "GlucoseKit.h"
+
+  export *
+  module * { export * }
+}
+
+module GlucoseKit.Swift {
+    header "GlucoseKit-Swift.h"
+}

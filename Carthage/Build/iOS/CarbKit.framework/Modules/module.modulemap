@@ -1,0 +1,10 @@
+framework module CarbKit {
+  umbrella header "CarbKit.h"
+
+  export *
+  module * { export * }
+}
+
+module CarbKit.Swift {
+    header "CarbKit-Swift.h"
+}
