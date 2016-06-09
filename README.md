@@ -41,20 +41,19 @@ Please understand that this project:
     <tr>
       <th rowspan="2">CGM</th>
       <th>Dexcom G4 + Share</th>
-      <td>❌<sup><a href="#hw1">1</a> <a href="#hw2">2</a> <a href="#hw3">3</a></sup></td>
-      <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
+      <td>✅<sup><a href="#hw1">1</a></sup></td>
     </tr>
     <tr>
       <th>Dexcom G5</th>
-      <td>✅<sup><a href="#hw3">3</a></sup></td>
+      <td>✅<sup><a href="#hw2">2</a></sup></td>
       <td>✅</td>
     </tr>
   </tbody>
 </table>
 
-<a name="hw1">1</a>. Follow [#10](https://github.com/loudnate/Loop/issues/10) for updates
-<br/><a name="hw2">2</a>. Internet connection required to retrieve glucose
-<br/><a name="hw3">3</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
+<br/><a name="hw1">1</a>. Internet connection required to retrieve glucose
+<br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
 
 ### LoopKit
 
