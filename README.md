@@ -90,18 +90,6 @@ $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 | `ShareAccountName`     | Your username for Dexcom share (for backfilling glucose data)
 | `ShareAccountPassword` | Your password for Dexcom share
 
-## Setting up Carthage
-
-[Carthage](https://github.com/carthage/carthage) is used to manage dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
-
-After a fresh clone of the repository, you'll need to do a checkout and build of the dependencies:
-
-```bash
-$ carthage bootstrap
-```
-
-After pulling new changes, you'll need to run the same command again.
-
 # Making it Your Own
 
 You might open this app a lot. Make it the most personal app on your iPhone by changing the name and icon.
@@ -124,9 +112,15 @@ Below are some example icons from other Loop users:
 
 ![Icon A](/Documentation/User Icons/LoopingPump.png?raw=true)
 
-# Changing the code
+# Changing the Code
 
 TODO: Write more documentation!
+
+## Updating Dependencies Using Carthage
+
+[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
+
+The framework versions specified in `Cartfile.resolved` are checked in to the repository for ease of building. If you update the `Cartfile`, make sure to run `carthage update` fetch and build the updated dependencies.
 
 # License and Code of Conduct
 

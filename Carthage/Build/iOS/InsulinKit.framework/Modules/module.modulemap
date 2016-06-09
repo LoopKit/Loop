@@ -1,0 +1,10 @@
+framework module InsulinKit {
+  umbrella header "InsulinKit.h"
+
+  export *
+  module * { export * }
+}
+
+module InsulinKit.Swift {
+    header "InsulinKit-Swift.h"
+}

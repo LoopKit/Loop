@@ -1,0 +1,10 @@
+framework module LoopKit {
+  umbrella header "LoopKit.h"
+
+  export *
+  module * { export * }
+}
+
+module LoopKit.Swift {
+    header "LoopKit-Swift.h"
+}

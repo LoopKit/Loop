@@ -1,0 +1,10 @@
+framework module RileyLinkKit {
+  umbrella header "RileyLinkKit.h"
+
+  export *
+  module * { export * }
+}
+
+module RileyLinkKit.Swift {
+    header "RileyLinkKit-Swift.h"
+}

@@ -1,0 +1,10 @@
+framework module xDripG5 {
+  umbrella header "xDripG5.h"
+
+  export *
+  module * { export * }
+}
+
+module xDripG5.Swift {
+    header "xDripG5-Swift.h"
+}
