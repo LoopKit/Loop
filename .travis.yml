@@ -1,9 +1,12 @@
 language: objective-c
 osx_image: xcode7.3
-xcode_sdk: iphonesimulator9.3
-xcode_project: Loop.xcodeproj
-xcode_scheme: Loop
+# xcode_sdk: iphonesimulator9.3
+# xcode_project: Loop.xcodeproj
+# xcode_scheme: Loop
 # before_script:
 #     - carthage bootstrap
 script:
+    # Build the app target
+    - xctool -project Loop.xcodeproj -scheme Loop
+    # Run the test target
     - xctool -project Loop.xcodeproj -scheme LoopTests -sdk iphonesimulator9.3 test
