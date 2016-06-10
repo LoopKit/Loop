@@ -1,0 +1,10 @@
+framework module SwiftCharts {
+  umbrella header "SwiftCharts.h"
+
+  export *
+  module * { export * }
+}
+
+module SwiftCharts.Swift {
+    header "SwiftCharts-Swift.h"
+}

@@ -352,6 +352,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         return formatter
     }()
 
+    private lazy var numberFormatter = NSNumberFormatter()
+
     private lazy var dateFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
         formatter.dateStyle = .MediumStyle
@@ -485,41 +487,33 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
 
-                if let date = dataManager.latestGlucoseMessageDate {
+                if let date = dataManager.latestGlucoseValue?.startDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
                 }
             case .Glucose:
                 cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
+                cell.detailTextLabel?.text = emptyValueString
 
-                if let glucose = dataManager.latestGlucoseMessage {
-                    let numberString = NSNumber(unsignedShort: glucose.glucose).descriptionWithLocale(locale)
-                    cell.detailTextLabel?.text = "\(numberString) mg/dL"
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
+                if let glucose = dataManager.latestGlucoseValue, glucoseStore = dataManager.glucoseStore {
+
+                    glucoseStore.preferredUnit { (unit, error) in
+                        guard let unit = unit, glucoseString = self.numberFormatter.stringFromNumber(glucose.quantity.doubleValueForUnit(unit)) else {
+                            return
+                        }
+
+                        dispatch_async(dispatch_get_main_queue()) {
+                            cell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string describing glucose: (1: quantity)(2: unit)"), glucoseString, unit.unitString)
+                        }
+                    }
                 }
             case .Trend:
                 cell.textLabel?.text = NSLocalizedString("Trend", comment: "The title of the cell containing the current glucose trend")
 
-                if let glucose = dataManager.latestGlucoseMessage where glucose.state > 5 {
-                    let direction: String
+                if let glucose = dataManager.latestGlucoseMessage, trendString = numberFormatter.stringFromNumber(NSNumber(char: glucose.trend)) {
 
-                    switch glucose.trend {
-                    case let x where x < -10:
-                        direction = "⇊"
-                    case let x where x < 0:
-                        direction = "↓"
-                    case let x where x > 10:
-                        direction = "⇈"
-                    case let x where x > 0:
-                        direction = "↑"
-                    default:
-                        direction = ""
-                    }
-
-                    let numberString = NSNumber(char: glucose.trend).descriptionWithLocale(locale)
-                    cell.detailTextLabel?.text = "\(numberString)\(direction)"
+                    cell.detailTextLabel?.text = trendString + glucose.trendDescription
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
                 }
@@ -558,7 +552,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                if let URL = NSURL(string: "dexcomcgm://") {
+                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
+                    UIApplication.sharedApplication().openURL(URL)
+                }
+                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
                     UIApplication.sharedApplication().openURL(URL)
                 }
             case .IOB, .Dose:

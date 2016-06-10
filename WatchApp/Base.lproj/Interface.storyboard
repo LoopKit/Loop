@@ -1,125 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="AgC-eL-Hgc">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="rNf-Mh-tID">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="10032"/>
     </dependencies>
     <scenes>
-        <!--Naterade-->
-        <scene sceneID="aou-V4-d1y">
-            <objects>
-                <controller title="Naterade" hidesWhenLoading="NO" id="AgC-eL-Hgc" customClass="InterfaceController" customModule="WatchApp" customModuleProvider="target">
-                    <items>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="3uZ-YX-yCf">
-                            <items>
-                                <group width="1" alignment="left" id="MxH-gC-oTv">
-                                    <items>
-                                        <label alignment="left" text="GLUCOSE" id="FIF-qM-FU9">
-                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                        </label>
-                                        <label alignment="right" id="SII-zE-v8z">
-                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                        </label>
-                                    </items>
-                                </group>
-                                <group width="1" alignment="left" id="Olx-IW-j14">
-                                    <items>
-                                        <label height="26" alignment="left" verticalAlignment="bottom" text="--" textAlignment="left" id="jyf-2i-aSI">
-                                            <fontDescription key="font" type="system" pointSize="27"/>
-                                        </label>
-                                        <label alignment="left" verticalAlignment="bottom" text="mg/dL" textAlignment="left" id="qRZ-7K-eLM">
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                    </items>
-                                </group>
-                            </items>
-                        </group>
-                        <separator alignment="left" id="SXA-5v-ANo">
-                            <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="Iwc-qf-d5t">
-                            <items>
-                                <group width="1" alignment="left" id="vbM-bh-6La">
-                                    <items>
-                                        <label alignment="left" text="IOB" id="8HH-S9-3dI">
-                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                        </label>
-                                        <label alignment="right" id="A2U-lq-0vp">
-                                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                        </label>
-                                    </items>
-                                </group>
-                                <group width="1" alignment="left" id="cKz-z2-jQ3">
-                                    <items>
-                                        <label height="26" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="Fey-vI-Ve9">
-                                            <fontDescription key="font" type="system" pointSize="27"/>
-                                        </label>
-                                        <label alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="rSy-Kj-t3c">
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                    </items>
-                                </group>
-                            </items>
-                        </group>
-                        <separator alignment="left" id="TEg-or-E2U">
-                            <color key="color" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="scG-Bt-b6u">
-                            <items>
-                                <label alignment="left" text="RESERVOIR" id="NuQ-IY-BPz">
-                                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
-                                </label>
-                                <group width="1" alignment="left" id="H2u-mq-dST">
-                                    <items>
-                                        <label height="26" alignment="left" verticalAlignment="bottom" text="-.-" textAlignment="left" id="7kS-O1-IHf">
-                                            <fontDescription key="font" type="system" pointSize="27"/>
-                                        </label>
-                                        <label alignment="left" verticalAlignment="bottom" text="U" textAlignment="left" id="5JA-iE-bWl">
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                    </items>
-                                </group>
-                            </items>
-                        </group>
-                        <separator alignment="left" id="OMo-Mn-YBf">
-                            <color key="color" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                    </items>
-                    <menu key="menu" id="86M-4O-eEk">
-                        <items>
-                            <menuItem title="Carbs" icon="add" id="ibk-6V-mGb">
-                                <connections>
-                                    <action selector="addCarbs" destination="AgC-eL-Hgc" id="Zok-JP-Tfg"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Bolus" icon="add" id="DfB-GY-F26">
-                                <connections>
-                                    <action selector="setBolus" destination="AgC-eL-Hgc" id="BxF-VA-z0n"/>
-                                </connections>
-                            </menuItem>
-                        </items>
-                    </menu>
-                    <connections>
-                        <outlet property="IOBLabel" destination="Fey-vI-Ve9" id="AxO-Gv-T23"/>
-                        <outlet property="glucoseDateLabel" destination="SII-zE-v8z" id="uDg-bG-6mo"/>
-                        <outlet property="glucoseLabel" destination="jyf-2i-aSI" id="yb7-1Y-vSu"/>
-                        <outlet property="glucoseUnitLabel" destination="qRZ-7K-eLM" id="nxB-4Z-hRo"/>
-                        <outlet property="pumpDateLabel" destination="A2U-lq-0vp" id="ACn-iS-qsE"/>
-                        <outlet property="reservoirLabel" destination="7kS-O1-IHf" id="t3a-hv-xST"/>
-                    </connections>
-                </controller>
-            </objects>
-            <point key="canvasLocation" x="235" y="347"/>
-        </scene>
-        <!--Add Carbs-->
+        <!--AddCarbsInterfaceController-->
         <scene sceneID="hZK-vD-D34">
             <objects>
-                <controller identifier="AddCarbsInterfaceController" title="Add Carbs" hidesWhenLoading="NO" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
+                <controller identifier="AddCarbsInterfaceController" hidesWhenLoading="NO" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="uPt-Z4-ngs">
                             <items>
@@ -190,7 +79,7 @@
                                         </button>
                                     </items>
                                 </group>
-                                <button width="1" alignment="left" verticalAlignment="bottom" title="Save" id="b6f-3I-jki">
+                                <button width="1" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
                                     <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
                                     <connections>
@@ -211,10 +100,75 @@
             </objects>
             <point key="canvasLocation" x="520" y="345"/>
         </scene>
-        <!--Bolus-->
+        <!--Naterade-->
+        <scene sceneID="gQv-2Z-iCt">
+            <objects>
+                <controller title="Naterade" hidesWhenLoading="NO" id="rNf-Mh-tID" customClass="StatusInterfaceController" customModule="WatchApp_Extension">
+                    <items>
+                        <group width="1" alignment="left" id="1wc-65-vel">
+                            <items>
+                                <group width="0.25" alignment="left" layout="vertical" id="2Qn-78-Zex">
+                                    <items>
+                                        <imageView alignment="center" image="loop_unknown" contentMode="center" id="Q7C-xN-eH8"/>
+                                        <timer width="1" alignment="left" hidden="YES" textAlignment="center" enabled="YES" format="abbreviated" previewedSeconds="500" id="sG9-yO-4Xy">
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                            <calendarUnit key="units" minute="YES"/>
+                                        </timer>
+                                    </items>
+                                </group>
+                                <group width="0.75" alignment="left" layout="vertical" id="QDM-Gw-2Ex">
+                                    <items>
+                                        <group width="1" height="26" alignment="left" id="iTE-zh-bqi">
+                                            <items>
+                                                <label height="1" alignment="left" hidden="YES" textAlignment="center" id="MHD-Is-5mK">
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="0zU-nK-BWD">
+                                                    <color key="textColor" white="1" alpha="0.80000000000000004" colorSpace="calibratedWhite"/>
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                            </items>
+                                            <variation key="device=watch42mm" height="29"/>
+                                        </group>
+                                        <label width="1" alignment="center" verticalAlignment="bottom" textAlignment="center" id="PI8-dB-Ykw">
+                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <imageView height="100" alignment="left" hidden="YES" id="6yE-DP-pXZ"/>
+                    </items>
+                    <menu key="menu" id="Enz-3V-zIL">
+                        <items>
+                            <menuItem title="Carbs" icon="add" id="Fhb-O2-qgq">
+                                <connections>
+                                    <action selector="addCarbs" destination="rNf-Mh-tID" id="vV7-7n-9Jh"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Bolus" icon="add" id="ONR-Fr-rMn">
+                                <connections>
+                                    <action selector="setBolus" destination="rNf-Mh-tID" id="lqt-6H-VfV"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                    <connections>
+                        <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
+                        <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
+                        <outlet property="graphImage" destination="6yE-DP-pXZ" id="IJ1-b5-ZGh"/>
+                        <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
+                        <outlet property="loopTimer" destination="sG9-yO-4Xy" id="tfl-hp-Eu5"/>
+                        <outlet property="statusLabel" destination="PI8-dB-Ykw" id="T85-wv-NB2"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="235" y="345"/>
+        </scene>
+        <!--BolusInterfaceController-->
         <scene sceneID="vCl-Xb-hzF">
             <objects>
-                <controller identifier="BolusInterfaceController" title="Bolus" hidesWhenLoading="NO" id="zTm-yH-n4A" customClass="BolusInterfaceController" customModule="WatchApp_Extension">
+                <controller identifier="BolusInterfaceController" hidesWhenLoading="NO" id="zTm-yH-n4A" customClass="BolusInterfaceController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="PJO-Ol-ya8">
                             <items>
@@ -263,7 +217,7 @@
                                     <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="font" style="UICTFontTextStyleBody"/>
                                 </label>
-                                <button width="1" alignment="left" verticalAlignment="bottom" title="Deliver" id="Qsq-p5-1J0">
+                                <button width="1" alignment="left" verticalAlignment="bottom" title="Bolus" id="Qsq-p5-1J0">
                                     <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
                                     <connections>
