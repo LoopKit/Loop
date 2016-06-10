@@ -132,7 +132,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         backfillGlucoseFromShareIfNeeded()
 
-        updateReservoirVolume(status.reservoirRemainingUnits, atDate: pumpDate, withTimeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
+        // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0)) {
+            self.updateReservoirVolume(status.reservoirRemainingUnits, atDate: pumpDate, withTimeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
+        }
 
         // Check for an empty battery. Sentry packets are still broadcast for a few hours after this value reaches 0.
         if status.batteryRemainingPercent == 0 {
