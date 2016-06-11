@@ -30,10 +30,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
-    enum Error: ErrorType {
-        case ValueError(String)
-    }
-
     // MARK: - Utilities
 
     lazy var logger = DiagnosticLogger()
