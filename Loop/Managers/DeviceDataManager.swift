@@ -162,7 +162,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
             self.latestReservoirValue = newValue
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+            if self.preferredInsulinDataSource == .PumpHistory {
+                self.fetchPumpHistory()
+            } else {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+            }
 
             // Send notifications for low reservoir if necessary
             if let newVolume = newValue?.unitVolume, previousVolume = previousValue?.unitVolume {
@@ -201,22 +205,55 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 switch result {
                 case .Success(let units):
                     self.updateReservoirVolume(units, atDate: NSDate(), withTimeLeft: nil)
-                case .Failure:
-                    // Try to troubleshoot communications errors with the pump
+                case .Failure(let error):
+                    self.logger?.addError("Failed to fetch reservoir: \(error)", fromSource: "RileyLink")
+                    self.troubleshootPumpCommsWithDevice(device)
+                }
+            }
+        }
+    }
 
-                    // How long should we wait before we re-tune the RileyLink?
-                    let tuneTolerance = NSTimeInterval(minutes: 14)
+    private func fetchPumpHistory() {
+        guard let _ = rileyLinkManager.firstConnectedDevice else {
+            return
+        }
 
-                    if device.lastTuned?.timeIntervalSinceNow <= -tuneTolerance {
-                        device.tunePumpWithResultHandler { (result) in
-                            switch result {
-                            case .Success(let scanResult):
-                                self.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
-                            case .Failure(let error):
-                                self.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
-                            }
-                        }
-                    }
+        /*
+         This is where we fetch history.
+
+         TOOD: Return pump history reconciled to a UTC timeline, e.g. (events: [PumpEvent], model: PumpModel, now: NSDate) -> [(event: PumpEvent, eventDate: NSDate, isMutable: Bool)]
+         so we can properly handle time zone discrepencies between the pump and the phone.
+         
+         let startDate = doseStore.pumpEventQueryAfterDate
+
+        device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
+            switch result {
+            case .Success((let events, let model)):
+                break
+            case .Failure(let error):
+                self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
+                self.troubleshootPumpCommsWithDevice(device)
+            }
+        }
+        */
+    }
+
+    /**
+     Attempts to fix an extended communication failure between a RileyLink device and the pump
+
+     - parameter device: The RileyLink device
+     */
+    private func troubleshootPumpCommsWithDevice(device: RileyLinkDevice) {
+        // How long we should wait before we re-tune the RileyLink
+        let tuneTolerance = NSTimeInterval(minutes: 14)
+
+        if device.lastTuned?.timeIntervalSinceNow <= -tuneTolerance {
+            device.tunePumpWithResultHandler { (result) in
+                switch result {
+                case .Success(let scanResult):
+                    self.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                case .Failure(let error):
+                    self.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
                 }
             }
         }
