@@ -56,6 +56,13 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         NSNotificationCenter.defaultCenter().postNotificationName(note.name, object: self, userInfo: note.userInfo)
     }
 
+    /**
+     Called when a new idle message is received by the RileyLink.
+     
+     Only MySentryPumpStatus messages are handled.
+
+     - parameter note: The notification object
+     */
     @objc private func receivedRileyLinkPacketNotification(note: NSNotification) {
         if let
             device = note.object as? RileyLinkDevice,
@@ -316,17 +323,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     // MARK: - Configuration
 
-    private var transmitterState: State<Transmitter> = .NeedsConfiguration {
-        didSet {
-            switch transmitterState {
-            case .Ready(let transmitter):
-                transmitter.delegate = self
-                rileyLinkManager.timerTickEnabled = false
-            case .NeedsConfiguration:
-                rileyLinkManager.timerTickEnabled = true
-            }
-        }
-    }
+    // MARK: Pump
 
     private var connectedPeripheralIDs: Set<String> = Set(NSUserDefaults.standardUserDefaults().connectedPeripheralIDs) {
         didSet {
@@ -410,6 +407,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
+    /// The user's preferred method of fetching insulin data from the pump
+    var preferredInsulinDataSource = NSUserDefaults.standardUserDefaults().preferredInsulinDataSource ?? .PumpHistory {
+        didSet {
+            NSUserDefaults.standardUserDefaults().preferredInsulinDataSource = preferredInsulinDataSource
+        }
+    }
+
+    // MARK: G5 Transmitter
+
+    private var transmitterState: State<Transmitter> = .NeedsConfiguration {
+        didSet {
+            switch transmitterState {
+            case .Ready(let transmitter):
+                transmitter.delegate = self
+                rileyLinkManager.timerTickEnabled = false
+            case .NeedsConfiguration:
+                rileyLinkManager.timerTickEnabled = true
+            }
+        }
+    }
+
     var transmitterID: String? {
         didSet {
             if transmitterID?.characters.count != 6 {
@@ -435,6 +453,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             NSUserDefaults.standardUserDefaults().transmitterID = transmitterID
         }
     }
+
+    // MARK: Loop model inputs
 
     var basalRateSchedule: BasalRateSchedule? = NSUserDefaults.standardUserDefaults().basalRateSchedule {
         didSet {

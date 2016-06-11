@@ -14,16 +14,10 @@ class SegmentedControlTableViewCell: UITableViewCell {
 
     @IBOutlet weak var segmentedControl: UISegmentedControl!
 
-    var selectedIndex = 0 {
-        didSet {
-            segmentedControl.selectedSegmentIndex = selectedIndex
-        }
-    }
-
     override func awakeFromNib() {
         super.awakeFromNib()
 
-        segmentedControl.selectedSegmentIndex = selectedIndex
+        segmentedControl.selectedSegmentIndex = 0
     }
 
     override func prepareForReuse() {
