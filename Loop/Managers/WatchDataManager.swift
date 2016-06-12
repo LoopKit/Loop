@@ -117,7 +117,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         }
     }
 
-    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((units: Double?, error: ErrorType?) -> Void)? = nil) {
+    private func addCarbEntryFromWatchMessage(message: [String: AnyObject], completionHandler: ((units: Double?) -> Void)? = nil) {
         if let carbStore = deviceDataManager.carbStore, carbEntry = CarbEntryUserInfo(rawValue: message) {
             let newEntry = NewCarbEntry(
                 quantity: HKQuantity(unit: carbStore.preferredUnit, doubleValue: carbEntry.value),
@@ -133,10 +133,10 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                     AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
                 }
 
-                completionHandler?(units: units, error: error)
+                completionHandler?(units: units)
             }
         } else {
-            completionHandler?(units: nil, error: DeviceDataManager.Error.ValueError("Unable to parse CarbEntryUserInfo: \(message)"))
+            completionHandler?(units: nil)
         }
     }
 
@@ -145,7 +145,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
     func session(session: WCSession, didReceiveMessage message: [String : AnyObject], replyHandler: ([String: AnyObject]) -> Void) {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
-            addCarbEntryFromWatchMessage(message) { (units, error) in
+            addCarbEntryFromWatchMessage(message) { (units) in
                 replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
             }
         case SetBolusUserInfo.name?:
