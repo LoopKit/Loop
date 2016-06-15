@@ -56,19 +56,6 @@ class LoopDataManager {
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
                     self.notify()
-
-                    // Try to troubleshoot communications errors
-                    if  let pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date where pumpStatusDate.timeIntervalSinceNow < NSTimeInterval(minutes: -15),
-                        let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice where device.lastTuned?.timeIntervalSinceNow < NSTimeInterval(minutes: -15) {
-                        device.tunePumpWithResultHandler { (result) in
-                            switch result {
-                            case .Success(let scanResult):
-                                self.deviceDataManager.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
-                            case .Failure(let error):
-                                self.deviceDataManager.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
-                            }
-                        }
-                    }
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
@@ -77,7 +64,9 @@ class LoopDataManager {
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
 
                 // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), self.dataAccessQueue) {
+                let waitTime = self.deviceDataManager.latestPumpStatus != nil ? Int64(11 * NSEC_PER_SEC) : 0
+
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, waitTime), self.dataAccessQueue) {
                     self.waitingForSentryPackets = false
                     self.insulinEffect = nil
                     self.loop()
@@ -314,7 +303,7 @@ class LoopDataManager {
     private func updatePredictedGlucoseAndRecommendedBasal() throws {
         guard let
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
-            pumpStatusDate = self.deviceDataManager.latestPumpStatus?.pumpDateComponents.date
+            pumpStatusDate = self.deviceDataManager.latestReservoirValue?.startDate
             else
         {
             self.predictedGlucose = nil
@@ -516,15 +505,30 @@ class LoopDataManager {
             return
         }
 
-        ops.setNormalBolus(units) { (error) in
-            if let error = error {
+        ops.readRemainingInsulin { (result) in
+            switch result {
+            case .Success(let unitVolume):
+                self.deviceDataManager.doseStore.addReservoirValue(unitVolume, atDate: NSDate()) { (_, _, error) in
+                    if let error = error {
+                        self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+                        resultsHandler(success: false, error: .CommunicationError)
+                    } else {
+                        ops.setNormalBolus(units) { (error) in
+                            if let error = error {
+                                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
+                                resultsHandler(success: false, error: .CommunicationError)
+                            } else {
+                                self.lastBolus = (units: units, date: NSDate())
+                                resultsHandler(success: true, error: nil)
+                            }
+
+                            self.notify()
+                        }
+                    }
+                }
+            case .Failure(let error):
                 self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-
                 resultsHandler(success: false, error: .CommunicationError)
-            } else {
-                self.lastBolus = (units: units, date: NSDate())
-
-                resultsHandler(success: true, error: nil)
             }
         }
     }

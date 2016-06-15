@@ -1,0 +1,10 @@
+framework module ShareClient {
+  umbrella header "ShareClient.h"
+
+  export *
+  module * { export * }
+}
+
+module ShareClient.Swift {
+    header "ShareClient-Swift.h"
+}
