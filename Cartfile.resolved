@@ -1,7 +1,7 @@
 github "mpurland/Amplitude-iOS" "934536d24cb9ce5c567c74ff12e2955faed74bc3"
 github "loudnate/Crypto" "e0ef5b498f2c373d676135dabf5d1803b8558509"
 github "loudnate/LoopKit" "v0.3.2"
-github "loudnate/SwiftCharts" "dc8f5fbb29e391a65995d138158139559e365a1e"
+github "loudnate/SwiftCharts" "f3e61c6193f3c19ec6b05941cdd1ba031722f461"
 github "mddub/dexcom-share-client-swift" "v0.1.2"
 github "ps2/rileylink_ios" "v0.3.3"
 github "loudnate/xDripG5" "0.4.1"
