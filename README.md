@@ -124,4 +124,4 @@ The framework versions specified in `Cartfile.resolved` are checked in to the re
 
 # License and Code of Conduct
 
-Please read the [LICENSE](/LICENSE) and [CODE_OF_CONDUCT](/CODE_OF_CONDUCT.md)
+Please read the [LICENSE](/LICENSE.md) and [CODE_OF_CONDUCT](/CODE_OF_CONDUCT.md)
