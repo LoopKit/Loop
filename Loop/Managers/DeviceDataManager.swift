@@ -214,28 +214,32 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
 
     private func fetchPumpHistory() {
-        guard let _ = rileyLinkManager.firstConnectedDevice else {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
 
         /*
          This is where we fetch history.
+        */
 
-         TOOD: Return pump history reconciled to a UTC timeline, e.g. (events: [PumpEvent], model: PumpModel, now: NSDate) -> [(event: PumpEvent, eventDate: NSDate, isMutable: Bool)]
-         so we can properly handle time zone discrepencies between the pump and the phone.
-         
-         let startDate = doseStore.pumpEventQueryAfterDate
+        let startDate = doseStore.pumpEventQueryAfterDate
 
         device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
             switch result {
-            case .Success((let events, let model)):
-                break
+            case let .Success(events, _):
+                // TODO: Surface raw pump event data and add DoseEntry conformance
+                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
+                    if let error = error {
+                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+                    }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                }
             case .Failure(let error):
                 self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
                 self.troubleshootPumpCommsWithDevice(device)
             }
         }
-        */
     }
 
     /**
