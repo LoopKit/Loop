@@ -1,0 +1,10 @@
+framework module NightscoutUploadKit {
+  umbrella header "NightscoutUploadKit.h"
+
+  export *
+  module * { export * }
+}
+
+module NightscoutUploadKit.Swift {
+    header "NightscoutUploadKit-Swift.h"
+}

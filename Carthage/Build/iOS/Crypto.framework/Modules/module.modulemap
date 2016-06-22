@@ -1,0 +1,10 @@
+framework module Crypto {
+  umbrella header "Crypto.h"
+
+  export *
+  module * { export * }
+}
+
+module Crypto.Swift {
+    header "Crypto-Swift.h"
+}

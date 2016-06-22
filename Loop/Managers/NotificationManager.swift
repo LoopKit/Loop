@@ -130,7 +130,7 @@ struct NotificationManager {
         UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
 
-    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval) {
+    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval?) {
         let notification = UILocalNotification()
 
         notification.alertTitle = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
@@ -144,11 +144,11 @@ struct NotificationManager {
         intervalFormatter.includesApproximationPhrase = true
         intervalFormatter.includesTimeRemainingPhrase = true
 
-        guard let timeString = intervalFormatter.stringFromTimeInterval(remaining) else {
-            return
+        if let remaining = remaining, timeString = intervalFormatter.stringFromTimeInterval(remaining) {
+            notification.alertBody = String(format: NSLocalizedString("%1$@ U left: %2$@", comment: "Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining)"), unitsString, timeString)
+        } else {
+            notification.alertBody = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
         }
-
-        notification.alertBody = NSLocalizedString("\(unitsString) U left: \(timeString)", comment: "")
 
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.category = Category.PumpReservoirLow.rawValue
