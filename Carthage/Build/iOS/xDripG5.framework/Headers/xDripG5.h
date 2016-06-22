@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-@import CommonCrypto;
+#import <xDripG5/AESCrypt.h>
 
 //! Project version number for xDripG5.
 FOUNDATION_EXPORT double xDripG5VersionNumber;
