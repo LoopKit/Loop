@@ -93,7 +93,6 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 #endif
 #if defined(__has_feature) && __has_feature(modules)
 @import Foundation;
-@import ObjectiveC;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
@@ -106,15 +105,8 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 @interface NSDateComponents (SWIFT_EXTENSION(MinimedKit))
 @end
 
-@class NSDate;
 
-SWIFT_CLASS("_TtC10MinimedKit10TimeFormat")
-@interface TimeFormat : NSObject
-+ (NSDateComponents * _Nonnull)parse2ByteDate:(NSData * _Nonnull)data offset:(NSInteger)offset;
-+ (NSDate * _Nullable)timestampAsLocalDate:(NSDateComponents * _Nonnull)comps;
-+ (NSString * _Nonnull)timestampStr:(NSDateComponents * _Nonnull)comps;
-+ (NSString * _Nonnull)timestampStrFromDate:(NSDate * _Nonnull)date;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@interface NSDateFormatter (SWIFT_EXTENSION(MinimedKit))
 @end
 
 #pragma clang diagnostic pop
