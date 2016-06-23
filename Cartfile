@@ -3,4 +3,4 @@ github "loudnate/xDripG5" ~> 0.5
 github "loudnate/SwiftCharts" "loudnate/naterade"
 github "mddub/dexcom-share-client-swift" ~> 0.1
 github "ps2/rileylink_ios" "dev"
-github "mpurland/Amplitude-iOS" "framework"
+github "amplitude/Amplitude-iOS" "mpurland-framework"
