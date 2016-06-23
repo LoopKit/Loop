@@ -2,5 +2,5 @@ github "loudnate/LoopKit" ~> 0.3
 github "loudnate/xDripG5" ~> 0.5
 github "loudnate/SwiftCharts" "loudnate/naterade"
 github "mddub/dexcom-share-client-swift" ~> 0.1
-github "ps2/rileylink_ios" ~> 0.4.0
+github "ps2/rileylink_ios" "dev"
 github "amplitude/Amplitude-iOS" "mpurland-framework"
