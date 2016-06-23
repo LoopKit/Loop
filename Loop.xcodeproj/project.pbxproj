@@ -850,6 +850,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/AmplitudeFramework.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
 			);
 			outputPaths = (
 			);
