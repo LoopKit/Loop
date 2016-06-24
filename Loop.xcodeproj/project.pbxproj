@@ -851,6 +851,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/AmplitudeFramework.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
 			);
 			outputPaths = (
 			);
