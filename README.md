@@ -24,7 +24,7 @@ Please understand that this project:
 <a href="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 
-### Hardware
+## Requirements
 
 <table>
   <thead>
@@ -54,6 +54,10 @@ Please understand that this project:
 
 <br/><a name="hw1">1</a>. Internet connection required to retrieve glucose
 <br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
+
+### RileyLink
+
+Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](https://github.com/ps2/rileylink), a compact BLE-to-916MHz bridge device designed by the incredible [@ps2](https://github.com/ps2). Please visit the [repository](https://github.com/ps2/rileylink) and the [gitter room](https://gitter.im/ps2/rileylink) for more information.
 
 ### LoopKit
 
@@ -92,36 +96,8 @@ $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 
 # Making it Your Own
 
-You might open this app a lot. Make it the most personal app on your iPhone by changing the name and icon.
-
-### Renaming the Target
-
-[![Changing the target name](/Documentation/Changing%20the%20target%20name.png?raw=true)](/Documentation/Changing%20the%20target%20name.png)
-
-In the Targets list, rename "Loop" to anything you like. This has the side-effect of changing the display name of the app as well, though you can choose to decouple those if you like later by reading more about Xcode target configuration.
-
-### Changing the Icon
-
-[![Changing the app icon](/Documentation/Changing%20the%20app%20icon.png?raw=true)](/Documentation/Changing%20the%20app%20icon.png)
-
-1. Select the application asset library from the Project Navigator
-2. Select the image set named AppIcon
-3. Replace each image size with your own icon
-
-Below are some example icons from other Loop users:
-
-![Icon A](/Documentation/User Icons/LoopingPump.png?raw=true)
-
-# Changing the Code
-
-TODO: Write more documentation!
-
-## Updating Dependencies Using Carthage
-
-[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. If you haven't installed Carthage on your Mac before, [follow the installation instructions](https://github.com/carthage/carthage#installing-carthage).
-
-The framework versions specified in `Cartfile.resolved` are checked in to the repository for ease of building. If you update the `Cartfile`, make sure to run `carthage update` fetch and build the updated dependencies.
+[Please visit the Wiki for more info on customizing the app](https://github.com/loudnate/Loop/wiki/)
 
 # License and Code of Conduct
 
-Please read the [LICENSE](/LICENSE) and [CODE_OF_CONDUCT](/CODE_OF_CONDUCT.md)
+Please read the [LICENSE](/LICENSE.md) and [CODE_OF_CONDUCT](/CODE_OF_CONDUCT.md)
