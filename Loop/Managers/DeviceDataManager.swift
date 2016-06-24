@@ -44,6 +44,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Nightscout Uploader
     var nightscoutUploader: NightscoutUploader?
     
+    // Timestamp of last event we've retrieved from pump
+    var observingPumpEventsSince: NSDate = NSDate().dateByAddingTimeInterval(60*60*24*(-1))
+    
+    
     /// The G5 transmitter object
     var transmitter: Transmitter? {
         switch transmitterState {
@@ -220,6 +224,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
     
     private func fetchPumpHistory() {
+        
         guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
@@ -228,20 +233,40 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
          This is where we fetch history.
          */
         
-        let startDate = doseStore.pumpEventQueryAfterDate
+        // TODO: Reconcile these
+        //let startDate = doseStore.pumpEventQueryAfterDate
+        let startDate = nightscoutUploader?.observingPumpEventsSince ?? observingPumpEventsSince
         
         device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
             switch result {
             case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                    if let error = error {
-                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                    }
-                    
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                }
+//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
+//                    if let error = error {
+//                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+//                    }
+//                }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
+                
+                
+                var lastFinalDate: NSDate?
+                var firstMutableDate: NSDate?
+                
+                for event in events {
+                    if event.isMutable() {
+                        firstMutableDate = min(event.date, firstMutableDate ?? event.date)
+                    } else {
+                        lastFinalDate = max(event.date, lastFinalDate ?? event.date)
+                    }
+                }
+                if let mutableDate = firstMutableDate {
+                    self.observingPumpEventsSince = mutableDate
+                } else if let finalDate = lastFinalDate {
+                    self.observingPumpEventsSince = finalDate
+                }
+                
                 
             case .Failure(let error):
                 self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
@@ -256,6 +281,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
      - parameter device: The RileyLink device
      */
     private func troubleshootPumpCommsWithDevice(device: RileyLinkDevice) {
+        
         // How long we should wait before we re-tune the RileyLink
         let tuneTolerance = NSTimeInterval(minutes: 14)
         
@@ -400,6 +426,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             } else {
                 self.pumpState = nil
             }
+            
+            nightscoutUploader?.pumpID = pumpID
             
             doseStore.pumpID = pumpID
             
@@ -658,9 +686,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             siteURL = settings["NightscoutSiteURL"],
             APISecret = settings["NightscoutAPISecret"]
         {
-            nightscoutUploader = NightscoutUploader()
-            nightscoutUploader!.siteURL = siteURL
-            nightscoutUploader!.APISecret = APISecret
+            nightscoutUploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret, pumpID: pumpID)
+            nightscoutUploader!.errorHandler = { (error: ErrorType, context: String) -> Void in
+                print("Error \(error), while \(context)")
+            }
+
         } else {
             nightscoutUploader = nil
         }
