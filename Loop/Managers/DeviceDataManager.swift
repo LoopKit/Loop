@@ -45,8 +45,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     var nightscoutUploader: NightscoutUploader?
 
     // Timestamp of last event we've retrieved from pump
-    var observingPumpEventsSince: NSDate = NSDate().dateByAddingTimeInterval(60*60*24*(-1))
-
+    var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
     /// The G5 transmitter object
     var transmitter: Transmitter? {
@@ -224,7 +223,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
 
     private func fetchPumpHistory() {
-
         guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
@@ -428,7 +426,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             }
 
             nightscoutUploader?.pumpID = pumpID
-
             doseStore.pumpID = pumpID
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
@@ -517,7 +514,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                     ID: transmitterID,
                     startTimeInterval: NSUserDefaults.standardUserDefaults().transmitterStartTime,
                     passiveModeEnabled: true
-                    ))
+                ))
             case (.Ready, .None):
                 transmitterState = .NeedsConfiguration
             case (.Ready(let transmitter), let transmitterID?):
