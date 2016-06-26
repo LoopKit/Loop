@@ -16,6 +16,7 @@ import MinimedKit
 import RileyLinkKit
 import ShareClient
 import xDripG5
+import NightscoutUploadKit
 
 enum State<T> {
     case NeedsConfiguration
@@ -40,6 +41,13 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// The share server client
     private let shareClient: ShareClient?
 
+    /// Nightscout Uploader
+    var nightscoutUploader: NightscoutUploader?
+
+    // Timestamp of last event we've retrieved from pump
+    var observingPumpEventsSince: NSDate = NSDate().dateByAddingTimeInterval(60*60*24*(-1))
+
+
     /// The G5 transmitter object
     var transmitter: Transmitter? {
         switch transmitterState {
@@ -58,7 +66,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     /**
      Called when a new idle message is received by the RileyLink.
-     
+
      Only MySentryPumpStatus messages are handled.
 
      - parameter note: The notification object
@@ -115,7 +123,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
-     
+
      This message has two important pieces of info about the pump: reservoir volume and battery.
 
      Because the RileyLink must actively listen for these packets, they are not the most reliable heartbeat. However, we can still use them to assert glucose data is current.
@@ -144,6 +152,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         if status.batteryRemainingPercent == 0 {
             NotificationManager.sendPumpBatteryLowNotification()
         }
+
+        nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
     }
 
     /**
@@ -214,27 +224,50 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
 
     private func fetchPumpHistory() {
+
         guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
 
         /*
          This is where we fetch history.
-        */
+         */
 
-        let startDate = doseStore.pumpEventQueryAfterDate
+        // TODO: Reconcile these
+        //let startDate = doseStore.pumpEventQueryAfterDate
+        let startDate = nightscoutUploader?.observingPumpEventsSince ?? observingPumpEventsSince
 
         device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
             switch result {
-            case let .Success(events, _):
+            case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                    if let error = error {
-                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                    }
+                //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
+                //                    if let error = error {
+                //                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+                //                    }
+                //                }
 
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                self.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
+
+
+                var lastFinalDate: NSDate?
+                var firstMutableDate: NSDate?
+
+                for event in events {
+                    if event.isMutable() {
+                        firstMutableDate = min(event.date, firstMutableDate ?? event.date)
+                    } else {
+                        lastFinalDate = max(event.date, lastFinalDate ?? event.date)
+                    }
                 }
+                if let mutableDate = firstMutableDate {
+                    self.observingPumpEventsSince = mutableDate
+                } else if let finalDate = lastFinalDate {
+                    self.observingPumpEventsSince = finalDate
+                }
+
+
             case .Failure(let error):
                 self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
                 self.troubleshootPumpCommsWithDevice(device)
@@ -248,6 +281,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
      - parameter device: The RileyLink device
      */
     private func troubleshootPumpCommsWithDevice(device: RileyLinkDevice) {
+
         // How long we should wait before we re-tune the RileyLink
         let tuneTolerance = NSTimeInterval(minutes: 14)
 
@@ -393,6 +427,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 self.pumpState = nil
             }
 
+            nightscoutUploader?.pumpID = pumpID
+
             doseStore.pumpID = pumpID
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
@@ -481,7 +517,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                     ID: transmitterID,
                     startTimeInterval: NSUserDefaults.standardUserDefaults().transmitterStartTime,
                     passiveModeEnabled: true
-                ))
+                    ))
             case (.Ready, .None):
                 transmitterState = .NeedsConfiguration
             case (.Ready(let transmitter), let transmitterID?):
@@ -637,13 +673,26 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         rileyLinkManager.idleListeningEnabled = idleListeningEnabled
 
         if let  settings = NSBundle.mainBundle().remoteSettings,
-                username = settings["ShareAccountName"],
-                password = settings["ShareAccountPassword"]
+            username = settings["ShareAccountName"],
+            password = settings["ShareAccountPassword"]
             where !username.isEmpty && !password.isEmpty
         {
             shareClient = ShareClient(username: username, password: password)
         } else {
             shareClient = nil
+        }
+
+        if let  settings = NSBundle.mainBundle().remoteSettings,
+            siteURL = settings["NightscoutSiteURL"],
+            APISecret = settings["NightscoutAPISecret"]
+        {
+            nightscoutUploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret, pumpID: pumpID)
+            nightscoutUploader!.errorHandler = { (error: ErrorType, context: String) -> Void in
+                print("Error \(error), while \(context)")
+            }
+
+        } else {
+            nightscoutUploader = nil
         }
 
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkManagerNotification(_:)), name: nil, object: rileyLinkManager)
