@@ -79,16 +79,16 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZgD-7x-5Wg">
-                                            <rect key="frame" x="15" y="8" width="419" height="27"/>
+                                            <rect key="frame" x="15" y="8" width="493" height="27"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="LrK-Yi-kdn">
-                                            <rect key="frame" x="442" y="7" width="143" height="29"/>
+                                            <rect key="frame" x="516" y="7" width="69" height="29"/>
                                             <segments>
-                                                <segment title="History"/>
-                                                <segment title="Reservoir"/>
+                                                <segment title="On"/>
+                                                <segment title="Off"/>
                                             </segments>
                                         </segmentedControl>
                                     </subviews>
