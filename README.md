@@ -98,9 +98,13 @@ $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 | `NightscoutSiteURL`    | Your Nightscout site URL
 | `NightscoutAPISecret`  | Your Nightscout API Secret (not hashed)
 
+## Installing Carthage
+
+[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. It will need to be [installed on your Mac](https://github.com/carthage/carthage#installing-carthage) to build and run the app, but most users won't have a need to explicitly rebuild any dependencies.
+
 # Making it Your Own
 
-[Please visit the Wiki for more info on customizing the app](https://github.com/loudnate/Loop/wiki/)
+[Please visit the Wiki for more info on customizing the app](https://github.com/loudnate/Loop/wiki/Personalizing-Your-App-Name-&-Icon)
 
 # License and Code of Conduct
 
