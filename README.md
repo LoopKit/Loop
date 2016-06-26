@@ -77,6 +77,8 @@ In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENT
 
 Loop optionally supports select third-party remote services. While none of them are required to run the app, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
 
+If the Nightscout related entries are included, treatments and other pump data will be uploaded to your Nightscout site.  Note you will need to set "Insulin Data Source" to "History" in Settings for treatments to be fetched from your pump and uploaded to Nightscout.
+
 After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
 
 ```bash
@@ -93,6 +95,8 @@ $ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
 | `AmplitudeAPIKey`      | Your Amplitude analytics API Key (for optional, private behavior tracking)
 | `ShareAccountName`     | Your username for Dexcom share (for backfilling glucose data)
 | `ShareAccountPassword` | Your password for Dexcom share
+| `NightscoutSiteURL`    | Your Nightscout site URL
+| `NightscoutAPISecret`  | Your Nightscout API Secret (not hashed)
 
 # Making it Your Own
 
