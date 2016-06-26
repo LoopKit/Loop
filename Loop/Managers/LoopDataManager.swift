@@ -59,15 +59,7 @@ class LoopDataManager {
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
-                self.waitingForSentryPackets = true
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
-
-                // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
-                let waitTime = self.deviceDataManager.latestPumpStatus != nil ? Int64(11 * NSEC_PER_SEC) : 0
-
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, waitTime), self.dataAccessQueue) {
-                    self.waitingForSentryPackets = false
+                dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
                     self.loop()
                 }
@@ -83,6 +75,8 @@ class LoopDataManager {
     }
 
     private func loop() {
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
+
         lastLoopError = nil
 
         do {
@@ -175,9 +169,7 @@ class LoopDataManager {
     }
 
     private func notify() {
-        if !waitingForSentryPackets {
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
-        }
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
     }
 
     /**
@@ -251,7 +243,6 @@ class LoopDataManager {
             AnalyticsManager.loopDidSucceed()
         }
     }
-    private var waitingForSentryPackets = false
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
