@@ -155,7 +155,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .PreferredInsulinDataSource:
                 let segmentCell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.className, forIndexPath: indexPath) as! SegmentedControlTableViewCell
 
-                segmentCell.titleLabel.text = NSLocalizedString("Insulin Data Source", comment: "The title text for the preferred insulin data source config")
+                segmentCell.titleLabel.text = NSLocalizedString("Nightscout history uploading", comment: "The title text for the preferred insulin data source config")
                 segmentCell.segmentedControl.selectedSegmentIndex = dataManager.preferredInsulinDataSource.rawValue
                 segmentCell.segmentedControl.addTarget(self, action: #selector(preferredInsulinDataSourceChanged(_:)), forControlEvents: .ValueChanged)
 
