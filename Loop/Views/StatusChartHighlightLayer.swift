@@ -29,7 +29,7 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                 }
             },
             viewGenerator: { (chartPointModel, layer, chart) -> U? in
-                let containerView = U(frame: chart.frame)
+                let containerView = U(frame: chart.bounds)
 
                 let xAxisOverlayView = UIView(frame: xAxis.rect.offsetBy(dx: 0, dy: 1))
                 xAxisOverlayView.backgroundColor = UIColor.whiteColor()
