@@ -91,8 +91,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     private enum LoopRow: Int {
         case Dosing = 0
+        case PreferredInsulinDataSource
 
-        static let count = 1
+        static let count = 2
     }
 
     private enum ConfigurationRow: Int {
@@ -151,6 +152,14 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 switchCell.`switch`?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), forControlEvents: .ValueChanged)
 
                 return switchCell
+            case .PreferredInsulinDataSource:
+                let segmentCell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.className, forIndexPath: indexPath) as! SegmentedControlTableViewCell
+
+                segmentCell.titleLabel.text = NSLocalizedString("Nightscout history uploading", comment: "The title text for the preferred insulin data source config")
+                segmentCell.segmentedControl.selectedSegmentIndex = dataManager.preferredInsulinDataSource.rawValue
+                segmentCell.segmentedControl.addTarget(self, action: #selector(preferredInsulinDataSourceChanged(_:)), forControlEvents: .ValueChanged)
+
+                return segmentCell
             }
         case .Configuration:
             let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
@@ -433,6 +442,12 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             } else {
                 dataManager.disconnectFromRileyLink(device)
             }
+        }
+    }
+
+    func preferredInsulinDataSourceChanged(sender: UISegmentedControl) {
+        if let dataSource = InsulinDataSource(rawValue: sender.selectedSegmentIndex) {
+            dataManager.preferredInsulinDataSource = dataSource
         }
     }
 
