@@ -48,6 +48,8 @@
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		4354003A1C9FB81100D5819C /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
+		436FACEC1D0BA246004E2427 /* SegmentedControlTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */; };
+		436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACED1D0BA636004E2427 /* InsulinDataSource.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
@@ -124,6 +126,7 @@
 		43F78D591C914C57002152D1 /* recommend_temp_basal_high_and_falling.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D581C914C57002152D1 /* recommend_temp_basal_high_and_falling.json */; };
 		43F78D5B1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D5A1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json */; };
 		43F78D5D1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = 43F78D5C1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json */; };
+		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -232,6 +235,8 @@
 		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
+		436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControlTableViewCell.swift; sourceTree = "<group>"; };
+		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -313,6 +318,7 @@
 		43F78D581C914C57002152D1 /* recommend_temp_basal_high_and_falling.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_high_and_falling.json; sourceTree = "<group>"; };
 		43F78D5A1C914CAB002152D1 /* recommend_temp_basal_in_range_and_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_in_range_and_rising.json; sourceTree = "<group>"; };
 		43F78D5C1C914CEA002152D1 /* recommend_temp_basal_high_and_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_high_and_rising.json; sourceTree = "<group>"; };
+		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -327,6 +333,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
 				439897391CD2F82C00223065 /* AmplitudeFramework.framework in Frameworks */,
 				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
 				43EDDBF21C361C75007D89B5 /* CommonCrypto.framework in Frameworks */,
@@ -397,6 +404,7 @@
 				43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */,
 				4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */,
 				434F24CA1CFCB7AB0004498F /* GlucoseRxMessage.swift */,
+				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */,
 				434F24C81CFCA8940004498F /* TransmitterGlucose.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
@@ -544,6 +552,7 @@
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
+				436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */,
 				43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */,
 				43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */,
 			);
@@ -598,6 +607,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */,
 				43B371871CE597D10013C5A6 /* ShareClient.framework */,
 				439897381CD2F82C00223065 /* AmplitudeFramework.framework */,
 				43F78D481C914197002152D1 /* CarbKit.framework */,
@@ -840,6 +850,8 @@
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/AmplitudeFramework.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
 			);
 			outputPaths = (
 			);
@@ -874,6 +886,7 @@
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
+				436FACEC1D0BA246004E2427 /* SegmentedControlTableViewCell.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
@@ -896,6 +909,7 @@
 				437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
+				436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,

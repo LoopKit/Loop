@@ -103,11 +103,18 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 @end
 
 
+@interface NSUserDefaults (SWIFT_EXTENSION(NightscoutUploadKit))
+@end
+
+@class NSDate;
+
 SWIFT_CLASS("_TtC19NightscoutUploadKit18NightscoutUploader")
 @interface NightscoutUploader : NSObject
 @property (nonatomic, copy) NSString * _Nullable siteURL;
 @property (nonatomic, copy) NSString * _Nullable APISecret;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@property (nonatomic, readonly, strong) NSDate * _Nonnull observingPumpEventsSince;
+@property (nonatomic, copy) NSString * _Nullable pumpID;
+- (nonnull instancetype)initWithSiteURL:(NSString * _Nullable)siteURL APISecret:(NSString * _Nullable)APISecret pumpID:(NSString * _Nullable)pumpID OBJC_DESIGNATED_INITIALIZER;
 @end
 
 #pragma clang diagnostic pop

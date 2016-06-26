@@ -22,6 +22,7 @@ extension NSUserDefaults {
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
+        case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
@@ -140,6 +141,19 @@ extension NSUserDefaults {
                 setDouble(maximumBolus, forKey: Key.MaximumBolus.rawValue)
             } else {
                 removeObjectForKey(Key.MaximumBolus.rawValue)
+            }
+        }
+    }
+
+    var preferredInsulinDataSource: InsulinDataSource? {
+        get {
+            return InsulinDataSource(rawValue: integerForKey(Key.PreferredInsulinDataSource.rawValue))
+        }
+        set {
+            if let preferredInsulinDataSource = preferredInsulinDataSource {
+                setInteger(preferredInsulinDataSource.rawValue, forKey: Key.PreferredInsulinDataSource.rawValue)
+            } else {
+                removeObjectForKey(Key.PreferredInsulinDataSource.rawValue)
             }
         }
     }
