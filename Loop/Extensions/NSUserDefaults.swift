@@ -150,7 +150,7 @@ extension NSUserDefaults {
             return InsulinDataSource(rawValue: integerForKey(Key.PreferredInsulinDataSource.rawValue))
         }
         set {
-            if let preferredInsulinDataSource = preferredInsulinDataSource {
+            if let preferredInsulinDataSource = newValue {
                 setInteger(preferredInsulinDataSource.rawValue, forKey: Key.PreferredInsulinDataSource.rawValue)
             } else {
                 removeObjectForKey(Key.PreferredInsulinDataSource.rawValue)
