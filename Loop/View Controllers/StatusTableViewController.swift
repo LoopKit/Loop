@@ -684,8 +684,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         if let bolusViewController = segue.sourceViewController as? BolusViewController {
             if let bolus = bolusViewController.bolus where bolus > 0 {
                 let startDate = NSDate()
-                dataManager.loopManager.enactBolus(bolus) { (success, error) in
-                    if !success {
+                dataManager.enactBolus(bolus) { (error) in
+                    if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus, atDate: startDate)
                     }
                 }

@@ -150,8 +150,8 @@ class WatchDataManager: NSObject, WCSessionDelegate {
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message) {
-                self.deviceDataManager.loopManager.enactBolus(bolus.value) { (success, error) in
-                    if !success {
+                self.deviceDataManager.enactBolus(bolus.value) { (error) in
+                    if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
                     } else {
                         AnalyticsManager.didSetBolusFromWatch(bolus.value)
