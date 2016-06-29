@@ -118,7 +118,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
-    var latestReservoirValue: ReservoirValue?
+    var latestReservoirValue: ReservoirValue? {
+        didSet {
+            if let oldValue = oldValue, newValue = latestReservoirValue {
+                latestReservoirVolumeDrop = oldValue.unitVolume - newValue.unitVolume
+            }
+        }
+    }
+
+    // The last change in reservoir volume. Useful in detecting rewind events.
+    private var latestReservoirVolumeDrop: Double = 0
 
     /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
@@ -153,6 +162,46 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
 
         nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
+    }
+
+    /**
+     Read the pump's current reservoir and clock
+ 
+     - parameter completion: A closure called after the command is complete. This closure takes a single Result argument:
+        - Success(units, date): The reservoir volume, in units of insulin, and date according to the pump's clock
+        - Failure(error): An error describing why the command failed
+     */
+    private func readReservoirVolume(completion: (Either<(units: Double, date: NSDate), ErrorType>) -> Void) {
+        guard let device = rileyLinkManager.firstConnectedDevice, ops = device.ops else {
+            completion(.Failure(LoopError.ConfigurationError))
+            return
+        }
+
+        ops.readRemainingInsulin { (result) in
+            switch result {
+            case .Success(let units):
+                ops.readTime { (result) in
+                    switch result {
+                    case .Success(let components):
+                        components.timeZone = ops.pumpState.timeZone
+
+                        guard let date = components.date else {
+                            self.logger?.addError("Could not interpret clock", fromSource: "RileyLink")
+                            completion(.Failure(LoopError.ConfigurationError))
+                            return
+                        }
+
+                        completion(.Success((units: units, date: date)))
+                    case .Failure(let error):
+                        self.logger?.addError("Failed to fetch clock: \(error)", fromSource: "RileyLink")
+                        completion(.Failure(error))
+                    }
+                }
+            case .Failure(let error):
+                self.logger?.addError("Failed to fetch reservoir: \(error)", fromSource: "RileyLink")
+                completion(.Failure(error))
+            }
+        }
     }
 
     /**
@@ -210,26 +259,24 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         // If we don't yet have reservoir data, or it's old, poll for it.
         if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -reservoirTolerance {
-            device.ops?.readRemainingInsulin { (result) in
+            readReservoirVolume { (result) in
                 switch result {
-                case .Success(let units):
-                    self.updateReservoirVolume(units, atDate: NSDate(), withTimeLeft: nil)
-                case .Failure(let error):
-                    self.logger?.addError("Failed to fetch reservoir: \(error)", fromSource: "RileyLink")
+                case .Success(let (units, date)):
+                    self.updateReservoirVolume(units, atDate: date, withTimeLeft: nil)
+                case .Failure:
                     self.troubleshootPumpCommsWithDevice(device)
                 }
             }
         }
     }
 
+    /**
+     Polls the pump for new history events
+     */
     private func fetchPumpHistory() {
         guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
-
-        /*
-         This is where we fetch history.
-         */
 
         // TODO: Reconcile these
         //let startDate = doseStore.pumpEventQueryAfterDate
@@ -270,6 +317,66 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
                 self.troubleshootPumpCommsWithDevice(device)
             }
+        }
+    }
+
+    /**
+     Send a bolus command and handle the result
+ 
+     - parameter completion: A closure called after the command is complete. This closure takes a single argument:
+        - error: An error describing why the command failed
+     */
+    func enactBolus(units: Double, completion: (error: ErrorType?) -> Void) {
+        guard units > 0 else {
+            completion(error: nil)
+            return
+        }
+
+        guard let device = rileyLinkManager.firstConnectedDevice else {
+            completion(error: LoopError.ConnectionError)
+            return
+        }
+
+        guard let ops = device.ops else {
+            completion(error: LoopError.ConfigurationError)
+            return
+        }
+
+        let setBolus = {
+            ops.setNormalBolus(units) { (error) in
+                if let error = error {
+                    self.logger?.addError(error, fromSource: "Bolus")
+                    completion(error: LoopError.CommunicationError)
+                } else {
+                    self.loopManager.recordBolus(units, atDate: NSDate())
+                    completion(error: nil)
+                }
+            }
+        }
+
+        // If we don't have a recent reservoir value, or the pump was recently rewound, read a new reservoir value before bolusing.
+        if  latestReservoirValue == nil ||
+            latestReservoirVolumeDrop < 0 ||
+            latestReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: 5)
+        {
+            readReservoirVolume { (result) in
+                switch result {
+                case .Success(let (unitVolume, date)):
+                    self.doseStore.addReservoirValue(unitVolume, atDate: date) { (newValue, _, error) in
+                        if let error = error {
+                            self.logger?.addError(error, fromSource: "Bolus")
+                            completion(error: LoopError.CommunicationError)
+                        } else {
+                            self.latestReservoirValue = newValue
+                            setBolus()
+                        }
+                    }
+                case .Failure(let error):
+                    completion(error: error)
+                }
+            }
+        } else {
+            setBolus()
         }
     }
 

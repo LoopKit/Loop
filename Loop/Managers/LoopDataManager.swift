@@ -18,14 +18,6 @@ class LoopDataManager {
 
     static let LoopRunningNotification = "com.loudnate.Naterade.notification.LoopRunning"
 
-    enum Error: ErrorType {
-        case CommunicationError
-        case ConfigurationError
-        case ConnectionError
-        case MissingDataError(String)
-        case StaleDataError(String)
-    }
-
     typealias TempBasalRecommendation = (recommendedDate: NSDate, rate: Double, duration: NSTimeInterval)
 
     unowned let deviceDataManager: DeviceDataManager
@@ -256,7 +248,7 @@ class LoopDataManager {
                 completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(effects: nil, error: Error.MissingDataError("CarbStore not available"))
+            completionHandler(effects: nil, error: LoopError.MissingDataError("CarbStore not available"))
         }
     }
 
@@ -282,7 +274,7 @@ class LoopDataManager {
                 completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(effects: nil, error: Error.MissingDataError("GlucoseStore not available"))
+            completionHandler(effects: nil, error: LoopError.MissingDataError("GlucoseStore not available"))
         }
     }
 
@@ -298,7 +290,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError("Cannot predict glucose due to missing input data")
+            throw LoopError.MissingDataError("Cannot predict glucose due to missing input data")
         }
 
         let startDate = NSDate()
@@ -309,7 +301,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.StaleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
+            throw LoopError.StaleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
         }
 
         guard let
@@ -318,7 +310,7 @@ class LoopDataManager {
             insulinEffect = self.insulinEffect else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError("Cannot predict glucose due to missing effect data")
+            throw LoopError.MissingDataError("Cannot predict glucose due to missing effect data")
         }
 
         var error: ErrorType?
@@ -349,7 +341,7 @@ class LoopDataManager {
             insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
             basalRates = deviceDataManager.basalRateSchedule
         else {
-            error = Error.MissingDataError("Loop configuration data not set")
+            error = LoopError.MissingDataError("Loop configuration data not set")
             throw error!
         }
 
@@ -387,7 +379,7 @@ class LoopDataManager {
                 }
             }
         } else {
-            resultsHandler(units: nil, error: Error.MissingDataError("CarbStore not configured"))
+            resultsHandler(units: nil, error: LoopError.MissingDataError("CarbStore not configured"))
         }
     }
 
@@ -399,17 +391,17 @@ class LoopDataManager {
             insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
             basalRates = self.deviceDataManager.basalRateSchedule
         else {
-            throw Error.MissingDataError("Bolus prediction and configuration data not found")
+            throw LoopError.MissingDataError("Bolus prediction and configuration data not found")
         }
 
         let recencyInterval = NSTimeInterval(minutes: 15)
 
         guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow else {
-            throw Error.MissingDataError("No glucose data found")
+            throw LoopError.MissingDataError("No glucose data found")
         }
 
         guard abs(predictedInterval) <= recencyInterval else {
-            throw Error.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
+            throw LoopError.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
         }
 
         let pendingBolusAmount: Double = lastBolus?.units ?? 0
@@ -441,17 +433,17 @@ class LoopDataManager {
         }
 
         guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
-            resultsHandler(success: false, error: Error.StaleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
+            resultsHandler(success: false, error: LoopError.StaleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
             return
         }
 
         guard let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice else {
-            resultsHandler(success: false, error: Error.ConnectionError)
+            resultsHandler(success: false, error: LoopError.ConnectionError)
             return
         }
 
         guard let ops = device.ops else {
-            resultsHandler(success: false, error: Error.ConfigurationError)
+            resultsHandler(success: false, error: LoopError.ConfigurationError)
             return
         }
 
@@ -480,47 +472,16 @@ class LoopDataManager {
         }
     }
 
-    func enactBolus(units: Double, resultsHandler: (success: Bool, error: Error?) -> Void) {
-        guard units > 0 else {
-            resultsHandler(success: true, error: nil)
-            return
-        }
+    /**
+     Informs the loop algorithm of an enacted bolus
 
-        guard let device = deviceDataManager.rileyLinkManager.firstConnectedDevice else {
-            resultsHandler(success: false, error: .ConnectionError)
-            return
-        }
-
-        guard let ops = device.ops else {
-            resultsHandler(success: false, error: .ConfigurationError)
-            return
-        }
-
-        ops.readRemainingInsulin { (result) in
-            switch result {
-            case .Success(let unitVolume):
-                self.deviceDataManager.doseStore.addReservoirValue(unitVolume, atDate: NSDate()) { (_, _, error) in
-                    if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                        resultsHandler(success: false, error: .CommunicationError)
-                    } else {
-                        ops.setNormalBolus(units) { (error) in
-                            if let error = error {
-                                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                                resultsHandler(success: false, error: .CommunicationError)
-                            } else {
-                                self.lastBolus = (units: units, date: NSDate())
-                                resultsHandler(success: true, error: nil)
-                            }
-
-                            self.notify()
-                        }
-                    }
-                }
-            case .Failure(let error):
-                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                resultsHandler(success: false, error: .CommunicationError)
-            }
+     - parameter units: The amount of insulin
+     - parameter date:  The date the bolus was set
+     */
+    func recordBolus(units: Double, atDate date: NSDate) {
+        dispatch_async(dataAccessQueue) {
+            self.lastBolus = (units: units, date: date)
+            self.notify()
         }
     }
 }
