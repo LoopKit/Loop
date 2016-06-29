@@ -362,11 +362,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             readReservoirVolume { (result) in
                 switch result {
                 case .Success(let (unitVolume, date)):
-                    self.doseStore.addReservoirValue(unitVolume, atDate: date) { (_, _, error) in
+                    self.doseStore.addReservoirValue(unitVolume, atDate: date) { (newValue, _, error) in
                         if let error = error {
                             self.logger?.addError(error, fromSource: "Bolus")
                             completion(error: LoopError.CommunicationError)
                         } else {
+                            self.latestReservoirValue = newValue
                             setBolus()
                         }
                     }
