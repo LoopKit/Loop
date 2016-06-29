@@ -12,10 +12,8 @@
 		4315D28B1CA5F48100589052 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		4315D2901CA6332F00589052 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
 		4328E0181CFBE1DA00E199AA /* ContextInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */; };
-		4328E0191CFBE1DA00E199AA /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0141CFBE1DA00E199AA /* InterfaceController.swift */; };
 		4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */; };
 		4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */; };
-		4328E01C1CFBE1DA00E199AA /* GlanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0171CFBE1DA00E199AA /* GlanceController.swift */; };
 		4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */; };
 		4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */; };
 		4328E0271CFBE2C500E199AA /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0211CFBE2C500E199AA /* NSDateFormatter.swift */; };
@@ -207,10 +205,8 @@
 		4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditTableViewController.swift; sourceTree = "<group>"; };
 		4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLogger+LoopKit.swift"; sourceTree = "<group>"; };
 		4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextInterfaceController.swift; sourceTree = "<group>"; };
-		4328E0141CFBE1DA00E199AA /* InterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
 		4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInterfaceController.swift; sourceTree = "<group>"; };
 		4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusInterfaceController.swift; sourceTree = "<group>"; };
-		4328E0171CFBE1DA00E199AA /* GlanceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlanceController.swift; sourceTree = "<group>"; };
 		4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		4328E0211CFBE2C500E199AA /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
@@ -377,8 +373,6 @@
 				4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */,
 				4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */,
 				4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */,
-				4328E0171CFBE1DA00E199AA /* GlanceController.swift */,
-				4328E0141CFBE1DA00E199AA /* InterfaceController.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
 				4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */,
 			);
@@ -943,8 +937,6 @@
 				4328E0281CFBE2C500E199AA /* CLKComplicationTemplate.swift in Sources */,
 				4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */,
 				4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */,
-				4328E01C1CFBE1DA00E199AA /* GlanceController.swift in Sources */,
-				4328E0191CFBE1DA00E199AA /* InterfaceController.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				4328E0301CFBFAEB00E199AA /* NSTimeInterval.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
