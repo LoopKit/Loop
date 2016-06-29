@@ -357,7 +357,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         // If we don't have a recent reservoir value, or the pump was recently rewound, read a new reservoir value before bolusing.
         if  latestReservoirValue == nil ||
             latestReservoirVolumeDrop < 0 ||
-            latestReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: 5)
+            latestReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: -5)
         {
             readReservoirVolume { (result) in
                 switch result {
