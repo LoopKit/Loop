@@ -206,7 +206,7 @@ class KeychainManager {
 }
 
 
-enum SecurityProtocol {
+private enum SecurityProtocol {
     case HTTP
     case HTTPS
 
@@ -251,7 +251,7 @@ enum SecurityProtocol {
 }
 
 
-extension NSURLComponents {
+private extension NSURLComponents {
     convenience init?(keychainAttributes: [NSObject: AnyObject]) {
         self.init()
 
