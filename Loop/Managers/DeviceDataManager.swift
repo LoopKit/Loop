@@ -38,11 +38,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Manages all the RileyLinks
     let rileyLinkManager: RileyLinkDeviceManager
 
-    /// The share server client
-    private let shareClient: ShareClient?
-
-    /// Nightscout Uploader
-    var nightscoutUploader: NightscoutUploader?
+    /// Manages remote data
+    let remoteDataManager = RemoteDataManager()
 
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
@@ -118,6 +115,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
 
+    // TODO: Expose this on DoseStore
     var latestReservoirValue: ReservoirValue? {
         didSet {
             if let oldValue = oldValue, newValue = latestReservoirValue {
@@ -127,6 +125,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
 
     // The last change in reservoir volume. Useful in detecting rewind events.
+    // TODO: Expose this on DoseStore
     private var latestReservoirVolumeDrop: Double = 0
 
     /**
@@ -134,7 +133,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
      This message has two important pieces of info about the pump: reservoir volume and battery.
 
-     Because the RileyLink must actively listen for these packets, they are not the most reliable heartbeat. However, we can still use them to assert glucose data is current.
+     Because the RileyLink must actively listen for these packets, they are not a reliable heartbeat. However, we can still use them to assert glucose data is current.
 
      - parameter status: The status message body
      - parameter device: The RileyLink that received the message
@@ -161,7 +160,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             NotificationManager.sendPumpBatteryLowNotification()
         }
 
-        nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
+        remoteDataManager.nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
     }
 
     /**
@@ -280,7 +279,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         // TODO: Reconcile these
         //let startDate = doseStore.pumpEventQueryAfterDate
-        let startDate = nightscoutUploader?.observingPumpEventsSince ?? observingPumpEventsSince
+        let startDate = remoteDataManager.nightscoutUploader?.observingPumpEventsSince ?? observingPumpEventsSince
 
         device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
             switch result {
@@ -293,7 +292,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 //                }
 
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                self.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
+                self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
 
 
                 var lastFinalDate: NSDate?
@@ -435,8 +434,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             return
         }
 
-        latestGlucoseValue = glucose
-
         let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
         glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
@@ -464,14 +461,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     var latestGlucoseMessage: GlucoseRxMessage?
 
-    var latestGlucoseValue: GlucoseValue?
-
     /**
      Attempts to backfill glucose data from the share servers if the G5 connection hasn't been established.
      */
     private func backfillGlucoseFromShareIfNeeded() {
         if latestGlucoseMessage == nil,
-            let shareClient = self.shareClient, glucoseStore = self.glucoseStore
+            let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore
         {
             // Load glucose from Share if our xDripG5 connection hasn't started
             shareClient.fetchLast(1) { (error, glucose) in
@@ -492,8 +487,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                     if let error = error {
                         self.logger?.addError(error, fromSource: "GlucoseStore")
                     }
-
-                    self.latestGlucoseValue = value
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
                 }
@@ -532,7 +525,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 self.pumpState = nil
             }
 
-            nightscoutUploader?.reset()
+            remoteDataManager.nightscoutUploader?.reset()
             doseStore.pumpID = pumpID
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
@@ -775,29 +768,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             autoConnectIDs: connectedPeripheralIDs
         )
         rileyLinkManager.idleListeningEnabled = idleListeningEnabled
-
-        if let  settings = NSBundle.mainBundle().remoteSettings,
-            username = settings["ShareAccountName"],
-            password = settings["ShareAccountPassword"]
-            where !username.isEmpty && !password.isEmpty
-        {
-            shareClient = ShareClient(username: username, password: password)
-        } else {
-            shareClient = nil
-        }
-
-        if let  settings = NSBundle.mainBundle().remoteSettings,
-            siteURL = settings["NightscoutSiteURL"],
-            APISecret = settings["NightscoutAPISecret"]
-        {
-            nightscoutUploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret)
-            nightscoutUploader!.errorHandler = { (error: ErrorType, context: String) -> Void in
-                print("Error \(error), while \(context)")
-            }
-
-        } else {
-            nightscoutUploader = nil
-        }
 
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkManagerNotification(_:)), name: nil, object: rileyLinkManager)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(receivedRileyLinkPacketNotification(_:)), name: RileyLinkDevice.DidReceiveIdleMessageNotification, object: nil)

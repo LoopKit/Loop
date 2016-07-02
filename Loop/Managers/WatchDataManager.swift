@@ -92,7 +92,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
             return
         }
 
-        let glucose = deviceDataManager.latestGlucoseValue
+        let glucose = deviceDataManager.glucoseStore?.latestGlucose
         let reservoir = deviceDataManager.latestReservoirValue
 
         deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) in

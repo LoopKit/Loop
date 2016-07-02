@@ -487,7 +487,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
 
-                if let date = dataManager.latestGlucoseValue?.startDate {
+                if let date = dataManager.glucoseStore?.latestGlucose?.startDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
@@ -496,7 +496,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
                 cell.detailTextLabel?.text = emptyValueString
 
-                if let glucose = dataManager.latestGlucoseValue, glucoseStore = dataManager.glucoseStore {
+                if let glucoseStore = dataManager.glucoseStore, glucose = glucoseStore.latestGlucose {
 
                     glucoseStore.preferredUnit { (unit, error) in
                         guard let unit = unit, glucoseString = self.numberFormatter.stringFromNumber(glucose.quantity.doubleValueForUnit(unit)) else {
