@@ -532,7 +532,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 self.pumpState = nil
             }
 
-            nightscoutUploader?.pumpID = pumpID
+            nightscoutUploader?.reset()
             doseStore.pumpID = pumpID
 
             NSUserDefaults.standardUserDefaults().pumpID = pumpID
@@ -790,7 +790,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             siteURL = settings["NightscoutSiteURL"],
             APISecret = settings["NightscoutAPISecret"]
         {
-            nightscoutUploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret, pumpID: pumpID)
+            nightscoutUploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret)
             nightscoutUploader!.errorHandler = { (error: ErrorType, context: String) -> Void in
                 print("Error \(error), while \(context)")
             }
