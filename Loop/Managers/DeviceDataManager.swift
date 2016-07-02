@@ -13,12 +13,12 @@ import HealthKit
 import InsulinKit
 import LoopKit
 import MinimedKit
+import NightscoutUploadKit
 import RileyLinkKit
 import ShareClient
 import xDripG5
-import NightscoutUploadKit
 
-enum State<T> {
+private enum State<T> {
     case NeedsConfiguration
     case Ready(T)
 }

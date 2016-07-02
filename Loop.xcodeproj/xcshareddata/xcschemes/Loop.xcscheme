@@ -33,7 +33,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
+               BlueprintIdentifier = "43E2D90A1D20C581004DA55F"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
                ReferencedContainer = "container:Loop.xcodeproj">

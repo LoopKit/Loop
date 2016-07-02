@@ -20,4 +20,13 @@ class SwitchTableViewCell: UITableViewCell {
         `switch`?.removeTarget(nil, action: nil, forControlEvents: .ValueChanged)
     }
 
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        print("init")
+    }
+
+    deinit {
+        print("deinit")
+    }
+
 }
