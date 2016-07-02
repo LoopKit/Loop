@@ -73,8 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             {
                 AnalyticsManager.didRetryBolus()
 
-                DeviceDataManager.sharedManager.loopManager.enactBolus(units) { (success, error) in
-                    if !success {
+                DeviceDataManager.sharedManager.enactBolus(units) { (error) in
+                    if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)
                     }
 
