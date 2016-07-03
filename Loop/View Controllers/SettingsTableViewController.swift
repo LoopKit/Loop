@@ -61,10 +61,6 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         dataManager.rileyLinkManager.deviceScanningEnabled = false
     }
 
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
-    }
-
     deinit {
         dataManagerObserver = nil
     }
@@ -83,10 +79,11 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     private enum Section: Int {
         case Loop = 0
-        case Configuration
         case Devices
+        case Configuration
+        case Services
 
-        static let count = 3
+        static let count = 4
     }
 
     private enum LoopRow: Int {
@@ -108,6 +105,12 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case MaxBolus
 
         static let count = 9
+    }
+
+    private enum ServiceRow: Int {
+        case Share = 0
+
+        static let count = 1
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
@@ -134,6 +137,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             return ConfigurationRow.count
         case .Devices:
             return dataManager.rileyLinkManager.devices.count
+        case .Services:
+            return ServiceRow.count
         }
     }
 
@@ -252,6 +257,18 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), forControlEvents: .ValueChanged)
 
             cell = deviceCell
+        case .Services:
+            switch ServiceRow(rawValue: indexPath.row)! {
+            case .Share:
+                let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
+
+                let shareService = dataManager.remoteDataManager.shareService
+
+                configCell.textLabel?.text = shareService.title
+                configCell.detailTextLabel?.text = shareService.username ?? TapToSetString
+
+                return configCell
+            }
         }
         return cell
     }
@@ -264,6 +281,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
             return nil
+        case .Services:
+            return NSLocalizedString("Services", comment: "The title of the services section in settings")
         }
     }
 
@@ -412,6 +431,16 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             showViewController(vc, sender: indexPath)
         case .Loop:
             break
+        case .Services:
+            let service = dataManager.remoteDataManager.shareService
+            let vc = AuthenticationViewController(authentication: service)
+            vc.authenticationObserver = { [unowned self] (service: ShareService) in
+                self.dataManager.remoteDataManager.shareService = service
+
+                self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+            }
+
+            showViewController(vc, sender: indexPath)
         }
     }
 
@@ -419,7 +448,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         switch Section(rawValue: section)! {
         case .Devices:
             return devicesSectionTitleView
-        case .Loop, .Configuration:
+        case .Loop, .Configuration, .Services:
             return nil
         }
     }
