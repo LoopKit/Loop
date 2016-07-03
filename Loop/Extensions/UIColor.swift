@@ -12,25 +12,27 @@ import UIKit
 extension UIColor {
     @nonobjc static var tintColor: UIColor? = nil
 
-    @nonobjc static let secondaryLabelColor: UIColor = UIColor(red: 142 / 255, green: 142 / 255, blue: 147 / 255, alpha: 1)
+    @nonobjc static let secondaryLabelColor = UIColor(red: 142 / 255, green: 142 / 255, blue: 147 / 255, alpha: 1)
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
-    @nonobjc static let glucoseTintColor: UIColor = UIColor.HIGLightBlueColor()
+    @nonobjc static let glucoseTintColor = UIColor.HIGLightBlueColor()
 
-    @nonobjc static let IOBTintColor: UIColor = UIColor.HIGOrangeColor()
+    @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
 
-    @nonobjc static let COBTintColor: UIColor = UIColor.HIGYellowColor()
+    @nonobjc static let COBTintColor = UIColor.HIGYellowColor()
 
-    @nonobjc static let doseTintColor: UIColor = UIColor.HIGGreenColor()
+    @nonobjc static let doseTintColor = UIColor.HIGGreenColor()
 
-    @nonobjc static let freshColor: UIColor = UIColor.HIGGreenColor()
+    @nonobjc static let freshColor = UIColor.HIGGreenColor()
 
-    @nonobjc static let agingColor: UIColor = UIColor.HIGYellowColor()
+    @nonobjc static let agingColor = UIColor.HIGYellowColor()
 
-    @nonobjc static let staleColor: UIColor = UIColor.HIGRedColor()
+    @nonobjc static let staleColor = UIColor.HIGRedColor()
 
-    @nonobjc static let unknownColor: UIColor = UIColor.HIGGrayColor().colorWithAlphaComponent(0.5)
+    @nonobjc static let unknownColor = UIColor.HIGGrayColor().colorWithAlphaComponent(0.5)
+
+    @nonobjc static let deleteColor = UIColor.HIGRedColor()
 
     // MARK: - HIG colors
     // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/ColorImagesText.html

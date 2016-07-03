@@ -10,9 +10,5 @@
 	<string>databases/YOUR_DB_NAME/collections</string>
 	<key>AmplitudeAPIKey</key>
 	<string></string>
-	<key>ShareAccountName</key>
-	<string></string>
-	<key>ShareAccountPassword</key>
-	<string></string>
 </dict>
 </plist>
