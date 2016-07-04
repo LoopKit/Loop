@@ -283,7 +283,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 let amplitudeService = AnalyticsManager.sharedManager.amplitudeService
 
                 configCell.textLabel?.text = amplitudeService.title
-                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? "✔︎" : TapToSetString
+                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? NSLocalizedString("Enabled", comment: "The detail text describing an enabled setting") : TapToSetString
             }
 
             return configCell
