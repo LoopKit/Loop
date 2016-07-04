@@ -20,23 +20,28 @@ struct ShareService: ServiceAuthentication {
         credentials = [
             ServiceCredential(
                 title: NSLocalizedString("Username", comment: "The title of the Dexcom share username credential"),
+                placeholder: nil,
                 isSecret: false,
                 keyboardType: .ASCIICapable,
                 value: username
             ),
             ServiceCredential(
                 title: NSLocalizedString("Password", comment: "The title of the Dexcom share password credential"),
+                placeholder: nil,
                 isSecret: true,
                 keyboardType: .ASCIICapable,
                 value: password
             )
         ]
 
-        isAuthorized = username != nil && password != nil
+        if let username = username, password = password {
+            isAuthorized = true
+            client = ShareClient(username: username, password: password)
+        }
     }
 
     // The share client, if credentials are present
-    var client: ShareClient?
+    private(set) var client: ShareClient?
 
     var username: String? {
         return credentials[0].value
@@ -46,10 +51,10 @@ struct ShareService: ServiceAuthentication {
         return credentials[1].value
     }
 
-    private(set) var isAuthorized: Bool
+    private(set) var isAuthorized: Bool = false
 
     mutating func verify(completion: (success: Bool, error: ErrorType?) -> Void) {
-        guard let username = username, let password = password else {
+        guard let username = username, password = password else {
             completion(success: false, error: nil)
             return
         }
@@ -67,5 +72,6 @@ struct ShareService: ServiceAuthentication {
         credentials[0].value = nil
         credentials[1].value = nil
         isAuthorized = false
+        client = nil
     }
 }

@@ -14,6 +14,9 @@ struct ServiceCredential {
     // The localized title of the credential (e.g. "Username")
     let title: String
 
+    // The localized placeholder text to assist text input
+    let placeholder: String?
+
     // Whether the credential is considered secret. Correponds to the `secureTextEntry` trait.
     let isSecret: Bool
 

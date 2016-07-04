@@ -14,7 +14,7 @@ import Security
  
  Influenced by https://github.com/marketplacer/keychain-swift
  */
-class KeychainManager {
+struct KeychainManager {
     typealias Query = [String: NSObject]
 
     var accessibility: CFString = kSecAttrAccessibleAfterFirstUnlock

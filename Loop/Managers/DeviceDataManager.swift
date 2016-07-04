@@ -39,7 +39,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     let rileyLinkManager: RileyLinkDeviceManager
 
     /// Manages remote data
-    let remoteDataManager = RemoteDataManager()
+    lazy var remoteDataManager = RemoteDataManager()
 
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
