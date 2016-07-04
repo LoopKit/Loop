@@ -90,9 +90,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     }
 
     @objc private func receivedRileyLinkTimerTickNotification(note: NSNotification) {
-        assertCurrentPumpData()
-
-        backfillGlucoseFromShareIfNeeded()
+        backfillGlucoseFromShareIfNeeded() {
+            self.assertCurrentPumpData()
+        }
     }
 
     func connectToRileyLink(device: RileyLinkDevice) {
@@ -414,8 +414,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     func transmitter(transmitter: Transmitter, didError error: ErrorType) {
         logger.addMessage([
-            "error": "\(error)",
-            "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
+                "error": "\(error)",
+                "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
             ], toCollection: "g5"
         )
 
@@ -466,34 +466,47 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     var latestGlucoseMessage: GlucoseRxMessage?
 
     /**
-     Attempts to backfill glucose data from the share servers if the G5 connection hasn't been established.
+     Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
+     
+     - parameter completion: An optional closure called after the command is complete.
      */
-    private func backfillGlucoseFromShareIfNeeded() {
-        if latestGlucoseMessage == nil,
-            let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore
-        {
-            // Load glucose from Share if our xDripG5 connection hasn't started
-            shareClient.fetchLast(1) { (error, glucose) in
+    private func backfillGlucoseFromShareIfNeeded(completion completion: (() -> Void)? = nil) {
+        // We should have no G5 data, and a configured ShareClient and GlucoseStore.
+        guard latestGlucoseMessage == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
+            completion?()
+            return
+        }
+
+        // If our last glucose was less than 4 minutes ago, don't fetch.
+        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow <= -NSTimeInterval(minutes: 4) {
+            completion?()
+            return
+        }
+
+        shareClient.fetchLast(1) { (error, glucose) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "ShareClient")
+            }
+
+            guard let glucose = glucose?.first else {
+                completion?()
+                return
+            }
+
+            // Ignore glucose values that are less than a minute newer than our previous value
+            if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceDate(glucose.startDate) > -NSTimeInterval(minutes: 1)  {
+                completion?()
+                return
+            }
+
+            glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
                 if let error = error {
-                    self.logger.addError(error, fromSource: "ShareClient")
+                    self.logger.addError(error, fromSource: "GlucoseStore")
                 }
 
-                guard let glucose = glucose?.first else {
-                    return
-                }
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
 
-                // Ignore glucose values that are less than a minute newer than our previous value
-                if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceDate(glucose.startDate) > -NSTimeInterval(minutes: 1)  {
-                    return
-                }
-
-                glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
-                    if let error = error {
-                        self.logger.addError(error, fromSource: "GlucoseStore")
-                    }
-
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-                }
+                completion?()
             }
         }
     }
