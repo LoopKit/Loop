@@ -20,7 +20,7 @@ struct MLabService: ServiceAuthentication {
     init(databaseName: String?, APIKey: String?) {
         credentials = [
             ServiceCredential(
-                title: NSLocalizedString("Database Name", comment: "The title of the mLab database name credential"),
+                title: NSLocalizedString("Database", comment: "The title of the mLab database name credential"),
                 placeholder: "nightscoutdb",
                 isSecret: false,
                 keyboardType: .ASCIICapable,
@@ -56,8 +56,14 @@ struct MLabService: ServiceAuthentication {
             return
         }
 
-        NSURLSession.sharedSession().dataTaskWithURL(APIURL) { (_, _, error) in
+        NSURLSession.sharedSession().dataTaskWithURL(APIURL) { (_, response, error) in
+            var error: ErrorType? = error
+            if error == nil, let response = response as? NSHTTPURLResponse where response.statusCode >= 300 {
+                error = LoopError.ConnectionError
+            }
+
             self.isAuthorized = error == nil
+
             completion(success: self.isAuthorized, error: error)
         }.resume()
     }

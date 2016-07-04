@@ -110,8 +110,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     private enum ServiceRow: Int {
         case Share = 0
         case Nightscout
+        case MLab
+        case Amplitude
 
-        static let count = 2
+        static let count = 4
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
@@ -272,6 +274,16 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? TapToSetString
+            case .MLab:
+                let mLabService = dataManager.logger.mLabService
+
+                configCell.textLabel?.text = mLabService.title
+                configCell.detailTextLabel?.text = mLabService.databaseName ?? TapToSetString
+            case .Amplitude:
+                let amplitudeService = AnalyticsManager.sharedManager.amplitudeService
+
+                configCell.textLabel?.text = amplitudeService.title
+                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? "✔︎" : TapToSetString
             }
 
             return configCell
@@ -454,6 +466,26 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [unowned self] (service) in
                     self.dataManager.remoteDataManager.nightscoutService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .MLab:
+                let service = dataManager.logger.mLabService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.logger.mLabService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .Amplitude:
+                let service = AnalyticsManager.sharedManager.amplitudeService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    AnalyticsManager.sharedManager.amplitudeService = service
 
                     self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
                 }
