@@ -128,6 +128,7 @@ class AuthenticationViewController<T: ServiceAuthentication>: UITableViewControl
             cell.textField.secureTextEntry = credential.isSecret
             cell.textField.returnKeyType = (indexPath.row < authentication.credentials.count - 1) ? .Next : .Done
             cell.textField.text = credential.value
+            cell.textField.placeholder = credential.placeholder ?? NSLocalizedString("Required", comment: "The default placeholder string for a credential")
 
             cell.textField.delegate = self
 

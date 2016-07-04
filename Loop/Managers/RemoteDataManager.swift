@@ -13,6 +13,16 @@ import ShareClient
 
 class RemoteDataManager {
 
+    var nightscoutUploader: NightscoutUploader? {
+        return nightscoutService.uploader
+    }
+
+    var nightscoutService: NightscoutService {
+        didSet {
+            try! keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
+        }
+    }
+
     var shareClient: ShareClient? {
         return shareService.client
     }
@@ -23,9 +33,7 @@ class RemoteDataManager {
         }
     }
 
-    var nightscoutUploader: NightscoutUploader?
-
-    private var keychain = KeychainManager()
+    private let keychain = KeychainManager()
 
     init() {
         // Migrate RemoteSettings.plist to the Keychain
@@ -44,17 +52,15 @@ class RemoteDataManager {
         }
 
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
-            nightscoutUploader = NightscoutUploader(siteURL: siteURL.absoluteString, APISecret: APISecret)
+            nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
         } else if let siteURLString = settings?["NightscoutSiteURL"],
             APISecret = settings?["NightscoutAPISecret"],
             siteURL = NSURL(string: siteURLString)
         {
             try! keychain.setNightscoutURL(siteURL, secret: APISecret)
-            nightscoutUploader = NightscoutUploader(siteURL: siteURLString, APISecret: APISecret)
-        }
-
-        nightscoutUploader?.errorHandler = { (error: ErrorType, context: String) -> Void in
-            print("Error \(error), while \(context)")
+            nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
+        } else {
+            nightscoutService = NightscoutService(siteURL: nil, APISecret: nil)
         }
     }
 

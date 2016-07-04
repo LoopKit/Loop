@@ -52,7 +52,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             })
         }
 
-        AnalyticsManager.didDisplaySettingsScreen()
+        AnalyticsManager.sharedManager.didDisplaySettingsScreen()
     }
 
     override func viewDidDisappear(animated: Bool) {
@@ -109,8 +109,9 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     private enum ServiceRow: Int {
         case Share = 0
+        case Nightscout
 
-        static let count = 1
+        static let count = 2
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
@@ -258,17 +259,22 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
             cell = deviceCell
         case .Services:
+            let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
+
             switch ServiceRow(rawValue: indexPath.row)! {
             case .Share:
-                let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
-
                 let shareService = dataManager.remoteDataManager.shareService
 
                 configCell.textLabel?.text = shareService.title
                 configCell.detailTextLabel?.text = shareService.username ?? TapToSetString
+            case .Nightscout:
+                let nightscoutService = dataManager.remoteDataManager.nightscoutService
 
-                return configCell
+                configCell.textLabel?.text = nightscoutService.title
+                configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? TapToSetString
             }
+
+            return configCell
         }
         return cell
     }
@@ -432,15 +438,28 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case .Loop:
             break
         case .Services:
-            let service = dataManager.remoteDataManager.shareService
-            let vc = AuthenticationViewController(authentication: service)
-            vc.authenticationObserver = { [unowned self] (service: ShareService) in
-                self.dataManager.remoteDataManager.shareService = service
+            switch ServiceRow(rawValue: indexPath.row)! {
+            case .Share:
+                let service = dataManager.remoteDataManager.shareService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.remoteDataManager.shareService = service
 
-                self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .Nightscout:
+                let service = dataManager.remoteDataManager.nightscoutService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.remoteDataManager.nightscoutService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
             }
-
-            showViewController(vc, sender: indexPath)
         }
     }
 

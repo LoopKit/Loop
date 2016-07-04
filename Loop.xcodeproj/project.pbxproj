@@ -66,6 +66,8 @@
 		437CEEC81CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */; };
 		437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
+		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
+		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438DADC71CDE8F8B007697A5 /* LoopStateView.swift */; };
 		439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
@@ -233,7 +235,7 @@
 		4328E02C1CFBE2E800E199AA /* DiagnosticLogger+Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLogger+Error.swift"; sourceTree = "<group>"; };
 		4328E02E1CFBF81800E199AA /* WKInterfaceImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WKInterfaceImage.swift; sourceTree = "<group>"; };
 		4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+LoopKit.swift"; sourceTree = "<group>"; };
-		4328E0341CFC0AE100E199AA /* WatchDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchDataManager.swift; sourceTree = "<group>"; };
+		4328E0341CFC0AE100E199AA /* WatchDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WatchDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDataManager.swift; sourceTree = "<group>"; };
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
@@ -259,7 +261,7 @@
 		436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControlTableViewCell.swift; sourceTree = "<group>"; };
 		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		43776F981B8022E90074EA36 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -273,12 +275,14 @@
 		437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirVolumeHUDView.swift; sourceTree = "<group>"; };
 		437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryLevelHUDView.swift; sourceTree = "<group>"; };
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
+		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
-		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
+		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AnalyticsManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		439897381CD2F82C00223065 /* AmplitudeFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AmplitudeFramework.framework; path = Carthage/Build/iOS/AmplitudeFramework.framework; sourceTree = "<group>"; };
 		4398973A1CD2FC2000223065 /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
-		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
+		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = LoopDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchTableViewCell.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
@@ -297,8 +301,8 @@
 		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MinimedKit.framework; path = Carthage/Build/iOS/MinimedKit.framework; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* NSDate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDate.swift; sourceTree = "<group>"; };
 		43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "WatchApp Extension.entitlements"; sourceTree = "<group>"; };
-		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusViewController.swift; sourceTree = "<group>"; };
-		43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDataManager.swift; sourceTree = "<group>"; };
+		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BolusViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DeviceDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDataManager.swift; sourceTree = "<group>"; };
 		43DBF0561C93F6EB00B3C386 /* ReservoirTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirTableViewController.swift; sourceTree = "<group>"; };
 		43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryTableViewController.swift; sourceTree = "<group>"; };
@@ -325,7 +329,7 @@
 		43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_low_end_in_range.json; sourceTree = "<group>"; };
 		43E2D90B1D20C581004DA55F /* LoopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LoopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		43E2D90F1D20C581004DA55F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusTableViewController.swift; sourceTree = "<group>"; };
+		43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = StatusTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		43E344A51B9E1B3300C85C07 /* NSBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSBundle.swift; sourceTree = "<group>"; };
 		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
@@ -340,7 +344,7 @@
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTableViewController.swift; sourceTree = "<group>"; };
+		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingsTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
 		43F78D481C914197002152D1 /* CarbKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CarbKit.framework; path = Carthage/Build/iOS/CarbKit.framework; sourceTree = "<group>"; };
 		43F78D491C914197002152D1 /* GlucoseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlucoseKit.framework; path = Carthage/Build/iOS/GlucoseKit.framework; sourceTree = "<group>"; };
@@ -433,10 +437,12 @@
 			isa = PBXGroup;
 			children = (
 				43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */,
+				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
 				4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */,
 				434F24CA1CFCB7AB0004498F /* GlucoseRxMessage.swift */,
 				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
+				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
 				437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */,
 				434F54601D28859B002A9274 /* ServiceCredential.swift */,
 				43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */,
@@ -974,6 +980,7 @@
 				437CEEC81CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
+				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */,
 				437CCADC1D284B830075D2C3 /* ButtonTableViewCell.swift in Sources */,
 				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
@@ -981,6 +988,7 @@
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				437CCAE01D285C7B0075D2C3 /* ServiceAuthentication.swift in Sources */,
+				438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */,
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				437CEEBC1CD6DE6A003C8C80 /* HUDView.swift in Sources */,
