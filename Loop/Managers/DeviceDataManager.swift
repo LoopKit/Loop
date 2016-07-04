@@ -109,6 +109,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         rileyLinkManager.disconnectDevice(device)
 
         AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
+
+        if connectedPeripheralIDs.count == 0 {
+            NotificationManager.clearLoopNotRunningNotifications()
+        }
     }
 
     // MARK: Pump data
