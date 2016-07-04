@@ -128,7 +128,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 dispatch_group_enter(reloadGroup)
                 glucoseStore.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                        self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                         self.needsRefresh = true
                         // TODO: Display error in the cell
                     } else {
@@ -156,7 +156,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             dispatch_group_enter(reloadGroup)
             dataManager.doseStore.getInsulinOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
                 if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 }
@@ -169,7 +169,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             dispatch_group_enter(reloadGroup)
             dataManager.doseStore.getRecentNormalizedReservoirDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
                 if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 }
@@ -183,7 +183,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 dispatch_group_enter(reloadGroup)
                 carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "CarbStore")
+                        self.dataManager.logger.addError(error, fromSource: "CarbStore")
                         self.needsRefresh = true
                         // TODO: Display error in the cell
                     }
@@ -575,7 +575,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                             self.settingTempBasal = false
 
                             if let error = error {
-                                self.dataManager.logger?.addError(error, fromSource: "TempBasal")
+                                self.dataManager.logger.addError(error, fromSource: "TempBasal")
                                 self.presentAlertControllerWithError(error)
                             } else if success {
                                 self.needsRefresh = true
@@ -643,7 +643,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             } else {
                 self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                        self.dataManager.logger.addError(error, fromSource: "Bolus")
                     } else if let bolus = units {
                         vc.recommendedBolus = bolus
                     }
@@ -664,7 +664,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         if error is CarbStore.Error {
                             self.presentAlertControllerWithError(error)
                         } else {
-                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                            self.dataManager.logger.addError(error, fromSource: "Bolus")
                             self.needsRefresh = true
                             self.reloadData()
                         }

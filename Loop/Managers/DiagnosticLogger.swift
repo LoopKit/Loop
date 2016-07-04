@@ -10,48 +10,40 @@ import Foundation
 
 
 class DiagnosticLogger {
-    let APIKey: String
-    let APIHost: String
-    let APIPath: String
-
     private lazy var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
-    init?() {
-        guard let settings = NSBundle.mainBundle().remoteSettings,
-            APIKey = settings["mLabAPIKey"],
-            APIHost = settings["mLabAPIHost"],
-            APIPath = settings["mLabAPIPath"] where !APIKey.isEmpty
-        else {
-            return nil
+    var mLabService: MLabService {
+        didSet {
+            try! KeychainManager().setMLabDatabaseName(mLabService.databaseName, APIKey: mLabService.APIKey)
         }
+    }
 
-        self.APIKey = APIKey
-        self.APIHost = APIHost
-        self.APIPath = APIPath
+    init() {
+        let keychain = KeychainManager()
+
+        // Migrate RemoteSettings.plist to the Keychain
+        if let (databaseName, APIKey) = keychain.getMLabCredentials() {
+            mLabService = MLabService(databaseName: databaseName, APIKey: APIKey)
+        } else if let settings = NSBundle.mainBundle().remoteSettings,
+            APIKey = settings["mLabAPIKey"],
+            APIPath = settings["mLabAPIPath"] where !APIKey.isEmpty
+        {
+            let databaseName = APIPath.componentsSeparatedByString("/")[1]
+            try! keychain.setMLabDatabaseName(databaseName, APIKey: APIKey)
+            mLabService = MLabService(databaseName: databaseName, APIKey: APIKey)
+        } else {
+            mLabService = MLabService(databaseName: nil, APIKey: nil)
+        }
     }
 
     func addMessage(message: [String: AnyObject], toCollection collection: String) {
         if !isSimulator,
             let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
-            let URL = NSURL(string: APIHost)?.URLByAppendingPathComponent(APIPath).URLByAppendingPathComponent(collection),
-            components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
+            let task = mLabService.uploadTaskWithData(messageData, inCollection: collection)
         {
-            components.query = "apiKey=\(APIKey)"
-
-            if let URL = components.URL {
-                let request = NSMutableURLRequest(URL: URL)
-
-                request.HTTPMethod = "POST"
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-                let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: messageData) { (_, _, error) -> Void in
-                    if let error = error {
-                        NSLog("%s error: %@", #function, error)
-                    }
-                }
-
-                task.resume()
-            }
+            task.resume()
+        } else {
+            NSLog("%@: %@", collection, message)
         }
     }
 }

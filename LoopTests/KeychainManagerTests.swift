@@ -53,5 +53,10 @@ class KeychainManagerTests: XCTestCase {
         try manager.setNightscoutURL(nil, secret: nil)
         XCTAssertNil(manager.getNightscoutCredentials())
 
+        try manager.setMLabDatabaseName("sugarmandb", APIKey: "rodriguez")
+        let mLabCredentials = manager.getMLabCredentials()!
+        XCTAssertEqual("sugarmandb", mLabCredentials.databaseName)
+        XCTAssertEqual("rodriguez", mLabCredentials.APIKey)
+
     }
 }

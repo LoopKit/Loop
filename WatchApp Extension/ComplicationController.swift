@@ -86,7 +86,7 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
     }
 
     func requestedUpdateBudgetExhausted() {
-        DiagnosticLogger()?.addError(#function, fromSource: "ClockKit")
+        // TODO: os_log_info in iOS 10
     }
 
     // MARK: - Update Scheduling
