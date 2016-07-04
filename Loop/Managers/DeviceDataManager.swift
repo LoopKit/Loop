@@ -33,12 +33,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     // MARK: - Utilities
 
-    lazy var logger = DiagnosticLogger()
+    let logger = DiagnosticLogger()
 
     /// Manages all the RileyLinks
     let rileyLinkManager: RileyLinkDeviceManager
 
-    /// Manages remote data
+    /// Manages remote data (TODO: the lazy initialization isn't thread-safe)
     lazy var remoteDataManager = RemoteDataManager()
 
     // Timestamp of last event we've retrieved from pump
@@ -81,7 +81,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 case is MySentryAlertMessageBody, is MySentryAlertClearedMessageBody:
                     break
                 case let body:
-                    logger?.addMessage(["messageType": Int(message.messageType.rawValue), "messageBody": body.txData.hexadecimalString], toCollection: "sentryOther")
+                    logger.addMessage(["messageType": Int(message.messageType.rawValue), "messageBody": body.txData.hexadecimalString], toCollection: "sentryOther")
                 }
             default:
                 break
@@ -185,19 +185,19 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                         components.timeZone = ops.pumpState.timeZone
 
                         guard let date = components.date else {
-                            self.logger?.addError("Could not interpret clock", fromSource: "RileyLink")
+                            self.logger.addError("Could not interpret clock", fromSource: "RileyLink")
                             completion(.Failure(LoopError.ConfigurationError))
                             return
                         }
 
                         completion(.Success((units: units, date: date)))
                     case .Failure(let error):
-                        self.logger?.addError("Failed to fetch clock: \(error)", fromSource: "RileyLink")
+                        self.logger.addError("Failed to fetch clock: \(error)", fromSource: "RileyLink")
                         completion(.Failure(error))
                     }
                 }
             case .Failure(let error):
-                self.logger?.addError("Failed to fetch reservoir: \(error)", fromSource: "RileyLink")
+                self.logger.addError("Failed to fetch reservoir: \(error)", fromSource: "RileyLink")
                 completion(.Failure(error))
             }
         }
@@ -213,7 +213,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     private func updateReservoirVolume(units: Double, atDate date: NSDate, withTimeLeft timeLeft: NSTimeInterval?) {
         doseStore.addReservoirValue(units, atDate: date) { (newValue, previousValue, error) -> Void in
             if let error = error {
-                self.logger?.addError(error, fromSource: "DoseStore")
+                self.logger.addError(error, fromSource: "DoseStore")
                 return
             }
 
@@ -287,7 +287,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 // TODO: Surface raw pump event data and add DoseEntry conformance
                 //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
                 //                    if let error = error {
-                //                        self.logger?.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+                //                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
                 //                    }
                 //                }
 
@@ -313,7 +313,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
 
             case .Failure(let error):
-                self.logger?.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
+                self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
                 self.troubleshootPumpCommsWithDevice(device)
             }
         }
@@ -344,7 +344,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         let setBolus = {
             ops.setNormalBolus(units) { (error) in
                 if let error = error {
-                    self.logger?.addError(error, fromSource: "Bolus")
+                    self.logger.addError(error, fromSource: "Bolus")
                     completion(error: LoopError.CommunicationError)
                 } else {
                     self.loopManager.recordBolus(units, atDate: NSDate())
@@ -363,7 +363,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 case .Success(let (unitVolume, date)):
                     self.doseStore.addReservoirValue(unitVolume, atDate: date) { (newValue, _, error) in
                         if let error = error {
-                            self.logger?.addError(error, fromSource: "Bolus")
+                            self.logger.addError(error, fromSource: "Bolus")
                             completion(error: LoopError.CommunicationError)
                         } else {
                             self.latestReservoirValue = newValue
@@ -393,9 +393,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             device.tunePumpWithResultHandler { (result) in
                 switch result {
                 case .Success(let scanResult):
-                    self.logger?.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                    self.logger.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
                 case .Failure(let error):
-                    self.logger?.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                    self.logger.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
                 }
             }
         }
@@ -409,7 +409,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     // MARK: TransmitterDelegate
 
     func transmitter(transmitter: Transmitter, didError error: ErrorType) {
-        logger?.addMessage([
+        logger.addMessage([
             "error": "\(error)",
             "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
             ], toCollection: "g5"
@@ -438,7 +438,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
             if let error = error {
-                self.logger?.addError(error, fromSource: "GlucoseStore")
+                self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -471,7 +471,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             // Load glucose from Share if our xDripG5 connection hasn't started
             shareClient.fetchLast(1) { (error, glucose) in
                 if let error = error {
-                    self.logger?.addError(error, fromSource: "ShareClient")
+                    self.logger.addError(error, fromSource: "ShareClient")
                 }
 
                 guard let glucose = glucose?.first else {
@@ -485,7 +485,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
                 glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
                     if let error = error {
-                        self.logger?.addError(error, fromSource: "GlucoseStore")
+                        self.logger.addError(error, fromSource: "GlucoseStore")
                     }
 
                     NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -704,7 +704,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     // MARK: CarbStoreDelegate
 
     func carbStore(_: CarbStore, didError error: CarbStore.Error) {
-        logger?.addError(error, fromSource: "CarbStore")
+        logger.addError(error, fromSource: "CarbStore")
     }
 
     // MARK: - GlucoseKit

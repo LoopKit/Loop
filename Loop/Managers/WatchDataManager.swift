@@ -79,7 +79,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                 do {
                     try session.updateApplicationContext(context.rawValue)
                 } catch let error {
-                    deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+                    deviceDataManager.logger.addError(error, fromSource: "WCSession")
                 }
             }
         }
@@ -128,7 +128,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
 
             deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
+                    self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
                 } else {
                     AnalyticsManager.sharedManager.didAddCarbsFromWatch(carbEntry.value)
                 }
@@ -175,7 +175,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         switch activationState {
         case .Activated:
             if let error = error {
-                deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+                deviceDataManager.logger.addError(error, fromSource: "WCSession")
             }
         case .Inactive, .NotActivated:
             break
@@ -184,7 +184,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
 
     func session(session: WCSession, didFinishUserInfoTransfer userInfoTransfer: WCSessionUserInfoTransfer, error: NSError?) {
         if let error = error {
-            deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+            deviceDataManager.logger.addError(error, fromSource: "WCSession")
         }
     }
 

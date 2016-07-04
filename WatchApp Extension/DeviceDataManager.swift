@@ -112,11 +112,10 @@ class DeviceDataManager: NSObject, WCSessionDelegate {
 
     // MARK: - WCSessionDelegate
 
-    @available(watchOSApplicationExtension 2.2, *)
     func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
-        if let error = error {
-            DiagnosticLogger()?.addError(String(error), fromSource: "WCSession")
-        }
+//        if let error = error {
+            // TODO: os_log_info in iOS 10
+//        }
     }
 
     func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
