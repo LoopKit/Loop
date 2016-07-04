@@ -66,7 +66,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.didDisplayStatusScreen()
+        AnalyticsManager.sharedManager.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(animated: Bool) {

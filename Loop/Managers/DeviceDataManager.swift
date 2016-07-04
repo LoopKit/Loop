@@ -100,7 +100,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         rileyLinkManager.connectDevice(device)
 
-        AnalyticsManager.didChangeRileyLinkConnectionState()
+        AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
     }
 
     func disconnectFromRileyLink(device: RileyLinkDevice) {
@@ -108,7 +108,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         rileyLinkManager.disconnectDevice(device)
 
-        AnalyticsManager.didChangeRileyLinkConnectionState()
+        AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
     }
 
     // MARK: Pump data
@@ -453,7 +453,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
 
                 if let transmitterStartTime = transmitterStartTime, drift = oldValue?.distanceTo(transmitterStartTime) where abs(drift) > 1 {
-                    AnalyticsManager.transmitterTimeDidDrift(drift)
+                    AnalyticsManager.sharedManager.transmitterTimeDidDrift(drift)
                 }
             }
         }
@@ -636,7 +636,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
             NSUserDefaults.standardUserDefaults().basalRateSchedule = basalRateSchedule
 
-            AnalyticsManager.didChangeBasalRateSchedule()
+            AnalyticsManager.sharedManager.didChangeBasalRateSchedule()
         }
     }
 
@@ -646,7 +646,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
             NSUserDefaults.standardUserDefaults().carbRatioSchedule = carbRatioSchedule
 
-            AnalyticsManager.didChangeCarbRatioSchedule()
+            AnalyticsManager.sharedManager.didChangeCarbRatioSchedule()
         }
     }
 
@@ -657,7 +657,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             NSUserDefaults.standardUserDefaults().insulinActionDuration = insulinActionDuration
 
             if oldValue != insulinActionDuration {
-                AnalyticsManager.didChangeInsulinActionDuration()
+                AnalyticsManager.sharedManager.didChangeInsulinActionDuration()
             }
         }
     }
@@ -669,7 +669,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
             NSUserDefaults.standardUserDefaults().insulinSensitivitySchedule = insulinSensitivitySchedule
 
-            AnalyticsManager.didChangeInsulinSensitivitySchedule()
+            AnalyticsManager.sharedManager.didChangeInsulinSensitivitySchedule()
         }
     }
 
@@ -677,7 +677,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
 
-            AnalyticsManager.didChangeGlucoseTargetRangeSchedule()
+            AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
     }
 
@@ -685,7 +685,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour = maximumBasalRatePerHour
 
-            AnalyticsManager.didChangeMaximumBasalRate()
+            AnalyticsManager.sharedManager.didChangeMaximumBasalRate()
         }
     }
 
@@ -693,7 +693,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().maximumBolus = maximumBolus
 
-            AnalyticsManager.didChangeMaximumBolus()
+            AnalyticsManager.sharedManager.didChangeMaximumBolus()
         }
     }
 

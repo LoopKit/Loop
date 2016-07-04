@@ -224,7 +224,7 @@ class LoopDataManager {
     private var lastLoopError: ErrorType? {
         didSet {
             if lastLoopError != nil {
-                AnalyticsManager.loopDidError()
+                AnalyticsManager.sharedManager.loopDidError()
             }
         }
     }
@@ -232,7 +232,7 @@ class LoopDataManager {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
 
-            AnalyticsManager.loopDidSucceed()
+            AnalyticsManager.sharedManager.loopDidSucceed()
         }
     }
 

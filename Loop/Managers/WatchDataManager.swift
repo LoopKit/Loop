@@ -130,7 +130,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                 if let error = error {
                     self.deviceDataManager.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
                 } else {
-                    AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
+                    AnalyticsManager.sharedManager.didAddCarbsFromWatch(carbEntry.value)
                 }
 
                 completionHandler?(units: units)
@@ -154,7 +154,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
                     } else {
-                        AnalyticsManager.didSetBolusFromWatch(bolus.value)
+                        AnalyticsManager.sharedManager.didSetBolusFromWatch(bolus.value)
                     }
 
                     replyHandler([:])

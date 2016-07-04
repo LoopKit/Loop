@@ -22,7 +22,7 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.didDisplayBolusScreen()
+        AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
     var recommendedBolus: Double = 0 {
