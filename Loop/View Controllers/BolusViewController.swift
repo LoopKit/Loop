@@ -69,10 +69,6 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
         }
     }
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        super.prepareForSegue(segue, sender: sender)
-    }
-
     private lazy var decimalFormatter: NSNumberFormatter = {
         let numberFormatter = NSNumberFormatter()
 
