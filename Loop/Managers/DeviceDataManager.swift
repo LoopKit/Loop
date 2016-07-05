@@ -483,23 +483,21 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             return
         }
 
-        shareClient.fetchLast(1) { (error, glucose) in
-            if let error = error {
-                self.logger.addError(error, fromSource: "ShareClient")
-            }
+        shareClient.fetchLast(6) { (error, glucose) in
+            guard let glucose = glucose else {
+                if let error = error {
+                    self.logger.addError(error, fromSource: "ShareClient")
+                }
 
-            guard let glucose = glucose?.first else {
-                completion?()
                 return
             }
 
-            // Ignore glucose values that are less than a minute newer than our previous value
-            if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceDate(glucose.startDate) > -NSTimeInterval(minutes: 1)  {
-                completion?()
-                return
+            // Ignore glucose values that are up to a minute newer than our previous value, to account for possible time shifting in Share data
+            let newGlucose = glucose.filterDateRange(glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1)), nil).map {
+                return (quantity: $0.quantity, date: $0.startDate, displayOnly: false)
             }
 
-            glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: false, device: nil) { (_, value, error) -> Void in
+            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
                 if let error = error {
                     self.logger.addError(error, fromSource: "GlucoseStore")
                 }
