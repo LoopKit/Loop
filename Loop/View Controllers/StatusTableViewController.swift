@@ -624,11 +624,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         super.prepareForSegue(segue, sender: sender)
 
-        guard let navVC = segue.destinationViewController as? UINavigationController else {
-            return
+        var targetViewController = segue.destinationViewController
+
+        if let navVC = targetViewController as? UINavigationController, topViewController = navVC.topViewController {
+            targetViewController = topViewController
         }
 
-        switch navVC.topViewController {
+        switch targetViewController {
         case let vc as CarbEntryTableViewController:
             vc.carbStore = dataManager.carbStore
             vc.hidesBottomBarWhenPushed = true
