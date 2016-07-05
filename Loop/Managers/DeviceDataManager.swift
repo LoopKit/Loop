@@ -478,7 +478,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
 
         // If our last glucose was less than 4 minutes ago, don't fetch.
-        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow <= -NSTimeInterval(minutes: 4) {
+        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4) {
             completion?()
             return
         }
