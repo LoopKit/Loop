@@ -79,7 +79,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                 do {
                     try session.updateApplicationContext(context.rawValue)
                 } catch let error {
-                    deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+                    deviceDataManager.logger.addError(error, fromSource: "WCSession")
                 }
             }
         }
@@ -92,7 +92,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
             return
         }
 
-        let glucose = deviceDataManager.latestGlucoseValue
+        let glucose = deviceDataManager.glucoseStore?.latestGlucose
         let reservoir = deviceDataManager.latestReservoirValue
 
         deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) in
@@ -128,9 +128,9 @@ class WatchDataManager: NSObject, WCSessionDelegate {
 
             deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
+                    self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.Error ? "CarbStore" : "Bolus")
                 } else {
-                    AnalyticsManager.didAddCarbsFromWatch(carbEntry.value)
+                    AnalyticsManager.sharedManager.didAddCarbsFromWatch(carbEntry.value)
                 }
 
                 completionHandler?(units: units)
@@ -150,11 +150,11 @@ class WatchDataManager: NSObject, WCSessionDelegate {
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message) {
-                self.deviceDataManager.loopManager.enactBolus(bolus.value) { (success, error) in
-                    if !success {
+                self.deviceDataManager.enactBolus(bolus.value) { (error) in
+                    if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
                     } else {
-                        AnalyticsManager.didSetBolusFromWatch(bolus.value)
+                        AnalyticsManager.sharedManager.didSetBolusFromWatch(bolus.value)
                     }
 
                     replyHandler([:])
@@ -175,7 +175,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         switch activationState {
         case .Activated:
             if let error = error {
-                deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+                deviceDataManager.logger.addError(error, fromSource: "WCSession")
             }
         case .Inactive, .NotActivated:
             break
@@ -184,7 +184,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
 
     func session(session: WCSession, didFinishUserInfoTransfer userInfoTransfer: WCSessionUserInfoTransfer, error: NSError?) {
         if let error = error {
-            deviceDataManager.logger?.addError(error, fromSource: "WCSession")
+            deviceDataManager.logger.addError(error, fromSource: "WCSession")
         }
     }
 

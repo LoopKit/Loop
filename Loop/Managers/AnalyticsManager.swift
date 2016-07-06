@@ -12,111 +12,118 @@ import AmplitudeFramework
 
 class AnalyticsManager {
 
-    // MARK: - Helpers
-
-    private static var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
-
-    private static var amplitudeAPIKey: String? {
-        if let settings = NSBundle.mainBundle().remoteSettings, key = settings["AmplitudeAPIKey"] where !key.isEmpty {
-            return key
+    var amplitudeService: AmplitudeService {
+        didSet {
+            try! KeychainManager().setAmplitudeAPIKey(amplitudeService.APIKey)
         }
-
-        return nil
     }
 
-    private static func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
-        guard amplitudeAPIKey != nil else {
-            return
-        }
+    init() {
+        // Migrate RemoteSettings.plist to the Keychain
+        let keychain = KeychainManager()
 
+        if let APIKey = keychain.getAmplitudeAPIKey() {
+            amplitudeService = AmplitudeService(APIKey: APIKey)
+        } else if let settings = NSBundle.mainBundle().remoteSettings, key = settings["AmplitudeAPIKey"] where !key.isEmpty {
+            try! keychain.setAmplitudeAPIKey(key)
+            amplitudeService = AmplitudeService(APIKey: key)
+        } else {
+            amplitudeService = AmplitudeService(APIKey: nil)
+        }
+    }
+
+    static let sharedManager = AnalyticsManager()
+
+    // MARK: - Helpers
+
+    private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
+
+    private func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
         if isSimulator {
             NSLog("\(name) \(properties ?? [:])")
         } else {
-            Amplitude.instance().logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
+            amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
         }
 
     }
 
     // MARK: - UIApplicationDelegate
 
-    static func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) {
-
-        if let APIKey = amplitudeAPIKey {
-            Amplitude.instance().initializeApiKey(APIKey)
-        }
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) {
+        logEvent("App Launch")
     }
 
     // MARK: - Screens
 
-    static func didDisplayBolusScreen() {
+    func didDisplayBolusScreen() {
         logEvent("Bolus Screen")
     }
 
-    static func didDisplaySettingsScreen() {
+    func didDisplaySettingsScreen() {
         logEvent("Settings Screen")
     }
 
-    static func didDisplayStatusScreen() {
+    func didDisplayStatusScreen() {
         logEvent("Status Screen")
     }
 
     // MARK: - Config Events
 
-    static func didChangeRileyLinkConnectionState() {
+    func didChangeRileyLinkConnectionState() {
         logEvent("RileyLink Connection")
     }
 
-    static func transmitterTimeDidDrift(drift: NSTimeInterval) {
+    func transmitterTimeDidDrift(drift: NSTimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
     }
 
-    static func didChangeBasalRateSchedule() {
+    func didChangeBasalRateSchedule() {
         logEvent("Basal rate change")
     }
 
-    static func didChangeCarbRatioSchedule() {
+    func didChangeCarbRatioSchedule() {
         logEvent("Carb ratio change")
     }
 
-    static func didChangeInsulinActionDuration() {
+    func didChangeInsulinActionDuration() {
         logEvent("Insulin action duration change")
     }
 
-    static func didChangeInsulinSensitivitySchedule() {
+    func didChangeInsulinSensitivitySchedule() {
         logEvent("Insulin sensitivity change")
     }
 
-    static func didChangeGlucoseTargetRangeSchedule() {
+    func didChangeGlucoseTargetRangeSchedule() {
         logEvent("Glucose target range change")
     }
 
-    static func didChangeMaximumBasalRate() {
+    func didChangeMaximumBasalRate() {
         logEvent("Maximum basal rate change")
     }
 
-    static func didChangeMaximumBolus() {
+    func didChangeMaximumBolus() {
         logEvent("Maximum bolus change")
     }
 
     // MARK: - Loop Events
 
-    static func didAddCarbsFromWatch(carbs: Double) {
+    func didAddCarbsFromWatch(carbs: Double) {
         logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
     }
 
-    static func didRetryBolus() {
+    func didRetryBolus() {
         logEvent("Bolus Retry", outOfSession: true)
     }
 
-    static func didSetBolusFromWatch(units: Double) {
+    func didSetBolusFromWatch(units: Double) {
         logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
     }
 
-    static func loopDidSucceed() {
+    func loopDidSucceed() {
         logEvent("Loop success", outOfSession: true)
     }
 
-    static func loopDidError() {
+    func loopDidError() {
         logEvent("Loop error", outOfSession: true)
     }
 }
