@@ -22,7 +22,11 @@ extension NSUserDefaults {
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
+<<<<<<< Updated upstream
+        case PreferredInsulinDataSource = "com.jlucasvt.LoopAPS.PreferredInsulinDataSource"
+=======
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
+>>>>>>> Stashed changes
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
