@@ -115,10 +115,6 @@ SWIFT_CLASS("_TtC12RileyLinkKit28RileyLinkDeviceTableViewCell")
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 @end
 
-
-@interface RileyLinkDeviceTableViewCell (SWIFT_EXTENSION(RileyLinkKit))
-@end
-
 @class UITableView;
 @class NSIndexPath;
 @class NSBundle;
@@ -136,6 +132,10 @@ SWIFT_CLASS("_TtC12RileyLinkKit34RileyLinkDeviceTableViewController")
 - (nonnull instancetype)initWithStyle:(UITableViewStyle)style OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithNibName:(NSString * _Nullable)nibNameOrNil bundle:(NSBundle * _Nullable)nibBundleOrNil OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+@interface UITableViewCell (SWIFT_EXTENSION(RileyLinkKit))
 @end
 
 #pragma clang diagnostic pop

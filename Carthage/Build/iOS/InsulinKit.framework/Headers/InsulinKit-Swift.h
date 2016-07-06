@@ -92,16 +92,11 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 # endif
 #endif
 #if defined(__has_feature) && __has_feature(modules)
-@import Foundation;
 @import UIKit;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 #pragma clang diagnostic ignored "-Wduplicate-method-arg"
-
-@interface NSUserDefaults (SWIFT_EXTENSION(InsulinKit))
-@end
-
 @class UITableView;
 @class NSIndexPath;
 @class UITableViewCell;

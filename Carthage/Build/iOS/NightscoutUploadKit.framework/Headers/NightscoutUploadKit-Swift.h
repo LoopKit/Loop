@@ -93,7 +93,6 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 #endif
 #if defined(__has_feature) && __has_feature(modules)
 @import Foundation;
-@import ObjectiveC;
 #endif
 
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
@@ -103,11 +102,7 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 @end
 
 
-SWIFT_CLASS("_TtC19NightscoutUploadKit18NightscoutUploader")
-@interface NightscoutUploader : NSObject
-@property (nonatomic, copy) NSString * _Nullable siteURL;
-@property (nonatomic, copy) NSString * _Nullable APISecret;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@interface NSUserDefaults (SWIFT_EXTENSION(NightscoutUploadKit))
 @end
 
 #pragma clang diagnostic pop

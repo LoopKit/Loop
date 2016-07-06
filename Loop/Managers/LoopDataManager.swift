@@ -18,14 +18,6 @@ class LoopDataManager {
 
     static let LoopRunningNotification = "com.loudnate.Naterade.notification.LoopRunning"
 
-    enum Error: ErrorType {
-        case CommunicationError
-        case ConfigurationError
-        case ConnectionError
-        case MissingDataError(String)
-        case StaleDataError(String)
-    }
-
     typealias TempBasalRecommendation = (recommendedDate: NSDate, rate: Double, duration: NSTimeInterval)
 
     unowned let deviceDataManager: DeviceDataManager
@@ -59,15 +51,7 @@ class LoopDataManager {
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
-                self.waitingForSentryPackets = true
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
-
-                // Sentry packets are sent in groups of 3, 5s apart. Wait 11s to avoid conflicting comms.
-                let waitTime = self.deviceDataManager.latestPumpStatus != nil ? Int64(11 * NSEC_PER_SEC) : 0
-
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, waitTime), self.dataAccessQueue) {
-                    self.waitingForSentryPackets = false
+                dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
                     self.loop()
                 }
@@ -83,6 +67,8 @@ class LoopDataManager {
     }
 
     private func loop() {
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopRunningNotification, object: self)
+
         lastLoopError = nil
 
         do {
@@ -93,7 +79,7 @@ class LoopDataManager {
                     self.lastLoopError = error
 
                     if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "TempBasal")
+                        self.deviceDataManager.logger.addError(error, fromSource: "TempBasal")
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
@@ -167,7 +153,7 @@ class LoopDataManager {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
-                self.deviceDataManager.logger?.addError(error, fromSource: "PredictGlucose")
+                self.deviceDataManager.logger.addError(error, fromSource: "PredictGlucose")
 
                 throw error
             }
@@ -175,9 +161,7 @@ class LoopDataManager {
     }
 
     private func notify() {
-        if !waitingForSentryPackets {
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
-        }
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
     }
 
     /**
@@ -240,7 +224,7 @@ class LoopDataManager {
     private var lastLoopError: ErrorType? {
         didSet {
             if lastLoopError != nil {
-                AnalyticsManager.loopDidError()
+                AnalyticsManager.sharedManager.loopDidError()
             }
         }
     }
@@ -248,10 +232,9 @@ class LoopDataManager {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
 
-            AnalyticsManager.loopDidSucceed()
+            AnalyticsManager.sharedManager.loopDidSucceed()
         }
     }
-    private var waitingForSentryPackets = false
 
     private func updateCarbEffect(completionHandler: (effects: [GlucoseEffect]?, error: ErrorType?) -> Void) {
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
@@ -259,13 +242,13 @@ class LoopDataManager {
         if let carbStore = deviceDataManager.carbStore {
             carbStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "CarbStore")
+                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
                 }
 
                 completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(effects: nil, error: Error.MissingDataError("CarbStore not available"))
+            completionHandler(effects: nil, error: LoopError.MissingDataError("CarbStore not available"))
         }
     }
 
@@ -274,7 +257,7 @@ class LoopDataManager {
 
         deviceDataManager.doseStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
             if let error = error {
-                self.deviceDataManager.logger?.addError(error, fromSource: "DoseStore")
+                self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
             }
 
             completionHandler(effects: effects, error: error)
@@ -285,13 +268,13 @@ class LoopDataManager {
         if let glucoseStore = deviceDataManager.glucoseStore {
             glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                    self.deviceDataManager.logger.addError(error, fromSource: "GlucoseStore")
                 }
 
                 completionHandler(effects: effects, error: error)
             }
         } else {
-            completionHandler(effects: nil, error: Error.MissingDataError("GlucoseStore not available"))
+            completionHandler(effects: nil, error: LoopError.MissingDataError("GlucoseStore not available"))
         }
     }
 
@@ -307,7 +290,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError("Cannot predict glucose due to missing input data")
+            throw LoopError.MissingDataError("Cannot predict glucose due to missing input data")
         }
 
         let startDate = NSDate()
@@ -318,7 +301,7 @@ class LoopDataManager {
             else
         {
             self.predictedGlucose = nil
-            throw Error.StaleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
+            throw LoopError.StaleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
         }
 
         guard let
@@ -327,13 +310,13 @@ class LoopDataManager {
             insulinEffect = self.insulinEffect else
         {
             self.predictedGlucose = nil
-            throw Error.MissingDataError("Cannot predict glucose due to missing effect data")
+            throw LoopError.MissingDataError("Cannot predict glucose due to missing effect data")
         }
 
         var error: ErrorType?
 
         defer {
-            self.deviceDataManager.logger?.addLoopStatus(
+            self.deviceDataManager.logger.addLoopStatus(
                 startDate: startDate,
                 endDate: NSDate(),
                 glucose: glucose,
@@ -358,7 +341,7 @@ class LoopDataManager {
             insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
             basalRates = deviceDataManager.basalRateSchedule
         else {
-            error = Error.MissingDataError("Loop configuration data not set")
+            error = LoopError.MissingDataError("Loop configuration data not set")
             throw error!
         }
 
@@ -396,7 +379,7 @@ class LoopDataManager {
                 }
             }
         } else {
-            resultsHandler(units: nil, error: Error.MissingDataError("CarbStore not configured"))
+            resultsHandler(units: nil, error: LoopError.MissingDataError("CarbStore not configured"))
         }
     }
 
@@ -408,17 +391,17 @@ class LoopDataManager {
             insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
             basalRates = self.deviceDataManager.basalRateSchedule
         else {
-            throw Error.MissingDataError("Bolus prediction and configuration data not found")
+            throw LoopError.MissingDataError("Bolus prediction and configuration data not found")
         }
 
         let recencyInterval = NSTimeInterval(minutes: 15)
 
         guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow else {
-            throw Error.MissingDataError("No glucose data found")
+            throw LoopError.MissingDataError("No glucose data found")
         }
 
         guard abs(predictedInterval) <= recencyInterval else {
-            throw Error.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
+            throw LoopError.StaleDataError("Glucose is \(predictedInterval.minutes) min old")
         }
 
         let pendingBolusAmount: Double = lastBolus?.units ?? 0
@@ -450,17 +433,17 @@ class LoopDataManager {
         }
 
         guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < NSTimeInterval(minutes: 5) else {
-            resultsHandler(success: false, error: Error.StaleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
+            resultsHandler(success: false, error: LoopError.StaleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
             return
         }
 
         guard let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice else {
-            resultsHandler(success: false, error: Error.ConnectionError)
+            resultsHandler(success: false, error: LoopError.ConnectionError)
             return
         }
 
         guard let ops = device.ops else {
-            resultsHandler(success: false, error: Error.ConfigurationError)
+            resultsHandler(success: false, error: LoopError.ConfigurationError)
             return
         }
 
@@ -489,47 +472,16 @@ class LoopDataManager {
         }
     }
 
-    func enactBolus(units: Double, resultsHandler: (success: Bool, error: Error?) -> Void) {
-        guard units > 0 else {
-            resultsHandler(success: true, error: nil)
-            return
-        }
+    /**
+     Informs the loop algorithm of an enacted bolus
 
-        guard let device = deviceDataManager.rileyLinkManager.firstConnectedDevice else {
-            resultsHandler(success: false, error: .ConnectionError)
-            return
-        }
-
-        guard let ops = device.ops else {
-            resultsHandler(success: false, error: .ConfigurationError)
-            return
-        }
-
-        ops.readRemainingInsulin { (result) in
-            switch result {
-            case .Success(let unitVolume):
-                self.deviceDataManager.doseStore.addReservoirValue(unitVolume, atDate: NSDate()) { (_, _, error) in
-                    if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                        resultsHandler(success: false, error: .CommunicationError)
-                    } else {
-                        ops.setNormalBolus(units) { (error) in
-                            if let error = error {
-                                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                                resultsHandler(success: false, error: .CommunicationError)
-                            } else {
-                                self.lastBolus = (units: units, date: NSDate())
-                                resultsHandler(success: true, error: nil)
-                            }
-
-                            self.notify()
-                        }
-                    }
-                }
-            case .Failure(let error):
-                self.deviceDataManager.logger?.addError(error, fromSource: "Bolus")
-                resultsHandler(success: false, error: .CommunicationError)
-            }
+     - parameter units: The amount of insulin
+     - parameter date:  The date the bolus was set
+     */
+    func recordBolus(units: Double, atDate date: NSDate) {
+        dispatch_async(dataAccessQueue) {
+            self.lastBolus = (units: units, date: date)
+            self.notify()
         }
     }
 }

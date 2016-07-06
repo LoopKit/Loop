@@ -73,30 +73,24 @@ Fork and clone this repository so you can commit the changes you'll make below.
 
 In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to something unique. Usually this means replacing `com.loudnate` with a reverse-domain name of your choosing.
 
-## Configuring RemoteSettings.plist
+## Installing Carthage
 
-Loop optionally supports select third-party remote services. While none of them are required to run the app, including [mLab](https://mlab.com) keys is strongly recommended at this time so loop diagnostic data can be stored in case retrospective analysis is needed.
+[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. It will need to be [installed on your Mac](https://github.com/carthage/carthage#installing-carthage) to build and run the app, but most users won't have a need to explicitly rebuild any dependencies.
 
-After a fresh clone of the repository, you'll need duplicate the template file and populate the copy with values.
+## Configuring Services
 
-```bash
-$ cp Loop/RemoteSettings-template.plist Loop/RemoteSettings.plist
-```
+Loop optionally supports select third-party remote services, which are configured in the Settings screen.
 
-`RemoteSettings.plist` is included in `.gitignore` so you won't accidentally commit any sensitive keys.
-
-| Key                    | Description
+| Service                | Description
 | ---------------------- | -------------
-| `mLabAPIKey`           | Your mLab API Key (for tracking errors and diagnostic info)
-| `mLabAPIHost`          | The mLab API host
-| `mLabAPIPath`          | Your mLab database path
-| `AmplitudeAPIKey`      | Your Amplitude analytics API Key (for optional, private behavior tracking)
-| `ShareAccountName`     | Your username for Dexcom share (for backfilling glucose data)
-| `ShareAccountPassword` | Your password for Dexcom share
+| Dexcom Share           | Downloads glucose data if the G5 transmitter is not available. This is the sole source of glucose data for G4 users.
+| Nightscout             | Uploads treatments and other pump data. Note you will need to set "Nightscout history uploading" to "On" in Settings for treatments to be fetched from your pump and uploaded to Nightscout.
+| mLab                   | Uploads diagnostic data about each loop run, as well as app errors. At this time, it is strongly recommended that you configure this service in case retrospective analysis is needed.
+| Amplitude              | Tracks private, single-user behavioral and system analytics
 
 # Making it Your Own
 
-[Please visit the Wiki for more info on customizing the app](https://github.com/loudnate/Loop/wiki/)
+[Please visit the Wiki for more info on customizing the app](https://github.com/loudnate/Loop/wiki/Personalizing-Your-App-Name-&-Icon)
 
 # License and Code of Conduct
 
