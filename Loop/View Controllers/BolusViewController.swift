@@ -22,7 +22,7 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.didDisplayBolusScreen()
+        AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
     var recommendedBolus: Double = 0 {
@@ -67,10 +67,6 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
 
             self.performSegueWithIdentifier("close", sender: sender)
         }
-    }
-
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        super.prepareForSegue(segue, sender: sender)
     }
 
     private lazy var decimalFormatter: NSNumberFormatter = {

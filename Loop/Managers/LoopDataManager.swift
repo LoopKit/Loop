@@ -79,7 +79,7 @@ class LoopDataManager {
                     self.lastLoopError = error
 
                     if let error = error {
-                        self.deviceDataManager.logger?.addError(error, fromSource: "TempBasal")
+                        self.deviceDataManager.logger.addError(error, fromSource: "TempBasal")
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
@@ -153,7 +153,7 @@ class LoopDataManager {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
-                self.deviceDataManager.logger?.addError(error, fromSource: "PredictGlucose")
+                self.deviceDataManager.logger.addError(error, fromSource: "PredictGlucose")
 
                 throw error
             }
@@ -224,7 +224,7 @@ class LoopDataManager {
     private var lastLoopError: ErrorType? {
         didSet {
             if lastLoopError != nil {
-                AnalyticsManager.loopDidError()
+                AnalyticsManager.sharedManager.loopDidError()
             }
         }
     }
@@ -232,7 +232,7 @@ class LoopDataManager {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
 
-            AnalyticsManager.loopDidSucceed()
+            AnalyticsManager.sharedManager.loopDidSucceed()
         }
     }
 
@@ -242,7 +242,7 @@ class LoopDataManager {
         if let carbStore = deviceDataManager.carbStore {
             carbStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "CarbStore")
+                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
                 }
 
                 completionHandler(effects: effects, error: error)
@@ -257,7 +257,7 @@ class LoopDataManager {
 
         deviceDataManager.doseStore.getGlucoseEffects(startDate: glucose?.startDate) { (effects, error) -> Void in
             if let error = error {
-                self.deviceDataManager.logger?.addError(error, fromSource: "DoseStore")
+                self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
             }
 
             completionHandler(effects: effects, error: error)
@@ -268,7 +268,7 @@ class LoopDataManager {
         if let glucoseStore = deviceDataManager.glucoseStore {
             glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
                 if let error = error {
-                    self.deviceDataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                    self.deviceDataManager.logger.addError(error, fromSource: "GlucoseStore")
                 }
 
                 completionHandler(effects: effects, error: error)
@@ -316,7 +316,7 @@ class LoopDataManager {
         var error: ErrorType?
 
         defer {
-            self.deviceDataManager.logger?.addLoopStatus(
+            self.deviceDataManager.logger.addLoopStatus(
                 startDate: startDate,
                 endDate: NSDate(),
                 glucose: glucose,

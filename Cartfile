@@ -1,4 +1,4 @@
-github "loudnate/LoopKit" ~> 0.3.3
+github "loudnate/LoopKit" ~> 0.3.4
 github "loudnate/xDripG5" ~> 0.5.0
 github "loudnate/SwiftCharts" "loudnate/naterade"
 github "mddub/dexcom-share-client-swift" ~> 0.1
