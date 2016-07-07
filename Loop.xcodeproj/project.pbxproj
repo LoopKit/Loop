@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */; };
 		4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */; };
-		4315D2901CA6332F00589052 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
 		4328E0181CFBE1DA00E199AA /* ContextInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */; };
 		4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */; };
 		4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */; };
@@ -122,7 +121,6 @@
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */; };
 		43E344A61B9E1B3300C85C07 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A51B9E1B3300C85C07 /* NSBundle.swift */; };
-		43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */ = {isa = PBXBuildFile; fileRef = 43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */; };
 		43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40851C82646A00472A8C /* StatusChartManager.swift */; };
 		43EB40C21C83F84900472A8C /* StatusChartHighlightLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */; };
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
@@ -329,7 +327,6 @@
 		43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = StatusTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		43E344A51B9E1B3300C85C07 /* NSBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSBundle.swift; sourceTree = "<group>"; };
-		43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = RemoteSettings.plist; sourceTree = "<group>"; };
 		43EB40851C82646A00472A8C /* StatusChartManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartManager.swift; sourceTree = "<group>"; };
 		43EB40C11C83F84900472A8C /* StatusChartHighlightLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartHighlightLayer.swift; sourceTree = "<group>"; };
 		43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CommonCrypto.framework; path = Carthage/Build/iOS/CommonCrypto.framework; sourceTree = "<group>"; };
@@ -479,7 +476,6 @@
 			children = (
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
-				43E344A71B9EAA8300C85C07 /* RemoteSettings.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
 				43776F981B8022E90074EA36 /* Assets.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
@@ -783,6 +779,7 @@
 				TargetAttributes = {
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = M5297NV32J;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -800,6 +797,7 @@
 					};
 					43A943711B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = M5297NV32J;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -860,7 +858,6 @@
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
 				434F54591D28805E002A9274 /* ButtonTableViewCell.xib in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
-				43E344A81B9EAA8400C85C07 /* RemoteSettings.plist in Resources */,
 				434F545B1D2880D4002A9274 /* AuthenticationTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -879,7 +876,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
-				4315D2901CA6332F00589052 /* RemoteSettings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1143,7 +1139,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate.Loop;
+				MAIN_APP_BUNDLE_IDENTIFIER = com.jlucasvt.LoopAPS;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1184,7 +1180,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate.Loop;
+				MAIN_APP_BUNDLE_IDENTIFIER = com.jlucasvt.LoopAPS;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -1200,6 +1196,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1219,6 +1216,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1342,7 +1340,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jlucasvt.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
@@ -1356,7 +1354,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jlucasvt.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
