@@ -141,12 +141,12 @@
                     </items>
                     <menu key="menu" id="Enz-3V-zIL">
                         <items>
-                            <menuItem title="Carbs" icon="add" id="Fhb-O2-qgq">
+                            <menuItem title="Carbs" image="fork" id="Fhb-O2-qgq">
                                 <connections>
                                     <action selector="addCarbs" destination="rNf-Mh-tID" id="vV7-7n-9Jh"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Bolus" icon="add" id="ONR-Fr-rMn">
+                            <menuItem title="Bolus" image="bolus" id="ONR-Fr-rMn">
                                 <connections>
                                     <action selector="setBolus" destination="rNf-Mh-tID" id="lqt-6H-VfV"/>
                                 </connections>

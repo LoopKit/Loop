@@ -16,7 +16,7 @@ extension UIColor {
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
-    @nonobjc static let glucoseTintColor = UIColor.HIGLightBlueColor()
+    @nonobjc static let glucoseTintColor = UIColor.HIGTealBlueColor()
 
     @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
 
@@ -35,34 +35,38 @@ extension UIColor {
     @nonobjc static let deleteColor = UIColor.HIGRedColor()
 
     // MARK: - HIG colors
-    // See: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/MobileHIG/ColorImagesText.html
+    // See: https://developer.apple.com/ios/human-interface-guidelines/visual-design/color/
 
-    private static func HIGLightBlueColor() -> UIColor {
-        return UIColor(red: 96 / 255, green: 201 / 255, blue: 248 / 255, alpha: 1)
+    private static func HIGTealBlueColor() -> UIColor {
+        return UIColor(red: 90 / 255, green: 200 / 255, blue: 250 / 255, alpha: 1)
     }
 
     private static func HIGYellowColor() -> UIColor {
-        return UIColor(red: 1, green: 203 / 255, blue: 47 / 255, alpha: 1)
+        return UIColor(red: 1, green: 204 / 255, blue: 0 / 255, alpha: 1)
     }
 
     private static func HIGOrangeColor() -> UIColor {
-        return UIColor(red: 254 / 255, green: 149 / 255, blue: 38 / 255, alpha: 1)
+        return UIColor(red: 1, green: 149 / 255, blue: 0 / 255, alpha: 1)
     }
 
     private static func HIGPinkColor() -> UIColor {
-        return UIColor(red: 253 / 255, green: 50 / 255, blue: 89 / 255, alpha: 1)
+        return UIColor(red: 1, green: 45 / 255, blue: 85 / 255, alpha: 1)
     }
 
     private static func HIGBlueColor() -> UIColor {
-        return UIColor(red: 22 / 255, green: 127 / 255, blue: 252 / 255, alpha: 1)
+        return UIColor(red: 0, green: 122 / 255, blue: 1, alpha: 1)
     }
 
     private static func HIGGreenColor() -> UIColor {
-        return UIColor(red: 83 / 255, green: 216 / 255, blue: 106 / 255, alpha: 1)
+        return UIColor(red: 76 / 255, green: 217 / 255, blue: 100 / 255, alpha: 1)
     }
 
     private static func HIGRedColor() -> UIColor {
-        return UIColor(red: 253 / 255, green: 61 / 255, blue: 57 / 255, alpha: 1)
+        return UIColor(red: 1, green: 59 / 255, blue: 48 / 255, alpha: 1)
+    }
+
+    private static func HIGPurpleColor() -> UIColor {
+        return UIColor(red: 88 / 255, green: 86 / 255, blue: 214 / 255, alpha: 1)
     }
 
     private static func HIGGrayColor() -> UIColor {
