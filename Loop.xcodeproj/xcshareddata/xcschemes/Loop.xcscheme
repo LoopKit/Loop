@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "0700"
-   version = "1.7">
+   version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -33,9 +33,19 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "43F78D2A1C8FC58F002152D1"
+               BlueprintIdentifier = "43E2D90A1D20C581004DA55F"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
+               ReferencedContainer = "container:Loop.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "43E2D8FC1D20C508004DA55F"
+               BuildableName = "LoopTests2.xctest"
+               BlueprintName = "LoopTests2"
                ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -98,23 +108,5 @@
    <ArchiveAction
       buildConfiguration = "Release"
       revealArchiveInOrganizer = "YES">
-      <PostActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Run Script"
-               scriptText = "#!/bin/bash&#10;&#10;if [[ ! -d $SRCROOT ]]; then&#10;echo &quot;This script must be run from an Xcode Build Phase&quot;&#10;exit 1;&#10;fi&#10;&#10;# Globals&#10;Tag=&#10;Logfile=&#10;CFBundleVersion=&#10;CFBundleShortVersionString=&#10;&#10;function init_logging () {&#10;    logdir=&quot;$HOME/Library/Logs/$PRODUCT_BUNDLE_IDENTIFIER&quot;&#10;    mkdir -p $logdir&#10;    Logfile=&quot;$logdir/archive_post_actions.log&quot;&#10;    exec &gt;&gt; $Logfile 2&gt;&amp;1&#10;&#10;    echo &quot;\n\n\n$(date) Beginning archive post-actions for $CONFIGURATION&quot;&#10;}&#10;&#10;function increment_bundle_version () {&#10;    srcPlist=&quot;$1&quot;&#10;    PlistBuddy=&quot;/usr/libexec/PlistBuddy&quot;&#10;&#10;    CFBundleVersion=`$PlistBuddy -c &quot;Print CFBundleVersion&quot; $srcPlist`&#10;    CFBundleShortVersionString=`$PlistBuddy -c &quot;Print CFBundleShortVersionString&quot; $srcPlist`&#10;    Tag=&quot;v$CFBundleShortVersionString&quot;&#10;&#10;    # Increment the bundle version for future builds&#10;    CFBundleVersionNext=$(($CFBundleVersion + 1))&#10;    $PlistBuddy -c &quot;Set :CFBundleVersion $CFBundleVersionNext&quot; $srcPlist&#10;&#10;    echo &quot;Updated build number of $srcPlist to $CFBundleVersionNext&quot;&#10;&#10;    # Copy the new version to the settings bundle&#10;    # settingsPlist=&quot;$SRCROOT/$PRODUCT_NAME/Settings.bundle/Root.plist&quot;&#10;    # $PlistBuddy -c &quot;Set :PreferenceSpecifiers:0:DefaultValue $CFBundleShortVersionString ($CFBundleVersionNext)&quot; $settingsPlist&#10;&#10;    git add $srcPlist &gt;&gt; $Logfile 2&gt;&amp;1&#10;}&#10;&#10;function commit_and_tag_changes () {&#10;    cd &quot;$SRCROOT&quot;&#10;&#10;    git commit -m &quot;Auto-commit with archive $Tag&quot; &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git tag $Tag  &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git push &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git push --tags &gt;&gt; $Logfile 2&gt;&amp;1&#10;&#10;    cd -&#10;}&#10;&#10;function merge_to_master () {&#10;    cd &quot;$SRCROOT&quot;&#10;&#10;    branch=$(git symbolic-ref --short HEAD)&#10;&#10;    git checkout master &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git merge &quot;$branch&quot; &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git push &gt;&gt; $Logfile 2&gt;&amp;1&#10;    git checkout &quot;$branch&quot; &gt;&gt; $Logfile 2&gt;&amp;1&#10;&#10;    cd -&#10;}&#10;&#10;## Run&#10;&#10;init_logging&#10;increment_bundle_version &quot;$SRCROOT/$INFOPLIST_FILE&quot;&#10;increment_bundle_version &quot;$SRCROOT/WatchApp/Info.plist&quot;&#10;commit_and_tag_changes&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-                     BuildableName = "Loop.app"
-                     BlueprintName = "Loop"
-                     ReferencedContainer = "container:Loop.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PostActions>
    </ArchiveAction>
 </Scheme>

@@ -66,7 +66,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.didDisplayStatusScreen()
+        AnalyticsManager.sharedManager.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(animated: Bool) {
@@ -128,7 +128,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 dispatch_group_enter(reloadGroup)
                 glucoseStore.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "GlucoseStore")
+                        self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                         self.needsRefresh = true
                         // TODO: Display error in the cell
                     } else {
@@ -156,7 +156,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             dispatch_group_enter(reloadGroup)
             dataManager.doseStore.getInsulinOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
                 if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 }
@@ -169,7 +169,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             dispatch_group_enter(reloadGroup)
             dataManager.doseStore.getRecentNormalizedReservoirDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
                 if let error = error {
-                    self.dataManager.logger?.addError(error, fromSource: "DoseStore")
+                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
                     // TODO: Display error in the cell
                 }
@@ -183,7 +183,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 dispatch_group_enter(reloadGroup)
                 carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "CarbStore")
+                        self.dataManager.logger.addError(error, fromSource: "CarbStore")
                         self.needsRefresh = true
                         // TODO: Display error in the cell
                     }
@@ -487,7 +487,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
 
-                if let date = dataManager.latestGlucoseValue?.startDate {
+                if let date = dataManager.glucoseStore?.latestGlucose?.startDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
@@ -496,7 +496,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
                 cell.detailTextLabel?.text = emptyValueString
 
-                if let glucose = dataManager.latestGlucoseValue, glucoseStore = dataManager.glucoseStore {
+                if let glucoseStore = dataManager.glucoseStore, glucose = glucoseStore.latestGlucose {
 
                     glucoseStore.preferredUnit { (unit, error) in
                         guard let unit = unit, glucoseString = self.numberFormatter.stringFromNumber(glucose.quantity.doubleValueForUnit(unit)) else {
@@ -575,7 +575,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                             self.settingTempBasal = false
 
                             if let error = error {
-                                self.dataManager.logger?.addError(error, fromSource: "TempBasal")
+                                self.dataManager.logger.addError(error, fromSource: "TempBasal")
                                 self.presentAlertControllerWithError(error)
                             } else if success {
                                 self.needsRefresh = true
@@ -624,7 +624,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         super.prepareForSegue(segue, sender: sender)
 
-        switch segue.destinationViewController {
+        var targetViewController = segue.destinationViewController
+
+        if let navVC = targetViewController as? UINavigationController, topViewController = navVC.topViewController {
+            targetViewController = topViewController
+        }
+
+        switch targetViewController {
         case let vc as CarbEntryTableViewController:
             vc.carbStore = dataManager.carbStore
             vc.hidesBottomBarWhenPushed = true
@@ -643,7 +649,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             } else {
                 self.dataManager.loopManager.getRecommendedBolus { (units, error) -> Void in
                     if let error = error {
-                        self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                        self.dataManager.logger.addError(error, fromSource: "Bolus")
                     } else if let bolus = units {
                         vc.recommendedBolus = bolus
                     }
@@ -664,7 +670,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                         if error is CarbStore.Error {
                             self.presentAlertControllerWithError(error)
                         } else {
-                            self.dataManager.logger?.addError(error, fromSource: "Bolus")
+                            self.dataManager.logger.addError(error, fromSource: "Bolus")
                             self.needsRefresh = true
                             self.reloadData()
                         }
@@ -684,8 +690,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         if let bolusViewController = segue.sourceViewController as? BolusViewController {
             if let bolus = bolusViewController.bolus where bolus > 0 {
                 let startDate = NSDate()
-                dataManager.loopManager.enactBolus(bolus) { (success, error) in
-                    if !success {
+                dataManager.enactBolus(bolus) { (error) in
+                    if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus, atDate: startDate)
                     }
                 }
