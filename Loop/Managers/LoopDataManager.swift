@@ -11,6 +11,7 @@ import CarbKit
 import InsulinKit
 import LoopKit
 import MinimedKit
+import HealthKit
 
 
 class LoopDataManager {
@@ -457,7 +458,8 @@ class LoopDataManager {
 
                     self.lastTempBasal = DoseEntry(type: .TempBasal, startDate: startDate, endDate: endDate, value: body.rate, unit: DoseUnit.UnitsPerHour)
                     self.recommendedTempBasal = nil
-
+                    self.addLoopTempBasalNotification((self.deviceDataManager.glucoseStore?.latestGlucose)!,prediction: self.predictedGlucose!,recommendedTempBasal: recommendedTempBasal)
+                    
                     resultsHandler(success: true, error: nil)
                 }
             case .Failure(let error):
@@ -484,4 +486,20 @@ class LoopDataManager {
             self.notify()
         }
     }
+    
+    private func addLoopTempBasalNotification(glucose: GlucoseValue, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
+        let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
+        let logger = DiagnosticLogger();
+        let unit = HKUnit.milligramsPerDeciliterUnit()
+        let pushMessage: [String: AnyObject] = [
+            "bg": glucose.quantity.doubleValueForUnit(unit),
+            "temp": "absolute",
+            "received": true,
+            "rate": recommendedTempBasal!.rate,
+            "duration": recommendedTempBasal!.duration.minutes,
+            "timestamp": dateFormatter.stringFromDate(recommendedTempBasal!.recommendedDate),
+            "eventualBG": round(prediction.last!.quantity.doubleValueForUnit(unit))]
+        logger.loopPushNotification(pushMessage, loopAlert: false)
+    }
+
 }

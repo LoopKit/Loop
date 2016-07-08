@@ -11,7 +11,10 @@ import Foundation
 
 class DiagnosticLogger {
     private lazy var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
-
+    let AzureAPIHost: String
+    let AzureTempBasalAPIPath: String
+    let AzureStatusAPIPath: String
+    
     var mLabService: MLabService {
         didSet {
             try! KeychainManager().setMLabDatabaseName(mLabService.databaseName, APIKey: mLabService.APIKey)
@@ -19,6 +22,15 @@ class DiagnosticLogger {
     }
 
     init() {
+            let settings = NSBundle.mainBundle().remoteSettings,
+            AzureAPIHost = settings?["AzureAppServiceURL"],
+            AzureTempBasalAPIPath = settings?["AzureAppServiceTempBasalAPI"],
+            AzureStatusAPIPath = settings?["AzureAppServiceStatusAPI"]
+        
+        self.AzureTempBasalAPIPath=AzureTempBasalAPIPath!
+        self.AzureStatusAPIPath = AzureStatusAPIPath!
+        self.AzureAPIHost=AzureAPIHost!
+
         let keychain = KeychainManager()
 
         // Migrate RemoteSettings.plist to the Keychain
@@ -46,5 +58,40 @@ class DiagnosticLogger {
             NSLog("%@: %@", collection, message)
         }
     }
+    
+    func loopPushNotification(message: [String: AnyObject], loopAlert: Bool) {
+        var path : String;
+        
+        if !loopAlert {
+            path = AzureTempBasalAPIPath
+        }
+        else {
+            path = AzureStatusAPIPath
+        }
+        if !isSimulator,
+            let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
+            let URL = NSURL(string: AzureAPIHost)?.URLByAppendingPathComponent(path),
+            components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
+        {
+            //components.query = "apiKey=\(APIKey)"
+            
+            if let URL = components.URL {
+                let request = NSMutableURLRequest(URL: URL)
+                
+                request.HTTPMethod = "POST"
+                request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+                
+                let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: messageData) { (_, _, error) -> Void in
+                    if let error = error {
+                        NSLog("%s error: %@", #function, error)
+                    }
+                }
+                
+                task.resume()
+            }
+        }
+        
+    }
+
 }
 
