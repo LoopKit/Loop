@@ -74,11 +74,21 @@ struct NotificationManager {
         UIApplication.sharedApplication().presentLocalNotificationNow(notification)
     }
 
+    // Cancel any previous scheduled notifications in the Loop Not Running category
+    static func clearLoopNotRunningNotifications() {
+        let app = UIApplication.sharedApplication()
+
+        app.scheduledLocalNotifications?.filter({
+            $0.category == Category.LoopNotRunning.rawValue
+        }).forEach({
+            app.cancelLocalNotification($0)
+        })
+    }
+
     static func scheduleLoopNotRunningNotifications() {
         let app = UIApplication.sharedApplication()
 
-        // Cancel any previous scheduled notifications
-        app.scheduledLocalNotifications?.filter({ $0.category == Category.LoopNotRunning.rawValue }).forEach({ app.cancelLocalNotification($0) })
+        clearLoopNotRunningNotifications()
 
         // Give a little extra time for a loop-in-progress to complete
         let gracePeriod = NSTimeInterval(minutes: 0.5)

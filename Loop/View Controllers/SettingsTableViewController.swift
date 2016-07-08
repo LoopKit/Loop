@@ -52,17 +52,13 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             })
         }
 
-        AnalyticsManager.didDisplaySettingsScreen()
+        AnalyticsManager.sharedManager.didDisplaySettingsScreen()
     }
 
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
 
         dataManager.rileyLinkManager.deviceScanningEnabled = false
-    }
-
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
     }
 
     deinit {
@@ -83,10 +79,11 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
     private enum Section: Int {
         case Loop = 0
-        case Configuration
         case Devices
+        case Configuration
+        case Services
 
-        static let count = 3
+        static let count = 4
     }
 
     private enum LoopRow: Int {
@@ -108,6 +105,15 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case MaxBolus
 
         static let count = 9
+    }
+
+    private enum ServiceRow: Int {
+        case Share = 0
+        case Nightscout
+        case MLab
+        case Amplitude
+
+        static let count = 4
     }
 
     private lazy var valueNumberFormatter: NSNumberFormatter = {
@@ -134,6 +140,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             return ConfigurationRow.count
         case .Devices:
             return dataManager.rileyLinkManager.devices.count
+        case .Services:
+            return ServiceRow.count
         }
     }
 
@@ -252,6 +260,33 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), forControlEvents: .ValueChanged)
 
             cell = deviceCell
+        case .Services:
+            let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
+
+            switch ServiceRow(rawValue: indexPath.row)! {
+            case .Share:
+                let shareService = dataManager.remoteDataManager.shareService
+
+                configCell.textLabel?.text = shareService.title
+                configCell.detailTextLabel?.text = shareService.username ?? TapToSetString
+            case .Nightscout:
+                let nightscoutService = dataManager.remoteDataManager.nightscoutService
+
+                configCell.textLabel?.text = nightscoutService.title
+                configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? TapToSetString
+            case .MLab:
+                let mLabService = dataManager.logger.mLabService
+
+                configCell.textLabel?.text = mLabService.title
+                configCell.detailTextLabel?.text = mLabService.databaseName ?? TapToSetString
+            case .Amplitude:
+                let amplitudeService = AnalyticsManager.sharedManager.amplitudeService
+
+                configCell.textLabel?.text = amplitudeService.title
+                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? NSLocalizedString("Enabled", comment: "The detail text describing an enabled setting") : TapToSetString
+            }
+
+            return configCell
         }
         return cell
     }
@@ -264,6 +299,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
             return nil
+        case .Services:
+            return NSLocalizedString("Services", comment: "The title of the services section in settings")
         }
     }
 
@@ -412,6 +449,49 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             showViewController(vc, sender: indexPath)
         case .Loop:
             break
+        case .Services:
+            switch ServiceRow(rawValue: indexPath.row)! {
+            case .Share:
+                let service = dataManager.remoteDataManager.shareService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.remoteDataManager.shareService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .Nightscout:
+                let service = dataManager.remoteDataManager.nightscoutService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.remoteDataManager.nightscoutService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .MLab:
+                let service = dataManager.logger.mLabService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    self.dataManager.logger.mLabService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            case .Amplitude:
+                let service = AnalyticsManager.sharedManager.amplitudeService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    AnalyticsManager.sharedManager.amplitudeService = service
+
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                }
+
+                showViewController(vc, sender: indexPath)
+            }
         }
     }
 
@@ -419,7 +499,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         switch Section(rawValue: section)! {
         case .Devices:
             return devicesSectionTitleView
-        case .Loop, .Configuration:
+        case .Loop, .Configuration, .Services:
             return nil
         }
     }

@@ -148,7 +148,7 @@
                     </constraints>
                 </view>
             </objects>
-            <point key="canvasLocation" x="1641" y="680"/>
+            <point key="canvasLocation" x="2453" y="680"/>
         </scene>
         <!--InsulinKit-->
         <scene sceneID="n8N-hY-V0o">
@@ -158,7 +158,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1386" y="-766"/>
+            <point key="canvasLocation" x="1386" y="-594"/>
         </scene>
         <!--CarbKit-->
         <scene sceneID="4Ej-lH-3ai">
@@ -168,7 +168,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="erV-pI-Wmo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1380" y="-869"/>
+            <point key="canvasLocation" x="1380" y="-697"/>
         </scene>
         <!--Status-->
         <scene sceneID="dRe-fy-po5">
@@ -393,25 +393,19 @@
                     <toolbarItems>
                         <barButtonItem title="Add Meal" id="lpE-RX-jWF">
                             <connections>
-                                <segue destination="Td9-bv-106" kind="popoverPresentation" identifier="CarbEntryEditViewController" customClass="PopoverInNavigationControllerSegue" customModule="Loop" customModuleProvider="target" popoverAnchorBarButtonItem="lpE-RX-jWF" id="viB-eQ-p7y">
-                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                </segue>
+                                <segue destination="YJ1-01-QoA" kind="presentation" identifier="CarbEntryEditViewController" id="viB-eQ-p7y"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="ava-EZ-v6i"/>
                         <barButtonItem title="Bolus" id="2kb-DB-Vag">
                             <connections>
-                                <segue destination="WhH-Np-jCn" kind="popoverPresentation" identifier="BolusViewController" customClass="PopoverInNavigationControllerSegue" customModule="Loop" customModuleProvider="target" popoverAnchorBarButtonItem="2kb-DB-Vag" id="PC7-vP-CUY">
-                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                </segue>
+                                <segue destination="m6L-HW-ENd" kind="presentation" identifier="BolusViewController" id="PC7-vP-CUY"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
                         <barButtonItem title="Settings" id="PHJ-4n-qiF">
                             <connections>
-                                <segue destination="4cb-Yq-02o" kind="popoverPresentation" customClass="PopoverInNavigationControllerSegue" customModule="Loop" customModuleProvider="target" popoverAnchorBarButtonItem="PHJ-4n-qiF" id="JAY-Kf-UMv">
-                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                </segue>
+                                <segue destination="Fr0-ut-OuL" kind="presentation" id="JAY-Kf-UMv"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -570,7 +564,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KEH-mi-7Jf" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="xgn-H5-ghO" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1641" y="-204"/>
+            <point key="canvasLocation" x="2453" y="-204"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="1UI-1d-xLb">
@@ -603,7 +597,61 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hft-ry-meg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1444.5" y="-671"/>
+            <point key="canvasLocation" x="2256.5" y="-1071"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="4kH-I0-mGD">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="m6L-HW-ENd" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="g59-B7-MLI">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="WhH-Np-jCn" kind="relationship" relationship="rootViewController" id="3MQ-PQ-Ot4"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VQT-96-wh7" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1641" y="-204"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="NT7-CC-bRN">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="YJ1-01-QoA" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="G1F-Va-gO2">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Td9-bv-106" kind="relationship" relationship="rootViewController" id="76q-VW-DX3"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3Ql-YC-B6I" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1641" y="-1071"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="vZz-u1-Q2B">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Fr0-ut-OuL" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="5cJ-yb-cD1">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="4cb-Yq-02o" kind="relationship" relationship="rootViewController" id="6BC-rd-2iw"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hu2-qg-8CR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1641" y="680"/>
         </scene>
     </scenes>
     <resources>
