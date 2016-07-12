@@ -161,6 +161,18 @@ class StatusChartsManager {
         }
     }
 
+    private var targetOverridePoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+        }
+    }
+
+    private var targetOverrideDurationPoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+        }
+    }
+
     private var IOBPoints: [ChartPoint] = [] {
         didSet {
             IOBChart = nil
@@ -236,7 +248,21 @@ class StatusChartsManager {
         var targetLayer: ChartPointsAreaLayer? = nil
 
         if targetGlucosePoints.count > 1 {
-            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetGlucosePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
+            let alpha: CGFloat = targetOverridePoints.count > 1 ? 0.15 : 0.3
+
+            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetGlucosePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(alpha), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        }
+
+        var targetOverrideLayer: ChartPointsAreaLayer? = nil
+
+        if targetOverridePoints.count > 1 {
+            targetOverrideLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverridePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        }
+
+        var targetOverrideDurationLayer: ChartPointsAreaLayer? = nil
+
+        if targetOverrideDurationPoints.count > 1 {
+            targetOverrideDurationLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverrideDurationPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
@@ -262,6 +288,8 @@ class StatusChartsManager {
         let layers: [ChartLayer?] = [
             gridLayer,
             targetLayer,
+            targetOverrideLayer,
+            targetOverrideDurationLayer,
             xAxis,
             yAxis,
             highlightLayer,
@@ -516,6 +544,15 @@ class StatusChartsManager {
         if let xAxisValues = xAxisValues where xAxisValues.count > 1,
             let targets = glucoseTargetRangeSchedule {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues)
+
+            if let override = targets.temporaryOverride {
+                targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, xAxisValues: xAxisValues)
+
+                targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverrideDuration(override, xAxisValues: xAxisValues)
+            } else {
+                targetOverridePoints = []
+                targetOverrideDurationPoints = []
+            }
         }
     }
 }

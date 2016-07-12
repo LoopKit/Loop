@@ -31,6 +31,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
+    /// Notification posted by the instance when loop configuration was changed
+    static let LoopSettingsUpdatedNotification = "com.loudnate.Naterade.notification.LoopSettingsUpdated"
+
     // MARK: - Utilities
 
     let logger = DiagnosticLogger()
@@ -289,11 +292,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             switch result {
             case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                //                    if let error = error {
-                //                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                //                    }
-                //                }
+//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, $0.pumpEvent.rawData, $0.isMutable()) })) { (error) in
+//                    if let error = error {
+//                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+//                    }
+//                }
 
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
@@ -692,7 +695,45 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
 
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
+        }
+    }
+
+    // TODO: Add a setter with a duration argument
+    var workoutMode: Bool? {
+        get {
+            guard let range = glucoseTargetRangeSchedule else {
+                return nil
+            }
+
+            guard let override = range.temporaryOverride else {
+                return false
+            }
+
+            return override.endDate.timeIntervalSinceNow > 0
+        }
+        set {
+            guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule, newValue = newValue else {
+                return
+            }
+
+            if newValue {
+                // Hardcoded: 160-180 mg/dL for 1 hour.
+                let endDate = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: 1))
+                let unit = HKUnit.milligramsPerDeciliterUnit()
+                let targets = DoubleRange(
+                    minValue: HKQuantity(unit: unit, doubleValue: 160).doubleValueForUnit(glucoseTargetRangeSchedule.unit),
+                    maxValue: HKQuantity(unit: unit, doubleValue: 180).doubleValueForUnit(glucoseTargetRangeSchedule.unit)
+                )
+
+                glucoseTargetRangeSchedule.setOverride(targets, untilDate: endDate)
+            } else {
+                glucoseTargetRangeSchedule.clearOverride()
+            }
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
         }
     }
 
@@ -804,4 +845,39 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 }
+
+/*
+ History parsing scratch.
+
+func translate(event: TimestampedHistoryEvent) -> DoseEntry? {
+
+    switch event.pumpEvent {
+    case let bolus as BolusNormalPumpEvent:
+        InsulinKit.PumpEventType.Bolus
+
+        let unit: DoseUnit
+
+        switch bolus.type {
+        case .Normal:
+            unit = .Units
+        case .Square:
+            unit = .UnitsPerHour
+        }
+
+        return DoseEntry(type: .Bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+    case let suspend as SuspendPumpEvent:
+        InsulinKit.PumpEventType.Suspend
+    case let resume as ResumePumpEvent:
+//        InsulinKit.PumpEventType.Resume
+        break
+    case let temp as TempBasalPumpEvent:
+        InsulinKit.PumpEventType.TempBasal
+    default:
+        break
+    }
+
+    return nil
+}
+*/
+
 

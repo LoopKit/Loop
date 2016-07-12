@@ -210,6 +210,10 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <accessibility key="accessibilityConfiguration">
+                                                <accessibilityTraits key="traits" summaryElement="YES"/>
+                                                <bool key="isElement" value="YES"/>
+                                            </accessibility>
                                             <constraints>
                                                 <constraint firstItem="agu-6n-4Lf" firstAttribute="centerX" secondItem="H3C-gh-Vum" secondAttribute="centerX" id="8cU-Gb-Zpf"/>
                                                 <constraint firstAttribute="bottom" secondItem="krM-Ky-OTb" secondAttribute="bottom" id="JM7-AC-KBR"/>
@@ -247,6 +251,9 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <accessibility key="accessibilityConfiguration">
+                                                <bool key="isElement" value="YES"/>
+                                            </accessibility>
                                             <constraints>
                                                 <constraint firstAttribute="trailingMargin" secondItem="Wkb-m1-PVZ" secondAttribute="trailing" id="20s-OF-j7K"/>
                                                 <constraint firstItem="AbR-sM-aVG" firstAttribute="top" secondItem="BEG-xe-e6y" secondAttribute="top" constant="8" id="5Un-T7-Hcy"/>
@@ -289,6 +296,9 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <accessibility key="accessibilityConfiguration">
+                                                <bool key="isElement" value="YES"/>
+                                            </accessibility>
                                             <constraints>
                                                 <constraint firstItem="TfZ-En-Kls" firstAttribute="leading" secondItem="uVa-hu-HBZ" secondAttribute="leadingMargin" id="95H-Dr-Ehg"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="TfZ-En-Kls" secondAttribute="trailing" id="fAL-fC-zik"/>
@@ -327,6 +337,9 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <accessibility key="accessibilityConfiguration">
+                                                <bool key="isElement" value="YES"/>
+                                            </accessibility>
                                             <constraints>
                                                 <constraint firstItem="LaA-uX-OgX" firstAttribute="top" secondItem="Jjc-jK-Vci" secondAttribute="bottom" constant="4" id="9Nu-VX-htt"/>
                                                 <constraint firstAttribute="bottom" secondItem="LaA-uX-OgX" secondAttribute="bottom" id="C7U-r6-wZ8"/>
@@ -391,19 +404,25 @@
                         </connections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem title="Add Meal" id="lpE-RX-jWF">
+                        <barButtonItem image="carbs" id="lpE-RX-jWF">
                             <connections>
                                 <segue destination="YJ1-01-QoA" kind="presentation" identifier="CarbEntryEditViewController" id="viB-eQ-p7y"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="ava-EZ-v6i"/>
-                        <barButtonItem title="Bolus" id="2kb-DB-Vag">
+                        <barButtonItem image="bolus" id="2kb-DB-Vag">
                             <connections>
                                 <segue destination="m6L-HW-ENd" kind="presentation" identifier="BolusViewController" id="PC7-vP-CUY"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="g6k-L0-2qh"/>
+                        <barButtonItem enabled="NO" image="workout" id="8Qz-Cj-oVB">
+                            <connections>
+                                <action selector="toggleWorkoutMode:" destination="1zR-tC-i50" id="coy-UU-6Zu"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
-                        <barButtonItem title="Settings" id="PHJ-4n-qiF">
+                        <barButtonItem image="settings" id="PHJ-4n-qiF">
                             <connections>
                                 <segue destination="Fr0-ut-OuL" kind="presentation" id="JAY-Kf-UMv"/>
                             </connections>
@@ -656,6 +675,10 @@
     </scenes>
     <resources>
         <image name="battery_unknown" width="27" height="44"/>
+        <image name="bolus" width="22" height="23"/>
+        <image name="carbs" width="22" height="23"/>
         <image name="reservoir_unknown" width="27" height="44"/>
+        <image name="settings" width="25" height="40"/>
+        <image name="workout" width="30" height="29"/>
     </resources>
 </document>
