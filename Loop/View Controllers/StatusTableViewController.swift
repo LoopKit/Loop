@@ -216,7 +216,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
-            workoutMode = dataManager.workoutMode
+            workoutMode = dataManager.workoutModeEnabled
 
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
                 self.charts.prerender()
@@ -738,13 +738,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         return item
     }
 
-    @IBAction func toggleWorkoutMode(sender: UIButton) {
-        guard let workoutMode = workoutMode else {
-            return
-        }
-
+    @IBAction func toggleWorkoutMode(sender: UIBarButtonItem) {
         // TODO: Display an action sheet to select a duration
-        dataManager.workoutMode = !workoutMode
+        if let workoutModeEnabled = workoutMode where workoutModeEnabled {
+            dataManager.disableWorkoutMode()
+        } else {
+            dataManager.enableWorkoutMode(duration: NSTimeInterval(hours: 1))
+        }
     }
 
     // MARK: - HUDs

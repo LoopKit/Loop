@@ -701,40 +701,44 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
-    // TODO: Add a setter with a duration argument
-    var workoutMode: Bool? {
-        get {
-            guard let range = glucoseTargetRangeSchedule else {
-                return nil
-            }
-
-            guard let override = range.temporaryOverride else {
-                return false
-            }
-
-            return override.endDate.timeIntervalSinceNow > 0
+    var workoutModeEnabled: Bool? {
+        guard let range = glucoseTargetRangeSchedule else {
+            return nil
         }
-        set {
-            guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule, newValue = newValue else {
-                return
-            }
 
-            if newValue {
-                // Hardcoded: 160-180 mg/dL for 1 hour.
-                let endDate = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: 1))
-                let unit = HKUnit.milligramsPerDeciliterUnit()
-                let targets = DoubleRange(
-                    minValue: HKQuantity(unit: unit, doubleValue: 160).doubleValueForUnit(glucoseTargetRangeSchedule.unit),
-                    maxValue: HKQuantity(unit: unit, doubleValue: 180).doubleValueForUnit(glucoseTargetRangeSchedule.unit)
-                )
-
-                glucoseTargetRangeSchedule.setOverride(targets, untilDate: endDate)
-            } else {
-                glucoseTargetRangeSchedule.clearOverride()
-            }
-
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+        guard let override = range.temporaryOverride else {
+            return false
         }
+
+        return override.endDate.timeIntervalSinceNow > 0
+    }
+
+    /// Attempts to enable workout glucose targets for the given duration, and returns true if successful.
+    /// TODO: This can live on the schedule itself once its a value type, since didSet would invoke when mutated.
+    func enableWorkoutMode(duration duration: NSTimeInterval) -> Bool {
+        guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule else {
+            return false
+        }
+
+        // Hardcoded: 160-180 mg/dL for 1 hour.
+        let endDate = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: 1))
+        let unit = HKUnit.milligramsPerDeciliterUnit()
+        let targets = DoubleRange(
+            minValue: HKQuantity(unit: unit, doubleValue: 160).doubleValueForUnit(glucoseTargetRangeSchedule.unit),
+            maxValue: HKQuantity(unit: unit, doubleValue: 180).doubleValueForUnit(glucoseTargetRangeSchedule.unit)
+        )
+
+        glucoseTargetRangeSchedule.setOverride(targets, untilDate: endDate)
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
+        return true
+    }
+
+    func disableWorkoutMode() {
+        glucoseTargetRangeSchedule?.clearOverride()
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
     }
 
     var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
