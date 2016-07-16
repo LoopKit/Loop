@@ -196,13 +196,10 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             reservoirVolume = dataManager.latestReservoirValue?.unitVolume
 			
-			// Remaining Volume HUD for x22 pumps
-			if reservoirVolume > 0 {
-				switch NSUserDefaults.standardUserDefaults().pumpModelNumber! {
-				case "722": reservoirLevel = Double(reservoirVolume! / 300) / 100  // 722 Reservior Vol = 300u
-				case "522": reservoirLevel = Double(reservoirVolume! / 176) / 100  // 522 Reservoir Vol= 176u
-				default: reservoirLevel = 0
-				}
+			if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
+                if let resVal = reservoirVolume {
+                    reservoirLevel = min(1, max(0, Double(resVal / capacity) / 100))
+                }
 			}
 			
             if let status = dataManager.latestPumpStatus {
