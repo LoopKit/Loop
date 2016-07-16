@@ -10,43 +10,71 @@ import Foundation
 import SwiftCharts
 
 
-class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighlightLayer<T, U> {
-    init(
-        xAxis: ChartAxisLayer,
-        yAxis: ChartAxisLayer,
-        innerFrame: CGRect,
-        chartPoints: [T],
-        tintColor: UIColor,
-        labelCenterY: CGFloat = 0,
-        gestureRecognizer: UIPanGestureRecognizer? = nil
-    ) {
-        super.init(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: chartPoints, gestureRecognizer: gestureRecognizer,
-            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<T>? in
+class ChartPointsTouchHighlightLayerViewCache {
+    private lazy var containerView = UIView(frame: .zero)
+
+    private lazy var xAxisOverlayView = UIView()
+
+    private lazy var point = ChartPointEllipseView(center: .zero, diameter: 16)
+
+    private lazy var labelY: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.monospacedDigitSystemFontOfSize(15, weight: UIFontWeightBold)
+        label.textAlignment = .Center
+        label.backgroundColor = UIColor.whiteColor()
+
+        return label
+    }()
+
+    private lazy var labelX: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+        label.textColor = UIColor.secondaryLabelColor
+
+        return label
+    }()
+
+    private(set) var highlightLayer: ChartPointsTouchHighlightLayer<ChartPoint, UIView>!
+
+    init(xAxis: ChartAxisLayer, yAxis: ChartAxisLayer, innerFrame: CGRect, chartPoints: [ChartPoint], tintColor: UIColor, labelCenterY: CGFloat, gestureRecognizer: UIPanGestureRecognizer? = nil) {
+
+        highlightLayer = ChartPointsTouchHighlightLayer(
+            xAxis: xAxis,
+            yAxis: yAxis,
+            innerFrame: innerFrame,
+            chartPoints: chartPoints,
+            gestureRecognizer: gestureRecognizer,
+            modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
                     return chartPointModels[index]
                 } else {
                     return nil
                 }
             },
-            viewGenerator: { (chartPointModel, layer, chart) -> U? in
-                let containerView = U(frame: chart.bounds)
+            viewGenerator: { [unowned self] (chartPointModel, layer, chart) -> UIView? in
+                let containerView = self.containerView
+                containerView.frame = chart.bounds
+                containerView.alpha = 1  // This is animated to 0 when touch last ended
 
-                let xAxisOverlayView = UIView(frame: xAxis.rect.offsetBy(dx: 0, dy: 1))
-                xAxisOverlayView.backgroundColor = UIColor.whiteColor()
-                xAxisOverlayView.opaque = true
-                containerView.addSubview(xAxisOverlayView)
+                let xAxisOverlayView = self.xAxisOverlayView
+                if xAxisOverlayView.superview == nil {
+                    xAxisOverlayView.frame = xAxis.rect.offsetBy(dx: 0, dy: 1)
+                    xAxisOverlayView.backgroundColor = UIColor.whiteColor()
+                    xAxisOverlayView.opaque = true
+                    containerView.addSubview(xAxisOverlayView)
+                }
 
-                let point = ChartPointEllipseView(center: chartPointModel.screenLoc, diameter: 16)
-                point.fillColor = tintColor.colorWithAlphaComponent(0.5)
-                containerView.addSubview(point)
+                let point = self.point
+                point.center = chartPointModel.screenLoc
+                if point.superview == nil {
+                    point.fillColor = tintColor.colorWithAlphaComponent(0.5)
+                    containerView.addSubview(point)
+                }
 
                 if let text = chartPointModel.chartPoint.y.labels.first?.text {
-                    let label = UILabel()
-                    label.font = UIFont.monospacedDigitSystemFontOfSize(15, weight: UIFontWeightBold)
+                    let label = self.labelY
 
                     label.text = text
-                    label.textColor = tintColor
-                    label.textAlignment = .Center
                     label.sizeToFit()
                     label.frame.size.height += 4
                     label.frame.size.width += label.frame.size.height / 2
@@ -54,29 +82,31 @@ class StatusChartHighlightLayer<T: ChartPoint, U: UIView>: ChartPointsTouchHighl
                     label.center.x = chartPointModel.screenLoc.x
                     label.frame.origin.x = min(max(label.frame.origin.x, innerFrame.origin.x), innerFrame.maxX - label.frame.size.width)
                     label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
-                    label.layer.borderColor = tintColor.CGColor
-                    label.layer.borderWidth = 1 / chart.view.traitCollection.displayScale
                     label.layer.cornerRadius = label.frame.size.height / 2
-                    label.backgroundColor = UIColor.whiteColor()
+                    label.layer.borderWidth = 1 / max(1, chart.view.traitCollection.displayScale)
 
-                    containerView.addSubview(label)
+                    if label.superview == nil {
+                        label.textColor = tintColor
+                        label.layer.borderColor = tintColor.CGColor
+
+                        containerView.addSubview(label)
+                    }
                 }
 
                 if let text = chartPointModel.chartPoint.x.labels.first?.text {
-                    let label = UILabel()
-                    label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+                    let label = self.labelX
                     label.text = text
-                    label.textColor = UIColor.secondaryLabelColor
                     label.sizeToFit()
                     label.center = CGPoint(x: chartPointModel.screenLoc.x, y: xAxisOverlayView.center.y)
                     label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
 
-                    containerView.addSubview(label)
+                    if label.superview == nil {
+                        containerView.addSubview(label)
+                    }
                 }
                 
                 return containerView
             }
         )
-
     }
 }
