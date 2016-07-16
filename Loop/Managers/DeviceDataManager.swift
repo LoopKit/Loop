@@ -583,7 +583,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 }
 
                 if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
-                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
+                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, workoutRange: glucoseTargetRangeSchedule.workoutRange, timeZone: pumpTimeZone)
                 }
             }
         case "pumpModel"?:
@@ -720,15 +720,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             return false
         }
 
-        // Hardcoded: 160-180 mg/dL for 1 hour.
-        let endDate = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: 1))
-        let unit = HKUnit.milligramsPerDeciliterUnit()
-        let targets = DoubleRange(
-            minValue: HKQuantity(unit: unit, doubleValue: 160).doubleValueForUnit(glucoseTargetRangeSchedule.unit),
-            maxValue: HKQuantity(unit: unit, doubleValue: 180).doubleValueForUnit(glucoseTargetRangeSchedule.unit)
-        )
-
-        glucoseTargetRangeSchedule.setOverride(targets, untilDate: endDate)
+        let endDate = NSDate(timeIntervalSinceNow: duration)
+        glucoseTargetRangeSchedule.setWorkoutOverrideUntilDate(endDate)
 
         NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
 

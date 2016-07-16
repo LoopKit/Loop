@@ -236,7 +236,7 @@ class StatusChartsManager {
         let allPoints = glucosePoints + predictedGlucosePoints
 
         // TODO: The segment/multiple values are unit-specific
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints + targetOverridePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
