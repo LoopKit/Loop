@@ -506,7 +506,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     let numberValue = NSNumber(double: iob).descriptionWithLocale(locale)
                     cell.detailTextLabel?.text = "\(numberValue) Units"
                 } else {
-                    cell.detailTextLabel?.text = emptyValueString
+                    //x22 BIoB Value from IOB Chart Decay Data
+                    dataManager.doseStore.getInsulinOnBoardValues(startDate: NSDate(), endDate: NSDate().dateByAddingTimeInterval(300)) { (values, error) -> Void in
+                        if let error = error {
+                            self.dataManager.logger.addError(error, fromSource: "DoseStore")
+                        }else{
+                            cell.detailTextLabel?.text = "\(NSString(format: "%.2f", values[0].value)) Units"
+                        }
+                    }
                 }
             }
 
