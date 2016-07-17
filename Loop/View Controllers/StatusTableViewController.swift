@@ -25,22 +25,28 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         let application = UIApplication.sharedApplication()
 
         notificationObservers += [
-            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: nil) { (note) -> Void in
+            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: nil) { _ in
                 dispatch_async(dispatch_get_main_queue()) {
                     self.needsRefresh = true
                     self.loopCompletionHUD.loopInProgress = false
-                    self.reloadData()
+                    self.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserverForName(LoopDataManager.LoopRunningNotification, object: dataManager.loopManager, queue: nil) { (note) in
+            notificationCenter.addObserverForName(LoopDataManager.LoopRunningNotification, object: dataManager.loopManager, queue: nil) { _ in
                 dispatch_async(dispatch_get_main_queue()) {
                     self.loopCompletionHUD.loopInProgress = true
                 }
             },
-            notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+            notificationCenter.addObserverForName(DeviceDataManager.LoopSettingsUpdatedNotification, object: dataManager, queue: nil) { _ in
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.needsRefresh = true
+                    self.reloadData(animated: true)
+                }
+            },
+            notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { _ in
                 self.active = false
             },
-            notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { (note) -> Void in
+            notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { _ in
                 self.active = true
             }
         ]
@@ -49,6 +55,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
         chartPanGestureRecognizer.delegate = self
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
+
+        // Toolbar
+        toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
+        toolbarItems![2].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
+        toolbarItems![6].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
     }
 
     deinit {
@@ -113,7 +124,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var reloading = false
 
-    private func reloadData() {
+    private func reloadData(animated animated: Bool = false) {
         if active && visible && needsRefresh {
             needsRefresh = false
             reloading = true
@@ -205,11 +216,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
+            workoutMode = dataManager.workoutModeEnabled
+
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
                 self.charts.prerender()
 
                 self.tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Charts.rawValue, 2)),
-                    withRowAnimation: .None
+                    withRowAnimation: animated ? .Fade : .None
                 )
 
                 self.reloading = false
@@ -319,6 +332,20 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 } else {
                     cell.accessoryView = nil
                 }
+            }
+        }
+    }
+
+    private var workoutMode: Bool? = nil {
+        didSet {
+            guard oldValue != workoutMode else {
+                return
+            }
+
+            if let workoutMode = workoutMode {
+                toolbarItems![4] = createWorkoutButtonItem(selected: workoutMode)
+            } else {
+                toolbarItems![4].enabled = false
             }
         }
     }
@@ -701,6 +728,23 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     @IBAction func unwindFromSettings(segue: UIStoryboardSegue) {
         
+    }
+
+    private func createWorkoutButtonItem(selected selected: Bool) -> UIBarButtonItem {
+        let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .Plain, target: self, action: #selector(toggleWorkoutMode(_:)))
+        item.accessibilityLabel = NSLocalizedString("Workout Mode", comment: "The label of the workout mode toggle button")
+        item.accessibilityHint = selected ? NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled") : NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+
+        return item
+    }
+
+    @IBAction func toggleWorkoutMode(sender: UIBarButtonItem) {
+        // TODO: Display an action sheet to select a duration
+        if let workoutModeEnabled = workoutMode where workoutModeEnabled {
+            dataManager.disableWorkoutMode()
+        } else {
+            dataManager.enableWorkoutMode(duration: NSTimeInterval(hours: 1))
+        }
     }
 
     // MARK: - HUDs

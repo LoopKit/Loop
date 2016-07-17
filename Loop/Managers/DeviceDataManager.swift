@@ -31,6 +31,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
+    /// Notification posted by the instance when loop configuration was changed
+    static let LoopSettingsUpdatedNotification = "com.loudnate.Naterade.notification.LoopSettingsUpdated"
+
     // MARK: - Utilities
 
     let logger = DiagnosticLogger()
@@ -289,11 +292,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             switch result {
             case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                //                    if let error = error {
-                //                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                //                    }
-                //                }
+//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, $0.pumpEvent.rawData, $0.isMutable()) })) { (error) in
+//                    if let error = error {
+//                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+//                    }
+//                }
 
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
@@ -580,7 +583,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 }
 
                 if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
-                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
+                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, workoutRange: glucoseTargetRangeSchedule.workoutRange, timeZone: pumpTimeZone)
                 }
             }
         case "pumpModel"?:
@@ -692,8 +695,43 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
 
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
+    }
+
+    var workoutModeEnabled: Bool? {
+        guard let range = glucoseTargetRangeSchedule else {
+            return nil
+        }
+
+        guard let override = range.temporaryOverride else {
+            return false
+        }
+
+        return override.endDate.timeIntervalSinceNow > 0
+    }
+
+    /// Attempts to enable workout glucose targets for the given duration, and returns true if successful.
+    /// TODO: This can live on the schedule itself once its a value type, since didSet would invoke when mutated.
+    func enableWorkoutMode(duration duration: NSTimeInterval) -> Bool {
+        guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule else {
+            return false
+        }
+
+        let endDate = NSDate(timeIntervalSinceNow: duration)
+        glucoseTargetRangeSchedule.setWorkoutOverrideUntilDate(endDate)
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
+        return true
+    }
+
+    func disableWorkoutMode() {
+        glucoseTargetRangeSchedule?.clearOverride()
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
     }
 
     var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
@@ -804,4 +842,39 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 }
+
+/*
+ History parsing scratch.
+
+func translate(event: TimestampedHistoryEvent) -> DoseEntry? {
+
+    switch event.pumpEvent {
+    case let bolus as BolusNormalPumpEvent:
+        InsulinKit.PumpEventType.Bolus
+
+        let unit: DoseUnit
+
+        switch bolus.type {
+        case .Normal:
+            unit = .Units
+        case .Square:
+            unit = .UnitsPerHour
+        }
+
+        return DoseEntry(type: .Bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+    case let suspend as SuspendPumpEvent:
+        InsulinKit.PumpEventType.Suspend
+    case let resume as ResumePumpEvent:
+//        InsulinKit.PumpEventType.Resume
+        break
+    case let temp as TempBasalPumpEvent:
+        InsulinKit.PumpEventType.TempBasal
+    default:
+        break
+    }
+
+    return nil
+}
+*/
+
 
