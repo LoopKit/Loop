@@ -127,6 +127,7 @@
 		43EDDBF31C361C75007D89B5 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43EDDBF11C361C75007D89B5 /* xDripG5.framework */; };
 		43F41C331D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */; };
 		43F41C351D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */; };
+		43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C361D3BF32400C11ED6 /* UIAlertController.swift */; };
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
@@ -340,6 +341,7 @@
 		43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Loop.entitlements; sourceTree = "<group>"; };
 		43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleUnit.swift; sourceTree = "<group>"; };
 		43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
+		43F41C361D3BF32400C11ED6 /* UIAlertController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIAlertController.swift; sourceTree = "<group>"; };
 		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -586,6 +588,7 @@
 				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
+				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
@@ -995,6 +998,7 @@
 				438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */,
 				43DBF0571C93F6EB00B3C386 /* ReservoirTableViewController.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
+				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				437CEEBC1CD6DE6A003C8C80 /* HUDView.swift in Sources */,
 				434F545F1D288345002A9274 /* ShareService.swift in Sources */,
 				4354003A1C9FB81100D5819C /* UIColor.swift in Sources */,
