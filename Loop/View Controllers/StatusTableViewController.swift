@@ -485,7 +485,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             switch SensorRow(rawValue: indexPath.row)! {
             case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last Sensor", comment: "The title of the cell containing the last updated sensor date")
+                cell.textLabel?.text = NSLocalizedString("Latest CGM", comment: "The title of the cell containing the last updated sensor date")
 
                 if let date = dataManager.glucoseStore?.latestGlucose?.startDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
