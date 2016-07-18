@@ -713,14 +713,13 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         return override.endDate.timeIntervalSinceNow > 0
     }
 
-    /// Attempts to enable workout glucose targets for the given duration, and returns true if successful.
+    /// Attempts to enable workout glucose targets until the given date, and returns true if successful.
     /// TODO: This can live on the schedule itself once its a value type, since didSet would invoke when mutated.
-    func enableWorkoutMode(duration duration: NSTimeInterval) -> Bool {
+    func enableWorkoutMode(until endDate: NSDate) -> Bool {
         guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule else {
             return false
         }
 
-        let endDate = NSDate(timeIntervalSinceNow: duration)
         glucoseTargetRangeSchedule.setWorkoutOverrideUntilDate(endDate)
 
         NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
