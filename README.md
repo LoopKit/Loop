@@ -49,6 +49,11 @@ Please understand that this project:
       <td>✅<sup><a href="#hw2">2</a></sup></td>
       <td>✅</td>
     </tr>
+    <tr>
+      <th>MM CGM</th>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
   </tbody>
 </table>
 

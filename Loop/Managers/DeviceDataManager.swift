@@ -147,6 +147,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
      */
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
         status.pumpDateComponents.timeZone = pumpState?.timeZone
+        status.glucoseDateComponents?.timeZone = pumpState?.timeZone
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
         guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
@@ -156,6 +157,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         latestPumpStatus = status
 
         backfillGlucoseFromShareIfNeeded()
+
+        // Minimed sensor glucose
+        switch status.glucose {
+        case .Active(glucose: let glucose):
+            if let date = status.glucoseDateComponents?.date {
+                glucoseStore?.addGlucose(
+                    HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose)),
+                    date: date,
+                    displayOnly: false,
+                    device: nil
+                ) { (success, sample, error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
+            }
+        default:
+            break
+        }
 
         // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0)) {
@@ -301,7 +323,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
 
-
                 var lastFinalDate: NSDate?
                 var firstMutableDate: NSDate?
 
@@ -317,11 +338,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 } else if let finalDate = lastFinalDate {
                     self.observingPumpEventsSince = finalDate
                 }
-
-
             case .Failure(let error):
                 self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
-                self.troubleshootPumpCommsWithDevice(device)
+
+                // Continue with the loop anyway
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
         }
     }
