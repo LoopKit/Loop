@@ -19,7 +19,7 @@ class RemoteDataManager {
 
     var nightscoutService: NightscoutService {
         didSet {
-            try! keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
+            keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
         }
     }
 
@@ -57,7 +57,7 @@ class RemoteDataManager {
             APISecret = settings?["NightscoutAPISecret"],
             siteURL = NSURL(string: siteURLString)
         {
-            try! keychain.setNightscoutURL(siteURL, secret: APISecret)
+            keychain.setNightscoutURL(siteURL, secret: APISecret)
             nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
         } else {
             nightscoutService = NightscoutService(siteURL: nil, APISecret: nil)

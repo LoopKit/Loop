@@ -577,7 +577,6 @@
 		43E344A01B9E144300C85C07 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				C51F56111D3B91CD004C46ED /* PumpModel.swift */,
 				4331E0771C85302200FBE832 /* CGPoint.swift */,
 				4346D1F51C78501000ABAFE3 /* ChartPoint.swift */,
 				43649A621C7A347F00523D7F /* CollectionType.swift */,
@@ -588,6 +587,7 @@
 				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
+				C51F56111D3B91CD004C46ED /* PumpModel.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,

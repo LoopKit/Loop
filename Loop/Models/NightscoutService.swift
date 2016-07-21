@@ -66,9 +66,17 @@ struct NightscoutService: ServiceAuthentication {
             return
         }
 
-        self.uploader = NightscoutUploader(siteURL: siteURL.absoluteString, APISecret: APISecret)
-        isAuthorized = true
-        completion(success: true, error: nil)
+        let uploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret)
+        uploader.checkAuth { (error) in
+            if let error = error {
+                self.isAuthorized = false
+                completion(success: false, error: error)
+            } else {
+                self.isAuthorized = true
+                completion(success: true, error: nil)
+            }
+        }
+        self.uploader = uploader
     }
 
     mutating func reset() {
