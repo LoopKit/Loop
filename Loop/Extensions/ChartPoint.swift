@@ -52,6 +52,52 @@ extension ChartPoint {
 
         return maxPoints + minPoints.reverse()
     }
+
+    static func pointsForGlucoseRangeScheduleOverrideDuration(override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let startDate = NSDate()
+
+        guard override.endDate.timeIntervalSinceDate(startDate) > 0,
+            let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
+        else {
+            return []
+        }
+
+        let dateFormatter = NSDateFormatter()
+        let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
+        let endDateAxisValue = ChartAxisValueDate(date: lastXAxisValue.date.earlierDate(override.endDate), formatter: dateFormatter)
+        let minValue = ChartAxisValueDouble(override.value.minValue)
+        let maxValue = ChartAxisValueDouble(override.value.maxValue)
+
+        return [
+            ChartPoint(x: startDateAxisValue, y: maxValue),
+            ChartPoint(x: endDateAxisValue, y: maxValue),
+            ChartPoint(x: endDateAxisValue, y: minValue),
+            ChartPoint(x: startDateAxisValue, y: minValue)
+        ]
+    }
+
+    static func pointsForGlucoseRangeScheduleOverride(override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let startDate = NSDate()
+
+        guard override.endDate.timeIntervalSinceDate(startDate) > 0,
+            let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
+            else {
+                return []
+        }
+
+        let dateFormatter = NSDateFormatter()
+        let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
+        let endDateAxisValue = ChartAxisValueDate(date: lastXAxisValue.date, formatter: dateFormatter)
+        let minValue = ChartAxisValueDouble(override.value.minValue)
+        let maxValue = ChartAxisValueDouble(override.value.maxValue)
+
+        return [
+            ChartPoint(x: startDateAxisValue, y: maxValue),
+            ChartPoint(x: endDateAxisValue, y: maxValue),
+            ChartPoint(x: endDateAxisValue, y: minValue),
+            ChartPoint(x: startDateAxisValue, y: minValue)
+        ]
+    }
 }
 
 

@@ -157,7 +157,8 @@ class DoseMath {
         let minGlucose = glucose.minElement { $0.quantity < $1.quantity }!
 
         let eventualGlucoseTargets = glucoseTargetRange.valueAt(eventualGlucose.startDate)
-        let minGlucoseTargets = glucoseTargetRange.valueAt(minGlucose.startDate)
+        // Use between to opt-out of the override.
+        let minGlucoseTargets = glucoseTargetRange.between(minGlucose.startDate, minGlucose.startDate).first!.value
 
         guard minGlucose.quantity.doubleValueForUnit(glucoseTargetRange.unit) >= minGlucoseTargets.minValue else {
             return 0

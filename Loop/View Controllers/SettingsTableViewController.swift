@@ -425,6 +425,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
+                    scheduleVC.workoutRange = schedule.workoutRange
 
                     showViewController(scheduleVC, sender: sender)
                 } else if let glucoseStore = dataManager.glucoseStore {
@@ -583,7 +584,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                     }
                 case .GlucoseTargetRange:
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                        dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, workoutRange: controller.workoutRange, timeZone: controller.timeZone)
                     }
                 case let row:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {

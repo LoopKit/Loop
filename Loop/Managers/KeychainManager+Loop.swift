@@ -45,16 +45,16 @@ extension KeychainManager {
         }
     }
 
-    func setNightscoutURL(URL: NSURL?, secret: String?) throws {
+    func setNightscoutURL(URL: NSURL?, secret: String?) {
+        let credentials: InternetCredentials?
+
+        if let URL = URL, secret = secret {
+            credentials = InternetCredentials(username: NightscoutAccount, password: secret, URL: URL)
+        } else {
+            credentials = nil
+        }
+
         do {
-            let credentials: InternetCredentials?
-
-            if let URL = URL, secret = secret {
-                credentials = InternetCredentials(username: NightscoutAccount, password: secret, URL: URL)
-            } else {
-                credentials = nil
-            }
-
             try replaceInternetCredentials(credentials, forAccount: NightscoutAccount)
         } catch {
         }
