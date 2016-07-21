@@ -1,4 +1,5 @@
 # Loop is released under the MIT license (MIT)
+With exceptions for frameworks and graphics, noted below.
 
 Copyright (c) 2015 Nathan Racklyeft
 
@@ -276,3 +277,13 @@ SwiftCharts is Copyright (c) 2015 Ivan Schütz and released as open source under
 >    See the License for the specific language governing permissions and
 >    limitations under the License.
 > 
+
+# Graphics licensed under CC BY-SA 4.0
+
+## "Carbs Fork"
+
+Designed by Sara Krugman
+
+(C) 2015 Boston University and Tidepool Project
+
+https://creativecommons.org/licenses/by-sa/4.0/

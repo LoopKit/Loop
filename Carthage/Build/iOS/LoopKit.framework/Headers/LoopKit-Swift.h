@@ -116,7 +116,7 @@ SWIFT_CLASS("_TtC7LoopKit37DailyValueScheduleTableViewController")
 - (void)viewWillDisappear:(BOOL)animated;
 - (UIBarButtonItem * _Nonnull)insertButtonItem;
 @property (nonatomic, strong) NSTimeZone * _Nonnull timeZone;
-@property (nonatomic, copy) NSString * _Nonnull unitString;
+@property (nonatomic, copy) NSString * _Nonnull unitDisplayString;
 - (NSInteger)numberOfSectionsInTableView:(UITableView * _Nonnull)tableView;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section;
 - (BOOL)tableView:(UITableView * _Nonnull)tableView canEditRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
@@ -159,12 +159,20 @@ SWIFT_CLASS("_TtC7LoopKit39GlucoseRangeScheduleTableViewController")
 @interface GlucoseRangeScheduleTableViewController : DailyValueScheduleTableViewController
 @property (nonatomic, strong) HKUnit * _Nonnull unit;
 - (void)viewDidLoad;
+- (NSInteger)numberOfSectionsInTableView:(UITableView * _Nonnull)tableView;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section;
 - (UITableViewCell * _Nonnull)tableView:(UITableView * _Nonnull)tableView cellForRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
 - (void)tableView:(UITableView * _Nonnull)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
 - (void)tableView:(UITableView * _Nonnull)tableView moveRowAtIndexPath:(NSIndexPath * _Nonnull)sourceIndexPath toIndexPath:(NSIndexPath * _Nonnull)destinationIndexPath;
+- (BOOL)tableView:(UITableView * _Nonnull)tableView canEditRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
+- (BOOL)tableView:(UITableView * _Nonnull)tableView canMoveRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
+- (NSString * _Nullable)tableView:(UITableView * _Nonnull)tableView titleForHeaderInSection:(NSInteger)section;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+@interface GlucoseRangeScheduleTableViewController (SWIFT_EXTENSION(LoopKit))
 @end
 
 
@@ -178,6 +186,9 @@ SWIFT_CLASS("_TtC7LoopKit39GlucoseRangeScheduleTableViewController")
 
 /// A formatting helper for determining the preferred decimal style for a given unit
 @property (nonatomic, readonly) NSInteger preferredMinimumFractionDigits;
+
+/// A presentation helper for the localized unit string
+@property (nonatomic, readonly, copy) NSString * _Nonnull glucoseUnitDisplayString;
 @end
 
 

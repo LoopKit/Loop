@@ -39,7 +39,7 @@ Please understand that this project:
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2">CGM</th>
+      <th rowspan="3">CGM</th>
       <th>Dexcom G4 + Share</th>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw1">1</a></sup></td>
@@ -49,11 +49,17 @@ Please understand that this project:
       <td>✅<sup><a href="#hw2">2</a></sup></td>
       <td>✅</td>
     </tr>
+    <tr>
+      <th>MM CGM</th>
+      <td>❌<sup><a href="#hw3">3</a></sup></td>
+      <td>✅</td>
+    </tr>
   </tbody>
 </table>
 
 <br/><a name="hw1">1</a>. Internet connection required to retrieve glucose
 <br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
+<br/><a name="hw3">3</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
 
 ### RileyLink
 
