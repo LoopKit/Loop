@@ -31,6 +31,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
     /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
 
+    /// Notification posted by the instance when loop configuration was changed
+    static let LoopSettingsUpdatedNotification = "com.loudnate.Naterade.notification.LoopSettingsUpdated"
+
     // MARK: - Utilities
 
     let logger = DiagnosticLogger()
@@ -144,6 +147,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
      */
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
         status.pumpDateComponents.timeZone = pumpState?.timeZone
+        status.glucoseDateComponents?.timeZone = pumpState?.timeZone
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
         guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
@@ -153,6 +157,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         latestPumpStatus = status
 
         backfillGlucoseFromShareIfNeeded()
+
+        // Minimed sensor glucose
+        switch status.glucose {
+        case .Active(glucose: let glucose):
+            if let date = status.glucoseDateComponents?.date {
+                glucoseStore?.addGlucose(
+                    HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose)),
+                    date: date,
+                    displayOnly: false,
+                    device: nil
+                ) { (success, sample, error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
+            }
+        default:
+            break
+        }
 
         // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0)) {
@@ -289,15 +314,14 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             switch result {
             case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                //                    if let error = error {
-                //                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                //                    }
-                //                }
+//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, $0.pumpEvent.rawData, $0.isMutable()) })) { (error) in
+//                    if let error = error {
+//                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+//                    }
+//                }
 
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
-
 
                 var lastFinalDate: NSDate?
                 var firstMutableDate: NSDate?
@@ -314,11 +338,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 } else if let finalDate = lastFinalDate {
                     self.observingPumpEventsSince = finalDate
                 }
-
-
             case .Failure(let error):
                 self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
-                self.troubleshootPumpCommsWithDevice(device)
+
+                // Continue with the loop anyway
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
         }
     }
@@ -580,7 +604,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 }
 
                 if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
-                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
+                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, workoutRange: glucoseTargetRangeSchedule.workoutRange, timeZone: pumpTimeZone)
                 }
             }
         case "pumpModel"?:
@@ -692,8 +716,42 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
 
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
+    }
+
+    var workoutModeEnabled: Bool? {
+        guard let range = glucoseTargetRangeSchedule else {
+            return nil
+        }
+
+        guard let override = range.temporaryOverride else {
+            return false
+        }
+
+        return override.endDate.timeIntervalSinceNow > 0
+    }
+
+    /// Attempts to enable workout glucose targets until the given date, and returns true if successful.
+    /// TODO: This can live on the schedule itself once its a value type, since didSet would invoke when mutated.
+    func enableWorkoutMode(until endDate: NSDate) -> Bool {
+        guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule else {
+            return false
+        }
+
+        glucoseTargetRangeSchedule.setWorkoutOverrideUntilDate(endDate)
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
+        return true
+    }
+
+    func disableWorkoutMode() {
+        glucoseTargetRangeSchedule?.clearOverride()
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
     }
 
     var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
@@ -804,4 +862,39 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 }
+
+/*
+ History parsing scratch.
+
+func translate(event: TimestampedHistoryEvent) -> DoseEntry? {
+
+    switch event.pumpEvent {
+    case let bolus as BolusNormalPumpEvent:
+        InsulinKit.PumpEventType.Bolus
+
+        let unit: DoseUnit
+
+        switch bolus.type {
+        case .Normal:
+            unit = .Units
+        case .Square:
+            unit = .UnitsPerHour
+        }
+
+        return DoseEntry(type: .Bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+    case let suspend as SuspendPumpEvent:
+        InsulinKit.PumpEventType.Suspend
+    case let resume as ResumePumpEvent:
+//        InsulinKit.PumpEventType.Resume
+        break
+    case let temp as TempBasalPumpEvent:
+        InsulinKit.PumpEventType.TempBasal
+    default:
+        break
+    }
+
+    return nil
+}
+*/
+
 

@@ -38,4 +38,8 @@ extension UIImage {
     static func reservoirHUDImageWithLevel(level: Double?) -> UIImage? {
         return UIImage(named: "reservoir_\(imageSuffixForLevel(level))")
     }
+
+    static func workoutImage(selected selected: Bool) -> UIImage? {
+        return UIImage(named: selected ? "workout-selected" : "workout")
+    }
 }
