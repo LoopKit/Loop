@@ -19,14 +19,8 @@ class AnalyticsManager {
     }
 
     init() {
-        // Migrate RemoteSettings.plist to the Keychain
-        let keychain = KeychainManager()
-
-        if let APIKey = keychain.getAmplitudeAPIKey() {
+        if let APIKey = KeychainManager().getAmplitudeAPIKey() {
             amplitudeService = AmplitudeService(APIKey: APIKey)
-        } else if let settings = NSBundle.mainBundle().remoteSettings, key = settings["AmplitudeAPIKey"] where !key.isEmpty {
-            try! keychain.setAmplitudeAPIKey(key)
-            amplitudeService = AmplitudeService(APIKey: key)
         } else {
             amplitudeService = AmplitudeService(APIKey: nil)
         }
