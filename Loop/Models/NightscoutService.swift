@@ -47,7 +47,7 @@ struct NightscoutService: ServiceAuthentication {
     }
 
     var siteURL: NSURL? {
-        if let URLString = credentials[0].value {
+        if let URLString = credentials[0].value where !URLString.isEmpty {
             return NSURL(string: URLString)
         }
 
