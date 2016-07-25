@@ -29,7 +29,7 @@ Please understand that this project:
 <table>
   <thead>
     <tr>
-      <td colspan="2" rowspan="2"></td>
+      <td colspan="2" rowspan="3"></td>
       <th colspan="2">Insulin Pump</th>
     </tr>
     <tr>
@@ -39,7 +39,7 @@ Please understand that this project:
   </thead>
   <tbody>
     <tr>
-      <th rowspan="3">CGM</th>
+      <th rowspan="4">CGM</th>
       <th>Dexcom G4 + Share</th>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw1">1</a></sup></td>
@@ -47,6 +47,11 @@ Please understand that this project:
     <tr>
       <th>Dexcom G5</th>
       <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <th>Dexcom G4 without Share</th>
+      <td>✅<sup><a href="#hw2">124</a></sup></td>
       <td>✅</td>
     </tr>
     <tr>
@@ -60,6 +65,7 @@ Please understand that this project:
 <br/><a name="hw1">1</a>. Internet connection required to retrieve glucose
 <br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
 <br/><a name="hw3">3</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
+<br/><a name="hw3">4</a>. Requires CGM data to be uploaded to Dexcom Share servers - and then downloaded into loop.  At time of writing this has been tested using xDrip+ (https://github.com/jamorham/xDrip-plus).
 
 ### RileyLink
 
