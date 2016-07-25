@@ -1,0 +1,10 @@
+framework module xDripG4Share {
+  umbrella header "xDripG4Share.h"
+
+  export *
+  module * { export * }
+}
+
+module xDripG4Share.Swift {
+    header "xDripG4Share-Swift.h"
+}
