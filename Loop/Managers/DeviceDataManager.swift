@@ -578,12 +578,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             return
         }
 
-        let validGlucose = glucoseHistory.map({
+        let validGlucose = glucoseHistory.flatMap({
             ReceiverGlucose(glucoseRecord: $0)
-        }).filter({
-            $0 != nil
         }).map({
-            (quantity: $0!.quantity, date: $0!.startDate, displayOnly: $0!.displayOnly)
+            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.displayOnly)
         }).filter({
             // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
             $0.date > glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
