@@ -19,17 +19,7 @@ class DiagnosticLogger {
     }
 
     init() {
-        let keychain = KeychainManager()
-
-        // Migrate RemoteSettings.plist to the Keychain
-        if let (databaseName, APIKey) = keychain.getMLabCredentials() {
-            mLabService = MLabService(databaseName: databaseName, APIKey: APIKey)
-        } else if let settings = NSBundle.mainBundle().remoteSettings,
-            APIKey = settings["mLabAPIKey"],
-            APIPath = settings["mLabAPIPath"] where !APIKey.isEmpty
-        {
-            let databaseName = APIPath.componentsSeparatedByString("/")[1]
-            try! keychain.setMLabDatabaseName(databaseName, APIKey: APIKey)
+        if let (databaseName, APIKey) = KeychainManager().getMLabCredentials() {
             mLabService = MLabService(databaseName: databaseName, APIKey: APIKey)
         } else {
             mLabService = MLabService(databaseName: nil, APIKey: nil)
