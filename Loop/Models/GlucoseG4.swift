@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import xDripG4Share
+import G4ShareSpy
 
 
 let TREND_TO_DESCRIPTION: [UInt8: String] = [

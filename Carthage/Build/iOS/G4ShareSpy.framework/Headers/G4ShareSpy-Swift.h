@@ -98,15 +98,15 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 #pragma clang diagnostic ignored "-Wduplicate-method-arg"
 
-@interface NSData (SWIFT_EXTENSION(xDripG4Share))
+@interface NSData (SWIFT_EXTENSION(G4ShareSpy))
 @end
 
 
-@interface NSData (SWIFT_EXTENSION(xDripG4Share))
+@interface NSData (SWIFT_EXTENSION(G4ShareSpy))
 @end
 
 
-@interface NSDate (SWIFT_EXTENSION(xDripG4Share))
+@interface NSDate (SWIFT_EXTENSION(G4ShareSpy))
 @end
 
 #pragma clang diagnostic pop

@@ -6,9 +6,9 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import G4ShareSpy
 import HealthKit
 import LoopKit
-import xDripG4Share
 
 
 struct ReceiverGlucose: GlucoseValue {

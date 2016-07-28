@@ -8,6 +8,7 @@
 
 import Foundation
 import CarbKit
+import G4ShareSpy
 import GlucoseKit
 import HealthKit
 import InsulinKit
@@ -16,7 +17,6 @@ import MinimedKit
 import NightscoutUploadKit
 import RileyLinkKit
 import ShareClient
-import xDripG4Share
 import xDripG5
 
 private enum State<T> {
@@ -592,7 +592,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
-        let device = HKDevice(name: "xDripG4Share", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG4ShareVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
+        let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
 
         glucoseStore.addGlucoseValues(validGlucose, device: device, resultHandler: { (_, _, error) -> Void in
             if let error = error {
@@ -609,7 +609,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         assertCurrentPumpData()
     }
 
-    func receiver(receiver: Receiver, didReceiveHeartbeat heartbeat: Bool) {}
+    func receiver(receiver: Receiver, didLogBluetoothEvent event: String) {
+        NSLog("G4: \(event)")
+    }
 
     // MARK: - Configuration
 
