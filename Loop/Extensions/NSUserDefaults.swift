@@ -26,6 +26,7 @@ extension NSUserDefaults {
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
+        case ReceiverEnabled = "com.loudnate.Naterade.ReceiverEnabled"
         case TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
     }
@@ -189,6 +190,15 @@ extension NSUserDefaults {
             } else {
                 removeObjectForKey(Key.PumpTimeZone.rawValue)
             }
+        }
+    }
+
+    var receiverEnabled: Bool {
+        get {
+            return boolForKey(Key.ReceiverEnabled.rawValue)
+        }
+        set {
+            setObject(newValue, forKey: Key.ReceiverEnabled.rawValue)
         }
     }
 
