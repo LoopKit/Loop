@@ -164,7 +164,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .PreferredInsulinDataSource:
                 let segmentCell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.className, forIndexPath: indexPath) as! SegmentedControlTableViewCell
 
-                segmentCell.titleLabel.text = NSLocalizedString("Nightscout history uploading", comment: "The title text for the preferred insulin data source config")
+                segmentCell.titleLabel.text = NSLocalizedString("Nightscout History Upload", comment: "The title text for the preferred insulin data source config")
                 segmentCell.segmentedControl.selectedSegmentIndex = dataManager.preferredInsulinDataSource.rawValue
                 segmentCell.segmentedControl.addTarget(self, action: #selector(preferredInsulinDataSourceChanged(_:)), forControlEvents: .ValueChanged)
 
@@ -308,8 +308,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
         case .Loop:
-            let version = NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString")!
-            return "Loop iOS v\(version)"
+            let bundle = NSBundle.mainBundle()
+            return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundle.bundleDisplayName, bundle.shortVersionString)
         case .Configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
