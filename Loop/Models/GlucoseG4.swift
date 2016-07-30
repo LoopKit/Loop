@@ -8,24 +8,47 @@
 
 import Foundation
 import G4ShareSpy
+import HealthKit
+import LoopKit
 
-
-let TREND_TO_DESCRIPTION: [UInt8: String] = [
-    1: "⇈",
-    2: "↑",
-    3: "↗",
-    4: "→",
-    5: "↘",
-    6: "↓",
-    7: "⇊",
-]
 
 extension GlucoseG4 {
-    var trendDescription: String {
-        if let direction = TREND_TO_DESCRIPTION[trend] {
-            return direction
+    var isValid: Bool {
+        return glucose >= 20
+    }
+}
+
+
+extension GlucoseG4: GlucoseValue {
+    public var quantity: HKQuantity {
+        return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
+    }
+
+    public var startDate: NSDate {
+        return time
+    }
+}
+
+
+extension GlucoseG4: SensorDisplayable {
+    var stateDescription: String {
+        if isValid {
+            return "✓"
         } else {
-            return ""
+            return String(format: "%02x", glucose)
+        }
+    }
+
+    var trendDescription: String {
+        switch trend {
+        case 1: return "⇈"
+        case 2: return "↑"
+        case 3: return "↗"
+        case 4: return "→"
+        case 5: return "↘"
+        case 6: return "↓"
+        case 7: return "⇊"
+        default: return ""
         }
     }
 }

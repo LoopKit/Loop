@@ -74,6 +74,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
+    var sensorInfo: SensorDisplayable? {
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatus
+    }
+
     // MARK: - RileyLink
 
     @objc private func receivedRileyLinkManagerNotification(note: NSNotification) {
@@ -463,7 +467,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: TransmitterDelegate
 
-    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
+    func transmitter(transmitter: xDripG5.Transmitter, didError error: ErrorType) {
         logger.addMessage([
                 "error": "\(error)",
                 "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
@@ -473,7 +477,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: Transmitter, didReadGlucose glucoseMessage: GlucoseRxMessage) {
+    func transmitter(transmitter: xDripG5.Transmitter, didReadGlucose glucoseMessage: xDripG5.GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
 
         assertCurrentPumpData()
@@ -514,22 +518,22 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
-    var latestGlucoseG5: GlucoseRxMessage?
+    private var latestGlucoseG5: GlucoseRxMessage?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
      
      - parameter completion: An optional closure called after the command is complete.
      */
-    private func backfillGlucoseFromShareIfNeeded(completion completion: (() -> Void)? = nil) {
+    private func backfillGlucoseFromShareIfNeeded(completion: (() -> Void)? = nil) {
         // We should have no G4 Share or G5 data, and a configured ShareClient and GlucoseStore.
         guard latestGlucoseG4 == nil && latestGlucoseG5 == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
             completion?()
             return
         }
 
-        // If our last glucose was less than 4 minutes ago, don't fetch.
-        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4) {
+        // If our last glucose was less than 4.5 minutes ago, don't fetch.
+        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4.5) {
             completion?()
             return
         }
@@ -564,12 +568,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: ReceiverDelegate
 
-    var latestGlucoseG4: GlucoseG4?
+    private var latestGlucoseG4: GlucoseG4?
 
     func receiver(receiver: Receiver, didReadGlucoseHistory glucoseHistory: [GlucoseG4]) {
         assertCurrentPumpData()
 
-        guard let latest = glucoseHistory.sort({ (a, b) in a.sequence < b.sequence }).last where latest != latestGlucoseG4 else {
+        guard let latest = glucoseHistory.sort({ $0.sequence < $1.sequence }).last where latest != latestGlucoseG4 else {
             return
         }
         latestGlucoseG4 = latest
@@ -578,18 +582,14 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             return
         }
 
-        let validGlucose = glucoseHistory.flatMap({
-            ReceiverGlucose(glucoseRecord: $0)
-        }).map({
-            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.displayOnly)
-        }).filter({
-            // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
-            $0.date > glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
-        })
+        // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
+        let includeAfter = glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
 
-        guard validGlucose.count > 0 else {
-            return
-        }
+        let validGlucose = glucoseHistory.flatMap({
+            $0.isValid ? $0 : nil
+        }).filterDateRange(includeAfter, nil).map({
+            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.isDisplayOnly)
+        })
 
         // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
         let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
@@ -610,7 +610,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     }
 
     func receiver(receiver: Receiver, didLogBluetoothEvent event: String) {
-        NSLog("G4: \(event)")
+        // Uncomment to debug communication
+        // NSLog("G4: \(event)")
     }
 
     // MARK: - Configuration
