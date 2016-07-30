@@ -46,20 +46,21 @@ Please understand that this project:
     </tr>
     <tr>
       <th>Dexcom G5</th>
-      <td>✅<sup><a href="#hw2">2</a></sup></td>
-      <td>✅</td>
+      <td>✅<sup><a href="#hw2">2</a> <a href="#hw3">3</a></sup></td>
+      <td>✅<sup><a href="#hw3">3</a></sup></td>
     </tr>
     <tr>
       <th>MM CGM</th>
-      <td>❌<sup><a href="#hw3">3</a></sup></td>
+      <td>❌<sup><a href="#hw4">4</a></sup></td>
       <td>✅</td>
     </tr>
   </tbody>
 </table>
 
 <br/><a name="hw1">1</a>. Offline access to glucose requires a Receiver with Share and the [Share2 app](https://itunes.apple.com/us/app/dexcom-share2/id834775275?mt=8) to be running on the same device. Internet-dependent access via Share servers is also supported.
-<br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
-<br/><a name="hw3">3</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
+<br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu.
+<br/><a name="hw3">3</a>. Early firmware only available on select models is required for using Closed Loop and Bolus features.
+<br/><a name="hw4">4</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
 
 ### RileyLink
 
