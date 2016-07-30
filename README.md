@@ -20,7 +20,7 @@ Please understand that this project:
 <a href="/Documentation/Screenshots/Watch%20Complication.png"><img src="/Documentation/Screenshots/Watch%20Complication.png?raw=true" alt="Screenshot of glucose complication on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Carb%20Entry.png"><img src="/Documentation/Screenshots/Watch%20Carb%20Entry.png?raw=true" alt="Screenshot of carb entry on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Bolus.png"><img src="/Documentation/Screenshots/Watch%20Bolus.png?raw=true" alt="Screenshot of bolus entry on Apple Watch" width="141"></a>
-<a href="/Documentation/Screenshots/Watch%20Notification%20Battery.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Battery.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
+<a href="/Documentation/Screenshots/Watch%20Menu.png"><img src="/Documentation/Screenshots/Watch%20Menu.png?raw=true" alt="Screenshot of the app menu on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 
@@ -29,7 +29,7 @@ Please understand that this project:
 <table>
   <thead>
     <tr>
-      <td colspan="2" rowspan="2"></td>
+      <td colspan="2" rowspan="3"></td>
       <th colspan="2">Insulin Pump</th>
     </tr>
     <tr>
@@ -39,21 +39,28 @@ Please understand that this project:
   </thead>
   <tbody>
     <tr>
-      <th rowspan="2">CGM</th>
-      <th>Dexcom G4 + Share</th>
+      <th rowspan="4">CGM</th>
+      <th>Dexcom G4</th>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw1">1</a></sup></td>
     </tr>
     <tr>
       <th>Dexcom G5</th>
-      <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅<sup><a href="#hw2">2</a> <a href="#hw3">3</a></sup></td>
+      <td>✅<sup><a href="#hw3">3</a></sup></td>
+    </tr>
+    <tr>
+      <th>MM CGM</th>
+      <td>❌<sup><a href="#hw4">4</a></sup></td>
       <td>✅</td>
     </tr>
   </tbody>
 </table>
 
-<br/><a name="hw1">1</a>. Internet connection required to retrieve glucose
-<br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu
+<br/><a name="hw1">1</a>. Offline access to glucose requires a Receiver with Share and the [Share2 app](https://itunes.apple.com/us/app/dexcom-share2/id834775275?mt=8) to be running on the same device. Internet-dependent access via Share servers is also supported.
+<br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu.
+<br/><a name="hw3">3</a>. Early firmware only available on select models is required for using Closed Loop and Bolus features.
+<br/><a name="hw4">4</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
 
 ### RileyLink
 
@@ -83,7 +90,7 @@ Loop optionally supports select third-party remote services, which are configure
 
 | Service                | Description
 | ---------------------- | -------------
-| Dexcom Share           | Downloads glucose data if the G5 transmitter is not available. This is the sole source of glucose data for G4 users.
+| Dexcom Share           | Downloads glucose data if a local G5 Transmitter or G4 Receiver with Share is not available.
 | Nightscout             | Uploads treatments and other pump data. Note you will need to set "Nightscout history uploading" to "On" in Settings for treatments to be fetched from your pump and uploaded to Nightscout.
 | mLab                   | Uploads diagnostic data about each loop run, as well as app errors. At this time, it is strongly recommended that you configure this service in case retrospective analysis is needed.
 | Amplitude              | Tracks private, single-user behavioral and system analytics

@@ -8,6 +8,7 @@
 
 import Foundation
 import CarbKit
+import G4ShareSpy
 import GlucoseKit
 import HealthKit
 import InsulinKit
@@ -24,12 +25,15 @@ private enum State<T> {
 }
 
 
-class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
+class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 
     /// Notification posted by the instance when new pump data was processed
     static let PumpStatusUpdatedNotification = "com.loudnate.Naterade.notification.PumpStatusUpdated"
+
+    /// Notification posted by the instance when loop configuration was changed
+    static let LoopSettingsUpdatedNotification = "com.loudnate.Naterade.notification.LoopSettingsUpdated"
 
     // MARK: - Utilities
 
@@ -52,6 +56,26 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         case .NeedsConfiguration:
             return nil
         }
+    }
+
+    // The Dexcom Share receiver object
+    var receiver: Receiver?
+
+    var receiverEnabled: Bool = false {
+        didSet {
+            if (receiverEnabled) {
+                receiver = Receiver()
+                receiver!.delegate = self
+            } else {
+                receiver = nil
+            }
+            NSUserDefaults.standardUserDefaults().receiverEnabled = receiverEnabled
+            enableRileyLinkHeartbeatIfNeeded()
+        }
+    }
+
+    var sensorInfo: SensorDisplayable? {
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatus
     }
 
     // MARK: - RileyLink
@@ -115,6 +139,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
+    func enableRileyLinkHeartbeatIfNeeded() {
+        if case .Ready = transmitterState {
+            rileyLinkManager.timerTickEnabled = false
+        } else if receiverEnabled {
+            rileyLinkManager.timerTickEnabled = false
+        } else {
+            rileyLinkManager.timerTickEnabled = true
+        }
+    }
+
     // MARK: Pump data
 
     var latestPumpStatus: MySentryPumpStatusMessageBody?
@@ -144,6 +178,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
      */
     private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
         status.pumpDateComponents.timeZone = pumpState?.timeZone
+        status.glucoseDateComponents?.timeZone = pumpState?.timeZone
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
         guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
@@ -153,6 +188,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         latestPumpStatus = status
 
         backfillGlucoseFromShareIfNeeded()
+
+        // Minimed sensor glucose
+        switch status.glucose {
+        case .Active(glucose: let glucose):
+            if let date = status.glucoseDateComponents?.date {
+                glucoseStore?.addGlucose(
+                    HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose)),
+                    date: date,
+                    displayOnly: false,
+                    device: nil
+                ) { (success, sample, error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
+            }
+        default:
+            break
+        }
 
         // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0)) {
@@ -289,15 +345,14 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
             switch result {
             case let .Success(events, pumpModel):
                 // TODO: Surface raw pump event data and add DoseEntry conformance
-                //                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, nil, $0.isMutable()) })) { (error) in
-                //                    if let error = error {
-                //                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                //                    }
-                //                }
+//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, $0.pumpEvent.rawData, $0.isMutable()) })) { (error) in
+//                    if let error = error {
+//                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+//                    }
+//                }
 
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
                 self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
-
 
                 var lastFinalDate: NSDate?
                 var firstMutableDate: NSDate?
@@ -314,11 +369,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 } else if let finalDate = lastFinalDate {
                     self.observingPumpEventsSince = finalDate
                 }
-
-
             case .Failure(let error):
                 self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
-                self.troubleshootPumpCommsWithDevice(device)
+
+                // Continue with the loop anyway
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
         }
     }
@@ -412,7 +467,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     // MARK: TransmitterDelegate
 
-    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
+    func transmitter(transmitter: xDripG5.Transmitter, didError error: ErrorType) {
         logger.addMessage([
                 "error": "\(error)",
                 "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
@@ -422,16 +477,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: Transmitter, didReadGlucose glucoseMessage: GlucoseRxMessage) {
+    func transmitter(transmitter: xDripG5.Transmitter, didReadGlucose glucoseMessage: xDripG5.GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
 
         assertCurrentPumpData()
 
-        guard glucoseMessage != latestGlucoseMessage else {
+        guard glucoseMessage != latestGlucoseG5 else {
             return
         }
 
-        latestGlucoseMessage = glucoseMessage
+        latestGlucoseG5 = glucoseMessage
 
         guard let glucose = TransmitterGlucose(glucoseMessage: glucoseMessage, startTime: transmitter.startTimeInterval), glucoseStore = glucoseStore else {
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -463,22 +518,22 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
-    var latestGlucoseMessage: GlucoseRxMessage?
+    private var latestGlucoseG5: GlucoseRxMessage?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
      
      - parameter completion: An optional closure called after the command is complete.
      */
-    private func backfillGlucoseFromShareIfNeeded(completion completion: (() -> Void)? = nil) {
-        // We should have no G5 data, and a configured ShareClient and GlucoseStore.
-        guard latestGlucoseMessage == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
+    private func backfillGlucoseFromShareIfNeeded(completion: (() -> Void)? = nil) {
+        // We should have no G4 Share or G5 data, and a configured ShareClient and GlucoseStore.
+        guard latestGlucoseG4 == nil && latestGlucoseG5 == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
             completion?()
             return
         }
 
-        // If our last glucose was less than 4 minutes ago, don't fetch.
-        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4) {
+        // If our last glucose was less than 4.5 minutes ago, don't fetch.
+        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4.5) {
             completion?()
             return
         }
@@ -507,6 +562,56 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 completion?()
             }
         }
+    }
+
+    // MARK: - Share Receiver
+
+    // MARK: ReceiverDelegate
+
+    private var latestGlucoseG4: GlucoseG4?
+
+    func receiver(receiver: Receiver, didReadGlucoseHistory glucoseHistory: [GlucoseG4]) {
+        assertCurrentPumpData()
+
+        guard let latest = glucoseHistory.sort({ $0.sequence < $1.sequence }).last where latest != latestGlucoseG4 else {
+            return
+        }
+        latestGlucoseG4 = latest
+
+        guard let glucoseStore = glucoseStore else {
+            return
+        }
+
+        // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
+        let includeAfter = glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
+
+        let validGlucose = glucoseHistory.flatMap({
+            $0.isValid ? $0 : nil
+        }).filterDateRange(includeAfter, nil).map({
+            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.isDisplayOnly)
+        })
+
+        // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
+        let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
+
+        glucoseStore.addGlucoseValues(validGlucose, device: device, resultHandler: { (_, _, error) -> Void in
+            if let error = error {
+                self.logger.addError(error, fromSource: "GlucoseStore")
+            }
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+        })
+    }
+
+    func receiver(receiver: Receiver, didError error: ErrorType) {
+        logger.addMessage(["error": "\(error)", "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())], toCollection: "g4")
+
+        assertCurrentPumpData()
+    }
+
+    func receiver(receiver: Receiver, didLogBluetoothEvent event: String) {
+        // Uncomment to debug communication
+        // NSLog("G4: \(event)")
     }
 
     // MARK: - Configuration
@@ -580,7 +685,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 }
 
                 if let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule {
-                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, timeZone: pumpTimeZone)
+                    self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, workoutRange: glucoseTargetRangeSchedule.workoutRange, timeZone: pumpTimeZone)
                 }
             }
         case "pumpModel"?:
@@ -607,13 +712,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     private var transmitterState: State<Transmitter> = .NeedsConfiguration {
         didSet {
-            switch transmitterState {
-            case .Ready(let transmitter):
+            if case .Ready(let transmitter) = transmitterState {
                 transmitter.delegate = self
-                rileyLinkManager.timerTickEnabled = false
-            case .NeedsConfiguration:
-                rileyLinkManager.timerTickEnabled = true
             }
+            enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
@@ -692,8 +794,42 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         didSet {
             NSUserDefaults.standardUserDefaults().glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
 
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
+    }
+
+    var workoutModeEnabled: Bool? {
+        guard let range = glucoseTargetRangeSchedule else {
+            return nil
+        }
+
+        guard let override = range.temporaryOverride else {
+            return false
+        }
+
+        return override.endDate.timeIntervalSinceNow > 0
+    }
+
+    /// Attempts to enable workout glucose targets until the given date, and returns true if successful.
+    /// TODO: This can live on the schedule itself once its a value type, since didSet would invoke when mutated.
+    func enableWorkoutMode(until endDate: NSDate) -> Bool {
+        guard let glucoseTargetRangeSchedule = glucoseTargetRangeSchedule else {
+            return false
+        }
+
+        glucoseTargetRangeSchedule.setWorkoutOverrideUntilDate(endDate)
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
+
+        return true
+    }
+
+    func disableWorkoutMode() {
+        glucoseTargetRangeSchedule?.clearOverride()
+
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopSettingsUpdatedNotification, object: self)
     }
 
     var maximumBasalRatePerHour: Double? = NSUserDefaults.standardUserDefaults().maximumBasalRatePerHour {
@@ -801,7 +937,43 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         defer {
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
+            receiverEnabled = NSUserDefaults.standardUserDefaults().receiverEnabled
         }
     }
 }
+
+/*
+ History parsing scratch.
+
+func translate(event: TimestampedHistoryEvent) -> DoseEntry? {
+
+    switch event.pumpEvent {
+    case let bolus as BolusNormalPumpEvent:
+        InsulinKit.PumpEventType.Bolus
+
+        let unit: DoseUnit
+
+        switch bolus.type {
+        case .Normal:
+            unit = .Units
+        case .Square:
+            unit = .UnitsPerHour
+        }
+
+        return DoseEntry(type: .Bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+    case let suspend as SuspendPumpEvent:
+        InsulinKit.PumpEventType.Suspend
+    case let resume as ResumePumpEvent:
+//        InsulinKit.PumpEventType.Resume
+        break
+    case let temp as TempBasalPumpEvent:
+        InsulinKit.PumpEventType.TempBasal
+    default:
+        break
+    }
+
+    return nil
+}
+*/
+
 

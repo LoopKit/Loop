@@ -19,6 +19,9 @@ extension NSUserDefaults {
         case DosingEnabled = "com.loudnate.Naterade.DosingEnabled"
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
+        case G4ReceiverEnabled = "com.loudnate.Loop.G4ReceiverEnabled"
+        case G5TransmitterID = "com.loudnate.Naterade.TransmitterID"
+        case G5TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
@@ -26,8 +29,6 @@ extension NSUserDefaults {
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
-        case TransmitterID = "com.loudnate.Naterade.TransmitterID"
-        case TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -192,27 +193,36 @@ extension NSUserDefaults {
         }
     }
 
+    var receiverEnabled: Bool {
+        get {
+            return boolForKey(Key.G4ReceiverEnabled.rawValue)
+        }
+        set {
+            setBool(newValue, forKey: Key.G4ReceiverEnabled.rawValue)
+        }
+    }
+
     var transmitterStartTime: NSTimeInterval? {
         get {
-            let value = doubleForKey(Key.TransmitterStartTime.rawValue)
+            let value = doubleForKey(Key.G5TransmitterStartTime.rawValue)
 
             return value > 0 ? value : nil
         }
         set {
             if let value = newValue {
-                setDouble(value, forKey: Key.TransmitterStartTime.rawValue)
+                setDouble(value, forKey: Key.G5TransmitterStartTime.rawValue)
             } else {
-                removeObjectForKey(Key.TransmitterStartTime.rawValue)
+                removeObjectForKey(Key.G5TransmitterStartTime.rawValue)
             }
         }
     }
 
     var transmitterID: String? {
         get {
-            return stringForKey(Key.TransmitterID.rawValue)
+            return stringForKey(Key.G5TransmitterID.rawValue)
         }
         set {
-            setObject(newValue, forKey: Key.TransmitterID.rawValue)
+            setObject(newValue, forKey: Key.G5TransmitterID.rawValue)
         }
     }
 
