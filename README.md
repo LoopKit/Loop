@@ -29,12 +29,13 @@ Please understand that this project:
 <table>
   <thead>
     <tr>
-      <td colspan="2" rowspan="3"></td>
+      <td colspan="2" rowspan="4"></td>
       <th colspan="2">Insulin Pump</th>
     </tr>
     <tr>
       <th>MM 522/722</th>
       <th>MM 523/723</th>
+      <th>MM 554/754</th>
     </tr>
   </thead>
   <tbody>
@@ -53,6 +54,7 @@ Please understand that this project:
       <th>MM CGM</th>
       <td>❌<sup><a href="#hw4">4</a></sup></td>
       <td>✅</td>
+      <td>✅<sup><a href="#hw5">5</a></sup></td>
     </tr>
   </tbody>
 </table>
@@ -61,6 +63,7 @@ Please understand that this project:
 <br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu.
 <br/><a name="hw3">3</a>. Early firmware only available on select models is required for using Closed Loop and Bolus features.
 <br/><a name="hw4">4</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
+<br/><a name="hw4">5</a>. Confirmed working with AU MM554 firmware 2.6A - unsuccessful reports from some, need to check individual pumps.
 
 ### RileyLink
 
