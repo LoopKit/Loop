@@ -18,7 +18,7 @@ class WatchContext: NSObject, RawRepresentable {
     var preferredGlucoseUnit: HKUnit?
 
     var glucose: HKQuantity?
-    var glucoseTrend: Int?
+    var glucoseTrend: String?
     var eventualGlucose: HKQuantity?
     var glucoseDate: NSDate?
 
@@ -56,7 +56,7 @@ class WatchContext: NSObject, RawRepresentable {
                 eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
             }
         }
-        glucoseTrend = rawValue["gt"] as? Int
+        glucoseTrend = rawValue["gt"] as? String
         glucoseDate = rawValue["gd"] as? NSDate
 
         IOB = rawValue["iob"] as? Double
@@ -87,7 +87,7 @@ class WatchContext: NSObject, RawRepresentable {
             raw["gv"] = glucose?.doubleValueForUnit(unit)
         }
 
-        raw["gt"] = glucoseTrend
+        raw["gtd"] = glucoseTrend
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
@@ -96,23 +96,5 @@ class WatchContext: NSObject, RawRepresentable {
         raw["rp"] = reservoirPercentage
 
         return raw
-    }
-
-    var glucoseTrendDescription: String {
-        let direction: String
-        switch glucoseTrend {
-        case let x? where x < -10:
-            direction = "⇊"
-        case let x? where x < 0:
-            direction = "↓"
-        case let x? where x > 10:
-            direction = "⇈"
-        case let x? where x > 0:
-            direction = "↑"
-        default:
-            direction = "→"
-        }
-
-        return direction
     }
 }
