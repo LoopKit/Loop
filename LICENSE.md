@@ -29,6 +29,10 @@ SOFTWARE.
 
 Copyright (c) 2014 Amplitude
 
+## G4ShareSpy.framework
+
+Copyright (c) 2016 Mark Wilson
+
 ## LoopKit.framework
 *Including CarbKit.framework, GlucoseKit.framework, and InsulinKit.framework*
 
