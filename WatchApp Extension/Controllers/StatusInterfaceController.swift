@@ -50,7 +50,7 @@ class StatusInterfaceController: ContextInterfaceController {
         dispatch_async(dispatch_get_main_queue()) {
             if let glucose = context?.glucose, unit = context?.preferredGlucoseUnit {
                 let glucoseValue = glucose.doubleValueForUnit(unit)
-                let trend = context?.glucoseTrendDescription ?? ""
+                let trend = context?.glucoseTrend ?? ""
 
                 self.glucoseLabel.setText((numberFormatter.stringFromNumber(glucoseValue) ?? "") + trend)
                 self.glucoseLabel.setHidden(false)
