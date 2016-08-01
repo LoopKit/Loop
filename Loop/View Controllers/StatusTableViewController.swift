@@ -541,22 +541,13 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     }
                 }
             case .Trend:
-                cell.textLabel?.text = NSLocalizedString("Trend", comment: "The title of the cell containing the current glucose trend")
+                cell.textLabel?.text = NSLocalizedString("Sensor Trend", comment: "The title of the cell containing the current glucose trend")
 
-                if let glucose = dataManager.latestGlucoseMessage, trendString = numberFormatter.stringFromNumber(NSNumber(char: glucose.trend)) {
-
-                    cell.detailTextLabel?.text = trendString + glucose.trendDescription
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
+                cell.detailTextLabel?.text = dataManager.sensorInfo?.trendDescription ?? emptyValueString
             case .State:
-                cell.textLabel?.text = NSLocalizedString("Calibration state", comment: "The title of the cell containing the current sensor state")
+                cell.textLabel?.text = NSLocalizedString("Sensor State", comment: "The title of the cell containing the current sensor state")
 
-                if let glucose = dataManager.latestGlucoseMessage {
-                    cell.detailTextLabel?.text = String(format: "%02x", glucose.state)
-                } else {
-                    cell.detailTextLabel?.text = nil
-                }
+                cell.detailTextLabel?.text = dataManager.sensorInfo?.stateDescription ?? emptyValueString
             }
 
             return cell

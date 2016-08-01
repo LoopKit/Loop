@@ -8,6 +8,7 @@
 
 import Foundation
 import CarbKit
+import G4ShareSpy
 import GlucoseKit
 import HealthKit
 import InsulinKit
@@ -24,7 +25,7 @@ private enum State<T> {
 }
 
 
-class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
+class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 
@@ -55,6 +56,26 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         case .NeedsConfiguration:
             return nil
         }
+    }
+
+    // The Dexcom Share receiver object
+    var receiver: Receiver?
+
+    var receiverEnabled: Bool = false {
+        didSet {
+            if (receiverEnabled) {
+                receiver = Receiver()
+                receiver!.delegate = self
+            } else {
+                receiver = nil
+            }
+            NSUserDefaults.standardUserDefaults().receiverEnabled = receiverEnabled
+            enableRileyLinkHeartbeatIfNeeded()
+        }
+    }
+
+    var sensorInfo: SensorDisplayable? {
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatus
     }
 
     // MARK: - RileyLink
@@ -115,6 +136,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         if connectedPeripheralIDs.count == 0 {
             NotificationManager.clearLoopNotRunningNotifications()
+        }
+    }
+
+    func enableRileyLinkHeartbeatIfNeeded() {
+        if case .Ready = transmitterState {
+            rileyLinkManager.timerTickEnabled = false
+        } else if receiverEnabled {
+            rileyLinkManager.timerTickEnabled = false
+        } else {
+            rileyLinkManager.timerTickEnabled = true
         }
     }
 
@@ -436,7 +467,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     // MARK: TransmitterDelegate
 
-    func transmitter(transmitter: Transmitter, didError error: ErrorType) {
+    func transmitter(transmitter: xDripG5.Transmitter, didError error: ErrorType) {
         logger.addMessage([
                 "error": "\(error)",
                 "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
@@ -446,16 +477,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: Transmitter, didReadGlucose glucoseMessage: GlucoseRxMessage) {
+    func transmitter(transmitter: xDripG5.Transmitter, didReadGlucose glucoseMessage: xDripG5.GlucoseRxMessage) {
         transmitterStartTime = transmitter.startTimeInterval
 
         assertCurrentPumpData()
 
-        guard glucoseMessage != latestGlucoseMessage else {
+        guard glucoseMessage != latestGlucoseG5 else {
             return
         }
 
-        latestGlucoseMessage = glucoseMessage
+        latestGlucoseG5 = glucoseMessage
 
         guard let glucose = TransmitterGlucose(glucoseMessage: glucoseMessage, startTime: transmitter.startTimeInterval), glucoseStore = glucoseStore else {
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
@@ -487,22 +518,22 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
         }
     }
 
-    var latestGlucoseMessage: GlucoseRxMessage?
+    private var latestGlucoseG5: GlucoseRxMessage?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
      
      - parameter completion: An optional closure called after the command is complete.
      */
-    private func backfillGlucoseFromShareIfNeeded(completion completion: (() -> Void)? = nil) {
-        // We should have no G5 data, and a configured ShareClient and GlucoseStore.
-        guard latestGlucoseMessage == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
+    private func backfillGlucoseFromShareIfNeeded(completion: (() -> Void)? = nil) {
+        // We should have no G4 Share or G5 data, and a configured ShareClient and GlucoseStore.
+        guard latestGlucoseG4 == nil && latestGlucoseG5 == nil, let shareClient = remoteDataManager.shareClient, glucoseStore = glucoseStore else {
             completion?()
             return
         }
 
-        // If our last glucose was less than 4 minutes ago, don't fetch.
-        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4) {
+        // If our last glucose was less than 4.5 minutes ago, don't fetch.
+        if let latestGlucose = glucoseStore.latestGlucose where latestGlucose.startDate.timeIntervalSinceNow > -NSTimeInterval(minutes: 4.5) {
             completion?()
             return
         }
@@ -531,6 +562,56 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
                 completion?()
             }
         }
+    }
+
+    // MARK: - Share Receiver
+
+    // MARK: ReceiverDelegate
+
+    private var latestGlucoseG4: GlucoseG4?
+
+    func receiver(receiver: Receiver, didReadGlucoseHistory glucoseHistory: [GlucoseG4]) {
+        assertCurrentPumpData()
+
+        guard let latest = glucoseHistory.sort({ $0.sequence < $1.sequence }).last where latest != latestGlucoseG4 else {
+            return
+        }
+        latestGlucoseG4 = latest
+
+        guard let glucoseStore = glucoseStore else {
+            return
+        }
+
+        // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
+        let includeAfter = glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
+
+        let validGlucose = glucoseHistory.flatMap({
+            $0.isValid ? $0 : nil
+        }).filterDateRange(includeAfter, nil).map({
+            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.isDisplayOnly)
+        })
+
+        // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
+        let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
+
+        glucoseStore.addGlucoseValues(validGlucose, device: device, resultHandler: { (_, _, error) -> Void in
+            if let error = error {
+                self.logger.addError(error, fromSource: "GlucoseStore")
+            }
+
+            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+        })
+    }
+
+    func receiver(receiver: Receiver, didError error: ErrorType) {
+        logger.addMessage(["error": "\(error)", "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())], toCollection: "g4")
+
+        assertCurrentPumpData()
+    }
+
+    func receiver(receiver: Receiver, didLogBluetoothEvent event: String) {
+        // Uncomment to debug communication
+        // NSLog("G4: \(event)")
     }
 
     // MARK: - Configuration
@@ -631,13 +712,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
     private var transmitterState: State<Transmitter> = .NeedsConfiguration {
         didSet {
-            switch transmitterState {
-            case .Ready(let transmitter):
+            if case .Ready(let transmitter) = transmitterState {
                 transmitter.delegate = self
-                rileyLinkManager.timerTickEnabled = false
-            case .NeedsConfiguration:
-                rileyLinkManager.timerTickEnabled = true
             }
+            enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
@@ -859,6 +937,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate {
 
         defer {
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
+            receiverEnabled = NSUserDefaults.standardUserDefaults().receiverEnabled
         }
     }
 }
