@@ -582,7 +582,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     UIApplication.sharedApplication().openURL(URL)
                 }
             case .IOB, .Dose:
-                performSegueWithIdentifier(ReservoirTableViewController.className, sender: indexPath)
+                performSegueWithIdentifier(InsulinDeliveryTableViewController.className, sender: indexPath)
             case .COB:
                 performSegueWithIdentifier(CarbEntryTableViewController.className, sender: indexPath)
             }
@@ -663,7 +663,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 vc.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
                 vc.preferredUnit = carbStore.preferredUnit
             }
-        case let vc as ReservoirTableViewController:
+        case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = dataManager.doseStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:

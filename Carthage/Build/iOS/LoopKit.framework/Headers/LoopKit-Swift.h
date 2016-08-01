@@ -209,13 +209,16 @@ SWIFT_CLASS("_TtC7LoopKit28TextFieldTableViewController")
 @interface TextFieldTableViewController : UITableViewController <UITextFieldDelegate>
 @property (nonatomic, strong) NSIndexPath * _Nullable indexPath;
 @property (nonatomic, copy) NSString * _Nullable placeholder;
+@property (nonatomic, copy) NSString * _Nullable unit;
 @property (nonatomic, copy) NSString * _Nullable value;
+@property (nonatomic, copy) NSString * _Nullable contextHelp;
 @property (nonatomic) UIKeyboardType keyboardType;
 - (nonnull instancetype)init;
 - (void)viewDidLoad;
 - (void)viewDidAppear:(BOOL)animated;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section;
 - (UITableViewCell * _Nonnull)tableView:(UITableView * _Nonnull)tableView cellForRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
+- (NSString * _Nullable)tableView:(UITableView * _Nonnull)tableView titleForFooterInSection:(NSInteger)section;
 - (BOOL)textFieldShouldEndEditing:(UITextField * _Nonnull)textField;
 - (BOOL)textFieldShouldReturn:(UITextField * _Nonnull)textField;
 - (nonnull instancetype)initWithStyle:(UITableViewStyle)style OBJC_DESIGNATED_INITIALIZER;

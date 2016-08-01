@@ -71,6 +71,10 @@ class AnalyticsManager {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
     }
 
+    func pumpBatteryWasReplaced() {
+        logEvent("Pump battery replacement")
+    }
+
     func didChangeBasalRateSchedule() {
         logEvent("Basal rate change")
     }
