@@ -8,6 +8,7 @@
 
 import Foundation
 import CarbKit
+import CoreData
 import G4ShareSpy
 import GlucoseKit
 import HealthKit
@@ -25,7 +26,7 @@ private enum State<T> {
 }
 
 
-class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
+class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 
@@ -44,9 +45,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     /// Manages remote data (TODO: the lazy initialization isn't thread-safe)
     lazy var remoteDataManager = RemoteDataManager()
-
-    // Timestamp of last event we've retrieved from pump
-    var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
     /// The G5 transmitter object
     var transmitter: Transmitter? {
@@ -225,7 +223,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             NotificationManager.sendPumpBatteryLowNotification()
         }
 
-        remoteDataManager.nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
+        if let nsUploader = remoteDataManager.nightscoutUploader, let pumpStatus = try? nsUploader.getPumpStatusFromMySentryPumpStatus(status) {
+            nsUploader.uploadDeviceStatus(DeviceStatus(device: device.deviceURI, timestamp: pumpDate, pumpStatus: pumpStatus, uploaderStatus: nil, loopStatus: nil))
+        }
     }
 
     /**
@@ -342,38 +342,18 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             return
         }
 
-        // TODO: Reconcile these
-        //let startDate = doseStore.pumpEventQueryAfterDate
-        let startDate = remoteDataManager.nightscoutUploader?.observingPumpEventsSince ?? observingPumpEventsSince
+        let startDate = doseStore.pumpEventQueryAfterDate
 
         device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
             switch result {
-            case let .Success(events, pumpModel):
-                // TODO: Surface raw pump event data and add DoseEntry conformance
-//                self.doseStore.addPumpEvents(events.map({ ($0.date, nil, $0.pumpEvent.rawData, $0.isMutable()) })) { (error) in
-//                    if let error = error {
-//                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-//                    }
-//                }
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-                self.remoteDataManager.nightscoutUploader?.processPumpEvents(events, source: device.deviceURI, pumpModel: pumpModel)
-
-                var lastFinalDate: NSDate?
-                var firstMutableDate: NSDate?
-
-                for event in events {
-                    if event.isMutable() {
-                        firstMutableDate = min(event.date, firstMutableDate ?? event.date)
-                    } else {
-                        lastFinalDate = max(event.date, lastFinalDate ?? event.date)
+            case let .Success(events, _):
+                self.doseStore.add(events) { (error) in
+                    if let error = error {
+                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
                     }
                 }
-                if let mutableDate = firstMutableDate {
-                    self.observingPumpEventsSince = mutableDate
-                } else if let finalDate = lastFinalDate {
-                    self.observingPumpEventsSince = finalDate
-                }
+
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             case .Failure(let error):
                 self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
 
@@ -871,6 +851,36 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     let doseStore: DoseStore
 
+    // MARK: DoseStoreDelegate
+
+    func doseStore(doseStore: DoseStore, hasEventsNeedingUpload pumpEvents: [(objectID: NSManagedObjectID, date: NSDate, dose: DoseEntry?, raw: NSData?)], withCompletion completionHandler: (uploadedObjects: [NSManagedObjectID]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader, device = rileyLinkManager.firstConnectedDevice, pumpModel = pumpState?.pumpModel else {
+            completionHandler(uploadedObjects: pumpEvents.map({ $0.objectID }))
+            return
+        }
+
+        var objectIDs = [NSManagedObjectID]()
+        var timestampedPumpEvents = [TimestampedHistoryEvent]()
+
+        for event in pumpEvents {
+            objectIDs.append(event.objectID)
+
+            if let raw = event.raw where raw.length > 0, let type = MinimedKit.PumpEventType(rawValue: raw[0])?.eventType, pumpEvent = type.init(availableData: raw, pumpModel: pumpModel) {
+                timestampedPumpEvents.append(TimestampedHistoryEvent(pumpEvent: pumpEvent, date: event.date))
+            }
+        }
+
+        uploader.upload(timestampedPumpEvents, forSource: device.deviceURI, from: pumpModel) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploadKit")
+                completionHandler(uploadedObjects: [])
+            } else {
+                completionHandler(uploadedObjects: objectIDs)
+            }
+        }
+    }
+
     // MARK: - WatchKit
 
     private(set) var watchManager: WatchDataManager!
@@ -940,6 +950,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         watchManager = WatchDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
+        doseStore.delegate = self
 
         defer {
             transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
