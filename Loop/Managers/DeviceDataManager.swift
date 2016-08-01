@@ -101,7 +101,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             case .MySentry:
                 switch message.messageBody {
                 case let body as MySentryPumpStatusMessageBody:
-                    updatePumpStatus(body, fromDevice: device)
+                    updatePumpStatus(body, from: device)
                 case is MySentryAlertMessageBody, is MySentryAlertClearedMessageBody:
                     break
                 case let body:
@@ -176,13 +176,18 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
      - parameter status: The status message body
      - parameter device: The RileyLink that received the message
      */
-    private func updatePumpStatus(status: MySentryPumpStatusMessageBody, fromDevice device: RileyLinkDevice) {
+    private func updatePumpStatus(status: MySentryPumpStatusMessageBody, from device: RileyLinkDevice) {
         status.pumpDateComponents.timeZone = pumpState?.timeZone
         status.glucoseDateComponents?.timeZone = pumpState?.timeZone
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
         guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
             return
+        }
+
+        // Report battery changes to Analytics
+        if let latestPumpStatus = latestPumpStatus where status.batteryRemainingPercent - latestPumpStatus.batteryRemainingPercent >= 50 {
+            AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
         }
 
         latestPumpStatus = status
@@ -196,7 +201,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 glucoseStore?.addGlucose(
                     HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose)),
                     date: date,
-                    displayOnly: false,
+                    isDisplayOnly: false,
                     device: nil
                 ) { (success, sample, error) in
                     if let error = error {
@@ -495,7 +500,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
         let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, displayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
+        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, isDisplayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
@@ -549,7 +554,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
             // Ignore glucose values that are up to a minute newer than our previous value, to account for possible time shifting in Share data
             let newGlucose = glucose.filterDateRange(glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1)), nil).map {
-                return (quantity: $0.quantity, date: $0.startDate, displayOnly: false)
+                return (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: false)
             }
 
             glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
@@ -588,7 +593,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         let validGlucose = glucoseHistory.flatMap({
             $0.isValid ? $0 : nil
         }).filterDateRange(includeAfter, nil).map({
-            (quantity: $0.quantity, date: $0.startDate, displayOnly: $0.isDisplayOnly)
+            (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: $0.isDisplayOnly)
         })
 
         // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
@@ -889,6 +894,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
+
         carbStore = CarbStore(
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
@@ -941,39 +947,3 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 }
-
-/*
- History parsing scratch.
-
-func translate(event: TimestampedHistoryEvent) -> DoseEntry? {
-
-    switch event.pumpEvent {
-    case let bolus as BolusNormalPumpEvent:
-        InsulinKit.PumpEventType.Bolus
-
-        let unit: DoseUnit
-
-        switch bolus.type {
-        case .Normal:
-            unit = .Units
-        case .Square:
-            unit = .UnitsPerHour
-        }
-
-        return DoseEntry(type: .Bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
-    case let suspend as SuspendPumpEvent:
-        InsulinKit.PumpEventType.Suspend
-    case let resume as ResumePumpEvent:
-//        InsulinKit.PumpEventType.Resume
-        break
-    case let temp as TempBasalPumpEvent:
-        InsulinKit.PumpEventType.TempBasal
-    default:
-        break
-    }
-
-    return nil
-}
-*/
-
-
