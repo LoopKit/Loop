@@ -46,7 +46,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
 
         dataManager.rileyLinkManager.deviceScanningEnabled = true
 
-        if dataManager.transmitterID != nil, let glucoseStore = dataManager.glucoseStore where glucoseStore.authorizationRequired {
+        if dataManager.transmitterID != nil || dataManager.receiverEnabled, let glucoseStore = dataManager.glucoseStore where glucoseStore.authorizationRequired {
             glucoseStore.authorize({ (success, error) -> Void in
                 // Do nothing for now
             })
@@ -96,6 +96,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     private enum ConfigurationRow: Int {
         case PumpID = 0
         case TransmitterID
+        case ReceiverEnabled
         case GlucoseTargetRange
         case InsulinActionDuration
         case BasalRate
@@ -104,7 +105,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         case MaxBasal
         case MaxBolus
 
-        static let count = 9
+        static let count = 10
     }
 
     private enum ServiceRow: Int {
@@ -163,13 +164,24 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .PreferredInsulinDataSource:
                 let segmentCell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.className, forIndexPath: indexPath) as! SegmentedControlTableViewCell
 
-                segmentCell.titleLabel.text = NSLocalizedString("Nightscout history uploading", comment: "The title text for the preferred insulin data source config")
+                segmentCell.titleLabel.text = NSLocalizedString("Nightscout History Upload", comment: "The title text for the preferred insulin data source config")
                 segmentCell.segmentedControl.selectedSegmentIndex = dataManager.preferredInsulinDataSource.rawValue
                 segmentCell.segmentedControl.addTarget(self, action: #selector(preferredInsulinDataSourceChanged(_:)), forControlEvents: .ValueChanged)
 
                 return segmentCell
             }
         case .Configuration:
+            if case .ReceiverEnabled = ConfigurationRow(rawValue: indexPath.row)! {
+                let switchCell = tableView.dequeueReusableCellWithIdentifier(SwitchTableViewCell.className, forIndexPath: indexPath) as! SwitchTableViewCell
+
+                switchCell.`switch`?.on = dataManager.receiverEnabled
+                switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver (beta)", comment: "The title text for the G4 Share Receiver enabled switch cell")
+
+                switchCell.`switch`?.addTarget(self, action: #selector(receiverEnabledChanged(_:)), forControlEvents: .ValueChanged)
+
+                return switchCell
+            }
+
             let configCell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
@@ -179,6 +191,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             case .TransmitterID:
                 configCell.textLabel?.text = NSLocalizedString("G5 Transmitter ID", comment: "The title text for the Dexcom G5 transmitter ID config value")
                 configCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
+            case .ReceiverEnabled:
+                break
             case .BasalRate:
                 configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
 
@@ -294,8 +308,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
         case .Loop:
-            let version = NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString")!
-            return "Loop iOS v\(version)"
+            let bundle = NSBundle.mainBundle()
+            return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundle.bundleDisplayName, bundle.shortVersionString)
         case .Configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
@@ -443,6 +457,8 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
                 } else {
                     showViewController(scheduleVC, sender: sender)
                 }
+            case .ReceiverEnabled:
+                break
             }
         case .Devices:
             let vc = RileyLinkDeviceTableViewController()
@@ -531,6 +547,10 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         if let dataSource = InsulinDataSource(rawValue: sender.selectedSegmentIndex) {
             dataManager.preferredInsulinDataSource = dataSource
         }
+    }
+
+    func receiverEnabledChanged(sender: UISwitch) {
+        dataManager.receiverEnabled = sender.on
     }
 
     // MARK: - TextFieldTableViewControllerDelegate

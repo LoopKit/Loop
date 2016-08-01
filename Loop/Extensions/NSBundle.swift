@@ -1,9 +1,9 @@
 //
 //  NSBundle.swift
-//  Naterade
+//  Loop
 //
-//  Created by Nathan Racklyeft on 9/7/15.
-//  Copyright © 2015 Nathan Racklyeft. All rights reserved.
+//  Created by Nate Racklyeft on 7/28/16.
+//  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
 import Foundation
@@ -24,4 +24,9 @@ extension NSBundle {
         
         return NSDictionary(contentsOfFile: path) as? [String: String]
     }
+    
+    var bundleDisplayName: String {
+        return objectForInfoDictionaryKey("CFBundleDisplayName") as! String
+    }
 }
+
