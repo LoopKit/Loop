@@ -87,7 +87,7 @@ class WatchContext: NSObject, RawRepresentable {
             raw["gv"] = glucose?.doubleValueForUnit(unit)
         }
 
-        raw["gtd"] = glucoseTrend
+        raw["gt"] = glucoseTrend
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
