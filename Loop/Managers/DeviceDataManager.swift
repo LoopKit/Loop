@@ -75,7 +75,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     }
 
     var sensorInfo: SensorDisplayable? {
-        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatus
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatusFromMySentry
     }
 
     // MARK: - RileyLink
@@ -151,7 +151,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: Pump data
 
-    var latestPumpStatus: MySentryPumpStatusMessageBody?
+    var latestPumpStatusDate: NSDate?
+
+    var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody? {
+        didSet {
+            if let update = latestPumpStatusFromMySentry, let timeZone = pumpState?.timeZone {
+                let pumpClock = update.pumpDateComponents
+                pumpClock.timeZone = timeZone
+                latestPumpStatusDate = pumpClock.date
+            }
+        }
+    }
+
+    var latestPolledPumpStatus: RileyLinkKit.PumpStatus? {
+        didSet {
+            if let update = latestPolledPumpStatus, let timeZone = pumpState?.timeZone {
+                let pumpClock = update.clock
+                pumpClock.timeZone = timeZone
+                latestPumpStatusDate = pumpClock.date
+            }
+        }
+    }
 
     // TODO: Expose this on DoseStore
     var latestReservoirValue: ReservoirValue? {
@@ -181,16 +201,33 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         status.glucoseDateComponents?.timeZone = pumpState?.timeZone
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
-        guard status != latestPumpStatus, let pumpDate = status.pumpDateComponents.date else {
+        guard status != latestPumpStatusFromMySentry, let pumpDate = status.pumpDateComponents.date else {
             return
         }
 
         // Report battery changes to Analytics
-        if let latestPumpStatus = latestPumpStatus where status.batteryRemainingPercent - latestPumpStatus.batteryRemainingPercent >= 50 {
+        if let latestPumpStatusFromMySentry = latestPumpStatusFromMySentry where status.batteryRemainingPercent - latestPumpStatusFromMySentry.batteryRemainingPercent >= 50 {
             AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
         }
 
-        latestPumpStatus = status
+        latestPumpStatusFromMySentry = status
+
+
+        // Gather PumpStatus from MySentry packet
+        let pumpStatus: NightscoutUploadKit.PumpStatus?
+        if let pumpDate = status.pumpDateComponents.date, let pumpID = pumpID {
+
+            let batteryStatus = BatteryStatus(percent: status.batteryRemainingPercent, status: "normal")
+            let iobStatus = IOBStatus(iob: status.iob, basaliob: 0, timestamp: pumpDate)
+
+            pumpStatus = NightscoutUploadKit.PumpStatus(clock: pumpDate, pumpID: pumpID, iob: iobStatus, battery: batteryStatus, reservoir: status.reservoirRemainingUnits)
+        } else {
+            pumpStatus = nil
+            print("Could not interpret pump clock: \(status.pumpDateComponents)")
+        }
+
+        // Trigger device status upload, even if something is wrong with pumpStatus
+        self.uploadDeviceStatus(pumpStatus)
 
         backfillGlucoseFromShareIfNeeded()
 
@@ -215,6 +252,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             break
         }
 
+        // Upload sensor glucose to Nightscout
+        remoteDataManager.nightscoutUploader?.uploadSGVFromMySentryPumpStatus(status, device: device.deviceURI)
+
         // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(11 * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_UTILITY, 0)) {
             self.updateReservoirVolume(status.reservoirRemainingUnits, atDate: pumpDate, withTimeLeft: NSTimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
@@ -224,9 +264,40 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         if status.batteryRemainingPercent == 0 {
             NotificationManager.sendPumpBatteryLowNotification()
         }
-
-        remoteDataManager.nightscoutUploader?.handlePumpStatus(status, device: device.deviceURI)
     }
+
+    private func uploadDeviceStatus(pumpStatus: NightscoutUploadKit.PumpStatus? /*, loopStatus: LoopStatus */) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            return
+        }
+
+
+        // Gather UploaderStatus
+        let uploaderDevice = UIDevice.currentDevice()
+
+        let battery: Int?
+        if uploaderDevice.batteryMonitoringEnabled {
+            battery = Int(uploaderDevice.batteryLevel * 100)
+        } else {
+            battery = nil
+        }
+        let uploaderStatus = UploaderStatus(name: uploaderDevice.name, timestamp: NSDate(), battery: battery)
+
+
+        // Mock out some loop data for testing
+        //            let loopTime = NSDate()
+        //            let iob = IOBStatus(iob: 3.0, basaliob: 1.2, timestamp: NSDate())
+        //            let loopSuggested = LoopSuggested(timestamp: loopTime, rate: 1.2, duration: NSTimeInterval(30*60), correction: 0, eventualBG: 200, reason: "Test Reason", bg: 205, tick: 5)
+        //            let loopEnacted = LoopEnacted(rate: 1.2, duration: NSTimeInterval(30*60), timestamp: loopTime, received: true)
+        //            let loopStatus = LoopStatus(name: "TestLoopName", timestamp: NSDate(), iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: nil)
+
+        // Build DeviceStatus
+        let deviceStatus = DeviceStatus(device: uploaderDevice.name, timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus)
+
+        uploader.uploadDeviceStatus(deviceStatus)
+    }
+
 
     /**
      Read the pump's current reservoir and clock
@@ -318,20 +389,45 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
         device.assertIdleListening()
 
-        // How long should we wait before we poll for new reservoir data?
-        let reservoirTolerance = rileyLinkManager.idleListeningEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 4)
+        // How long should we wait before we poll for new pump data?
+        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 4)
 
-        // If we don't yet have reservoir data, or it's old, poll for it.
-        if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -reservoirTolerance {
-            readReservoirVolume { (result) in
+        // If we don't yet have pump status, or it's old, poll for it.
+        if latestPumpStatusDate == nil || latestPumpStatusDate!.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
+            guard let device = rileyLinkManager.firstConnectedDevice else {
+                return
+            }
+
+            guard let ops = device.ops else {
+                self.troubleshootPumpCommsWithDevice(device)
+                return
+            }
+
+            ops.readPumpStatus({ (result) in
                 switch result {
-                case .Success(let (units, date)):
-                    self.updateReservoirVolume(units, atDate: date, withTimeLeft: nil)
+                case .Success(let status):
+                    self.latestPolledPumpStatus = status
+
+                    let battery = BatteryStatus(voltage: status.batteryVolts, status: String(status.batteryStatus).lowercaseString)
+                    status.clock.timeZone = ops.pumpState.timeZone
+                    guard let date = status.clock.date else {
+                        print("Could not interpret clock")
+                        return
+                    }
+
+                    self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
+
+                    let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
+                    self.uploadDeviceStatus(nsPumpStatus)
+
+
                 case .Failure:
                     self.troubleshootPumpCommsWithDevice(device)
                 }
-            }
+            })
         }
+
+
     }
 
     /**
@@ -697,8 +793,9 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
                 rileyLinkManager.idleListeningEnabled = false
             }
-
             NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
+            self.enableRileyLinkHeartbeatIfNeeded()
+
         case "lastHistoryDump"?, "awakeUntil"?:
             break
         default:

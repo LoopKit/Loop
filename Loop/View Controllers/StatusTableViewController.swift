@@ -211,9 +211,11 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 resVol = reservoirVolume {
                 reservoirLevel = min(1, max(0, Double(resVol / Double(capacity))))
             }
-            
-            if let status = dataManager.latestPumpStatus {
-                reservoirLevel = Double(status.reservoirRemainingPercent) / 100
+
+            reservoirLevel = dataManager.latestReservoirValue?.unitVolume
+
+            // TODO: If we don't have MySentry, we should still have battery voltage
+            if let status = dataManager.latestPumpStatusFromMySentry {
                 batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
 
@@ -494,7 +496,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .Date:
                 cell.textLabel?.text = NSLocalizedString("Last Sentry", comment: "The title of the cell containing the last updated date")
 
-                if let date = dataManager.latestPumpStatus?.pumpDateComponents.date {
+                if let date = dataManager.latestPumpStatusDate {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
@@ -502,7 +504,7 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             case .InsulinOnBoard:
                 cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
 
-                if let iob = dataManager.latestPumpStatus?.iob {
+                if let iob = dataManager.latestPumpStatusFromMySentry?.iob {
                     let numberValue = NSNumber(double: iob).descriptionWithLocale(locale)
                     cell.detailTextLabel?.text = "\(numberValue) Units"
                 } else {
