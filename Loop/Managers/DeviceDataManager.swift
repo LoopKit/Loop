@@ -151,7 +151,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: Pump data
 
-    var latestPumpStatusDate: NSDate?
+    private var latestPumpStatusDate: NSDate?
 
     var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody? {
         didSet {
@@ -163,7 +163,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
-    var latestPolledPumpStatus: RileyLinkKit.PumpStatus? {
+    private var latestPolledPumpStatus: RileyLinkKit.PumpStatus? {
         didSet {
             if let update = latestPolledPumpStatus, let timeZone = pumpState?.timeZone {
                 let pumpClock = update.clock
@@ -217,13 +217,13 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         let pumpStatus: NightscoutUploadKit.PumpStatus?
         if let pumpDate = status.pumpDateComponents.date, let pumpID = pumpID {
 
-            let batteryStatus = BatteryStatus(percent: status.batteryRemainingPercent, status: "normal")
-            let iobStatus = IOBStatus(iob: status.iob, basaliob: 0, timestamp: pumpDate)
+            let batteryStatus = BatteryStatus(percent: status.batteryRemainingPercent)
+            let iobStatus = IOBStatus(timestamp: pumpDate, iob: status.iob)
 
             pumpStatus = NightscoutUploadKit.PumpStatus(clock: pumpDate, pumpID: pumpID, iob: iobStatus, battery: batteryStatus, reservoir: status.reservoirRemainingUnits)
         } else {
             pumpStatus = nil
-            print("Could not interpret pump clock: \(status.pumpDateComponents)")
+            self.logger.addError("Could not interpret pump clock: \(status.pumpDateComponents)", fromSource: "RileyLink")
         }
 
         // Trigger device status upload, even if something is wrong with pumpStatus
@@ -394,12 +394,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
         // If we don't yet have pump status, or it's old, poll for it.
         if latestPumpStatusDate == nil || latestPumpStatusDate!.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
-            guard let device = rileyLinkManager.firstConnectedDevice else {
-                return
-            }
 
             guard let ops = device.ops else {
-                self.troubleshootPumpCommsWithDevice(device)
                 return
             }
 
@@ -408,10 +404,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 case .Success(let status):
                     self.latestPolledPumpStatus = status
 
-                    let battery = BatteryStatus(voltage: status.batteryVolts, status: String(status.batteryStatus).lowercaseString)
+                    let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                     status.clock.timeZone = ops.pumpState.timeZone
                     guard let date = status.clock.date else {
-                        print("Could not interpret clock")
+                        self.logger.addError("Could not interpret pump clock: \(status.clock)", fromSource: "RileyLink")
                         return
                     }
 

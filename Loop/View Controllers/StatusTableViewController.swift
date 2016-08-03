@@ -205,18 +205,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
 
-            reservoirVolume = dataManager.latestReservoirValue?.unitVolume
-            
             if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity,
                 resVol = reservoirVolume {
                 reservoirLevel = min(1, max(0, Double(resVol / Double(capacity))))
             }
 
-            reservoirLevel = dataManager.latestReservoirValue?.unitVolume
-
-            // TODO: If we don't have MySentry, we should still have battery voltage
             if let status = dataManager.latestPumpStatusFromMySentry {
                 batteryLevel = Double(status.batteryRemainingPercent) / 100
+                reservoirLevel = Double(status.reservoirRemainingPercent) / 100
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
@@ -494,9 +490,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
             switch PumpRow(rawValue: indexPath.row)! {
             case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last Sentry", comment: "The title of the cell containing the last updated date")
+                cell.textLabel?.text = NSLocalizedString("Last MySentry", comment: "The title of the cell containing the last updated mysentry status packet date")
 
-                if let date = dataManager.latestPumpStatusDate {
+                if let date = dataManager.latestPumpStatusFromMySentry?.pumpDateComponents.date {
                     cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
                 } else {
                     cell.detailTextLabel?.text = emptyValueString
