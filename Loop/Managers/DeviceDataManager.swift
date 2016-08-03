@@ -222,10 +222,6 @@ class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelega
         if status.batteryRemainingPercent == 0 {
             NotificationManager.sendPumpBatteryLowNotification()
         }
-
-        if let nsUploader = remoteDataManager.nightscoutUploader, let pumpStatus = try? nsUploader.getPumpStatusFromMySentryPumpStatus(status) {
-            nsUploader.uploadDeviceStatus(DeviceStatus(device: device.deviceURI, timestamp: pumpDate, pumpStatus: pumpStatus, uploaderStatus: nil, loopStatus: nil))
-        }
     }
 
     /**
@@ -853,9 +849,8 @@ class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelega
 
     // MARK: DoseStoreDelegate
 
-    func doseStore(doseStore: DoseStore, hasEventsNeedingUpload pumpEvents: [(objectID: NSManagedObjectID, date: NSDate, dose: DoseEntry?, raw: NSData?)], withCompletion completionHandler: (uploadedObjects: [NSManagedObjectID]) -> Void) {
-
-        guard let uploader = remoteDataManager.nightscoutUploader, device = rileyLinkManager.firstConnectedDevice, pumpModel = pumpState?.pumpModel else {
+    func doseStore(doseStore: DoseStore, hasEventsNeedingUpload pumpEvents: [PersistedPumpEvent], fromPumpID pumpID: String, withCompletion completionHandler: (uploadedObjects: [NSManagedObjectID]) -> Void) {
+        guard let uploader = remoteDataManager.nightscoutUploader, pumpModel = pumpState?.pumpModel else {
             completionHandler(uploadedObjects: pumpEvents.map({ $0.objectID }))
             return
         }
@@ -871,7 +866,7 @@ class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelega
             }
         }
 
-        uploader.upload(timestampedPumpEvents, forSource: device.deviceURI, from: pumpModel) { (error) in
+        uploader.upload(timestampedPumpEvents, forSource: "loop://\(UIDevice.currentDevice().name)", from: pumpModel) { (error) in
             if let error = error {
                 self.logger.addError(error, fromSource: "NightscoutUploadKit")
                 completionHandler(uploadedObjects: [])
