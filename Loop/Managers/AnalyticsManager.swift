@@ -75,6 +75,10 @@ class AnalyticsManager {
         logEvent("Pump battery replacement")
     }
 
+    func reservoirWasRewound() {
+        logEvent("Pump reservoir rewind")
+    }
+
     func didChangeBasalRateSchedule() {
         logEvent("Basal rate change")
     }

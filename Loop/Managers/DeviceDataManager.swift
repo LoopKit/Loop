@@ -300,6 +300,10 @@ class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelega
                         NotificationManager.sendPumpReservoirLowNotificationForAmount(newVolume, andTimeRemaining: timeLeft)
                     }
                 }
+
+                if newVolume > previousVolume + 1 {
+                    AnalyticsManager.sharedManager.reservoirWasRewound()
+                }
             }
         }
     }
