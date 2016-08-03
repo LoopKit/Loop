@@ -16,9 +16,9 @@ extension DoseStore {
      Adds and persists new pump events.
      */
     func add(pumpEvents: [TimestampedHistoryEvent], completionHandler: (error: DoseStore.Error?) -> Void) {
-
-        var events: [(date: NSDate, dose: DoseEntry?, raw: NSData?, isMutable: Bool)] = []
+        var events: [NewPumpEvent] = []
         var lastTempBasalAmount: DoseEntry?
+        var title: String
 
         for event in pumpEvents {
             var dose: DoseEntry?
@@ -59,12 +59,9 @@ extension DoseStore {
                 break
             }
 
-            events.append((
-                date: event.date,
-                dose: dose,
-                raw: event.pumpEvent.rawData,
-                isMutable: event.isMutable()
-            ))
+            title = (dose?.type != nil ? String(dose!.type) : event.dictionaryRepresentation["_type"] as? String) ?? String(event.pumpEvent.dynamicType)
+
+            events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title))
         }
 
         addPumpEvents(events, completionHandler: completionHandler)

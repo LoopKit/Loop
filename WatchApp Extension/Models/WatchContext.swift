@@ -18,7 +18,7 @@ class WatchContext: NSObject, RawRepresentable {
     var preferredGlucoseUnit: HKUnit?
 
     var glucose: HKQuantity?
-    var glucoseTrend: String?
+    var glucoseTrend: GlucoseTrend?
     var eventualGlucose: HKQuantity?
     var glucoseDate: NSDate?
 
@@ -56,7 +56,10 @@ class WatchContext: NSObject, RawRepresentable {
                 eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
             }
         }
-        glucoseTrend = rawValue["gt"] as? String
+
+        if let rawTrend = rawValue["gt"] as? Int {
+            glucoseTrend = GlucoseTrend(rawValue: rawTrend)
+        }
         glucoseDate = rawValue["gd"] as? NSDate
 
         IOB = rawValue["iob"] as? Double
@@ -87,7 +90,7 @@ class WatchContext: NSObject, RawRepresentable {
             raw["gv"] = glucose?.doubleValueForUnit(unit)
         }
 
-        raw["gt"] = glucoseTrend
+        raw["gt"] = glucoseTrend?.rawValue
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
