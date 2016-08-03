@@ -205,6 +205,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
                 }
             }
 
+            reservoirVolume = dataManager.latestReservoirValue?.unitVolume
+
             if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity,
                 resVol = reservoirVolume {
                 reservoirLevel = min(1, max(0, Double(resVol / Double(capacity))))
