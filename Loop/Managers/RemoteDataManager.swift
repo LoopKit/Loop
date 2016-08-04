@@ -70,7 +70,7 @@ class RemoteDataManager {
         let uploaderStatus = UploaderStatus(name: uploaderDevice.name, timestamp: NSDate(), battery: battery)
 
         // Build DeviceStatus
-        let deviceStatus = DeviceStatus(device: uploaderDevice.name, timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
+        let deviceStatus = DeviceStatus(device: "loop://" + uploaderDevice.name, timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
 
         uploader.uploadDeviceStatus(deviceStatus)
     }
