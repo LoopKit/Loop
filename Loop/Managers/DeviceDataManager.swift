@@ -307,10 +307,10 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
-    private func readAndUpdatePumpData(completion: ((error: ErrorType?) -> Void)?) {
+    private func readAndUpdatePumpData(completion: (error: ErrorType?) -> Void) {
 
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
-            completion?(error: LoopError.ConfigurationError)
+            completion(error: LoopError.ConfigurationError)
             return
         }
 
@@ -322,7 +322,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 status.clock.timeZone = ops.pumpState.timeZone
                 guard let date = status.clock.date else {
                     self.logger.addError("Could not interpret pump clock: \(status.clock)", fromSource: "RileyLink")
-                    completion?(error: LoopError.ConfigurationError)
+                    completion(error: LoopError.ConfigurationError)
                     return
                 }
 
@@ -333,7 +333,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 self.remoteDataManager.uploadDeviceStatus(nsPumpStatus)
 
             case .Failure(let error):
-                completion?(error: error)
+                completion(error: error)
             }
         })
     }
