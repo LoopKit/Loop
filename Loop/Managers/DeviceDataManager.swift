@@ -839,9 +839,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     // MARK: DoseStoreDelegate
 
-    func doseStore(doseStore: DoseStore, hasEventsNeedingUpload pumpEvents: [(objectID: NSManagedObjectID, date: NSDate, dose: DoseEntry?, raw: NSData?)], withCompletion completionHandler: (uploadedObjects: [NSManagedObjectID]) -> Void) {
-
-        guard let uploader = remoteDataManager.nightscoutUploader, device = rileyLinkManager.firstConnectedDevice, pumpModel = pumpState?.pumpModel else {
+    func doseStore(doseStore: DoseStore, hasEventsNeedingUpload pumpEvents: [PersistedPumpEvent], fromPumpID pumpID: String, withCompletion completionHandler: (uploadedObjects: [NSManagedObjectID]) -> Void) {
+        guard let uploader = remoteDataManager.nightscoutUploader, pumpModel = pumpState?.pumpModel else {
             completionHandler(uploadedObjects: pumpEvents.map({ $0.objectID }))
             return
         }
@@ -857,7 +856,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             }
         }
 
-        uploader.upload(timestampedPumpEvents, forSource: device.deviceURI, from: pumpModel) { (error) in
+        uploader.upload(timestampedPumpEvents, forSource: "loop://\(UIDevice.currentDevice().name)", from: pumpModel) { (error) in
             if let error = error {
                 self.logger.addError(error, fromSource: "NightscoutUploadKit")
                 completionHandler(uploadedObjects: [])
