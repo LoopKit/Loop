@@ -20,6 +20,7 @@ class RemoteDataManager {
     var nightscoutService: NightscoutService {
         didSet {
             keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
+            UIDevice.currentDevice().batteryMonitoringEnabled = true
         }
     }
 
@@ -44,9 +45,33 @@ class RemoteDataManager {
 
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
             nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
+            UIDevice.currentDevice().batteryMonitoringEnabled = true
         } else {
             nightscoutService = NightscoutService(siteURL: nil, APISecret: nil)
         }
+    }
+
+    func uploadDeviceStatus(pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil) {
+
+        guard let uploader = nightscoutUploader else {
+            return
+        }
+
+        // Gather UploaderStatus
+        let uploaderDevice = UIDevice.currentDevice()
+
+        let battery: Int?
+        if uploaderDevice.batteryMonitoringEnabled {
+            battery = Int(uploaderDevice.batteryLevel * 100)
+        } else {
+            battery = nil
+        }
+        let uploaderStatus = UploaderStatus(name: uploaderDevice.name, timestamp: NSDate(), battery: battery)
+
+        // Build DeviceStatus
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
+
+        uploader.uploadDeviceStatus(deviceStatus)
     }
 
 }
