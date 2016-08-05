@@ -151,27 +151,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: Pump data
 
-    private var latestPumpStatusDate: NSDate?
-
-    var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody? {
-        didSet {
-            if let update = latestPumpStatusFromMySentry, let timeZone = pumpState?.timeZone {
-                let pumpClock = update.pumpDateComponents
-                pumpClock.timeZone = timeZone
-                latestPumpStatusDate = pumpClock.date
-            }
-        }
-    }
-
-    private var latestPolledPumpStatus: RileyLinkKit.PumpStatus? {
-        didSet {
-            if let update = latestPolledPumpStatus, let timeZone = pumpState?.timeZone {
-                let pumpClock = update.clock
-                pumpClock.timeZone = timeZone
-                latestPumpStatusDate = pumpClock.date
-            }
-        }
-    }
+    var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
 
     // TODO: Expose this on DoseStore
     var latestReservoirValue: ReservoirValue? {
@@ -211,7 +191,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         latestPumpStatusFromMySentry = status
-
 
         // Gather PumpStatus from MySentry packet
         let pumpStatus: NightscoutUploadKit.PumpStatus?
@@ -266,7 +245,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
-
     /**
      Store a new reservoir volume and notify observers of new pump data.
 
@@ -307,35 +285,39 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
     }
 
-    private func readAndUpdatePumpData(completion: (error: ErrorType?) -> Void) {
+    /**
+     Read the pump's current state, including reservoir and clock
 
+     - parameter completion: A closure called after the command is complete. This closure takes a single Result argument:
+        - Success(status, date): The pump status, and the resolved date according to the pump's clock
+        - Failure(error): An error describing why the command failed
+     */
+    private func readPumpData(completion: (Either<(status: RileyLinkKit.PumpStatus, date: NSDate), ErrorType>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
-            completion(error: LoopError.ConfigurationError)
+            completion(.Failure(LoopError.ConfigurationError))
             return
         }
 
-        ops.readPumpStatus({ (result) in
+        ops.readPumpStatus { (result) in
             switch result {
             case .Success(let status):
-                self.latestPolledPumpStatus = status
-
                 status.clock.timeZone = ops.pumpState.timeZone
                 guard let date = status.clock.date else {
                     self.logger.addError("Could not interpret pump clock: \(status.clock)", fromSource: "RileyLink")
-                    completion(error: LoopError.ConfigurationError)
+                    completion(.Failure(LoopError.ConfigurationError))
                     return
                 }
-
-                self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
 
                 let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                 let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 self.remoteDataManager.uploadDeviceStatus(nsPumpStatus)
 
+                completion(.Success(status: status, date: date))
             case .Failure(let error):
-                completion(error: error)
+                self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
+                completion(.Failure(error))
             }
-        })
+        }
     }
 
     /**
@@ -352,17 +334,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 4)
 
         // If we don't yet have pump status, or it's old, poll for it.
-        if latestPumpStatusDate == nil || latestPumpStatusDate!.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
-            readAndUpdatePumpData({ (error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "RileyLink")
+        if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
+            readPumpData { (result) in
+                switch result {
+                case .Success(let (status, date)):
+                    self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
+                case .Failure:
                     self.troubleshootPumpCommsWithDevice(device)
                 }
-            })
-
+            }
         }
-
-
     }
 
     /**
@@ -449,18 +430,26 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
-        if  latestPumpStatusDate == nil ||
+        if  latestReservoirValue == nil ||
             latestReservoirVolumeDrop < 0 ||
-            latestPumpStatusDate!.timeIntervalSinceNow <= NSTimeInterval(minutes: -5)
+            latestReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: -5)
         {
-            readAndUpdatePumpData({ (error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "Bolus")
-                    completion(error: LoopError.CommunicationError)
-                } else {
-                    setBolus()
+            readPumpData { (result) in
+                switch result {
+                case .Success(let (status, date)):
+                    self.doseStore.addReservoirValue(status.reservoir, atDate: date) { (newValue, _, error) in
+                        if let error = error {
+                            self.logger.addError(error, fromSource: "Bolus")
+                            completion(error: error)
+                        } else {
+                            self.latestReservoirValue = newValue
+                            setBolus()
+                        }
+                    }
+                case .Failure(let error):
+                    completion(error: error)
                 }
-            })
+            }
         } else {
             setBolus()
         }
@@ -720,8 +709,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
                 rileyLinkManager.idleListeningEnabled = false
             }
-            NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
 
+            NSUserDefaults.standardUserDefaults().pumpModelNumber = pumpState?.pumpModel?.rawValue
         case "lastHistoryDump"?, "awakeUntil"?:
             break
         default:
