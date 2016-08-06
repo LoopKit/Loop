@@ -107,7 +107,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
                     context.loopLastRunDate = lastLoopCompleted
                     context.recommendedBolusDose = units
 
-                    if let trend = self.deviceDataManager.sensorInfo?.trendDescription {
+                    if let trend = self.deviceDataManager.sensorInfo?.trendType {
                         context.glucoseTrend = trend
                     }
 
