@@ -628,7 +628,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     func receiver(receiver: Receiver, didLogBluetoothEvent event: String) {
         // Uncomment to debug communication
-        // NSLog("G4: \(event)")
+        // logger.addMessage(["event": "\(event)", "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())], toCollection: "g4")
     }
 
     // MARK: - Configuration
