@@ -12,16 +12,18 @@ class BasalRateHUDView: HUDView {
 
     @IBOutlet private var basalStateView: BasalStateView!
 
-    @IBOutlet var basalRateLabel: UILabel! {
+    @IBOutlet private var basalRateLabel: UILabel! {
         didSet {
-            basalRateLabel?.text = "— U"
-            basalRateLabel?.textColor = UIColor.doseTintColor
+            basalRateLabel?.text = String(format: basalRateFormatString, "–")
+            basalRateLabel?.textColor = .doseTintColor
         }
     }
 
+    private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate. ")
+
     func setNetBasalRate(rate: Double, percent: Double, atDate date: NSDate) {
         caption?.text = timeFormatter.stringFromDate(date)
-        basalRateLabel?.text = "\(decimalFormatter.stringFromNumber(rate) ?? "–") U"
+        basalRateLabel?.text = String(format: basalRateFormatString, decimalFormatter.stringFromNumber(rate) ?? "–")
         basalStateView.netBasalPercent = percent
     }
 

@@ -69,6 +69,8 @@ class StatusChartsManager {
 
     var startDate = NSDate()
 
+    var glucoseUnit: HKUnit?
+
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
     var glucoseValues: [GlucoseValue] = [] {
