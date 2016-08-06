@@ -10,15 +10,6 @@ import Foundation
 import xDripG5
 
 
-protocol SensorDisplayable {
-    // Describes the state of the sensor in the current localization
-    var stateDescription: String { get }
-
-    // Describes the trend of the sensor values in the current localization
-    var trendDescription: String { get }
-}
-
-
 extension GlucoseRxMessage: SensorDisplayable {
     var stateDescription: String {
         let status: String
@@ -34,25 +25,34 @@ extension GlucoseRxMessage: SensorDisplayable {
         return String(format: "%1$02x %2$@", state, status)
     }
 
-    var trendDescription: String {
+    var trendType: GlucoseTrend? {
         guard trend < Int8.max else {
+            return nil
+        }
+
+        switch trend {
+        case let x where x <= -30:
+            return .DownDownDown
+        case let x where x <= -20:
+            return .DownDown
+        case let x where x <= -10:
+            return .Down
+        case let x where x < 10:
+            return .Flat
+        case let x where x < 20:
+            return .Up
+        case let x where x < 30:
+            return .UpUp
+        default:
+            return .UpUpUp
+        }
+    }
+
+    var trendDescription: String {
+        guard let trendType = trendType else {
             return ""
         }
 
-        let direction: String
-        switch trend {
-        case let x where x < -10:
-            direction = "⇊"
-        case let x where x < 0:
-            direction = "↓"
-        case let x where x > 10:
-            direction = "⇈"
-        case let x where x > 0:
-            direction = "↑"
-        default:
-            direction = "→"
-        }
-
-        return String(format: NSLocalizedString("%1$d %2$@", comment: "The format string describing the G5 sensor trend (1: The raw trend value)(2: The direction arrow)"), trend, direction)
+        return String(format: NSLocalizedString("%1$d %2$@", comment: "The format string describing the G5 sensor trend (1: The raw trend value)(2: The direction arrow)"), trend, trendType.description)
     }
 }
