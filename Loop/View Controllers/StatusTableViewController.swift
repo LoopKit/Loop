@@ -132,7 +132,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
 
-            charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            let calendar = NSCalendar.currentCalendar()
+            let components = NSDateComponents()
+            components.minute = 0
+            let date = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            charts.startDate = calendar.nextDateAfterDate(date, matchingComponents: components, options: [.MatchStrictly, .SearchBackwards]) ?? date
+
             let reloadGroup = dispatch_group_create()
 
             if let glucoseStore = dataManager.glucoseStore {

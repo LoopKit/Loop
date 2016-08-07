@@ -22,7 +22,7 @@ extension Glucose: SensorDisplayable {
             status = String(format: "%02x", value)
         }
 
-        return String(format: "%1$02x %2$@", String(state), status)
+        return String(format: "%1$@ %2$@", String(state), status)
     }
 
     var trendType: GlucoseTrend? {
