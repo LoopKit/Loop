@@ -328,38 +328,21 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
             case .PumpID, .TransmitterID, .InsulinActionDuration, .MaxBasal, .MaxBolus:
-                let vc = TextFieldTableViewController()
+                let vc: TextFieldTableViewController
 
                 switch row {
                 case .PumpID:
-                    vc.placeholder = NSLocalizedString("Enter the 6-digit pump ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                    vc.value = dataManager.pumpID
+                    vc = .pumpID(dataManager.pumpID)
                 case .TransmitterID:
-                    vc.placeholder = NSLocalizedString("Enter the 6-digit transmitter ID", comment: "The placeholder text instructing users how to enter a pump ID")
-                    vc.value = dataManager.transmitterID
+                    vc = .transmitterID(dataManager.transmitterID)
                 case .InsulinActionDuration:
-                    vc.placeholder = NSLocalizedString("Enter a number of hours", comment: "The placeholder text instructing users how to enter an insulin action duration")
-                    vc.keyboardType = .DecimalPad
-
-                    if let insulinActionDuration = dataManager.insulinActionDuration {
-                        vc.value = valueNumberFormatter.stringFromNumber(insulinActionDuration.hours)
-                    }
+                    vc = .insulinActionDuration(dataManager.insulinActionDuration)
                 case .MaxBasal:
-                    vc.placeholder = NSLocalizedString("Enter a rate in units per hour", comment: "The placeholder text instructing users how to enter a maximum basal rate")
-                    vc.keyboardType = .DecimalPad
-
-                    if let maxBasal = dataManager.maximumBasalRatePerHour {
-                        vc.value = valueNumberFormatter.stringFromNumber(maxBasal)
-                    }
+                    vc = .maxBasal(dataManager.maximumBasalRatePerHour)
                 case .MaxBolus:
-                    vc.placeholder = NSLocalizedString("Enter a number of units", comment: "The placeholder text instructing users how to enter a maximum bolus")
-                    vc.keyboardType = .DecimalPad
-
-                    if let maxBolus = dataManager.maximumBolus {
-                        vc.value = valueNumberFormatter.stringFromNumber(maxBolus)
-                    }
+                    vc = .maxBolus(dataManager.maximumBolus)
                 default:
-                    assertionFailure()
+                    fatalError()
                 }
 
                 vc.title = sender?.textLabel?.text

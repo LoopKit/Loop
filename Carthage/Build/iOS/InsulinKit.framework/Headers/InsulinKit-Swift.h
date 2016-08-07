@@ -103,8 +103,8 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 @class NSBundle;
 @class NSCoder;
 
-SWIFT_CLASS("_TtC10InsulinKit28ReservoirTableViewController")
-@interface ReservoirTableViewController : UITableViewController
+SWIFT_CLASS("_TtC10InsulinKit34InsulinDeliveryTableViewController")
+@interface InsulinDeliveryTableViewController : UITableViewController
 - (void)viewDidLoad;
 - (void)viewWillAppear:(BOOL)animated;
 - (void)viewDidAppear:(BOOL)animated;
