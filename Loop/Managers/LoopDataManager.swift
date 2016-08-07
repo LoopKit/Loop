@@ -11,6 +11,8 @@ import CarbKit
 import InsulinKit
 import LoopKit
 import MinimedKit
+import NightscoutUploadKit
+import HealthKit
 
 
 class LoopDataManager {
@@ -53,6 +55,8 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
+                    self.carbsOnBoardValues = nil
+                    self.insulinOnBoardValues = nil
                     self.loop()
                 }
             }
@@ -83,7 +87,7 @@ class LoopDataManager {
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
-
+                    self.uploadLoopStatus()
                     self.notify()
                 }
 
@@ -97,6 +101,45 @@ class LoopDataManager {
         }
 
         notify()
+    }
+
+    func uploadLoopStatus() {
+
+        let statusTime = NSDate()
+
+        let glucose = deviceDataManager.glucoseStore?.latestGlucose
+
+        let iob: IOBStatus?
+
+        if let iobValues = insulinOnBoardValues, iobValue = iobValues.first {
+            iob = IOBStatus( timestamp: iobValue.startDate, iob: iobValue.value)
+        } else {
+            iob = nil
+        }
+
+       let eventualBG = self.predictedGlucose?.last?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
+
+        let loopSuggested: LoopSuggested?
+
+        let glucoseVal = glucose?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
+
+        if let recommendedTempBasal = self.lastRecommendedTempBasal, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
+            loopSuggested = LoopSuggested(timestamp: recommendedTempBasal.recommendedDate, rate: recommendedTempBasal.rate, duration: recommendedTempBasal.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal))
+        } else {
+            loopSuggested = nil
+        }
+
+        let loopEnacted: LoopEnacted?
+        if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour {
+            let duration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
+            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received: true)
+        } else {
+            loopEnacted = nil
+        }
+
+        let loopStatus = LoopStatus(name: "TestLoopName", timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: nil)
+
+        deviceDataManager.remoteDataManager.uploadDeviceStatus(nil, loopStatus: loopStatus)
     }
 
     // References to registered notification center observers
@@ -142,6 +185,32 @@ class LoopDataManager {
                     self.insulinEffect = effects
                 } else {
                     self.insulinEffect = nil
+                }
+                dispatch_group_leave(updateGroup)
+            }
+        }
+
+        // Not used directly in loop decision making, but useful for reporting
+        if insulinOnBoardValues == nil {
+            dispatch_group_enter(updateGroup)
+            updateIOB { (values, error) -> Void in
+                if error == nil {
+                    self.insulinOnBoardValues = values
+                } else {
+                    self.insulinOnBoardValues = nil
+                }
+                dispatch_group_leave(updateGroup)
+            }
+        }
+
+        // Not used directly in loop decision making, but useful for reporting
+        if carbsOnBoardValues == nil {
+            dispatch_group_enter(updateGroup)
+            updateCOB { (values, error) -> Void in
+                if error == nil {
+                    self.carbsOnBoardValues = values
+                } else {
+                    self.carbsOnBoardValues = nil
                 }
                 dispatch_group_leave(updateGroup)
             }
@@ -218,7 +287,18 @@ class LoopDataManager {
             recommendedTempBasal = nil
         }
     }
-    private var recommendedTempBasal: TempBasalRecommendation?
+
+    private var insulinOnBoardValues: [InsulinValue]?
+    private var carbsOnBoardValues: [CarbValue]?
+
+    private var recommendedTempBasal: TempBasalRecommendation? {
+        didSet {
+            if let recommendation = recommendedTempBasal {
+                lastRecommendedTempBasal = recommendation
+            }
+        }
+    }
+    private var lastRecommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
     private var lastLoopError: ErrorType? {
@@ -275,6 +355,34 @@ class LoopDataManager {
             }
         } else {
             completionHandler(effects: nil, error: LoopError.MissingDataError("GlucoseStore not available"))
+        }
+    }
+
+    private func updateIOB(completionHandler: (values: [InsulinValue]?, error: ErrorType?) -> Void) {
+        let glucose = deviceDataManager.glucoseStore?.latestGlucose
+
+        deviceDataManager.doseStore.getInsulinOnBoardValues(startDate: glucose?.startDate) { (values, error) -> Void in
+            if let error = error {
+                self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
+            }
+
+            completionHandler(values: values, error: error)
+        }
+    }
+
+    private func updateCOB(completionHandler: (values: [CarbValue]?, error: ErrorType?) -> Void) {
+        let glucose = deviceDataManager.glucoseStore?.latestGlucose
+
+        if let carbStore = deviceDataManager.carbStore {
+            carbStore.getCarbsOnBoardValues(startDate: glucose?.startDate) { (values, error) -> Void in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
+                }
+
+                completionHandler(values: values, error: error)
+            }
+        } else {
+            completionHandler(values: nil, error: LoopError.MissingDataError("CarbStore not available"))
         }
     }
 
