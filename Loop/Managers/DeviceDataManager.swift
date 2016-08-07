@@ -498,48 +498,34 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: xDripG5.Transmitter, didReadGlucose glucoseMessage: xDripG5.GlucoseRxMessage) {
-        transmitterStartTime = transmitter.startTimeInterval
-
+    func transmitter(transmitter: xDripG5.Transmitter, didRead glucose: xDripG5.Glucose) {
         assertCurrentPumpData()
 
-        guard glucoseMessage != latestGlucoseG5 else {
+        guard glucose != latestGlucoseG5 else {
             return
         }
 
-        latestGlucoseG5 = glucoseMessage
+        latestGlucoseG5 = glucose
 
-        guard let glucose = TransmitterGlucose(glucoseMessage: glucoseMessage, startTime: transmitter.startTimeInterval), glucoseStore = glucoseStore else {
+        guard let glucoseStore = glucoseStore, let quantity = glucose.glucose else {
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             return
         }
 
         let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, isDisplayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
+        glucoseStore.addGlucose(quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly, device: device) { (_, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-        })
+        }
     }
 
     // MARK: G5 data
 
-    private var transmitterStartTime: NSTimeInterval? = NSUserDefaults.standardUserDefaults().transmitterStartTime {
-        didSet {
-            if oldValue != transmitterStartTime {
-                NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
-
-                if let transmitterStartTime = transmitterStartTime, drift = oldValue?.distanceTo(transmitterStartTime) where abs(drift) > 1 {
-                    AnalyticsManager.sharedManager.transmitterTimeDidDrift(drift)
-                }
-            }
-        }
-    }
-
-    private var latestGlucoseG5: GlucoseRxMessage?
+    private var latestGlucoseG5: xDripG5.Glucose?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
@@ -750,14 +736,12 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
             case (.NeedsConfiguration, let transmitterID?):
                 transmitterState = .Ready(Transmitter(
                     ID: transmitterID,
-                    startTimeInterval: NSUserDefaults.standardUserDefaults().transmitterStartTime,
                     passiveModeEnabled: true
                 ))
             case (.Ready, .None):
                 transmitterState = .NeedsConfiguration
             case (.Ready(let transmitter), let transmitterID?):
                 transmitter.ID = transmitterID
-                transmitter.startTimeInterval = nil
             case (.NeedsConfiguration, .None):
                 break
             }
