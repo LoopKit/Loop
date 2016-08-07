@@ -69,20 +69,18 @@ class StatusChartsManager {
 
     var startDate = NSDate()
 
-    var glucoseUnit: HKUnit?
+    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
 
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
     var glucoseValues: [GlucoseValue] = [] {
         didSet {
-            // TODO: Use the preferred unit
-            let unit = HKUnit.milligramsPerDeciliterUnit()
-            let unitString = unit.glucoseUnitDisplayString
+            let unitString = glucoseUnit.glucoseUnitDisplayString
 
             glucosePoints = glucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(unit), unitString: unitString)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString)
                 )
             }
         }
@@ -90,14 +88,12 @@ class StatusChartsManager {
 
     var predictedGlucoseValues: [GlucoseValue] = [] {
         didSet {
-            // TODO: Use the preferred unit
-            let unit = HKUnit.milligramsPerDeciliterUnit()
-            let unitString = unit.glucoseUnitDisplayString
+            let unitString = glucoseUnit.glucoseUnitDisplayString
 
             predictedGlucosePoints = predictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(unit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString, formatter: integerFormatter)
                 )
             }
         }
@@ -256,8 +252,15 @@ class StatusChartsManager {
 
         let allPoints = glucosePoints + predictedGlucosePoints
 
-        // TODO: The segment/multiple values are unit-specific
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints + targetOverridePoints, minSegmentCount: 2, maxSegmentCount: 4, multiple: 25, axisValueGenerator: { ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints + targetOverridePoints,
+            minSegmentCount: 2,
+            maxSegmentCount: 4,
+            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize,
+            axisValueGenerator: {
+                ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings)
+            },
+            addPaddingSegmentIfEdge: true
+        )
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
@@ -576,6 +579,17 @@ class StatusChartsManager {
                 targetOverridePoints = []
                 targetOverrideDurationPoints = []
             }
+        }
+    }
+}
+
+
+private extension HKUnit {
+    var glucoseUnitYAxisSegmentSize: Double {
+        if self == .milligramsPerDeciliterUnit() {
+            return 25
+        } else {
+            return 1
         }
     }
 }

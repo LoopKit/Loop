@@ -386,12 +386,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     }
 
     private enum SensorRow: Int {
-        case Date
-        case Glucose
-        case Trend
         case State
 
-        static let count = 4
+        static let count = 1
     }
 
     private lazy var emptyValueString: String = NSLocalizedString("––",
@@ -537,21 +534,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             cell.selectionStyle = .None
 
             switch SensorRow(rawValue: indexPath.row)! {
-            case .Date:
-                cell.textLabel?.text = NSLocalizedString("Latest CGM", comment: "The title of the cell containing the last updated sensor date")
-
-                if let date = dataManager.glucoseStore?.latestGlucose?.startDate {
-                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            case .Glucose:
-                cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
-                cell.detailTextLabel?.text = emptyValueString
-            case .Trend:
-                cell.textLabel?.text = NSLocalizedString("Sensor Trend", comment: "The title of the cell containing the current glucose trend")
-
-                cell.detailTextLabel?.text = dataManager.sensorInfo?.trendType?.description ?? emptyValueString
             case .State:
                 cell.textLabel?.text = NSLocalizedString("Sensor State", comment: "The title of the cell containing the current sensor state")
 
