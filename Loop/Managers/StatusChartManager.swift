@@ -586,7 +586,7 @@ class StatusChartsManager {
 
 private extension HKUnit {
     var glucoseUnitYAxisSegmentSize: Double {
-        if self == .milligramsPerDeciliterUnit() {
+        if self == HKUnit.milligramsPerDeciliterUnit() {
             return 25
         } else {
             return 1
