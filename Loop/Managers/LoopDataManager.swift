@@ -98,6 +98,7 @@ class LoopDataManager {
             }
         } catch let error {
             lastLoopError = error
+            self.uploadLoopStatus()
         }
 
         notify()
@@ -137,7 +138,18 @@ class LoopDataManager {
             loopEnacted = nil
         }
 
-        let loopStatus = LoopStatus(name: "TestLoopName", timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: nil)
+        let failureReason: String?
+
+
+        if let lastLoopError = lastLoopError {
+            failureReason = String(lastLoopError)
+        } else {
+            failureReason = nil
+        }
+
+        let loopName = NSBundle.mainBundle().localizedNameAndVersion
+
+        let loopStatus = LoopStatus(name: loopName, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: failureReason)
 
         deviceDataManager.remoteDataManager.uploadDeviceStatus(nil, loopStatus: loopStatus)
     }

@@ -309,7 +309,7 @@ class SettingsTableViewController: UITableViewController, DailyValueScheduleTabl
         switch Section(rawValue: section)! {
         case .Loop:
             let bundle = NSBundle.mainBundle()
-            return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundle.bundleDisplayName, bundle.shortVersionString)
+            return bundle.localizedNameAndVersion
         case .Configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .Devices:
