@@ -19,11 +19,6 @@ import RileyLinkKit
 import ShareClient
 import xDripG5
 
-private enum State<T> {
-    case NeedsConfiguration
-    case Ready(T)
-}
-
 
 class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
@@ -48,29 +43,21 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
-    /// The G5 transmitter object
-    var transmitter: Transmitter? {
-        switch transmitterState {
-        case .Ready(let transmitter):
-            return transmitter
-        case .NeedsConfiguration:
-            return nil
+    // The Dexcom Share receiver object
+    private var receiver: Receiver? {
+        didSet {
+            receiver?.delegate = self
+            enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
-    // The Dexcom Share receiver object
-    var receiver: Receiver?
-
-    var receiverEnabled: Bool = false {
-        didSet {
-            if (receiverEnabled) {
-                receiver = Receiver()
-                receiver!.delegate = self
-            } else {
-                receiver = nil
-            }
-            NSUserDefaults.standardUserDefaults().receiverEnabled = receiverEnabled
-            enableRileyLinkHeartbeatIfNeeded()
+    var receiverEnabled: Bool {
+        get {
+            return receiver != nil
+        }
+        set {
+            receiver = newValue ? Receiver() : nil
+            NSUserDefaults.standardUserDefaults().receiverEnabled = newValue
         }
     }
 
@@ -140,7 +127,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     }
 
     func enableRileyLinkHeartbeatIfNeeded() {
-        if case .Ready = transmitterState {
+        if transmitter != nil {
             rileyLinkManager.timerTickEnabled = false
         } else if receiverEnabled {
             rileyLinkManager.timerTickEnabled = false
@@ -717,36 +704,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: G5 Transmitter
 
-    private var transmitterState: State<Transmitter> = .NeedsConfiguration {
+    internal private(set) var transmitter: Transmitter? {
         didSet {
-            if case .Ready(let transmitter) = transmitterState {
-                transmitter.delegate = self
-            }
+            transmitter?.delegate = self
             enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
     var transmitterID: String? {
-        didSet {
-            if transmitterID?.characters.count != 6 {
-                transmitterID = nil
+        get {
+            return transmitter?.ID
+        }
+        set {
+            guard transmitterID != newValue else { return }
+
+            if let transmitterID = newValue where transmitterID.characters.count == 6 {
+                transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
+            } else {
+                transmitter = nil
             }
 
-            switch (transmitterState, transmitterID) {
-            case (.NeedsConfiguration, let transmitterID?):
-                transmitterState = .Ready(Transmitter(
-                    ID: transmitterID,
-                    passiveModeEnabled: true
-                ))
-            case (.Ready, .None):
-                transmitterState = .NeedsConfiguration
-            case (.Ready(let transmitter), let transmitterID?):
-                transmitter.ID = transmitterID
-            case (.NeedsConfiguration, .None):
-                break
-            }
-
-            NSUserDefaults.standardUserDefaults().transmitterID = transmitterID
+            NSUserDefaults.standardUserDefaults().transmitterID = newValue
         }
     }
 
@@ -941,9 +919,16 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
         carbStore?.delegate = self
 
-        defer {
-            transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
-            receiverEnabled = NSUserDefaults.standardUserDefaults().receiverEnabled
+        if NSUserDefaults.standardUserDefaults().receiverEnabled {
+            receiver = Receiver()
+            receiver?.delegate = self
         }
+
+        if let transmitterID = NSUserDefaults.standardUserDefaults().transmitterID {
+            transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
+            transmitter?.delegate = self
+        }
+
+        enableRileyLinkHeartbeatIfNeeded()
     }
 }
