@@ -5,6 +5,8 @@ By adding this to Loop, you will be presented with a switch in your settings whe
 
 If your BG value is stale or loop is in the "aging" state (loop has not run for over 5 minutes), then the BG will not show on your home icon. If I do not see a badge then I know that my loop may not be working properly and I can drill in to see what is going on. I do not make any decisions based upon the value of this badge and I always check BG in other places (Dexcom, finger stick, etc) before putting trust into the badge value.
 
+There is an experimental, untested line of code for displaying the floor value in mmol (example 5.8 would display 5) included in the comments.
+
 Please understand that this project:
 
 * Is highly experimental
