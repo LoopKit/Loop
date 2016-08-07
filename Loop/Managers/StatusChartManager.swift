@@ -545,8 +545,10 @@ class StatusChartsManager {
         let timeFormatter = NSDateFormatter()
         timeFormatter.dateFormat = "h a"
 
-        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: { ChartAxisValueDate(date: ChartAxisValueDate.dateFromScalar($0), formatter: timeFormatter, labelSettings: self.axisLabelSettings)
-            }, addPaddingSegmentIfEdge: false)
+        let minDate = startDate
+        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: {
+            ChartAxisValueDate(date: max(minDate, ChartAxisValueDate.dateFromScalar($0)), formatter: timeFormatter, labelSettings: self.axisLabelSettings)
+        }, addPaddingSegmentIfEdge: false)
         xAxisValues.first?.hidden = true
         xAxisValues.last?.hidden = true
 
