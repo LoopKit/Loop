@@ -7,7 +7,7 @@ If your BG value is stale or loop is in the "aging" state (loop has not run for 
 
 Please understand that this project:
 
-Is highly experimental
-Is not approved for therapy
+* Is highly experimental
+* Is not approved for therapy
 
 
