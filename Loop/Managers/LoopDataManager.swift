@@ -78,7 +78,10 @@ class LoopDataManager {
         do {
             try self.update()
 
+            let recommendation = recommendedTempBasal
+
             if dosingEnabled {
+
                 setRecommendedTempBasal { (success, error) -> Void in
                     self.lastLoopError = error
 
@@ -87,7 +90,7 @@ class LoopDataManager {
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
-                    self.uploadLoopStatus()
+                    self.uploadLoopStatus(recommendation)
                     self.notify()
                 }
 
@@ -98,13 +101,15 @@ class LoopDataManager {
             }
         } catch let error {
             lastLoopError = error
-            self.uploadLoopStatus()
+            self.uploadLoopStatus(nil)
         }
 
         notify()
     }
 
-    func uploadLoopStatus() {
+    private var lastTempBasalUploaded: DoseEntry?
+
+    func uploadLoopStatus(recommendation: TempBasalRecommendation?) {
 
         let statusTime = NSDate()
 
@@ -124,16 +129,19 @@ class LoopDataManager {
 
         let glucoseVal = glucose?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
 
-        if let recommendedTempBasal = self.lastRecommendedTempBasal, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
-            loopSuggested = LoopSuggested(timestamp: recommendedTempBasal.recommendedDate, rate: recommendedTempBasal.rate, duration: recommendedTempBasal.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal))
+        if let recommendation = recommendation, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
+            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal))
         } else {
             loopSuggested = nil
         }
 
         let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour {
+        if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour &&
+            lastTempBasalUploaded?.startDate != tempBasal.startDate {
             let duration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
-            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received: true)
+            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
+                true)
+            lastTempBasalUploaded = tempBasal
         } else {
             loopEnacted = nil
         }
@@ -303,14 +311,7 @@ class LoopDataManager {
     private var insulinOnBoardValues: [InsulinValue]?
     private var carbsOnBoardValues: [CarbValue]?
 
-    private var recommendedTempBasal: TempBasalRecommendation? {
-        didSet {
-            if let recommendation = recommendedTempBasal {
-                lastRecommendedTempBasal = recommendation
-            }
-        }
-    }
-    private var lastRecommendedTempBasal: TempBasalRecommendation?
+    private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
     private var lastLoopError: ErrorType? {
