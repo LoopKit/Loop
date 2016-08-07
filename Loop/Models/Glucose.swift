@@ -10,23 +10,23 @@ import Foundation
 import xDripG5
 
 
-extension GlucoseRxMessage: SensorDisplayable {
+extension Glucose: SensorDisplayable {
     var stateDescription: String {
         let status: String
         switch self.status {
         case .OK:
             status = ""
         case .LowBattery:
-            status = NSLocalizedString("Low Battery", comment: "The description of a low G5 transmitter battery")
+            status = NSLocalizedString(" Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
         case .Unknown(let value):
             status = String(format: "%02x", value)
         }
 
-        return String(format: "%1$02x %2$@", state, status)
+        return String(format: "%1$02x %2$@", String(state), status)
     }
 
     var trendType: GlucoseTrend? {
-        guard trend < Int8.max else {
+        guard trend < Int(Int8.max) else {
             return nil
         }
 
