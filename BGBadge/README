@@ -1,4 +1,4 @@
-* BG Badge
+#BG Badge
 BG Badge is a modification to Loop which will allow you to view your current BG value in mg/dl as a badge on your Loop icon.
 
 By adding this to Loop, you will be presented with a switch in your settings where you can toggle the badge on and off.
@@ -9,3 +9,5 @@ Please understand that this project:
 
 Is highly experimental
 Is not approved for therapy
+
+
