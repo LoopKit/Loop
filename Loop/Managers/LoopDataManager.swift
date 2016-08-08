@@ -142,6 +142,9 @@ class LoopDataManager {
             loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
+        } else if let recommendation = recommendation {
+            // notEnacted
+            loopEnacted = LoopEnacted(rate: recommendation.rate, duration: recommendation.duration, timestamp: recommendation.recommendedDate, received: false)
         } else {
             loopEnacted = nil
         }
