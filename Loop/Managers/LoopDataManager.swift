@@ -129,8 +129,17 @@ class LoopDataManager {
 
         let glucoseVal = glucose?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
 
+        let predBGs: [Double]?
+        if let predicted = predictedGlucose {
+            predBGs = predicted[0...10].map({ (value) -> Double in
+                value.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
+            })
+        } else {
+            predBGs = nil
+        }
+
         if let recommendation = recommendation, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
-            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal), correction: recommendedBolus)
+            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal), correction: recommendedBolus, predBGs: predBGs)
         } else {
             loopSuggested = nil
         }
@@ -158,9 +167,10 @@ class LoopDataManager {
             failureReason = nil
         }
 
-        let loopName = NSBundle.mainBundle().localizedNameAndVersion
+        let loopName = NSBundle.mainBundle().bundleDisplayName
+        let loopVersion = NSBundle.mainBundle().shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: failureReason)
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: failureReason)
 
         deviceDataManager.remoteDataManager.uploadDeviceStatus(nil, loopStatus: loopStatus)
     }
