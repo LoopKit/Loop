@@ -129,7 +129,7 @@ class StatusChartsManager {
     var doseEntries: [DoseEntry] = [] {
         didSet {
             dosePoints = doseEntries.reduce([], combine: { (points, entry) -> [ChartPoint] in
-                if entry.unit == .UnitsPerHour {
+                if entry.unit == .unitsPerHour {
                     let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                     let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
                     let zero = ChartAxisValueInt(0)
