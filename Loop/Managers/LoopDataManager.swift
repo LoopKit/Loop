@@ -130,7 +130,7 @@ class LoopDataManager {
         let glucoseVal = glucose?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
 
         if let recommendation = recommendation, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
-            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal))
+            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal), correction: recommendedBolus)
         } else {
             loopSuggested = nil
         }
@@ -213,7 +213,7 @@ class LoopDataManager {
             }
         }
 
-        // Not used directly in loop decision making, but useful for reporting
+        // Not used directly in loop decision making, but used for reporting loop state
         if insulinOnBoardValues == nil {
             dispatch_group_enter(updateGroup)
             updateIOB { (values, error) -> Void in
@@ -226,7 +226,7 @@ class LoopDataManager {
             }
         }
 
-        // Not used directly in loop decision making, but useful for reporting
+        // Not used directly in loop decision making, but used for reporting loop state
         if carbsOnBoardValues == nil {
             dispatch_group_enter(updateGroup)
             updateCOB { (values, error) -> Void in
@@ -243,7 +243,7 @@ class LoopDataManager {
 
         if self.predictedGlucose == nil {
             do {
-                try self.updatePredictedGlucoseAndRecommendedBasal()
+                try self.updatePredictedGlucoseAndRecommendations()
             } catch let error {
                 self.deviceDataManager.logger.addError(error, fromSource: "PredictGlucose")
 
@@ -308,12 +308,14 @@ class LoopDataManager {
     private var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
+            recommendedBolus = nil
         }
     }
 
     private var insulinOnBoardValues: [InsulinValue]?
     private var carbsOnBoardValues: [CarbValue]?
 
+    private var recommendedBolus: Double?
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
@@ -407,7 +409,7 @@ class LoopDataManager {
      
      *This method should only be called from the `dataAccessQueue`*
      */
-    private func updatePredictedGlucoseAndRecommendedBasal() throws {
+    private func updatePredictedGlucoseAndRecommendations() throws {
         guard let
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
             pumpStatusDate = self.deviceDataManager.latestReservoirValue?.startDate
@@ -481,6 +483,9 @@ class LoopDataManager {
         } else {
             recommendedTempBasal = nil
         }
+
+        recommendedBolus = nil
+        recommendedBolus = try self.recommendBolus()
     }
 
     func addCarbEntryAndRecommendBolus(carbEntry: CarbEntry, resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
