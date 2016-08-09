@@ -40,6 +40,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     /// Manages remote data (TODO: the lazy initialization isn't thread-safe)
     lazy var remoteDataManager = RemoteDataManager()
 
+    private var nightscoutDataManager: NightscoutDataManager!
+
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
@@ -916,6 +918,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataDidUpdateNotification(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: loopManager)
 
         watchManager = WatchDataManager(deviceDataManager: self)
+        nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
 

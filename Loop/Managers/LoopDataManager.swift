@@ -55,8 +55,7 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
-                    self.carbsOnBoardValues = nil
-                    self.insulinOnBoardValues = nil
+                    self.insulinOnBoard = nil
                     self.loop()
                 }
             }
@@ -117,8 +116,8 @@ class LoopDataManager {
 
         let iob: IOBStatus?
 
-        if let iobValues = insulinOnBoardValues, iobValue = iobValues.first {
-            iob = IOBStatus( timestamp: iobValue.startDate, iob: iobValue.value)
+        if let insulinOnBoard = insulinOnBoard {
+            iob = IOBStatus(timestamp: insulinOnBoard.startDate, iob: insulinOnBoard.value)
         } else {
             iob = nil
         }
@@ -159,7 +158,6 @@ class LoopDataManager {
         }
 
         let failureReason: String?
-
 
         if let lastLoopError = lastLoopError {
             failureReason = String(lastLoopError)
@@ -223,28 +221,14 @@ class LoopDataManager {
             }
         }
 
-        // Not used directly in loop decision making, but used for reporting loop state
-        if insulinOnBoardValues == nil {
+        if insulinOnBoard == nil {
             dispatch_group_enter(updateGroup)
-            updateIOB { (values, error) -> Void in
-                if error == nil {
-                    self.insulinOnBoardValues = values
-                } else {
-                    self.insulinOnBoardValues = nil
+            deviceDataManager.doseStore.insulinOnBoardAtDate(NSDate()) { (value, error) in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                 }
-                dispatch_group_leave(updateGroup)
-            }
-        }
 
-        // Not used directly in loop decision making, but used for reporting loop state
-        if carbsOnBoardValues == nil {
-            dispatch_group_enter(updateGroup)
-            updateCOB { (values, error) -> Void in
-                if error == nil {
-                    self.carbsOnBoardValues = values
-                } else {
-                    self.carbsOnBoardValues = nil
-                }
+                self.insulinOnBoard = value
                 dispatch_group_leave(updateGroup)
             }
         }
@@ -310,6 +294,7 @@ class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    private var insulinOnBoard: InsulinValue?
     private var glucoseMomentumEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
@@ -321,9 +306,6 @@ class LoopDataManager {
             recommendedBolus = nil
         }
     }
-
-    private var insulinOnBoardValues: [InsulinValue]?
-    private var carbsOnBoardValues: [CarbValue]?
 
     private var recommendedBolus: Double?
     private var recommendedTempBasal: TempBasalRecommendation?
@@ -383,34 +365,6 @@ class LoopDataManager {
             }
         } else {
             completionHandler(effects: nil, error: LoopError.MissingDataError("GlucoseStore not available"))
-        }
-    }
-
-    private func updateIOB(completionHandler: (values: [InsulinValue]?, error: ErrorType?) -> Void) {
-        let glucose = deviceDataManager.glucoseStore?.latestGlucose
-
-        deviceDataManager.doseStore.getInsulinOnBoardValues(startDate: glucose?.startDate) { (values, error) -> Void in
-            if let error = error {
-                self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
-            }
-
-            completionHandler(values: values, error: error)
-        }
-    }
-
-    private func updateCOB(completionHandler: (values: [CarbValue]?, error: ErrorType?) -> Void) {
-        let glucose = deviceDataManager.glucoseStore?.latestGlucose
-
-        if let carbStore = deviceDataManager.carbStore {
-            carbStore.getCarbsOnBoardValues(startDate: glucose?.startDate) { (values, error) -> Void in
-                if let error = error {
-                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
-                }
-
-                completionHandler(values: values, error: error)
-            }
-        } else {
-            completionHandler(values: nil, error: LoopError.MissingDataError("CarbStore not available"))
         }
     }
 
