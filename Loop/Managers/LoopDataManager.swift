@@ -87,8 +87,6 @@ class LoopDataManager {
         do {
             try self.update()
 
-            let recommendation = recommendedTempBasal
-
             if dosingEnabled {
 
                 setRecommendedTempBasal { (success, error) -> Void in
@@ -99,7 +97,6 @@ class LoopDataManager {
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
-                    self.uploadLoopStatus(recommendation)
                     self.notify(forChange: .TempBasal)
                 }
 
@@ -110,77 +107,9 @@ class LoopDataManager {
             }
         } catch let error {
             lastLoopError = error
-            self.uploadLoopStatus(nil)
         }
 
         notify(forChange: .TempBasal)
-    }
-
-    private var lastTempBasalUploaded: DoseEntry?
-
-    func uploadLoopStatus(recommendation: TempBasalRecommendation?) {
-
-        let statusTime = NSDate()
-
-        let glucose = deviceDataManager.glucoseStore?.latestGlucose
-
-        let iob: IOBStatus?
-
-        if let insulinOnBoard = insulinOnBoard {
-            iob = IOBStatus(timestamp: insulinOnBoard.startDate, iob: insulinOnBoard.value)
-        } else {
-            iob = nil
-        }
-
-       let eventualBG = self.predictedGlucose?.last?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
-
-        let loopSuggested: LoopSuggested?
-
-        let glucoseVal = glucose?.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
-
-        let predBGs: [Double]?
-        if let predicted = predictedGlucose {
-            predBGs = predicted[0...10].map({ (value) -> Double in
-                value.quantity.doubleValueForUnit(HKUnit.milligramsPerDeciliterUnit())
-            })
-        } else {
-            predBGs = nil
-        }
-
-        if let recommendation = recommendation, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
-            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: Int(eventualBG), bg: Int(glucoseVal), correction: recommendedBolus, predBGs: predBGs)
-        } else {
-            loopSuggested = nil
-        }
-
-        let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour &&
-            lastTempBasalUploaded?.startDate != tempBasal.startDate {
-            let duration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
-            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
-                true)
-            lastTempBasalUploaded = tempBasal
-        } else if let recommendation = recommendation {
-            // notEnacted
-            loopEnacted = LoopEnacted(rate: recommendation.rate, duration: recommendation.duration, timestamp: recommendation.recommendedDate, received: false)
-        } else {
-            loopEnacted = nil
-        }
-
-        let failureReason: String?
-
-        if let lastLoopError = lastLoopError {
-            failureReason = String(lastLoopError)
-        } else {
-            failureReason = nil
-        }
-
-        let loopName = NSBundle.mainBundle().bundleDisplayName
-        let loopVersion = NSBundle.mainBundle().shortVersionString
-
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: failureReason)
-
-        deviceDataManager.remoteDataManager.uploadDeviceStatus(nil, loopStatus: loopStatus)
     }
 
     // References to registered notification center observers
@@ -270,12 +199,15 @@ class LoopDataManager {
 
      - parameter resultsHandler: A closure called once the values have been retrieved. The closure takes the following arguments:
         - predictedGlucose:     The calculated timeline of predicted glucose values
+        - insulinEffect:        The predicted effect of insulin
+        - carbEffect:           The predicted effect of carbohydrates
+        - insulinOnBoard        Current insulin on board
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
         - error:                An error object explaining why the retrieval failed
      */
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -285,7 +217,7 @@ class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, error: error)
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error)
         }
     }
 

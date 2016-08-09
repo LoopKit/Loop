@@ -144,6 +144,7 @@
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
+		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -367,6 +368,7 @@
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
+		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -664,6 +666,7 @@
 				43E2D8C51D204678004DA55F /* KeychainManager.swift */,
 				43E2D8C71D208D5B004DA55F /* KeychainManager+Loop.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
+				C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */,
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
@@ -1009,6 +1012,7 @@
 				437CEEC81CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
+				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
 				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				437CCADC1D284B830075D2C3 /* ButtonTableViewCell.swift in Sources */,
 				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
