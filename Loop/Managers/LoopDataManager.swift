@@ -16,9 +16,19 @@ import HealthKit
 
 
 class LoopDataManager {
+    enum LoopUpdateContext: Int {
+        case Bolus
+        case Carbs
+        case Glucose
+        case Preferences
+        case TempBasal
+    }
+
     static let LoopDataUpdatedNotification = "com.loudnate.Naterade.notification.LoopDataUpdated"
 
     static let LoopRunningNotification = "com.loudnate.Naterade.notification.LoopRunning"
+
+    static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     typealias TempBasalRecommendation = (recommendedDate: NSDate, rate: Double, duration: NSTimeInterval)
 
@@ -28,7 +38,7 @@ class LoopDataManager {
         didSet {
             NSUserDefaults.standardUserDefaults().dosingEnabled = dosingEnabled
 
-            notify()
+            notify(forChange: .Preferences)
         }
     }
 
@@ -49,7 +59,7 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
-                    self.notify()
+                    self.notify(forChange: .Glucose)
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
@@ -64,7 +74,7 @@ class LoopDataManager {
         notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: nil) { (note) -> Void in
             dispatch_async(self.dataAccessQueue) {
                 self.carbEffect = nil
-                self.notify()
+                self.notify(forChange: .Carbs)
             }
         })
     }
@@ -90,7 +100,7 @@ class LoopDataManager {
                         self.lastLoopCompleted = NSDate()
                     }
                     self.uploadLoopStatus(recommendation)
-                    self.notify()
+                    self.notify(forChange: .TempBasal)
                 }
 
                 // Delay the notification until we know the result of the temp basal
@@ -103,7 +113,7 @@ class LoopDataManager {
             self.uploadLoopStatus(nil)
         }
 
-        notify()
+        notify(forChange: .TempBasal)
     }
 
     private var lastTempBasalUploaded: DoseEntry?
@@ -246,8 +256,11 @@ class LoopDataManager {
         }
     }
 
-    private func notify() {
-        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+    private func notify(forChange context: LoopUpdateContext) {
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification,
+            object: self,
+            userInfo: [self.dynamicType.LoopUpdateContextKey: context.rawValue]
+        )
     }
 
     /**
@@ -574,7 +587,7 @@ class LoopDataManager {
     func recordBolus(units: Double, atDate date: NSDate) {
         dispatch_async(dataAccessQueue) {
             self.lastBolus = (units: units, date: date)
-            self.notify()
+            self.notify(forChange: .Bolus)
         }
     }
 }

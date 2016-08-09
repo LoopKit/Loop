@@ -47,12 +47,4 @@ extension Glucose: SensorDisplayable {
             return .UpUpUp
         }
     }
-
-    var trendDescription: String {
-        guard let trendType = trendType else {
-            return ""
-        }
-
-        return String(format: NSLocalizedString("%1$d %2$@", comment: "The format string describing the G5 sensor trend (1: The raw trend value)(2: The direction arrow)"), trend, trendType.description)
-    }
 }

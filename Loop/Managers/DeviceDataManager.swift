@@ -855,10 +855,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     private(set) var watchManager: WatchDataManager!
 
-    @objc private func loopDataDidUpdateNotification(_: NSNotification) {
-        watchManager.updateWatch()
-    }
-
     // MARK: - Initialization
 
     static let sharedManager = DeviceDataManager()
@@ -915,8 +911,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         loopManager = LoopDataManager(deviceDataManager: self)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataDidUpdateNotification(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: loopManager)
-
         watchManager = WatchDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
