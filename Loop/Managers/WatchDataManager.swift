@@ -105,8 +105,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         let reservoir = deviceDataManager.doseStore.lastReservoirValue
         let maxBolus = deviceDataManager.maximumBolus
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
-
+<<<<<<< a739dde0824f6d03dc39605460e9d0bcbe93afe6
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, error) in
             let eventualGlucose = predictedGlucose?.last
 
             self.deviceDataManager.loopManager.getRecommendedBolus { (units, error) in

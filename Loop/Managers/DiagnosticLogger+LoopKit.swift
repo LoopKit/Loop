@@ -26,7 +26,7 @@ extension DiagnosticLogger {
         addError(String(message), fromSource: source)
     }
 
-    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
+    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue], reflection: [GlucoseValue] = [], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
 
         let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
         let unit = HKUnit.milligramsPerDeciliterUnit()
@@ -50,13 +50,20 @@ extension DiagnosticLogger {
                 }
                 return input
             }),
-            "prediction": prediction.map({ (value) -> [String: AnyObject] in
+            "prediction": prediction.map { (value) -> [String: AnyObject] in
                 [
                     "startDate": dateFormatter.stringFromDate(value.startDate),
                     "value": value.quantity.doubleValueForUnit(unit),
                     "unit": unit.unitString
                 ]
-            })
+            },
+            "reflection": reflection.map { (value) -> [String: AnyObject] in
+                [
+                    "startDate": dateFormatter.stringFromDate(value.startDate),
+                    "value": value.quantity.doubleValueForUnit(unit),
+                    "unit": unit.unitString
+                ]
+            }
         ]
 
         if let error = error {
