@@ -57,9 +57,6 @@ class NightscoutDataManager {
 
         let statusTime = NSDate()
         
-        // Is this just predictedGlucose[0]?
-        let glucose = deviceDataManager.glucoseStore?.latestGlucose
-        
         let iob: IOBStatus?
         
         if let insulinOnBoard = insulinOnBoard {
@@ -71,8 +68,8 @@ class NightscoutDataManager {
         let eventualBG = predictedGlucose?.last?.quantity
         
         let loopSuggested: LoopSuggested?
-        
-        let glucoseVal = glucose?.quantity
+
+        let glucoseVal = predictedGlucose?.first?.quantity
         
         let predBGs: PredictedBG?
         
