@@ -176,7 +176,7 @@ class LoopDataManager {
 
         if self.predictedGlucose == nil {
             do {
-                try self.updatePredictedGlucoseAndRecommendations()
+                try self.updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
                 self.deviceDataManager.logger.addError(error, fromSource: "PredictGlucose")
 
@@ -248,11 +248,9 @@ class LoopDataManager {
     private var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
-            recommendedBolus = nil
         }
     }
 
-    private var recommendedBolus: Double?
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
@@ -318,7 +316,7 @@ class LoopDataManager {
      
      *This method should only be called from the `dataAccessQueue`*
      */
-    private func updatePredictedGlucoseAndRecommendations() throws {
+    private func updatePredictedGlucoseAndRecommendedBasal() throws {
         guard let
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
             pumpStatusDate = self.deviceDataManager.latestReservoirValue?.startDate
