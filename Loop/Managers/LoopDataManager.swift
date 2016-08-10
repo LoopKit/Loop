@@ -393,8 +393,6 @@ class LoopDataManager {
             recommendedTempBasal = nil
         }
 
-        recommendedBolus = nil
-        recommendedBolus = try self.recommendBolus()
     }
 
     func addCarbEntryAndRecommendBolus(carbEntry: CarbEntry, resultsHandler: (units: Double?, error: ErrorType?) -> Void) {

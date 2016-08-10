@@ -50,7 +50,11 @@ class NightscoutDataManager {
     private var lastTempBasalUploaded: DoseEntry?
 
     private func uploadLoopStatus(insulinOnBoard: InsulinValue?, predictedGlucose: [GlucoseValue]?, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?, recommendedBolus: Double?, lastTempBasal: DoseEntry?, lastLoopError: ErrorType?) {
-        
+
+        guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
+            return
+        }
+
         let statusTime = NSDate()
         
         // Is this just predictedGlucose[0]?
@@ -80,9 +84,31 @@ class NightscoutDataManager {
         } else {
             predBGs = nil
         }
-        
-        if let recommendation = recommendedTempBasal, let glucoseVal = glucoseVal, let eventualBG = eventualBG {
-            loopSuggested = LoopSuggested(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration, eventualBG: eventualBG, bg: glucoseVal, correction: recommendedBolus, predBGs: predBGs)
+
+        // If the last recommendedTempBasal was successfully enacted, then lastTempBasal will be set, and
+        // recommendedTempBasal will be nil. We can use lastTempBasal in lieu of recommendedTempBasal in this
+        // case to populate the 'suggested' fields for NS.
+        let suggestedTimestamp: NSDate?
+        let suggestedRate: Double?
+        let suggestedDuration: NSTimeInterval?
+
+        if let recommendation = recommendedTempBasal {
+            suggestedTimestamp = recommendation.recommendedDate
+            suggestedRate = recommendation.rate
+            suggestedDuration = recommendation.duration
+        } else if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour {
+            suggestedTimestamp = tempBasal.startDate
+            suggestedRate = tempBasal.value
+            suggestedDuration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
+        } else {
+            suggestedTimestamp = nil
+            suggestedRate = nil
+            suggestedDuration = nil
+        }
+
+        if let suggestedTimestamp = suggestedTimestamp, suggestedRate = suggestedRate, suggestedDuration = suggestedDuration, glucoseVal = glucoseVal, eventualBG = eventualBG
+        {
+            loopSuggested = LoopSuggested(timestamp: suggestedTimestamp, rate: suggestedRate, duration: suggestedDuration, eventualBG: eventualBG, bg: glucoseVal, correction: recommendedBolus, predBGs: predBGs)
         } else {
             loopSuggested = nil
         }
@@ -103,11 +129,39 @@ class NightscoutDataManager {
         
         let loopName = NSBundle.mainBundle().bundleDisplayName
         let loopVersion = NSBundle.mainBundle().shortVersionString
-        
+
         let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: lastLoopError)
         
-        deviceDataManager.remoteDataManager.uploadDeviceStatus(nil, loopStatus: loopStatus)
+        uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
     }
 
+    func getUploaderStatus() -> UploaderStatus {
+        // Gather UploaderStatus
+        let uploaderDevice = UIDevice.currentDevice()
+
+        let battery: Int?
+        if uploaderDevice.batteryMonitoringEnabled {
+            battery = Int(uploaderDevice.batteryLevel * 100)
+        } else {
+            battery = nil
+        }
+        return UploaderStatus(name: uploaderDevice.name, timestamp: NSDate(), battery: battery)
+    }
+
+    func uploadDeviceStatus(pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, includeUploaderStatus: Bool = true) {
+
+        guard let uploader = deviceDataManager.remoteDataManager.nightscoutUploader else {
+            return
+        }
+
+        let uploaderDevice = UIDevice.currentDevice()
+
+        let uploaderStatus: UploaderStatus? = includeUploaderStatus ? getUploaderStatus() : nil
+
+        // Build DeviceStatus
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
+
+        uploader.uploadDeviceStatus(deviceStatus)
+    }
 }
