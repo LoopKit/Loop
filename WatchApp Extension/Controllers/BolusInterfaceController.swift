@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 
 
-class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
+final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     private var bolusValue: Double = 0 {
         didSet {

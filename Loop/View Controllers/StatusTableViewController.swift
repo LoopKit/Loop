@@ -15,7 +15,7 @@ import LoopKit
 import SwiftCharts
 
 
-class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
+final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()

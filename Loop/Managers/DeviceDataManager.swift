@@ -20,7 +20,7 @@ import ShareClient
 import xDripG5
 
 
-class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
+final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 

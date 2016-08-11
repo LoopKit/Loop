@@ -9,7 +9,7 @@
 import Foundation
 
 
-class BolusSuggestionUserInfo: RawRepresentable {
+final class BolusSuggestionUserInfo: RawRepresentable {
     let recommendedBolus: Double
 
     init(recommendedBolus: Double) {
