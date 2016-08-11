@@ -11,7 +11,6 @@ import CarbKit
 import InsulinKit
 import LoopKit
 import MinimedKit
-import NightscoutUploadKit
 import HealthKit
 
 
@@ -199,10 +198,10 @@ class LoopDataManager {
 
      - parameter resultsHandler: A closure called once the values have been retrieved. The closure takes the following arguments:
         - predictedGlucose:     The calculated timeline of predicted glucose values
-        - insulinOnBoard        Current insulin on board
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
+        - insulinOnBoard        Current insulin on board
         - error:                An error object explaining why the retrieval failed
      */
     func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
