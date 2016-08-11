@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 
 
-class NotificationController: WKUserNotificationInterfaceController {
+final class NotificationController: WKUserNotificationInterfaceController {
 
     override init() {
         // Initialize variables here.

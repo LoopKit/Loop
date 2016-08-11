@@ -16,7 +16,7 @@ private let ConfigCellIdentifier = "ConfigTableViewCell"
 private let TapToSetString = NSLocalizedString("Tap to set", comment: "The empty-state text for a configuration value")
 
 
-class SettingsTableViewController: UITableViewController, DailyValueScheduleTableViewControllerDelegate, TextFieldTableViewControllerDelegate {
+final class SettingsTableViewController: UITableViewController, DailyValueScheduleTableViewControllerDelegate, TextFieldTableViewControllerDelegate {
 
     @IBOutlet var devicesSectionTitleView: UIView!
 

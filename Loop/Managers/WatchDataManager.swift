@@ -14,7 +14,7 @@ import LoopKit
 import xDripG5
 
 
-class WatchDataManager: NSObject, WCSessionDelegate {
+final class WatchDataManager: NSObject, WCSessionDelegate {
 
     unowned let deviceDataManager: DeviceDataManager
 

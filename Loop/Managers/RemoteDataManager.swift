@@ -11,7 +11,7 @@ import NightscoutUploadKit
 import ShareClient
 
 
-class RemoteDataManager {
+final class RemoteDataManager {
 
     var nightscoutUploader: NightscoutUploader? {
         return nightscoutService.uploader

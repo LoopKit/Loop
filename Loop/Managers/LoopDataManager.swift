@@ -13,7 +13,7 @@ import LoopKit
 import MinimedKit
 
 
-class LoopDataManager {
+final class LoopDataManager {
     enum LoopUpdateContext: Int {
         case Bolus
         case Carbs

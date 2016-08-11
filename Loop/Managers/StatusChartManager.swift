@@ -16,7 +16,7 @@ import LoopKit
 import SwiftCharts
 
 
-class StatusChartsManager {
+final class StatusChartsManager {
 
     // MARK: - Configuration
 

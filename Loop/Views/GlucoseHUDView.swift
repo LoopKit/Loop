@@ -11,7 +11,7 @@ import LoopKit
 import HealthKit
 
 
-class GlucoseHUDView: HUDView {
+final class GlucoseHUDView: HUDView {
 
     @IBOutlet private var unitLabel: UILabel! {
         didSet {

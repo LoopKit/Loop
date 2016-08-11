@@ -8,7 +8,8 @@
 
 import UIKit
 
-class BasalRateHUDView: HUDView {
+
+final class BasalRateHUDView: HUDView {
 
     @IBOutlet private var basalStateView: BasalStateView!
 
