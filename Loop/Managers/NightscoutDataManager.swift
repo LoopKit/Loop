@@ -74,9 +74,7 @@ class NightscoutDataManager {
         let predBGs: PredictedBG?
         
         if let predicted = predictedGlucose {
-            let values = predicted.map({ (value) -> HKQuantity in
-                value.quantity
-            })
+            let values = predicted.map { $0.quantity }
             predBGs = PredictedBG(values: values)
         } else {
             predBGs = nil

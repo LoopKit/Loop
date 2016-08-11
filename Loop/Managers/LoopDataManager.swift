@@ -199,8 +199,6 @@ class LoopDataManager {
 
      - parameter resultsHandler: A closure called once the values have been retrieved. The closure takes the following arguments:
         - predictedGlucose:     The calculated timeline of predicted glucose values
-        - insulinEffect:        The predicted effect of insulin
-        - carbEffect:           The predicted effect of carbohydrates
         - insulinOnBoard        Current insulin on board
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
