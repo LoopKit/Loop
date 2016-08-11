@@ -33,14 +33,16 @@ class NightscoutDataManager {
             else {
                 return
         }
-        
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, lastLoopError) in
+
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, lastLoopError, insulinOnBoard, getLoopStatusError) in
             
-            self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, error) in
+            let error = lastLoopError ?? getLoopStatusError
+
+            self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
                 if error != nil {
                     self.deviceDataManager.logger.addError(error!, fromSource: "LoopManager")
                 }
-                self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, lastLoopError: lastLoopError)
+                self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: error ?? getBolusError)
             }
         }
 
@@ -49,7 +51,7 @@ class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    private func uploadLoopStatus(insulinOnBoard: InsulinValue?, predictedGlucose: [GlucoseValue]?, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?, recommendedBolus: Double?, lastTempBasal: DoseEntry?, lastLoopError: ErrorType?) {
+    private func uploadLoopStatus(insulinOnBoard: InsulinValue?, predictedGlucose: [GlucoseValue]?, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?, recommendedBolus: Double?, lastTempBasal: DoseEntry?, loopError: ErrorType?) {
 
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
@@ -125,7 +127,7 @@ class NightscoutDataManager {
         let loopName = NSBundle.mainBundle().bundleDisplayName
         let loopVersion = NSBundle.mainBundle().shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: lastLoopError)
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: loopError)
         
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
