@@ -40,6 +40,8 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     /// Manages remote data (TODO: the lazy initialization isn't thread-safe)
     lazy var remoteDataManager = RemoteDataManager()
 
+    private var nightscoutDataManager: NightscoutDataManager!
+
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
@@ -193,7 +195,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         // Trigger device status upload, even if something is wrong with pumpStatus
-        remoteDataManager.uploadDeviceStatus(pumpStatus)
+        nightscoutDataManager.uploadDeviceStatus(pumpStatus)
 
         backfillGlucoseFromShareIfNeeded()
 
@@ -301,7 +303,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
                 let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                 let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                self.remoteDataManager.uploadDeviceStatus(nsPumpStatus)
+                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
 
                 completion(.Success(status: status, date: date))
             case .Failure(let error):
@@ -910,6 +912,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
         loopManager = LoopDataManager(deviceDataManager: self)
         watchManager = WatchDataManager(deviceDataManager: self)
+        nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
 

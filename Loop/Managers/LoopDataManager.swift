@@ -11,6 +11,7 @@ import CarbKit
 import InsulinKit
 import LoopKit
 import MinimedKit
+import HealthKit
 
 
 class LoopDataManager {
@@ -63,6 +64,7 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
+                    self.insulinOnBoard = nil
                     self.loop()
                 }
             }
@@ -85,6 +87,7 @@ class LoopDataManager {
             try self.update()
 
             if dosingEnabled {
+
                 setRecommendedTempBasal { (success, error) -> Void in
                     self.lastLoopError = error
 
@@ -93,7 +96,6 @@ class LoopDataManager {
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
-
                     self.notify(forChange: .TempBasal)
                 }
 
@@ -157,6 +159,18 @@ class LoopDataManager {
             }
         }
 
+        if insulinOnBoard == nil {
+            dispatch_group_enter(updateGroup)
+            deviceDataManager.doseStore.insulinOnBoardAtDate(NSDate()) { (value, error) in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
+                }
+
+                self.insulinOnBoard = value
+                dispatch_group_leave(updateGroup)
+            }
+        }
+
         dispatch_group_wait(updateGroup, DISPATCH_TIME_FOREVER)
 
         if self.predictedGlucose == nil {
@@ -187,9 +201,10 @@ class LoopDataManager {
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
+        - insulinOnBoard        Current insulin on board
         - error:                An error object explaining why the retrieval failed
      */
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -199,7 +214,7 @@ class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, error: error)
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error)
         }
     }
 
@@ -221,6 +236,7 @@ class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    private var insulinOnBoard: InsulinValue?
     private var glucoseMomentumEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
@@ -231,6 +247,7 @@ class LoopDataManager {
             recommendedTempBasal = nil
         }
     }
+
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
@@ -370,6 +387,7 @@ class LoopDataManager {
         } else {
             recommendedTempBasal = nil
         }
+
     }
 
     func addCarbEntryAndRecommendBolus(carbEntry: CarbEntry, resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
