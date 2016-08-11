@@ -188,7 +188,7 @@ final class LoopDataManager {
 
         if self.retrospectivePredictedGlucose == nil {
             do {
-                try self.updateRetrospectivePredictedGlucose()
+                try self.updateRetrospectiveGlucoseEffect()
             } catch let error {
                 self.deviceDataManager.logger.addError(error, fromSource: "RetrospectiveGlucose")
             }
@@ -363,7 +363,7 @@ final class LoopDataManager {
  
      *This method should only be called from the `dataAccessQueue`*
      */
-    private func updateRetrospectivePredictedGlucose() throws {
+    private func updateRetrospectiveGlucoseEffect() throws {
         guard
             let carbEffect = self.carbEffect,
             let insulinEffect = self.insulinEffect
@@ -396,7 +396,7 @@ final class LoopDataManager {
         let type = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierBloodGlucose)!
         let glucose = HKQuantitySample(type: type, quantity: change.1.quantity, startDate: change.1.startDate, endDate: change.1.endDate)
 
-        self.retrospectiveGlucoseEffect = LoopMath.decayEffect(from: glucose, atRate: velocity, for: NSTimeInterval(minutes: 30))
+        self.retrospectiveGlucoseEffect = LoopMath.decayEffect(from: glucose, atRate: velocity, for: NSTimeInterval(minutes: 60))
     }
 
     /**
@@ -478,7 +478,7 @@ final class LoopDataManager {
             throw error!
         }
 
-        if let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(prediction,
+        if let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictionWithRetrospectiveEffect,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasal,
             glucoseTargetRange: glucoseTargetRange,
