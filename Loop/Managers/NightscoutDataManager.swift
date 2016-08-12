@@ -19,7 +19,8 @@ class NightscoutDataManager {
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataUpdated(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
+        // Temporarily disabled, until new code for uploading to new NS 'loop' plugin is in place
+        //NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataUpdated(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
     }
     
     @objc func loopDataUpdated(note: NSNotification) {
