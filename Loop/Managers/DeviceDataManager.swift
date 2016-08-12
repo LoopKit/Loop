@@ -548,18 +548,13 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                 return (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: false)
             }
 
-            if (newGlucose.count > 0) {
-
-                glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
-                    if let error = error {
-                        self.logger.addError(error, fromSource: "GlucoseStore")
-                    }
-
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-
-                    completion?()
+            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
+                if let error = error {
+                    self.logger.addError(error, fromSource: "GlucoseStore")
                 }
-            } else {
+
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+
                 completion?()
             }
         }
