@@ -164,7 +164,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, lastLoopError, insulinOnBoard, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 }

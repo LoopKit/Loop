@@ -201,11 +201,10 @@ final class LoopDataManager {
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
-        - lastLoopError         The error, if any, from the last loop attempt
         - insulinOnBoard        Current insulin on board
-        - error:                An error object explaining why the retrieval failed
+        - error:                An error in the current state of the loop, or one that happened during the last attempt to loop.
      */
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, lastLoopError: ErrorType?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -215,7 +214,7 @@ final class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, lastLoopError: self.lastLoopError, insulinOnBoard: self.insulinOnBoard, error: error)
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error ?? self.lastLoopError)
         }
     }
 

@@ -9,11 +9,8 @@
 import Foundation
 import NightscoutUploadKit
 import HealthKit
-//import CarbKit
 import InsulinKit
 import LoopKit
-//import MinimedKit
-
 
 class NightscoutDataManager {
 
@@ -34,15 +31,13 @@ class NightscoutDataManager {
                 return
         }
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, lastLoopError, insulinOnBoard, getLoopStatusError) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, loopError) in
             
-            let error = lastLoopError ?? getLoopStatusError
-
             self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
-                if error != nil {
-                    self.deviceDataManager.logger.addError(error!, fromSource: "LoopManager")
+                if getBolusError != nil {
+                    self.deviceDataManager.logger.addError(getBolusError!, fromSource: "NightscoutDataManager")
                 }
-                self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: error ?? getBolusError)
+                self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: loopError ?? getBolusError)
             }
         }
 
