@@ -208,12 +208,14 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                     date: date,
                     isDisplayOnly: false,
                     device: nil
-                ) { (success, sample, error) in
+                ) { (success, _, error) in
                     if let error = error {
                         self.logger.addError(error, fromSource: "GlucoseStore")
                     }
 
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                    if success {
+                        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                    }
                 }
             }
         default:
@@ -503,12 +505,14 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
 
         let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-        glucoseStore.addGlucose(quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly, device: device) { (_, _, error) -> Void in
+        glucoseStore.addGlucose(quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly, device: device) { (success, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+            if success {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+            }
         }
     }
 
@@ -548,12 +552,14 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                 return (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: false)
             }
 
-            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
+            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (success, _, error) -> Void in
                 if let error = error {
                     self.logger.addError(error, fromSource: "GlucoseStore")
                 }
 
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                if success {
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
 
                 completion?()
             }
@@ -590,13 +596,15 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
         // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
         let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
 
-        glucoseStore.addGlucoseValues(validGlucose, device: device, resultHandler: { (_, _, error) -> Void in
+        glucoseStore.addGlucoseValues(validGlucose, device: device) { (success, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-        })
+            if success {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+            }
+        }
     }
 
     func receiver(receiver: Receiver, didError error: ErrorType) {
