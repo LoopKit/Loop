@@ -34,7 +34,7 @@ class NightscoutDataManager {
                 return
         }
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, loopError) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, loopError) in
             
             self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
                 if getBolusError != nil {
