@@ -62,49 +62,22 @@ class NightscoutDataManager {
             iob = nil
         }
         
-        let eventualBG = predictedGlucose?.last?.quantity
-        
-        let loopSuggested: LoopSuggested?
-
-        let glucoseVal = predictedGlucose?.first?.quantity
-        
-        let predBGs: PredictedBG?
-        
-        if let predicted = predictedGlucose {
-            let values = predicted.map { $0.quantity }
-            predBGs = PredictedBG(values: values)
+        let predicted: PredictedBG?
+        if let predictedGlucose = predictedGlucose, startDate = predictedGlucose.first?.startDate {
+            let values = predictedGlucose.map { $0.quantity }
+            predicted = PredictedBG(startDate: startDate, values: values)
         } else {
-            predBGs = nil
+            predicted = nil
         }
 
-        // If the last recommendedTempBasal was successfully enacted, then lastTempBasal will be set, and
-        // recommendedTempBasal will be nil. We can use lastTempBasal in lieu of recommendedTempBasal in this
-        // case to populate the 'suggested' fields for NS.
-        let suggestedTimestamp: NSDate?
-        let suggestedRate: Double?
-        let suggestedDuration: NSTimeInterval?
+        let recommended: RecommendedTempBasal?
 
         if let recommendation = recommendedTempBasal {
-            suggestedTimestamp = recommendation.recommendedDate
-            suggestedRate = recommendation.rate
-            suggestedDuration = recommendation.duration
-        } else if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour {
-            suggestedTimestamp = tempBasal.startDate
-            suggestedRate = tempBasal.value
-            suggestedDuration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
+            recommended = RecommendedTempBasal(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration)
         } else {
-            suggestedTimestamp = nil
-            suggestedRate = nil
-            suggestedDuration = nil
+            recommended = nil
         }
 
-        if let suggestedTimestamp = suggestedTimestamp, suggestedRate = suggestedRate, suggestedDuration = suggestedDuration, glucoseVal = glucoseVal, eventualBG = eventualBG
-        {
-            loopSuggested = LoopSuggested(timestamp: suggestedTimestamp, rate: suggestedRate, duration: suggestedDuration, eventualBG: eventualBG, bg: glucoseVal, correction: recommendedBolus, predBGs: predBGs)
-        } else {
-            loopSuggested = nil
-        }
-        
         let loopEnacted: LoopEnacted?
         if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour &&
             lastTempBasalUploaded?.startDate != tempBasal.startDate {
@@ -112,9 +85,6 @@ class NightscoutDataManager {
             loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
-        } else if let recommendation = recommendedTempBasal {
-            // notEnacted
-            loopEnacted = LoopEnacted(rate: recommendation.rate, duration: recommendation.duration, timestamp: recommendation.recommendedDate, received: false)
         } else {
             loopEnacted = nil
         }
@@ -122,7 +92,7 @@ class NightscoutDataManager {
         let loopName = NSBundle.mainBundle().bundleDisplayName
         let loopVersion = NSBundle.mainBundle().shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: loopError)
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
