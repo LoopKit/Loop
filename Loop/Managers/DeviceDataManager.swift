@@ -559,7 +559,7 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                 if let error = error {
                     self.logger.addError(error, fromSource: "ShareClient")
                 }
-
+                completion?()
                 return
             }
 
