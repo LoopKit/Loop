@@ -44,6 +44,9 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
 
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
+    
+    // Last time we uploaded device status
+    var lastDeviceStatusUpload: NSDate?
 
     // The Dexcom Share receiver object
     private var receiver: Receiver? {
@@ -302,11 +305,6 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                     completion(.Failure(LoopError.ConfigurationError))
                     return
                 }
-
-                let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
-                let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-
                 completion(.Success(status: status, date: date))
             case .Failure(let error):
                 self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
@@ -331,14 +329,32 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
         // If we don't yet have pump status, or it's old, poll for it.
         if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
             readPumpData { (result) in
+                let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
                 case .Success(let (status, date)):
                     self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
+                    let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                    nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 case .Failure:
                     self.troubleshootPumpCommsWithDevice(device)
+                    nsPumpStatus = nil
+                }
+                
+                if nsPumpStatus != nil {
+                    // Always upload new pump data
+                    self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+                    self.lastDeviceStatusUpload = NSDate()
+                } else {
+                    // Only upload if it's been a while
+                    if self.lastDeviceStatusUpload == nil || -(self.lastDeviceStatusUpload!.timeIntervalSinceNow) >= NSTimeInterval(minutes: 4) {
+                        self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+                        self.lastDeviceStatusUpload = NSDate()
+                    }
                 }
             }
         }
+        
+        
     }
 
     /**
