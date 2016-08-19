@@ -175,7 +175,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 let switchCell = tableView.dequeueReusableCellWithIdentifier(SwitchTableViewCell.className, forIndexPath: indexPath) as! SwitchTableViewCell
 
                 switchCell.`switch`?.on = dataManager.receiverEnabled
-                switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver (beta)", comment: "The title text for the G4 Share Receiver enabled switch cell")
+                switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver enabled switch cell")
 
                 switchCell.`switch`?.addTarget(self, action: #selector(receiverEnabledChanged(_:)), forControlEvents: .ValueChanged)
 
