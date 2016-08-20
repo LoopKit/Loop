@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import AmplitudeFramework
+import Amplitude
 
 
 final class AnalyticsManager {
