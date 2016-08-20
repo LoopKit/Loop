@@ -8,7 +8,8 @@
 
 import UIKit
 
-class SwitchTableViewCell: UITableViewCell {
+
+final class SwitchTableViewCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel!
 

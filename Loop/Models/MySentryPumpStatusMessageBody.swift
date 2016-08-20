@@ -40,8 +40,4 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
             return .Flat
         }
     }
-
-    var trendDescription: String {
-        return trendType?.description ?? ""
-    }
 }

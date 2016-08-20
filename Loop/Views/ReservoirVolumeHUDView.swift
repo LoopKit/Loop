@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ReservoirVolumeHUDView: HUDView {
+final class ReservoirVolumeHUDView: HUDView {
 
     @IBOutlet private var imageView: UIImageView!
 

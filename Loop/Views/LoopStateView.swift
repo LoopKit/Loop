@@ -8,7 +8,7 @@
 
 import UIKit
 
-class LoopStateView: UIView {
+final class LoopStateView: UIView {
     enum Freshness {
         case Fresh
         case Aging

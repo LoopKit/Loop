@@ -11,7 +11,7 @@ import LocalAuthentication
 import LoopKit
 
 
-class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
+final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
