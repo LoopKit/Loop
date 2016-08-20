@@ -313,6 +313,11 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 }
 
                 let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                
+                if let sentrySupported = self.pumpState?.pumpModel?.larger where !sentrySupported {
+                    self.setBatteryDataforNonMySentryPumps(status.batteryVolts)
+                    }
+                
                 let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 self.remoteDataManager.uploadDeviceStatus(nsPumpStatus)
 
@@ -322,6 +327,46 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 completion(.Failure(error))
             }
         }
+    }
+    
+    /**
+     jlucasvt
+     x22 Battery Voltage, Lithium Decay Display, and Notifications.
+     Code added here to store battery voltage, broacast battery percentage, and notify of battery status for x22 pumps.
+     Broadcast Remaining Percentage is based on the pumps ability to continue to broadcast to RileyLink using a Lithium Battery.
+     This is NOT the actual pump battery % status that is shown on pump.  The ability to broadcast stops hours before the pump battery
+     staus shows battery low status.
+     */
+    
+    // Local Variable to store Battery Broadcast Remaining Percentage.
+    var x22BatteryBroadcastRemaining: Double = -1
+    
+    // Local Variable to store Battery Voltage Reading from Pump
+    var batteryVoltage: Double = -1
+    
+    //x22 pump Lithium Ion Decay Schedule (Approximately 7 day's of 100% Loop Usage)
+    private func setBatteryDataforNonMySentryPumps(voltage : Double){
+        
+        var percentage: Double
+        
+        if voltage >= 1.56{                             //100%
+            percentage = 1
+        }else if voltage < 1.56 && voltage >= 1.53{     //75%
+            percentage = 0.75
+        }else if voltage < 1.53 && voltage >= 1.50{     //50%
+            percentage = 0.50
+        }else if voltage < 1.50 && voltage >= 1.47{     //25%
+            percentage = 0.25
+        }else if voltage < 1.47{                        //0%
+            percentage = 0
+            NotificationManager.sendPumpBatteryLowNotification()
+        }else{
+            percentage = -1
+        }
+        
+        self.batteryVoltage = voltage
+        self.x22BatteryBroadcastRemaining = percentage
+        
     }
 
     /**
