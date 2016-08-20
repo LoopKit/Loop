@@ -37,7 +37,7 @@ class ContextInterfaceController: WKInterfaceController {
 
     }
 
-    @objc func updateFromContext(context: WatchContext?) {
+    func updateFromContext(context: WatchContext?) {
         DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 

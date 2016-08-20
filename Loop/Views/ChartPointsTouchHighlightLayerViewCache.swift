@@ -10,7 +10,7 @@ import Foundation
 import SwiftCharts
 
 
-class ChartPointsTouchHighlightLayerViewCache {
+final class ChartPointsTouchHighlightLayerViewCache {
     private lazy var containerView = UIView(frame: .zero)
 
     private lazy var xAxisOverlayView = UIView()

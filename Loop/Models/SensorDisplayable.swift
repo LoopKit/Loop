@@ -13,7 +13,4 @@ protocol SensorDisplayable {
 
     /// Enumerates the trend of the sensor values
     var trendType: GlucoseTrend? { get }
-
-    // Describes the trend of the sensor values in the current localization
-    var trendDescription: String { get }
 }

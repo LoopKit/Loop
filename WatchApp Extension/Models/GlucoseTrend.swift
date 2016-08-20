@@ -23,11 +23,11 @@ enum GlucoseTrend: Int {
         case UpUp:
             return "↑"
         case Up:
-            return "↗"
+            return "↗︎"
         case Flat:
             return "→"
         case Down:
-            return "↘"
+            return "↘︎"
         case DownDown:
             return "↓"
         case DownDownDown:

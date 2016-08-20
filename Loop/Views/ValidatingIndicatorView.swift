@@ -11,7 +11,7 @@ import UIKit
 private let Margin: CGFloat = 8
 
 
-class ValidatingIndicatorView: UIView {
+final class ValidatingIndicatorView: UIView {
 
     let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
 

@@ -9,7 +9,7 @@
 import Foundation
 
 
-class DiagnosticLogger {
+final class DiagnosticLogger {
     private lazy var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
     let AzureAPIHost: String
     let AzureTempBasalAPIPath: String
