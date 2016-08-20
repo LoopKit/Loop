@@ -8,7 +8,8 @@
 
 import UIKit
 
-class BatteryLevelHUDView: HUDView {
+
+final class BatteryLevelHUDView: HUDView {
 
     @IBOutlet private var imageView: UIImageView!
 

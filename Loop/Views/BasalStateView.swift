@@ -8,7 +8,8 @@
 
 import UIKit
 
-class BasalStateView: UIView {
+
+final class BasalStateView: UIView {
     var netBasalPercent: Double = 0 {
         didSet {
             animateToPath(drawPath())

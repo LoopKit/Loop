@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 
 
-class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
+final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
     private var carbValue: Int = 15
 

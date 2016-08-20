@@ -10,7 +10,7 @@ import Foundation
 import HealthKit
 
 
-class WatchContext: NSObject, RawRepresentable {
+final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: AnyObject]
 
     private let version = 2

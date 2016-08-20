@@ -11,12 +11,23 @@ import CarbKit
 import InsulinKit
 import LoopKit
 import MinimedKit
+import HealthKit
 
 
-class LoopDataManager {
+final class LoopDataManager {
+    enum LoopUpdateContext: Int {
+        case Bolus
+        case Carbs
+        case Glucose
+        case Preferences
+        case TempBasal
+    }
+
     static let LoopDataUpdatedNotification = "com.loudnate.Naterade.notification.LoopDataUpdated"
 
     static let LoopRunningNotification = "com.loudnate.Naterade.notification.LoopRunning"
+
+    static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
     typealias TempBasalRecommendation = (recommendedDate: NSDate, rate: Double, duration: NSTimeInterval)
 
@@ -26,7 +37,7 @@ class LoopDataManager {
         didSet {
             NSUserDefaults.standardUserDefaults().dosingEnabled = dosingEnabled
 
-            notify()
+            notify(forChange: .Preferences)
         }
     }
 
@@ -47,12 +58,13 @@ class LoopDataManager {
             center.addObserverForName(DeviceDataManager.GlucoseUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.glucoseMomentumEffect = nil
-                    self.notify()
+                    self.notify(forChange: .Glucose)
                 }
             },
             center.addObserverForName(DeviceDataManager.PumpStatusUpdatedNotification, object: deviceDataManager, queue: nil) { (note) -> Void in
                 dispatch_async(self.dataAccessQueue) {
                     self.insulinEffect = nil
+                    self.insulinOnBoard = nil
                     self.loop()
                 }
             }
@@ -61,7 +73,7 @@ class LoopDataManager {
         notificationObservers.append(center.addObserverForName(CarbStore.CarbEntriesDidUpdateNotification, object: nil, queue: nil) { (note) -> Void in
             dispatch_async(self.dataAccessQueue) {
                 self.carbEffect = nil
-                self.notify()
+                self.notify(forChange: .Carbs)
             }
         })
     }
@@ -75,6 +87,7 @@ class LoopDataManager {
             try self.update()
 
             if dosingEnabled {
+
                 setRecommendedTempBasal { (success, error) -> Void in
                     self.lastLoopError = error
 
@@ -83,8 +96,7 @@ class LoopDataManager {
                     } else {
                         self.lastLoopCompleted = NSDate()
                     }
-
-                    self.notify()
+                    self.notify(forChange: .TempBasal)
                 }
 
                 // Delay the notification until we know the result of the temp basal
@@ -96,7 +108,7 @@ class LoopDataManager {
             lastLoopError = error
         }
 
-        notify()
+        notify(forChange: .TempBasal)
     }
 
     // References to registered notification center observers
@@ -147,6 +159,18 @@ class LoopDataManager {
             }
         }
 
+        if insulinOnBoard == nil {
+            dispatch_group_enter(updateGroup)
+            deviceDataManager.doseStore.insulinOnBoardAtDate(NSDate()) { (value, error) in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
+                }
+
+                self.insulinOnBoard = value
+                dispatch_group_leave(updateGroup)
+            }
+        }
+
         dispatch_group_wait(updateGroup, DISPATCH_TIME_FOREVER)
 
         if self.predictedGlucose == nil {
@@ -160,8 +184,11 @@ class LoopDataManager {
         }
     }
 
-    private func notify() {
-        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification, object: self)
+    private func notify(forChange context: LoopUpdateContext) {
+        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.LoopDataUpdatedNotification,
+            object: self,
+            userInfo: [self.dynamicType.LoopUpdateContextKey: context.rawValue]
+        )
     }
 
     /**
@@ -174,9 +201,10 @@ class LoopDataManager {
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
-        - error:                An error object explaining why the retrieval failed
+        - insulinOnBoard        Current insulin on board
+        - error:                An error in the current state of the loop, or one that happened during the last attempt to loop.
      */
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -186,7 +214,7 @@ class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, error: error)
+            resultsHandler(predictedGlucose: self.predictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error ?? self.lastLoopError)
         }
     }
 
@@ -208,6 +236,7 @@ class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    private var insulinOnBoard: InsulinValue?
     private var glucoseMomentumEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
@@ -218,6 +247,7 @@ class LoopDataManager {
             recommendedTempBasal = nil
         }
     }
+
     private var recommendedTempBasal: TempBasalRecommendation?
     private var lastTempBasal: DoseEntry?
     private var lastBolus: (units: Double, date: NSDate)?
@@ -357,6 +387,7 @@ class LoopDataManager {
         } else {
             recommendedTempBasal = nil
         }
+
     }
 
     func addCarbEntryAndRecommendBolus(carbEntry: CarbEntry, resultsHandler: (units: Double?, error: ErrorType?) -> Void) {
@@ -481,7 +512,7 @@ class LoopDataManager {
     func recordBolus(units: Double, atDate date: NSDate) {
         dispatch_async(dataAccessQueue) {
             self.lastBolus = (units: units, date: date)
-            self.notify()
+            self.notify(forChange: .Bolus)
         }
     }
 }

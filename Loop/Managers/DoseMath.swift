@@ -12,7 +12,7 @@ import InsulinKit
 import LoopKit
 
 
-class DoseMath {
+struct DoseMath {
     /// The allowed precision
     static let basalStrokes: Double = 40
 

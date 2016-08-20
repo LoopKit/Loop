@@ -10,7 +10,7 @@ import Foundation
 import AmplitudeFramework
 
 
-class AnalyticsManager {
+final class AnalyticsManager {
 
     var amplitudeService: AmplitudeService {
         didSet {

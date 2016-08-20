@@ -1,5 +1,5 @@
 framework module xDripG5 {
-  umbrella header "xDripG5.h"
+  umbrella header "xDripG5-umbrella.h"
 
   export *
   module * { export * }
