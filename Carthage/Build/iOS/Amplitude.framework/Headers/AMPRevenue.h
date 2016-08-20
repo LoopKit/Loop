@@ -9,7 +9,7 @@
 /**
  `AMPRevenue` objects are a wrapper for revenue data, which get passed to the `logRevenueV2` method to send to Amplitude servers.
 
- **Note:** productId and price are required fields. If quantity is not specified, then defaults to 1.
+ **Note:** price is a required field. If quantity is not specified, then defaults to 1.
 
  **Note:** Revenue amount is calculated as price * quantity.
 
@@ -32,9 +32,7 @@
  */
 
 /**
- The product identifier for the transaction.
-
- @warning: required field
+ The product identifier for the transaction (optional).
  */
 @property (nonatomic, strong, readonly) NSString *productId;
 
@@ -99,7 +97,7 @@
  */
 
 /**
- Set a value for the product identifier. This field is required for all revenue being logged.
+ Set a value for the product identifier.
 
  @param productIdentifier The value for the product identifier. Empty strings are ignored.
 
