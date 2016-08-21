@@ -1,5 +1,5 @@
 #BG Badge
-BG Badge is a modification to Loop which will allow you to view your current BG value in mg/dl as a badge on your Loop icon. There is a line of code for displaying the floor value in mmol (example 5.8 would display 5) included in the comments. If you'd like to try mmol you can uncomment it.
+BG Badge is a modification to Loop which will allow you to view your current BG value in mg/dl or mmol as a badge on your Loop icon. For displaying in mmol, we use the floor value (example 5.8 would display 5).
 
 ![badge](https://github.com/CrushingT1D/Loop/blob/master/BGBadge/badge-sample.jpg)
 
