@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import AmplitudeFramework
+import Amplitude
 
 
 struct AmplitudeService: ServiceAuthentication {
