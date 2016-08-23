@@ -332,8 +332,9 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                     self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
                     let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                     nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                case .Failure:
+                case .Failure(let error):
                     self.troubleshootPumpCommsWithDevice(device)
+                    self.nightscoutDataManager.uploadLoopStatus(loopError: error)
                     nsPumpStatus = nil
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)

@@ -49,7 +49,7 @@ class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    private func uploadLoopStatus(insulinOnBoard: InsulinValue?, predictedGlucose: [GlucoseValue]?, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?, recommendedBolus: Double?, lastTempBasal: DoseEntry?, loopError: ErrorType?) {
+    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: ErrorType? = nil) {
 
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
@@ -100,7 +100,7 @@ class NightscoutDataManager {
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
     }
-
+    
     func getUploaderStatus() -> UploaderStatus {
         // Gather UploaderStatus
         let uploaderDevice = UIDevice.currentDevice()
