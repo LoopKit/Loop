@@ -45,9 +45,6 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
     
-    // Last time we uploaded device status
-    var lastDeviceStatusUpload: NSDate?
-
     // The Dexcom Share receiver object
     private var receiver: Receiver? {
         didSet {
@@ -339,18 +336,7 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                     self.troubleshootPumpCommsWithDevice(device)
                     nsPumpStatus = nil
                 }
-                
-                if nsPumpStatus != nil {
-                    // Always upload new pump data
-                    self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-                    self.lastDeviceStatusUpload = NSDate()
-                } else {
-                    // Only upload if it's been a while
-                    if self.lastDeviceStatusUpload == nil || -(self.lastDeviceStatusUpload!.timeIntervalSinceNow) >= NSTimeInterval(minutes: 4) {
-                        self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-                        self.lastDeviceStatusUpload = NSDate()
-                    }
-                }
+                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
             }
         }
         

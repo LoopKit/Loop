@@ -15,6 +15,9 @@ import LoopKit
 class NightscoutDataManager {
 
     unowned let deviceDataManager: DeviceDataManager
+    
+    // Last time we uploaded device status
+    var lastDeviceStatusUpload: NSDate?
 
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
@@ -51,7 +54,7 @@ class NightscoutDataManager {
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
         }
-
+        
         let statusTime = NSDate()
         
         let iob: IOBStatus?
@@ -116,6 +119,13 @@ class NightscoutDataManager {
         guard let uploader = deviceDataManager.remoteDataManager.nightscoutUploader else {
             return
         }
+        
+        if pumpStatus == nil && loopStatus == nil && includeUploaderStatus {
+            // If we're just uploading phone status, limit it to once every 5 minutes
+            if self.lastDeviceStatusUpload != nil && self.lastDeviceStatusUpload!.timeIntervalSinceNow > -(NSTimeInterval(minutes: 5)) {
+                return
+            }
+        }
 
         let uploaderDevice = UIDevice.currentDevice()
 
@@ -124,6 +134,7 @@ class NightscoutDataManager {
         // Build DeviceStatus
         let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
 
+        self.lastDeviceStatusUpload = NSDate()
         uploader.uploadDeviceStatus(deviceStatus)
     }
 }
