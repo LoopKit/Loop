@@ -310,6 +310,9 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
         }
     }
 
+    
+    private var lastPumpStatusAttempt: NSDate?
+    
     /**
      Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
      */
@@ -325,6 +328,14 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
 
         // If we don't yet have pump status, or it's old, poll for it.
         if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
+            
+            // Only attempt this at most once every 5 minutes.
+            if lastPumpStatusAttempt != nil && lastPumpStatusAttempt!.timeIntervalSinceNow > -NSTimeInterval(minutes: 5) {
+                return
+            }
+            
+            lastPumpStatusAttempt = NSDate()
+            
             readPumpData { (result) in
                 let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
