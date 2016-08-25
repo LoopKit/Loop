@@ -12,7 +12,7 @@ import WatchConnectivity
 import WatchKit
 
 
-class DeviceDataManager: NSObject, WCSessionDelegate {
+final class DeviceDataManager: NSObject, WCSessionDelegate {
 
     enum Error: ErrorType {
         case ReachabilityError

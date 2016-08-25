@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AuthenticationTableViewCell: UITableViewCell, NibLoadable {
+final class AuthenticationTableViewCell: UITableViewCell, NibLoadable {
 
     @IBOutlet weak var titleLabel: UILabel!
 

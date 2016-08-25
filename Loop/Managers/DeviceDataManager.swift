@@ -19,13 +19,8 @@ import RileyLinkKit
 import ShareClient
 import xDripG5
 
-private enum State<T> {
-    case NeedsConfiguration
-    case Ready(T)
-}
 
-
-class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
+final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegate {
     /// Notification posted by the instance when new glucose data was processed
     static let GlucoseUpdatedNotification = "com.loudnate.Naterade.notification.GlucoseUpdated"
 
@@ -45,32 +40,26 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     /// Manages remote data (TODO: the lazy initialization isn't thread-safe)
     lazy var remoteDataManager = RemoteDataManager()
 
+    private var nightscoutDataManager: NightscoutDataManager!
+
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
 
-    /// The G5 transmitter object
-    var transmitter: Transmitter? {
-        switch transmitterState {
-        case .Ready(let transmitter):
-            return transmitter
-        case .NeedsConfiguration:
-            return nil
+    // The Dexcom Share receiver object
+    private var receiver: Receiver? {
+        didSet {
+            receiver?.delegate = self
+            enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
-    // The Dexcom Share receiver object
-    var receiver: Receiver?
-
-    var receiverEnabled: Bool = false {
-        didSet {
-            if (receiverEnabled) {
-                receiver = Receiver()
-                receiver!.delegate = self
-            } else {
-                receiver = nil
-            }
-            NSUserDefaults.standardUserDefaults().receiverEnabled = receiverEnabled
-            enableRileyLinkHeartbeatIfNeeded()
+    var receiverEnabled: Bool {
+        get {
+            return receiver != nil
+        }
+        set {
+            receiver = newValue ? Receiver() : nil
+            NSUserDefaults.standardUserDefaults().receiverEnabled = newValue
         }
     }
 
@@ -140,7 +129,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
     }
 
     func enableRileyLinkHeartbeatIfNeeded() {
-        if case .Ready = transmitterState {
+        if transmitter != nil {
             rileyLinkManager.timerTickEnabled = false
         } else if receiverEnabled {
             rileyLinkManager.timerTickEnabled = false
@@ -206,7 +195,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         // Trigger device status upload, even if something is wrong with pumpStatus
-        remoteDataManager.uploadDeviceStatus(pumpStatus)
+        nightscoutDataManager.uploadDeviceStatus(pumpStatus)
 
         backfillGlucoseFromShareIfNeeded()
 
@@ -219,12 +208,14 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                     date: date,
                     isDisplayOnly: false,
                     device: nil
-                ) { (success, sample, error) in
+                ) { (success, _, error) in
                     if let error = error {
                         self.logger.addError(error, fromSource: "GlucoseStore")
                     }
 
-                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                    if success {
+                        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                    }
                 }
             }
         default:
@@ -314,7 +305,7 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
                 let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                 let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                self.remoteDataManager.uploadDeviceStatus(nsPumpStatus)
+                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
 
                 completion(.Success(status: status, date: date))
             case .Failure(let error):
@@ -498,48 +489,36 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         assertCurrentPumpData()
     }
 
-    func transmitter(transmitter: xDripG5.Transmitter, didReadGlucose glucoseMessage: xDripG5.GlucoseRxMessage) {
-        transmitterStartTime = transmitter.startTimeInterval
-
+    func transmitter(transmitter: xDripG5.Transmitter, didRead glucose: xDripG5.Glucose) {
         assertCurrentPumpData()
 
-        guard glucoseMessage != latestGlucoseG5 else {
+        guard glucose != latestGlucoseG5 else {
             return
         }
 
-        latestGlucoseG5 = glucoseMessage
+        latestGlucoseG5 = glucose
 
-        guard let glucose = TransmitterGlucose(glucoseMessage: glucoseMessage, startTime: transmitter.startTimeInterval), glucoseStore = glucoseStore else {
+        guard let glucoseStore = glucoseStore, let quantity = glucose.glucose else {
             NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             return
         }
 
         let device = HKDevice(name: "xDripG5", manufacturer: "Dexcom", model: "G5 Mobile", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(xDripG5VersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "00386270000002")
 
-        glucoseStore.addGlucose(glucose.quantity, date: glucose.startDate, isDisplayOnly: glucoseMessage.glucoseIsDisplayOnly, device: device, resultHandler: { (_, _, error) -> Void in
+        glucoseStore.addGlucose(quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly, device: device) { (success, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-        })
-    }
-
-    // MARK: G5 data
-
-    private var transmitterStartTime: NSTimeInterval? = NSUserDefaults.standardUserDefaults().transmitterStartTime {
-        didSet {
-            if oldValue != transmitterStartTime {
-                NSUserDefaults.standardUserDefaults().transmitterStartTime = transmitterStartTime
-
-                if let transmitterStartTime = transmitterStartTime, drift = oldValue?.distanceTo(transmitterStartTime) where abs(drift) > 1 {
-                    AnalyticsManager.sharedManager.transmitterTimeDidDrift(drift)
-                }
+            if success {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
             }
         }
     }
 
-    private var latestGlucoseG5: GlucoseRxMessage?
+    // MARK: G5 data
+
+    private var latestGlucoseG5: xDripG5.Glucose?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
@@ -573,12 +552,14 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
                 return (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: false)
             }
 
-            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (_, _, error) -> Void in
+            glucoseStore.addGlucoseValues(newGlucose, device: nil) { (success, _, error) -> Void in
                 if let error = error {
                     self.logger.addError(error, fromSource: "GlucoseStore")
                 }
 
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                if success {
+                    NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+                }
 
                 completion?()
             }
@@ -615,13 +596,15 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         // "Dexcom G4 Platinum Transmitter (Retail) US" - see https://accessgudid.nlm.nih.gov/devices/search?query=dexcom+g4
         let device = HKDevice(name: "G4ShareSpy", manufacturer: "Dexcom", model: "G4 Share", hardwareVersion: nil, firmwareVersion: nil, softwareVersion: String(G4ShareSpyVersionNumber), localIdentifier: nil, UDIDeviceIdentifier: "40386270000048")
 
-        glucoseStore.addGlucoseValues(validGlucose, device: device, resultHandler: { (_, _, error) -> Void in
+        glucoseStore.addGlucoseValues(validGlucose, device: device) { (success, _, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "GlucoseStore")
             }
 
-            NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
-        })
+            if success {
+                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.GlucoseUpdatedNotification, object: self)
+            }
+        }
     }
 
     func receiver(receiver: Receiver, didError error: ErrorType) {
@@ -731,38 +714,27 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     // MARK: G5 Transmitter
 
-    private var transmitterState: State<Transmitter> = .NeedsConfiguration {
+    internal private(set) var transmitter: Transmitter? {
         didSet {
-            if case .Ready(let transmitter) = transmitterState {
-                transmitter.delegate = self
-            }
+            transmitter?.delegate = self
             enableRileyLinkHeartbeatIfNeeded()
         }
     }
 
     var transmitterID: String? {
-        didSet {
-            if transmitterID?.characters.count != 6 {
-                transmitterID = nil
+        get {
+            return transmitter?.ID
+        }
+        set {
+            guard transmitterID != newValue else { return }
+
+            if let transmitterID = newValue where transmitterID.characters.count == 6 {
+                transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
+            } else {
+                transmitter = nil
             }
 
-            switch (transmitterState, transmitterID) {
-            case (.NeedsConfiguration, let transmitterID?):
-                transmitterState = .Ready(Transmitter(
-                    ID: transmitterID,
-                    startTimeInterval: NSUserDefaults.standardUserDefaults().transmitterStartTime,
-                    passiveModeEnabled: true
-                ))
-            case (.Ready, .None):
-                transmitterState = .NeedsConfiguration
-            case (.Ready(let transmitter), let transmitterID?):
-                transmitter.ID = transmitterID
-                transmitter.startTimeInterval = nil
-            case (.NeedsConfiguration, .None):
-                break
-            }
-
-            NSUserDefaults.standardUserDefaults().transmitterID = transmitterID
+            NSUserDefaults.standardUserDefaults().transmitterID = newValue
         }
     }
 
@@ -891,10 +863,6 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
 
     private(set) var watchManager: WatchDataManager!
 
-    @objc private func loopDataDidUpdateNotification(_: NSNotification) {
-        watchManager.updateWatch()
-    }
-
     // MARK: - Initialization
 
     static let sharedManager = DeviceDataManager()
@@ -951,15 +919,21 @@ class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverDelegat
         }
 
         loopManager = LoopDataManager(deviceDataManager: self)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataDidUpdateNotification(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: loopManager)
-
         watchManager = WatchDataManager(deviceDataManager: self)
+        nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
 
-        defer {
-            transmitterID = NSUserDefaults.standardUserDefaults().transmitterID
-            receiverEnabled = NSUserDefaults.standardUserDefaults().receiverEnabled
+        if NSUserDefaults.standardUserDefaults().receiverEnabled {
+            receiver = Receiver()
+            receiver?.delegate = self
         }
+
+        if let transmitterID = NSUserDefaults.standardUserDefaults().transmitterID {
+            transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
+            transmitter?.delegate = self
+        }
+
+        enableRileyLinkHeartbeatIfNeeded()
     }
 }

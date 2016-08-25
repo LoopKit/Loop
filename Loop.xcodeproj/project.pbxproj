@@ -31,11 +31,10 @@
 		432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */; };
 		4331E0781C85302200FBE832 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0771C85302200FBE832 /* CGPoint.swift */; };
 		4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */; };
+		4337615F1D52F487004A3647 /* GlucoseHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4337615E1D52F487004A3647 /* GlucoseHUDView.swift */; };
 		4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */; };
 		4346D1F01C781BEA00ABAFE3 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
-		434F24C91CFCA8940004498F /* TransmitterGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F24C81CFCA8940004498F /* TransmitterGlucose.swift */; };
-		434F24CB1CFCB7AB0004498F /* GlucoseRxMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F24CA1CFCB7AB0004498F /* GlucoseRxMessage.swift */; };
 		434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		434F54591D28805E002A9274 /* ButtonTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 434F54581D28805E002A9274 /* ButtonTableViewCell.xib */; };
 		434F545B1D2880D4002A9274 /* AuthenticationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 434F545A1D2880D4002A9274 /* AuthenticationTableViewCell.xib */; };
@@ -124,6 +123,7 @@
 		43E2D9191D222759004DA55F /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */; };
+		43E397A31D56B9E40028E321 /* Glucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E397A21D56B9E40028E321 /* Glucose.swift */; };
 		43EA285F1D50ED3D001BC233 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		43EA28601D50ED4D001BC233 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		43EA28621D517E42001BC233 /* SensorDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA28611D517E42001BC233 /* SensorDisplayable.swift */; };
@@ -144,6 +144,7 @@
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
+		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -250,12 +251,11 @@
 		432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDataManager.swift; sourceTree = "<group>"; };
 		4331E0771C85302200FBE832 /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
+		4337615E1D52F487004A3647 /* GlucoseHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseHUDView.swift; sourceTree = "<group>"; };
 		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartTableViewCell.swift; sourceTree = "<group>"; };
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkBLEKit.framework; path = Carthage/Build/iOS/RileyLinkBLEKit.framework; sourceTree = "<group>"; };
-		434F24C81CFCA8940004498F /* TransmitterGlucose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransmitterGlucose.swift; sourceTree = "<group>"; };
-		434F24CA1CFCB7AB0004498F /* GlucoseRxMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRxMessage.swift; sourceTree = "<group>"; };
 		434F54561D287FDB002A9274 /* NibLoadable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
 		434F54581D28805E002A9274 /* ButtonTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ButtonTableViewCell.xib; sourceTree = "<group>"; };
 		434F545A1D2880D4002A9274 /* AuthenticationTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AuthenticationTableViewCell.xib; sourceTree = "<group>"; };
@@ -342,6 +342,7 @@
 		43E2D90F1D20C581004DA55F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = StatusTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
+		43E397A21D56B9E40028E321 /* Glucose.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Glucose.swift; sourceTree = "<group>"; };
 		43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseTrend.swift; sourceTree = "<group>"; };
 		43EA28611D517E42001BC233 /* SensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SensorDisplayable.swift; sourceTree = "<group>"; };
 		43EB40851C82646A00472A8C /* StatusChartManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartManager.swift; sourceTree = "<group>"; };
@@ -367,6 +368,7 @@
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
+		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -455,8 +457,8 @@
 				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
 				4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */,
 				43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */,
+				43E397A21D56B9E40028E321 /* Glucose.swift */,
 				4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */,
-				434F24CA1CFCB7AB0004498F /* GlucoseRxMessage.swift */,
 				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
 				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
@@ -467,7 +469,6 @@
 				434F54601D28859B002A9274 /* ServiceCredential.swift */,
 				43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */,
 				434F545E1D288345002A9274 /* ShareService.swift */,
-				434F24C81CFCA8940004498F /* TransmitterGlucose.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
 			);
 			path = Models;
@@ -642,6 +643,7 @@
 				434F54581D28805E002A9274 /* ButtonTableViewCell.xib */,
 				43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */,
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
+				4337615E1D52F487004A3647 /* GlucoseHUDView.swift */,
 				437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */,
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
@@ -664,6 +666,7 @@
 				43E2D8C51D204678004DA55F /* KeychainManager.swift */,
 				43E2D8C71D208D5B004DA55F /* KeychainManager+Loop.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
+				C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */,
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
@@ -978,8 +981,6 @@
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
 				430DA58E1D4AEC230097D1CA /* NSBundle.swift in Sources */,
-				434F24C91CFCA8940004498F /* TransmitterGlucose.swift in Sources */,
-				434F24CB1CFCB7AB0004498F /* GlucoseRxMessage.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				437CCADA1D284ADF0075D2C3 /* AuthenticationTableViewCell.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* NSDate.swift in Sources */,
@@ -990,6 +991,7 @@
 				437CCADE1D2858FD0075D2C3 /* AuthenticationViewController.swift in Sources */,
 				43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
+				43E397A31D56B9E40028E321 /* Glucose.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
 				43649A631C7A347F00523D7F /* CollectionType.swift in Sources */,
@@ -1010,6 +1012,7 @@
 				437CEEC81CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
+				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
 				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				437CCADC1D284B830075D2C3 /* ButtonTableViewCell.swift in Sources */,
 				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
@@ -1041,6 +1044,7 @@
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
 				43EA28601D50ED4D001BC233 /* GlucoseTrend.swift in Sources */,
+				4337615F1D52F487004A3647 /* GlucoseHUDView.swift in Sources */,
 				438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
 				432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */,
@@ -1164,7 +1168,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1212,7 +1216,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

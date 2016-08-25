@@ -78,6 +78,8 @@ Loop is built on top of [LoopKit](https://github.com/loudnate/LoopKit). LoopKit 
 
 Fork and clone this repository so you can commit the changes you'll make below.
 
+[Sign up for the Loop Users announcement list](https://groups.google.com/forum/#!forum/loop-ios-users) to stay informed of critical issues that may arise.
+
 ## Assigning a Bundle Identifier
 
 [![Assigning a bundle identifier](/Documentation/Assigning%20a%20bundle%20identifier.png?raw=true)](/Documentation/Assigning%20a%20bundle%20identifier.png)

@@ -15,7 +15,7 @@ import LoopKit
 import SwiftCharts
 
 
-class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
+final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -132,8 +132,14 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
 
-            charts.startDate = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            let calendar = NSCalendar.currentCalendar()
+            let components = NSDateComponents()
+            components.minute = 0
+            let date = NSDate(timeIntervalSinceNow: -NSTimeInterval(hours: 6))
+            charts.startDate = calendar.nextDateAfterDate(date, matchingComponents: components, options: [.MatchStrictly, .SearchBackwards]) ?? date
+
             let reloadGroup = dispatch_group_create()
+            var glucoseUnit: HKUnit?
 
             if let glucoseStore = dataManager.glucoseStore {
                 dispatch_group_enter(reloadGroup)
@@ -148,10 +154,17 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
                     dispatch_group_leave(reloadGroup)
                 }
+
+                dispatch_group_enter(reloadGroup)
+                glucoseStore.preferredUnit { (unit, error) in
+                    glucoseUnit = unit
+
+                    dispatch_group_leave(reloadGroup)
+                }
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 }
@@ -224,6 +237,12 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             workoutMode = dataManager.workoutModeEnabled
 
             dispatch_group_notify(reloadGroup, dispatch_get_main_queue()) {
+                if let unit = glucoseUnit, let glucose = self.dataManager.glucoseStore?.latestGlucose {
+                    self.charts.glucoseUnit = unit
+
+                    self.glucoseHUD.set(glucose, for: unit, from: self.dataManager.sensorInfo)
+                }
+
                 self.charts.prerender()
 
                 self.tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Charts.rawValue, 2)),
@@ -305,7 +324,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private var lastLoopCompleted: NSDate? {
         didSet {
-            loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+            dispatch_async(dispatch_get_main_queue()) {
+                self.loopCompletionHUD.lastLoopCompleted = self.lastLoopCompleted
+            }
         }
     }
 
@@ -365,12 +386,9 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     }
 
     private enum SensorRow: Int {
-        case Date
-        case Glucose
-        case Trend
         case State
 
-        static let count = 4
+        static let count = 1
     }
 
     private lazy var emptyValueString: String = NSLocalizedString("––",
@@ -516,34 +534,6 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
             cell.selectionStyle = .None
 
             switch SensorRow(rawValue: indexPath.row)! {
-            case .Date:
-                cell.textLabel?.text = NSLocalizedString("Latest CGM", comment: "The title of the cell containing the last updated sensor date")
-
-                if let date = dataManager.glucoseStore?.latestGlucose?.startDate {
-                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            case .Glucose:
-                cell.textLabel?.text = NSLocalizedString("Glucose", comment: "The title of the cell containing the current glucose")
-                cell.detailTextLabel?.text = emptyValueString
-
-                if let glucoseStore = dataManager.glucoseStore, glucose = glucoseStore.latestGlucose {
-
-                    glucoseStore.preferredUnit { (unit, error) in
-                        guard let unit = unit, glucoseString = self.numberFormatter.stringFromNumber(glucose.quantity.doubleValueForUnit(unit)) else {
-                            return
-                        }
-
-                        dispatch_async(dispatch_get_main_queue()) {
-                            cell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string describing glucose: (1: quantity)(2: unit)"), glucoseString, unit.unitString)
-                        }
-                    }
-                }
-            case .Trend:
-                cell.textLabel?.text = NSLocalizedString("Sensor Trend", comment: "The title of the cell containing the current glucose trend")
-
-                cell.detailTextLabel?.text = dataManager.sensorInfo?.trendDescription ?? emptyValueString
             case .State:
                 cell.textLabel?.text = NSLocalizedString("Sensor State", comment: "The title of the cell containing the current sensor state")
 
@@ -749,6 +739,8 @@ class StatusTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // MARK: - HUDs
 
     @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
+
+    @IBOutlet var glucoseHUD: GlucoseHUDView!
 
     @IBOutlet var basalRateHUD: BasalRateHUDView!
 

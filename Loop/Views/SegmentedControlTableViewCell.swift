@@ -8,7 +8,8 @@
 
 import UIKit
 
-class SegmentedControlTableViewCell: UITableViewCell {
+
+final class SegmentedControlTableViewCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel!
 

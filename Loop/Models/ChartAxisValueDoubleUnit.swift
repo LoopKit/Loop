@@ -10,7 +10,7 @@ import UIKit
 import SwiftCharts
 
 
-class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
+final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
     let unitString: String
 
     init(_ double: Double, unitString: String, formatter: NSNumberFormatter) {

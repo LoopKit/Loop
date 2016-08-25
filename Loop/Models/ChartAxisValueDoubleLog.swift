@@ -10,7 +10,7 @@ import UIKit
 import SwiftCharts
 
 
-class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
+final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
 
     let unitString: String?
 

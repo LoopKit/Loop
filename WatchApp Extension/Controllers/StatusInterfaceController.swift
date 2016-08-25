@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 
 
-class StatusInterfaceController: ContextInterfaceController {
+final class StatusInterfaceController: ContextInterfaceController {
 
     @IBOutlet var graphImage: WKInterfaceImage!
     @IBOutlet var loopHUDImage: WKInterfaceImage!
