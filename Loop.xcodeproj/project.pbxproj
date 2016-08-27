@@ -41,6 +41,7 @@
 		434F545F1D288345002A9274 /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F545E1D288345002A9274 /* ShareService.swift */; };
 		434F54611D28859B002A9274 /* ServiceCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54601D28859B002A9274 /* ServiceCredential.swift */; };
 		434F54631D28DD80002A9274 /* ValidatingIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54621D28DD80002A9274 /* ValidatingIndicatorView.swift */; };
+		434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434FB6451D68F1CD007B9C70 /* Amplitude.framework */; };
 		434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */; };
 		434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */; };
 		43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43523EDA1CC35083001850F1 /* RileyLinkKit.framework */; };
@@ -73,7 +74,6 @@
 		438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438DADC71CDE8F8B007697A5 /* LoopStateView.swift */; };
 		439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
-		439897391CD2F82C00223065 /* AmplitudeFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 439897381CD2F82C00223065 /* AmplitudeFramework.framework */; };
 		4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4398973A1CD2FC2000223065 /* NSDateFormatter.swift */; };
 		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
 		43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */; };
@@ -262,6 +262,7 @@
 		434F545E1D288345002A9274 /* ShareService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		434F54601D28859B002A9274 /* ServiceCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceCredential.swift; sourceTree = "<group>"; };
 		434F54621D28DD80002A9274 /* ValidatingIndicatorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValidatingIndicatorView.swift; sourceTree = "<group>"; };
+		434FB6451D68F1CD007B9C70 /* Amplitude.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Amplitude.framework; path = Carthage/Build/iOS/Amplitude.framework; sourceTree = "<group>"; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKit.framework; path = Carthage/Build/iOS/RileyLinkKit.framework; sourceTree = "<group>"; };
@@ -292,7 +293,6 @@
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
 		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AnalyticsManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		439897381CD2F82C00223065 /* AmplitudeFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AmplitudeFramework.framework; path = Carthage/Build/iOS/AmplitudeFramework.framework; sourceTree = "<group>"; };
 		4398973A1CD2FC2000223065 /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = LoopDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchTableViewCell.swift; sourceTree = "<group>"; };
@@ -383,8 +383,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
 				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
-				439897391CD2F82C00223065 /* AmplitudeFramework.framework in Frameworks */,
 				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
 				4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */,
 				43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */,
@@ -687,9 +687,9 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				434FB6451D68F1CD007B9C70 /* Amplitude.framework */,
 				C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */,
 				43B371871CE597D10013C5A6 /* ShareClient.framework */,
-				439897381CD2F82C00223065 /* AmplitudeFramework.framework */,
 				43F78D481C914197002152D1 /* CarbKit.framework */,
 				43EDDBF01C361C75007D89B5 /* CommonCrypto.framework */,
 				43EDDBF51C361D24007D89B5 /* CommonCrypto.framework.dSYM */,
@@ -958,7 +958,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkBLEKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/AmplitudeFramework.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Amplitude.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
@@ -1168,7 +1168,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1216,7 +1216,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

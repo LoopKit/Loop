@@ -44,7 +44,7 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
 
     // Timestamp of last event we've retrieved from pump
     var observingPumpEventsSince = NSDate(timeIntervalSinceNow: NSTimeInterval(hours: -24))
-
+    
     // The Dexcom Share receiver object
     private var receiver: Receiver? {
         didSet {
@@ -302,11 +302,6 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                     completion(.Failure(LoopError.ConfigurationError))
                     return
                 }
-
-                let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
-                let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-
                 completion(.Success(status: status, date: date))
             case .Failure(let error):
                 self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
@@ -331,12 +326,18 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
         // If we don't yet have pump status, or it's old, poll for it.
         if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
             readPumpData { (result) in
+                let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
                 case .Success(let (status, date)):
                     self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
-                case .Failure:
+                    let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                    nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
+                case .Failure(let error):
                     self.troubleshootPumpCommsWithDevice(device)
+                    self.nightscoutDataManager.uploadLoopStatus(loopError: error)
+                    nsPumpStatus = nil
                 }
+                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
             }
         }
     }
@@ -543,7 +544,7 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                 if let error = error {
                     self.logger.addError(error, fromSource: "ShareClient")
                 }
-
+                completion?()
                 return
             }
 
