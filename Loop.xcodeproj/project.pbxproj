@@ -52,7 +52,6 @@
 		4354003A1C9FB81100D5819C /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
 		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
-		436FACEC1D0BA246004E2427 /* SegmentedControlTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */; };
 		436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACED1D0BA636004E2427 /* InsulinDataSource.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
@@ -133,6 +132,7 @@
 		43F41C351D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */; };
 		43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C361D3BF32400C11ED6 /* UIAlertController.swift */; };
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
+		43F5173D1D713DB0000FA422 /* RadioSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5173C1D713DB0000FA422 /* RadioSelectionTableViewController.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
 		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
 		43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
@@ -270,7 +270,6 @@
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
-		436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControlTableViewCell.swift; sourceTree = "<group>"; };
 		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -355,6 +354,7 @@
 		43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
 		43F41C361D3BF32400C11ED6 /* UIAlertController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIAlertController.swift; sourceTree = "<group>"; };
 		43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
+		43F5173C1D713DB0000FA422 /* RadioSelectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RadioSelectionTableViewController.swift; sourceTree = "<group>"; };
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -624,6 +624,7 @@
 				4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */,
 				43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
+				43F5173C1D713DB0000FA422 /* RadioSelectionTableViewController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
@@ -648,7 +649,6 @@
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
-				436FACEB1D0BA246004E2427 /* SegmentedControlTableViewCell.swift */,
 				43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */,
 				434F54621D28DD80002A9274 /* ValidatingIndicatorView.swift */,
 			);
@@ -1003,7 +1003,6 @@
 				43E2D8C81D208D5B004DA55F /* KeychainManager+Loop.swift in Sources */,
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
-				436FACEC1D0BA246004E2427 /* SegmentedControlTableViewCell.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43DE925C1C547A20001FFDE1 /* WatchContext.swift in Sources */,
 				43F41C351D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
@@ -1016,6 +1015,7 @@
 				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				437CCADC1D284B830075D2C3 /* ButtonTableViewCell.swift in Sources */,
 				4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */,
+				43F5173D1D713DB0000FA422 /* RadioSelectionTableViewController.swift in Sources */,
 				4331E0781C85302200FBE832 /* CGPoint.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,

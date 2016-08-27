@@ -195,7 +195,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.doseStore.getRecentNormalizedReservoirDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
+            dataManager.doseStore.getRecentNormalizedDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
                 if let error = error {
                     self.dataManager.logger.addError(error, fromSource: "DoseStore")
                     self.needsRefresh = true
@@ -222,7 +222,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
 
-            reservoirVolume = dataManager.latestReservoirValue?.unitVolume
+            reservoirVolume = dataManager.doseStore.lastReservoirValue?.unitVolume
 
             if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity,
                 resVol = reservoirVolume {
@@ -231,7 +231,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             if let status = dataManager.latestPumpStatusFromMySentry {
                 batteryLevel = Double(status.batteryRemainingPercent) / 100
-                reservoirLevel = Double(status.reservoirRemainingPercent) / 100
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
