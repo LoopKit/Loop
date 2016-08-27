@@ -340,8 +340,6 @@ final class DeviceDataManager: CarbStoreDelegate, TransmitterDelegate, ReceiverD
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
             }
         }
-        
-        
     }
 
     /**
