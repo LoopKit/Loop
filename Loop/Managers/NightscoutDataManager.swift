@@ -15,12 +15,14 @@ import LoopKit
 class NightscoutDataManager {
 
     unowned let deviceDataManager: DeviceDataManager
+    
+    // Last time we uploaded device status
+    var lastDeviceStatusUpload: NSDate?
 
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
 
-        // Temporarily disabled, until new code for uploading to new NS 'loop' plugin is in place
-        //NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataUpdated(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataUpdated(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
     }
     
     @objc func loopDataUpdated(note: NSNotification) {
@@ -47,12 +49,12 @@ class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    private func uploadLoopStatus(insulinOnBoard: InsulinValue?, predictedGlucose: [GlucoseValue]?, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?, recommendedBolus: Double?, lastTempBasal: DoseEntry?, loopError: ErrorType?) {
+    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: ErrorType? = nil) {
 
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
         }
-
+        
         let statusTime = NSDate()
         
         let iob: IOBStatus?
@@ -63,49 +65,22 @@ class NightscoutDataManager {
             iob = nil
         }
         
-        let eventualBG = predictedGlucose?.last?.quantity
-        
-        let loopSuggested: LoopSuggested?
-
-        let glucoseVal = predictedGlucose?.first?.quantity
-        
-        let predBGs: PredictedBG?
-        
-        if let predicted = predictedGlucose {
-            let values = predicted.map { $0.quantity }
-            predBGs = PredictedBG(values: values)
+        let predicted: PredictedBG?
+        if let predictedGlucose = predictedGlucose, startDate = predictedGlucose.first?.startDate {
+            let values = predictedGlucose.map { $0.quantity }
+            predicted = PredictedBG(startDate: startDate, values: values)
         } else {
-            predBGs = nil
+            predicted = nil
         }
 
-        // If the last recommendedTempBasal was successfully enacted, then lastTempBasal will be set, and
-        // recommendedTempBasal will be nil. We can use lastTempBasal in lieu of recommendedTempBasal in this
-        // case to populate the 'suggested' fields for NS.
-        let suggestedTimestamp: NSDate?
-        let suggestedRate: Double?
-        let suggestedDuration: NSTimeInterval?
+        let recommended: RecommendedTempBasal?
 
         if let recommendation = recommendedTempBasal {
-            suggestedTimestamp = recommendation.recommendedDate
-            suggestedRate = recommendation.rate
-            suggestedDuration = recommendation.duration
-        } else if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour {
-            suggestedTimestamp = tempBasal.startDate
-            suggestedRate = tempBasal.value
-            suggestedDuration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
+            recommended = RecommendedTempBasal(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration)
         } else {
-            suggestedTimestamp = nil
-            suggestedRate = nil
-            suggestedDuration = nil
+            recommended = nil
         }
 
-        if let suggestedTimestamp = suggestedTimestamp, suggestedRate = suggestedRate, suggestedDuration = suggestedDuration, glucoseVal = glucoseVal, eventualBG = eventualBG
-        {
-            loopSuggested = LoopSuggested(timestamp: suggestedTimestamp, rate: suggestedRate, duration: suggestedDuration, eventualBG: eventualBG, bg: glucoseVal, correction: recommendedBolus, predBGs: predBGs)
-        } else {
-            loopSuggested = nil
-        }
-        
         let loopEnacted: LoopEnacted?
         if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour &&
             lastTempBasalUploaded?.startDate != tempBasal.startDate {
@@ -113,9 +88,6 @@ class NightscoutDataManager {
             loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
-        } else if let recommendation = recommendedTempBasal {
-            // notEnacted
-            loopEnacted = LoopEnacted(rate: recommendation.rate, duration: recommendation.duration, timestamp: recommendation.recommendedDate, received: false)
         } else {
             loopEnacted = nil
         }
@@ -123,12 +95,12 @@ class NightscoutDataManager {
         let loopName = NSBundle.mainBundle().bundleDisplayName
         let loopVersion = NSBundle.mainBundle().shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, suggested: loopSuggested, enacted: loopEnacted, failureReason: loopError)
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
     }
-
+    
     func getUploaderStatus() -> UploaderStatus {
         // Gather UploaderStatus
         let uploaderDevice = UIDevice.currentDevice()
@@ -147,6 +119,13 @@ class NightscoutDataManager {
         guard let uploader = deviceDataManager.remoteDataManager.nightscoutUploader else {
             return
         }
+        
+        if pumpStatus == nil && loopStatus == nil && includeUploaderStatus {
+            // If we're just uploading phone status, limit it to once every 5 minutes
+            if self.lastDeviceStatusUpload != nil && self.lastDeviceStatusUpload!.timeIntervalSinceNow > -(NSTimeInterval(minutes: 5)) {
+                return
+            }
+        }
 
         let uploaderDevice = UIDevice.currentDevice()
 
@@ -155,6 +134,7 @@ class NightscoutDataManager {
         // Build DeviceStatus
         let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
 
+        self.lastDeviceStatusUpload = NSDate()
         uploader.uploadDeviceStatus(deviceStatus)
     }
 }
