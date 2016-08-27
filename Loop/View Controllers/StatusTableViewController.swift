@@ -71,7 +71,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
-        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         visible = true
     }
 
@@ -85,7 +85,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         super.viewWillDisappear(animated)
 
         if presentedViewController == nil {
-            self.navigationController?.setNavigationBarHidden(false, animated: animated)
+            navigationController?.setNavigationBarHidden(false, animated: animated)
         }
         visible = false
     }
