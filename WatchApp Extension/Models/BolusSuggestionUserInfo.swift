@@ -11,9 +11,11 @@ import Foundation
 
 final class BolusSuggestionUserInfo: RawRepresentable {
     let recommendedBolus: Double
+    let maxBolus: Double?
 
-    init(recommendedBolus: Double) {
+    init(recommendedBolus: Double, maxBolus: Double? = nil) {
         self.recommendedBolus = recommendedBolus
+        self.maxBolus = maxBolus
     }
 
     // MARK: - RawRepresentable
@@ -30,13 +32,20 @@ final class BolusSuggestionUserInfo: RawRepresentable {
         }
 
         self.recommendedBolus = recommendedBolus
+        self.maxBolus = rawValue["mb"] as? Double
     }
 
     var rawValue: RawValue {
-        return [
+        var raw: RawValue = [
             "v": self.dynamicType.version,
             "name": BolusSuggestionUserInfo.name,
             "br": recommendedBolus
         ]
+
+        if let maxBolus = maxBolus {
+            raw["mb"] = maxBolus
+        }
+
+        return raw
     }
 }

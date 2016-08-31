@@ -27,8 +27,6 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         }
     }
 
-    private var maxBolusValue: Double = 15
-
     private func pickerValueFromBolusValue(bolusValue: Double) -> Int {
         switch bolusValue {
         case let bolus where bolus > 10:
@@ -71,15 +69,25 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         super.awakeWithContext(context)
 
         let maxPickerValue: Int
+        var maxBolusValue: Double = 15
         let pickerValue: Int
 
         if let context = context as? BolusSuggestionUserInfo {
-            maxPickerValue = pickerValueFromBolusValue(context.recommendedBolus)
+            let recommendedBolus = context.recommendedBolus
+
+            if let maxBolus = context.maxBolus {
+                maxBolusValue = maxBolus
+            } else if recommendedBolus > 0 {
+                maxBolusValue = recommendedBolus
+            }
+
+            maxPickerValue = pickerValueFromBolusValue(maxBolusValue)
+            let recommendedPickerValue = pickerValueFromBolusValue(recommendedBolus)
             maxBolusValue = bolusValueFromPickerValue(maxPickerValue)
-            pickerValue = Int(Double(maxPickerValue) * 0.75)
+            pickerValue = Int(Double(recommendedPickerValue) * 0.75)
             bolusValue = bolusValueFromPickerValue(pickerValue)
 
-            if let valueString = formatter.stringFromNumber(maxBolusValue) {
+            if let valueString = formatter.stringFromNumber(recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercaseString)
             }
         } else {
