@@ -79,7 +79,7 @@ extension RadioSelectionTableViewController {
 
         vc.selectedIndex = value.rawValue
         vc.options = (0..<2).flatMap({ InsulinDataSource(rawValue: $0) }).map { String($0) }
-        vc.contextHelp = NSLocalizedString("Insulin delivery can be determined from the pump by either interpreting the event history, or comparing the reservoir volume over time. Reading event history allows for a more accurate status graph and uploading up-to-date treatment data to Nightscout, at the cost of faster pump battery drain and the possibility of a higher radio error rate compared to reading only reservoir volume. If the selected source cannot be used for any reason, the system will attempt to fall back to the other option.", comment: "Instructions on selecting an insulin data source")
+        vc.contextHelp = NSLocalizedString("Insulin delivery can be determined from the pump by either interpreting the event history or comparing the reservoir volume over time. Reading event history allows for a more accurate status graph and uploading up-to-date treatment data to Nightscout, at the cost of faster pump battery drain and the possibility of a higher radio error rate compared to reading only reservoir volume. If the selected source cannot be used for any reason, the system will attempt to fall back to the other option.", comment: "Instructions on selecting an insulin data source")
 
         return vc
     }
