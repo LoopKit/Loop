@@ -101,6 +101,23 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 #pragma clang diagnostic ignored "-Wduplicate-method-arg"
 @class NSCoder;
+
+SWIFT_CLASS("_TtC7LoopKit29CommandResponseViewController")
+@interface CommandResponseViewController : UIViewController
+- (nonnull instancetype)initWithCommand:(NSString * _Nonnull (^ _Nonnull)(void (^ _Nonnull completionHandler)(NSString * _Nonnull responseText)))command OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
+- (void)loadView;
+- (void)viewDidLoad;
+@end
+
+@class UIActivityViewController;
+
+@interface CommandResponseViewController (SWIFT_EXTENSION(LoopKit)) <UIActivityItemSource>
+- (id _Nonnull)activityViewControllerPlaceholderItem:(UIActivityViewController * _Nonnull)activityViewController;
+- (id _Nullable)activityViewController:(UIActivityViewController * _Nonnull)activityViewController itemForActivityType:(NSString * _Nonnull)activityType;
+- (NSString * _Nonnull)activityViewController:(UIActivityViewController * _Nonnull)activityViewController subjectForActivityType:(NSString * _Nullable)activityType;
+@end
+
 @class UIBarButtonItem;
 @class NSTimeZone;
 @class UITableView;
@@ -177,6 +194,14 @@ SWIFT_CLASS("_TtC7LoopKit39GlucoseRangeScheduleTableViewController")
 
 
 @interface HKQuantity (SWIFT_EXTENSION(LoopKit))
+@end
+
+
+@interface HKQuantitySample (SWIFT_EXTENSION(LoopKit))
+@end
+
+
+@interface HKQuantitySample (SWIFT_EXTENSION(LoopKit))
 @end
 
 

@@ -236,7 +236,12 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             }
 
             if self.preferredInsulinDataSource == .pumpHistory || !areStoredValuesContinuous {
-                self.fetchPumpHistory()
+                self.fetchPumpHistory { (error) in
+                    // Notify and trigger a loop as long as we have fresh, reliable pump data.
+                    if error == nil || areStoredValuesContinuous {
+                        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                    }
+                }
             } else {
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
@@ -259,6 +264,38 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 if newVolume > previousVolume + 1 {
                     AnalyticsManager.sharedManager.reservoirWasRewound()
                 }
+            }
+        }
+    }
+
+
+    /**
+     Polls the pump for new history events and stores them.
+     
+     - parameter completion: A closure called after the fetch is complete. This closure takes a single argument:
+        - error: An error describing why the fetch and/or store failed
+     */
+    private func fetchPumpHistory(completionHandler: (error: ErrorType?) -> Void) {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
+            return
+        }
+
+        let startDate = doseStore.pumpEventQueryAfterDate
+
+        device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
+            switch result {
+            case let .Success(events, _):
+                self.doseStore.add(events) { (error) in
+                    if let error = error {
+                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+                    }
+
+                    completionHandler(error: error)
+                }
+            case .Failure(let error):
+                self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
+
+                completionHandler(error: error)
             }
         }
     }
@@ -322,35 +359,6 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                     nsPumpStatus = nil
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-            }
-        }
-    }
-
-    /**
-     Polls the pump for new history events
-     */
-    private func fetchPumpHistory() {
-        guard let device = rileyLinkManager.firstConnectedDevice else {
-            return
-        }
-
-        let startDate = doseStore.pumpEventQueryAfterDate
-
-        device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
-            switch result {
-            case let .Success(events, _):
-                self.doseStore.add(events) { (error) in
-                    if let error = error {
-                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                    }
-                }
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-            case .Failure(let error):
-                self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
-
-                // Continue with the loop anyway
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
         }
     }
