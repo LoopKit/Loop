@@ -140,19 +140,6 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
 
-    // TODO: Expose this on DoseStore
-    var latestReservoirValue: ReservoirValue? {
-        didSet {
-            if let oldValue = oldValue, newValue = latestReservoirValue {
-                latestReservoirVolumeDrop = oldValue.unitVolume - newValue.unitVolume
-            }
-        }
-    }
-
-    // The last change in reservoir volume. Useful in detecting rewind events.
-    // TODO: Expose this on DoseStore
-    private var latestReservoirVolumeDrop: Double = 0
-
     /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
 
@@ -242,16 +229,19 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
      - parameter timeLeft: The approximate time before the reservoir is empty
      */
     private func updateReservoirVolume(units: Double, atDate date: NSDate, withTimeLeft timeLeft: NSTimeInterval?) {
-        doseStore.addReservoirValue(units, atDate: date) { (newValue, previousValue, error) -> Void in
+        doseStore.addReservoirValue(units, atDate: date) { (newValue, previousValue, areStoredValuesContinuous, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "DoseStore")
                 return
             }
 
-            self.latestReservoirValue = newValue
-
-            if self.preferredInsulinDataSource == .PumpHistory {
-                self.fetchPumpHistory()
+            if self.preferredInsulinDataSource == .pumpHistory || !areStoredValuesContinuous {
+                self.fetchPumpHistory { (error) in
+                    // Notify and trigger a loop as long as we have fresh, reliable pump data.
+                    if error == nil || areStoredValuesContinuous {
+                        NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
+                    }
+                }
             } else {
                 NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
@@ -274,6 +264,38 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 if newVolume > previousVolume + 1 {
                     AnalyticsManager.sharedManager.reservoirWasRewound()
                 }
+            }
+        }
+    }
+
+
+    /**
+     Polls the pump for new history events and stores them.
+     
+     - parameter completion: A closure called after the fetch is complete. This closure takes a single argument:
+        - error: An error describing why the fetch and/or store failed
+     */
+    private func fetchPumpHistory(completionHandler: (error: ErrorType?) -> Void) {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
+            return
+        }
+
+        let startDate = doseStore.pumpEventQueryAfterDate
+
+        device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
+            switch result {
+            case let .Success(events, _):
+                self.doseStore.add(events) { (error) in
+                    if let error = error {
+                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
+                    }
+
+                    completionHandler(error: error)
+                }
+            case .Failure(let error):
+                self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
+
+                completionHandler(error: error)
             }
         }
     }
@@ -322,7 +344,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? NSTimeInterval(minutes: 11) : NSTimeInterval(minutes: 4)
 
         // If we don't yet have pump status, or it's old, poll for it.
-        if latestReservoirValue == nil || latestReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
+        if  doseStore.lastReservoirValue == nil ||
+            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
             readPumpData { (result) in
                 let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
@@ -336,35 +359,6 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                     nsPumpStatus = nil
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-            }
-        }
-    }
-
-    /**
-     Polls the pump for new history events
-     */
-    private func fetchPumpHistory() {
-        guard let device = rileyLinkManager.firstConnectedDevice else {
-            return
-        }
-
-        let startDate = doseStore.pumpEventQueryAfterDate
-
-        device.ops?.getHistoryEventsSinceDate(startDate) { (result) in
-            switch result {
-            case let .Success(events, _):
-                self.doseStore.add(events) { (error) in
-                    if let error = error {
-                        self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
-                    }
-                }
-
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
-            case .Failure(let error):
-                self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
-
-                // Continue with the loop anyway
-                NSNotificationCenter.defaultCenter().postNotificationName(self.dynamicType.PumpStatusUpdatedNotification, object: self)
             }
         }
     }
@@ -404,19 +398,18 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
 
         // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
-        if  latestReservoirValue == nil ||
-            latestReservoirVolumeDrop < 0 ||
-            latestReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: -5)
+        if  doseStore.lastReservoirValue == nil ||
+            doseStore.lastReservoirVolumeDrop < 0 ||
+            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= NSTimeInterval(minutes: -5)
         {
             readPumpData { (result) in
                 switch result {
                 case .Success(let (status, date)):
-                    self.doseStore.addReservoirValue(status.reservoir, atDate: date) { (newValue, _, error) in
+                    self.doseStore.addReservoirValue(status.reservoir, atDate: date) { (newValue, _, _, error) in
                         if let error = error {
                             self.logger.addError(error, fromSource: "Bolus")
                             completion(error: error)
                         } else {
-                            self.latestReservoirValue = newValue
                             setBolus()
                         }
                     }
@@ -685,7 +678,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
     }
 
     /// The user's preferred method of fetching insulin data from the pump
-    var preferredInsulinDataSource = NSUserDefaults.standardUserDefaults().preferredInsulinDataSource ?? .PumpHistory {
+    var preferredInsulinDataSource = NSUserDefaults.standardUserDefaults().preferredInsulinDataSource ?? .pumpHistory {
         didSet {
             NSUserDefaults.standardUserDefaults().preferredInsulinDataSource = preferredInsulinDataSource
         }

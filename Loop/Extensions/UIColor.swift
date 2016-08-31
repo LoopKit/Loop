@@ -12,7 +12,7 @@ import UIKit
 extension UIColor {
     @nonobjc static var tintColor: UIColor? = nil
 
-    @nonobjc static let secondaryLabelColor = UIColor(red: 142 / 255, green: 142 / 255, blue: 147 / 255, alpha: 1)
+    @nonobjc static let secondaryLabelColor = UIColor.HIGGrayColor()
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
@@ -30,7 +30,7 @@ extension UIColor {
 
     @nonobjc static let staleColor = UIColor.HIGRedColor()
 
-    @nonobjc static let unknownColor = UIColor.HIGGrayColor().colorWithAlphaComponent(0.5)
+    @nonobjc static let unknownColor = UIColor(red: 198 / 255, green: 199 / 255, blue: 201 / 255, alpha: 1)
 
     @nonobjc static let deleteColor = UIColor.HIGRedColor()
 

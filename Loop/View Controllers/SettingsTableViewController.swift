@@ -162,13 +162,12 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 return switchCell
             case .PreferredInsulinDataSource:
-                let segmentCell = tableView.dequeueReusableCellWithIdentifier(SegmentedControlTableViewCell.className, forIndexPath: indexPath) as! SegmentedControlTableViewCell
+                let cell = tableView.dequeueReusableCellWithIdentifier(ConfigCellIdentifier, forIndexPath: indexPath)
 
-                segmentCell.titleLabel.text = NSLocalizedString("Nightscout History Upload", comment: "The title text for the preferred insulin data source config")
-                segmentCell.segmentedControl.selectedSegmentIndex = dataManager.preferredInsulinDataSource.rawValue
-                segmentCell.segmentedControl.addTarget(self, action: #selector(preferredInsulinDataSourceChanged(_:)), forControlEvents: .ValueChanged)
+                cell.textLabel?.text = NSLocalizedString("Preferred Data Source", comment: "The title text for the preferred insulin data source config")
+                cell.detailTextLabel?.text = String(dataManager.preferredInsulinDataSource)
 
-                return segmentCell
+                return cell
             }
         case .Configuration:
             if case .ReceiverEnabled = ConfigurationRow(rawValue: indexPath.row)! {
@@ -322,9 +321,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     // MARK: - UITableViewDelegate
 
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let sender = tableView.cellForRowAtIndexPath(indexPath)
+
         switch Section(rawValue: indexPath.section)! {
         case .Configuration:
-            let sender = tableView.cellForRowAtIndexPath(indexPath)
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
             case .PumpID, .TransmitterID, .InsulinActionDuration, .MaxBasal, .MaxBolus:
@@ -447,9 +447,18 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let vc = RileyLinkDeviceTableViewController()
             vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
 
-            showViewController(vc, sender: indexPath)
+            showViewController(vc, sender: sender)
         case .Loop:
-            break
+            switch LoopRow(rawValue: indexPath.row)! {
+            case .PreferredInsulinDataSource:
+                let vc = RadioSelectionTableViewController.insulinDataSource(dataManager.preferredInsulinDataSource)
+                vc.title = sender?.textLabel?.text
+                vc.delegate = self
+
+                showViewController(vc, sender: sender)
+            default:
+                break
+            }
         case .Services:
             switch ServiceRow(rawValue: indexPath.row)! {
             case .Share:
@@ -461,7 +470,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
                 }
 
-                showViewController(vc, sender: indexPath)
+                showViewController(vc, sender: sender)
             case .Nightscout:
                 let service = dataManager.remoteDataManager.nightscoutService
                 let vc = AuthenticationViewController(authentication: service)
@@ -471,7 +480,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
                 }
 
-                showViewController(vc, sender: indexPath)
+                showViewController(vc, sender: sender)
             case .MLab:
                 let service = dataManager.logger.mLabService
                 let vc = AuthenticationViewController(authentication: service)
@@ -481,7 +490,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
                 }
 
-                showViewController(vc, sender: indexPath)
+                showViewController(vc, sender: sender)
             case .Amplitude:
                 let service = AnalyticsManager.sharedManager.amplitudeService
                 let vc = AuthenticationViewController(authentication: service)
@@ -491,7 +500,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
                 }
 
-                showViewController(vc, sender: indexPath)
+                showViewController(vc, sender: sender)
             }
         }
     }
@@ -523,12 +532,6 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             } else {
                 dataManager.disconnectFromRileyLink(device)
             }
-        }
-    }
-
-    func preferredInsulinDataSourceChanged(sender: UISegmentedControl) {
-        if let dataSource = InsulinDataSource(rawValue: sender.selectedSegmentIndex) {
-            dataManager.preferredInsulinDataSource = dataSource
         }
     }
 
@@ -607,6 +610,17 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             default:
                 break
             }
+        }
+    }
+}
+
+
+extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate {
+    func radioSelectionTableViewControllerDidChangeSelectedIndex(controller: RadioSelectionTableViewController) {
+        if let selectedIndex = controller.selectedIndex, dataSource = InsulinDataSource(rawValue: selectedIndex) {
+            dataManager.preferredInsulinDataSource = dataSource
+
+            tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: LoopRow.PreferredInsulinDataSource.rawValue, inSection: Section.Loop.rawValue)], withRowAnimation: .None)
         }
     }
 }
