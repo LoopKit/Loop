@@ -39,16 +39,7 @@ extension GlucoseG4: SensorDisplayable {
         }
     }
 
-    var trendDescription: String {
-        switch trend {
-        case 1: return "⇈"
-        case 2: return "↑"
-        case 3: return "↗"
-        case 4: return "→"
-        case 5: return "↘"
-        case 6: return "↓"
-        case 7: return "⇊"
-        default: return ""
-        }
+    var trendType: GlucoseTrend? {
+        return GlucoseTrend(rawValue: Int(trend))
     }
 }

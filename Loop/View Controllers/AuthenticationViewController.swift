@@ -9,7 +9,7 @@
 import UIKit
 
 
-class AuthenticationViewController<T: ServiceAuthentication>: UITableViewController, IdentifiableClass, UITextFieldDelegate {
+final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
     typealias AuthenticationObserver = (authentication: T) -> Void
 

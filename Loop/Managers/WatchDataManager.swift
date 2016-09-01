@@ -14,7 +14,7 @@ import LoopKit
 import xDripG5
 
 
-class WatchDataManager: NSObject, WCSessionDelegate {
+final class WatchDataManager: NSObject, WCSessionDelegate {
 
     unowned let deviceDataManager: DeviceDataManager
 
@@ -22,6 +22,8 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         self.deviceDataManager = deviceDataManager
 
         super.init()
+
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(updateWatch(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
 
         watchSession?.delegate = self
         watchSession?.activateSession()
@@ -35,16 +37,23 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         }
     }()
 
-    func updateWatch() {
-        if let session = watchSession {
-            switch session.activationState {
-            case .NotActivated, .Inactive:
-                session.activateSession()
-            case .Activated:
-                createWatchContext { (context) in
-                    if let context = context {
-                        self.sendWatchContext(context)
-                    }
+    @objc private func updateWatch(notification: NSNotification) {
+        guard
+            let rawContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+            let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
+            case .TempBasal = context,
+            let session = watchSession
+        else {
+            return
+        }
+
+        switch session.activationState {
+        case .NotActivated, .Inactive:
+            session.activateSession()
+        case .Activated:
+            createWatchContext { (context) in
+                if let context = context {
+                    self.sendWatchContext(context)
                 }
             }
         }
@@ -93,9 +102,10 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         }
 
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
-        let reservoir = deviceDataManager.latestReservoirValue
+        let reservoir = deviceDataManager.doseStore.lastReservoirValue
+        let maxBolus = deviceDataManager.maximumBolus
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, error) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
 
             let eventualGlucose = predictedGlucose?.last
 
@@ -106,8 +116,9 @@ class WatchDataManager: NSObject, WCSessionDelegate {
 
                     context.loopLastRunDate = lastLoopCompleted
                     context.recommendedBolusDose = units
+                    context.maxBolus = maxBolus
 
-                    if let trend = self.deviceDataManager.sensorInfo?.trendDescription {
+                    if let trend = self.deviceDataManager.sensorInfo?.trendType {
                         context.glucoseTrend = trend
                     }
 
@@ -146,7 +157,7 @@ class WatchDataManager: NSObject, WCSessionDelegate {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
             addCarbEntryFromWatchMessage(message) { (units) in
-                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
+                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0, maxBolus: self.deviceDataManager.maximumBolus).rawValue)
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message) {

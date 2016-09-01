@@ -11,7 +11,7 @@ import NightscoutUploadKit
 import ShareClient
 
 
-class RemoteDataManager {
+final class RemoteDataManager {
 
     var nightscoutUploader: NightscoutUploader? {
         return nightscoutService.uploader
@@ -20,6 +20,7 @@ class RemoteDataManager {
     var nightscoutService: NightscoutService {
         didSet {
             keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
+            UIDevice.currentDevice().batteryMonitoringEnabled = true
         }
     }
 
@@ -44,9 +45,9 @@ class RemoteDataManager {
 
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
             nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
+            UIDevice.currentDevice().batteryMonitoringEnabled = true
         } else {
             nightscoutService = NightscoutService(siteURL: nil, APISecret: nil)
         }
     }
-
 }

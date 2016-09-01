@@ -22,22 +22,22 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
         }
     }
 
-    var trendDescription: String {
+    var trendType: GlucoseTrend? {
         guard case .Active = glucose else {
-            return ""
+            return nil
         }
 
         switch glucoseTrend {
-        case .Flat:
-            return "→"
-        case .Up:
-            return "⇈"
-        case .UpUp:
-            return "↑"
         case .Down:
-            return "↓"
+            return .Down
         case .DownDown:
-            return "⇊"
+            return .DownDown
+        case .Up:
+            return .Up
+        case .UpUp:
+            return .UpUp
+        case .Flat:
+            return .Flat
         }
     }
 }

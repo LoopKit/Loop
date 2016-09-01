@@ -8,7 +8,8 @@
 
 import UIKit
 
-class ChartTableViewCell: UITableViewCell {
+
+final class ChartTableViewCell: UITableViewCell {
 
     var chartView: UIView? {
         didSet {

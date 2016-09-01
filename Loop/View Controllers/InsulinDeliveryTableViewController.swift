@@ -1,5 +1,5 @@
 //
-//  ReservoirTableViewController.swift
+//  InsulinDeliveryTableViewController.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 3/11/16.
@@ -9,5 +9,5 @@
 import InsulinKit
 
 
-extension ReservoirTableViewController: IdentifiableClass {
+extension InsulinDeliveryTableViewController: IdentifiableClass {
 }

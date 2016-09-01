@@ -10,7 +10,7 @@ import WatchKit
 import Foundation
 
 
-class StatusInterfaceController: ContextInterfaceController {
+final class StatusInterfaceController: ContextInterfaceController {
 
     @IBOutlet var graphImage: WKInterfaceImage!
     @IBOutlet var loopHUDImage: WKInterfaceImage!
@@ -50,7 +50,7 @@ class StatusInterfaceController: ContextInterfaceController {
         dispatch_async(dispatch_get_main_queue()) {
             if let glucose = context?.glucose, unit = context?.preferredGlucoseUnit {
                 let glucoseValue = glucose.doubleValueForUnit(unit)
-                let trend = context?.glucoseTrend ?? ""
+                let trend = context?.glucoseTrend?.description ?? ""
 
                 self.glucoseLabel.setText((numberFormatter.stringFromNumber(glucoseValue) ?? "") + trend)
                 self.glucoseLabel.setHidden(false)
@@ -81,7 +81,7 @@ class StatusInterfaceController: ContextInterfaceController {
     }
 
     @IBAction func setBolus() {
-        presentControllerWithName(BolusInterfaceController.className, context: nil)
+        presentControllerWithName(BolusInterfaceController.className, context: dataManager.lastContextData?.bolusSuggestion)
     }
 
 }

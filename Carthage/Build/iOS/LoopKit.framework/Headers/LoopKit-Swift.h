@@ -101,6 +101,23 @@ typedef int swift_int4  __attribute__((__ext_vector_type__(4)));
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 #pragma clang diagnostic ignored "-Wduplicate-method-arg"
 @class NSCoder;
+
+SWIFT_CLASS("_TtC7LoopKit29CommandResponseViewController")
+@interface CommandResponseViewController : UIViewController
+- (nonnull instancetype)initWithCommand:(NSString * _Nonnull (^ _Nonnull)(void (^ _Nonnull completionHandler)(NSString * _Nonnull responseText)))command OBJC_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
+- (void)loadView;
+- (void)viewDidLoad;
+@end
+
+@class UIActivityViewController;
+
+@interface CommandResponseViewController (SWIFT_EXTENSION(LoopKit)) <UIActivityItemSource>
+- (id _Nonnull)activityViewControllerPlaceholderItem:(UIActivityViewController * _Nonnull)activityViewController;
+- (id _Nullable)activityViewController:(UIActivityViewController * _Nonnull)activityViewController itemForActivityType:(NSString * _Nonnull)activityType;
+- (NSString * _Nonnull)activityViewController:(UIActivityViewController * _Nonnull)activityViewController subjectForActivityType:(NSString * _Nullable)activityType;
+@end
+
 @class UIBarButtonItem;
 @class NSTimeZone;
 @class UITableView;
@@ -180,6 +197,14 @@ SWIFT_CLASS("_TtC7LoopKit39GlucoseRangeScheduleTableViewController")
 @end
 
 
+@interface HKQuantitySample (SWIFT_EXTENSION(LoopKit))
+@end
+
+
+@interface HKQuantitySample (SWIFT_EXTENSION(LoopKit))
+@end
+
+
 @interface HKUnit (SWIFT_EXTENSION(LoopKit))
 + (HKUnit * _Nonnull)milligramsPerDeciliterUnit;
 + (HKUnit * _Nonnull)millimolesPerLiterUnit;
@@ -209,13 +234,16 @@ SWIFT_CLASS("_TtC7LoopKit28TextFieldTableViewController")
 @interface TextFieldTableViewController : UITableViewController <UITextFieldDelegate>
 @property (nonatomic, strong) NSIndexPath * _Nullable indexPath;
 @property (nonatomic, copy) NSString * _Nullable placeholder;
+@property (nonatomic, copy) NSString * _Nullable unit;
 @property (nonatomic, copy) NSString * _Nullable value;
+@property (nonatomic, copy) NSString * _Nullable contextHelp;
 @property (nonatomic) UIKeyboardType keyboardType;
 - (nonnull instancetype)init;
 - (void)viewDidLoad;
 - (void)viewDidAppear:(BOOL)animated;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section;
 - (UITableViewCell * _Nonnull)tableView:(UITableView * _Nonnull)tableView cellForRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
+- (NSString * _Nullable)tableView:(UITableView * _Nonnull)tableView titleForFooterInSection:(NSInteger)section;
 - (BOOL)textFieldShouldEndEditing:(UITextField * _Nonnull)textField;
 - (BOOL)textFieldShouldReturn:(UITextField * _Nonnull)textField;
 - (nonnull instancetype)initWithStyle:(UITableViewStyle)style OBJC_DESIGNATED_INITIALIZER;

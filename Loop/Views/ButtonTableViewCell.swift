@@ -8,7 +8,8 @@
 
 import UIKit
 
-class ButtonTableViewCell: UITableViewCell, NibLoadable {
+
+final class ButtonTableViewCell: UITableViewCell, NibLoadable {
 
     @IBOutlet weak var button: UIButton!
 

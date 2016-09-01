@@ -21,7 +21,6 @@ extension NSUserDefaults {
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case G4ReceiverEnabled = "com.loudnate.Loop.G4ReceiverEnabled"
         case G5TransmitterID = "com.loudnate.Naterade.TransmitterID"
-        case G5TransmitterStartTime = "com.loudnate.Naterade.TransmitterStartTime"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
@@ -199,21 +198,6 @@ extension NSUserDefaults {
         }
         set {
             setBool(newValue, forKey: Key.G4ReceiverEnabled.rawValue)
-        }
-    }
-
-    var transmitterStartTime: NSTimeInterval? {
-        get {
-            let value = doubleForKey(Key.G5TransmitterStartTime.rawValue)
-
-            return value > 0 ? value : nil
-        }
-        set {
-            if let value = newValue {
-                setDouble(value, forKey: Key.G5TransmitterStartTime.rawValue)
-            } else {
-                removeObjectForKey(Key.G5TransmitterStartTime.rawValue)
-            }
         }
     }
 

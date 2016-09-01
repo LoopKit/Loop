@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import AmplitudeFramework
+import Amplitude
 
 
-class AnalyticsManager {
+final class AnalyticsManager {
 
     var amplitudeService: AmplitudeService {
         didSet {
@@ -69,6 +69,14 @@ class AnalyticsManager {
 
     func transmitterTimeDidDrift(drift: NSTimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
+    }
+
+    func pumpBatteryWasReplaced() {
+        logEvent("Pump battery replacement")
+    }
+
+    func reservoirWasRewound() {
+        logEvent("Pump reservoir rewind")
     }
 
     func didChangeBasalRateSchedule() {
