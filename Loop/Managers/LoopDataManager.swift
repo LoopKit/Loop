@@ -316,9 +316,8 @@ final class LoopDataManager {
     private func updatePredictedGlucoseAndRecommendedBasal() throws {
         guard let
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
-            pumpStatusDate = self.deviceDataManager.latestReservoirValue?.startDate
-            else
-        {
+            pumpStatusDate = self.deviceDataManager.doseStore.lastReservoirValue?.startDate
+        else {
             self.predictedGlucose = nil
             throw LoopError.MissingDataError("Cannot predict glucose due to missing input data")
         }

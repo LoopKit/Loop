@@ -59,7 +59,7 @@ extension DoseStore {
                 break
             }
 
-            title = (dose?.type != nil ? String(dose!.type) : event.dictionaryRepresentation["_type"] as? String) ?? String(event.pumpEvent.dynamicType)
+            title = String(event.pumpEvent)
             events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title))
         }
 

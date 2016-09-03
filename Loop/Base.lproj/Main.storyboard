@@ -71,41 +71,6 @@
                                     </subviews>
                                 </tableViewCellContentView>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="SegmentedControlTableViewCell" id="qVa-bG-wlH" customClass="SegmentedControlTableViewCell" customModule="Loop" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="201.5" width="600" height="44"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qVa-bG-wlH" id="5qS-48-yNM">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZgD-7x-5Wg">
-                                            <rect key="frame" x="15" y="8" width="493" height="27"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="LrK-Yi-kdn">
-                                            <rect key="frame" x="516" y="7" width="69" height="29"/>
-                                            <segments>
-                                                <segment title="On"/>
-                                                <segment title="Off"/>
-                                            </segments>
-                                        </segmentedControl>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="ZgD-7x-5Wg" firstAttribute="bottom" secondItem="5qS-48-yNM" secondAttribute="bottomMargin" priority="750" id="Fik-ru-b1R"/>
-                                        <constraint firstItem="LrK-Yi-kdn" firstAttribute="leading" secondItem="ZgD-7x-5Wg" secondAttribute="trailing" constant="8" symbolic="YES" id="XJH-Sy-MdY"/>
-                                        <constraint firstItem="LrK-Yi-kdn" firstAttribute="centerY" secondItem="5qS-48-yNM" secondAttribute="centerY" id="qod-JV-8ip"/>
-                                        <constraint firstItem="ZgD-7x-5Wg" firstAttribute="top" secondItem="5qS-48-yNM" secondAttribute="topMargin" id="rxe-38-gFO"/>
-                                        <constraint firstItem="ZgD-7x-5Wg" firstAttribute="leading" secondItem="5qS-48-yNM" secondAttribute="leadingMargin" constant="7" id="uwV-Bp-8gq"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="LrK-Yi-kdn" secondAttribute="trailing" constant="7" id="zMJ-bc-2B1"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="segmentedControl" destination="LrK-Yi-kdn" id="e99-v4-aTF"/>
-                                    <outlet property="titleLabel" destination="ZgD-7x-5Wg" id="iDE-Jk-fkZ"/>
-                                </connections>
-                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="4cb-Yq-02o" id="KZ7-dm-dst"/>
@@ -245,7 +210,7 @@
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="399" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="01f-Du-MVi">
                                                     <rect key="frame" x="0.0" y="5" width="120" height="32.5"/>
                                                     <fontDescription key="fontDescription" type="system" weight="light" pointSize="27"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
