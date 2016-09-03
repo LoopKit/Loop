@@ -842,8 +842,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         var objectIDs = [NSManagedObjectID]()
         var timestampedPumpEvents = [TimestampedHistoryEvent]()
 
-        // TODO: LoopKit should return these in chronological order instead of reversing here.
-        for event in pumpEvents.reverse() {
+        for event in pumpEvents {
             objectIDs.append(event.objectID)
 
             if let raw = event.raw where raw.length > 0, let type = MinimedKit.PumpEventType(rawValue: raw[0])?.eventType, pumpEvent = type.init(availableData: raw, pumpModel: pumpModel) {
