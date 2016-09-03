@@ -11,7 +11,13 @@ import UIKit
 
 final class BatteryLevelHUDView: HUDView {
 
-    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private var levelMaskView: LevelMaskView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        tintColor = .unknownColor
+    }
 
     private lazy var numberFormatter: NSNumberFormatter = {
         let formatter = NSNumberFormatter()
@@ -29,7 +35,18 @@ final class BatteryLevelHUDView: HUDView {
                 caption.text = nil
             }
 
-            imageView.image = UIImage.batteryHUDImageWithLevel(batteryLevel)
+            switch batteryLevel {
+            case .None:
+                tintColor = .unknownColor
+            case let x? where x > 0.25:
+                tintColor = .secondaryLabelColor
+            case let x? where x > 0.10:
+                tintColor = .agingColor
+            default:
+                tintColor = .staleColor
+            }
+
+            levelMaskView.value = batteryLevel ?? 1.0
         }
     }
 
