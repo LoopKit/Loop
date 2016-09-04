@@ -1,7 +1,7 @@
-github "loudnate/LoopKit" ~> 0.5.1
+github "loudnate/LoopKit" ~> 0.6.0
 github "loudnate/xDripG5" ~> 0.6.0
 github "loudnate/SwiftCharts" "loudnate/naterade"
 github "mddub/dexcom-share-client-swift" ~> 0.1
 github "mddub/G4ShareSpy" ~> 0.2.2
 github "ps2/rileylink_ios" ~> 0.10.0
-github "amplitude/Amplitude-iOS" ~> 3.8.4
+github "amplitude/Amplitude-iOS" ~> 3.8.5

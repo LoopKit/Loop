@@ -102,7 +102,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         }
 
         let glucose = deviceDataManager.glucoseStore?.latestGlucose
-        let reservoir = deviceDataManager.latestReservoirValue
+        let reservoir = deviceDataManager.doseStore.lastReservoirValue
+        let maxBolus = deviceDataManager.maximumBolus
 
         deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
 
@@ -115,6 +116,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
                     context.loopLastRunDate = lastLoopCompleted
                     context.recommendedBolusDose = units
+                    context.maxBolus = maxBolus
 
                     if let trend = self.deviceDataManager.sensorInfo?.trendType {
                         context.glucoseTrend = trend
@@ -155,7 +157,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
             addCarbEntryFromWatchMessage(message) { (units) in
-                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0).rawValue)
+                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0, maxBolus: self.deviceDataManager.maximumBolus).rawValue)
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message) {

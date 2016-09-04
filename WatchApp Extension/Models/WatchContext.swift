@@ -13,9 +13,10 @@ import HealthKit
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: AnyObject]
 
-    private let version = 2
+    private let version = 3
 
     var preferredGlucoseUnit: HKUnit?
+    var maxBolus: Double?
 
     var glucose: HKQuantity?
     var glucoseTrend: GlucoseTrend?
@@ -26,6 +27,12 @@ final class WatchContext: NSObject, RawRepresentable {
     var lastNetTempBasalDose: Double?
     var lastNetTempBasalDate: NSDate?
     var recommendedBolusDose: Double?
+
+    var bolusSuggestion: BolusSuggestionUserInfo? {
+        guard let recommended = recommendedBolusDose else { return nil }
+
+        return BolusSuggestionUserInfo(recommendedBolus: recommended, maxBolus: maxBolus)
+    }
 
     var COB: Double?
     var IOB: Double?
@@ -72,6 +79,7 @@ final class WatchContext: NSObject, RawRepresentable {
         lastNetTempBasalDate = rawValue["bad"] as? NSDate
         recommendedBolusDose = rawValue["rbo"] as? Double
         COB = rawValue["cob"] as? Double
+        maxBolus = rawValue["mb"] as? Double
     }
 
     var rawValue: RawValue {
@@ -94,6 +102,7 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
+        raw["mb"] = maxBolus
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage

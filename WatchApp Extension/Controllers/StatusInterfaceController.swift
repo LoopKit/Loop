@@ -81,7 +81,7 @@ final class StatusInterfaceController: ContextInterfaceController {
     }
 
     @IBAction func setBolus() {
-        presentControllerWithName(BolusInterfaceController.className, context: nil)
+        presentControllerWithName(BolusInterfaceController.className, context: dataManager.lastContextData?.bolusSuggestion)
     }
 
 }
