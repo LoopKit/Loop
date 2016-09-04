@@ -665,7 +665,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 }
             }
         case "pumpModel"?:
-            if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
+            if let sentrySupported = pumpState?.pumpModel?.hasMySentry where !sentrySupported {
                 rileyLinkManager.idleListeningEnabled = false
             }
 
@@ -898,7 +898,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 if let model = PumpModel(rawValue: pumpModelNumber) {
                     pumpState.pumpModel = model
 
-                    idleListeningEnabled = model.larger
+                    idleListeningEnabled = model.hasMySentry
                 }
             }
 
