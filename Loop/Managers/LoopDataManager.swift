@@ -240,6 +240,50 @@ final class LoopDataManager {
         }
     }
 
+    enum PredictionInput {
+        case carbs
+        case insulin
+        case momentum
+        case retrospection
+    }
+
+    func modelPredictedGlucose(using inputs: [PredictionInput], resultsHandler: (predictedGlucose: [GlucoseValue]?, error: ErrorType?) -> Void) {
+        dispatch_async(dataAccessQueue) { 
+            guard let
+                glucose = self.deviceDataManager.glucoseStore?.latestGlucose
+            else {
+                resultsHandler(predictedGlucose: nil, error: LoopError.MissingDataError("Cannot predict glucose due to missing input data"))
+                return
+            }
+
+            var momentum: [GlucoseEffect] = []
+            var effects: [[GlucoseEffect]] = []
+
+            for input in inputs {
+                switch input {
+                case .carbs:
+                    if let carbEffect = self.carbEffect {
+                        effects.append(carbEffect)
+                    }
+                case .insulin:
+                    if let insulinEffect = self.insulinEffect {
+                        effects.append(insulinEffect)
+                    }
+                case .momentum:
+                    if let momentumEffect = self.glucoseMomentumEffect {
+                        momentum = momentumEffect
+                    }
+                case .retrospection:
+                    effects.append(self.retrospectiveGlucoseEffect)
+                }
+            }
+
+            let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: effects)
+
+            resultsHandler(predictedGlucose: prediction, error: nil)
+        }
+    }
+
     // Calculation
 
     private let dataAccessQueue: dispatch_queue_t = dispatch_queue_create("com.loudnate.Naterade.LoopDataManager.dataAccessQueue", dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_UTILITY, 0))

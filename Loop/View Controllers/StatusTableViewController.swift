@@ -553,7 +553,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 return 85
             }
         case .Status, .Pump, .Sensor:
-            return 44
+            return UITableViewAutomaticDimension
         }
     }
 
@@ -562,12 +562,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
-                    UIApplication.sharedApplication().openURL(URL)
-                }
-                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
-                    UIApplication.sharedApplication().openURL(URL)
-                }
+//                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
+//                    UIApplication.sharedApplication().openURL(URL)
+//                }
+//                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
+//                    UIApplication.sharedApplication().openURL(URL)
+//                }
+
+                showViewController(PredictionTableViewController(dataManager: dataManager), sender: indexPath)
             case .IOB, .Dose:
                 performSegueWithIdentifier(InsulinDeliveryTableViewController.className, sender: indexPath)
             case .COB:

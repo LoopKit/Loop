@@ -296,7 +296,10 @@ final class StatusChartsManager {
         var prediction: ChartLayer?
 
         if predictedGlucosePoints.count > 1 {
-            prediction = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: predictedGlucosePoints, displayDelay: 0, itemSize: CGSize(width: 2, height: 2), itemFillColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.75))
+            // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
+            let lineModel = ChartLineModel(chartPoints: predictedGlucosePoints, lineColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.75), lineWidth: 1, animDuration: 0.0001, animDelay: 0, dashPattern: [6, 5])
+
+            prediction = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
         }
 
         glucoseChartCache = ChartPointsTouchHighlightLayerViewCache(
