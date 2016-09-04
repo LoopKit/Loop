@@ -71,6 +71,7 @@
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
+		438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */; };
 		438DADC81CDE8F8B007697A5 /* LoopStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438DADC71CDE8F8B007697A5 /* LoopStateView.swift */; };
 		439897351CD2F7DE00223065 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
@@ -293,6 +294,7 @@
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
+		438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionInputEffect.swift; sourceTree = "<group>"; };
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
 		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AnalyticsManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -469,6 +471,7 @@
 				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
 				430DA58F1D4B0E4C0097D1CA /* MySentryPumpStatusMessageBody.swift */,
 				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
+				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
 				43EA28611D517E42001BC233 /* SensorDisplayable.swift */,
 				437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */,
 				434F54601D28859B002A9274 /* ServiceCredential.swift */,
@@ -1048,6 +1051,7 @@
 				4302F4DB1D4D6E9F00F0FCAF /* NSData.swift in Sources */,
 				437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
+				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				434F54611D28859B002A9274 /* ServiceCredential.swift in Sources */,
 				436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */,

@@ -121,7 +121,7 @@ class PredictionTableViewController: UITableViewController {
         static let count = 2
     }
 
-    private lazy var selectedInputs: [(input: LoopDataManager.PredictionInput, selected: Bool)] = [
+    private lazy var selectedInputs: [(input: PredictionInputEffect, selected: Bool)] = [
         (.carbs, true), (.insulin, true), (.momentum, true), (.retrospection, true)
     ]
 
@@ -154,11 +154,12 @@ class PredictionTableViewController: UITableViewController {
 
             return cell
         case .inputs:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className) ?? UITableViewCell(style: .Default, reuseIdentifier: UITableViewCell.className)
+            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className) ?? UITableViewCell(style: .Subtitle, reuseIdentifier: UITableViewCell.className)
 
             let (input, selected) = selectedInputs[indexPath.row]
 
-            cell.textLabel?.text = String(input)
+            cell.textLabel?.text = input.localizedTitle
+            cell.detailTextLabel?.text = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
             cell.accessoryType = selected ? .Checkmark : .None
 
             return cell

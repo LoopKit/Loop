@@ -240,14 +240,7 @@ final class LoopDataManager {
         }
     }
 
-    enum PredictionInput {
-        case carbs
-        case insulin
-        case momentum
-        case retrospection
-    }
-
-    func modelPredictedGlucose(using inputs: [PredictionInput], resultsHandler: (predictedGlucose: [GlucoseValue]?, error: ErrorType?) -> Void) {
+    func modelPredictedGlucose(using inputs: [PredictionInputEffect], resultsHandler: (predictedGlucose: [GlucoseValue]?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) { 
             guard let
                 glucose = self.deviceDataManager.glucoseStore?.latestGlucose
