@@ -286,6 +286,7 @@
 		437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReservoirVolumeHUDView.swift; sourceTree = "<group>"; };
 		437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryLevelHUDView.swift; sourceTree = "<group>"; };
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
+		437D9BA11D7B5203007245E8 /* Loop.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Loop.xcconfig; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
@@ -484,6 +485,7 @@
 				43E2D8D21D20BF42004DA55F /* DoseMathTests */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
+				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1151,6 +1153,7 @@
 /* Begin XCBuildConfiguration section */
 		43776FB41B8022E90074EA36 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 437D9BA11D7B5203007245E8 /* Loop.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -1168,7 +1171,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1187,7 +1190,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate.Loop;
+				MAIN_APP_BUNDLE_IDENTIFIER = "$(inherited).Loop";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1199,6 +1202,7 @@
 		};
 		43776FB51B8022E90074EA36 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 437D9BA11D7B5203007245E8 /* Loop.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -1216,7 +1220,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1229,7 +1233,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
-				MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate.Loop;
+				MAIN_APP_BUNDLE_IDENTIFIER = "$(inherited).Loop";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
