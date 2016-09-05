@@ -228,14 +228,14 @@ final class LoopDataManager {
 
      - parameter resultsHandler: A closure called once the values have been retrieved. The closure takes the following arguments:
         - predictedGlucose:     The calculated timeline of predicted glucose values
-        - reflectedGlucose:     The retrospective prediction over a recent period of glucose samples
+        - retrospectivePredictedGlucose: The retrospective prediction over a recent period of glucose samples
         - recommendedTempBasal: The recommended temp basal based on predicted glucose
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
         - insulinOnBoard        Current insulin on board
         - error:                An error in the current state of the loop, or one that happened during the last attempt to loop.
      */
-    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, reflectedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
+    func getLoopStatus(resultsHandler: (predictedGlucose: [GlucoseValue]?, retrospectivePredictedGlucose: [GlucoseValue]?, recommendedTempBasal: TempBasalRecommendation?, lastTempBasal: DoseEntry?, lastLoopCompleted: NSDate?, insulinOnBoard: InsulinValue?, error: ErrorType?) -> Void) {
         dispatch_async(dataAccessQueue) {
             var error: ErrorType?
 
@@ -245,7 +245,7 @@ final class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(predictedGlucose: self.predictedGlucose, reflectedGlucose: self.retrospectivePredictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error ?? self.lastLoopError)
+            resultsHandler(predictedGlucose: self.predictedGlucose, retrospectivePredictedGlucose: self.retrospectivePredictedGlucose, recommendedTempBasal: self.recommendedTempBasal, lastTempBasal: self.lastTempBasal, lastLoopCompleted: self.lastLoopCompleted, insulinOnBoard: self.insulinOnBoard, error: error ?? self.lastLoopError)
         }
     }
 
@@ -294,7 +294,7 @@ final class LoopDataManager {
         didSet {
             predictedGlucose = nil
 
-            // Carb data may be back-dated, so re-calculate the reflected glucose.
+            // Carb data may be back-dated, so re-calculate the retrospective glucose.
             retrospectivePredictedGlucose = nil
         }
     }
@@ -512,7 +512,7 @@ final class LoopDataManager {
             )
         }
 
-        self.predictedGlucose = predictionWithRetrospectiveEffect
+        self.predictedGlucose = retrospectiveCorrectionEnabled ? predictionWithRetrospectiveEffect : prediction
 
         guard let
             maxBasal = deviceDataManager.maximumBasalRatePerHour,

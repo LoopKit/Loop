@@ -136,7 +136,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             needsRefresh = false
             reloading = true
 
-            tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
+            tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Sensor.rawValue, Section.count - Section.Sensor.rawValue)
             ), withRowAnimation: visible ? .Automatic : .None)
 
             let calendar = NSCalendar.currentCalendar()
@@ -171,14 +171,13 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, reflectedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 }
 
                 self.charts.predictedGlucoseValues = predictedGlucose ?? []
                 self.recommendedTempBasal = recommendedTempBasal
-                self.reflectedGlucose = reflectedGlucose
                 self.lastTempBasal = lastTempBasal
                 self.lastLoopCompleted = lastLoopCompleted
 
@@ -266,10 +265,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private enum Section: Int {
         case Charts = 0
         case Status
-        case Pump
         case Sensor
 
-        static let count = 4
+        static let count = 3
     }
 
     // MARK: - Chart Section Data
@@ -289,14 +287,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     private enum StatusRow: Int {
         case RecommendedBasal = 0
-        case ReflectedGlucose
 
-        static let count = 2
+        static let count = 1
     }
 
     private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
-
-    private var reflectedGlucose: [GlucoseValue]?
 
     private var lastTempBasal: DoseEntry? {
         didSet {
@@ -372,12 +367,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - Pump/Sensor Section Data
 
-    private enum PumpRow: Int {
-        case InsulinOnBoard = 0
-
-        static let count = 1
-    }
-
     private enum SensorRow: Int {
         case State
 
@@ -424,8 +413,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return ChartRow.count
         case .Status:
             return StatusRow.count
-        case .Pump:
-            return PumpRow.count
         case .Sensor:
             return SensorRow.count
         }
@@ -494,35 +481,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 } else {
                     cell.accessoryView = nil
                 }
-            case .ReflectedGlucose:
-                cell.textLabel?.text = "Predicted 30m ago"
-
-                if let startGlucose = reflectedGlucose?.first, let endGlucose = reflectedGlucose?.last, let currentGlucose = self.dataManager.glucoseStore?.latestGlucose {
-                    let startValue = Int(startGlucose.quantity.doubleValueForUnit(charts.glucoseUnit))
-                    let predictedValue = Int(endGlucose.quantity.doubleValueForUnit(charts.glucoseUnit))
-                    let currentValue = Int(currentGlucose.quantity.doubleValueForUnit(charts.glucoseUnit))
-
-                    cell.detailTextLabel?.text = "\(startValue) → \(predictedValue) @ \(timeFormatter.stringFromDate(endGlucose.startDate)) \(currentValue - predictedValue)"
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            }
-
-            return cell
-        case .Pump:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
-            cell.selectionStyle = .None
-
-            switch PumpRow(rawValue: indexPath.row)! {
-            case .InsulinOnBoard:
-                cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
-
-                if let iob = dataManager.latestPumpStatusFromMySentry?.iob {
-                    let numberValue = NSNumber(double: iob).descriptionWithLocale(locale)
-                    cell.detailTextLabel?.text = "\(numberValue) Units"
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
             }
 
             return cell
@@ -552,7 +510,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             case .IOB, .Dose, .COB:
                 return 85
             }
-        case .Status, .Pump, .Sensor:
+        case .Status, .Sensor:
             return UITableViewAutomaticDimension
         }
     }
@@ -562,13 +520,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-//                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
-//                    UIApplication.sharedApplication().openURL(URL)
-//                }
-//                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
-//                    UIApplication.sharedApplication().openURL(URL)
-//                }
-
                 performSegueWithIdentifier(PredictionTableViewController.className, sender: indexPath)
             case .IOB, .Dose:
                 performSegueWithIdentifier(InsulinDeliveryTableViewController.className, sender: indexPath)
@@ -596,15 +547,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         }
                     }
                 }
-            case .ReflectedGlucose:
-                break
             }
         case .Sensor:
             if let URL = NSURL(string: "dexcomcgm://") {
                 UIApplication.sharedApplication().openURL(URL)
             }
-        case .Pump:
-            break
         }
     }
 
@@ -744,7 +691,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
 
-    @IBOutlet var glucoseHUD: GlucoseHUDView!
+    @IBOutlet var glucoseHUD: GlucoseHUDView! {
+        didSet {
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
+            glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
+        }
+    }
+
+    @objc private func openCGMApp(_: AnyObject) {
+        if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
+            UIApplication.sharedApplication().openURL(URL)
+        }
+        else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
+            UIApplication.sharedApplication().openURL(URL)
+        }
+    }
 
     @IBOutlet var basalRateHUD: BasalRateHUDView!
 
