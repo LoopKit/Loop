@@ -16,13 +16,13 @@ extension UIColor {
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
-    @nonobjc static let glucoseTintColor = UIColor.HIGTealBlueColor()
+    @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
 
     @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
 
-    @nonobjc static let COBTintColor = UIColor.HIGYellowColor()
+    @nonobjc static let COBTintColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
 
-    @nonobjc static let doseTintColor = UIColor.HIGGreenColor()
+    @nonobjc static let doseTintColor = UIColor.HIGOrangeColor()
 
     @nonobjc static let freshColor = UIColor.HIGGreenColor()
 
@@ -42,7 +42,7 @@ extension UIColor {
     }
 
     private static func HIGYellowColor() -> UIColor {
-        return UIColor(red: 1, green: 204 / 255, blue: 0 / 255, alpha: 1)
+        return UIColor(red: 1, green: 204 / 255, blue: 0, alpha: 1)
     }
 
     private static func HIGOrangeColor() -> UIColor {

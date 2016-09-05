@@ -58,8 +58,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
+        toolbarItems![0].tintColor = UIColor.COBTintColor
         toolbarItems![2].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
+        toolbarItems![2].tintColor = UIColor.doseTintColor
         toolbarItems![6].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
+        toolbarItems![6].tintColor = UIColor.secondaryLabelColor
     }
 
     deinit {
@@ -222,15 +225,17 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
 
-            reservoirVolume = dataManager.doseStore.lastReservoirValue?.unitVolume
+            if let reservoir = dataManager.doseStore.lastReservoirValue {
+                if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
+                    reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+                }
 
-            if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity,
-                resVol = reservoirVolume {
-                reservoirLevel = min(1, max(0, Double(resVol / Double(capacity))))
+                reservoirVolumeHUD.reservoirVolume = reservoir.unitVolume
+                reservoirVolumeHUD.lastUpdated = reservoir.startDate
             }
 
             if let status = dataManager.latestPumpStatusFromMySentry {
-                batteryLevel = Double(status.batteryRemainingPercent) / 100
+                batteryLevelHUD.batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
@@ -333,24 +338,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var reservoirLevel: Double? {
-        didSet {
-            reservoirVolumeHUD.reservoirLevel = reservoirLevel
-        }
-    }
-
-    private var reservoirVolume: Double? {
-        didSet {
-            reservoirVolumeHUD.reservoirVolume = reservoirVolume
-        }
-    }
-
-    private var batteryLevel: Double? {
-        didSet {
-            batteryLevelHUD.batteryLevel = batteryLevel
-        }
-    }
-
     private var settingTempBasal: Bool = false {
         didSet {
             if let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: StatusRow.RecommendedBasal.rawValue, inSection: Section.Status.rawValue)) {
@@ -382,10 +369,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     // MARK: - Pump/Sensor Section Data
 
     private enum PumpRow: Int {
-        case Date = 0
-        case InsulinOnBoard
+        case InsulinOnBoard = 0
 
-        static let count = 2
+        static let count = 1
     }
 
     private enum SensorRow: Int {
@@ -512,14 +498,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             cell.selectionStyle = .None
 
             switch PumpRow(rawValue: indexPath.row)! {
-            case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last MySentry", comment: "The title of the cell containing the last updated mysentry status packet date")
-
-                if let date = dataManager.latestPumpStatusFromMySentry?.pumpDateComponents.date {
-                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
             case .InsulinOnBoard:
                 cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
 
@@ -723,6 +701,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .Plain, target: self, action: #selector(toggleWorkoutMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Workout Mode", comment: "The label of the workout mode toggle button")
         item.accessibilityHint = selected ? NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled") : NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+        item.tintColor = UIColor.glucoseTintColor
 
         return item
     }

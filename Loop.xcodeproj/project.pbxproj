@@ -140,6 +140,7 @@
 		43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D491C914197002152D1 /* GlucoseKit.framework */; };
 		43F78D4E1C914197002152D1 /* InsulinKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4A1C914197002152D1 /* InsulinKit.framework */; };
 		43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
+		43FBEDD81D73843700B21F22 /* LevelMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FBEDD71D73843700B21F22 /* LevelMaskView.swift */; };
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
@@ -365,6 +366,7 @@
 		43F78D491C914197002152D1 /* GlucoseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlucoseKit.framework; path = Carthage/Build/iOS/GlucoseKit.framework; sourceTree = "<group>"; };
 		43F78D4A1C914197002152D1 /* InsulinKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = InsulinKit.framework; path = Carthage/Build/iOS/InsulinKit.framework; sourceTree = "<group>"; };
 		43F78D4B1C914197002152D1 /* LoopKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKit.framework; path = Carthage/Build/iOS/LoopKit.framework; sourceTree = "<group>"; };
+		43FBEDD71D73843700B21F22 /* LevelMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelMaskView.swift; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
@@ -648,6 +650,7 @@
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				4337615E1D52F487004A3647 /* GlucoseHUDView.swift */,
 				437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */,
+				43FBEDD71D73843700B21F22 /* LevelMaskView.swift */,
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
@@ -1031,6 +1034,7 @@
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				437CEEBC1CD6DE6A003C8C80 /* HUDView.swift in Sources */,
 				434F545F1D288345002A9274 /* ShareService.swift in Sources */,
+				43FBEDD81D73843700B21F22 /* LevelMaskView.swift in Sources */,
 				4354003A1C9FB81100D5819C /* UIColor.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */,
