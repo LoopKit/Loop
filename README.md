@@ -30,7 +30,7 @@ Please understand that this project:
   <thead>
     <tr>
       <td colspan="2" rowspan="5"></td>
-      <th colspan="3">Insulin Pump</th>
+      <th colspan="4">Insulin Pump</th>
     </tr>
     <tr>
       <th>MM 515/715</th>
