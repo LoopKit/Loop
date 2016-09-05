@@ -136,9 +136,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             needsRefresh = false
             reloading = true
 
-            tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Sensor.rawValue, Section.count - Section.Sensor.rawValue)
-            ), withRowAnimation: visible ? .Automatic : .None)
-
             let calendar = NSCalendar.currentCalendar()
             let components = NSDateComponents()
             components.minute = 0
@@ -265,9 +262,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private enum Section: Int {
         case Charts = 0
         case Status
-        case Sensor
 
-        static let count = 3
+        static let count = 2
     }
 
     // MARK: - Chart Section Data
@@ -367,31 +363,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - Pump/Sensor Section Data
 
-    private enum SensorRow: Int {
-        case State
-
-        static let count = 1
-    }
-
     private lazy var emptyValueString: String = NSLocalizedString("––",
         comment: "The detail value of a numeric cell with no value"
     )
-
-    private lazy var dateComponentsFormatter: NSDateComponentsFormatter = {
-        let formatter = NSDateComponentsFormatter()
-        formatter.unitsStyle = .Short
-
-        return formatter
-    }()
-
-    private lazy var numberFormatter = NSNumberFormatter()
-
-    private lazy var dateFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .MediumStyle
-        formatter.timeStyle = .MediumStyle
-        return formatter
-    }()
 
     private lazy var timeFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
@@ -413,8 +387,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return ChartRow.count
         case .Status:
             return StatusRow.count
-        case .Sensor:
-            return SensorRow.count
         }
     }
 
@@ -484,18 +456,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             return cell
-        case .Sensor:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
-            cell.selectionStyle = .None
-
-            switch SensorRow(rawValue: indexPath.row)! {
-            case .State:
-                cell.textLabel?.text = NSLocalizedString("Sensor State", comment: "The title of the cell containing the current sensor state")
-
-                cell.detailTextLabel?.text = dataManager.sensorInfo?.stateDescription ?? emptyValueString
-            }
-
-            return cell
         }
     }
 
@@ -510,7 +470,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             case .IOB, .Dose, .COB:
                 return 85
             }
-        case .Status, .Sensor:
+        case .Status:
             return UITableViewAutomaticDimension
         }
     }
@@ -547,10 +507,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         }
                     }
                 }
-            }
-        case .Sensor:
-            if let URL = NSURL(string: "dexcomcgm://") {
-                UIApplication.sharedApplication().openURL(URL)
             }
         }
     }

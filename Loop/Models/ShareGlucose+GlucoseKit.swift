@@ -21,3 +21,14 @@ extension ShareGlucose: GlucoseValue {
         return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
     }
 }
+
+
+extension ShareGlucose: SensorDisplayable {
+    var isStateValid: Bool {
+        return glucose >= 20
+    }
+
+    var trendType: GlucoseTrend? {
+        return GlucoseTrend(rawValue: Int(trend))
+    }
+}
