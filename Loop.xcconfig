@@ -1,0 +1,11 @@
+//
+//  Loop.xcconfig
+//  Loop
+//
+//  Created by Nate Racklyeft on 9/3/16.
+//  Copyright © 2016 Nathan Racklyeft. All rights reserved.
+//
+
+// Change this on first setup to your own unique organization identifier in
+// reverse-domain name syntax.
+MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate

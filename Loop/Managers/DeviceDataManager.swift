@@ -715,7 +715,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 }
             }
         case "pumpModel"?:
-            if let sentrySupported = pumpState?.pumpModel?.larger where !sentrySupported {
+            if let sentrySupported = pumpState?.pumpModel?.hasMySentry where !sentrySupported {
                 rileyLinkManager.idleListeningEnabled = false
             }
 
@@ -892,8 +892,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         var objectIDs = [NSManagedObjectID]()
         var timestampedPumpEvents = [TimestampedHistoryEvent]()
 
-        // TODO: LoopKit should return these in chronological order instead of reversing here.
-        for event in pumpEvents.reverse() {
+        for event in pumpEvents {
             objectIDs.append(event.objectID)
 
             if let raw = event.raw where raw.length > 0, let type = MinimedKit.PumpEventType(rawValue: raw[0])?.eventType, pumpEvent = type.init(availableData: raw, pumpModel: pumpModel) {
@@ -949,7 +948,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 if let model = PumpModel(rawValue: pumpModelNumber) {
                     pumpState.pumpModel = model
 
-                    idleListeningEnabled = model.larger
+                    idleListeningEnabled = model.hasMySentry
                 }
             }
 
