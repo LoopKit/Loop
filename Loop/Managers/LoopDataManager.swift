@@ -44,10 +44,19 @@ final class LoopDataManager {
         }
     }
 
+    var retrospectiveCorrectionEnabled: Bool {
+        didSet {
+            NSUserDefaults.standardUserDefaults().retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
+
+            notify(forChange: .Preferences)
+        }
+    }
+
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
 
         dosingEnabled = NSUserDefaults.standardUserDefaults().dosingEnabled
+        retrospectiveCorrectionEnabled = NSUserDefaults.standardUserDefaults().retrospectiveCorrectionEnabled
 
         // Observe changes
         let center = NSNotificationCenter.defaultCenter()

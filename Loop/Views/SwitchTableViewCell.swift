@@ -13,6 +13,8 @@ final class SwitchTableViewCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel!
 
+    @IBOutlet weak var subtitleLabel: UILabel?
+
     @IBOutlet var `switch`: UISwitch?
 
     override func prepareForReuse() {

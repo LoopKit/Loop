@@ -9,46 +9,111 @@
 import UIKit
 import HealthKit
 
-class PredictionTableViewController: UITableViewController {
-
-    init(dataManager: DeviceDataManager) {
-        self.dataManager = dataManager
-
-        super.init(style: .Plain)
-
-        title = NSLocalizedString("Predicted Glucose", comment: "Title of the PredictionTableViewController")
-
-        hidesBottomBarWhenPushed = true
-
-        reloadData()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.registerClass(ChartTableViewCell.self, forCellReuseIdentifier: ChartTableViewCell.className)
+        tableView.cellLayoutMarginsFollowReadableWidth = true
+
+        let notificationCenter = NSNotificationCenter.defaultCenter()
+        let mainQueue = NSOperationQueue.mainQueue()
+        let application = UIApplication.sharedApplication()
+
+        notificationObservers += [
+            notificationCenter.addObserverForName(LoopDataManager.LoopDataUpdatedNotification, object: dataManager.loopManager, queue: nil) { note in
+                guard let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? Int where LoopDataManager.LoopUpdateContext(rawValue: rawContext) != .Preferences else {
+                    return
+                }
+
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.needsRefresh = true
+                    self.reloadData(animated: true)
+                }
+            },
+            notificationCenter.addObserverForName(UIApplicationWillResignActiveNotification, object: application, queue: mainQueue) { _ in
+                self.active = false
+            },
+            notificationCenter.addObserverForName(UIApplicationDidBecomeActiveNotification, object: application, queue: mainQueue) { _ in
+                self.active = true
+            }
+        ]
+    }
+
+    deinit {
+        for observer in notificationObservers {
+            NSNotificationCenter.defaultCenter().removeObserver(observer)
+        }
+    }
+
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+
+        visible = true
     }
 
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
+
+        AnalyticsManager.sharedManager.didDisplayStatusScreen()
     }
 
-    // MARK: - 
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
 
-    private let dataManager: DeviceDataManager
+        visible = false
+    }
 
-    private let charts = StatusChartsManager()
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+
+        if visible {
+            coordinator.animateAlongsideTransition({ (_) -> Void in
+                self.tableView.beginUpdates()
+                self.tableView.reloadSections(NSIndexSet(index: Section.charts.rawValue), withRowAnimation: .Fade)
+                self.tableView.endUpdates()
+            }, completion: nil)
+        } else {
+            needsRefresh = true
+        }
+    }
+
+    // MARK: - State
+
+    // References to registered notification center observers
+    private var notificationObservers: [AnyObject] = []
+
+    var dataManager: DeviceDataManager!
+
+    private var active = true {
+        didSet {
+            reloadData()
+        }
+    }
+
+    private lazy var charts: StatusChartsManager = {
+        let charts = StatusChartsManager()
+
+        charts.glucoseDisplayRange = (
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 60),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 200)
+        )
+
+        return charts
+    }()
 
     private var needsRefresh = true
+
+    private var visible = false {
+        didSet {
+            reloadData()
+        }
+    }
 
     private var reloading = false
 
     private func reloadData(animated animated: Bool = false) {
-        if needsRefresh {
+        if active && visible && needsRefresh {
             needsRefresh = false
             reloading = true
 
@@ -84,12 +149,23 @@ class PredictionTableViewController: UITableViewController {
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.modelPredictedGlucose(using: selectedInputs.flatMap { $0.selected ? $0.input : nil }) { (predictedGlucose, error) in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, _, _, _, _, _, error) in
                 if error != nil {
                     self.needsRefresh = true
                 }
 
                 self.charts.predictedGlucoseValues = predictedGlucose ?? []
+
+                dispatch_group_leave(reloadGroup)
+            }
+
+            dispatch_group_enter(reloadGroup)
+            dataManager.loopManager.modelPredictedGlucose(using: selectedInputs.flatMap { $0.selected ? $0.input : nil }) { (predictedGlucose, error) in
+                if error != nil {
+                    self.needsRefresh = true
+                }
+
+                self.charts.alternatePredictedGlucoseValues = predictedGlucose ?? []
 
                 dispatch_group_leave(reloadGroup)
             }
@@ -117,8 +193,9 @@ class PredictionTableViewController: UITableViewController {
     private enum Section: Int {
         case charts
         case inputs
+        case settings
 
-        static let count = 2
+        static let count = 3
     }
 
     private lazy var selectedInputs: [(input: PredictionInputEffect, selected: Bool)] = [
@@ -135,6 +212,8 @@ class PredictionTableViewController: UITableViewController {
             return 1
         case .inputs:
             return selectedInputs.count
+        case .settings:
+            return 1
         }
     }
 
@@ -143,7 +222,11 @@ class PredictionTableViewController: UITableViewController {
         case .charts:
             let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath) as! ChartTableViewCell
 
-            if let chart = charts.glucoseChartWithFrame(cell.contentView.frame) {
+            let frame = CGRect(origin: .zero, size: CGSize(width: tableView.bounds.width, height: cell.placeholderView!.bounds.height))
+
+            cell.contentView.layoutMargins.left = tableView.separatorInset.left
+
+            if let chart = charts.glucoseChartWithFrame(frame) {
                 cell.chartView = chart.view
             } else {
                 cell.chartView = nil
@@ -154,30 +237,56 @@ class PredictionTableViewController: UITableViewController {
 
             return cell
         case .inputs:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className) ?? UITableViewCell(style: .Subtitle, reuseIdentifier: UITableViewCell.className)
+            let cell = tableView.dequeueReusableCellWithIdentifier(PredictionInputEffectTableViewCell.className, forIndexPath: indexPath) as! PredictionInputEffectTableViewCell
 
             let (input, selected) = selectedInputs[indexPath.row]
 
-            cell.textLabel?.text = input.localizedTitle
-            cell.detailTextLabel?.text = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
+            cell.titleLabel?.text = input.localizedTitle
+            cell.subtitleLabel?.text = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
             cell.accessoryType = selected ? .Checkmark : .None
+
+            cell.enabled = input != .retrospection || dataManager.loopManager.retrospectiveCorrectionEnabled
+
+            cell.contentView.layoutMargins.left = tableView.separatorInset.left
+
+            return cell
+        case .settings:
+            let cell = tableView.dequeueReusableCellWithIdentifier(SwitchTableViewCell.className, forIndexPath: indexPath) as! SwitchTableViewCell
+
+            cell.titleLabel?.text = NSLocalizedString("Enable Retrospective Correction", comment: "Title of the switch which toggles retrospective correction effects")
+            cell.subtitleLabel?.text = NSLocalizedString("This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model.", comment: "The description of the switch which toggles retrospective correction effects")
+            cell.`switch`?.on = dataManager.loopManager.retrospectiveCorrectionEnabled
+            cell.`switch`?.addTarget(self, action: #selector(retrospectiveCorrectionSwitchChanged(_:)), forControlEvents: .ValueChanged)
+
+            cell.contentView.layoutMargins.left = tableView.separatorInset.left
 
             return cell
         }
     }
 
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        switch Section(rawValue: indexPath.section)! {
-        case .charts:
-            return 170
-        case .inputs:
-            return UITableViewAutomaticDimension
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch Section(rawValue: section)! {
+        case .settings:
+            return NSLocalizedString("Algorithm Settings", comment: "The title of the section containing algorithm settings")
+        default:
+            return nil
         }
     }
 
     // MARK: - UITableViewDelegate
 
+    override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        switch Section(rawValue: indexPath.section)! {
+        case .charts:
+            return 220
+        case .inputs, .settings:
+            return 60
+        }
+    }
+
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        guard Section(rawValue: indexPath.section) == .inputs else { return }
+
         let (input, selected) = selectedInputs[indexPath.row]
 
         if let cell = tableView.cellForRowAtIndexPath(indexPath) {
@@ -190,5 +299,17 @@ class PredictionTableViewController: UITableViewController {
 
         needsRefresh = true
         reloadData()
+    }
+
+    // MARK: - Actions
+
+    @objc private func retrospectiveCorrectionSwitchChanged(sender: UISwitch) {
+        dataManager.loopManager.retrospectiveCorrectionEnabled = sender.on
+
+        if  let row = selectedInputs.indexOf({ $0.input == PredictionInputEffect.retrospection }),
+            let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: row, inSection: Section.inputs.rawValue)) as? PredictionInputEffectTableViewCell
+        {
+            cell.enabled = self.dataManager.loopManager.retrospectiveCorrectionEnabled
+        }
     }
 }

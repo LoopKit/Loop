@@ -438,7 +438,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         switch Section(rawValue: indexPath.section)! {
         case .Charts:
             let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath) as! ChartTableViewCell
-            let frame = cell.contentView.frame
+            let frame = cell.contentView.bounds
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
@@ -569,7 +569,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 //                    UIApplication.sharedApplication().openURL(URL)
 //                }
 
-                showViewController(PredictionTableViewController(dataManager: dataManager), sender: indexPath)
+                performSegueWithIdentifier(PredictionTableViewController.className, sender: indexPath)
             case .IOB, .Dose:
                 performSegueWithIdentifier(InsulinDeliveryTableViewController.className, sender: indexPath)
             case .COB:
@@ -669,6 +669,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
+        case let vc as PredictionTableViewController:
+            vc.dataManager = dataManager
         default:
             break
         }
