@@ -33,6 +33,9 @@ final class GlucoseHUDView: HUDView {
         let numberFormatter = NSNumberFormatter()
         numberFormatter.numberStyle = .DecimalStyle
         numberFormatter.minimumFractionDigits = unit.preferredMinimumFractionDigits
+        numberFormatter.usesSignificantDigits = true
+        numberFormatter.minimumSignificantDigits = 2
+        numberFormatter.maximumSignificantDigits = 3
         glucoseLabel.text = numberFormatter.stringFromNumber(glucoseValue.quantity.doubleValueForUnit(unit))
 
         var unitStrings = [unit.glucoseUnitDisplayString]
