@@ -86,11 +86,37 @@ final class StatusChartsManager {
         }
     }
 
+    var glucoseDisplayRange: (min: HKQuantity, max: HKQuantity)? {
+        didSet {
+            if let range = glucoseDisplayRange {
+                glucoseDisplayRangePoints = [
+                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.min.doubleValueForUnit(glucoseUnit))),
+                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.max.doubleValueForUnit(glucoseUnit)))
+                ]
+            } else {
+                glucoseDisplayRangePoints = []
+            }
+        }
+    }
+
     var predictedGlucoseValues: [GlucoseValue] = [] {
         didSet {
             let unitString = glucoseUnit.glucoseUnitDisplayString
 
             predictedGlucosePoints = predictedGlucoseValues.map {
+                return ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString, formatter: integerFormatter)
+                )
+            }
+        }
+    }
+
+    var alternatePredictedGlucoseValues: [GlucoseValue] = [] {
+        didSet {
+            let unitString = glucoseUnit.glucoseUnitDisplayString
+
+            alternatePredictedGlucosePoints = alternatePredictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
                     y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString, formatter: integerFormatter)
@@ -157,12 +183,20 @@ final class StatusChartsManager {
         }
     }
 
+    private var glucoseDisplayRangePoints: [ChartPoint] = [] {
+        didSet {
+            glucoseChart = nil
+        }
+    }
+
     private var predictedGlucosePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
             xAxisValues = nil
         }
     }
+
+    private var alternatePredictedGlucosePoints: [ChartPoint]?
 
     private var targetGlucosePoints: [ChartPoint] = [] {
         didSet {
@@ -250,9 +284,9 @@ final class StatusChartsManager {
             return nil
         }
 
-        let allPoints = glucosePoints + predictedGlucosePoints
+        let points = glucosePoints + predictedGlucosePoints + targetGlucosePoints + targetOverridePoints + glucoseDisplayRangePoints
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(allPoints + targetGlucosePoints + targetOverridePoints,
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 4,
             multiple: glucoseUnit.glucoseUnitYAxisSegmentSize,
@@ -293,17 +327,38 @@ final class StatusChartsManager {
 
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: glucosePoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
 
+        var alternatePrediction: ChartLayer?
+
+        if let altPoints = alternatePredictedGlucosePoints where altPoints.count > 1 {
+            // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
+            let lineModel = ChartLineModel(chartPoints: altPoints, lineColor: UIColor.glucoseTintColor, lineWidth: 2, animDuration: 0.0001, animDelay: 0, dashPattern: [6, 5])
+
+            alternatePrediction = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
+        }
+
         var prediction: ChartLayer?
 
         if predictedGlucosePoints.count > 1 {
-            prediction = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: predictedGlucosePoints, displayDelay: 0, itemSize: CGSize(width: 2, height: 2), itemFillColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.75))
+            let lineColor = (alternatePrediction == nil) ? UIColor.glucoseTintColor : UIColor.secondaryLabelColor
+
+            // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
+            let lineModel = ChartLineModel(
+                chartPoints: predictedGlucosePoints,
+                lineColor: lineColor,
+                lineWidth: 1,
+                animDuration: 0.0001,
+                animDelay: 0,
+                dashPattern: [6, 5]
+            )
+
+            prediction = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
         }
 
         glucoseChartCache = ChartPointsTouchHighlightLayerViewCache(
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: allPoints,
+            chartPoints: glucosePoints + (alternatePredictedGlucosePoints ?? predictedGlucosePoints),
             tintColor: UIColor.glucoseTintColor,
             labelCenterY: chartSettings.top,
             gestureRecognizer: panGestureRecognizer
@@ -318,6 +373,7 @@ final class StatusChartsManager {
             yAxis,
             glucoseChartCache?.highlightLayer,
             prediction,
+            alternatePrediction,
             circles
         ]
 

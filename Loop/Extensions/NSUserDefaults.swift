@@ -28,6 +28,7 @@ extension NSUserDefaults {
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
+        case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -198,6 +199,15 @@ extension NSUserDefaults {
         }
         set {
             setBool(newValue, forKey: Key.G4ReceiverEnabled.rawValue)
+        }
+    }
+
+    var retrospectiveCorrectionEnabled: Bool {
+        get {
+            return boolForKey(Key.RetrospectiveCorrectionEnabled.rawValue)
+        }
+        set {
+            setBool(newValue, forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
         }
     }
 

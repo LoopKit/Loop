@@ -84,7 +84,7 @@ Fork and clone this repository so you can commit the changes you'll make below.
 
 [![Assigning a bundle identifier](/Documentation/Assigning%20a%20bundle%20identifier.png?raw=true)](/Documentation/Assigning%20a%20bundle%20identifier.png)
 
-In the Loop project's Build Settings, change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to something unique. Usually this means replacing `com.loudnate` with a reverse-domain name of your choosing.
+Open `Loop.xcodeproj` in Xcode. In the Project Navigator on the left-hand side, open `Loop.xcconfig`. Change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to a unique reverse-domain name of your choosing.
 
 ## Installing Carthage
 
