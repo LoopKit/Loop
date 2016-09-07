@@ -29,10 +29,11 @@ Please understand that this project:
 <table>
   <thead>
     <tr>
-      <td colspan="2" rowspan="4"></td>
-      <th colspan="3">Insulin Pump</th>
+      <td colspan="2" rowspan="5"></td>
+      <th colspan="4">Insulin Pump</th>
     </tr>
     <tr>
+      <th>MM 515/715</th>
       <th>MM 522/722</th>
       <th>MM 523/723</th>
       <th>MM 554/754</th>
@@ -40,8 +41,9 @@ Please understand that this project:
   </thead>
   <tbody>
     <tr>
-      <th rowspan="4">CGM</th>
+      <th rowspan="5">CGM</th>
       <th>Dexcom G4</th>
+      <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw3">3</a></sup></sup></td>
       <td>✅<sup><a href="#hw1">1</a> <a href="#hw3">3</a></sup></sup></td>
@@ -49,11 +51,13 @@ Please understand that this project:
     <tr>
       <th>Dexcom G5</th>
       <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅<sup><a href="#hw2">2</a></sup></td>
       <td>✅<sup><a href="#hw3">3</a></sup></td>
       <td>✅<sup><a href="#hw3">3</a></sup></td>
     </tr>
     <tr>
       <th>MM CGM</th>
+      <td>❌<sup><a href="#hw5">5</a></sup></td>
       <td>❌<sup><a href="#hw4">4</a></sup></td>
       <td>✅<sup><a href="#hw3">3</a></sup></td>
       <td>✅<sup><a href="#hw3">3</a></sup></td>
@@ -65,7 +69,7 @@ Please understand that this project:
 <br/><a name="hw2">2</a>. Pump must have a remote ID added in the [Remote Options](https://www.medtronicdiabetes.com/sites/default/files/library/download-library/workbooks/x22_menu_map.pdf) menu.
 <br/><a name="hw3">3</a>. Early firmware (US <= 2.4A, AU/EUR <= 2.6A) is required for using Closed Loop and Bolus features.
 <br/><a name="hw4">4</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
-
+<br/><a name="hw5">5</a>. The Medtronic 515/715 does not have integrated CGM functionality.
 ### RileyLink
 
 Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](https://github.com/ps2/rileylink), a compact BLE-to-916MHz bridge device designed by the incredible [@ps2](https://github.com/ps2). Please visit the [repository](https://github.com/ps2/rileylink) and the [gitter room](https://gitter.im/ps2/rileylink) for more information.
