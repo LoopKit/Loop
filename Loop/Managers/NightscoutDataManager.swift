@@ -34,17 +34,15 @@ class NightscoutDataManager {
                 return
         }
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, loopError) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, _, insulinOnBoard, loopError) in
             
             self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
-                if getBolusError != nil {
-                    self.deviceDataManager.logger.addError(getBolusError!, fromSource: "NightscoutDataManager")
+                if let getBolusError = getBolusError {
+                    self.deviceDataManager.logger.addError(getBolusError, fromSource: "NightscoutDataManager")
                 }
                 self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: loopError ?? getBolusError)
             }
         }
-
-        
     }
     
     private var lastTempBasalUploaded: DoseEntry?
