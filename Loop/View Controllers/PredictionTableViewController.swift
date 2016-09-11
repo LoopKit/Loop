@@ -8,6 +8,8 @@
 
 import UIKit
 import HealthKit
+import LoopKit
+
 
 class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
@@ -85,12 +87,6 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
     var dataManager: DeviceDataManager!
 
-    private var active = true {
-        didSet {
-            reloadData()
-        }
-    }
-
     private lazy var charts: StatusChartsManager = {
         let charts = StatusChartsManager()
 
@@ -101,6 +97,14 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
         return charts
     }()
+
+    private var retrospectivePredictedGlucose: [GlucoseValue]?
+
+    private var active = true {
+        didSet {
+            reloadData()
+        }
+    }
 
     private var needsRefresh = true
 
@@ -149,11 +153,12 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, _, _, _, _, _, error) in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, _, _, _, _, error) in
                 if error != nil {
                     self.needsRefresh = true
                 }
 
+                self.retrospectivePredictedGlucose = retrospectivePredictedGlucose
                 self.charts.predictedGlucoseValues = predictedGlucose ?? []
 
                 dispatch_group_leave(reloadGroup)
@@ -180,7 +185,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
                 self.charts.prerender()
                 
                 self.tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.charts.rawValue, 1)),
-                                              withRowAnimation: animated ? .Fade : .None
+                                              withRowAnimation: .None
                 )
                 
                 self.reloading = false
@@ -242,10 +247,28 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
             let (input, selected) = selectedInputs[indexPath.row]
 
             cell.titleLabel?.text = input.localizedTitle
-            cell.subtitleLabel?.text = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
             cell.accessoryType = selected ? .Checkmark : .None
-
             cell.enabled = input != .retrospection || dataManager.loopManager.retrospectiveCorrectionEnabled
+
+            var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
+
+            if input == .retrospection,
+                let startGlucose = retrospectivePredictedGlucose?.first,
+                let endGlucose = retrospectivePredictedGlucose?.last,
+                let currentGlucose = self.dataManager.glucoseStore?.latestGlucose
+            {
+                let formatter = NSNumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
+                let values = [startGlucose, endGlucose, currentGlucose].map { formatter.stringFromNumber($0.quantity.doubleValueForUnit(charts.glucoseUnit)) ?? "?" }
+
+                let retro = String(
+                    format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)"),
+                    values[0], values[1], values[2]
+                )
+
+                subtitleText = String(format: "%@\n%@", subtitleText, retro)
+            }
+
+            cell.subtitleLabel?.text = subtitleText
 
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
 

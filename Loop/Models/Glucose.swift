@@ -11,6 +11,10 @@ import xDripG5
 
 
 extension Glucose: SensorDisplayable {
+    var isStateValid: Bool {
+        return state == .OK && status == .OK
+    }
+
     var stateDescription: String {
         let status: String
         switch self.status {
