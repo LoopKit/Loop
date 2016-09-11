@@ -62,7 +62,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
     }
 
     var sensorInfo: SensorDisplayable? {
-        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestPumpStatusFromMySentry
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
     }
 
     // MARK: - RileyLink
@@ -126,7 +126,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
-    func enableRileyLinkHeartbeatIfNeeded() {
+    private func enableRileyLinkHeartbeatIfNeeded() {
         if transmitter != nil {
             rileyLinkManager.timerTickEnabled = false
         } else if receiverEnabled {
@@ -492,6 +492,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     private var latestGlucoseG5: xDripG5.Glucose?
 
+    private var latestGlucoseFromShare: ShareGlucose?
+
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
      
@@ -518,6 +520,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 completion?()
                 return
             }
+
+            self.latestGlucoseFromShare = glucose.first
 
             // Ignore glucose values that are up to a minute newer than our previous value, to account for possible time shifting in Share data
             let newGlucose = glucose.filterDateRange(glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1)), nil).map {
@@ -560,7 +564,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         let includeAfter = glucoseStore.latestGlucose?.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 1))
 
         let validGlucose = glucoseHistory.flatMap({
-            $0.isValid ? $0 : nil
+            $0.isStateValid ? $0 : nil
         }).filterDateRange(includeAfter, nil).map({
             (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: $0.isDisplayOnly)
         })

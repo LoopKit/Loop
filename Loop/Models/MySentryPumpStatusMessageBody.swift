@@ -11,14 +11,12 @@ import MinimedKit
 
 
 extension MySentryPumpStatusMessageBody: SensorDisplayable {
-    var stateDescription: String {
+    var isStateValid: Bool {
         switch glucose {
-        case .Active:
-            return "✓"
-        case .Off:
-            return ""
+        case .Active, .Off:
+            return true
         default:
-            return String(glucose)
+            return false
         }
     }
 

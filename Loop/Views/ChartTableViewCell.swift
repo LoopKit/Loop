@@ -11,6 +11,14 @@ import UIKit
 
 final class ChartTableViewCell: UITableViewCell {
 
+    @IBOutlet var placeholderView: UIView?
+
+    @IBOutlet var subtitleLabel: UILabel? {
+        didSet {
+            subtitleLabel?.textColor = UIColor.secondaryLabelColor
+        }
+    }
+
     var chartView: UIView? {
         didSet {
             if let view = oldValue {

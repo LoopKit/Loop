@@ -58,8 +58,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
+        toolbarItems![0].tintColor = UIColor.COBTintColor
         toolbarItems![2].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
+        toolbarItems![2].tintColor = UIColor.doseTintColor
         toolbarItems![6].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
+        toolbarItems![6].tintColor = UIColor.secondaryLabelColor
     }
 
     deinit {
@@ -133,9 +136,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             needsRefresh = false
             reloading = true
 
-            tableView.reloadSections(NSIndexSet(indexesInRange: NSMakeRange(Section.Pump.rawValue, Section.count - Section.Pump.rawValue)
-            ), withRowAnimation: visible ? .Automatic : .None)
-
             let calendar = NSCalendar.currentCalendar()
             let components = NSDateComponents()
             components.minute = 0
@@ -168,7 +168,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             dispatch_group_enter(reloadGroup)
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) -> Void in
+            dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, error) -> Void in
                 if error != nil {
                     self.needsRefresh = true
                 }
@@ -222,15 +222,17 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
 
-            reservoirVolume = dataManager.doseStore.lastReservoirValue?.unitVolume
+            if let reservoir = dataManager.doseStore.lastReservoirValue {
+                if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
+                    reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+                }
 
-            if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity,
-                resVol = reservoirVolume {
-                reservoirLevel = min(1, max(0, Double(resVol / Double(capacity))))
+                reservoirVolumeHUD.reservoirVolume = reservoir.unitVolume
+                reservoirVolumeHUD.lastUpdated = reservoir.startDate
             }
 
             if let status = dataManager.latestPumpStatusFromMySentry {
-                batteryLevel = Double(status.batteryRemainingPercent) / 100
+                batteryLevelHUD.batteryLevel = Double(status.batteryRemainingPercent) / 100
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
@@ -260,10 +262,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private enum Section: Int {
         case Charts = 0
         case Status
-        case Pump
-        case Sensor
 
-        static let count = 4
+        static let count = 2
     }
 
     // MARK: - Chart Section Data
@@ -333,24 +333,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var reservoirLevel: Double? {
-        didSet {
-            reservoirVolumeHUD.reservoirLevel = reservoirLevel
-        }
-    }
-
-    private var reservoirVolume: Double? {
-        didSet {
-            reservoirVolumeHUD.reservoirVolume = reservoirVolume
-        }
-    }
-
-    private var batteryLevel: Double? {
-        didSet {
-            batteryLevelHUD.batteryLevel = batteryLevel
-        }
-    }
-
     private var settingTempBasal: Bool = false {
         didSet {
             if let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: StatusRow.RecommendedBasal.rawValue, inSection: Section.Status.rawValue)) {
@@ -381,38 +363,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - Pump/Sensor Section Data
 
-    private enum PumpRow: Int {
-        case Date = 0
-        case InsulinOnBoard
-
-        static let count = 2
-    }
-
-    private enum SensorRow: Int {
-        case State
-
-        static let count = 1
-    }
-
     private lazy var emptyValueString: String = NSLocalizedString("––",
         comment: "The detail value of a numeric cell with no value"
     )
-
-    private lazy var dateComponentsFormatter: NSDateComponentsFormatter = {
-        let formatter = NSDateComponentsFormatter()
-        formatter.unitsStyle = .Short
-
-        return formatter
-    }()
-
-    private lazy var numberFormatter = NSNumberFormatter()
-
-    private lazy var dateFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .MediumStyle
-        formatter.timeStyle = .MediumStyle
-        return formatter
-    }()
 
     private lazy var timeFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
@@ -434,10 +387,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return ChartRow.count
         case .Status:
             return StatusRow.count
-        case .Pump:
-            return PumpRow.count
-        case .Sensor:
-            return SensorRow.count
         }
     }
 
@@ -448,7 +397,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         switch Section(rawValue: indexPath.section)! {
         case .Charts:
             let cell = tableView.dequeueReusableCellWithIdentifier(ChartTableViewCell.className, forIndexPath: indexPath) as! ChartTableViewCell
-            let frame = cell.contentView.frame
+            let frame = cell.contentView.bounds
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
@@ -507,43 +456,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             return cell
-        case .Pump:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
-            cell.selectionStyle = .None
-
-            switch PumpRow(rawValue: indexPath.row)! {
-            case .Date:
-                cell.textLabel?.text = NSLocalizedString("Last MySentry", comment: "The title of the cell containing the last updated mysentry status packet date")
-
-                if let date = dataManager.latestPumpStatusFromMySentry?.pumpDateComponents.date {
-                    cell.detailTextLabel?.text = dateFormatter.stringFromDate(date)
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            case .InsulinOnBoard:
-                cell.textLabel?.text = NSLocalizedString("Bolus Insulin on Board", comment: "The title of the cell containing the estimated amount of active bolus insulin in the body")
-
-                if let iob = dataManager.latestPumpStatusFromMySentry?.iob {
-                    let numberValue = NSNumber(double: iob).descriptionWithLocale(locale)
-                    cell.detailTextLabel?.text = "\(numberValue) Units"
-                } else {
-                    cell.detailTextLabel?.text = emptyValueString
-                }
-            }
-
-            return cell
-        case .Sensor:
-            let cell = tableView.dequeueReusableCellWithIdentifier(UITableViewCell.className, forIndexPath: indexPath)
-            cell.selectionStyle = .None
-
-            switch SensorRow(rawValue: indexPath.row)! {
-            case .State:
-                cell.textLabel?.text = NSLocalizedString("Sensor State", comment: "The title of the cell containing the current sensor state")
-
-                cell.detailTextLabel?.text = dataManager.sensorInfo?.stateDescription ?? emptyValueString
-            }
-
-            return cell
         }
     }
 
@@ -558,8 +470,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             case .IOB, .Dose, .COB:
                 return 85
             }
-        case .Status, .Pump, .Sensor:
-            return 44
+        case .Status:
+            return UITableViewAutomaticDimension
         }
     }
 
@@ -568,12 +480,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case .Charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .Glucose:
-                if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
-                    UIApplication.sharedApplication().openURL(URL)
-                }
-                else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
-                    UIApplication.sharedApplication().openURL(URL)
-                }
+                performSegueWithIdentifier(PredictionTableViewController.className, sender: indexPath)
             case .IOB, .Dose:
                 performSegueWithIdentifier(InsulinDeliveryTableViewController.className, sender: indexPath)
             case .COB:
@@ -601,12 +508,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
-        case .Sensor:
-            if let URL = NSURL(string: "dexcomcgm://") {
-                UIApplication.sharedApplication().openURL(URL)
-            }
-        case .Pump:
-            break
         }
     }
 
@@ -671,6 +572,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
+        case let vc as PredictionTableViewController:
+            vc.dataManager = dataManager
         default:
             break
         }
@@ -723,6 +626,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .Plain, target: self, action: #selector(toggleWorkoutMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Workout Mode", comment: "The label of the workout mode toggle button")
         item.accessibilityHint = selected ? NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled") : NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+        item.tintColor = UIColor.glucoseTintColor
 
         return item
     }
@@ -743,7 +647,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
 
-    @IBOutlet var glucoseHUD: GlucoseHUDView!
+    @IBOutlet var glucoseHUD: GlucoseHUDView! {
+        didSet {
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
+            glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
+        }
+    }
+
+    @objc private func openCGMApp(_: AnyObject) {
+        if let URL = NSURL(string: "dexcomcgm://") where UIApplication.sharedApplication().canOpenURL(URL) {
+            UIApplication.sharedApplication().openURL(URL)
+        }
+        else if let URL = NSURL(string: "dexcomshare://") where UIApplication.sharedApplication().canOpenURL(URL) {
+            UIApplication.sharedApplication().openURL(URL)
+        }
+    }
 
     @IBOutlet var basalRateHUD: BasalRateHUDView!
 
