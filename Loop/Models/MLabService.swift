@@ -79,8 +79,8 @@ struct MLabService: ServiceAuthentication {
             return nil
         }
 
-        let APIURL = mLabAPIHost.URLByAppendingPathComponent("\(databaseName)/collections").URLByAppendingPathComponent(collection)
-        let components = NSURLComponents(URL: APIURL, resolvingAgainstBaseURL: true)!
+        let APIURL = mLabAPIHost.URLByAppendingPathComponent("\(databaseName)/collections")!.URLByAppendingPathComponent(collection)
+        let components = NSURLComponents(URL: APIURL!, resolvingAgainstBaseURL: true)!
 
         var items = components.queryItems ?? []
         items.append(NSURLQueryItem(name: "apiKey", value: APIKey))
