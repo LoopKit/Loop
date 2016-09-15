@@ -15,7 +15,7 @@ extension DoseStore {
     /**
      Adds and persists new pump events.
      */
-    func add(pumpEvents: [TimestampedHistoryEvent], completionHandler: (error: DoseStore.Error?) -> Void) {
+    func add(_ pumpEvents: [TimestampedHistoryEvent], completionHandler: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         var events: [NewPumpEvent] = []
         var lastTempBasalAmount: DoseEntry?
         var title: String
@@ -25,8 +25,6 @@ extension DoseStore {
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:
-                InsulinKit.PumpEventType.bolus
-
                 let unit: DoseUnit
 
                 switch bolus.type {
@@ -36,7 +34,7 @@ extension DoseStore {
                     unit = .unitsPerHour
                 }
 
-                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.dateByAddingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
             case is SuspendPumpEvent:
                 dose = DoseEntry(suspendDate: event.date)
             case is ResumePumpEvent:
@@ -46,11 +44,11 @@ extension DoseStore {
                     lastTempBasalAmount = DoseEntry(type: .tempBasal, startDate: event.date, value: temp.rate, unit: .unitsPerHour)
                 }
             case let temp as TempBasalDurationPumpEvent:
-                if let amount = lastTempBasalAmount where amount.startDate == event.date {
+                if let amount = lastTempBasalAmount, amount.startDate == event.date {
                     dose = DoseEntry(
                         type: .tempBasal,
                         startDate: event.date,
-                        endDate: event.date.dateByAddingTimeInterval(NSTimeInterval(minutes: Double(temp.duration))),
+                        endDate: event.date.addingTimeInterval(TimeInterval(minutes: Double(temp.duration))),
                         value: amount.value,
                         unit: amount.unit
                     )
@@ -59,7 +57,7 @@ extension DoseStore {
                 break
             }
 
-            title = String(event.pumpEvent)
+            title = String(describing: event.pumpEvent)
             events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title))
         }
 

@@ -17,19 +17,19 @@ class NightscoutDataManager {
     unowned let deviceDataManager: DeviceDataManager
     
     // Last time we uploaded device status
-    var lastDeviceStatusUpload: NSDate?
+    var lastDeviceStatusUpload: Date?
 
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(loopDataUpdated(_:)), name: LoopDataManager.LoopDataUpdatedNotification, object: deviceDataManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(loopDataUpdated(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
     
-    @objc func loopDataUpdated(note: NSNotification) {
+    @objc func loopDataUpdated(_ note: Notification) {
         guard
             let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
-            case .TempBasal = context
+            case .tempBasal = context
             else {
                 return
         }
@@ -47,13 +47,13 @@ class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: ErrorType? = nil) {
+    func uploadLoopStatus(_ insulinOnBoard: InsulinValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
 
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
         }
         
-        let statusTime = NSDate()
+        let statusTime = Date()
         
         let iob: IOBStatus?
         
@@ -64,7 +64,7 @@ class NightscoutDataManager {
         }
         
         let predicted: PredictedBG?
-        if let predictedGlucose = predictedGlucose, startDate = predictedGlucose.first?.startDate {
+        if let predictedGlucose = predictedGlucose, let startDate = predictedGlucose.first?.startDate {
             let values = predictedGlucose.map { $0.quantity }
             predicted = PredictedBG(startDate: startDate, values: values)
         } else {
@@ -80,9 +80,9 @@ class NightscoutDataManager {
         }
 
         let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal where tempBasal.unit == .unitsPerHour &&
+        if let tempBasal = lastTempBasal, tempBasal.unit == .unitsPerHour &&
             lastTempBasalUploaded?.startDate != tempBasal.startDate {
-            let duration = tempBasal.endDate.timeIntervalSinceDate(tempBasal.startDate)
+            let duration = tempBasal.endDate.timeIntervalSince(tempBasal.startDate)
             loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
@@ -90,8 +90,8 @@ class NightscoutDataManager {
             loopEnacted = nil
         }
         
-        let loopName = NSBundle.mainBundle().bundleDisplayName
-        let loopVersion = NSBundle.mainBundle().shortVersionString
+        let loopName = Bundle.main.bundleDisplayName
+        let loopVersion = Bundle.main.shortVersionString
 
         let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
@@ -101,18 +101,18 @@ class NightscoutDataManager {
     
     func getUploaderStatus() -> UploaderStatus {
         // Gather UploaderStatus
-        let uploaderDevice = UIDevice.currentDevice()
+        let uploaderDevice = UIDevice.current
 
         let battery: Int?
-        if uploaderDevice.batteryMonitoringEnabled {
+        if uploaderDevice.isBatteryMonitoringEnabled {
             battery = Int(uploaderDevice.batteryLevel * 100)
         } else {
             battery = nil
         }
-        return UploaderStatus(name: uploaderDevice.name, timestamp: NSDate(), battery: battery)
+        return UploaderStatus(name: uploaderDevice.name, timestamp: Date(), battery: battery)
     }
 
-    func uploadDeviceStatus(pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, includeUploaderStatus: Bool = true) {
+    func uploadDeviceStatus(_ pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, includeUploaderStatus: Bool = true) {
 
         guard let uploader = deviceDataManager.remoteDataManager.nightscoutUploader else {
             return
@@ -120,19 +120,19 @@ class NightscoutDataManager {
         
         if pumpStatus == nil && loopStatus == nil && includeUploaderStatus {
             // If we're just uploading phone status, limit it to once every 5 minutes
-            if self.lastDeviceStatusUpload != nil && self.lastDeviceStatusUpload!.timeIntervalSinceNow > -(NSTimeInterval(minutes: 5)) {
+            if self.lastDeviceStatusUpload != nil && self.lastDeviceStatusUpload!.timeIntervalSinceNow > -(TimeInterval(minutes: 5)) {
                 return
             }
         }
 
-        let uploaderDevice = UIDevice.currentDevice()
+        let uploaderDevice = UIDevice.current
 
         let uploaderStatus: UploaderStatus? = includeUploaderStatus ? getUploaderStatus() : nil
 
         // Build DeviceStatus
-        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: NSDate(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus)
 
-        self.lastDeviceStatusUpload = NSDate()
+        self.lastDeviceStatusUpload = Date()
         uploader.uploadDeviceStatus(deviceStatus)
     }
 }

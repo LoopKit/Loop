@@ -32,42 +32,42 @@ final class StatusChartsManager {
         return chartSettings
     }()
 
-    private lazy var dateFormatter: NSDateFormatter = {
-        let timeFormatter = NSDateFormatter()
-        timeFormatter.dateStyle = .NoStyle
-        timeFormatter.timeStyle = .ShortStyle
+    private lazy var dateFormatter: DateFormatter = {
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
 
         return timeFormatter
     }()
 
-    private lazy var decimalFormatter: NSNumberFormatter = {
-        let numberFormatter = NSNumberFormatter()
-        numberFormatter.numberStyle = .DecimalStyle
+    private lazy var decimalFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
         numberFormatter.minimumFractionDigits = 2
         numberFormatter.maximumFractionDigits = 2
 
         return numberFormatter
     }()
 
-    private lazy var integerFormatter: NSNumberFormatter = {
-        let numberFormatter = NSNumberFormatter()
-        numberFormatter.numberStyle = .NoStyle
+    private lazy var integerFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .none
         numberFormatter.maximumFractionDigits = 0
 
         return numberFormatter
     }()
 
-    private lazy var axisLineColor = UIColor.clearColor()
+    private lazy var axisLineColor = UIColor.clear
 
-    private lazy var axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1), fontColor: UIColor.secondaryLabelColor)
+    private lazy var axisLabelSettings: ChartLabelSettings = ChartLabelSettings(font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1), fontColor: UIColor.secondaryLabelColor)
 
-    private lazy var guideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor)
+    private lazy var guideLinesLayerSettings: ChartGuideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor)
 
     var panGestureRecognizer: UIPanGestureRecognizer?
 
     // MARK: - Data
 
-    var startDate = NSDate()
+    var startDate = Date()
 
     var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
 
@@ -80,7 +80,7 @@ final class StatusChartsManager {
             glucosePoints = glucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString)
                 )
             }
         }
@@ -90,8 +90,8 @@ final class StatusChartsManager {
         didSet {
             if let range = glucoseDisplayRange {
                 glucoseDisplayRangePoints = [
-                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.min.doubleValueForUnit(glucoseUnit))),
-                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.max.doubleValueForUnit(glucoseUnit)))
+                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.min.doubleValue(for: glucoseUnit))),
+                    ChartPoint(x: ChartAxisValue(scalar: 0), y: ChartAxisValueDouble(range.max.doubleValue(for: glucoseUnit)))
                 ]
             } else {
                 glucoseDisplayRangePoints = []
@@ -106,7 +106,7 @@ final class StatusChartsManager {
             predictedGlucosePoints = predictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: integerFormatter)
                 )
             }
         }
@@ -119,7 +119,7 @@ final class StatusChartsManager {
             alternatePredictedGlucosePoints = alternatePredictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(glucoseUnit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: integerFormatter)
                 )
             }
         }
@@ -138,13 +138,13 @@ final class StatusChartsManager {
 
     var COBValues: [CarbValue] = [] {
         didSet {
-            let unit = HKUnit.gramUnit()
+            let unit = HKUnit.gram()
             let unitString = unit.unitString
 
             COBPoints = COBValues.map {
                 ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValueForUnit(unit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: unit), unitString: unitString, formatter: integerFormatter)
                 )
             }
         }
@@ -152,7 +152,7 @@ final class StatusChartsManager {
 
     var doseEntries: [DoseEntry] = [] {
         didSet {
-            dosePoints = doseEntries.reduce([], combine: { (points, entry) -> [ChartPoint] in
+            dosePoints = doseEntries.reduce([], { (points, entry) -> [ChartPoint] in
                 if entry.unit == .unitsPerHour {
                     let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                     let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
@@ -267,8 +267,8 @@ final class StatusChartsManager {
 
     // MARK: - Generators
 
-    func glucoseChartWithFrame(frame: CGRect) -> Chart? {
-        if let chart = glucoseChart where chart.frame != frame {
+    func glucoseChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = glucoseChart, chart.frame != frame {
             self.glucoseChart = nil
         }
 
@@ -279,7 +279,7 @@ final class StatusChartsManager {
         return glucoseChart
     }
 
-    private func generateGlucoseChartWithFrame(frame: CGRect) -> Chart? {
+    private func generateGlucoseChartWithFrame(_ frame: CGRect) -> Chart? {
         guard glucosePoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
@@ -308,28 +308,28 @@ final class StatusChartsManager {
         if targetGlucosePoints.count > 1 {
             let alpha: CGFloat = targetOverridePoints.count > 1 ? 0.15 : 0.3
 
-            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetGlucosePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(alpha), animDuration: 0, animDelay: 0, addContainerPoints: false)
+            targetLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetGlucosePoints, areaColor: UIColor.glucoseTintColor.withAlphaComponent(alpha), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
         var targetOverrideLayer: ChartPointsAreaLayer? = nil
 
         if targetOverridePoints.count > 1 {
-            targetOverrideLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverridePoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
+            targetOverrideLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverridePoints, areaColor: UIColor.glucoseTintColor.withAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
         var targetOverrideDurationLayer: ChartPointsAreaLayer? = nil
 
         if targetOverrideDurationPoints.count > 1 {
-            targetOverrideDurationLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverrideDurationPoints, areaColor: UIColor.glucoseTintColor.colorWithAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
+            targetOverrideDurationLayer = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: targetOverrideDurationPoints, areaColor: UIColor.glucoseTintColor.withAlphaComponent(0.3), animDuration: 0, animDelay: 0, addContainerPoints: false)
         }
 
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .xAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: glucosePoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor.glucoseTintColor)
 
         var alternatePrediction: ChartLayer?
 
-        if let altPoints = alternatePredictedGlucosePoints where altPoints.count > 1 {
+        if let altPoints = alternatePredictedGlucosePoints, altPoints.count > 1 {
             // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
             let lineModel = ChartLineModel(chartPoints: altPoints, lineColor: UIColor.glucoseTintColor, lineWidth: 2, animDuration: 0.0001, animDelay: 0, dashPattern: [6, 5])
 
@@ -380,8 +380,8 @@ final class StatusChartsManager {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    func IOBChartWithFrame(frame: CGRect) -> Chart? {
-        if let chart = IOBChart where chart.frame != frame {
+    func IOBChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = IOBChart, chart.frame != frame {
             self.IOBChart = nil
         }
 
@@ -392,7 +392,7 @@ final class StatusChartsManager {
         return IOBChart
     }
 
-    private func generateIOBChartWithFrame(frame: CGRect) -> Chart? {
+    private func generateIOBChartWithFrame(_ frame: CGRect) -> Chart? {
         guard IOBPoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
@@ -401,7 +401,7 @@ final class StatusChartsManager {
 
         // Create a container line at 0
         if let first = IOBPoints.first {
-            containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), atIndex: 0)
+            containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), at: 0)
         }
 
         if let last = IOBPoints.last {
@@ -420,16 +420,16 @@ final class StatusChartsManager {
         let lineModel = ChartLineModel(chartPoints: IOBPoints, lineColor: UIColor.IOBTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
         let IOBLine = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
 
-        let IOBArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: containerPoints, areaColor: UIColor.IOBTintColor.colorWithAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        let IOBArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: containerPoints, areaColor: UIColor.IOBTintColor.withAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
 
         // Grid lines
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .xAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
         // 0-line
         let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
         let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
             let width: CGFloat = 0.5
-            let viewFrame = CGRectMake(innerFrame.origin.x, chartPointModel.screenLoc.y - width / 2, innerFrame.size.width, width)
+            let viewFrame = CGRect(x: innerFrame.origin.x, y: chartPointModel.screenLoc.y - width / 2, width: innerFrame.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
             v.backgroundColor = UIColor.IOBTintColor
@@ -459,8 +459,8 @@ final class StatusChartsManager {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    func COBChartWithFrame(frame: CGRect) -> Chart? {
-        if let chart = COBChart where chart.frame != frame {
+    func COBChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = COBChart, chart.frame != frame {
             self.COBChart = nil
         }
 
@@ -471,7 +471,7 @@ final class StatusChartsManager {
         return COBChart
     }
 
-    private func generateCOBChartWithFrame(frame: CGRect) -> Chart? {
+    private func generateCOBChartWithFrame(_ frame: CGRect) -> Chart? {
         guard COBPoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
@@ -480,7 +480,7 @@ final class StatusChartsManager {
 
         // Create a container line at 0
         if let first = COBPoints.first {
-            containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), atIndex: 0)
+            containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), at: 0)
         }
 
         if let last = COBPoints.last {
@@ -499,10 +499,10 @@ final class StatusChartsManager {
         let lineModel = ChartLineModel(chartPoints: COBPoints, lineColor: UIColor.COBTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
         let COBLine = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
 
-        let COBArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: containerPoints, areaColor: UIColor.COBTintColor.colorWithAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        let COBArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: containerPoints, areaColor: UIColor.COBTintColor.withAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
 
         // Grid lines
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .xAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
 
         COBChartCache = ChartPointsTouchHighlightLayerViewCache(
@@ -527,8 +527,8 @@ final class StatusChartsManager {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    func doseChartWithFrame(frame: CGRect) -> Chart? {
-        if let chart = doseChart where chart.frame != frame {
+    func doseChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = doseChart, chart.frame != frame {
             self.doseChart = nil
         }
 
@@ -539,7 +539,7 @@ final class StatusChartsManager {
         return doseChart
     }
 
-    private func generateDoseChartWithFrame(frame: CGRect) -> Chart? {
+    private func generateDoseChartWithFrame(_ frame: CGRect) -> Chart? {
         guard dosePoints.count > 1, let xAxisModel = xAxisModel else {
             return nil
         }
@@ -556,16 +556,16 @@ final class StatusChartsManager {
         let lineModel = ChartLineModel(chartPoints: dosePoints, lineColor: UIColor.doseTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
         let doseLine = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
 
-        let doseArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: dosePoints, areaColor: UIColor.doseTintColor.colorWithAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
+        let doseArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: dosePoints, areaColor: UIColor.doseTintColor.withAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
 
         // Grid lines
-        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .XAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
+        let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .xAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
         // 0-line
         let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
         let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
             let width: CGFloat = 1
-            let viewFrame = CGRectMake(innerFrame.origin.x, chartPointModel.screenLoc.y - width / 2, innerFrame.size.width, width)
+            let viewFrame = CGRect(x: innerFrame.origin.x, y: chartPointModel.screenLoc.y - width / 2, width: innerFrame.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
             v.backgroundColor = UIColor.doseTintColor
@@ -603,11 +603,11 @@ final class StatusChartsManager {
             return
         }
 
-        let timeFormatter = NSDateFormatter()
+        let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h a"
 
         let minDate = startDate
-        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: NSTimeInterval(hours: 1), axisValueGenerator: {
+        let xAxisValues = ChartAxisValuesGenerator.generateXAxisValuesWithChartPoints(points, minSegmentCount: 5, maxSegmentCount: 10, multiple: TimeInterval(hours: 1), axisValueGenerator: {
             ChartAxisValueDate(date: max(minDate, ChartAxisValueDate.dateFromScalar($0)), formatter: timeFormatter, labelSettings: self.axisLabelSettings)
         }, addPaddingSegmentIfEdge: false)
         xAxisValues.first?.hidden = true
@@ -623,7 +623,7 @@ final class StatusChartsManager {
 
         generateXAxisValues()
 
-        if let xAxisValues = xAxisValues where xAxisValues.count > 1,
+        if let xAxisValues = xAxisValues, xAxisValues.count > 1,
             let targets = glucoseTargetRangeSchedule {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues)
 

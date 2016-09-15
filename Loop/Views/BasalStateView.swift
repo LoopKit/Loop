@@ -16,7 +16,7 @@ final class BasalStateView: UIView {
         }
     }
 
-    override class func layerClass() -> AnyClass {
+    override class var layerClass : AnyClass {
         return CAShapeLayer.self
     }
 
@@ -28,8 +28,8 @@ final class BasalStateView: UIView {
         super.init(frame: frame)
 
         shapeLayer.lineWidth = 2
-        shapeLayer.fillColor = UIColor.doseTintColor.colorWithAlphaComponent(0.5).CGColor
-        shapeLayer.strokeColor = UIColor.doseTintColor.CGColor
+        shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
+        shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
 
         shapeLayer.path = drawPath()
     }
@@ -38,8 +38,8 @@ final class BasalStateView: UIView {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 2
-        shapeLayer.fillColor = UIColor.doseTintColor.colorWithAlphaComponent(0.5).CGColor
-        shapeLayer.strokeColor = UIColor.doseTintColor.CGColor
+        shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
+        shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
 
         shapeLayer.path = drawPath()
     }
@@ -56,32 +56,32 @@ final class BasalStateView: UIView {
         let midY = bounds.midY
 
         let path = UIBezierPath()
-        path.moveToPoint(CGPoint(x: startX, y: midY))
+        path.move(to: CGPoint(x: startX, y: midY))
 
         let leftAnchor = startX + 1/6 * bounds.size.width
         let rightAnchor = startX + 5/6 * bounds.size.width
 
         let yAnchor = bounds.midY - CGFloat(netBasalPercent) * (bounds.size.height - shapeLayer.lineWidth) / 2
 
-        path.addLineToPoint(CGPoint(x: leftAnchor, y: midY))
-        path.addLineToPoint(CGPoint(x: leftAnchor, y: yAnchor))
-        path.addLineToPoint(CGPoint(x: rightAnchor, y: yAnchor))
-        path.addLineToPoint(CGPoint(x: rightAnchor, y: midY))
-        path.addLineToPoint(CGPoint(x: endX, y: midY))
+        path.addLine(to: CGPoint(x: leftAnchor, y: midY))
+        path.addLine(to: CGPoint(x: leftAnchor, y: yAnchor))
+        path.addLine(to: CGPoint(x: rightAnchor, y: yAnchor))
+        path.addLine(to: CGPoint(x: rightAnchor, y: midY))
+        path.addLine(to: CGPoint(x: endX, y: midY))
 
-        return path.CGPath
+        return path.cgPath
     }
 
     private static let AnimationKey = "com.loudnate.Naterade.shapePathAnimation"
 
-    private func animateToPath(path: CGPath) {
+    private func animateToPath(_ path: CGPath) {
         let animation = CABasicAnimation(keyPath: "path")
         animation.fromValue = shapeLayer.path ?? drawPath()
         animation.toValue = path
         animation.duration = 1
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
-        shapeLayer.addAnimation(animation, forKey: self.dynamicType.AnimationKey)
+        shapeLayer.add(animation, forKey: type(of: self).AnimationKey)
         
         shapeLayer.path = path
     }

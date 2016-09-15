@@ -9,13 +9,16 @@
 import NightscoutUploadKit
 import MinimedKit
 
+
+// TODO: Remove this when made public in NightscoutUploadKit
+
 extension BatteryIndicator {
     init?(batteryStatus: MinimedKit.BatteryStatus) {
         switch batteryStatus {
-        case .Low:
-            self = .Low
-        case .Normal:
-            self = .Normal
+        case .low:
+            self = .low
+        case .normal:
+            self = .normal
         default:
             return nil
         }

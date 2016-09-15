@@ -7,19 +7,19 @@
 //
 
 
-enum LoopError: ErrorType {
+enum LoopError: Error {
     // Failure during device communication
-    case CommunicationError
+    case communicationError
 
     // Missing or unexpected configuration values
-    case ConfigurationError
+    case configurationError
 
     // No connected devices, or failure during device connection
-    case ConnectionError
+    case connectionError
 
     // Missing required data to perform an action
-    case MissingDataError(String)
+    case missingDataError(String)
 
     // Out-of-date required data to perform an action
-    case StaleDataError(String)
+    case staleDataError(String)
 }

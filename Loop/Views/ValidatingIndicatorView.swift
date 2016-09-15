@@ -13,20 +13,20 @@ private let Margin: CGFloat = 8
 
 final class ValidatingIndicatorView: UIView {
 
-    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
 
     let label = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+        label.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
         label.text = NSLocalizedString("Verifying", comment: "Label indicating validation is occurring")
         label.sizeToFit()
 
         addSubview(indicatorView)
         addSubview(label)
 
-        self.frame.size = intrinsicContentSize()
+        self.frame.size = intrinsicContentSize
 
         setNeedsLayout()
 
@@ -46,7 +46,7 @@ final class ValidatingIndicatorView: UIView {
         indicatorView.frame.origin.x = -indicatorView.frame.size.width - Margin
     }
 
-    override func intrinsicContentSize() -> CGSize {
-        return label.intrinsicContentSize()
+    override var intrinsicContentSize : CGSize {
+        return label.intrinsicContentSize
     }
 }

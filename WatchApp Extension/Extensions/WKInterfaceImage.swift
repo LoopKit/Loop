@@ -17,7 +17,7 @@ enum LoopImage: String {
 
 
 extension WKInterfaceImage {
-    func setLoopImage(loopImage: LoopImage) {
-        setImageNamed("loop_\(loopImage.rawValue.lowercaseString)")
+    func setLoopImage(_ loopImage: LoopImage) {
+        setImageNamed("loop_\(loopImage.rawValue.lowercased())")
     }
 }

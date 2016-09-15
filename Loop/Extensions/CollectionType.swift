@@ -9,7 +9,7 @@
 import Foundation
 
 
-extension CollectionType where Index: RandomAccessIndexType, Generator.Element: Comparable {
+extension BidirectionalCollection where Index: Strideable, Iterator.Element: Comparable, Index.Stride == Int {
 
     /**
      Returns the insertion index of a new value in a sorted collection
@@ -20,15 +20,15 @@ extension CollectionType where Index: RandomAccessIndexType, Generator.Element: 
 
      - returns: The appropriate insertion index, between `startIndex` and `endIndex`
      */
-    func findInsertionIndexForValue(value: Generator.Element) -> Index {
+    func findInsertionIndex(for value: Iterator.Element) -> Index {
         var low = startIndex
         var high = endIndex
 
         while low != high {
-            let mid = low.advancedBy(low.distanceTo(high) / 2)
+            let mid = low.advanced(by: low.distance(to: high) / 2)
 
             if self[mid] < value {
-                low = mid.advancedBy(1)
+                low = mid.advanced(by: 1)
             } else {
                 high = mid
             }
@@ -39,7 +39,7 @@ extension CollectionType where Index: RandomAccessIndexType, Generator.Element: 
 }
 
 
-extension CollectionType where Index: RandomAccessIndexType, Generator.Element: Strideable {
+extension BidirectionalCollection where Index: Strideable, Iterator.Element: Strideable, Index.Stride == Int {
     /**
      Returns the index of the closest element to a specified value in a sorted collection
 
@@ -47,8 +47,8 @@ extension CollectionType where Index: RandomAccessIndexType, Generator.Element: 
 
      - returns: The index of the closest element, or nil if the collection is empty
      */
-    func findClosestElementIndexToValue(value: Generator.Element) -> Index? {
-        let upperBound = findInsertionIndexForValue(value)
+    func findClosestElementIndex(matching value: Iterator.Element) -> Index? {
+        let upperBound = findInsertionIndex(for: value)
 
         if upperBound == startIndex {
             if upperBound == endIndex {
@@ -57,13 +57,13 @@ extension CollectionType where Index: RandomAccessIndexType, Generator.Element: 
             return upperBound
         }
 
-        let lowerBound = upperBound.advancedBy(-1)
+        let lowerBound = upperBound.advanced(by: -1)
 
         if upperBound == endIndex {
             return lowerBound
         }
 
-        if value.distanceTo(self[upperBound]) < self[lowerBound].distanceTo(value) {
+        if value.distance(to: self[upperBound]) < self[lowerBound].distance(to: value) {
             return upperBound
         }
         

@@ -31,18 +31,18 @@ struct NotificationManager {
         let retryBolusAction = UIMutableUserNotificationAction()
         retryBolusAction.title = NSLocalizedString("Retry", comment: "The title of the notification action to retry a bolus command")
         retryBolusAction.identifier = Action.RetryBolus.rawValue
-        retryBolusAction.activationMode = .Background
+        retryBolusAction.activationMode = .background
 
         let bolusFailureCategory = UIMutableUserNotificationCategory()
         bolusFailureCategory.identifier = Category.BolusFailure.rawValue
         bolusFailureCategory.setActions([
                 retryBolusAction
             ],
-            forContext: .Default
+            for: .default
         )
 
         return UIUserNotificationSettings(
-            forTypes: [.Badge, .Sound, .Alert],
+            types: [.badge, .sound, .alert],
             categories: [
                 bolusFailureCategory
             ]
@@ -50,19 +50,19 @@ struct NotificationManager {
     }
 
     static func authorize() {
-        UIApplication.sharedApplication().registerUserNotificationSettings(userNotificationSettings)
+        UIApplication.shared.registerUserNotificationSettings(userNotificationSettings)
     }
 
     // MARK: - Notifications
 
-    static func sendBolusFailureNotificationForAmount(units: Double, atDate startDate: NSDate) {
+    static func sendBolusFailureNotificationForAmount(_ units: Double, atDate startDate: Date) {
         let notification = UILocalNotification()
 
         notification.alertTitle = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
-        notification.alertBody = String(format: NSLocalizedString("%@ U bolus may have failed.", comment: "The notification alert describing a possible bolus failure. The substitution parameter is the size of the bolus in units."), NSNumberFormatter.localizedStringFromNumber(units, numberStyle: .DecimalStyle))
+        notification.alertBody = String(format: NSLocalizedString("%@ U bolus may have failed.", comment: "The notification alert describing a possible bolus failure. The substitution parameter is the size of the bolus in units."), NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal))
         notification.soundName = UILocalNotificationDefaultSoundName
 
-        if startDate.timeIntervalSinceNow >= NSTimeInterval(minutes: -5) {
+        if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {
             notification.category = Category.BolusFailure.rawValue
         }
 
@@ -71,12 +71,12 @@ struct NotificationManager {
             UserInfoKey.BolusStartDate.rawValue: startDate
         ]
 
-        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+        UIApplication.shared.presentLocalNotificationNow(notification)
     }
 
     // Cancel any previous scheduled notifications in the Loop Not Running category
     static func clearLoopNotRunningNotifications() {
-        let app = UIApplication.sharedApplication()
+        let app = UIApplication.shared
 
         app.scheduledLocalNotifications?.filter({
             $0.category == Category.LoopNotRunning.rawValue
@@ -86,29 +86,28 @@ struct NotificationManager {
     }
 
     static func scheduleLoopNotRunningNotifications() {
-        let app = UIApplication.sharedApplication()
+        let app = UIApplication.shared
 
         clearLoopNotRunningNotifications()
 
         // Give a little extra time for a loop-in-progress to complete
-        let gracePeriod = NSTimeInterval(minutes: 0.5)
+        let gracePeriod = TimeInterval(minutes: 0.5)
 
         for minutes: Double in [20, 40, 60, 120] {
             let notification = UILocalNotification()
-            let failureInterval = NSTimeInterval(minutes: minutes)
+            let failureInterval = TimeInterval(minutes: minutes)
 
-            let formatter = NSDateComponentsFormatter()
+            let formatter = DateComponentsFormatter()
             formatter.maximumUnitCount = 1
-            formatter.allowedUnits = [.Hour, .Minute]
-            formatter.unitsStyle = .Full
-            formatter.stringFromTimeInterval(failureInterval)?.localizedLowercaseString
+            formatter.allowedUnits = [.hour, .minute]
+            formatter.unitsStyle = .full
 
-            if let failueIntervalString = formatter.stringFromTimeInterval(failureInterval) {
+            if let failueIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
                 notification.alertBody = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failueIntervalString)
             }
 
             notification.alertTitle = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            notification.fireDate = NSDate(timeIntervalSinceNow: failureInterval + gracePeriod)
+            notification.fireDate = Date(timeIntervalSinceNow: failureInterval + gracePeriod)
             notification.soundName = UILocalNotificationDefaultSoundName
             notification.category = Category.LoopNotRunning.rawValue
 
@@ -124,7 +123,7 @@ struct NotificationManager {
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.category = Category.PumpBatteryLow.rawValue
 
-        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+        UIApplication.shared.presentLocalNotificationNow(notification)
     }
 
     static func sendPumpReservoirEmptyNotification() {
@@ -137,24 +136,24 @@ struct NotificationManager {
 
         // TODO: Add an action to Suspend the pump
 
-        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+        UIApplication.shared.presentLocalNotificationNow(notification)
     }
 
-    static func sendPumpReservoirLowNotificationForAmount(units: Double, andTimeRemaining remaining: NSTimeInterval?) {
+    static func sendPumpReservoirLowNotificationForAmount(_ units: Double, andTimeRemaining remaining: TimeInterval?) {
         let notification = UILocalNotification()
 
         notification.alertTitle = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
 
-        let unitsString = NSNumberFormatter.localizedStringFromNumber(units, numberStyle: .DecimalStyle)
+        let unitsString = NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal)
 
-        let intervalFormatter = NSDateComponentsFormatter()
-        intervalFormatter.allowedUnits = [.Hour, .Minute]
+        let intervalFormatter = DateComponentsFormatter()
+        intervalFormatter.allowedUnits = [.hour, .minute]
         intervalFormatter.maximumUnitCount = 1
-        intervalFormatter.unitsStyle = .Full
+        intervalFormatter.unitsStyle = .full
         intervalFormatter.includesApproximationPhrase = true
         intervalFormatter.includesTimeRemainingPhrase = true
 
-        if let remaining = remaining, timeString = intervalFormatter.stringFromTimeInterval(remaining) {
+        if let remaining = remaining, let timeString = intervalFormatter.string(from: remaining) {
             notification.alertBody = String(format: NSLocalizedString("%1$@ U left: %2$@", comment: "Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining)"), unitsString, timeString)
         } else {
             notification.alertBody = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
@@ -163,6 +162,6 @@ struct NotificationManager {
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.category = Category.PumpReservoirLow.rawValue
 
-        UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+        UIApplication.shared.presentLocalNotificationNow(notification)
     }
 }

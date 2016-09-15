@@ -14,7 +14,7 @@ extension WKAlertAction {
     static func dismissAction() -> Self {
         return self.init(
             title: NSLocalizedString("Dismiss", comment: "The action button title to dismiss an error message"),
-            style: .Cancel,
+            style: .cancel,
             handler: { }
         )
     }

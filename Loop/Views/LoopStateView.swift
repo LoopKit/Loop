@@ -10,28 +10,28 @@ import UIKit
 
 final class LoopStateView: UIView {
     enum Freshness {
-        case Fresh
-        case Aging
-        case Stale
-        case Unknown
+        case fresh
+        case aging
+        case stale
+        case unknown
 
         var color: UIColor {
             switch self {
-            case .Fresh:
+            case .fresh:
                 return UIColor.freshColor
-            case .Aging:
+            case .aging:
                 return UIColor.agingColor
-            case .Stale:
+            case .stale:
                 return UIColor.staleColor
-            case .Unknown:
+            case .unknown:
                 return UIColor.unknownColor
             }
         }
     }
 
-    var freshness = Freshness.Unknown {
+    var freshness = Freshness.unknown {
         didSet {
-            shapeLayer.strokeColor = freshness.color.CGColor
+            shapeLayer.strokeColor = freshness.color.cgColor
         }
     }
 
@@ -43,7 +43,7 @@ final class LoopStateView: UIView {
         }
     }
 
-    override class func layerClass() -> AnyClass {
+    override class var layerClass : AnyClass {
         return CAShapeLayer.self
     }
 
@@ -56,7 +56,7 @@ final class LoopStateView: UIView {
 
         shapeLayer.lineWidth = 8
         shapeLayer.fillColor = nil
-        shapeLayer.strokeColor = freshness.color.CGColor
+        shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
     }
@@ -66,7 +66,7 @@ final class LoopStateView: UIView {
 
         shapeLayer.lineWidth = 8
         shapeLayer.fillColor = nil
-        shapeLayer.strokeColor = freshness.color.CGColor
+        shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
     }
@@ -77,7 +77,7 @@ final class LoopStateView: UIView {
         shapeLayer.path = drawPath()
     }
 
-    private func drawPath(lineWidth lineWidth: CGFloat? = nil) -> CGPath {
+    private func drawPath(lineWidth: CGFloat? = nil) -> CGPath {
         let center = CGPoint(x: bounds.midX, y: bounds.midY)
         let lineWidth = lineWidth ?? shapeLayer.lineWidth
         let radius = min(bounds.width / 2, bounds.height / 2) - lineWidth / 2
@@ -93,7 +93,7 @@ final class LoopStateView: UIView {
             clockwise: true
         )
 
-        return path.CGPath
+        return path.cgPath
     }
 
     private static let AnimationKey = "com.loudnate.Naterade.breatheAnimation"
@@ -117,9 +117,9 @@ final class LoopStateView: UIView {
                     group.autoreverses = true
                     group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
-                    shapeLayer.addAnimation(group, forKey: self.dynamicType.AnimationKey)
+                    shapeLayer.add(group, forKey: type(of: self).AnimationKey)
                 } else {
-                    shapeLayer.removeAnimationForKey(self.dynamicType.AnimationKey)
+                    shapeLayer.removeAnimation(forKey: type(of: self).AnimationKey)
                 }
             }
         }

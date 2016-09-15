@@ -19,16 +19,16 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
     private lazy var labelY: UILabel = {
         let label = UILabel()
-        label.font = UIFont.monospacedDigitSystemFontOfSize(15, weight: UIFontWeightBold)
-        label.textAlignment = .Center
-        label.backgroundColor = UIColor.whiteColor()
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: UIFontWeightBold)
+        label.textAlignment = .center
+        label.backgroundColor = UIColor.white
 
         return label
     }()
 
     private lazy var labelX: UILabel = {
         let label = UILabel()
-        label.font = UIFont.preferredFontForTextStyle(UIFontTextStyleCaption1)
+        label.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1)
         label.textColor = UIColor.secondaryLabelColor
 
         return label
@@ -45,7 +45,7 @@ final class ChartPointsTouchHighlightLayerViewCache {
             chartPoints: chartPoints,
             gestureRecognizer: gestureRecognizer,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
-                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndexToValue(screenLoc.x) {
+                if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndex(matching: screenLoc.x) {
                     return chartPointModels[index]
                 } else {
                     return nil
@@ -59,15 +59,15 @@ final class ChartPointsTouchHighlightLayerViewCache {
                 let xAxisOverlayView = self.xAxisOverlayView
                 if xAxisOverlayView.superview == nil {
                     xAxisOverlayView.frame = xAxis.rect.offsetBy(dx: 0, dy: 1)
-                    xAxisOverlayView.backgroundColor = UIColor.whiteColor()
-                    xAxisOverlayView.opaque = true
+                    xAxisOverlayView.backgroundColor = UIColor.white
+                    xAxisOverlayView.isOpaque = true
                     containerView.addSubview(xAxisOverlayView)
                 }
 
                 let point = self.point
                 point.center = chartPointModel.screenLoc
                 if point.superview == nil {
-                    point.fillColor = tintColor.colorWithAlphaComponent(0.5)
+                    point.fillColor = tintColor.withAlphaComponent(0.5)
                     containerView.addSubview(point)
                 }
 
@@ -87,7 +87,7 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
                     if label.superview == nil {
                         label.textColor = tintColor
-                        label.layer.borderColor = tintColor.CGColor
+                        label.layer.borderColor = tintColor.cgColor
 
                         containerView.addSubview(label)
                     }
