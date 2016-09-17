@@ -12,37 +12,38 @@ import WatchConnectivity
 import WatchKit
 
 
-final class DeviceDataManager: NSObject, WCSessionDelegate {
+enum DeviceDataManagerError: Error {
+    case reachabilityError
+}
 
-    enum Error: ErrorType {
-        case ReachabilityError
-    }
+
+final class DeviceDataManager: NSObject, WCSessionDelegate {
 
     private var connectSession: WCSession?
 
     private func readContext() -> WatchContext? {
-        return NSUserDefaults.standardUserDefaults().watchContext
+        return UserDefaults.standard.watchContext
     }
 
-    private func saveContext(context: WatchContext) {
-        NSUserDefaults.standardUserDefaults().watchContext = context
+    private func saveContext(_ context: WatchContext) {
+        UserDefaults.standard.watchContext = context
     }
 
-    private var complicationDataLastRefreshed: NSDate {
+    private var complicationDataLastRefreshed: Date {
         get {
-            return NSUserDefaults.standardUserDefaults().complicationDataLastRefreshed
+            return UserDefaults.standard.complicationDataLastRefreshed
         }
         set {
-            NSUserDefaults.standardUserDefaults().complicationDataLastRefreshed = newValue
+            UserDefaults.standard.complicationDataLastRefreshed = newValue
         }
     }
 
     private var hasNewComplicationData: Bool {
         get {
-            return NSUserDefaults.standardUserDefaults().watchContextReadyForComplication
+            return UserDefaults.standard.watchContextReadyForComplication
         }
         set {
-            NSUserDefaults.standardUserDefaults().watchContextReadyForComplication = newValue
+            UserDefaults.standard.watchContextReadyForComplication = newValue
         }
     }
 
@@ -59,33 +60,33 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
             DeviceDataManager.sharedManager.hasNewComplicationData = false
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
-                if complicationDataLastRefreshed.timeIntervalSinceNow < NSTimeInterval(-8 * 60 * 60) {
-                    complicationDataLastRefreshed = NSDate()
-                    server.reloadTimelineForComplication(complication)
+                if complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(-8 * 60 * 60) {
+                    complicationDataLastRefreshed = Date()
+                    server.reloadTimeline(for: complication)
                 } else {
-                    server.extendTimelineForComplication(complication)
+                    server.extendTimeline(for: complication)
                 }
             }
         }
     }
 
-    func sendCarbEntry(carbEntry: CarbEntryUserInfo) {
+    func sendCarbEntry(_ carbEntry: CarbEntryUserInfo) {
         guard let session = connectSession else { return }
 
-        if session.reachable {
+        if session.isReachable {
             var replied = false
 
             session.sendMessage(carbEntry.rawValue,
                 replyHandler: { (reply) -> Void in
                     replied = true
 
-                    if let suggestion = BolusSuggestionUserInfo(rawValue: reply) where suggestion.recommendedBolus > 0 {
-                        WKExtension.sharedExtension().rootInterfaceController?.presentControllerWithName(BolusInterfaceController.className, context: suggestion)
+                    if let suggestion = BolusSuggestionUserInfo(rawValue: reply as BolusSuggestionUserInfo.RawValue), suggestion.recommendedBolus > 0 {
+                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                     }
                 },
                 errorHandler: { (error) -> Void in
                     if !replied {
-                        WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(#function, message: error.localizedRecoverySuggestion, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+                        WKExtension.shared().rootInterfaceController?.presentAlert(withTitle: #function, message: (error as NSError).localizedRecoverySuggestion, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
                     }
                 }
             )
@@ -94,9 +95,9 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
         }
     }
 
-    func sendSetBolus(userInfo: SetBolusUserInfo) throws {
-        guard let session = connectSession where session.reachable else {
-            throw Error.ReachabilityError
+    func sendSetBolus(_ userInfo: SetBolusUserInfo) throws {
+        guard let session = connectSession, session.isReachable else {
+            throw DeviceDataManagerError.reachabilityError
         }
 
         var replied = false
@@ -105,45 +106,35 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
             replied = true
         }, errorHandler: { (error) -> Void in
             if !replied {
-                WKExtension.sharedExtension().rootInterfaceController?.presentAlertControllerWithTitle(error.localizedDescription, message: error.localizedRecoverySuggestion ?? error.localizedFailureReason, preferredStyle: .Alert, actions: [WKAlertAction.dismissAction()])
+                WKExtension.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
             }
         })
     }
 
     // MARK: - WCSessionDelegate
 
-    func session(session: WCSession, activationDidCompleteWithState activationState: WCSessionActivationState, error: NSError?) {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
 //        if let error = error {
             // TODO: os_log_info in iOS 10
 //        }
     }
 
-    func session(session: WCSession, didReceiveApplicationContext applicationContext: [String : AnyObject]) {
-        if let context = WatchContext(rawValue: applicationContext) {
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        if let context = WatchContext(rawValue: applicationContext as WatchContext.RawValue) {
             lastContextData = context
         }
     }
 
-    func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
         switch userInfo["name"] as? String {
-        case .Some:
+        case .some:
             break
         default:
-            if let context = WatchContext(rawValue: userInfo) {
+            if let context = WatchContext(rawValue: userInfo as WatchContext.RawValue) {
                 lastContextData = context
                 updateComplicationDataIfNeeded()
             }
         }
-    }
-
-    func sessionDidBecomeInactive(session: WCSession) {
-        // Nothing to do here
-    }
-
-    func sessionDidDeactivate(session: WCSession) {
-        connectSession = WCSession.defaultSession()
-        connectSession?.delegate = self
-        connectSession?.activateSession()
     }
 
     // MARK: - Initialization
@@ -153,9 +144,9 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
     override init() {
         super.init()
 
-        connectSession = WCSession.defaultSession()
+        connectSession = WCSession.default()
         connectSession?.delegate = self
-        connectSession?.activateSession()
+        connectSession?.activate()
 
         if let context = readContext() {
             self.lastContextData = context

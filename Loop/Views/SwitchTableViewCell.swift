@@ -20,7 +20,7 @@ final class SwitchTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        `switch`?.removeTarget(nil, action: nil, forControlEvents: .ValueChanged)
+        `switch`?.removeTarget(nil, action: nil, for: .valueChanged)
     }
 
 }

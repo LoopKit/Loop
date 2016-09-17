@@ -12,48 +12,48 @@ import LoopKit
 
 
 extension DiagnosticLogger {
-    func addError(message: String, fromSource source: String) {
+    func addError(_ message: String, fromSource source: String) {
         let info = [
             "source": source,
             "message": message,
-            "reportedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())
+            "reportedAt": DateFormatter.ISO8601StrictDateFormatter().string(from: Date())
         ]
 
         addMessage(info, toCollection: "errors")
     }
 
-    func addError(message: ErrorType, fromSource source: String) {
-        addError(String(message), fromSource: source)
+    func addError(_ message: Error, fromSource source: String) {
+        addError(String(describing: message), fromSource: source)
     }
 
-    func addLoopStatus(startDate startDate: NSDate, endDate: NSDate, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: ErrorType?, prediction: [GlucoseValue], predictionWithRetrospectiveEffect: Double, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
+    func addLoopStatus(startDate: Date, endDate: Date, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: Error?, prediction: [GlucoseValue], predictionWithRetrospectiveEffect: Double, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
 
-        let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
+        let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
         let unit = HKUnit.milligramsPerDeciliterUnit()
 
-        var message: [String: AnyObject] = [
-            "startDate": dateFormatter.stringFromDate(startDate),
-            "duration": endDate.timeIntervalSinceDate(startDate),
+        var message: [String: Any] = [
+            "startDate": dateFormatter.string(from: startDate),
+            "duration": endDate.timeIntervalSince(startDate),
             "glucose": [
-                "startDate": dateFormatter.stringFromDate(glucose.startDate),
-                "value": glucose.quantity.doubleValueForUnit(unit),
+                "startDate": dateFormatter.string(from: glucose.startDate),
+                "value": glucose.quantity.doubleValue(for: unit),
                 "unit": unit.unitString
             ],
-            "input": effects.reduce([:], combine: { (previous, item) -> [String: AnyObject] in
+            "input": effects.reduce([:], { (previous, item) -> [String: Any] in
                 var input = previous
                 input[item.0] = item.1.map {
                     [
-                        "startDate": dateFormatter.stringFromDate($0.startDate),
-                        "value": $0.quantity.doubleValueForUnit(unit),
+                        "startDate": dateFormatter.string(from: $0.startDate),
+                        "value": $0.quantity.doubleValue(for: unit),
                         "unit": unit.unitString
                     ]
                 }
                 return input
             }),
-            "prediction": prediction.map { (value) -> [String: AnyObject] in
+            "prediction": prediction.map { (value) -> [String: Any] in
                 [
-                    "startDate": dateFormatter.stringFromDate(value.startDate),
-                    "value": value.quantity.doubleValueForUnit(unit),
+                    "startDate": dateFormatter.string(from: value.startDate),
+                    "value": value.quantity.doubleValue(for: unit),
                     "unit": unit.unitString
                 ]
             },
@@ -61,7 +61,7 @@ extension DiagnosticLogger {
         ]
 
         if let error = error {
-            message["error"] = String(error)
+            message["error"] = String(describing: error)
         }
 
         if let recommendedTempBasal = recommendedTempBasal {

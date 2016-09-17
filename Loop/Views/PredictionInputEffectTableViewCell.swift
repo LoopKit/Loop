@@ -17,8 +17,8 @@ class PredictionInputEffectTableViewCell: UITableViewCell {
     var enabled: Bool = true {
         didSet {
             if enabled {
-                titleLabel.textColor = UIColor.darkTextColor()
-                subtitleLabel.textColor = UIColor.darkTextColor()
+                titleLabel.textColor = UIColor.darkText
+                subtitleLabel.textColor = UIColor.darkText
             } else {
                 titleLabel.textColor = UIColor.secondaryLabelColor
                 subtitleLabel.textColor = UIColor.secondaryLabelColor

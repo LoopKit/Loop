@@ -16,8 +16,8 @@ class ContextInterfaceController: WKInterfaceController {
 
     private var lastContextDataObserverContext = 0
 
-    override func awakeWithContext(context: AnyObject?) {
-        super.awakeWithContext(context)
+    override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
         
         // Configure interface objects here.
     }
@@ -37,19 +37,19 @@ class ContextInterfaceController: WKInterfaceController {
 
     }
 
-    func updateFromContext(context: WatchContext?) {
+    func updateFromContext(_ context: WatchContext?) {
         DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
     }
 
     // MARK: - KVO
 
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if context == &lastContextDataObserverContext {
             if let context = dataManager.lastContextData {
                 updateFromContext(context)
             }
         } else {
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
 
