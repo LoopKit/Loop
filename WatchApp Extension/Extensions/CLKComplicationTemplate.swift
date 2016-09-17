@@ -12,8 +12,8 @@ import Foundation
 
 extension CLKComplicationTemplateModularSmallStackText {
 
-    convenience init?(line1: String?, date: NSDate?) {
-        guard let line1 = line1, date = date else {
+    convenience init?(line1: String?, date: Date?) {
+        guard let line1 = line1, let date = date else {
             return nil
         }
 

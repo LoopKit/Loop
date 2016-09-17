@@ -10,13 +10,13 @@ import CarbKit
 
 
 extension AbsorptionTimeType {
-    func absorptionTimeFromDefaults(defaults: CarbStore.DefaultAbsorptionTimes) -> NSTimeInterval {
+    func absorptionTimeFromDefaults(_ defaults: CarbStore.DefaultAbsorptionTimes) -> TimeInterval {
         switch self {
-        case .Fast:
+        case .fast:
             return defaults.fast
-        case .Medium:
+        case .medium:
             return defaults.medium
-        case .Slow:
+        case .slow:
             return defaults.slow
         }
     }

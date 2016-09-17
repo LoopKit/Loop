@@ -16,6 +16,6 @@ protocol IdentifiableClass: class {
 
 extension IdentifiableClass {
     static var className: String {
-        return NSStringFromClass(self).componentsSeparatedByString(".").last!
+        return NSStringFromClass(self).components(separatedBy: ".").last!
     }
 }

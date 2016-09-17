@@ -8,9 +8,9 @@
 
 import Foundation
 
-extension NSBundle {
-    var shortVersionString: String! {
-        return objectForInfoDictionaryKey("CFBundleShortVersionString") as? String
+extension Bundle {
+    var shortVersionString: String {
+        return object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
     }
     
     private var remoteSettingsPath: String? {
@@ -26,7 +26,7 @@ extension NSBundle {
     }
     
     var bundleDisplayName: String {
-        return objectForInfoDictionaryKey("CFBundleDisplayName") as! String
+        return object(forInfoDictionaryKey: "CFBundleDisplayName") as! String
     }
 
     var localizedNameAndVersion: String {

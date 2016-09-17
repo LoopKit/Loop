@@ -12,30 +12,27 @@ import HealthKit
 import LoopKit
 
 
-extension GlucoseG4 {
-    var isValid: Bool {
-        return glucose >= 20
-    }
-}
-
-
 extension GlucoseG4: GlucoseValue {
     public var quantity: HKQuantity {
         return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
     }
 
-    public var startDate: NSDate {
+    public var startDate: Date {
         return time
     }
 }
 
 
 extension GlucoseG4: SensorDisplayable {
+    var isStateValid: Bool {
+        return glucose >= 20
+    }
+
     var stateDescription: String {
-        if isValid {
-            return "✓"
+        if isStateValid {
+            return NSLocalizedString("OK", comment: "Sensor state description for the valid state")
         } else {
-            return String(format: "%02x", glucose)
+            return NSLocalizedString("Needs Attention", comment: "Sensor state description for the non-valid state")
         }
     }
 

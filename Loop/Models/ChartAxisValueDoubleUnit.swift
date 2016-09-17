@@ -13,7 +13,7 @@ import SwiftCharts
 final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
     let unitString: String
 
-    init(_ double: Double, unitString: String, formatter: NSNumberFormatter) {
+    init(_ double: Double, unitString: String, formatter: NumberFormatter) {
         self.unitString = unitString
 
         super.init(double, formatter: formatter)

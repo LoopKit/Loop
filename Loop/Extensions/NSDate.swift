@@ -9,13 +9,11 @@
 import Foundation
 
 
-extension NSData {
+extension Data {
     var hexadecimalString: String {
-        let bytesCollection = UnsafeBufferPointer<UInt8>(start: UnsafePointer<UInt8>(bytes), count: length)
+        let string = NSMutableString(capacity: count * 2)
 
-        let string = NSMutableString(capacity: length * 2)
-
-        for byte in bytesCollection {
+        for byte in self {
             string.appendFormat("%02x", byte)
         }
 
