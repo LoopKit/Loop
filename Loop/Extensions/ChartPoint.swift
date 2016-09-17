@@ -12,17 +12,17 @@ import SwiftCharts
 
 
 extension ChartPoint {
-    static func pointsForGlucoseRangeSchedule(glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeSchedule(_ glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let targetRanges = glucoseRangeSchedule.between(
-            ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
-            ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
+            start: ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
+            end: ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
         )
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
 
         var maxPoints: [ChartPoint] = []
         var minPoints: [ChartPoint] = []
 
-        for (index, range) in targetRanges.enumerate() {
+        for (index, range) in targetRanges.enumerated() {
             var startDate = ChartAxisValueDate(date: range.startDate, formatter: dateFormatter)
             var endDate: ChartAxisValueDate
 
@@ -50,21 +50,21 @@ extension ChartPoint {
             ]
         }
 
-        return maxPoints + minPoints.reverse()
+        return maxPoints + minPoints.reversed()
     }
 
-    static func pointsForGlucoseRangeScheduleOverrideDuration(override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
-        let startDate = NSDate()
+    static func pointsForGlucoseRangeScheduleOverrideDuration(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let startDate = Date()
 
-        guard override.endDate.timeIntervalSinceDate(startDate) > 0,
+        guard override.endDate.timeIntervalSince(startDate) > 0,
             let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
         else {
             return []
         }
 
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
         let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
-        let endDateAxisValue = ChartAxisValueDate(date: lastXAxisValue.date.earlierDate(override.endDate), formatter: dateFormatter)
+        let endDateAxisValue = ChartAxisValueDate(date: min(lastXAxisValue.date, override.endDate), formatter: dateFormatter)
         let minValue = ChartAxisValueDouble(override.value.minValue)
         let maxValue = ChartAxisValueDouble(override.value.maxValue)
 
@@ -76,16 +76,16 @@ extension ChartPoint {
         ]
     }
 
-    static func pointsForGlucoseRangeScheduleOverride(override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
-        let startDate = NSDate()
+    static func pointsForGlucoseRangeScheduleOverride(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let startDate = Date()
 
-        guard override.endDate.timeIntervalSinceDate(startDate) > 0,
+        guard override.endDate.timeIntervalSince(startDate) > 0,
             let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
             else {
                 return []
         }
 
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
         let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
         let endDateAxisValue = ChartAxisValueDate(date: lastXAxisValue.date, formatter: dateFormatter)
         let minValue = ChartAxisValueDouble(override.value.minValue)

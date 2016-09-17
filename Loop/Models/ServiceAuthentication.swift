@@ -16,10 +16,10 @@ protocol ServiceAuthentication {
     var credentials: [ServiceCredential] { get set }
 
     // Whether the current credential values are valid authorization
-    var isAuthorized: Bool { get }
+    var isAuthorized: Bool { get set }
 
     // Tests the credentials for valid authorization
-    mutating func verify(completion: (success: Bool, error: ErrorType?) -> Void)
+    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void)
 
     // Clears the credential values and authorization status
     mutating func reset()

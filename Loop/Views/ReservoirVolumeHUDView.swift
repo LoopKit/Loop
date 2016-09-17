@@ -10,27 +10,69 @@ import UIKit
 
 final class ReservoirVolumeHUDView: HUDView {
 
-    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private var levelMaskView: LevelMaskView!
 
-    private lazy var numberFormatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .DecimalStyle
-        formatter.minimumFractionDigits = 1
+    @IBOutlet private var volumeLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        tintColor = .unknownColor
+        volumeLabel.isHidden = true
+    }
+
+    var reservoirLevel: Double? {
+        didSet {
+            levelMaskView.value = reservoirLevel ?? 1.0
+
+            switch reservoirLevel {
+            case .none:
+                tintColor = .unknownColor
+                volumeLabel.isHidden = true
+            case let x? where x > 0.25:
+                tintColor = .secondaryLabelColor
+                volumeLabel.isHidden = true
+            case let x? where x > 0.10:
+                tintColor = .agingColor
+                volumeLabel.textColor = tintColor
+                volumeLabel.isHidden = false
+            default:
+                tintColor = .staleColor
+                volumeLabel.textColor = tintColor
+                volumeLabel.isHidden = false
+            }
+        }
+    }
+
+    var lastUpdated: Date? {
+        didSet {
+            if let date = lastUpdated {
+                caption?.text = timeFormatter.string(from: date)
+            }
+        }
+    }
+
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+
+        return formatter
+    }()
+
+    private lazy var numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
 
         return formatter
     }()
 
     var reservoirVolume: Double? {
         didSet {
-            if let volume = reservoirVolume, units = numberFormatter.stringFromNumber(volume) {
-                caption.text = "\(units) U"
+            if let volume = reservoirVolume, let units = numberFormatter.string(from: NSNumber(value: volume)) {
+                volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
             }
-        }
-    }
-
-    var reservoirLevel: Double? {
-        didSet {
-            imageView.image = UIImage.reservoirHUDImageWithLevel(reservoirLevel)
         }
     }
 

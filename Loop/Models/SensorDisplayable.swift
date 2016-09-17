@@ -6,11 +6,27 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import Foundation
+
 
 protocol SensorDisplayable {
-    // Describes the state of the sensor in the current localization
+    /// Returns whether the current state is valid
+    var isStateValid: Bool { get }
+
+    /// Describes the state of the sensor in the current localization
     var stateDescription: String { get }
 
     /// Enumerates the trend of the sensor values
     var trendType: GlucoseTrend? { get }
+}
+
+
+extension SensorDisplayable {
+    var stateDescription: String {
+        if isStateValid {
+            return NSLocalizedString("OK", comment: "Sensor state description for the valid state")
+        } else {
+            return NSLocalizedString("Needs Attention", comment: "Sensor state description for the non-valid state")
+        }
+    }
 }

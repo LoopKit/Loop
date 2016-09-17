@@ -11,16 +11,17 @@ import UIKit
 
 final class ChartTableViewCell: UITableViewCell {
 
-    var chartView: UIView? {
-        didSet {
-            if let view = oldValue {
-                view.removeFromSuperview()
-            }
+    @IBOutlet var chartContentView: ChartContentView!
 
-            if let view = chartView {
-                contentView.addSubview(view)
-            }
+    @IBOutlet var subtitleLabel: UILabel? {
+        didSet {
+            subtitleLabel?.textColor = UIColor.secondaryLabelColor
         }
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        chartContentView.chartGenerator = nil
+    }
 }

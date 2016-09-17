@@ -11,9 +11,9 @@ import Foundation
 
 struct SetBolusUserInfo {
     let value: Double
-    let startDate: NSDate
+    let startDate: Date
 
-    init(value: Double, startDate: NSDate) {
+    init(value: Double, startDate: Date) {
         self.value = value
         self.startDate = startDate
     }
@@ -21,16 +21,16 @@ struct SetBolusUserInfo {
 
 
 extension SetBolusUserInfo: RawRepresentable {
-    typealias RawValue = [String: AnyObject]
+    typealias RawValue = [String: Any]
 
     static let version = 1
     static let name = "SetBolusUserInfo"
 
     init?(rawValue: RawValue) {
-        guard rawValue["v"] as? Int == self.dynamicType.version &&
+        guard rawValue["v"] as? Int == type(of: self).version &&
             rawValue["name"] as? String == SetBolusUserInfo.name,
             let value = rawValue["bv"] as? Double,
-            startDate = rawValue["sd"] as? NSDate else
+            let startDate = rawValue["sd"] as? Date else
         {
             return nil
         }
@@ -41,7 +41,7 @@ extension SetBolusUserInfo: RawRepresentable {
 
     var rawValue: RawValue {
         return [
-            "v": self.dynamicType.version,
+            "v": type(of: self).version,
             "name": SetBolusUserInfo.name,
             "bv": value,
             "sd": startDate

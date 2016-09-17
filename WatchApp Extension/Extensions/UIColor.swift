@@ -22,7 +22,7 @@ extension UIColor {
     }
 
     private static func HIGPinkColorDark() -> UIColor {
-        return HIGPinkColor().colorWithAlphaComponent(0.17)
+        return HIGPinkColor().withAlphaComponent(0.17)
     }
 
     private static func HIGRedColor() -> UIColor {
@@ -30,7 +30,7 @@ extension UIColor {
     }
 
     private static func HIGRedColorDark() -> UIColor {
-        return HIGRedColor().colorWithAlphaComponent(0.17)
+        return HIGRedColor().withAlphaComponent(0.17)
     }
 
     private static func HIGOrangeColor() -> UIColor {
@@ -38,7 +38,7 @@ extension UIColor {
     }
 
     private static func HIGOrangeColorDark() -> UIColor {
-        return HIGOrangeColor().colorWithAlphaComponent(0.15)
+        return HIGOrangeColor().withAlphaComponent(0.15)
     }
 
     private static func HIGYellowColor() -> UIColor {
@@ -46,7 +46,7 @@ extension UIColor {
     }
 
     private static func HIGYellowColorDark() -> UIColor {
-        return HIGYellowColor().colorWithAlphaComponent(0.14)
+        return HIGYellowColor().withAlphaComponent(0.14)
     }
 
     private static func HIGGreenColor() -> UIColor {
@@ -54,6 +54,6 @@ extension UIColor {
     }
 
     private static func HIGGreenColorDark() -> UIColor {
-        return HIGGreenColor().colorWithAlphaComponent(0.14)
+        return HIGGreenColor().withAlphaComponent(0.14)
     }
 }

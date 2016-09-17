@@ -9,7 +9,7 @@
 import Foundation
 
 
-private let mLabAPIHost = NSURL(string: "https://api.mongolab.com/api/1/databases")!
+private let mLabAPIHost = URL(string: "https://api.mongolab.com/api/1/databases")!
 
 
 struct MLabService: ServiceAuthentication {
@@ -23,14 +23,14 @@ struct MLabService: ServiceAuthentication {
                 title: NSLocalizedString("Database", comment: "The title of the mLab database name credential"),
                 placeholder: "nightscoutdb",
                 isSecret: false,
-                keyboardType: .ASCIICapable,
+                keyboardType: .asciiCapable,
                 value: databaseName
             ),
             ServiceCredential(
                 title: NSLocalizedString("API Key", comment: "The title of the mLab API Key credential"),
                 placeholder: nil,
                 isSecret: false,
-                keyboardType: .ASCIICapable,
+                keyboardType: .asciiCapable,
                 value: APIKey
             )
         ]
@@ -48,24 +48,22 @@ struct MLabService: ServiceAuthentication {
         return credentials[1].value
     }
 
-    private(set) var isAuthorized: Bool = false
+    var isAuthorized: Bool = false
 
-    mutating func verify(completion: (success: Bool, error: ErrorType?) -> Void) {
+    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let APIURL = APIURLForCollection("") else {
-            completion(success: false, error: nil)
+            completion(false, nil)
             return
         }
 
-        NSURLSession.sharedSession().dataTaskWithURL(APIURL) { (_, response, error) in
-            var error: ErrorType? = error
-            if error == nil, let response = response as? NSHTTPURLResponse where response.statusCode >= 300 {
-                error = LoopError.ConnectionError
+        URLSession.shared.dataTask(with: APIURL, completionHandler: { (_, response, error) in
+            var error: Error? = error
+            if error == nil, let response = response as? HTTPURLResponse, response.statusCode >= 300 {
+                error = LoopError.connectionError
             }
 
-            self.isAuthorized = error == nil
-
-            completion(success: self.isAuthorized, error: error)
-        }.resume()
+            completion(error == nil, error)
+        }).resume()
     }
 
     mutating func reset() {
@@ -74,41 +72,41 @@ struct MLabService: ServiceAuthentication {
         isAuthorized = false
     }
 
-    private func APIURLForCollection(collection: String) -> NSURL? {
-        guard let databaseName = databaseName, APIKey = APIKey else {
+    private func APIURLForCollection(_ collection: String) -> URL? {
+        guard let databaseName = databaseName, let APIKey = APIKey else {
             return nil
         }
 
-        let APIURL = mLabAPIHost.URLByAppendingPathComponent("\(databaseName)/collections").URLByAppendingPathComponent(collection)
-        let components = NSURLComponents(URL: APIURL, resolvingAgainstBaseURL: true)!
+        let APIURL = mLabAPIHost.appendingPathComponent("\(databaseName)/collections").appendingPathComponent(collection)
+        var components = URLComponents(url: APIURL, resolvingAgainstBaseURL: true)!
 
         var items = components.queryItems ?? []
-        items.append(NSURLQueryItem(name: "apiKey", value: APIKey))
+        items.append(URLQueryItem(name: "apiKey", value: APIKey))
         components.queryItems = items
 
-        return components.URL
+        return components.url
     }
 
-    func uploadTaskWithData(data: NSData, inCollection collection: String) -> NSURLSessionTask? {
+    func uploadTaskWithData(_ data: Data, inCollection collection: String) -> URLSessionTask? {
         guard let URL = APIURLForCollection(collection) else {
             return nil
         }
 
-        let request = NSMutableURLRequest(URL: URL)
-        request.HTTPMethod = "POST"
+        var request = URLRequest(url: URL)
+        request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        return NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: data)
+        return URLSession.shared.uploadTask(with: request, from: data)
     }
 }
 
 
 extension KeychainManager {
-    func setMLabDatabaseName(databaseName: String?, APIKey: String?) throws {
+    func setMLabDatabaseName(_ databaseName: String?, APIKey: String?) throws {
         let credentials: InternetCredentials?
 
-        if let username = databaseName, password = APIKey {
-            credentials = InternetCredentials(username: username, password: password, URL: mLabAPIHost)
+        if let username = databaseName, let password = APIKey {
+            credentials = InternetCredentials(username: username, password: password, url: mLabAPIHost)
         } else {
             credentials = nil
         }
@@ -118,7 +116,7 @@ extension KeychainManager {
 
     func getMLabCredentials() -> (databaseName: String, APIKey: String)? {
         do {
-            let credentials = try getInternetCredentials(URL: mLabAPIHost)
+            let credentials = try getInternetCredentials(url: mLabAPIHost)
 
             return (databaseName: credentials.username, APIKey: credentials.password)
         } catch {
