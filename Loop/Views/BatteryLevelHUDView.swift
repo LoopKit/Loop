@@ -19,9 +19,9 @@ final class BatteryLevelHUDView: HUDView {
         tintColor = .unknownColor
     }
 
-    private lazy var numberFormatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .PercentStyle
+    private lazy var numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
 
         return formatter
     }()
@@ -29,14 +29,14 @@ final class BatteryLevelHUDView: HUDView {
 
     var batteryLevel: Double? {
         didSet {
-            if let value = batteryLevel, level = numberFormatter.stringFromNumber(value) {
+            if let value = batteryLevel, let level = numberFormatter.string(from: NSNumber(value: value)) {
                 caption.text = level
             } else {
                 caption.text = nil
             }
 
             switch batteryLevel {
-            case .None:
+            case .none:
                 tintColor = .unknownColor
             case let x? where x > 0.25:
                 tintColor = .secondaryLabelColor

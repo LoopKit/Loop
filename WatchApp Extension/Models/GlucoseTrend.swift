@@ -8,29 +8,29 @@
 
 
 enum GlucoseTrend: Int {
-    case UpUpUp       = 1
-    case UpUp         = 2
-    case Up           = 3
-    case Flat         = 4
-    case Down         = 5
-    case DownDown     = 6
-    case DownDownDown = 7
+    case upUpUp       = 1
+    case upUp         = 2
+    case up           = 3
+    case flat         = 4
+    case down         = 5
+    case downDown     = 6
+    case downDownDown = 7
 
     var description: String {
         switch self {
-        case UpUpUp:
+        case .upUpUp:
             return "⇈"
-        case UpUp:
+        case .upUp:
             return "↑"
-        case Up:
+        case .up:
             return "↗︎"
-        case Flat:
+        case .flat:
             return "→"
-        case Down:
+        case .down:
             return "↘︎"
-        case DownDown:
+        case .downDown:
             return "↓"
-        case DownDownDown:
+        case .downDownDown:
             return "⇊"
         }
     }

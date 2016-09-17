@@ -18,7 +18,7 @@ final class ReservoirVolumeHUDView: HUDView {
         super.awakeFromNib()
 
         tintColor = .unknownColor
-        volumeLabel.hidden = true
+        volumeLabel.isHidden = true
     }
 
     var reservoirLevel: Double? {
@@ -26,43 +26,43 @@ final class ReservoirVolumeHUDView: HUDView {
             levelMaskView.value = reservoirLevel ?? 1.0
 
             switch reservoirLevel {
-            case .None:
+            case .none:
                 tintColor = .unknownColor
-                volumeLabel.hidden = true
+                volumeLabel.isHidden = true
             case let x? where x > 0.25:
                 tintColor = .secondaryLabelColor
-                volumeLabel.hidden = true
+                volumeLabel.isHidden = true
             case let x? where x > 0.10:
                 tintColor = .agingColor
                 volumeLabel.textColor = tintColor
-                volumeLabel.hidden = false
+                volumeLabel.isHidden = false
             default:
                 tintColor = .staleColor
                 volumeLabel.textColor = tintColor
-                volumeLabel.hidden = false
+                volumeLabel.isHidden = false
             }
         }
     }
 
-    var lastUpdated: NSDate? {
+    var lastUpdated: Date? {
         didSet {
             if let date = lastUpdated {
-                caption?.text = timeFormatter.stringFromDate(date)
+                caption?.text = timeFormatter.string(from: date)
             }
         }
     }
 
-    private lazy var timeFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = .NoStyle
-        formatter.timeStyle = .ShortStyle
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
 
         return formatter
     }()
 
-    private lazy var numberFormatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .DecimalStyle
+    private lazy var numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
         formatter.maximumFractionDigits = 0
 
         return formatter
@@ -70,7 +70,7 @@ final class ReservoirVolumeHUDView: HUDView {
 
     var reservoirVolume: Double? {
         didSet {
-            if let volume = reservoirVolume, units = numberFormatter.stringFromNumber(volume) {
+            if let volume = reservoirVolume, let units = numberFormatter.string(from: NSNumber(value: volume)) {
                 volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
             }
         }

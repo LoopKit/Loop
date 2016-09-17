@@ -10,8 +10,16 @@ import Foundation
 import Security
 
 
+enum KeychainManagerError: Error {
+    case add(OSStatus)
+    case copy(OSStatus)
+    case delete(OSStatus)
+    case unknownResult
+}
+
+
 /**
- 
+
  Influenced by https://github.com/marketplacer/keychain-swift
  */
 struct KeychainManager {
@@ -21,47 +29,40 @@ struct KeychainManager {
 
     var accessGroup: String?
 
-    enum Error: ErrorType {
-        case add(OSStatus)
-        case copy(OSStatus)
-        case delete(OSStatus)
-        case unknownResult
-    }
-
     struct InternetCredentials {
         let username: String
         let password: String
-        let URL: NSURL
+        let url: URL
     }
 
     // MARK: - Convenience methods
 
-    private func queryByClass(`class`: CFString) -> Query {
+    private func query(by class: CFString) -> Query {
         var query: Query = [kSecClass as String: `class`]
 
         if let accessGroup = accessGroup {
-            query[kSecAttrAccessGroup as String] = accessGroup
+            query[kSecAttrAccessGroup as String] = accessGroup as NSObject?
         }
 
         return query
     }
 
-    private func queryForGenericPasswordByService(service: String) -> Query {
-        var query = queryByClass(kSecClassGenericPassword)
+    private func queryForGenericPassword(by service: String) -> Query {
+        var query = self.query(by: kSecClassGenericPassword)
 
-        query[kSecAttrService as String] = service
+        query[kSecAttrService as String] = service as NSObject?
 
         return query
     }
 
-    private func queryForInternetPassword(account account: String? = nil, URL: NSURL? = nil) -> Query {
-        var query = queryByClass(kSecClassInternetPassword)
+    private func queryForInternetPassword(account: String? = nil, url: URL? = nil) -> Query {
+        var query = self.query(by: kSecClassInternetPassword)
 
         if let account = account {
-            query[kSecAttrAccount as String] = account
+            query[kSecAttrAccount as String] = account as NSObject?
         }
 
-        if let URL = URL, components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true) {
+        if let url = url, let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
             for (key, value) in components.keychainAttributes {
                 query[key] = value
             }
@@ -70,31 +71,31 @@ struct KeychainManager {
         return query
     }
 
-    private func updatedQuery(query: Query, withPassword password: String) throws -> Query {
+    private func updatedQuery(_ query: Query, withPassword password: String) throws -> Query {
         var query = query
 
-        guard let value = password.dataUsingEncoding(NSUTF8StringEncoding) else {
-            throw Error.add(errSecDecode)
+        guard let value = password.data(using: String.Encoding.utf8) else {
+            throw KeychainManagerError.add(errSecDecode)
         }
 
-        query[kSecValueData as String] = value
+        query[kSecValueData as String] = value as NSObject?
         query[kSecAttrAccessible as String] = accessibility
 
         return query
     }
 
-    func delete(query: Query) throws {
-        let statusCode = SecItemDelete(query)
+    func delete(_ query: Query) throws {
+        let statusCode = SecItemDelete(query as CFDictionary)
 
         guard statusCode == errSecSuccess || statusCode == errSecItemNotFound else {
-            throw Error.delete(statusCode)
+            throw KeychainManagerError.delete(statusCode)
         }
     }
 
     // MARK: – Generic Passwords
 
-    func replaceGenericPassword(password: String?, forService service: String) throws {
-        var query = queryForGenericPasswordByService(service)
+    func replaceGenericPassword(_ password: String?, forService service: String) throws {
+        var query = queryForGenericPassword(by: service)
 
         try delete(query)
 
@@ -104,31 +105,29 @@ struct KeychainManager {
 
         query = try updatedQuery(query, withPassword: password)
 
-        let statusCode = SecItemAdd(query, nil)
+        let statusCode = SecItemAdd(query as CFDictionary, nil)
 
         guard statusCode == errSecSuccess else {
-            throw Error.add(statusCode)
+            throw KeychainManagerError.add(statusCode)
         }
     }
 
-    func getGenericPasswordForService(service: String) throws -> String {
-        var query = queryForGenericPasswordByService(service)
+    func getGenericPasswordForService(_ service: String) throws -> String {
+        var query = queryForGenericPassword(by: service)
 
         query[kSecReturnData as String] = kCFBooleanTrue
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
-        var result: NSData?
+        var result: AnyObject?
 
-        let statusCode: OSStatus = withUnsafeMutablePointer(&result) {
-            SecItemCopyMatching(query, UnsafeMutablePointer($0))
-        }
+        let statusCode = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard statusCode == errSecSuccess else {
-            throw Error.copy(statusCode)
+            throw KeychainManagerError.copy(statusCode)
         }
 
-        guard let passwordData = result, password = String(data: passwordData, encoding: NSUTF8StringEncoding) else {
-            throw Error.unknownResult
+        guard let passwordData = result as? Data, let password = String(data: passwordData, encoding: String.Encoding.utf8) else {
+            throw KeychainManagerError.unknownResult
         }
 
         return password
@@ -136,86 +135,82 @@ struct KeychainManager {
 
     // MARK – Internet Passwords
 
-    func setInternetPassword(password: String, forAccount account: String, atURL url: NSURL) throws {
-        var query = try updatedQuery(queryForInternetPassword(account: account, URL: url), withPassword: password)
+    func setInternetPassword(_ password: String, forAccount account: String, atURL url: URL) throws {
+        var query = try updatedQuery(queryForInternetPassword(account: account, url: url), withPassword: password)
 
-        query[kSecAttrAccount as String] = account
+        query[kSecAttrAccount as String] = account as NSObject?
 
-        if let components = NSURLComponents(URL: url, resolvingAgainstBaseURL: true) {
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
             for (key, value) in components.keychainAttributes {
                 query[key] = value
             }
         }
 
-        let statusCode = SecItemAdd(query, nil)
+        let statusCode = SecItemAdd(query as CFDictionary, nil)
 
         guard statusCode == errSecSuccess else {
-            throw Error.add(statusCode)
+            throw KeychainManagerError.add(statusCode)
         }
     }
 
-    func replaceInternetCredentials(credentials: InternetCredentials?, forAccount account: String) throws {
+    func replaceInternetCredentials(_ credentials: InternetCredentials?, forAccount account: String) throws {
         let query = queryForInternetPassword(account: account)
 
         try delete(query)
 
         if let credentials = credentials {
-            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.URL)
+            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.url)
         }
     }
 
-    func replaceInternetCredentials(credentials: InternetCredentials?, forURL URL: NSURL) throws {
-        let query = queryForInternetPassword(URL: URL)
+    func replaceInternetCredentials(_ credentials: InternetCredentials?, forURL url: URL) throws {
+        let query = queryForInternetPassword(url: url)
 
         try delete(query)
 
         if let credentials = credentials {
-            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.URL)
+            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.url)
         }
     }
 
-    func getInternetCredentials(account account: String? = nil, URL: NSURL? = nil) throws -> InternetCredentials {
-        var query = queryForInternetPassword(account: account, URL: URL)
+    func getInternetCredentials(account: String? = nil, url: URL? = nil) throws -> InternetCredentials {
+        var query = queryForInternetPassword(account: account, url: url)
 
         query[kSecReturnData as String] = kCFBooleanTrue
         query[kSecReturnAttributes as String] = kCFBooleanTrue
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
-        var result: CFDictionary?
+        var result: AnyObject?
 
-        let statusCode: OSStatus = withUnsafeMutablePointer(&result) {
-            SecItemCopyMatching(query, UnsafeMutablePointer($0))
-        }
+        let statusCode: OSStatus = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard statusCode == errSecSuccess else {
-            throw Error.copy(statusCode)
+            throw KeychainManagerError.copy(statusCode)
         }
 
-        let resultDict = result as [NSObject: AnyObject]?
-
-        if let  result = resultDict, passwordData = result[kSecValueData as String] as? NSData,
-                password = String(data: passwordData, encoding: NSUTF8StringEncoding),
-                URL = NSURLComponents(keychainAttributes: result)?.URL,
-                username = result[kSecAttrAccount as String] as? String
+        if  let result = result as? [AnyHashable: Any], let passwordData = result[kSecValueData as String] as? Data,
+            let password = String(data: passwordData, encoding: String.Encoding.utf8),
+            let url = URLComponents(keychainAttributes: result)?.url,
+            let username = result[kSecAttrAccount as String] as? String
         {
-            return InternetCredentials(username: username, password: password, URL: URL)
+            return InternetCredentials(username: username, password: password, url: url)
         }
 
-        throw Error.unknownResult
+        throw KeychainManagerError.unknownResult
     }
 }
 
 
 private enum SecurityProtocol {
-    case HTTP
-    case HTTPS
+    case http
+    case https
 
     init?(scheme: String?) {
-        switch scheme?.lowercaseString {
+        switch scheme?.lowercased() {
         case "http"?:
-            self = .HTTP
+            self = .http
         case "https"?:
-            self = .HTTPS
+            self = .https
         default:
             return nil
         }
@@ -223,9 +218,9 @@ private enum SecurityProtocol {
 
     init?(secAttrProtocol: CFString) {
         if secAttrProtocol == kSecAttrProtocolHTTP {
-            self = .HTTP
+            self = .http
         } else if secAttrProtocol == kSecAttrProtocolHTTPS {
-            self = .HTTPS
+            self = .https
         } else {
             return nil
         }
@@ -233,26 +228,26 @@ private enum SecurityProtocol {
 
     var scheme: String {
         switch self {
-        case .HTTP:
+        case .http:
             return "http"
-        case .HTTPS:
+        case .https:
             return "https"
         }
     }
 
     var secAttrProtocol: CFString {
         switch self {
-        case .HTTP:
+        case .http:
             return kSecAttrProtocolHTTP
-        case .HTTPS:
+        case .https:
             return kSecAttrProtocolHTTPS
         }
     }
 }
 
 
-private extension NSURLComponents {
-    convenience init?(keychainAttributes: [NSObject: AnyObject]) {
+private extension URLComponents {
+    init?(keychainAttributes: [AnyHashable: Any]) {
         self.init()
 
         if let secAttProtocol = keychainAttributes[kSecAttrProtocol as String] {
@@ -261,11 +256,13 @@ private extension NSURLComponents {
 
         host = keychainAttributes[kSecAttrServer as String] as? String
 
-        if let port = keychainAttributes[kSecAttrPort as String] as? NSNumber where port.integerValue > 0 {
-            self.port = port
+        if let port = keychainAttributes[kSecAttrPort as String] as? NSNumber, port.intValue > 0 {
+            self.port = port as Int?
         }
 
-        path = keychainAttributes[kSecAttrPath as String] as? String
+        if let path = keychainAttributes[kSecAttrPath as String] as? String {
+            self.path = path
+        }
     }
 
     var keychainAttributes: [String: NSObject] {
@@ -276,15 +273,15 @@ private extension NSURLComponents {
         }
 
         if let host = host {
-            query[kSecAttrServer as String] = host
+            query[kSecAttrServer as String] = host as NSObject
         }
 
         if let port = port {
-            query[kSecAttrPort as String] = port
+            query[kSecAttrPort as String] = port as NSObject
         }
 
-        if let path = path {
-            query[kSecAttrPath as String] = path
+        if !path.isEmpty {
+            query[kSecAttrPath as String] = path as NSObject
         }
 
         return query

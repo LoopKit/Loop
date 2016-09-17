@@ -22,15 +22,15 @@ class LevelMaskView: UIView {
     @IBInspectable var maskImage: UIImage? {
         didSet {
             fillView?.removeFromSuperview()
-            maskView?.removeFromSuperview()
+            mask?.removeFromSuperview()
             maskImageView?.removeFromSuperview()
 
             guard let maskImage = maskImage else { return }
 
-            maskView = UIView()
+            mask = UIView()
             maskImageView = UIImageView(image: maskImage)
-            maskImageView!.contentMode = .Center
-            maskView!.addSubview(maskImageView!)
+            maskImageView!.contentMode = .center
+            mask!.addSubview(maskImageView!)
 
             clipsToBounds = true
 
@@ -51,9 +51,9 @@ class LevelMaskView: UIView {
 
         let maskImageSize = maskImage.size
 
-        maskView?.frame = CGRect(origin: .zero, size: maskImageSize)
-        maskView?.center = CGPoint(x: bounds.midX, y: bounds.midY)
-        maskImageView?.frame = maskView?.bounds ?? bounds
+        mask?.frame = CGRect(origin: .zero, size: maskImageSize)
+        mask?.center = CGPoint(x: bounds.midX, y: bounds.midY)
+        maskImageView?.frame = mask?.bounds ?? bounds
 
         if (fillView?.layer.animationKeys()?.count ?? 0) == 0 {
             updateFillViewFrame()
@@ -67,13 +67,13 @@ class LevelMaskView: UIView {
     }
 
     private func animateFill() {
-        UIView.animateWithDuration(1.25, delay: 0, options: .BeginFromCurrentState, animations: {
+        UIView.animate(withDuration: 1.25, delay: 0, options: .beginFromCurrentState, animations: {
             self.updateFillViewFrame()
         }, completion: nil)
     }
 
     private func updateFillViewFrame() {
-        guard let maskViewFrame = maskView?.frame else { return }
+        guard let maskViewFrame = mask?.frame else { return }
 
         var fillViewFrame = maskViewFrame
         fillViewFrame.origin.y = maskViewFrame.maxY

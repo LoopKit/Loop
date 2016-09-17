@@ -8,8 +8,8 @@
 
 import Foundation
 
-
-extension NSData {
+/*
+extension Data {
     @nonobjc subscript(index: Int) -> UInt8 {
         let bytes: [UInt8] = self[index...index]
 
@@ -17,13 +17,14 @@ extension NSData {
     }
 
     subscript(range: Range<Int>) -> [UInt8] {
-        var dataArray = [UInt8](count: range.count, repeatedValue: 0)
-        self.getBytes(&dataArray, range: NSRange(range))
+        var dataArray = [UInt8](repeating: 0, count: range.count)
+        (self as NSData).getBytes(&dataArray, range: NSRange(range))
 
         return dataArray
     }
 
-    subscript(range: Range<Int>) -> NSData {
-        return subdataWithRange(NSRange(range))
+    subscript(range: Range<Int>) -> Data {
+        return subdata(in: NSRange(range))
     }
 }
+*/

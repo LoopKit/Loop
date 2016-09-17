@@ -13,7 +13,7 @@ import ShareClient
 
 
 extension ShareGlucose: GlucoseValue {
-    public var startDate: NSDate {
+    public var startDate: Date {
         return timestamp
     }
 

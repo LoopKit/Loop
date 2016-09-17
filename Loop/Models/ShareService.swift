@@ -22,19 +22,19 @@ struct ShareService: ServiceAuthentication {
                 title: NSLocalizedString("Username", comment: "The title of the Dexcom share username credential"),
                 placeholder: nil,
                 isSecret: false,
-                keyboardType: .ASCIICapable,
+                keyboardType: .asciiCapable,
                 value: username
             ),
             ServiceCredential(
                 title: NSLocalizedString("Password", comment: "The title of the Dexcom share password credential"),
                 placeholder: nil,
                 isSecret: true,
-                keyboardType: .ASCIICapable,
+                keyboardType: .asciiCapable,
                 value: password
             )
         ]
 
-        if let username = username, password = password {
+        if let username = username, let password = password {
             isAuthorized = true
             client = ShareClient(username: username, password: password)
         }
@@ -51,19 +51,17 @@ struct ShareService: ServiceAuthentication {
         return credentials[1].value
     }
 
-    private(set) var isAuthorized: Bool = false
+    var isAuthorized: Bool = false
 
-    mutating func verify(completion: (success: Bool, error: ErrorType?) -> Void) {
-        guard let username = username, password = password else {
-            completion(success: false, error: nil)
+    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+        guard let username = username, let password = password else {
+            completion(false, nil)
             return
         }
 
         let client = ShareClient(username: username, password: password)
         client.fetchLast(1) { (error, _) in
-            self.isAuthorized = (error == nil)
-
-            completion(success: self.isAuthorized, error: error)
+            completion(true, error)
         }
         self.client = client
     }

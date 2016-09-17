@@ -19,14 +19,14 @@ final class StatusInterfaceController: ContextInterfaceController {
     @IBOutlet var eventualGlucoseLabel: WKInterfaceLabel!
     @IBOutlet var statusLabel: WKInterfaceLabel!
 
-    override func updateFromContext(context: WatchContext?) {
+    override func updateFromContext(_ context: WatchContext?) {
         super.updateFromContext(context)
 
         resetInterface()
 
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if let date = context?.loopLastRunDate {
-                self.loopTimer.setDate(date)
+                self.loopTimer.setDate(date as Date)
                 self.loopTimer.setHidden(false)
                 self.loopTimer.start()
 
@@ -45,21 +45,21 @@ final class StatusInterfaceController: ContextInterfaceController {
             }
         }
 
-        let numberFormatter = NSNumberFormatter()
+        let numberFormatter = NumberFormatter()
 
-        dispatch_async(dispatch_get_main_queue()) {
-            if let glucose = context?.glucose, unit = context?.preferredGlucoseUnit {
-                let glucoseValue = glucose.doubleValueForUnit(unit)
+        DispatchQueue.main.async {
+            if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
+                let glucoseValue = glucose.doubleValue(for: unit)
                 let trend = context?.glucoseTrend?.description ?? ""
 
-                self.glucoseLabel.setText((numberFormatter.stringFromNumber(glucoseValue) ?? "") + trend)
+                self.glucoseLabel.setText((numberFormatter.string(from: NSNumber(value: glucoseValue)) ?? "") + trend)
                 self.glucoseLabel.setHidden(false)
             }
 
-            if let eventualGlucose = context?.eventualGlucose, unit = context?.preferredGlucoseUnit {
-                let glucoseValue = eventualGlucose.doubleValueForUnit(unit)
+            if let eventualGlucose = context?.eventualGlucose, let unit = context?.preferredGlucoseUnit {
+                let glucoseValue = eventualGlucose.doubleValue(for: unit)
 
-                self.eventualGlucoseLabel.setText(numberFormatter.stringFromNumber(glucoseValue))
+                self.eventualGlucoseLabel.setText(numberFormatter.string(from: NSNumber(value: glucoseValue)))
                 self.eventualGlucoseLabel.setHidden(false)
             }
         }
@@ -77,11 +77,11 @@ final class StatusInterfaceController: ContextInterfaceController {
     // MARK: - Menu Items
 
     @IBAction func addCarbs() {
-        presentControllerWithName(AddCarbsInterfaceController.className, context: nil)
+        presentController(withName: AddCarbsInterfaceController.className, context: nil)
     }
 
     @IBAction func setBolus() {
-        presentControllerWithName(BolusInterfaceController.className, context: dataManager.lastContextData?.bolusSuggestion)
+        presentController(withName: BolusInterfaceController.className, context: dataManager.lastContextData?.bolusSuggestion)
     }
 
 }

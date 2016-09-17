@@ -17,7 +17,7 @@ extension GlucoseG4: GlucoseValue {
         return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
     }
 
-    public var startDate: NSDate {
+    public var startDate: Date {
         return time
     }
 }

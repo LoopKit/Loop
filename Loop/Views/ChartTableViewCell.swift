@@ -11,7 +11,7 @@ import UIKit
 
 final class ChartTableViewCell: UITableViewCell {
 
-    @IBOutlet var placeholderView: UIView?
+    @IBOutlet var chartContentView: ChartContentView!
 
     @IBOutlet var subtitleLabel: UILabel? {
         didSet {
@@ -19,16 +19,9 @@ final class ChartTableViewCell: UITableViewCell {
         }
     }
 
-    var chartView: UIView? {
-        didSet {
-            if let view = oldValue {
-                view.removeFromSuperview()
-            }
+    override func prepareForReuse() {
+        super.prepareForReuse()
 
-            if let view = chartView {
-                contentView.addSubview(view)
-            }
-        }
+        chartContentView.chartGenerator = nil
     }
-
 }

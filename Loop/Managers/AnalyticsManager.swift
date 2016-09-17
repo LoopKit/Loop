@@ -32,7 +32,7 @@ final class AnalyticsManager {
 
     private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
-    private func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
+    private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
         if isSimulator {
             NSLog("\(name) \(properties ?? [:])")
         } else {
@@ -43,7 +43,7 @@ final class AnalyticsManager {
 
     // MARK: - UIApplicationDelegate
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any]?) {
         logEvent("App Launch")
     }
 
@@ -67,7 +67,7 @@ final class AnalyticsManager {
         logEvent("RileyLink Connection")
     }
 
-    func transmitterTimeDidDrift(drift: NSTimeInterval) {
+    func transmitterTimeDidDrift(_ drift: TimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
     }
 
@@ -109,7 +109,7 @@ final class AnalyticsManager {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(carbs: Double) {
+    func didAddCarbsFromWatch(_ carbs: Double) {
         logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
     }
 
@@ -117,7 +117,7 @@ final class AnalyticsManager {
         logEvent("Bolus Retry", outOfSession: true)
     }
 
-    func didSetBolusFromWatch(units: Double) {
+    func didSetBolusFromWatch(_ units: Double) {
         logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
     }
 
