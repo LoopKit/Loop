@@ -643,10 +643,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @objc private func openCGMApp(_: Any) {
         if let URL = URL(string: "dexcomcgm://"), UIApplication.shared.canOpenURL(URL) {
-            UIApplication.shared.openURL(URL)
+            UIApplication.shared.open(URL)
         }
         else if let URL = URL(string: "dexcomshare://"), UIApplication.shared.canOpenURL(URL) {
-            UIApplication.shared.openURL(URL)
+            UIApplication.shared.open(URL)
         }
     }
 

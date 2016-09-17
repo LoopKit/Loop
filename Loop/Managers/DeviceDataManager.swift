@@ -114,7 +114,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
 
         if connectedPeripheralIDs.count == 0 {
-            NotificationManager.clearLoopNotRunningNotifications()
+            NotificationManager.clearPendingNotificationRequests()
         }
     }
 

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UserNotifications
 
 
 struct NotificationManager {
@@ -27,43 +28,44 @@ struct NotificationManager {
         case BolusStartDate
     }
 
-    static var userNotificationSettings: UIUserNotificationSettings {
-        let retryBolusAction = UIMutableUserNotificationAction()
-        retryBolusAction.title = NSLocalizedString("Retry", comment: "The title of the notification action to retry a bolus command")
-        retryBolusAction.identifier = Action.RetryBolus.rawValue
-        retryBolusAction.activationMode = .background
+    private static var notificationCategories: Set<UNNotificationCategory> {
+        var categories = [UNNotificationCategory]()
 
-        let bolusFailureCategory = UIMutableUserNotificationCategory()
-        bolusFailureCategory.identifier = Category.BolusFailure.rawValue
-        bolusFailureCategory.setActions([
-                retryBolusAction
-            ],
-            for: .default
+        let retryBolusAction = UNNotificationAction(
+            identifier: Action.RetryBolus.rawValue,
+            title: NSLocalizedString("Retry", comment: "The title of the notification action to retry a bolus command"),
+            options: []
         )
 
-        return UIUserNotificationSettings(
-            types: [.badge, .sound, .alert],
-            categories: [
-                bolusFailureCategory
-            ]
-        )
+        categories.append(UNNotificationCategory(
+            identifier: Category.BolusFailure.rawValue,
+            actions: [retryBolusAction],
+            intentIdentifiers: [],
+            options: []
+        ))
+
+        return Set(categories)
     }
 
-    static func authorize() {
-        UIApplication.shared.registerUserNotificationSettings(userNotificationSettings)
+    static func authorize(delegate: UNUserNotificationCenterDelegate) {
+        let center = UNUserNotificationCenter.current()
+
+        center.delegate = delegate
+        center.requestAuthorization(options: [.badge, .sound, .alert], completionHandler: { _, _ in })
+        center.setNotificationCategories(notificationCategories)
     }
 
     // MARK: - Notifications
 
     static func sendBolusFailureNotificationForAmount(_ units: Double, atDate startDate: Date) {
-        let notification = UILocalNotification()
+        let notification = UNMutableNotificationContent()
 
-        notification.alertTitle = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
-        notification.alertBody = String(format: NSLocalizedString("%@ U bolus may have failed.", comment: "The notification alert describing a possible bolus failure. The substitution parameter is the size of the bolus in units."), NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal))
-        notification.soundName = UILocalNotificationDefaultSoundName
+        notification.title = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
+        notification.body = String(format: NSLocalizedString("%@ U bolus may have failed.", comment: "The notification alert describing a possible bolus failure. The substitution parameter is the size of the bolus in units."), NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal))
+        notification.sound = UNNotificationSound.default()
 
         if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {
-            notification.category = Category.BolusFailure.rawValue
+            notification.categoryIdentifier = Category.BolusFailure.rawValue
         }
 
         notification.userInfo = [
@@ -71,30 +73,27 @@ struct NotificationManager {
             UserInfoKey.BolusStartDate.rawValue: startDate
         ]
 
-        UIApplication.shared.presentLocalNotificationNow(notification)
+        let request = UNNotificationRequest(
+            // Only support 1 bolus notification at once
+            identifier: Category.BolusFailure.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
     }
 
     // Cancel any previous scheduled notifications in the Loop Not Running category
-    static func clearLoopNotRunningNotifications() {
-        let app = UIApplication.shared
-
-        app.scheduledLocalNotifications?.filter({
-            $0.category == Category.LoopNotRunning.rawValue
-        }).forEach({
-            app.cancelLocalNotification($0)
-        })
+    static func clearPendingNotificationRequests() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
 
     static func scheduleLoopNotRunningNotifications() {
-        let app = UIApplication.shared
-
-        clearLoopNotRunningNotifications()
-
         // Give a little extra time for a loop-in-progress to complete
         let gracePeriod = TimeInterval(minutes: 0.5)
 
         for minutes: Double in [20, 40, 60, 120] {
-            let notification = UILocalNotification()
+            let notification = UNMutableNotificationContent()
             let failureInterval = TimeInterval(minutes: minutes)
 
             let formatter = DateComponentsFormatter()
@@ -103,15 +102,24 @@ struct NotificationManager {
             formatter.unitsStyle = .full
 
             if let failueIntervalString = formatter.string(from: failureInterval)?.localizedLowercase {
-                notification.alertBody = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failueIntervalString)
+                notification.body = String(format: NSLocalizedString("Loop has not completed successfully in %@", comment: "The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop"), failueIntervalString)
             }
 
-            notification.alertTitle = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            notification.fireDate = Date(timeIntervalSinceNow: failureInterval + gracePeriod)
-            notification.soundName = UILocalNotificationDefaultSoundName
-            notification.category = Category.LoopNotRunning.rawValue
+            notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
+            notification.sound = UNNotificationSound.default()
+            notification.categoryIdentifier = Category.LoopNotRunning.rawValue
+            notification.threadIdentifier = Category.LoopNotRunning.rawValue
 
-            app.scheduleLocalNotification(notification)
+            let request = UNNotificationRequest(
+                identifier: "\(Category.LoopNotRunning.rawValue)\(failureInterval)",
+                content: notification,
+                trigger: UNTimeIntervalNotificationTrigger(
+                    timeInterval: failureInterval + gracePeriod,
+                    repeats: false
+                )
+            )
+
+            UNUserNotificationCenter.current().add(request)
         }
     }
 
