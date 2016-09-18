@@ -124,33 +124,44 @@ struct NotificationManager {
     }
 
     static func sendPumpBatteryLowNotification() {
-        let notification = UILocalNotification()
+        let notification = UNMutableNotificationContent()
 
-        notification.alertTitle = NSLocalizedString("Pump Battery Low", comment: "The notification title for a low pump battery")
-        notification.alertBody = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
-        notification.soundName = UILocalNotificationDefaultSoundName
-        notification.category = Category.PumpBatteryLow.rawValue
+        notification.title = NSLocalizedString("Pump Battery Low", comment: "The notification title for a low pump battery")
+        notification.body = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
+        notification.sound = UNNotificationSound.default()
+        notification.categoryIdentifier = Category.PumpBatteryLow.rawValue
 
-        UIApplication.shared.presentLocalNotificationNow(notification)
+        let request = UNNotificationRequest(
+            identifier: Category.PumpBatteryLow.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
     }
 
     static func sendPumpReservoirEmptyNotification() {
-        let notification = UILocalNotification()
+        let notification = UNMutableNotificationContent()
 
-        notification.alertTitle = NSLocalizedString("Pump Reservoir Empty", comment: "The notification title for an empty pump reservoir")
-        notification.alertBody = NSLocalizedString("Change the pump reservoir now", comment: "The notification alert describing an empty pump reservoir")
-        notification.soundName = UILocalNotificationDefaultSoundName
-        notification.category = Category.PumpReservoirEmpty.rawValue
+        notification.title = NSLocalizedString("Pump Reservoir Empty", comment: "The notification title for an empty pump reservoir")
+        notification.body = NSLocalizedString("Change the pump reservoir now", comment: "The notification alert describing an empty pump reservoir")
+        notification.sound = UNNotificationSound.default()
+        notification.categoryIdentifier = Category.PumpReservoirEmpty.rawValue
 
-        // TODO: Add an action to Suspend the pump
+        let request = UNNotificationRequest(
+            // Not a typo: this should replace any pump reservoir low notifications
+            identifier: Category.PumpReservoirLow.rawValue,
+            content: notification,
+            trigger: nil
+        )
 
-        UIApplication.shared.presentLocalNotificationNow(notification)
+        UNUserNotificationCenter.current().add(request)
     }
 
     static func sendPumpReservoirLowNotificationForAmount(_ units: Double, andTimeRemaining remaining: TimeInterval?) {
-        let notification = UILocalNotification()
+        let notification = UNMutableNotificationContent()
 
-        notification.alertTitle = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
+        notification.title = NSLocalizedString("Pump Reservoir Low", comment: "The notification title for a low pump reservoir")
 
         let unitsString = NumberFormatter.localizedString(from: NSNumber(value: units), number: .decimal)
 
@@ -162,14 +173,20 @@ struct NotificationManager {
         intervalFormatter.includesTimeRemainingPhrase = true
 
         if let remaining = remaining, let timeString = intervalFormatter.string(from: remaining) {
-            notification.alertBody = String(format: NSLocalizedString("%1$@ U left: %2$@", comment: "Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining)"), unitsString, timeString)
+            notification.body = String(format: NSLocalizedString("%1$@ U left: %2$@", comment: "Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining)"), unitsString, timeString)
         } else {
-            notification.alertBody = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
+            notification.body = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
         }
 
-        notification.soundName = UILocalNotificationDefaultSoundName
-        notification.category = Category.PumpReservoirLow.rawValue
+        notification.sound = UNNotificationSound.default()
+        notification.categoryIdentifier = Category.PumpReservoirLow.rawValue
 
-        UIApplication.shared.presentLocalNotificationNow(notification)
+        let request = UNNotificationRequest(
+            identifier: Category.PumpReservoirLow.rawValue,
+            content: notification,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request)
     }
 }

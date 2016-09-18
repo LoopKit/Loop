@@ -61,27 +61,25 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     }
 
-    // MARK: - Notifications
+    // MARK: - 3D Touch
 
-    func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        if application.applicationState == .active {
-            if let message = notification.alertBody {
-                window?.rootViewController?.presentAlertController(withTitle: notification.alertTitle, message: message, animated: true, completion: nil)
-            }
-        }
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(false)
     }
+}
 
-    func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
 
-        switch identifier {
-        case NotificationManager.Action.RetryBolus.rawValue?:
-            if  let units = notification.userInfo?[NotificationManager.UserInfoKey.BolusAmount.rawValue] as? Double,
-                let startDate = notification.userInfo?[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? Date,
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case NotificationManager.Action.RetryBolus.rawValue:
+            if  let units = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.BolusAmount.rawValue] as? Double,
+                let startDate = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 AnalyticsManager.sharedManager.didRetryBolus()
 
-                dataManager.enactBolus(units) { (error) in
+                dataManager.enactBolus(units: units) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)
                     }
@@ -93,21 +91,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         default:
             break
         }
-
+        
         completionHandler()
-    }
-
-    // MARK: - 3D Touch
-
-    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-        completionHandler(false)
-    }
-}
-
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {

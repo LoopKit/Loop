@@ -596,7 +596,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         if let bolusViewController = segue.source as? BolusViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
                 let startDate = Date()
-                dataManager.enactBolus(bolus) { (error) in
+                dataManager.enactBolus(units: bolus) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus, atDate: startDate)
                     }
