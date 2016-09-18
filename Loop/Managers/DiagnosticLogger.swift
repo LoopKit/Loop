@@ -22,7 +22,7 @@ final class DiagnosticLogger {
     }
 
     init() {
-            let settings = NSBundle.mainBundle().remoteSettings,
+            let settings = Bundle.main.remoteSettings,
             AzureAPIHost = settings?["AzureAppServiceURL"],
             AzureTempBasalAPIPath = settings?["AzureAppServiceTempBasalAPI"],
             AzureStatusAPIPath = settings?["AzureAppServiceStatusAPI"]
@@ -59,21 +59,21 @@ final class DiagnosticLogger {
             path = AzureStatusAPIPath
         }
         if !isSimulator,
-            let messageData = try? NSJSONSerialization.dataWithJSONObject(message, options: []),
-            let URL = NSURL(string: AzureAPIHost)?.URLByAppendingPathComponent(path),
-            components = NSURLComponents(URL: URL, resolvingAgainstBaseURL: true)
+            let messageData = try? JSONSerialization.data(withJSONObject: message, options: []),
+            let URL = NSURL(string: AzureAPIHost)?.appendingPathComponent(path),
+            let components = NSURLComponents(url: URL, resolvingAgainstBaseURL: true)
         {
             //components.query = "apiKey=\(APIKey)"
             
-            if let URL = components.URL {
-                let request = NSMutableURLRequest(URL: URL)
+            if let URL = components.url {
+                let request = NSMutableURLRequest(url: URL)
                 
-                request.HTTPMethod = "POST"
+                request.httpMethod = "POST"
                 request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
                 
-                let task = NSURLSession.sharedSession().uploadTaskWithRequest(request, fromData: messageData) { (_, _, error) -> Void in
+                let task = URLSession.shared.uploadTask(with: request as URLRequest, from: messageData) { (_, _, error) -> Void in
                     if let error = error {
-                        NSLog("%s error: %@", #function, error)
+                        //NSLog("%s error: %@", #function, error)
                     }
                 }
                 

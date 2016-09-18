@@ -14,7 +14,7 @@ extension Bundle {
     }
     
     private var remoteSettingsPath: String? {
-        return NSBundle.mainBundle().pathForResource("RemoteSettings", ofType: "plist")
+        return Bundle.main.path(forResource: "RemoteSettings", ofType: "plist")
     }
     
     var remoteSettings: [String: String]? {

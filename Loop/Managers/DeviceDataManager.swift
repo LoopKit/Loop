@@ -321,8 +321,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 }
         let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                 
-                if let sentrySupported = self.pumpState?.pumpModel?.larger where !sentrySupported {
-                    self.setBatteryDataforNonMySentryPumps(status.batteryVolts)
+                if let sentrySupported = self.pumpState?.pumpModel?.larger , !sentrySupported {
+                    self.setBatteryDataforNonMySentryPumps(voltage: status.batteryVolts)
                     }
                 
                 let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)

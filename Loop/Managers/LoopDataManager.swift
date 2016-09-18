@@ -633,7 +633,7 @@ final class LoopDataManager {
 
                     self.lastTempBasal = DoseEntry(type: .tempBasal, startDate: startDate, endDate: endDate, value: body.rate, unit: .unitsPerHour)
                     self.recommendedTempBasal = nil
-                    self.addLoopTempBasalNotification((self.deviceDataManager.glucoseStore?.latestGlucose)!,prediction: self.predictedGlucose!,recommendedTempBasal: recommendedTempBasal)
+                    self.addLoopTempBasalNotification(glucose: (self.deviceDataManager.glucoseStore?.latestGlucose)!,prediction: self.predictedGlucose!,recommendedTempBasal: recommendedTempBasal)
                     resultsHandler(true, nil)
                 }
             case .failure(let error):
@@ -662,18 +662,18 @@ final class LoopDataManager {
     }
     
     private func addLoopTempBasalNotification(glucose: GlucoseValue, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
-        let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
+        let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
         let logger = DiagnosticLogger();
         let unit = HKUnit.milligramsPerDeciliterUnit()
         let pushMessage: [String: AnyObject] = [
-            "bg": glucose.quantity.doubleValueForUnit(unit),
-            "temp": "absolute",
-            "received": true,
-            "rate": recommendedTempBasal!.rate,
-            "duration": recommendedTempBasal!.duration.minutes,
-            "timestamp": dateFormatter.stringFromDate(recommendedTempBasal!.recommendedDate),
-            "eventualBG": round(prediction.last!.quantity.doubleValueForUnit(unit))]
-        logger.loopPushNotification(pushMessage, loopAlert: false)
+            "bg": glucose.quantity.doubleValue(for: unit) as AnyObject,
+            "temp": "absolute" as AnyObject,
+            "received": true as AnyObject,
+            "rate": recommendedTempBasal!.rate as AnyObject,
+            "duration": recommendedTempBasal!.duration.minutes as AnyObject,
+            "timestamp": dateFormatter.string(from: recommendedTempBasal!.recommendedDate) as AnyObject,
+            "eventualBG": round(prediction.last!.quantity.doubleValue(for: unit)) as AnyObject]
+        logger.loopPushNotification(message: pushMessage, loopAlert: false);
     }
 
 }

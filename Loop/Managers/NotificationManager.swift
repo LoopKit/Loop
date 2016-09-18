@@ -29,13 +29,13 @@ struct NotificationManager {
     
     private static func sendAlertPushNotification(alert: String){
         let logger = DiagnosticLogger()
-        let dateFormatter = NSDateFormatter.ISO8601StrictDateFormatter()
+        let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
         let date = NSDate()
         let pushMessage: [String: AnyObject] = [
-            "DeviceName": "Loop",
-            "TimeStamp": dateFormatter.stringFromDate(date),
-            "Reason": alert]
-        logger.loopPushNotification(pushMessage, loopAlert: true)
+            "DeviceName": "Loop" as AnyObject,
+            "TimeStamp": dateFormatter.string(from: date as Date) as AnyObject,
+            "Reason": alert as AnyObject]
+        logger.loopPushNotification(message: pushMessage, loopAlert: true)
     }
 
     static var userNotificationSettings: UIUserNotificationSettings {
@@ -81,7 +81,7 @@ struct NotificationManager {
             UserInfoKey.BolusAmount.rawValue: units,
             UserInfoKey.BolusStartDate.rawValue: startDate
         ]
-        sendAlertPushNotification(notification.alertBody!)
+        sendAlertPushNotification(alert: notification.alertBody!)
         UIApplication.shared.presentLocalNotificationNow(notification)
     }
 
@@ -133,7 +133,7 @@ struct NotificationManager {
         notification.alertBody = NSLocalizedString("Change the pump battery immediately", comment: "The notification alert describing a low pump battery")
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.category = Category.PumpBatteryLow.rawValue
-        sendAlertPushNotification(notification.alertBody!)
+        sendAlertPushNotification(alert: notification.alertBody!)
         UIApplication.shared.presentLocalNotificationNow(notification)
     }
 
@@ -146,7 +146,7 @@ struct NotificationManager {
         notification.category = Category.PumpReservoirEmpty.rawValue
 
         // TODO: Add an action to Suspend the pump
-        sendAlertPushNotification(notification.alertBody!)
+        sendAlertPushNotification(alert: notification.alertBody!)
         UIApplication.shared.presentLocalNotificationNow(notification)
    }
 
@@ -172,7 +172,7 @@ struct NotificationManager {
 
         notification.soundName = UILocalNotificationDefaultSoundName
         notification.category = Category.PumpReservoirLow.rawValue
-        sendAlertPushNotification(notification.alertBody!)
+        sendAlertPushNotification(alert: notification.alertBody!)
         UIApplication.shared.presentLocalNotificationNow(notification)
     }
 }
