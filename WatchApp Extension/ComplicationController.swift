@@ -100,14 +100,14 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     // MARK: - Placeholder Templates
-    
-    func getPlaceholderTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
+
+    func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         switch complication.family {
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
 
             template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
-            template.line2TextProvider = CLKSimpleTextProvider(text: "mg/dL")
+            template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
 
             handler(template)
         default:
