@@ -15,7 +15,6 @@
 		4313EDE01D8A6BF90060FA79 /* ChartContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313EDDF1D8A6BF90060FA79 /* ChartContentView.swift */; };
 		4315D2871CA5CC3B00589052 /* CarbEntryEditTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */; };
 		4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */; };
-		4328E0181CFBE1DA00E199AA /* ContextInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */; };
 		4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */; };
 		4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */; };
 		4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */; };
@@ -71,6 +70,7 @@
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
 		43846AD51D8FA67800799272 /* Base.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD41D8FA67800799272 /* Base.lproj */; };
 		43846AD91D8FA84B00799272 /* gallery.ckcomplication in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD81D8FA84B00799272 /* gallery.ckcomplication */; };
+		43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43846ADA1D91057000799272 /* ContextUpdatable.swift */; };
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
@@ -244,7 +244,6 @@
 		4313EDDF1D8A6BF90060FA79 /* ChartContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartContentView.swift; sourceTree = "<group>"; };
 		4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryEditTableViewController.swift; sourceTree = "<group>"; };
 		4315D2891CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLogger+LoopKit.swift"; sourceTree = "<group>"; };
-		4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextInterfaceController.swift; sourceTree = "<group>"; };
 		4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInterfaceController.swift; sourceTree = "<group>"; };
 		4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusInterfaceController.swift; sourceTree = "<group>"; };
 		4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
@@ -299,6 +298,7 @@
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
 		43846AD41D8FA67800799272 /* Base.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Base.lproj; sourceTree = "<group>"; };
 		43846AD81D8FA84B00799272 /* gallery.ckcomplication */ = {isa = PBXFileReference; lastKnownFileType = folder; path = gallery.ckcomplication; sourceTree = "<group>"; };
+		43846ADA1D91057000799272 /* ContextUpdatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextUpdatable.swift; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
@@ -445,7 +445,7 @@
 			children = (
 				4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */,
 				4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */,
-				4328E0131CFBE1DA00E199AA /* ContextInterfaceController.swift */,
+				43846ADA1D91057000799272 /* ContextUpdatable.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
 				4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */,
 			);
@@ -1097,7 +1097,6 @@
 			files = (
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */,
-				4328E0181CFBE1DA00E199AA /* ContextInterfaceController.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				4328E0291CFBE2C500E199AA /* NSUserDefaults.swift in Sources */,
@@ -1107,6 +1106,7 @@
 				4328E02B1CFBE2C500E199AA /* WKAlertAction.swift in Sources */,
 				4328E0281CFBE2C500E199AA /* CLKComplicationTemplate.swift in Sources */,
 				4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */,
+				43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */,
 				43EA285F1D50ED3D001BC233 /* GlucoseTrend.swift in Sources */,
 				4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,

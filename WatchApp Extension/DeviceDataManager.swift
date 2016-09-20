@@ -17,17 +17,9 @@ enum DeviceDataManagerError: Error {
 }
 
 
-final class DeviceDataManager: NSObject, WCSessionDelegate {
+final class DeviceDataManager {
 
     private var connectSession: WCSession?
-
-    private func readContext() -> WatchContext? {
-        return UserDefaults.standard.watchContext
-    }
-
-    private func saveContext(_ context: WatchContext) {
-        UserDefaults.standard.watchContext = context
-    }
 
     private var complicationDataLastRefreshed: Date {
         get {
@@ -47,17 +39,11 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
         }
     }
 
-    dynamic var lastContextData: WatchContext? {
-        didSet {
-            if let data = lastContextData {
-                saveContext(data)
-            }
-        }
-    }
+    var lastContextData: WatchContext?
 
     func updateComplicationDataIfNeeded() {
-        if DeviceDataManager.sharedManager.hasNewComplicationData {
-            DeviceDataManager.sharedManager.hasNewComplicationData = false
+        if hasNewComplicationData {
+            hasNewComplicationData = false
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
                 if complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(-8 * 60 * 60) {
@@ -111,45 +97,7 @@ final class DeviceDataManager: NSObject, WCSessionDelegate {
         })
     }
 
-    // MARK: - WCSessionDelegate
-
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-//        if let error = error {
-            // TODO: os_log_info in iOS 10
-//        }
-    }
-
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        if let context = WatchContext(rawValue: applicationContext as WatchContext.RawValue) {
-            lastContextData = context
-        }
-    }
-
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
-        switch userInfo["name"] as? String {
-        case .some:
-            break
-        default:
-            if let context = WatchContext(rawValue: userInfo as WatchContext.RawValue) {
-                lastContextData = context
-                updateComplicationDataIfNeeded()
-            }
-        }
-    }
-
     // MARK: - Initialization
 
     static let sharedManager = DeviceDataManager()
-
-    override init() {
-        super.init()
-
-        connectSession = WCSession.default()
-        connectSession?.delegate = self
-        connectSession?.activate()
-
-        if let context = readContext() {
-            self.lastContextData = context
-        }
-    }
 }

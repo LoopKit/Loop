@@ -6,6 +6,7 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import WatchConnectivity
 import WatchKit
 
 
@@ -13,15 +14,23 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
+
+        WCSession.default().delegate = self
     }
 
     func applicationDidBecomeActive() {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+
+        WCSession.default().activate()
     }
 
     func applicationWillResignActive() {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, etc.
+    }
+
+    func handleUserActivity(_ userInfo: [AnyHashable : Any]?) {
+        // Use it to respond to Handoff–related activity. WatchKit calls this method when your app is launched as a result of a Handoff action. Use the information in the provided userInfo dictionary to determine how you want to respond to the action. For example, you might decide to display a specific interface controller.
     }
 
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
@@ -64,4 +73,52 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    // Main queue only
+    private(set) var lastContext: WatchContext? {
+        didSet {
+            WKExtension.shared().rootUpdatableInterfaceController?.update(with: lastContext)
+        }
+    }
+
+    fileprivate func updateContext(_ data: [String: Any]) {
+        if let context = WatchContext(rawValue: data as WatchContext.RawValue) {
+            DispatchQueue.main.async {
+                self.lastContext = context
+            }
+        }
+    }
+
+}
+
+
+extension ExtensionDelegate: WCSessionDelegate {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        // TODO: if error, os_log_info?
+
+        if activationState == .activated && lastContext == nil {
+            updateContext(session.receivedApplicationContext)
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        updateContext(applicationContext)
+    }
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        // WatchContext is the only userInfo type without a "name" key. This isn't a great heuristic.
+        if !(userInfo["name"] is String) {
+            updateContext(userInfo)
+        }
+    }
+}
+
+
+fileprivate extension WKExtension {
+    var extensionDelegate: ExtensionDelegate! {
+        return delegate as? ExtensionDelegate
+    }
+
+    var rootUpdatableInterfaceController: ContextUpdatable? {
+        return rootInterfaceController as? ContextUpdatable
+    }
 }
