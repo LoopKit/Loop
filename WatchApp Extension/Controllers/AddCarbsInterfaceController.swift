@@ -14,18 +14,18 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     private var carbValue: Int = 15
 
-    private var absorptionTime = AbsorptionTimeType.Medium {
+    private var absorptionTime = AbsorptionTimeType.medium {
         didSet {
             absorptionButtonA.setBackgroundColor(UIColor.darkTintColor)
             absorptionButtonB.setBackgroundColor(UIColor.darkTintColor)
             absorptionButtonC.setBackgroundColor(UIColor.darkTintColor)
 
             switch absorptionTime {
-            case .Fast:
+            case .fast:
                 absorptionButtonA.setBackgroundColor(UIColor.tintColor)
-            case .Medium:
+            case .medium:
                 absorptionButtonB.setBackgroundColor(UIColor.tintColor)
-            case .Slow:
+            case .slow:
                 absorptionButtonC.setBackgroundColor(UIColor.tintColor)
             }
         }
@@ -41,8 +41,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBOutlet var absorptionButtonC: WKInterfaceButton!
 
-    override func awakeWithContext(context: AnyObject?) {
-        super.awakeWithContext(context)
+    override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
         
         // Configure interface objects here.
 
@@ -52,7 +52,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
         valuePicker.setSelectedItemIndex(carbValue)
 
-        absorptionTime = .Medium
+        absorptionTime = .medium
     }
 
     override func willActivate() {
@@ -69,7 +69,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     // MARK: - Actions
 
-    @IBAction func pickerValueUpdated(value: Int) {
+    @IBAction func pickerValueUpdated(_ value: Int) {
         carbValue = value
         valueLabel.setText(String(value))
     }
@@ -83,25 +83,25 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     }
 
     @IBAction func setAbsorptionTimeFast() {
-        absorptionTime = .Fast
+        absorptionTime = .fast
     }
 
     @IBAction func setAbsorptionTimeMedium() {
-        absorptionTime = .Medium
+        absorptionTime = .medium
     }
 
     @IBAction func setAbsorptionTimeSlow() {
-        absorptionTime = .Slow
+        absorptionTime = .slow
     }
 
     @IBAction func save() {
         if carbValue > 0 {
-            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: NSDate())
+            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
 
             DeviceDataManager.sharedManager.sendCarbEntry(entry)
         }
 
-        dismissController()
+        dismiss()
     }
 
 }

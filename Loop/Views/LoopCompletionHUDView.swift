@@ -24,7 +24,7 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    var lastLoopCompleted: NSDate? {
+    var lastLoopCompleted: Date? {
         didSet {
             updateTimer = nil
             loopInProgress = false
@@ -38,7 +38,7 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    func assertTimer(active: Bool = true) {
+    func assertTimer(_ active: Bool = true) {
         if active && window != nil, let date = lastLoopCompleted {
             initTimer(date)
         } else {
@@ -46,11 +46,11 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    private func initTimer(startDate: NSDate) {
-        let updateInterval = NSTimeInterval(minutes: 1)
+    private func initTimer(_ startDate: Date) {
+        let updateInterval = TimeInterval(minutes: 1)
 
-        let timer = NSTimer(
-            fireDate: startDate.dateByAddingTimeInterval(2),
+        let timer = Timer(
+            fireAt: startDate.addingTimeInterval(2),
             interval: updateInterval,
             target: self,
             selector: #selector(updateDisplay(_:)),
@@ -59,10 +59,10 @@ final class LoopCompletionHUDView: HUDView {
         )
         updateTimer = timer
 
-        NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSDefaultRunLoopMode)
+        RunLoop.main.add(timer, forMode: RunLoopMode.defaultRunLoopMode)
     }
 
-    private var updateTimer: NSTimer? {
+    private var updateTimer: Timer? {
         willSet {
             if let timer = updateTimer {
                 timer.invalidate()
@@ -70,30 +70,30 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    private lazy var formatter: NSDateComponentsFormatter = {
-        let formatter = NSDateComponentsFormatter()
+    private lazy var formatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
 
-        formatter.allowedUnits = [.Hour, .Minute]
+        formatter.allowedUnits = [.hour, .minute]
         formatter.maximumUnitCount = 1
-        formatter.unitsStyle = .Short
+        formatter.unitsStyle = .short
 
         return formatter
     }()
 
-    @objc private func updateDisplay(_: NSTimer?) {
+    @objc private func updateDisplay(_: Timer?) {
         if let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
             switch ago {
             case let t where t.minutes <= 5:
-                loopStateView.freshness = .Fresh
+                loopStateView.freshness = .fresh
             case let t where t.minutes <= 15:
-                loopStateView.freshness = .Aging
+                loopStateView.freshness = .aging
             default:
-                loopStateView.freshness = .Stale
+                loopStateView.freshness = .stale
             }
 
-            if let timeString = formatter.stringFromTimeInterval(ago) {
+            if let timeString = formatter.string(from: ago) {
                 caption.text = String(format: NSLocalizedString("%@ ago", comment: "The description of the time interval since the last completion date. The format string"), timeString)
             } else {
                 caption.text = "—"

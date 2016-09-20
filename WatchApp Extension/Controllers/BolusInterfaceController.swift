@@ -23,11 +23,11 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
                 formatter.minimumFractionDigits = 1
             }
 
-            valueLabel.setText(formatter.stringFromNumber(bolusValue) ?? "--")
+            valueLabel.setText(formatter.string(from: NSNumber(value: bolusValue)) ?? "--")
         }
     }
 
-    private func pickerValueFromBolusValue(bolusValue: Double) -> Int {
+    private func pickerValueFromBolusValue(_ bolusValue: Double) -> Int {
         switch bolusValue {
         case let bolus where bolus > 10:
             return Int((bolus - 10.0) * 10) + pickerValueFromBolusValue(10)
@@ -38,7 +38,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         }
     }
 
-    private func bolusValueFromPickerValue(pickerValue: Int) -> Double {
+    private func bolusValueFromPickerValue(_ pickerValue: Int) -> Double {
         switch pickerValue {
         case let picker where picker > 220:
             return Double(picker - 220) / 10.0 + bolusValueFromPickerValue(220)
@@ -49,9 +49,9 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         }
     }
 
-    private lazy var formatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .DecimalStyle
+    private lazy var formatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
         formatter.minimumIntegerDigits = 1
 
         return formatter
@@ -65,8 +65,8 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     /// REC: 2.25 U
     @IBOutlet var recommendedValueLabel: WKInterfaceLabel!
 
-    override func awakeWithContext(context: AnyObject?) {
-        super.awakeWithContext(context)
+    override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
 
         let maxPickerValue: Int
         var maxBolusValue: Double = 15
@@ -87,8 +87,8 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             pickerValue = Int(Double(recommendedPickerValue) * 0.75)
             bolusValue = bolusValueFromPickerValue(pickerValue)
 
-            if let valueString = formatter.stringFromNumber(recommendedBolus) {
-                recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercaseString)
+            if let valueString = formatter.string(from: NSNumber(value: recommendedBolus)) {
+                recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
         } else {
             maxPickerValue = pickerValueFromBolusValue(maxBolusValue)
@@ -115,7 +115,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     // MARK: - Actions
 
-    @IBAction func pickerValueUpdated(value: Int) {
+    @IBAction func pickerValueUpdated(_ value: Int) {
         bolusValue = bolusValueFromPickerValue(value)
     }
 
@@ -129,13 +129,13 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     @IBAction func deliver() {
         if bolusValue > 0 {
-            let bolus = SetBolusUserInfo(value: bolusValue, startDate: NSDate())
+            let bolus = SetBolusUserInfo(value: bolusValue, startDate: Date())
             do {
                 try DeviceDataManager.sharedManager.sendSetBolus(bolus)
-            } catch DeviceDataManager.Error.ReachabilityError {
-                presentAlertControllerWithTitle(NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
+            } catch DeviceDataManagerError.reachabilityError {
+                presentAlert(withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
                     message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a bolus attempt fails"),
-                    preferredStyle: .Alert,
+                    preferredStyle: .alert,
                     actions: [WKAlertAction.dismissAction()]
                 )
                 return
@@ -143,7 +143,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             }
         }
 
-        dismissController()
+        dismiss()
     }
 
 }

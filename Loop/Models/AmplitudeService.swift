@@ -21,7 +21,7 @@ struct AmplitudeService: ServiceAuthentication {
                 title: NSLocalizedString("API Key", comment: "The title of the amplitude API key credential"),
                 placeholder: nil,
                 isSecret: false,
-                keyboardType: .ASCIICapable,
+                keyboardType: .asciiCapable,
                 value: APIKey
             )
         ]
@@ -35,11 +35,11 @@ struct AmplitudeService: ServiceAuthentication {
         return credentials[0].value
     }
 
-    private(set) var isAuthorized: Bool = false
+    var isAuthorized: Bool = false
 
-    mutating func verify(completion: (success: Bool, error: ErrorType?) -> Void) {
+    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let APIKey = APIKey else {
-            completion(success: false, error: nil)
+            completion(false, nil)
             return
         }
 
@@ -47,7 +47,7 @@ struct AmplitudeService: ServiceAuthentication {
         let client = Amplitude()
         client.initializeApiKey(APIKey)
         self.client = client
-        completion(success: true, error: nil)
+        completion(true, nil)
     }
 
     mutating func reset() {

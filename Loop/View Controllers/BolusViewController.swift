@@ -13,21 +13,17 @@ import LoopKit
 
 final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
 
         bolusAmountTextField.becomeFirstResponder()
-    }
-
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
 
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
     var recommendedBolus: Double = 0 {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
         }
     }
 
@@ -35,7 +31,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
         }
     }
 
@@ -43,13 +39,13 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     // MARK: - Actions
 
-    @IBAction func authenticateBolus(sender: AnyObject) {
+    @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
 
         let context = LAContext()
 
-        if context.canEvaluatePolicy(.DeviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.DeviceOwnerAuthentication,
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication,
                                    localizedReason: NSLocalizedString("Please authenticate to bolus", comment: "The message displayed during a device authentication prompt for bolus specification"),
                                    reply: { (success, error) in
                 if success {
@@ -61,16 +57,16 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         }
     }
 
-    private func setBolusAndClose(sender: AnyObject) {
-        if let text = bolusAmountTextField?.text, bolus = decimalFormatter.numberFromString(text)?.doubleValue {
+    private func setBolusAndClose(_ sender: Any) {
+        if let text = bolusAmountTextField?.text, let bolus = decimalFormatter.number(from: text)?.doubleValue {
             self.bolus = bolus
 
-            self.performSegueWithIdentifier("close", sender: sender)
+            self.performSegue(withIdentifier: "close", sender: sender)
         }
     }
 
-    private lazy var decimalFormatter: NSNumberFormatter = {
-        let numberFormatter = NSNumberFormatter()
+    private lazy var decimalFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
 
         numberFormatter.maximumSignificantDigits = 3
         numberFormatter.minimumFractionDigits = 1
@@ -78,9 +74,15 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         return numberFormatter
     }()
 
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+
+        bolusAmountTextField.resignFirstResponder()
+    }
+
     // MARK: - UITextFieldDelegate
 
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
 
         return true

@@ -9,32 +9,32 @@
 import Foundation
 
 
-extension NSUserDefaults {
+extension UserDefaults {
     private enum Key: String {
         case ComplicationDataLastRefreshed = "com.loudnate.Naterade.ComplicationDataLastRefreshed"
         case WatchContext = "com.loudnate.Naterade.WatchContext"
         case WatchContextReadyForComplication = "com.loudnate.Naterade.WatchContextReadyForComplication"
     }
 
-    var complicationDataLastRefreshed: NSDate {
+    var complicationDataLastRefreshed: Date {
         get {
-            return objectForKey(Key.ComplicationDataLastRefreshed.rawValue) as? NSDate ?? NSDate.distantPast()
+            return object(forKey: Key.ComplicationDataLastRefreshed.rawValue) as? Date ?? Date.distantPast
         }
         set {
-            setObject(newValue, forKey: Key.ComplicationDataLastRefreshed.rawValue)
+            set(newValue, forKey: Key.ComplicationDataLastRefreshed.rawValue)
         }
     }
 
     var watchContext: WatchContext? {
         get {
-            if let rawValue = dictionaryForKey(Key.WatchContext.rawValue) {
-                return WatchContext(rawValue: rawValue)
+            if let rawValue = dictionary(forKey: Key.WatchContext.rawValue) {
+                return WatchContext(rawValue: rawValue as WatchContext.RawValue)
             } else {
                 return nil
             }
         }
         set {
-            setObject(newValue?.rawValue, forKey: Key.WatchContext.rawValue)
+            set(newValue?.rawValue, forKey: Key.WatchContext.rawValue)
 
             watchContextReadyForComplication = newValue != nil
         }
@@ -42,10 +42,10 @@ extension NSUserDefaults {
 
     var watchContextReadyForComplication: Bool {
         get {
-            return boolForKey(Key.WatchContextReadyForComplication.rawValue)
+            return bool(forKey: Key.WatchContextReadyForComplication.rawValue)
         }
         set {
-            setBool(newValue, forKey: Key.WatchContextReadyForComplication.rawValue)
+            set(newValue, forKey: Key.WatchContextReadyForComplication.rawValue)
         }
     }
 }

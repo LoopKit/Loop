@@ -14,7 +14,7 @@ final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
 
     let unitString: String?
 
-    init(actualDouble: Double, unitString: String? = nil, formatter: NSNumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
+    init(actualDouble: Double, unitString: String? = nil, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
         let screenLocDouble: Double
 
         switch actualDouble {
@@ -31,7 +31,7 @@ final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
         super.init(screenLocDouble: screenLocDouble, actualDouble: actualDouble, formatter: formatter, labelSettings: labelSettings)
     }
 
-    init(screenLocDouble: Double, formatter: NSNumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
+    init(screenLocDouble: Double, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
         let actualDouble: Double
 
         switch screenLocDouble {

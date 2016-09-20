@@ -11,33 +11,31 @@ import MinimedKit
 
 
 extension MySentryPumpStatusMessageBody: SensorDisplayable {
-    var stateDescription: String {
+    var isStateValid: Bool {
         switch glucose {
-        case .Active:
-            return "✓"
-        case .Off:
-            return ""
+        case .active, .off:
+            return true
         default:
-            return String(glucose)
+            return false
         }
     }
 
     var trendType: GlucoseTrend? {
-        guard case .Active = glucose else {
+        guard case .active = glucose else {
             return nil
         }
 
         switch glucoseTrend {
-        case .Down:
-            return .Down
-        case .DownDown:
-            return .DownDown
-        case .Up:
-            return .Up
-        case .UpUp:
-            return .UpUp
-        case .Flat:
-            return .Flat
+        case .down:
+            return .down
+        case .downDown:
+            return .downDown
+        case .up:
+            return .up
+        case .upUp:
+            return .upUp
+        case .flat:
+            return .flat
         }
     }
 }
