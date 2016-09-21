@@ -119,7 +119,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
             var components = DateComponents()
             components.minute = 0
             let date = Date(timeIntervalSinceNow: -TimeInterval(hours: 1))
-            charts.startDate = (calendar as NSCalendar).nextDate(after: date, matching: components, options: [.matchStrictly, .searchBackwards]) ?? date
+            charts.startDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
             var glucoseUnit: HKUnit?

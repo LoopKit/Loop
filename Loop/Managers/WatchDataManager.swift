@@ -39,7 +39,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     @objc private func updateWatch(_ notification: Notification) {
         guard
-            let rawContext = (notification as NSNotification).userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+            let rawContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
             case .tempBasal = context,
             let session = watchSession
