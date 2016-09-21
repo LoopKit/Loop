@@ -12,6 +12,10 @@ import WatchKit
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
+    static func shared() -> ExtensionDelegate {
+        return WKExtension.shared().extensionDelegate
+    }
+
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
 
@@ -39,31 +43,28 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             case is WKApplicationRefreshBackgroundTask:
                 // Use the WKApplicationRefreshBackgroundTask class to update your app’s state in the background.
                 // You often use a background app refresh task to drive other tasks. For example, you could use a background app refresh task to start an URLSession background transfer, or to schedule a background snapshot refresh task.
-
                 // Your app must schedule background app refresh tasks by calling your extension’s scheduleBackgroundRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system never schedules these tasks.
-
                 // WKExtension.shared().scheduleBackgroundRefresh(withPreferredDate: <#T##Date#>, userInfo: <#T##NSSecureCoding?#>, scheduledCompletion: <#T##(Error?) -> Void#>)
-
                 // For more information, see [WKApplicationRefreshBackgroundTask] https://developer.apple.com/reference/watchkit/wkapplicationrefreshbackgroundtask
-
                 // Background app refresh tasks are budgeted. In general, the system performs approximately one task per hour for each app in the dock (including the most recently used app). This budget is shared among all apps on the dock. The system performs multiple tasks an hour for each app with a complication on the active watch face. This budget is shared among all complications on the watch face. After you exhaust the budget, the system delays your requests until more time becomes available.
                 break
             case let task as WKSnapshotRefreshBackgroundTask:
                 // Use the WKSnapshotRefreshBackgroundTask class to update your app’s user interface. You can push, pop, or present other interface controllers, and then update the content of the desired interface controller. The system automatically takes a snapshot of your user interface as soon as this task completes.
                 // Your app can invalidate its current snapshot and schedule a background snapshot refresh tasks by calling your extension’s scheduleSnapshotRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system will also schedule background snapshot refresh tasks to periodically update your snapshot.
+                // For more information, see WKSnapshotRefreshBackgroundTask.
+                // WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: <#T##Date#>, userInfo: <#T##NSSecureCoding?#>, scheduledCompletion: <#T##(Error?) -> Void#>)
+                // For more information about snapshots, see Snapshots.
 
-//                For more information, see WKSnapshotRefreshBackgroundTask.
-
-//                WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: <#T##Date#>, userInfo: <#T##NSSecureCoding?#>, scheduledCompletion: <#T##(Error?) -> Void#>)
-
-//                For more information about snapshots, see Snapshots.
-                break
+                task.setTaskCompleted(restoredDefaultState: false, estimatedSnapshotExpiration: Date(timeIntervalSinceNow: TimeInterval(minutes: 5)), userInfo: nil)
+                return  // Don't call the standard setTaskCompleted handler
             case is WKURLSessionRefreshBackgroundTask:
                 // Use the WKURLSessionRefreshBackgroundTask class to respond to URLSession background transfers.
                 break
             case is WKWatchConnectivityRefreshBackgroundTask:
                 // Use the WKWatchConnectivityRefreshBackgroundTask class to receive background updates from the WatchConnectivity framework.
                 // For more information, see WKWatchConnectivityRefreshBackgroundTask.
+
+                WCSession.default().activate()
                 break
             default:
                 break
@@ -77,6 +78,21 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     private(set) var lastContext: WatchContext? {
         didSet {
             WKExtension.shared().rootUpdatableInterfaceController?.update(with: lastContext)
+
+            if WKExtension.shared().applicationState != .active {
+                WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: Date(), userInfo: nil) { (_) in }
+            }
+
+            // Update complication data if needed
+            let server = CLKComplicationServer.sharedInstance()
+            for complication in server.activeComplications ?? [] {
+                if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(-8 * 60 * 60) {
+                    UserDefaults.standard.complicationDataLastRefreshed = Date()
+                    server.reloadTimeline(for: complication)
+                } else {
+                    server.extendTimeline(for: complication)
+                }
+            }
         }
     }
 
@@ -87,7 +103,6 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             }
         }
     }
-
 }
 
 
@@ -109,6 +124,13 @@ extension ExtensionDelegate: WCSessionDelegate {
         if !(userInfo["name"] is String) {
             updateContext(userInfo)
         }
+    }
+}
+
+
+extension ExtensionDelegate {
+    func present(_ error: Error) {
+        WKExtension.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
     }
 }
 

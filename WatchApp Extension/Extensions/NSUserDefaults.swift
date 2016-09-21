@@ -25,7 +25,7 @@ extension UserDefaults {
         }
     }
 
-    var watchContext: WatchContext? {
+    private var watchContext: WatchContext? {
         get {
             if let rawValue = dictionary(forKey: Key.WatchContext.rawValue) {
                 return WatchContext(rawValue: rawValue as WatchContext.RawValue)
@@ -40,7 +40,7 @@ extension UserDefaults {
         }
     }
 
-    var watchContextReadyForComplication: Bool {
+    private var watchContextReadyForComplication: Bool {
         get {
             return bool(forKey: Key.WatchContextReadyForComplication.rawValue)
         }

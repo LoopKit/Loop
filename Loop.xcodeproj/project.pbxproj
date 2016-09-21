@@ -97,10 +97,10 @@
 		43C246A81D89990F0031F8D1 /* Crypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C246A71D89990F0031F8D1 /* Crypto.framework */; };
 		43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */; };
 		43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43CA93361CB98079000026B5 /* MinimedKit.framework */; };
+		43CB2B2B1D924D450079823D /* WCSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CB2B2A1D924D450079823D /* WCSession.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* Data.swift */; };
 		43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */; };
 		43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */; };
-		43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */; };
 		43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */; };
 		43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
 		43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */; };
@@ -327,11 +327,11 @@
 		43C246A71D89990F0031F8D1 /* Crypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crypto.framework; path = Carthage/Build/iOS/Crypto.framework; sourceTree = "<group>"; };
 		43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ShareGlucose+GlucoseKit.swift"; sourceTree = "<group>"; };
 		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MinimedKit.framework; path = Carthage/Build/iOS/MinimedKit.framework; sourceTree = "<group>"; };
+		43CB2B2A1D924D450079823D /* WCSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WCSession.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "WatchApp Extension.entitlements"; sourceTree = "<group>"; };
 		43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BolusViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DeviceDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceDataManager.swift; sourceTree = "<group>"; };
 		43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryTableViewController.swift; sourceTree = "<group>"; };
 		43DE92501C541832001FFDE1 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryUserInfo.swift; sourceTree = "<group>"; };
@@ -459,6 +459,7 @@
 				4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */,
 				4328E0231CFBE2C500E199AA /* NSUserDefaults.swift */,
 				4328E0241CFBE2C500E199AA /* UIColor.swift */,
+				43CB2B2A1D924D450079823D /* WCSession.swift */,
 				4328E0251CFBE2C500E199AA /* WKAlertAction.swift */,
 				4328E02E1CFBF81800E199AA /* WKInterfaceImage.swift */,
 			);
@@ -552,7 +553,6 @@
 				43846AD41D8FA67800799272 /* Base.lproj */,
 				43A943911B926B7B0051FA24 /* Info.plist */,
 				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
-				43DBF0541C93ED3000B3C386 /* DeviceDataManager.swift */,
 				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				4328E0121CFBE1B700E199AA /* Controllers */,
@@ -1096,7 +1096,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
-				43DBF0551C93ED3000B3C386 /* DeviceDataManager.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				4328E0291CFBE2C500E199AA /* NSUserDefaults.swift in Sources */,
@@ -1109,6 +1108,7 @@
 				43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */,
 				43EA285F1D50ED3D001BC233 /* GlucoseTrend.swift in Sources */,
 				4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */,
+				43CB2B2B1D924D450079823D /* WCSession.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				4328E0301CFBFAEB00E199AA /* NSTimeInterval.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
