@@ -45,7 +45,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     func applicationDidBecomeActive() {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 
-        WCSession.default().activate()
+        if WCSession.default().activationState != .activated {
+            WCSession.default().activate()
+        }
     }
 
     func applicationWillResignActive() {
@@ -59,10 +61,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
         for task in backgroundTasks {
-            os_log("Processing background task: %@", log: OSLog.default, type: .error, String(describing: type(of: task)))
-
             switch task {
             case is WKApplicationRefreshBackgroundTask:
+                os_log("Processing WKApplicationRefreshBackgroundTask")
                 // Use the WKApplicationRefreshBackgroundTask class to update your app’s state in the background.
                 // You often use a background app refresh task to drive other tasks. For example, you could use a background app refresh task to start an URLSession background transfer, or to schedule a background snapshot refresh task.
                 // Your app must schedule background app refresh tasks by calling your extension’s scheduleBackgroundRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system never schedules these tasks.
@@ -71,6 +72,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 // Background app refresh tasks are budgeted. In general, the system performs approximately one task per hour for each app in the dock (including the most recently used app). This budget is shared among all apps on the dock. The system performs multiple tasks an hour for each app with a complication on the active watch face. This budget is shared among all complications on the watch face. After you exhaust the budget, the system delays your requests until more time becomes available.
                 break
             case let task as WKSnapshotRefreshBackgroundTask:
+                os_log("Processing WKSnapshotRefreshBackgroundTask")
                 // Use the WKSnapshotRefreshBackgroundTask class to update your app’s user interface. You can push, pop, or present other interface controllers, and then update the content of the desired interface controller. The system automatically takes a snapshot of your user interface as soon as this task completes.
                 // Your app can invalidate its current snapshot and schedule a background snapshot refresh tasks by calling your extension’s scheduleSnapshotRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system will also schedule background snapshot refresh tasks to periodically update your snapshot.
                 // For more information, see WKSnapshotRefreshBackgroundTask.
@@ -83,6 +85,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 // Use the WKURLSessionRefreshBackgroundTask class to respond to URLSession background transfers.
                 break
             case let task as WKWatchConnectivityRefreshBackgroundTask:
+                os_log("Processing WKWatchConnectivityRefreshBackgroundTask")
                 // Use the WKWatchConnectivityRefreshBackgroundTask class to receive background updates from the WatchConnectivity framework.
                 // For more information, see WKWatchConnectivityRefreshBackgroundTask.
 
@@ -123,11 +126,12 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             // Update complication data if needed
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
-                if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(-8 * 60 * 60) {
-                    UserDefaults.standard.complicationDataLastRefreshed = Date()
+                if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(hours: -8) {
+                    os_log("Reloading complication timeline")
                     server.reloadTimeline(for: complication)
                 } else {
-                    server.extendTimeline(for: complication)
+                    os_log("Extending complication timeline")
+                    server.reloadTimeline(for: complication)
                 }
             }
         }

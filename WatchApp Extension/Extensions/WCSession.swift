@@ -49,6 +49,10 @@ extension WCSession {
             throw MessageError.reachabilityError
         }
 
-        sendMessage(userInfo.rawValue, replyHandler: nil, errorHandler: errorHandler)
+        sendMessage(userInfo.rawValue,
+            replyHandler: { (reply) in
+            },
+            errorHandler: errorHandler
+        )
     }
 }

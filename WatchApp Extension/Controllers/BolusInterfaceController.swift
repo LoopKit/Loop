@@ -137,7 +137,8 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
                     ExtensionDelegate.shared().present(error)
                 }
             } catch {
-                presentAlert(withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
+                presentAlert(
+                    withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
                     message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a bolus attempt fails"),
                     preferredStyle: .alert,
                     actions: [WKAlertAction.dismissAction()]
