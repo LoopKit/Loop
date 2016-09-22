@@ -606,11 +606,13 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             return pumpState?.pumpID
         }
         set {
-            guard newValue?.characters.count == 6 && newValue != pumpState?.pumpID else {
+            guard newValue != pumpState?.pumpID else {
                 return
             }
 
-            if let pumpID = newValue {
+            var pumpID = newValue
+
+            if let pumpID = pumpID, pumpID.characters.count == 6 {
                 let pumpState = PumpState(pumpID: pumpID, pumpRegion: .northAmerica)
 
                 if let timeZone = self.pumpState?.timeZone {
@@ -619,6 +621,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
                 self.pumpState = pumpState
             } else {
+                pumpID = nil
                 self.pumpState = nil
             }
 
@@ -868,8 +871,6 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     // MARK: - Initialization
 
-    static let sharedManager = DeviceDataManager()
-
     private(set) var loopManager: LoopDataManager!
 
     init() {
@@ -933,7 +934,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             receiver?.delegate = self
         }
 
-        if let transmitterID = UserDefaults.standard.transmitterID {
+        if let transmitterID = UserDefaults.standard.transmitterID, transmitterID.characters.count == 6 {
             transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
             transmitter?.delegate = self
         }

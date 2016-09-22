@@ -65,9 +65,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         dataManagerObserver = nil
     }
 
-    fileprivate var dataManager: DeviceDataManager {
-        return DeviceDataManager.sharedManager
-    }
+    var dataManager: DeviceDataManager!
 
     private var dataManagerObserver: Any? {
         willSet {

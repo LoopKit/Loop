@@ -106,7 +106,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
 
-    unowned let dataManager = DeviceDataManager.sharedManager
+    weak var dataManager: DeviceDataManager!
 
     private var active = true {
         didSet {
@@ -558,6 +558,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
         case let vc as PredictionTableViewController:
+            vc.dataManager = dataManager
+        case let vc as SettingsTableViewController:
             vc.dataManager = dataManager
         default:
             break
