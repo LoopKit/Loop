@@ -8,6 +8,7 @@
 
 import WatchConnectivity
 import WatchKit
+import os
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
@@ -16,10 +17,29 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         return WKExtension.shared().extensionDelegate
     }
 
+    override init() {
+        super.init()
+
+        let session = WCSession.default()
+        session.delegate = self
+
+        // It seems, according to [this sample code](https://developer.apple.com/library/prerelease/content/samplecode/QuickSwitch/Listings/QuickSwitch_WatchKit_Extension_ExtensionDelegate_swift.html#//apple_ref/doc/uid/TP40016647-QuickSwitch_WatchKit_Extension_ExtensionDelegate_swift-DontLinkElementID_8)
+        // that WCSession activation and delegation and WKWatchConnectivityRefreshBackgroundTask don't have any determinism,
+        // and that KVO is the "recommended" way to deal with it.
+        session.addObserver(self, forKeyPath: "activationState", options: [], context: nil)
+        session.addObserver(self, forKeyPath: "hasContentPending", options: [], context: nil)
+
+        session.activate()
+    }
+
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        DispatchQueue.main.async {
+            self.completePendingConnectivityTasksIfNeeded()
+        }
+    }
+
     func applicationDidFinishLaunching() {
         // Perform any final initialization of your application.
-
-        WCSession.default().delegate = self
     }
 
     func applicationDidBecomeActive() {
@@ -39,6 +59,8 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
         for task in backgroundTasks {
+            os_log("Processing background task: %@", log: OSLog.default, type: .error, String(describing: type(of: task)))
+
             switch task {
             case is WKApplicationRefreshBackgroundTask:
                 // Use the WKApplicationRefreshBackgroundTask class to update your app’s state in the background.
@@ -60,17 +82,32 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             case is WKURLSessionRefreshBackgroundTask:
                 // Use the WKURLSessionRefreshBackgroundTask class to respond to URLSession background transfers.
                 break
-            case is WKWatchConnectivityRefreshBackgroundTask:
+            case let task as WKWatchConnectivityRefreshBackgroundTask:
                 // Use the WKWatchConnectivityRefreshBackgroundTask class to receive background updates from the WatchConnectivity framework.
                 // For more information, see WKWatchConnectivityRefreshBackgroundTask.
 
-                WCSession.default().activate()
-                break
+                pendingConnectivityTasks.append(task)
+
+                if WCSession.default().activationState != .activated {
+                    WCSession.default().activate()
+                }
+
+                completePendingConnectivityTasksIfNeeded()
+                return // Don't call the standard setTaskCompleted handler
             default:
                 break
             }
 
             task.setTaskCompleted()
+        }
+    }
+
+    private var pendingConnectivityTasks: [WKWatchConnectivityRefreshBackgroundTask] = []
+
+    private func completePendingConnectivityTasksIfNeeded() {
+        if WCSession.default().activationState == .activated && !WCSession.default().hasContentPending {
+            pendingConnectivityTasks.forEach { $0.setTaskCompleted() }
+            pendingConnectivityTasks.removeAll()
         }
     }
 

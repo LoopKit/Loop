@@ -82,24 +82,6 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    /// TODO: Not called in watchOS 3
-    func requestedUpdateDidBegin() {
-        // updateComplicationDataIfNeeded()
-    }
-
-    /// TODO: Not called in watchOS 3
-    func requestedUpdateBudgetExhausted() {
-        // TODO: os_log_info in iOS 10
-    }
-
-    // MARK: - Update Scheduling
-
-    /// TODO: Not called in watchOS 3
-    func getNextRequestedUpdateDate(handler: @escaping (Date?) -> Void) {
-        // Call the handler with the date when you would next like to be given the opportunity to update your complication content
-        handler(Date(timeIntervalSinceNow: TimeInterval(2 * 60 * 60)))
-    }
-    
     // MARK: - Placeholder Templates
 
     func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
@@ -115,5 +97,4 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             handler(nil)
         }
     }
-
 }
