@@ -114,7 +114,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
 
         if connectedPeripheralIDs.count == 0 {
-            NotificationManager.clearLoopNotRunningNotifications()
+            NotificationManager.clearPendingNotificationRequests()
         }
     }
 
@@ -360,13 +360,12 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
-    /**
-     Send a bolus command and handle the result
- 
-     - parameter completion: A closure called after the command is complete. This closure takes a single argument:
-        - error: An error describing why the command failed
-     */
-    func enactBolus(_ units: Double, completion: @escaping (_ error: Error?) -> Void) {
+    /// Send a bolus command and handle the result
+    ///
+    /// - parameter units:      The number of units to deliver
+    /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
+    ///     - error: An error describing why the command failed
+    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
         guard units > 0 else {
             completion(nil)
             return
@@ -442,9 +441,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
     }
 
     // MARK: - G5 Transmitter
-    /**
-     The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
-     */
+    /// The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
 
     // MARK: TransmitterDelegate
 
