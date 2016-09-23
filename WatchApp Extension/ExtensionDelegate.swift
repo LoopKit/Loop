@@ -67,7 +67,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 // Use the WKApplicationRefreshBackgroundTask class to update your app’s state in the background.
                 // You often use a background app refresh task to drive other tasks. For example, you could use a background app refresh task to start an URLSession background transfer, or to schedule a background snapshot refresh task.
                 // Your app must schedule background app refresh tasks by calling your extension’s scheduleBackgroundRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system never schedules these tasks.
-                // WKExtension.shared().scheduleBackgroundRefresh(withPreferredDate: <#T##Date#>, userInfo: <#T##NSSecureCoding?#>, scheduledCompletion: <#T##(Error?) -> Void#>)
+                // WKExtension.shared().scheduleBackgroundRefresh(withPreferredDate:userInfo: scheduledCompletion:)
                 // For more information, see [WKApplicationRefreshBackgroundTask] https://developer.apple.com/reference/watchkit/wkapplicationrefreshbackgroundtask
                 // Background app refresh tasks are budgeted. In general, the system performs approximately one task per hour for each app in the dock (including the most recently used app). This budget is shared among all apps on the dock. The system performs multiple tasks an hour for each app with a complication on the active watch face. This budget is shared among all complications on the watch face. After you exhaust the budget, the system delays your requests until more time becomes available.
                 break
@@ -76,7 +76,6 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 // Use the WKSnapshotRefreshBackgroundTask class to update your app’s user interface. You can push, pop, or present other interface controllers, and then update the content of the desired interface controller. The system automatically takes a snapshot of your user interface as soon as this task completes.
                 // Your app can invalidate its current snapshot and schedule a background snapshot refresh tasks by calling your extension’s scheduleSnapshotRefresh(withPreferredDate:userInfo:scheduledCompletion:) method. The system will also schedule background snapshot refresh tasks to periodically update your snapshot.
                 // For more information, see WKSnapshotRefreshBackgroundTask.
-                // WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: <#T##Date#>, userInfo: <#T##NSSecureCoding?#>, scheduledCompletion: <#T##(Error?) -> Void#>)
                 // For more information about snapshots, see Snapshots.
 
                 task.setTaskCompleted(restoredDefaultState: false, estimatedSnapshotExpiration: Date(timeIntervalSinceNow: TimeInterval(minutes: 5)), userInfo: nil)
@@ -96,7 +95,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 }
 
                 completePendingConnectivityTasksIfNeeded()
-                return // Don't call the standard setTaskCompleted handler
+                return // Defer calls to the setTaskCompleted handler
             default:
                 break
             }
@@ -131,6 +130,8 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                     server.reloadTimeline(for: complication)
                 } else {
                     os_log("Extending complication timeline")
+                    // TODO: Switch this back to extendTimeline if things are working correctly.
+                    // Time Travel appears to be disabled by default in watchOS 3 anyway
                     server.reloadTimeline(for: complication)
                 }
             }
@@ -149,8 +150,6 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
 extension ExtensionDelegate: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        // TODO: if error, os_log_info?
-
         if activationState == .activated && lastContext == nil {
             updateContext(session.receivedApplicationContext)
         }
@@ -170,6 +169,10 @@ extension ExtensionDelegate: WCSessionDelegate {
 
 
 extension ExtensionDelegate {
+
+    /// Global shortcut to present an alert for a specific error out-of-context with a specific interface controller.
+    ///
+    /// - parameter error: The error whose contents to display
     func present(_ error: Error) {
         WKExtension.shared().rootInterfaceController?.presentAlert(withTitle: error.localizedDescription, message: (error as NSError).localizedRecoverySuggestion ?? (error as NSError).localizedFailureReason, preferredStyle: .alert, actions: [WKAlertAction.dismissAction()])
     }
