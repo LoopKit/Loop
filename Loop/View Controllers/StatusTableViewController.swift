@@ -136,8 +136,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             let date = Date(timeIntervalSinceNow: -TimeInterval(hours: 6))
             charts.startDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
             charts.glucoseDisplayRange = (
-                min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 75),
-                max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 225)
+                min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
+                max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 175)
             )
 
             let reloadGroup = DispatchGroup()
@@ -401,18 +401,22 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 cell.chartContentView.chartGenerator = { [unowned self] (frame) in
                     return self.charts.glucoseChartWithFrame(frame)?.view
                 }
+                cell.subtitleLabel?.text = NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph")
             case .iob:
                 cell.chartContentView.chartGenerator = { [unowned self] (frame) in
                     return self.charts.IOBChartWithFrame(frame)?.view
                 }
+                cell.subtitleLabel?.text = NSLocalizedString("Active Insulin", comment: "The title of the Insulin On-Board graph")
             case .dose:
                 cell.chartContentView?.chartGenerator = { [unowned self] (frame) in
                     return self.charts.doseChartWithFrame(frame)?.view
                 }
+                cell.subtitleLabel?.text = NSLocalizedString("Insulin Delivery", comment: "The title of the insulin delivery graph")
             case .cob:
                 cell.chartContentView?.chartGenerator = { [unowned self] (frame) in
                     return self.charts.COBChartWithFrame(frame)?.view
                 }
+                cell.subtitleLabel?.text = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph")
             }
 
             return cell
@@ -451,9 +455,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case .charts:
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                return 170
+                return 180
             case .iob, .dose, .cob:
-                return 85
+                return 110
             }
         case .status:
             return UITableViewAutomaticDimension
