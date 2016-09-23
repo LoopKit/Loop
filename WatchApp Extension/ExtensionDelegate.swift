@@ -125,6 +125,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             // Update complication data if needed
             let server = CLKComplicationServer.sharedInstance()
             for complication in server.activeComplications ?? [] {
+                // In watchOS 2, we forced a timeline reload every 8 hours because attempting to extend it indefinitely seemed to lead to the complication "freezing".
                 if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(hours: -8) {
                     os_log("Reloading complication timeline")
                     server.reloadTimeline(for: complication)
