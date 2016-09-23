@@ -220,6 +220,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
+            cell.textLabel?.textColor = UIColor.secondaryLabelColor
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
             cell.chartContentView.chartGenerator = { [unowned self] (frame) in
                 return self.charts.glucoseChartWithFrame(frame)?.view

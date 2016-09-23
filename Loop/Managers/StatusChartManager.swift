@@ -313,7 +313,7 @@ final class StatusChartsManager {
             axisValueGenerator: {
                 ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings)
             },
-            addPaddingSegmentIfEdge: true
+            addPaddingSegmentIfEdge: false
         )
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
