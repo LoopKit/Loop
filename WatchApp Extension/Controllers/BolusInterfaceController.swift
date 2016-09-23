@@ -8,6 +8,7 @@
 
 import WatchKit
 import Foundation
+import WatchConnectivity
 
 
 final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
@@ -130,16 +131,19 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     @IBAction func deliver() {
         if bolusValue > 0 {
             let bolus = SetBolusUserInfo(value: bolusValue, startDate: Date())
+
             do {
-                try DeviceDataManager.sharedManager.sendSetBolus(bolus)
-            } catch DeviceDataManagerError.reachabilityError {
-                presentAlert(withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
+                try WCSession.default().sendBolusMessage(bolus) { (error) in
+                    ExtensionDelegate.shared().present(error)
+                }
+            } catch {
+                presentAlert(
+                    withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
                     message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a bolus attempt fails"),
                     preferredStyle: .alert,
                     actions: [WKAlertAction.dismissAction()]
                 )
                 return
-            } catch {
             }
         }
 
