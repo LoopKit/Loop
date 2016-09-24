@@ -96,8 +96,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
-        if !visible {
-            needsRefresh = true
+        needsRefresh = true
+        if visible {
+            reloadData(animated: false)
         }
     }
 
@@ -125,6 +126,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     private var reloading = false
 
+    /// Refetches all data and updates the views. Must be called on the main queue.
+    ///
+    /// - parameter animated: Whether the updating should be animated if possible
     private func reloadData(animated: Bool = false) {
         if active && visible && needsRefresh {
             needsRefresh = false
@@ -142,6 +146,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             let reloadGroup = DispatchGroup()
             var glucoseUnit: HKUnit?
+            let oldRecommendedTempBasal = self.recommendedTempBasal
+            var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
             if let glucoseStore = dataManager.glucoseStore {
                 reloadGroup.enter()
@@ -172,7 +178,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
 
                 self.charts.predictedGlucoseValues = predictedGlucose ?? []
-                self.recommendedTempBasal = recommendedTempBasal
+                newRecommendedTempBasal = recommendedTempBasal
                 self.lastTempBasal = lastTempBasal
                 self.lastLoopCompleted = lastLoopCompleted
 
@@ -248,9 +254,22 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                 self.charts.prerender()
 
-                self.tableView.reloadSections(IndexSet(integersIn: NSMakeRange(Section.charts.rawValue, 2).toRange() ?? 0..<0),
-                    with: animated ? .fade : .none
-                )
+                // Show/hide the recommended temp basal row
+                self.recommendedTempBasal = newRecommendedTempBasal
+                switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
+                case (let old?, let new?) where old != new:
+                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+                case (.none, .some):
+                    self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+                case (.some, .none):
+                    self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+                default:
+                    break
+                }
+
+                for case let row as ChartTableViewCell in self.tableView.visibleCells {
+                    row.reloadChart()
+                }
 
                 self.reloading = false
             }
@@ -258,8 +277,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private enum Section: Int {
-        case charts = 0
-        case status
+        case status = 0
+        case charts
 
         static let count = 2
     }
@@ -384,7 +403,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case .charts:
             return ChartRow.count
         case .status:
-            return StatusRow.count
+            return self.recommendedTempBasal == nil ? 0 : StatusRow.count
         }
     }
 

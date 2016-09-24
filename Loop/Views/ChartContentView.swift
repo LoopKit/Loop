@@ -13,9 +13,7 @@ class ChartContentView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
 
-        if chartView == nil || chartView!.frame != bounds {
-            chartView = chartGenerator?(bounds)
-        }
+        chartView = chartGenerator?(bounds)
     }
 
     var chartGenerator: ((CGRect) -> UIView?)? {
