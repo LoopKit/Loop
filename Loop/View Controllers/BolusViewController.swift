@@ -13,14 +13,10 @@ import LoopKit
 
 final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        bolusAmountTextField.becomeFirstResponder()
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        bolusAmountTextField.becomeFirstResponder()
 
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
@@ -77,6 +73,12 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
         return numberFormatter
     }()
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+
+        bolusAmountTextField.resignFirstResponder()
+    }
 
     // MARK: - UITextFieldDelegate
 
