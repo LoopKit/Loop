@@ -73,7 +73,7 @@ final class DiagnosticLogger {
                 
                 let task = URLSession.shared.uploadTask(with: request as URLRequest, from: messageData) { (_, _, error) -> Void in
                     if let error = error {
-                        //NSLog("%s error: %@", #function, error)
+                        NSLog("%s error: %@", error)
                     }
                 }
                 
