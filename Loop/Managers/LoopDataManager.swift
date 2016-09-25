@@ -520,19 +520,22 @@ final class LoopDataManager {
             throw error!
         }
 
-        if let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictionWithRetrospectiveEffect,
-            lastTempBasal: lastTempBasal,
-            maxBasalRate: maxBasal,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates,
-            allowPredictiveTempBelowRange: true
-        ) {
-            recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.rate, duration: tempBasal.duration)
-        } else {
+        guard
+            lastBolus == nil,  // Don't recommend changes if a bolus was just set
+            let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictionWithRetrospectiveEffect,
+                lastTempBasal: lastTempBasal,
+                maxBasalRate: maxBasal,
+                glucoseTargetRange: glucoseTargetRange,
+                insulinSensitivity: insulinSensitivity,
+                basalRateSchedule: basalRates,
+                allowPredictiveTempBelowRange: true
+            )
+        else {
             recommendedTempBasal = nil
+            return
         }
 
+        recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.rate, duration: tempBasal.duration)
     }
 
     func addCarbEntryAndRecommendBolus(_ carbEntry: CarbEntry, resultsHandler: @escaping (_ units: Double?, _ error: Error?) -> Void) {
