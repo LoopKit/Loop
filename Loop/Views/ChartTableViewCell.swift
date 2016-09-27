@@ -20,4 +20,8 @@ final class ChartTableViewCell: UITableViewCell {
 
         chartContentView.chartGenerator = nil
     }
+
+    func reloadChart() {
+        chartContentView.setNeedsLayout()
+    }
 }

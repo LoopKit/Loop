@@ -69,8 +69,9 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
-        if !visible {
-            needsRefresh = true
+        needsRefresh = true
+        if visible {
+            reloadData(animated: false)
         }
     }
 
@@ -177,11 +178,11 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
                 }
                 
                 self.charts.prerender()
-                
-                self.tableView.reloadSections(IndexSet(integersIn: NSMakeRange(Section.charts.rawValue, 1).toRange() ?? 0..<0),
-                                              with: .none
-                )
-                
+
+                for case let row as ChartTableViewCell in self.tableView.visibleCells {
+                    row.reloadChart()
+                }
+
                 self.reloading = false
             }
         }
