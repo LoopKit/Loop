@@ -289,7 +289,7 @@
                                             </subviews>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <accessibility key="accessibilityConfiguration">
-                                                <accessibilityTraits key="traits" summaryElement="YES"/>
+                                                <accessibilityTraits key="traits" none="YES"/>
                                                 <bool key="isElement" value="YES"/>
                                             </accessibility>
                                             <constraints>
@@ -333,8 +333,7 @@
                                                 </label>
                                             </subviews>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <accessibility key="accessibilityConfiguration">
-                                                <accessibilityTraits key="traits" summaryElement="YES"/>
+                                            <accessibility key="accessibilityConfiguration" label="Glucose">
                                                 <bool key="isElement" value="YES"/>
                                             </accessibility>
                                             <constraints>
@@ -378,7 +377,7 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <accessibility key="accessibilityConfiguration">
+                                            <accessibility key="accessibilityConfiguration" label="Net Basal Rate">
                                                 <bool key="isElement" value="YES"/>
                                             </accessibility>
                                             <constraints>
@@ -434,7 +433,7 @@
                                                 </label>
                                             </subviews>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <accessibility key="accessibilityConfiguration">
+                                            <accessibility key="accessibilityConfiguration" label="Reservoir Volume">
                                                 <bool key="isElement" value="YES"/>
                                             </accessibility>
                                             <constraints>
@@ -483,7 +482,7 @@
                                                 </view>
                                             </subviews>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <accessibility key="accessibilityConfiguration">
+                                            <accessibility key="accessibilityConfiguration" label="Battery Level">
                                                 <bool key="isElement" value="YES"/>
                                             </accessibility>
                                             <constraints>
@@ -637,6 +636,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="U" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mVz-dr-xLU">
+                                                    <accessibility key="accessibilityConfiguration" label="Units"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.55676333109537768" green="0.55676333109537768" blue="0.55676333109537768" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -660,6 +660,10 @@
                                                 <constraint firstItem="mVz-dr-xLU" firstAttribute="leading" secondItem="5QS-Yf-Pua" secondAttribute="trailing" constant="8" symbolic="YES" id="z7E-fc-REL"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" none="YES"/>
+                                            <bool key="isElement" value="YES"/>
+                                        </accessibility>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="us0-UE-Wqz">
                                         <rect key="frame" x="0.0" y="143" width="375" height="44"/>
@@ -674,6 +678,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="0.0" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7LT-50-ZzK">
+                                                    <accessibility key="accessibilityConfiguration" label="Bolus Amount"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="120" id="hZ2-Aq-FHT"/>
                                                     </constraints>
@@ -684,6 +689,7 @@
                                                     </connections>
                                                 </textField>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="U" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BR0-dr-Fj2">
+                                                    <accessibility key="accessibilityConfiguration" label="Units"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <color key="textColor" red="0.55676333109537768" green="0.55676333109537768" blue="0.55676333109537768" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>

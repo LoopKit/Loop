@@ -231,8 +231,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
 
-                reservoirVolumeHUD.reservoirVolume = reservoir.unitVolume
-                reservoirVolumeHUD.lastUpdated = reservoir.startDate
+                reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
             if let status = dataManager.latestPumpStatusFromMySentry {
@@ -337,7 +336,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             DispatchQueue.main.async {
-                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, atDate: basalStartDate)
+                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, at: basalStartDate)
             }
         }
     }
@@ -569,6 +568,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             vc.doseStore = dataManager.doseStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
+            if let maxBolus = self.dataManager.maximumBolus {
+                vc.maxBolus = maxBolus
+            }
+
             if let bolus = sender as? Double {
                 vc.recommendedBolus = bolus
             } else {
@@ -576,7 +579,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     if let error = error {
                         self.dataManager.logger.addError(error, fromSource: "Bolus")
                     } else if let bolus = units {
-                        vc.recommendedBolus = bolus
+                        DispatchQueue.main.async {
+                            vc.recommendedBolus = bolus
+                        }
                     }
                 }
             }
@@ -621,7 +626,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 let startDate = Date()
                 dataManager.enactBolus(bolus) { (error) in
                     if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus, atDate: startDate)
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: startDate)
                     }
                 }
             }
@@ -635,7 +640,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private func createWorkoutButtonItem(selected: Bool) -> UIBarButtonItem {
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .plain, target: self, action: #selector(toggleWorkoutMode(_:)))
         item.accessibilityLabel = NSLocalizedString("Workout Mode", comment: "The label of the workout mode toggle button")
-        item.accessibilityHint = selected ? NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled") : NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+
+        if selected {
+            item.accessibilityTraits = item.accessibilityTraits | UIAccessibilityTraitSelected
+            item.accessibilityHint = NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled")
+        } else {
+            item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+        }
+
         item.tintColor = UIColor.glucoseTintColor
 
         return item
@@ -661,15 +673,26 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         didSet {
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
+
+            if cgmAppURL != nil {
+                glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
+            }
+        }
+    }
+
+    private var cgmAppURL: URL? {
+        if let url = URL(string: "dexcomcgm://"), UIApplication.shared.canOpenURL(url) {
+            return url
+        } else if let url = URL(string: "dexcomshare://"), UIApplication.shared.canOpenURL(url) {
+            return url
+        } else {
+            return nil
         }
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let URL = URL(string: "dexcomcgm://"), UIApplication.shared.canOpenURL(URL) {
-            UIApplication.shared.openURL(URL)
-        }
-        else if let URL = URL(string: "dexcomshare://"), UIApplication.shared.canOpenURL(URL) {
-            UIApplication.shared.openURL(URL)
+        if let url = cgmAppURL {
+            UIApplication.shared.openURL(url)
         }
     }
 

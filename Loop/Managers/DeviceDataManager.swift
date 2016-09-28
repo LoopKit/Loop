@@ -207,7 +207,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
         // Sentry packets are sent in groups of 3, 5s apart. Wait 11s before allowing the loop data to continue to avoid conflicting comms.
         DispatchQueue.global(qos: DispatchQoS.QoSClass.utility).asyncAfter(deadline: DispatchTime.now() + Double(Int64(11 * NSEC_PER_SEC)) / Double(NSEC_PER_SEC)) {
-            self.updateReservoirVolume(status.reservoirRemainingUnits, atDate: pumpDate, withTimeLeft: TimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
+            self.updateReservoirVolume(status.reservoirRemainingUnits, at: pumpDate, withTimeLeft: TimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
         }
 
         // Check for an empty battery. Sentry packets are still broadcast for a few hours after this value reaches 0.
@@ -223,7 +223,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
      - parameter date:     The date the reservoir was read
      - parameter timeLeft: The approximate time before the reservoir is empty
      */
-    private func updateReservoirVolume(_ units: Double, atDate date: Date, withTimeLeft timeLeft: TimeInterval?) {
+    private func updateReservoirVolume(_ units: Double, at date: Date, withTimeLeft timeLeft: TimeInterval?) {
         doseStore.addReservoirValue(units, atDate: date) { (newValue, previousValue, areStoredValuesContinuous, error) -> Void in
             if let error = error {
                 self.logger.addError(error, fromSource: "DoseStore")
@@ -347,7 +347,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
                 case .success(let (status, date)):
-                    self.updateReservoirVolume(status.reservoir, atDate: date, withTimeLeft: nil)
+                    self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
                     let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                     nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 case .failure(let error):
@@ -388,7 +388,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                     self.logger.addError(error, fromSource: "Bolus")
                     completion(LoopError.communicationError)
                 } else {
-                    self.loopManager.recordBolus(units, atDate: Date())
+                    self.loopManager.recordBolus(units, at: Date())
                     completion(nil)
                 }
             }
