@@ -17,14 +17,25 @@ final class BasalRateHUDView: HUDView {
         didSet {
             basalRateLabel?.text = String(format: basalRateFormatString, "–")
             basalRateLabel?.textColor = .doseTintColor
+
+            accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
         }
     }
 
-    private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate. ")
+    private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate.")
 
-    func setNetBasalRate(_ rate: Double, percent: Double, atDate date: Date) {
-        caption?.text = timeFormatter.string(from: date)
-        basalRateLabel?.text = String(format: basalRateFormatString, decimalFormatter.string(from: NSNumber(value: rate)) ?? "–")
+    func setNetBasalRate(_ rate: Double, percent: Double, at date: Date) {
+        let time = timeFormatter.string(from: date)
+        caption?.text = time
+
+        if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
+            basalRateLabel?.text = String(format: basalRateFormatString, rateString)
+            accessibilityValue = String(format: NSLocalizedString("%1$@ units per hour at %2$@", comment: "Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time)"), rateString, time)
+        } else {
+            basalRateLabel?.text = nil
+            accessibilityValue = nil
+        }
+
         basalStateView.netBasalPercent = percent
     }
 

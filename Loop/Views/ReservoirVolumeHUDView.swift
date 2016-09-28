@@ -19,6 +19,8 @@ final class ReservoirVolumeHUDView: HUDView {
 
         tintColor = .unknownColor
         volumeLabel.isHidden = true
+
+        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
     var reservoirLevel: Double? {
@@ -44,14 +46,6 @@ final class ReservoirVolumeHUDView: HUDView {
         }
     }
 
-    var lastUpdated: Date? {
-        didSet {
-            if let date = lastUpdated {
-                caption?.text = timeFormatter.string(from: date)
-            }
-        }
-    }
-
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .none
@@ -68,12 +62,13 @@ final class ReservoirVolumeHUDView: HUDView {
         return formatter
     }()
 
-    var reservoirVolume: Double? {
-        didSet {
-            if let volume = reservoirVolume, let units = numberFormatter.string(from: NSNumber(value: volume)) {
-                volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
-            }
+    func setReservoirVolume(volume: Double, at date: Date) {
+        if let units = numberFormatter.string(from: NSNumber(value: volume)) {
+            volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
+            let time = timeFormatter.string(from: date)
+            caption?.text = time
+
+            accessibilityValue = String(format: NSLocalizedString("%1$@ units remaining at %2$@", comment: "Accessibility format string for (1: localized volume)(2: time)"), units, time)
         }
     }
-
 }

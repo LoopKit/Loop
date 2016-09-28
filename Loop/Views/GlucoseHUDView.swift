@@ -38,18 +38,30 @@ final class GlucoseHUDView: HUDView {
     }
 
     func set(_ glucoseValue: GlucoseValue, for unit: HKUnit, from sensor: SensorDisplayable?) {
-        caption?.text = timeFormatter.string(from: glucoseValue.startDate)
+        var accessibilityStrings = [String]()
+
+        let time = timeFormatter.string(from: glucoseValue.startDate)
+        caption?.text = time
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        glucoseLabel.text = numberFormatter.string(from: NSNumber(value: glucoseValue.quantity.doubleValue(for: unit)))
+        if let valueString = numberFormatter.string(from: NSNumber(value: glucoseValue.quantity.doubleValue(for: unit))) {
+            glucoseLabel.text = valueString
+            accessibilityStrings.append(String(format: NSLocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
+        }
 
         var unitStrings = [unit.glucoseUnitDisplayString]
 
         if let trend = sensor?.trendType {
-            unitStrings.append(trend.description)
+            unitStrings.append(trend.symbol)
+            accessibilityStrings.append(trend.localizedDescription)
+        }
+
+        if sensor?.isStateValid == false {
+            accessibilityStrings.append(NSLocalizedString("Needs attention", comment: "Accessibility label component for glucose HUD describing an invalid state"))
         }
 
         unitLabel.text = unitStrings.joined(separator: " ")
+        accessibilityValue = accessibilityStrings.joined(separator: ", ")
 
         UIView.animate(withDuration: 0.25, animations: { 
             self.alertLabel.alpha = sensor?.isStateValid == true ? 0 : 1

@@ -162,7 +162,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
                 self.deviceDataManager.enactBolus(bolus.value) { (error) in
                     if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atStartDate: bolus.startDate)
                     } else {
                         AnalyticsManager.sharedManager.didSetBolusFromWatch(bolus.value)
                     }

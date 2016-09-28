@@ -17,6 +17,8 @@ final class BatteryLevelHUDView: HUDView {
         super.awakeFromNib()
 
         tintColor = .unknownColor
+
+        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
     private lazy var numberFormatter: NumberFormatter = {
@@ -31,6 +33,7 @@ final class BatteryLevelHUDView: HUDView {
         didSet {
             if let value = batteryLevel, let level = numberFormatter.string(from: NSNumber(value: value)) {
                 caption.text = level
+                accessibilityValue = level
             } else {
                 caption.text = nil
             }

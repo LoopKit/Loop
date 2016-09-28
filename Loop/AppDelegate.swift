@@ -82,7 +82,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 dataManager.enactBolus(units) { (error) in
                     if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)
+                        NotificationManager.sendBolusFailureNotificationForAmount(units, atStartDate: startDate)
                     }
 
                     completionHandler()

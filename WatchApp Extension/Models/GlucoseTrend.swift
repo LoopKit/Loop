@@ -6,6 +6,8 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import Foundation
+
 
 enum GlucoseTrend: Int {
     case upUpUp       = 1
@@ -16,7 +18,7 @@ enum GlucoseTrend: Int {
     case downDown     = 6
     case downDownDown = 7
 
-    var description: String {
+    var symbol: String {
         switch self {
         case .upUpUp:
             return "⇈"
@@ -32,6 +34,25 @@ enum GlucoseTrend: Int {
             return "↓"
         case .downDownDown:
             return "⇊"
+        }
+    }
+
+    var localizedDescription: String {
+        switch self {
+        case .upUpUp:
+            return NSLocalizedString("Rising very fast", comment: "Glucose trend up-up-up")
+        case .upUp:
+            return NSLocalizedString("Rising fast", comment: "Glucose trend up-up")
+        case .up:
+            return NSLocalizedString("Rising", comment: "Glucose trend up")
+        case .flat:
+            return NSLocalizedString("Flat", comment: "Glucose trend flat")
+        case .down:
+            return NSLocalizedString("Falling", comment: "Glucose trend down")
+        case .downDown:
+            return NSLocalizedString("Falling fast", comment: "Glucose trend down-down")
+        case .downDownDown:
+            return NSLocalizedString("Falling very fast", comment: "Glucose trend down-down-down")
         }
     }
 }
