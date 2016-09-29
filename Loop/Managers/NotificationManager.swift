@@ -55,7 +55,7 @@ struct NotificationManager {
 
     // MARK: - Notifications
 
-    static func sendBolusFailureNotificationForAmount(_ units: Double, atDate startDate: Date) {
+    static func sendBolusFailureNotificationForAmount(_ units: Double, atStartDate startDate: Date) {
         let notification = UILocalNotification()
 
         notification.alertTitle = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")

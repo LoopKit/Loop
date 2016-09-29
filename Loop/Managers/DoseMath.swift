@@ -177,6 +177,8 @@ struct DoseMath {
             doseUnits -= max(0, remainingUnits)
         }
 
-        return max(0, doseUnits)
+        doseUnits = round(doseUnits * 40) / 40
+
+        return min(maxBolus, max(0, doseUnits))
     }
 }

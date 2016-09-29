@@ -39,7 +39,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     @objc private func updateWatch(_ notification: Notification) {
         guard
-            let rawContext = (notification as NSNotification).userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+            let rawContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
             case .tempBasal = context,
             let session = watchSession
@@ -162,7 +162,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
                 self.deviceDataManager.enactBolus(bolus.value) { (error) in
                     if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atDate: bolus.startDate)
+                        NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atStartDate: bolus.startDate)
                     } else {
                         AnalyticsManager.sharedManager.didSetBolusFromWatch(bolus.value)
                     }

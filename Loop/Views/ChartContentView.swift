@@ -18,6 +18,11 @@ class ChartContentView: UIView {
         }
     }
 
+    func reloadChart() {
+        chartView = nil
+        setNeedsLayout()
+    }
+
     var chartGenerator: ((CGRect) -> UIView?)? {
         didSet {
             chartView = nil

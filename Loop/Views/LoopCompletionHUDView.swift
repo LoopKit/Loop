@@ -94,12 +94,21 @@ final class LoopCompletionHUDView: HUDView {
             }
 
             if let timeString = formatter.string(from: ago) {
-                caption.text = String(format: NSLocalizedString("%@ ago", comment: "The description of the time interval since the last completion date. The format string"), timeString)
+                caption.text = String(format: NSLocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                accessibilityLabel = String(format: NSLocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
                 caption.text = "—"
+                accessibilityLabel = nil
             }
         } else {
             caption.text = "—"
+            accessibilityLabel = NSLocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
+        }
+
+        if dosingEnabled {
+            accessibilityHint = NSLocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
+        } else {
+            accessibilityHint = NSLocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
         }
     }
 
