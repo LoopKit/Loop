@@ -62,7 +62,7 @@ struct MLabService: ServiceAuthentication {
                 error = LoopError.connectionError
             }
 
-            completion(error == nil, error)
+            completion(true, error)
         }).resume()
     }
 
