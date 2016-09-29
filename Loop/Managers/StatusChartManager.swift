@@ -157,26 +157,45 @@ final class StatusChartsManager {
 
     var doseEntries: [DoseEntry] = [] {
         didSet {
-            basalDosePoints = doseEntries.reduce([], { (points, entry) -> [ChartPoint] in
-                if entry.unit == .unitsPerHour {
+            var basalDosePoints = [ChartPoint]()
+            var bolusDosePoints = [ChartPoint]()
+            var allDosePoints = [ChartPoint]()
+
+            for entry in doseEntries {
+                switch entry.unit {
+                case .unitsPerHour:
                     // TODO: Display the DateInterval
                     let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                     let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
                     let zero = ChartAxisValueInt(0)
                     let value = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U/hour", formatter: doseFormatter)
 
-                    let newPoints = [
+                    basalDosePoints += [
                         ChartPoint(x: startX, y: zero),
                         ChartPoint(x: startX, y: value),
                         ChartPoint(x: endX, y: value),
                         ChartPoint(x: endX, y: zero)
                     ]
 
-                    return points + newPoints
-                } else {
-                    return points
+                    if entry.value != 0 {
+                        allDosePoints += [
+                            ChartPoint(x: startX, y: value),
+                            ChartPoint(x: endX, y: value)
+                        ]
+                    }
+                case .units:
+                    let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
+                    let y = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U", formatter: doseFormatter)
+
+                    let point = ChartPoint(x: x, y: y)
+                    bolusDosePoints.append(point)
+                    allDosePoints.append(point)
                 }
-            })
+            }
+
+            self.basalDosePoints = basalDosePoints
+            self.bolusDosePoints = bolusDosePoints
+            self.allDosePoints = allDosePoints
         }
     }
 
@@ -262,6 +281,15 @@ final class StatusChartsManager {
             xAxisValues = nil
         }
     }
+
+    private var bolusDosePoints: [ChartPoint] = [] {
+        didSet {
+            doseChart = nil
+            xAxisValues = nil
+        }
+    }
+
+    private var allDosePoints: [ChartPoint] = []
 
     private var xAxisValues: [ChartAxisValue]? {
         didSet {
@@ -586,7 +614,7 @@ final class StatusChartsManager {
             return nil
         }
 
-        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(basalDosePoints + iobDisplayRangePoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: log10(2) / 2, axisValueGenerator: { ChartAxisValueDoubleLog(screenLocDouble: $0, formatter: self.integerFormatter, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
+        let yAxisValues = ChartAxisValuesGenerator.generateYAxisValuesWithChartPoints(basalDosePoints + bolusDosePoints + iobDisplayRangePoints, minSegmentCount: 2, maxSegmentCount: 3, multiple: log10(2) / 2, axisValueGenerator: { ChartAxisValueDoubleLog(screenLocDouble: $0, formatter: self.integerFormatter, labelSettings: self.axisLabelSettings) }, addPaddingSegmentIfEdge: true)
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: axisLineColor)
 
@@ -604,6 +632,14 @@ final class StatusChartsManager {
             doseArea = ChartPointsAreaLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: basalDosePoints, areaColor: UIColor.doseTintColor.withAlphaComponent(0.5), animDuration: 0, animDelay: 0, addContainerPoints: false)
         } else {
             doseArea = nil
+        }
+
+        let bolusLayer: ChartPointsScatterDownTrianglesLayer<ChartPoint>?
+
+        if bolusDosePoints.count > 0 {
+            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: bolusDosePoints, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: UIColor.doseTintColor)
+        } else {
+            bolusLayer = nil
         }
 
         // Grid lines
@@ -624,7 +660,7 @@ final class StatusChartsManager {
             xAxis: xAxis,
             yAxis: yAxis,
             innerFrame: innerFrame,
-            chartPoints: basalDosePoints.filter { $0.y.scalar != 0 },
+            chartPoints: allDosePoints,
             tintColor: UIColor.doseTintColor,
             labelCenterY: chartSettings.top,
             gestureRecognizer: panGestureRecognizer
@@ -637,7 +673,8 @@ final class StatusChartsManager {
             zeroGuidelineLayer,
             doseChartCache?.highlightLayer,
             doseArea,
-            doseLine
+            doseLine,
+            bolusLayer
         ]
         
         return Chart(frame: frame, layers: layers.flatMap { $0 })
