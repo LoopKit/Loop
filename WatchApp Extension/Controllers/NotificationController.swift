@@ -30,10 +30,8 @@ final class NotificationController: WKUserNotificationInterfaceController {
         super.didDeactivate()
     }
 
-    /*
     override func didReceive(_ notification: UNNotification, withCompletion completionHandler: @escaping (WKUserNotificationInterfaceType) -> Void) {
         completionHandler(.default)
     }
-    */
 
 }

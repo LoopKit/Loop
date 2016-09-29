@@ -7,7 +7,7 @@
 //
 
 import WatchKit
-import Foundation
+import WatchConnectivity
 
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
@@ -98,7 +98,23 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         if carbValue > 0 {
             let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
 
-            DeviceDataManager.sharedManager.sendCarbEntry(entry)
+            do {
+                try WCSession.default().sendCarbEntryMessage(entry,
+                    replyHandler: { (suggestion) in
+                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                    },
+                    errorHandler: { (error) in
+                        ExtensionDelegate.shared().present(error)
+                    }
+                )
+            } catch {
+                presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a carb entry send attempt fails"),
+                    message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a carb entry send attempt fails"),
+                    preferredStyle: .alert,
+                    actions: [WKAlertAction.dismissAction()]
+                )
+                return
+            }
         }
 
         dismiss()
