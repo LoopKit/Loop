@@ -13,6 +13,8 @@ final class ChartTableViewCell: UITableViewCell {
 
     @IBOutlet var chartContentView: ChartContentView!
 
+    @IBOutlet var titleLabel: UILabel?
+
     @IBOutlet var subtitleLabel: UILabel?
 
     override func prepareForReuse() {
@@ -22,6 +24,6 @@ final class ChartTableViewCell: UITableViewCell {
     }
 
     func reloadChart() {
-        chartContentView.setNeedsLayout()
+        chartContentView.reloadChart()
     }
 }
