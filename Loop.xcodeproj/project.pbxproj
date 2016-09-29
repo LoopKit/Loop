@@ -470,23 +470,18 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				43880F961D9D8052009061A8 /* ServiceAuthentication */,
 				43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */,
-				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
 				4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */,
 				43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */,
 				43E397A21D56B9E40028E321 /* Glucose.swift */,
 				4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */,
 				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
-				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
 				430DA58F1D4B0E4C0097D1CA /* MySentryPumpStatusMessageBody.swift */,
-				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
 				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
 				43EA28611D517E42001BC233 /* SensorDisplayable.swift */,
-				437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */,
-				434F54601D28859B002A9274 /* ServiceCredential.swift */,
 				43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */,
-				434F545E1D288345002A9274 /* ShareService.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
 			);
 			path = Models;
@@ -534,6 +529,19 @@
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
 			path = Loop;
+			sourceTree = "<group>";
+		};
+		43880F961D9D8052009061A8 /* ServiceAuthentication */ = {
+			isa = PBXGroup;
+			children = (
+				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
+				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
+				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
+				437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */,
+				434F54601D28859B002A9274 /* ServiceCredential.swift */,
+				434F545E1D288345002A9274 /* ShareService.swift */,
+			);
+			path = ServiceAuthentication;
 			sourceTree = "<group>";
 		};
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
