@@ -657,7 +657,7 @@ final class LoopDataManager {
      - parameter units: The amount of insulin
      - parameter date:  The date the bolus was set
      */
-    func recordBolus(_ units: Double, atDate date: Date) {
+    func recordBolus(_ units: Double, at date: Date) {
         dataAccessQueue.async {
             self.lastBolus = (units: units, date: date)
             self.notify(forChange: .bolus)

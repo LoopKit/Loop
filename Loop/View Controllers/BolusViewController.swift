@@ -16,6 +16,11 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
+        let spellOutFormatter = NumberFormatter()
+        spellOutFormatter.numberStyle = .spellOut
+
+        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: recommendedBolus)) ?? "0")
+
         bolusAmountTextField.becomeFirstResponder()
 
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
@@ -26,6 +31,8 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
         }
     }
+
+    var maxBolus: Double = 25
 
     private(set) var bolus: Double?
 
@@ -42,27 +49,35 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
 
+        guard let text = bolusAmountTextField?.text, let bolus = decimalFormatter.number(from: text)?.doubleValue,
+            let amountString = decimalFormatter.string(from: NSNumber(value: bolus)) else {
+            return
+        }
+
+        guard bolus <= maxBolus else {
+            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), decimalFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
+            return
+        }
+
         let context = LAContext()
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
             context.evaluatePolicy(.deviceOwnerAuthentication,
-                                   localizedReason: NSLocalizedString("Please authenticate to bolus", comment: "The message displayed during a device authentication prompt for bolus specification"),
+                                   localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString),
                                    reply: { (success, error) in
                 if success {
-                    self.setBolusAndClose(sender)
+                    self.setBolusAndClose(bolus)
                 }
             })
         } else {
-            setBolusAndClose(sender)
+            setBolusAndClose(bolus)
         }
     }
 
-    private func setBolusAndClose(_ sender: Any) {
-        if let text = bolusAmountTextField?.text, let bolus = decimalFormatter.number(from: text)?.doubleValue {
-            self.bolus = bolus
+    private func setBolusAndClose(_ bolus: Double) {
+        self.bolus = bolus
 
-            self.performSegue(withIdentifier: "close", sender: sender)
-        }
+        self.performSegue(withIdentifier: "close", sender: nil)
     }
 
     private lazy var decimalFormatter: NumberFormatter = {
