@@ -68,10 +68,10 @@
 		437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC91CD84DB7003C8C80 /* BatteryLevelHUDView.swift */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
-		43880F951D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43880F941D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift */; };
 		43846AD51D8FA67800799272 /* Base.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD41D8FA67800799272 /* Base.lproj */; };
 		43846AD91D8FA84B00799272 /* gallery.ckcomplication in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD81D8FA84B00799272 /* gallery.ckcomplication */; };
 		43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43846ADA1D91057000799272 /* ContextUpdatable.swift */; };
+		43880F951D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43880F941D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift */; };
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
@@ -298,10 +298,10 @@
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		437D9BA11D7B5203007245E8 /* Loop.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Loop.xcconfig; sourceTree = "<group>"; };
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
-		43880F941D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
 		43846AD41D8FA67800799272 /* Base.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Base.lproj; sourceTree = "<group>"; };
 		43846AD81D8FA84B00799272 /* gallery.ckcomplication */ = {isa = PBXFileReference; lastKnownFileType = folder; path = gallery.ckcomplication; sourceTree = "<group>"; };
 		43846ADA1D91057000799272 /* ContextUpdatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextUpdatable.swift; sourceTree = "<group>"; };
+		43880F941D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
@@ -847,7 +847,7 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0800;
-				ORGANIZATIONNAME = "Nathan Racklyeft";
+				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
