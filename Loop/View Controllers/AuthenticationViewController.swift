@@ -37,13 +37,13 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
                             self.navigationItem.hidesBackButton = false
                         }) 
 
+                        if let error = error {
+                            self.presentAlertController(with: error)
+                        }
+
                         if success {
                             self.state = .authorized
                         } else {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            }
-
                             self.state = .unauthorized
                         }
                     }
@@ -179,14 +179,13 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField.returnKeyType == .done {
             textField.resignFirstResponder()
+            validate()
         } else {
             let point = tableView.convert(textField.frame.origin, from: textField.superview)
             if let indexPath = tableView.indexPathForRow(at: point),
                 let cell = tableView.cellForRow(at: IndexPath(row: indexPath.row + 1, section: indexPath.section)) as? AuthenticationTableViewCell
             {
                 cell.textField.becomeFirstResponder()
-
-                validate()
             }
         }
 

@@ -11,7 +11,7 @@ import HealthKit
 import LoopKit
 
 
-class PredictionTableViewController: UITableViewController, IdentifiableClass {
+class PredictionTableViewController: UITableViewController, IdentifiableClass, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +40,11 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
                 self.active = true
             }
         ]
+
+        let chartPanGestureRecognizer = UIPanGestureRecognizer()
+        chartPanGestureRecognizer.delegate = self
+        chartPanGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
+        charts.panGestureRecognizer = chartPanGestureRecognizer
     }
 
     deinit {
@@ -69,8 +74,9 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
-        if !visible {
-            needsRefresh = true
+        needsRefresh = true
+        if visible {
+            reloadData(animated: false)
         }
     }
 
@@ -119,69 +125,75 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
             var components = DateComponents()
             components.minute = 0
             let date = Date(timeIntervalSinceNow: -TimeInterval(hours: 1))
-            charts.startDate = (calendar as NSCalendar).nextDate(after: date, matching: components, options: [.matchStrictly, .searchBackwards]) ?? date
+            charts.startDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
-            var glucoseUnit: HKUnit?
 
             if let glucoseStore = dataManager.glucoseStore {
                 reloadGroup.enter()
-                glucoseStore.getRecentGlucoseValues(startDate: charts.startDate) { (values, error) -> Void in
-                    if let error = error {
-                        self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                        self.needsRefresh = true
-                        // TODO: Display error in the cell
-                    } else {
-                        self.charts.glucoseValues = values
+
+                glucoseStore.preferredUnit { (unit, error) in
+                    if let unit = unit {
+                        self.charts.glucoseUnit = unit
+                    }
+
+                    reloadGroup.enter()
+                    glucoseStore.getRecentGlucoseValues(startDate: self.charts.startDate) { (values, error) -> Void in
+                        if let error = error {
+                            self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
+                            self.needsRefresh = true
+                            // TODO: Display error in the cell
+                        } else {
+                            self.charts.glucoseValues = values
+                        }
+
+                        reloadGroup.leave()
+                    }
+
+                    reloadGroup.enter()
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, _, _, _, _, error) in
+                        if error != nil {
+                            self.needsRefresh = true
+                        }
+
+                        self.retrospectivePredictedGlucose = retrospectivePredictedGlucose
+                        self.charts.predictedGlucoseValues = predictedGlucose ?? []
+                        
+                        reloadGroup.leave()
+                    }
+
+                    reloadGroup.enter()
+                    self.dataManager.loopManager.modelPredictedGlucose(using: self.selectedInputs.flatMap { $0.selected ? $0.input : nil }) { (predictedGlucose, error) in
+                        if error != nil {
+                            self.needsRefresh = true
+                        }
+
+                        self.charts.alternatePredictedGlucoseValues = predictedGlucose ?? []
+
+                        if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
+                            self.eventualGlucoseDescription = String(describing: lastPoint)
+                        }
+
+                        reloadGroup.leave()
                     }
 
                     reloadGroup.leave()
                 }
-
-                reloadGroup.enter()
-                glucoseStore.preferredUnit { (unit, error) in
-                    glucoseUnit = unit
-
-                    reloadGroup.leave()
-                }
-            }
-
-            reloadGroup.enter()
-            dataManager.loopManager.getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, _, _, _, _, error) in
-                if error != nil {
-                    self.needsRefresh = true
-                }
-
-                self.retrospectivePredictedGlucose = retrospectivePredictedGlucose
-                self.charts.predictedGlucoseValues = predictedGlucose ?? []
-
-                reloadGroup.leave()
-            }
-
-            reloadGroup.enter()
-            dataManager.loopManager.modelPredictedGlucose(using: selectedInputs.flatMap { $0.selected ? $0.input : nil }) { (predictedGlucose, error) in
-                if error != nil {
-                    self.needsRefresh = true
-                }
-
-                self.charts.alternatePredictedGlucoseValues = predictedGlucose ?? []
-
-                reloadGroup.leave()
             }
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
             reloadGroup.notify(queue: DispatchQueue.main) {
-                if let unit = glucoseUnit {
-                    self.charts.glucoseUnit = unit
-                }
-                
                 self.charts.prerender()
-                
-                self.tableView.reloadSections(IndexSet(integersIn: NSMakeRange(Section.charts.rawValue, 1).toRange() ?? 0..<0),
-                                              with: .none
-                )
-                
+
+                for case let cell as ChartTableViewCell in self.tableView.visibleCells {
+                    cell.reloadChart()
+
+                    if let indexPath = self.tableView.indexPath(for: cell) {
+                        self.tableView(self.tableView, updateTitleFor: cell, at: indexPath)
+                    }
+                }
+
                 self.reloading = false
             }
         }
@@ -196,6 +208,8 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
         static let count = 3
     }
+
+    private var eventualGlucoseDescription: String?
 
     private lazy var selectedInputs: [(input: PredictionInputEffect, selected: Bool)] = [
         (.carbs, true), (.insulin, true), (.momentum, true), (.retrospection, true)
@@ -220,12 +234,18 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
+            cell.titleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
-            cell.chartContentView.chartGenerator = { [unowned self] (frame) in
-                return self.charts.glucoseChartWithFrame(frame)?.view
+            cell.chartContentView.chartGenerator = { [weak self] (frame) in
+                return self?.charts.glucoseChartWithFrame(frame)?.view
             }
 
+            self.tableView(tableView, updateTitleFor: cell, at: indexPath)
+            cell.titleLabel?.textColor = UIColor.secondaryLabelColor
             cell.selectionStyle = .none
+
+            cell.addGestureRecognizer(charts.panGestureRecognizer!)
 
             return cell
         case .inputs:
@@ -274,6 +294,19 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
         }
     }
 
+    private func tableView(_ tableView: UITableView, updateTitleFor cell: ChartTableViewCell, at indexPath: IndexPath) {
+        switch Section(rawValue: indexPath.section)! {
+        case .charts:
+            if let eventualGlucose = eventualGlucoseDescription {
+                cell.titleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
+            } else {
+                cell.titleLabel?.text = nil
+            }
+        default:
+            break
+        }
+    }
+
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
         case .settings:
@@ -288,7 +321,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
     override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
-            return 220
+            return 270
         case .inputs, .settings:
             return 60
         }
@@ -309,6 +342,28 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass {
 
         needsRefresh = true
         reloadData()
+    }
+
+    // MARK: - UIGestureRecognizer
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+
+    @objc func handlePan(_ gestureRecognizer: UIGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .possible, .changed:
+            // Follow your dreams!
+            break
+        case .began, .cancelled, .ended, .failed:
+            for case let row as ChartTableViewCell in self.tableView.visibleCells {
+                let forwards = gestureRecognizer.state == .began
+                UIView.animate(withDuration: forwards ? 0.2 : 0.5, delay: forwards ? 0 : 1, animations: {
+                    let alpha: CGFloat = forwards ? 0 : 1
+                    row.titleLabel?.alpha = alpha
+                })
+            }
+        }
     }
 
     // MARK: - Actions

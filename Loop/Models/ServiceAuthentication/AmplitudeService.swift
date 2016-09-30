@@ -35,10 +35,11 @@ struct AmplitudeService: ServiceAuthentication {
         return credentials[0].value
     }
 
-    var isAuthorized: Bool = false
+    var isAuthorized: Bool = true
 
     mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let APIKey = APIKey else {
+            isAuthorized = false
             completion(false, nil)
             return
         }

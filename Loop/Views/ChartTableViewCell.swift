@@ -13,15 +13,17 @@ final class ChartTableViewCell: UITableViewCell {
 
     @IBOutlet var chartContentView: ChartContentView!
 
-    @IBOutlet var subtitleLabel: UILabel? {
-        didSet {
-            subtitleLabel?.textColor = UIColor.secondaryLabelColor
-        }
-    }
+    @IBOutlet var titleLabel: UILabel?
+
+    @IBOutlet var subtitleLabel: UILabel?
 
     override func prepareForReuse() {
         super.prepareForReuse()
 
         chartContentView.chartGenerator = nil
+    }
+
+    func reloadChart() {
+        chartContentView.reloadChart()
     }
 }
