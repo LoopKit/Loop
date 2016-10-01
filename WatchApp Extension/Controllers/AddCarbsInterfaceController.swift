@@ -7,12 +7,26 @@
 //
 
 import WatchKit
-import Foundation
+import WatchConnectivity
 
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    private var carbValue: Int = 15
+    fileprivate var carbValue: Int = 15 {
+        didSet {
+            guard carbValue >= 0 else {
+                carbValue = 0
+                return
+            }
+
+            guard carbValue <= 100 else {
+                carbValue = 100
+                return
+            }
+
+            valueLabel.setText(String(carbValue))
+        }
+    }
 
     private var absorptionTime = AbsorptionTimeType.medium {
         didSet {
@@ -33,8 +47,6 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBOutlet var valueLabel: WKInterfaceLabel!
 
-    @IBOutlet var valuePicker: WKInterfacePicker!
-
     @IBOutlet var absorptionButtonA: WKInterfaceButton!
 
     @IBOutlet var absorptionButtonB: WKInterfaceButton!
@@ -45,12 +57,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         super.awake(withContext: context)
         
         // Configure interface objects here.
-
-        let items = (0...100).map { _ in WKPickerItem() }
-
-        valuePicker.setItems(items)
-
-        valuePicker.setSelectedItemIndex(carbValue)
+        crownSequencer.delegate = self
 
         absorptionTime = .medium
     }
@@ -59,7 +66,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        valuePicker.focus()
+        crownSequencer.focus()
     }
 
     override func didDeactivate() {
@@ -69,17 +76,12 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     // MARK: - Actions
 
-    @IBAction func pickerValueUpdated(_ value: Int) {
-        carbValue = value
-        valueLabel.setText(String(value))
-    }
-
     @IBAction func decrement() {
-        valuePicker.setSelectedItemIndex(carbValue - 5)
+        carbValue -= 5
     }
 
     @IBAction func increment() {
-        valuePicker.setSelectedItemIndex(carbValue + 5)
+        carbValue += 5
     }
 
     @IBAction func setAbsorptionTimeFast() {
@@ -98,10 +100,41 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         if carbValue > 0 {
             let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
 
-            DeviceDataManager.sharedManager.sendCarbEntry(entry)
+            do {
+                try WCSession.default().sendCarbEntryMessage(entry,
+                    replyHandler: { (suggestion) in
+                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                    },
+                    errorHandler: { (error) in
+                        ExtensionDelegate.shared().present(error)
+                    }
+                )
+            } catch {
+                presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a carb entry send attempt fails"),
+                    message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a carb entry send attempt fails"),
+                    preferredStyle: .alert,
+                    actions: [WKAlertAction.dismissAction()]
+                )
+                return
+            }
         }
 
         dismiss()
     }
 
+    // MARK: - Crown Sequencer
+
+    fileprivate var accumulatedRotation: Double = 0
+}
+
+fileprivate let rotationsPerCarb: Double = 1/24
+
+extension AddCarbsInterfaceController: WKCrownDelegate {
+    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
+        accumulatedRotation += rotationalDelta
+
+        let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
+        carbValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerCarb))
+        accumulatedRotation = remainder
+    }
 }

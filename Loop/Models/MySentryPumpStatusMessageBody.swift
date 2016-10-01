@@ -38,4 +38,8 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
             return .flat
         }
     }
+
+    var isLocal: Bool {
+        return true
+    }
 }

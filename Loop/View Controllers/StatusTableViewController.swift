@@ -145,10 +145,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             components.minute = 0
             let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, historyHours)))
             charts.startDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
-            charts.glucoseDisplayRange = (
-                min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
-                max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 175)
-            )
 
             let reloadGroup = DispatchGroup()
             let oldRecommendedTempBasal = self.recommendedTempBasal
@@ -321,7 +317,16 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         static let count = 4
     }
 
-    private let charts = StatusChartsManager()
+    private lazy var charts: StatusChartsManager = {
+        let charts = StatusChartsManager()
+
+        charts.glucoseDisplayRange = (
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 175)
+        )
+
+        return charts
+    }()
 
     // MARK: Glucose
 
@@ -558,11 +563,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
+            // 20: Status bar
+            // 44: Toolbar
+            let availableSize = max(tableView.bounds.width, tableView.bounds.height) - 20 - (tableView.tableHeaderView?.frame.height ?? 0) - 44
+
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                return 180
+                return max(100, 0.37 * availableSize)
             case .iob, .dose, .cob:
-                return 110
+                return max(100, 0.21 * availableSize)
             }
         case .status:
             return UITableViewAutomaticDimension
@@ -731,7 +740,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         if let bolusViewController = segue.source as? BolusViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
                 let startDate = Date()
-                dataManager.enactBolus(bolus) { (error) in
+                dataManager.enactBolus(units: bolus) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: startDate)
                     }
@@ -798,7 +807,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @objc private func openCGMApp(_: Any) {
         if let url = cgmAppURL {
-            UIApplication.shared.openURL(url)
+            UIApplication.shared.open(url)
         }
     }
 

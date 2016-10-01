@@ -2,6 +2,7 @@
 With exceptions for frameworks and graphics, noted below.
 
 Copyright (c) 2015 Nathan Racklyeft
+Copyright (c) 2016 LoopKit Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +38,7 @@ Copyright (c) 2016 Mark Wilson
 *Including CarbKit.framework, GlucoseKit.framework, and InsulinKit.framework*
 
 Copyright (c) 2015 Nathan Racklyeft
+Copyright (c) 2016 LoopKit Authors
 
 ## RileyLinkKit.framework
 *Including MinimedKit.framework, NightscoutUploadKit.framework, and RileyLinkBLEKit.framework*
@@ -54,6 +56,7 @@ Copyright (c) 2016 Mark Wilson
 ## xDripG5.framework
 
 Copyright (c) 2015 Nathan Racklyeft
+Copyright (c) 2016 LoopKit Authors
 
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
