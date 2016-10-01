@@ -13,8 +13,20 @@ import WatchConnectivity
 
 final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    private var bolusValue: Double = 0 {
+    fileprivate var pickerValue: Int = 0 {
         didSet {
+            guard pickerValue >= 0 else {
+                pickerValue = 0
+                return
+            }
+
+            guard pickerValue <= maxPickerValue else {
+                pickerValue = maxPickerValue
+                return
+            }
+
+            let bolusValue = bolusValueFromPickerValue(pickerValue)
+
             switch bolusValue {
             case let x where x < 1:
                 formatter.minimumFractionDigits = 3
@@ -58,10 +70,10 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         return formatter
     }()
 
+    private var maxPickerValue = 0
+
     /// 1.25
     @IBOutlet var valueLabel: WKInterfaceLabel!
-
-    @IBOutlet var valuePicker: WKInterfacePicker!
 
     /// REC: 2.25 U
     @IBOutlet var recommendedValueLabel: WKInterfaceLabel!
@@ -69,12 +81,13 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
 
-        let maxPickerValue: Int
         var maxBolusValue: Double = 15
-        let pickerValue: Int
+        var pickerValue = 0
 
-        if let context = context as? BolusSuggestionUserInfo {
-            let recommendedBolus = context.recommendedBolus
+        let info: BolusSuggestionUserInfo? = BolusSuggestionUserInfo(recommendedBolus: 3.5, maxBolus: 10)
+
+        if let context = info {
+            let recommendedBolus = 3.5
 
             if let maxBolus = context.maxBolus {
                 maxBolusValue = maxBolus
@@ -82,31 +95,26 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
                 maxBolusValue = recommendedBolus
             }
 
-            maxPickerValue = pickerValueFromBolusValue(maxBolusValue)
             let recommendedPickerValue = pickerValueFromBolusValue(recommendedBolus)
             maxBolusValue = bolusValueFromPickerValue(maxPickerValue)
             pickerValue = Int(Double(recommendedPickerValue) * 0.75)
-            bolusValue = bolusValueFromPickerValue(pickerValue)
 
             if let valueString = formatter.string(from: NSNumber(value: recommendedBolus)) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
-        } else {
-            maxPickerValue = pickerValueFromBolusValue(maxBolusValue)
-            pickerValue = pickerValueFromBolusValue(bolusValue)
-            bolusValue = 0
         }
 
-        let items = (0...maxPickerValue).map { _ in WKPickerItem() }
-        valuePicker.setItems(items)
-        valuePicker.setSelectedItemIndex(pickerValue)
+        self.maxPickerValue = pickerValueFromBolusValue(maxBolusValue)
+        self.pickerValue = pickerValue
+
+        crownSequencer.delegate = self
     }
 
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        valuePicker.focus()
+        crownSequencer.focus()
     }
 
     override func didDeactivate() {
@@ -116,19 +124,17 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     // MARK: - Actions
 
-    @IBAction func pickerValueUpdated(_ value: Int) {
-        bolusValue = bolusValueFromPickerValue(value)
-    }
-
     @IBAction func decrement() {
-        valuePicker.setSelectedItemIndex(pickerValueFromBolusValue(bolusValue) - 10)
+        pickerValue -= 10
     }
 
     @IBAction func increment() {
-        valuePicker.setSelectedItemIndex(pickerValueFromBolusValue(bolusValue) + 10)
+        pickerValue += 10
     }
 
     @IBAction func deliver() {
+        let bolusValue = bolusValueFromPickerValue(pickerValue)
+
         if bolusValue > 0 {
             let bolus = SetBolusUserInfo(value: bolusValue, startDate: Date())
 
@@ -150,4 +156,19 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         dismiss()
     }
 
+    // MARK: - Crown Sequencer
+
+    fileprivate var accumulatedRotation: Double = 0
+}
+
+fileprivate let rotationsPerValue: Double = 1/24
+
+extension BolusInterfaceController: WKCrownDelegate {
+    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
+        accumulatedRotation += rotationalDelta
+
+        let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
+        pickerValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerValue))
+        accumulatedRotation = remainder
+    }
 }
