@@ -132,7 +132,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                     server.reloadTimeline(for: complication)
                 } else {
                     os_log("Extending complication timeline")
-                    server.extendTimeline(for: complication)
+                    // TODO: Switch this back to extendTimeline if things are working correctly.
+                    // Time Travel appears to be disabled by default in watchOS 3 anyway
+                    server.reloadTimeline(for: complication)
                 }
             }
         }

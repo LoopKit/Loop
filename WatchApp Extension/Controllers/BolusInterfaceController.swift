@@ -84,10 +84,8 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         var maxBolusValue: Double = 15
         var pickerValue = 0
 
-        let info: BolusSuggestionUserInfo? = BolusSuggestionUserInfo(recommendedBolus: 3.5, maxBolus: 10)
-
-        if let context = info {
-            let recommendedBolus = 3.5
+        if let context = context as? BolusSuggestionUserInfo {
+            let recommendedBolus = context.recommendedBolus
 
             if let maxBolus = context.maxBolus {
                 maxBolusValue = maxBolus
@@ -96,7 +94,6 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             }
 
             let recommendedPickerValue = pickerValueFromBolusValue(recommendedBolus)
-            maxBolusValue = bolusValueFromPickerValue(maxPickerValue)
             pickerValue = Int(Double(recommendedPickerValue) * 0.75)
 
             if let valueString = formatter.string(from: NSNumber(value: recommendedBolus)) {
