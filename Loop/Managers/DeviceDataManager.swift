@@ -968,7 +968,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "workoutModeEnabled: \(workoutModeEnabled)",
             "maximumBasalRatePerHour: \(maximumBasalRatePerHour)",
             "maximumBolus: \(maximumBolus)",
-//            rileyLinkManager.debugDescription
+            String(reflecting: rileyLinkManager)
         ].joined(separator: "\n")
     }
 }
