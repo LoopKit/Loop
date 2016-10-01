@@ -492,9 +492,9 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     // MARK: G5 data
 
-    private var latestGlucoseG5: xDripG5.Glucose?
+    fileprivate var latestGlucoseG5: xDripG5.Glucose?
 
-    private var latestGlucoseFromShare: ShareGlucose?
+    fileprivate var latestGlucoseFromShare: ShareGlucose?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
@@ -548,7 +548,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     // MARK: ReceiverDelegate
 
-    private var latestGlucoseG4: GlucoseG4?
+    fileprivate var latestGlucoseG4: GlucoseG4?
 
     func receiver(_ receiver: Receiver, didReadGlucoseHistory glucoseHistory: [GlucoseG4]) {
         assertCurrentPumpData()
@@ -618,7 +618,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             var pumpID = newValue
 
             if let pumpID = pumpID, pumpID.characters.count == 6 {
-                let pumpState = PumpState(pumpID: pumpID, pumpRegion: .northAmerica)
+                let pumpState = PumpState(pumpID: pumpID, pumpRegion: self.pumpState?.pumpRegion ?? .northAmerica)
 
                 if let timeZone = self.pumpState?.timeZone {
                     pumpState.timeZone = timeZone
@@ -679,6 +679,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             }
 
             UserDefaults.standard.pumpModelNumber = pumpState?.pumpModel?.rawValue
+        case "pumpRegion"?:
+            UserDefaults.standard.pumpRegion = pumpState?.pumpRegion
         case "lastHistoryDump"?, "awakeUntil"?:
             break
         default:
@@ -897,7 +899,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         var idleListeningEnabled = true
 
         if let pumpID = pumpID {
-            let pumpState = PumpState(pumpID: pumpID, pumpRegion: .northAmerica)
+            let pumpState = PumpState(pumpID: pumpID, pumpRegion: UserDefaults.standard.pumpRegion ?? .northAmerica)
 
             if let timeZone = UserDefaults.standard.pumpTimeZone {
                 pumpState.timeZone = timeZone
@@ -946,6 +948,28 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
 
         enableRileyLinkHeartbeatIfNeeded()
+    }
+}
+
+
+extension DeviceDataManager: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return [
+            "## DeviceDataManager",
+            "receiverEnabled: \(receiverEnabled)",
+            "latestPumpStatusFromMySentry: \(latestPumpStatusFromMySentry)",
+            "latestGlucoseG5: \(latestGlucoseG5)",
+            "latestGlucoseFromShare: \(latestGlucoseFromShare)",
+            "latestGlucoseG4: \(latestGlucoseG4)",
+            "pumpState: \(String(reflecting: pumpState))",
+            "preferredInsulinDataSource: \(preferredInsulinDataSource)",
+            "transmitterID: \(transmitterID)",
+            "glucoseTargetRangeSchedule: \(glucoseTargetRangeSchedule?.debugDescription ?? "")",
+            "workoutModeEnabled: \(workoutModeEnabled)",
+            "maximumBasalRatePerHour: \(maximumBasalRatePerHour)",
+            "maximumBolus: \(maximumBolus)",
+//            rileyLinkManager.debugDescription
+        ].joined(separator: "\n")
     }
 }
 
