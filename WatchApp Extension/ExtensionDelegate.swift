@@ -127,13 +127,12 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             for complication in server.activeComplications ?? [] {
                 // In watchOS 2, we forced a timeline reload every 8 hours because attempting to extend it indefinitely seemed to lead to the complication "freezing".
                 if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(hours: -8) {
+                    UserDefaults.standard.complicationDataLastRefreshed = Date()
                     os_log("Reloading complication timeline")
                     server.reloadTimeline(for: complication)
                 } else {
                     os_log("Extending complication timeline")
-                    // TODO: Switch this back to extendTimeline if things are working correctly.
-                    // Time Travel appears to be disabled by default in watchOS 3 anyway
-                    server.reloadTimeline(for: complication)
+                    server.extendTimeline(for: complication)
                 }
             }
         }
