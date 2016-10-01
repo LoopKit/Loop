@@ -666,6 +666,30 @@ final class LoopDataManager {
 }
 
 
+extension LoopDataManager {
+    /// Generates a diagnostic report about the current state
+    ///
+    /// This operation is performed asynchronously and the completion will be executed on an arbitrary background queue.
+    ///
+    /// - parameter completionHandler: A closure called once the report has been generated. The closure takes a single argument of the report string.
+    func generateDiagnosticReport(_ completionHandler: @escaping (_ report:     String) -> Void) {
+        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
+            let report = [
+                "## LoopDataManager",
+                "predictedGlucose: \(predictedGlucose ?? [])",
+                "retrospectivePredictedGlucose: \(retrospectivePredictedGlucose ?? [])",
+                "recommendedTempBasal: \(recommendedTempBasal)",
+                "lastTempBasal: \(lastTempBasal)",
+                "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
+                "insulinOnBoard: \(insulinOnBoard)",
+                "error: \(error)"
+            ]
+            completionHandler(report.joined(separator: "\n"))
+        }
+    }
+}
+
+
 extension Notification.Name {
     static let LoopDataUpdated = Notification.Name(rawValue:  "com.loudnate.Naterade.notification.LoopDataUpdated")
 

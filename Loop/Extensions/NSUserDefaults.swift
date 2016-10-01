@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import MinimedKit
 
 
 extension UserDefaults {
@@ -27,6 +28,7 @@ extension UserDefaults {
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
+        case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
     }
@@ -174,6 +176,16 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.PumpModelNumber.rawValue)
+        }
+    }
+
+    var pumpRegion: PumpRegion? {
+        get {
+            // Defaults to 0 / northAmerica
+            return PumpRegion(rawValue: integer(forKey: Key.PumpRegion.rawValue))
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.PumpRegion.rawValue)
         }
     }
 
