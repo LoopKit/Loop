@@ -7,6 +7,7 @@
 //
 
 import ClockKit
+import WatchKit
 
 
 final class ComplicationController: NSObject, CLKComplicationDataSource {
@@ -18,7 +19,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
+        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
             handler(date as Date)
         } else {
             handler(nil)
@@ -26,7 +27,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
+        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
             handler(date as Date)
         } else {
             handler(nil)
@@ -45,7 +46,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
 
         switch complication.family {
         case .modularSmall:
-            if let context = DeviceDataManager.sharedManager.lastContextData,
+            if let context = ExtensionDelegate.shared().lastContext,
                 let glucose = context.glucose,
                 let unit = context.preferredGlucoseUnit,
                 let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
@@ -68,7 +69,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
-        if let context = DeviceDataManager.sharedManager.lastContextData,
+        if let context = ExtensionDelegate.shared().lastContext,
             let glucose = context.glucose,
             let unit = context.preferredGlucoseUnit,
             let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
@@ -81,35 +82,19 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    func requestedUpdateDidBegin() {
-        DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
-    }
-
-    func requestedUpdateBudgetExhausted() {
-        // TODO: os_log_info in iOS 10
-    }
-
-    // MARK: - Update Scheduling
-    
-    func getNextRequestedUpdateDate(handler: @escaping (Date?) -> Void) {
-        // Call the handler with the date when you would next like to be given the opportunity to update your complication content
-        handler(Date(timeIntervalSinceNow: TimeInterval(2 * 60 * 60)))
-    }
-    
     // MARK: - Placeholder Templates
-    
-    func getPlaceholderTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
+
+    func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         switch complication.family {
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
 
             template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
-            template.line2TextProvider = CLKSimpleTextProvider(text: "mg/dL")
+            template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
 
             handler(template)
         default:
             handler(nil)
         }
     }
-
 }

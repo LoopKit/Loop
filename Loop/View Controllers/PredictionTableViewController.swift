@@ -300,7 +300,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
             if let eventualGlucose = eventualGlucoseDescription {
                 cell.titleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
             } else {
-                cell.titleLabel?.text = nil
+                cell.titleLabel?.text = "–"
             }
         default:
             break
@@ -321,7 +321,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
-            return 270
+            return 275
         case .inputs, .settings:
             return 60
         }

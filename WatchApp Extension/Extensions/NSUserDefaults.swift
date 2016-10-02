@@ -12,8 +12,6 @@ import Foundation
 extension UserDefaults {
     private enum Key: String {
         case ComplicationDataLastRefreshed = "com.loudnate.Naterade.ComplicationDataLastRefreshed"
-        case WatchContext = "com.loudnate.Naterade.WatchContext"
-        case WatchContextReadyForComplication = "com.loudnate.Naterade.WatchContextReadyForComplication"
     }
 
     var complicationDataLastRefreshed: Date {
@@ -22,30 +20,6 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.ComplicationDataLastRefreshed.rawValue)
-        }
-    }
-
-    var watchContext: WatchContext? {
-        get {
-            if let rawValue = dictionary(forKey: Key.WatchContext.rawValue) {
-                return WatchContext(rawValue: rawValue as WatchContext.RawValue)
-            } else {
-                return nil
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.WatchContext.rawValue)
-
-            watchContextReadyForComplication = newValue != nil
-        }
-    }
-
-    var watchContextReadyForComplication: Bool {
-        get {
-            return bool(forKey: Key.WatchContextReadyForComplication.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.WatchContextReadyForComplication.rawValue)
         }
     }
 }
