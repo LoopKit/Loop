@@ -83,7 +83,7 @@ struct NotificationManager {
             UserInfoKey.BolusAmount.rawValue: units,
             UserInfoKey.BolusStartDate.rawValue: startDate
         ]
-        sendAlertPushNotification(alert: notification.alertBody!)
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             // Only support 1 bolus notification at once
             identifier: Category.BolusFailure.rawValue,
@@ -142,7 +142,7 @@ struct NotificationManager {
         notification.sound = UNNotificationSound.default()
         notification.categoryIdentifier = Category.PumpBatteryLow.rawValue
 
-        sendAlertPushNotification(alert: notification.alertBody!)
+        sendAlertPushNotification(alert: notification.body)
         let request = UNNotificationRequest(
             identifier: Category.PumpBatteryLow.rawValue,
             content: notification,
@@ -190,7 +190,7 @@ struct NotificationManager {
             notification.body = String(format: NSLocalizedString("%1$@ U left", comment: "Low reservoir alert format string. (1: Number of units remaining)"), unitsString)
         }
 
-        sendAlertPushNotification(alert: notification.alertBody!)
+        sendAlertPushNotification(alert: notification.body)
         notification.sound = UNNotificationSound.default()
         notification.categoryIdentifier = Category.PumpReservoirLow.rawValue
 

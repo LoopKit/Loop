@@ -254,10 +254,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
 
 
-                batteryLevelHUD.batteryLevel = dataManager.x22BatteryBroadcastRemaining
-                reservoirVolumeHUD.reservoirVolume = reservoir.unitVolume
-                reservoirVolumeHUD.lastUpdated = reservoir.startDate
-                reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+             batteryLevelHUD.batteryLevel = dataManager.x22BatteryBroadcastRemaining
+             reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
             if let status = dataManager.latestPumpStatusFromMySentry {
