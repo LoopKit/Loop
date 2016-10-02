@@ -20,8 +20,6 @@ final class ChartPointsTouchHighlightLayerViewCache {
     private lazy var labelY: UILabel = {
         let label = UILabel()
         label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: UIFontWeightBold)
-        label.textAlignment = .center
-        label.backgroundColor = UIColor.white
 
         return label
     }()
@@ -76,18 +74,13 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
                     label.text = text
                     label.sizeToFit()
-                    label.frame.size.height += 4
-                    label.frame.size.width += label.frame.size.height / 2
-                    label.center.y = innerFrame.origin.y - 1
+                    label.center.y = innerFrame.origin.y - 21
                     label.center.x = chartPointModel.screenLoc.x
                     label.frame.origin.x = min(max(label.frame.origin.x, innerFrame.origin.x), innerFrame.maxX - label.frame.size.width)
                     label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
-                    label.layer.cornerRadius = label.frame.size.height / 2
-                    label.layer.borderWidth = 1 / max(1, chart.view.traitCollection.displayScale)
 
                     if label.superview == nil {
                         label.textColor = tintColor
-                        label.layer.borderColor = tintColor.cgColor
 
                         containerView.addSubview(label)
                     }

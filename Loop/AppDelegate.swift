@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UserNotifications
 import CarbKit
 import InsulinKit
 
@@ -15,12 +16,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    private(set) lazy var dataManager = DeviceDataManager()
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         window?.tintColor = UIColor.tintColor
 
-        NotificationManager.authorize()
+        NotificationManager.authorize(delegate: self)
 
         AnalyticsManager.sharedManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+        if  let navVC = window?.rootViewController as? UINavigationController,
+            let statusVC = navVC.viewControllers.first as? StatusTableViewController {
+            statusVC.dataManager = dataManager
+        }
 
         return true
     }
@@ -42,7 +50,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 
-        DeviceDataManager.sharedManager.transmitter?.resumeScanning()
+        dataManager.transmitter?.resumeScanning()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -53,29 +61,27 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     }
 
-    // MARK: - Notifications
+    // MARK: - 3D Touch
 
-    func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        if application.applicationState == .active {
-            if let message = notification.alertBody {
-                window?.rootViewController?.presentAlertController(withTitle: notification.alertTitle, message: message, animated: true, completion: nil)
-            }
-        }
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(false)
     }
+}
 
-    func application(_ application: UIApplication, handleActionWithIdentifier identifier: String?, for notification: UILocalNotification, withResponseInfo responseInfo: [AnyHashable: Any], completionHandler: @escaping () -> Void) {
 
-        switch identifier {
-        case NotificationManager.Action.RetryBolus.rawValue?:
-            if  let units = notification.userInfo?[NotificationManager.UserInfoKey.BolusAmount.rawValue] as? Double,
-                let startDate = notification.userInfo?[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? Date,
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        switch response.actionIdentifier {
+        case NotificationManager.Action.RetryBolus.rawValue:
+            if  let units = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.BolusAmount.rawValue] as? Double,
+                let startDate = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.BolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
                 AnalyticsManager.sharedManager.didRetryBolus()
 
-                DeviceDataManager.sharedManager.enactBolus(units) { (error) in
+                dataManager.enactBolus(units: units) { (error) in
                     if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(units, atDate: startDate)
+                        NotificationManager.sendBolusFailureNotificationForAmount(units, atStartDate: startDate)
                     }
 
                     completionHandler()
@@ -85,13 +91,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         default:
             break
         }
-
+        
         completionHandler()
     }
 
-    // MARK: - 3D Touch
-
-    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
-        completionHandler(false)
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.badge, .sound, .alert])
     }
 }

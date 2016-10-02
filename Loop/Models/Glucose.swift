@@ -51,4 +51,8 @@ extension Glucose: SensorDisplayable {
             return .upUpUp
         }
     }
+
+    var isLocal: Bool {
+        return true
+    }
 }

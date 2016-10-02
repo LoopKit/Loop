@@ -15,7 +15,14 @@ class ChartContentView: UIView {
 
         if chartView == nil || chartView!.frame != bounds {
             chartView = chartGenerator?(bounds)
+        } else if chartView!.superview == nil {
+            addSubview(chartView!)
         }
+    }
+
+    func reloadChart() {
+        chartView = nil
+        setNeedsLayout()
     }
 
     var chartGenerator: ((CGRect) -> UIView?)? {

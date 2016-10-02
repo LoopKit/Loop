@@ -18,6 +18,9 @@ protocol SensorDisplayable {
 
     /// Enumerates the trend of the sensor values
     var trendType: GlucoseTrend? { get }
+
+    /// Returns wheter the data is from a locally-connected device
+    var isLocal: Bool { get }
 }
 
 

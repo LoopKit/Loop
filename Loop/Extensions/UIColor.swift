@@ -14,6 +14,8 @@ extension UIColor {
 
     @nonobjc static let secondaryLabelColor = UIColor.HIGGrayColor()
 
+    @nonobjc static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
+
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
     @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)

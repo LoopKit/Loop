@@ -657,10 +657,34 @@ final class LoopDataManager {
      - parameter units: The amount of insulin
      - parameter date:  The date the bolus was set
      */
-    func recordBolus(_ units: Double, atDate date: Date) {
+    func recordBolus(_ units: Double, at date: Date) {
         dataAccessQueue.async {
             self.lastBolus = (units: units, date: date)
             self.notify(forChange: .bolus)
+        }
+    }
+}
+
+
+extension LoopDataManager {
+    /// Generates a diagnostic report about the current state
+    ///
+    /// This operation is performed asynchronously and the completion will be executed on an arbitrary background queue.
+    ///
+    /// - parameter completionHandler: A closure called once the report has been generated. The closure takes a single argument of the report string.
+    func generateDiagnosticReport(_ completionHandler: @escaping (_ report:     String) -> Void) {
+        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
+            let report = [
+                "## LoopDataManager",
+                "predictedGlucose: \(predictedGlucose ?? [])",
+                "retrospectivePredictedGlucose: \(retrospectivePredictedGlucose ?? [])",
+                "recommendedTempBasal: \(recommendedTempBasal)",
+                "lastTempBasal: \(lastTempBasal)",
+                "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
+                "insulinOnBoard: \(insulinOnBoard)",
+                "error: \(error)"
+            ]
+            completionHandler(report.joined(separator: "\n"))
         }
     }
 }
