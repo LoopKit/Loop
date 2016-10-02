@@ -782,9 +782,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - HUDs
 
-    @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
+    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
 
-    @IBOutlet var glucoseHUD: GlucoseHUDView! {
+    @IBOutlet weak var glucoseHUD: GlucoseHUDView! {
         didSet {
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
@@ -811,9 +811,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    @IBOutlet var basalRateHUD: BasalRateHUDView!
+    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
 
-    @IBOutlet var reservoirVolumeHUD: ReservoirVolumeHUDView!
+    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
 
-    @IBOutlet var batteryLevelHUD: BatteryLevelHUDView!
+    @IBOutlet weak var batteryLevelHUD: BatteryLevelHUDView!
 }

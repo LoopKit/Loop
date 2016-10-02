@@ -118,6 +118,10 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
+    /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
+    /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and 
+    /// G4 Receiver are reliable as hearbeats, but users who find their resources extremely constrained
+    /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
     private func enableRileyLinkHeartbeatIfNeeded() {
         if transmitter != nil {
             rileyLinkManager.timerTickEnabled = false

@@ -13,21 +13,21 @@ import HealthKit
 
 final class GlucoseHUDView: HUDView {
 
-    @IBOutlet private var unitLabel: UILabel! {
+    @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
             unitLabel.text = "–"
             unitLabel.textColor = .glucoseTintColor
         }
     }
 
-    @IBOutlet private var glucoseLabel: UILabel! {
+    @IBOutlet private weak var glucoseLabel: UILabel! {
         didSet {
             glucoseLabel.text = "–"
             glucoseLabel.textColor = .glucoseTintColor
         }
     }
 
-    @IBOutlet private var alertLabel: UILabel! {
+    @IBOutlet private weak var alertLabel: UILabel! {
         didSet {
             alertLabel.alpha = 0
             alertLabel.backgroundColor = UIColor.agingColor
