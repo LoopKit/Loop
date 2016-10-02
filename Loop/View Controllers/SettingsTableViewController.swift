@@ -246,8 +246,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 if let insulinActionDuration = dataManager.insulinActionDuration {
                     let formatter = DateComponentsFormatter()
+                    formatter.unitsStyle = .abbreviated
+                    // Seems to have no effect.
+                    // http://stackoverflow.com/questions/32522965/what-am-i-doing-wrong-with-allowsfractionalunits-on-nsdatecomponentsformatter
                     formatter.allowsFractionalUnits = true
-                    formatter.allowedUnits = [.hour]
+                    // formatter.allowedUnits = [.hour]
 
                     configCell.detailTextLabel?.text = formatter.string(from: insulinActionDuration)
                 } else {
