@@ -120,9 +120,9 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     private func enableRileyLinkHeartbeatIfNeeded() {
         if transmitter != nil {
-            rileyLinkManager.timerTickEnabled = false
+            rileyLinkManager.timerTickEnabled = true //SCOTT
         } else if receiverEnabled {
-            rileyLinkManager.timerTickEnabled = false
+            rileyLinkManager.timerTickEnabled = true //SCOTT
         } else {
             rileyLinkManager.timerTickEnabled = true
         }
