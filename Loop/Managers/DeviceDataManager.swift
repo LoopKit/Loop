@@ -114,7 +114,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
 
         if connectedPeripheralIDs.count == 0 {
-            NotificationManager.clearLoopNotRunningNotifications()
+            NotificationManager.clearPendingNotificationRequests()
         }
     }
 
@@ -408,13 +408,12 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
-    /**
-     Send a bolus command and handle the result
- 
-     - parameter completion: A closure called after the command is complete. This closure takes a single argument:
-        - error: An error describing why the command failed
-     */
-    func enactBolus(_ units: Double, completion: @escaping (_ error: Error?) -> Void) {
+    /// Send a bolus command and handle the result
+    ///
+    /// - parameter units:      The number of units to deliver
+    /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
+    ///     - error: An error describing why the command failed
+    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
         guard units > 0 else {
             completion(nil)
             return
@@ -490,9 +489,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
     }
 
     // MARK: - G5 Transmitter
-    /**
-     The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
-     */
+    /// The G5 transmitter is a reliable heartbeat by which we can assert the loop state.
 
     // MARK: TransmitterDelegate
 
@@ -533,11 +530,19 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
+    public func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
+        logger.addMessage([
+                "unknownData": data.hexadecimalString,
+                "collectedAt": DateFormatter.ISO8601StrictDateFormatter().string(from: Date())
+            ], toCollection: "g5"
+        )
+    }
+
     // MARK: G5 data
 
-    private var latestGlucoseG5: xDripG5.Glucose?
+    fileprivate var latestGlucoseG5: xDripG5.Glucose?
 
-    private var latestGlucoseFromShare: ShareGlucose?
+    fileprivate var latestGlucoseFromShare: ShareGlucose?
 
     /**
      Attempts to backfill glucose data from the share servers if a G5 connection hasn't been established.
@@ -591,7 +596,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
 
     // MARK: ReceiverDelegate
 
-    private var latestGlucoseG4: GlucoseG4?
+    fileprivate var latestGlucoseG4: GlucoseG4?
 
     func receiver(_ receiver: Receiver, didReadGlucoseHistory glucoseHistory: [GlucoseG4]) {
         assertCurrentPumpData()
@@ -661,7 +666,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             var pumpID = newValue
 
             if let pumpID = pumpID, pumpID.characters.count == 6 {
-                let pumpState = PumpState(pumpID: pumpID, pumpRegion: .northAmerica)
+                let pumpState = PumpState(pumpID: pumpID, pumpRegion: self.pumpState?.pumpRegion ?? .northAmerica)
 
                 if let timeZone = self.pumpState?.timeZone {
                     pumpState.timeZone = timeZone
@@ -722,6 +727,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             }
 
             UserDefaults.standard.pumpModelNumber = pumpState?.pumpModel?.rawValue
+        case "pumpRegion"?:
+            UserDefaults.standard.pumpRegion = pumpState?.pumpRegion
         case "lastHistoryDump"?, "awakeUntil"?:
             break
         default:
@@ -932,6 +939,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         )
 
         carbStore = CarbStore(
+            defaultAbsorptionTimes: (fast: TimeInterval(hours: 2), medium: TimeInterval(hours: 3), slow: TimeInterval(hours: 4)),
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -939,7 +947,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         var idleListeningEnabled = true
 
         if let pumpID = pumpID {
-            let pumpState = PumpState(pumpID: pumpID, pumpRegion: .northAmerica)
+            let pumpState = PumpState(pumpID: pumpID, pumpRegion: UserDefaults.standard.pumpRegion ?? .northAmerica)
 
             if let timeZone = UserDefaults.standard.pumpTimeZone {
                 pumpState.timeZone = timeZone
@@ -988,6 +996,28 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
 
         enableRileyLinkHeartbeatIfNeeded()
+    }
+}
+
+
+extension DeviceDataManager: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return [
+            "## DeviceDataManager",
+            "receiverEnabled: \(receiverEnabled)",
+            "latestPumpStatusFromMySentry: \(latestPumpStatusFromMySentry)",
+            "latestGlucoseG5: \(latestGlucoseG5)",
+            "latestGlucoseFromShare: \(latestGlucoseFromShare)",
+            "latestGlucoseG4: \(latestGlucoseG4)",
+            "pumpState: \(String(reflecting: pumpState))",
+            "preferredInsulinDataSource: \(preferredInsulinDataSource)",
+            "transmitterID: \(transmitterID)",
+            "glucoseTargetRangeSchedule: \(glucoseTargetRangeSchedule?.debugDescription ?? "")",
+            "workoutModeEnabled: \(workoutModeEnabled)",
+            "maximumBasalRatePerHour: \(maximumBasalRatePerHour)",
+            "maximumBolus: \(maximumBolus)",
+            String(reflecting: rileyLinkManager)
+        ].joined(separator: "\n")
     }
 }
 

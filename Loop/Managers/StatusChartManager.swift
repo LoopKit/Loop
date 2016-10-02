@@ -74,7 +74,15 @@ final class StatusChartsManager {
 
     var startDate = Date()
 
-    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
+    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit() {
+        didSet {
+            if glucoseUnit != oldValue {
+                // Regenerate the glucose display points
+                let oldRange = glucoseDisplayRange
+                glucoseDisplayRange = oldRange
+            }
+        }
+    }
 
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 

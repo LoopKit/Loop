@@ -32,9 +32,9 @@
                                         <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="guo-4Z-RoO"/>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="moR-fS-DWR" firstAttribute="leading" secondItem="D0A-EB-kmz" secondAttribute="leadingMargin" constant="7" id="3Zc-7R-Uft"/>
+                                        <constraint firstItem="moR-fS-DWR" firstAttribute="leading" secondItem="D0A-EB-kmz" secondAttribute="leadingMargin" id="3Zc-7R-Uft"/>
                                         <constraint firstItem="moR-fS-DWR" firstAttribute="top" secondItem="D0A-EB-kmz" secondAttribute="topMargin" id="Sa2-TB-EcZ"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="guo-4Z-RoO" secondAttribute="trailing" constant="7" id="gb5-W2-roe"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="guo-4Z-RoO" secondAttribute="trailing" id="gb5-W2-roe"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="moR-fS-DWR" secondAttribute="bottom" priority="750" id="j5I-H8-Otk"/>
                                         <constraint firstItem="guo-4Z-RoO" firstAttribute="leading" secondItem="moR-fS-DWR" secondAttribute="trailing" constant="8" symbolic="YES" id="tzW-RW-90H"/>
                                         <constraint firstItem="guo-4Z-RoO" firstAttribute="centerY" secondItem="D0A-EB-kmz" secondAttribute="centerY" id="w98-m4-irJ"/>

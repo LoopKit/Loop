@@ -17,6 +17,13 @@ final class SwitchTableViewCell: UITableViewCell {
 
     @IBOutlet var `switch`: UISwitch?
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        contentView.layoutMargins.left = separatorInset.left
+        contentView.layoutMargins.right = separatorInset.left
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
 

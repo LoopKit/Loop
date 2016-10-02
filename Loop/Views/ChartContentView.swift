@@ -15,6 +15,8 @@ class ChartContentView: UIView {
 
         if chartView == nil || chartView!.frame != bounds {
             chartView = chartGenerator?(bounds)
+        } else if chartView!.superview == nil {
+            addSubview(chartView!)
         }
     }
 

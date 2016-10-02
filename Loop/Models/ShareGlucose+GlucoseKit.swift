@@ -31,4 +31,8 @@ extension ShareGlucose: SensorDisplayable {
     var trendType: GlucoseTrend? {
         return GlucoseTrend(rawValue: Int(trend))
     }
+
+    var isLocal: Bool {
+        return false
+    }
 }
