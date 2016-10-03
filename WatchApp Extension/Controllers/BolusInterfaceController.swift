@@ -73,10 +73,10 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     private var maxPickerValue = 0
 
     /// 1.25
-    @IBOutlet var valueLabel: WKInterfaceLabel!
+    @IBOutlet weak var valueLabel: WKInterfaceLabel!
 
     /// REC: 2.25 U
-    @IBOutlet var recommendedValueLabel: WKInterfaceLabel!
+    @IBOutlet weak var recommendedValueLabel: WKInterfaceLabel!
 
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)

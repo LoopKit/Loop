@@ -45,13 +45,13 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         }
     }
 
-    @IBOutlet var valueLabel: WKInterfaceLabel!
+    @IBOutlet weak var valueLabel: WKInterfaceLabel!
 
-    @IBOutlet var absorptionButtonA: WKInterfaceButton!
+    @IBOutlet weak var absorptionButtonA: WKInterfaceButton!
 
-    @IBOutlet var absorptionButtonB: WKInterfaceButton!
+    @IBOutlet weak var absorptionButtonB: WKInterfaceButton!
 
-    @IBOutlet var absorptionButtonC: WKInterfaceButton!
+    @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
