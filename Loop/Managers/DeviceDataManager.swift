@@ -306,7 +306,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         - Success(status, date): The pump status, and the resolved date according to the pump's clock
         - Failure(error): An error describing why the command failed
      */
-    private func readPumpData(_ completion: @escaping (Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
+    private func readPumpData(_ completion: @escaping (RileyLinkKit.Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
             completion(.failure(LoopError.configurationError))
             return
@@ -838,6 +838,28 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
     func carbStore(_: CarbStore, didError error: CarbStore.CarbStoreError) {
         logger.addError(error, fromSource: "CarbStore")
     }
+
+    func carbStore(_ carbStore: CarbStore, hasEventsNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.upload(nsCarbEntries) { (result) in
+            switch result {
+            case .success(let ids):
+                // Pass new ids back
+                completionHandler(ids)
+            case .failure(let error):
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            }
+        }
+    }
+
 
     // MARK: - GlucoseKit
 
