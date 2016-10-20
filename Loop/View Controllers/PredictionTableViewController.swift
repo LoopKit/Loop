@@ -151,7 +151,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                     }
 
                     reloadGroup.enter()
-                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, _, _, _, _, error) in
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, _, _, _, _, _, error) in
                         if error != nil {
                             self.needsRefresh = true
                         }
