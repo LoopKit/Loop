@@ -68,9 +68,13 @@ Please understand that this project:
 <br/><a name="hw3">3</a>. Early firmware (US <= 2.4A, AU/EUR <= 2.6A) is required for using Closed Loop and Bolus features.
 <br/><a name="hw4">4</a>. It's not impossible, but comms-heavy and there's some work to be done. File an issue if you're someone who's up for the challenge and can test this hardware configuration.
 
-### Mac and XCode
+### Mac and Xcode
 
-To build Loop you will need a mac computer, and have Xcode 8 installed on it.  You will need to use git, either from the command line, or with a GUI like the Github Desktop Client.  You can build Loop without an Apple Developer Account, but any apps built this way will expire after a week, so signing up for the $99 developer account is recommended.
+To build Loop you will need a Mac, and have Xcode 8 installed on it.  You will need to use git, either from the command line, or with a GUI like the Github Desktop Client.  You can build Loop without an Apple Developer Account, but any apps built this way will expire after a week, so signing up for the $99 developer account is recommended.
+
+### iOS Phone
+
+Loop will run on on any iPhone that is compatible with iOS 10.
 
 ### RileyLink
 
