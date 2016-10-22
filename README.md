@@ -26,7 +26,7 @@ Please understand that this project:
 <a href="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Reservoir.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 <a href="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png"><img src="/Documentation/Screenshots/Watch%20Notification%20Bolus%20Failure.png?raw=true" alt="Screenshot of bolus failure notification on Apple Watch" width="141"></a>
 
-## Requirements
+# Requirements
 
 <table>
   <thead>
@@ -76,6 +76,10 @@ To build Loop you will need a mac computer, and have Xcode 8 installed on it.  Y
 
 Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](https://github.com/ps2/rileylink), a compact BLE-to-916MHz bridge device designed by the incredible [@ps2](https://github.com/ps2). Please visit the [repository](https://github.com/ps2/rileylink) and the [gitter room](https://gitter.im/ps2/rileylink) for more information.
 
+## Carthage
+
+[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. It will need to be [installed on your Mac](https://github.com/carthage/carthage#installing-carthage) to build and run the app, but most users won't have a need to explicitly rebuild any dependencies.
+
 # Getting Started
 
 Fork and clone this repository so you can commit the changes you'll make below.
@@ -87,10 +91,6 @@ Fork and clone this repository so you can commit the changes you'll make below.
 [![Assigning a bundle identifier](/Documentation/Assigning%20a%20bundle%20identifier.png?raw=true)](/Documentation/Assigning%20a%20bundle%20identifier.png)
 
 Open `Loop.xcodeproj` in Xcode. In the Project Navigator on the left-hand side, open `Loop.xcconfig`. Change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to a unique reverse-domain name of your choosing.
-
-## Installing Carthage
-
-[Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. It will need to be [installed on your Mac](https://github.com/carthage/carthage#installing-carthage) to build and run the app, but most users won't have a need to explicitly rebuild any dependencies.
 
 ## Configuring Services
 
