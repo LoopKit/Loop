@@ -839,7 +839,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         logger.addError(error, fromSource: "CarbStore")
     }
 
-    func carbStore(_ carbStore: CarbStore, hasEventsNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+    func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
 
         guard let uploader = remoteDataManager.nightscoutUploader else {
             completionHandler([])
@@ -858,6 +858,44 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 completionHandler([])
             }
         }
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasModifiedEntries entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+        
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.modifyTreatments(nsCarbEntries) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(entries.map { $0.externalId ?? "" } )
+            }
+        }
+
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], withCompletion completionHandler: @escaping ([String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        uploader.deleteTreatmentsById(ids) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(ids)
+            }
+        }
+        completionHandler([])
     }
 
 
