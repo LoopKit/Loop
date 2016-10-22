@@ -70,7 +70,7 @@ Please understand that this project:
 
 ### Mac and XCode
 
-To build Loop you will need a mac computer, and have Xcode 8 installed on it.  You will need to use git, either from the command line, or with a GUI like the Github Desktop Client.
+To build Loop you will need a mac computer, and have Xcode 8 installed on it.  You will need to use git, either from the command line, or with a GUI like the Github Desktop Client.  You can build Loop without an Apple Developer Account, but any apps built this way will expire after a week, so signing up for the $99 developer account is recommended.
 
 ### RileyLink
 
