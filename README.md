@@ -76,7 +76,7 @@ To build Loop you will need a mac computer, and have Xcode 8 installed on it.  Y
 
 Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](https://github.com/ps2/rileylink), a compact BLE-to-916MHz bridge device designed by the incredible [@ps2](https://github.com/ps2). Please visit the [repository](https://github.com/ps2/rileylink) and the [gitter room](https://gitter.im/ps2/rileylink) for more information.
 
-## Carthage
+### Carthage
 
 [Carthage](https://github.com/carthage/carthage) is used to manage framework dependencies. It will need to be [installed on your Mac](https://github.com/carthage/carthage#installing-carthage) to build and run the app, but most users won't have a need to explicitly rebuild any dependencies.
 
