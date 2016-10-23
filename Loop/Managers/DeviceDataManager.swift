@@ -353,6 +353,12 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 case .success(let (status, date)):
                     self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
                     let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                    
+                    //x22 Battery Status #141
+                    if let sentrySupported = self.pumpState?.pumpModel?.larger , !sentrySupported {
+                        self.setBatteryStatusforNonMySentryPumps(currVoltage: status.batteryVolts)
+                    }
+                    
                     nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 case .failure(let error):
                     self.troubleshootPumpComms(using: device)
@@ -363,7 +369,42 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             }
         }
     }
-
+    
+    /// x22 Battery Calculation for Alkline and Lithuim  #141
+    ///
+    /// - parameter currVoltage:    Current Voltage Reading from Pump
+    ///
+    public var x22BatteryPercentRemaining : Double = -1
+    
+    private func setBatteryStatusforNonMySentryPumps(currVoltage : Double){
+        var minVoltage : Double
+        var maxVoltage : Double
+        var batteryNotification : Double
+        
+        // Which type of battery chemistry?
+        let BatteryisLithium : Bool = true
+        
+        // if Lithium set min and max linear voltages
+        if (BatteryisLithium){
+            minVoltage = 1.32
+            maxVoltage = 1.58
+            batteryNotification = 0.12
+        }else{
+        // if Alkline set min and max linear voltages
+            minVoltage = 1.26
+            maxVoltage = 1.58
+            batteryNotification = 0.19
+        }
+        
+        // Linear EQ ((currVoltage - minVoltage)/(maxVoltage - minVoltage))
+        self.x22BatteryPercentRemaining = ((currVoltage - minVoltage)/(maxVoltage - minVoltage))
+        
+        // Notify if <= batteryNotification setpoint
+        if self.x22BatteryPercentRemaining <= (batteryNotification){
+            NotificationManager.sendPumpBatteryLowNotification()
+        }
+    }
+    
     /// Send a bolus command and handle the result
     ///
     /// - parameter units:      The number of units to deliver
