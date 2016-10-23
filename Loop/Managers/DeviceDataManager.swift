@@ -382,7 +382,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         var batteryNotification : Double
         
         // Which type of battery chemistry?
-        let BatteryisLithium : Bool = true
+        let BatteryisLithium : Bool = UserDefaults.standard.batteryIsLithium
         
         // if Lithium set min and max linear voltages
         if (BatteryisLithium){

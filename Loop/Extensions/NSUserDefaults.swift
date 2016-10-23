@@ -31,6 +31,7 @@ extension UserDefaults {
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
+        case BatteryIsLithium = "com.jlucasvt.Loop.BatteryIsLithium"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -74,6 +75,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.DosingEnabled.rawValue)
+        }
+    }
+    
+    var batteryIsLithium: Bool {
+        get {
+            return bool(forKey: Key.BatteryIsLithium.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.BatteryIsLithium.rawValue)
         }
     }
 
