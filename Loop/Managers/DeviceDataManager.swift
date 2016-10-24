@@ -355,7 +355,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                     let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
                     
                     //x22 Battery Status #141
-                    if let sentrySupported = self.pumpState?.pumpModel?.larger , !sentrySupported {
+                    if let sentrySupported = self.pumpState?.pumpModel?.hasMySentry , !sentrySupported {
                         self.setBatteryStatusforNonMySentryPumps(currVoltage: status.batteryVolts)
                     }
                     

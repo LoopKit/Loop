@@ -276,9 +276,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .isBatteryLithium:
                 
                 let configCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-                
                 configCell.`switch`?.isOn = dataManager.loopManager.batteryIsLithium
-                configCell.titleLabel.text = NSLocalizedString("Pump Battery Is Lithium?", comment: "The title text for the lithium battery enabled switch cell")
+                configCell.titleLabel.text = NSLocalizedString("Pump Battery Is Lithium", comment: "The title text for the lithium battery enabled switch cell")
                 
                 configCell.`switch`?.addTarget(self, action: #selector(batteryIsLithiumEnabledChanged(_:)), for: .valueChanged)
                 
