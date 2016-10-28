@@ -76,6 +76,7 @@ final class LoopDataManager {
             center.addObserver(forName: .CarbEntriesDidUpdate, object: nil, queue: nil) { (note) -> Void in
                 self.dataAccessQueue.async {
                     self.carbEffect = nil
+                    self.carbsOnBoardSeries = nil
                     self.notify(forChange: .carbs)
                 }
             }
@@ -165,6 +166,18 @@ final class LoopDataManager {
             }
         }
 
+        if carbsOnBoardSeries == nil, let carbStore = deviceDataManager.carbStore {
+            updateGroup.enter()
+            carbStore.getCarbsOnBoardValues { (values, error) in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
+                }
+
+                self.carbsOnBoardSeries = values
+                updateGroup.leave()
+            }
+        }
+
         if insulinEffect == nil {
             updateGroup.enter()
             updateInsulinEffect { (effects, error) in
@@ -229,9 +242,10 @@ final class LoopDataManager {
         - lastTempBasal:        The last set temp basal
         - lastLoopCompleted:    The last date at which a loop completed, from prediction to dose (if dosing is enabled)
         - insulinOnBoard        Current insulin on board
+        - carbsOnBoard          Current carbs on board
         - error:                An error in the current state of the loop, or one that happened during the last attempt to loop.
      */
-    func getLoopStatus(_ resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ retrospectivePredictedGlucose: [GlucoseValue]?, _ recommendedTempBasal: TempBasalRecommendation?, _ lastTempBasal: DoseEntry?, _ lastLoopCompleted: Date?, _ insulinOnBoard: InsulinValue?, _ error: Error?) -> Void) {
+    func getLoopStatus(_ resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ retrospectivePredictedGlucose: [GlucoseValue]?, _ recommendedTempBasal: TempBasalRecommendation?, _ lastTempBasal: DoseEntry?, _ lastLoopCompleted: Date?, _ insulinOnBoard: InsulinValue?, _ carbsOnBoard: CarbValue?, _ error: Error?) -> Void) {
         dataAccessQueue.async {
             var error: Error?
 
@@ -241,7 +255,9 @@ final class LoopDataManager {
                 error = updateError
             }
 
-            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.lastLoopCompleted, self.insulinOnBoard, error ?? self.lastLoopError)
+            let currentCOB = self.carbsOnBoardSeries?.closestPriorToDate(Date())
+
+            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.lastLoopCompleted, self.insulinOnBoard, currentCOB, error ?? self.lastLoopError)
         }
     }
 
@@ -294,6 +310,7 @@ final class LoopDataManager {
             retrospectivePredictedGlucose = nil
         }
     }
+    private var carbsOnBoardSeries: [CarbValue]?
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
             if let bolusDate = lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
@@ -544,6 +561,7 @@ final class LoopDataManager {
                 self.dataAccessQueue.async {
                     if success {
                         self.carbEffect = nil
+                        self.carbsOnBoardSeries = nil
 
                         do {
                             try self.update()
@@ -673,7 +691,7 @@ extension LoopDataManager {
     ///
     /// - parameter completionHandler: A closure called once the report has been generated. The closure takes a single argument of the report string.
     func generateDiagnosticReport(_ completionHandler: @escaping (_ report:     String) -> Void) {
-        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, error) in
+        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, carbsOnBoard, error) in
             let report = [
                 "## LoopDataManager",
                 "predictedGlucose: \(predictedGlucose ?? [])",
@@ -682,6 +700,7 @@ extension LoopDataManager {
                 "lastTempBasal: \(lastTempBasal)",
                 "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
                 "insulinOnBoard: \(insulinOnBoard)",
+                "carbsOnBoard: \(carbsOnBoard)",
                 "error: \(error)"
             ]
             completionHandler(report.joined(separator: "\n"))
