@@ -31,7 +31,7 @@ extension UserDefaults {
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
-        case BatteryIsLithium = "com.jlucasvt.Loop.BatteryIsLithium"
+        case BatteryIsLithium = "com.loopkit.Loop.BatteryIsLithium"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
