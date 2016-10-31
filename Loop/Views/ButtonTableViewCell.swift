@@ -8,13 +8,14 @@
 
 import UIKit
 
-class ButtonTableViewCell: UITableViewCell, NibLoadable {
+
+final class ButtonTableViewCell: UITableViewCell, NibLoadable {
 
     @IBOutlet weak var button: UIButton!
 
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        button.removeTarget(nil, action: nil, forControlEvents: .TouchUpInside)
+        button.removeTarget(nil, action: nil, for: .touchUpInside)
     }
 }

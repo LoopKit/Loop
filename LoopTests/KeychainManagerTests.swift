@@ -21,10 +21,10 @@ class KeychainManagerTests: XCTestCase {
         try manager.setDexcomShareUsername("foo", password: nil)
         XCTAssertNil(manager.getDexcomShareCredentials())
 
-        try manager.setNightscoutURL(nil, secret: "foo")
+        manager.setNightscoutURL(nil, secret: "foo")
         XCTAssertNil(manager.getNightscoutCredentials())
 
-        try manager.setNightscoutURL(NSURL(string: "foo"), secret: nil)
+        manager.setNightscoutURL(URL(string: "foo"), secret: nil)
         XCTAssertNil(manager.getNightscoutCredentials())
     }
 
@@ -45,12 +45,12 @@ class KeychainManagerTests: XCTestCase {
         try manager.setDexcomShareUsername(nil, password: nil)
         XCTAssertNil(manager.getDexcomShareCredentials())
 
-        try manager.setNightscoutURL(NSURL(string: "http://mysite.azurewebsites.net")!, secret: "ABCDEFG")
+        manager.setNightscoutURL(URL(string: "http://mysite.azurewebsites.net")!, secret: "ABCDEFG")
         let nightscoutCredentials = manager.getNightscoutCredentials()!
-        XCTAssertEqual(NSURL(string: "http://mysite.azurewebsites.net")!, nightscoutCredentials.URL)
+        XCTAssertEqual(URL(string: "http://mysite.azurewebsites.net")!, nightscoutCredentials.url)
         XCTAssertEqual("ABCDEFG", nightscoutCredentials.secret)
 
-        try manager.setNightscoutURL(nil, secret: nil)
+        manager.setNightscoutURL(nil, secret: nil)
         XCTAssertNil(manager.getNightscoutCredentials())
 
         try manager.setMLabDatabaseName("sugarmandb", APIKey: "rodriguez")

@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import AmplitudeFramework
+import Amplitude
 
 
-class AnalyticsManager {
+final class AnalyticsManager {
 
     var amplitudeService: AmplitudeService {
         didSet {
@@ -19,14 +19,8 @@ class AnalyticsManager {
     }
 
     init() {
-        // Migrate RemoteSettings.plist to the Keychain
-        let keychain = KeychainManager()
-
-        if let APIKey = keychain.getAmplitudeAPIKey() {
+        if let APIKey = KeychainManager().getAmplitudeAPIKey() {
             amplitudeService = AmplitudeService(APIKey: APIKey)
-        } else if let settings = NSBundle.mainBundle().remoteSettings, key = settings["AmplitudeAPIKey"] where !key.isEmpty {
-            try! keychain.setAmplitudeAPIKey(key)
-            amplitudeService = AmplitudeService(APIKey: key)
         } else {
             amplitudeService = AmplitudeService(APIKey: nil)
         }
@@ -38,7 +32,7 @@ class AnalyticsManager {
 
     private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
-    private func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
+    private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
         if isSimulator {
             NSLog("\(name) \(properties ?? [:])")
         } else {
@@ -49,7 +43,7 @@ class AnalyticsManager {
 
     // MARK: - UIApplicationDelegate
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any]?) {
         logEvent("App Launch")
     }
 
@@ -73,8 +67,16 @@ class AnalyticsManager {
         logEvent("RileyLink Connection")
     }
 
-    func transmitterTimeDidDrift(drift: NSTimeInterval) {
+    func transmitterTimeDidDrift(_ drift: TimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
+    }
+
+    func pumpBatteryWasReplaced() {
+        logEvent("Pump battery replacement")
+    }
+
+    func reservoirWasRewound() {
+        logEvent("Pump reservoir rewind")
     }
 
     func didChangeBasalRateSchedule() {
@@ -107,7 +109,7 @@ class AnalyticsManager {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(carbs: Double) {
+    func didAddCarbsFromWatch(_ carbs: Double) {
         logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
     }
 
@@ -115,7 +117,7 @@ class AnalyticsManager {
         logEvent("Bolus Retry", outOfSession: true)
     }
 
-    func didSetBolusFromWatch(units: Double) {
+    func didSetBolusFromWatch(_ units: Double) {
         logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
     }
 

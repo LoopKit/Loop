@@ -7,49 +7,50 @@
 //
 
 import ClockKit
+import WatchKit
 
 
-class ComplicationController: NSObject, CLKComplicationDataSource {
+final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     // MARK: - Timeline Configuration
     
-    func getSupportedTimeTravelDirectionsForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTimeTravelDirections) -> Void) {
-        handler([.Backward])
+    func getSupportedTimeTravelDirections(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTimeTravelDirections) -> Void) {
+        handler([.backward])
     }
     
-    func getTimelineStartDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
-        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
-            handler(date)
+    func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
+        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
+            handler(date as Date)
         } else {
             handler(nil)
         }
     }
     
-    func getTimelineEndDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
-        if let date = DeviceDataManager.sharedManager.lastContextData?.glucoseDate {
-            handler(date)
+    func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
+        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
+            handler(date as Date)
         } else {
             handler(nil)
         }
     }
     
-    func getPrivacyBehaviorForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationPrivacyBehavior) -> Void) {
-        handler(.HideOnLockScreen)
+    func getPrivacyBehavior(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationPrivacyBehavior) -> Void) {
+        handler(.hideOnLockScreen)
     }
     
     // MARK: - Timeline Population
 
-    private lazy var formatter = NSNumberFormatter()
+    private lazy var formatter = NumberFormatter()
 
-    func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: ((CLKComplicationTimelineEntry?) -> Void)) {
+    func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
 
         switch complication.family {
-        case .ModularSmall:
-            if let context = DeviceDataManager.sharedManager.lastContextData,
-                glucose = context.glucose,
-                unit = context.preferredGlucoseUnit,
-                glucoseString = formatter.stringFromNumber(glucose.doubleValueForUnit(unit)),
-                date = context.glucoseDate where date.timeIntervalSinceNow.minutes >= -15,
+        case .modularSmall:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let date = context.glucoseDate, date.timeIntervalSinceNow.minutes >= -15,
                 let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: date)
             {
                 handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
@@ -61,18 +62,18 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
     
-    func getTimelineEntriesForComplication(complication: CLKComplication, beforeDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
+    func getTimelineEntries(for complication: CLKComplication, before date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries prior to the given date
         handler(nil)
     }
     
-    func getTimelineEntriesForComplication(complication: CLKComplication, afterDate date: NSDate, limit: Int, withHandler handler: (([CLKComplicationTimelineEntry]?) -> Void)) {
+    func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
-        if let context = DeviceDataManager.sharedManager.lastContextData,
-            glucose = context.glucose,
-            unit = context.preferredGlucoseUnit,
-            glucoseString = formatter.stringFromNumber(glucose.doubleValueForUnit(unit)),
-            glucoseDate = context.glucoseDate where glucoseDate.timeIntervalSinceDate(date) > 0,
+        if let context = ExtensionDelegate.shared().lastContext,
+            let glucose = context.glucose,
+            let unit = context.preferredGlucoseUnit,
+            let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+            let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
             let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: glucoseDate)
         {
             handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
@@ -81,35 +82,19 @@ class ComplicationController: NSObject, CLKComplicationDataSource {
         }
     }
 
-    func requestedUpdateDidBegin() {
-        DeviceDataManager.sharedManager.updateComplicationDataIfNeeded()
-    }
-
-    func requestedUpdateBudgetExhausted() {
-        // TODO: os_log_info in iOS 10
-    }
-
-    // MARK: - Update Scheduling
-    
-    func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {
-        // Call the handler with the date when you would next like to be given the opportunity to update your complication content
-        handler(NSDate(timeIntervalSinceNow: NSTimeInterval(2 * 60 * 60)))
-    }
-    
     // MARK: - Placeholder Templates
-    
-    func getPlaceholderTemplateForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTemplate?) -> Void) {
+
+    func getLocalizableSampleTemplate(for complication: CLKComplication, withHandler handler: @escaping (CLKComplicationTemplate?) -> Void) {
         switch complication.family {
-        case .ModularSmall:
+        case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
 
             template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
-            template.line2TextProvider = CLKSimpleTextProvider(text: "mg/dL")
+            template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
 
             handler(template)
         default:
             handler(nil)
         }
     }
-
 }

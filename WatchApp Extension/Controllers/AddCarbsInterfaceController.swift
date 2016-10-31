@@ -7,59 +7,66 @@
 //
 
 import WatchKit
-import Foundation
+import WatchConnectivity
 
 
-class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
+final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    private var carbValue: Int = 15
+    fileprivate var carbValue: Int = 15 {
+        didSet {
+            guard carbValue >= 0 else {
+                carbValue = 0
+                return
+            }
 
-    private var absorptionTime = AbsorptionTimeType.Medium {
+            guard carbValue <= 100 else {
+                carbValue = 100
+                return
+            }
+
+            valueLabel.setText(String(carbValue))
+        }
+    }
+
+    private var absorptionTime = AbsorptionTimeType.medium {
         didSet {
             absorptionButtonA.setBackgroundColor(UIColor.darkTintColor)
             absorptionButtonB.setBackgroundColor(UIColor.darkTintColor)
             absorptionButtonC.setBackgroundColor(UIColor.darkTintColor)
 
             switch absorptionTime {
-            case .Fast:
+            case .fast:
                 absorptionButtonA.setBackgroundColor(UIColor.tintColor)
-            case .Medium:
+            case .medium:
                 absorptionButtonB.setBackgroundColor(UIColor.tintColor)
-            case .Slow:
+            case .slow:
                 absorptionButtonC.setBackgroundColor(UIColor.tintColor)
             }
         }
     }
 
-    @IBOutlet var valueLabel: WKInterfaceLabel!
+    @IBOutlet weak var valueLabel: WKInterfaceLabel!
 
-    @IBOutlet var valuePicker: WKInterfacePicker!
+    @IBOutlet weak var absorptionButtonA: WKInterfaceButton!
 
-    @IBOutlet var absorptionButtonA: WKInterfaceButton!
+    @IBOutlet weak var absorptionButtonB: WKInterfaceButton!
 
-    @IBOutlet var absorptionButtonB: WKInterfaceButton!
+    @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
-    @IBOutlet var absorptionButtonC: WKInterfaceButton!
-
-    override func awakeWithContext(context: AnyObject?) {
-        super.awakeWithContext(context)
+    override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
         
         // Configure interface objects here.
+        crownSequencer.delegate = self
 
-        let items = (0...100).map { _ in WKPickerItem() }
-
-        valuePicker.setItems(items)
-
-        valuePicker.setSelectedItemIndex(carbValue)
-
-        absorptionTime = .Medium
+        absorptionTime = .medium
     }
 
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
 
-        valuePicker.focus()
+        crownSequencer.focus()
     }
 
     override func didDeactivate() {
@@ -69,39 +76,65 @@ class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
     // MARK: - Actions
 
-    @IBAction func pickerValueUpdated(value: Int) {
-        carbValue = value
-        valueLabel.setText(String(value))
-    }
-
     @IBAction func decrement() {
-        valuePicker.setSelectedItemIndex(carbValue - 5)
+        carbValue -= 5
     }
 
     @IBAction func increment() {
-        valuePicker.setSelectedItemIndex(carbValue + 5)
+        carbValue += 5
     }
 
     @IBAction func setAbsorptionTimeFast() {
-        absorptionTime = .Fast
+        absorptionTime = .fast
     }
 
     @IBAction func setAbsorptionTimeMedium() {
-        absorptionTime = .Medium
+        absorptionTime = .medium
     }
 
     @IBAction func setAbsorptionTimeSlow() {
-        absorptionTime = .Slow
+        absorptionTime = .slow
     }
 
     @IBAction func save() {
         if carbValue > 0 {
-            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: NSDate())
+            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
 
-            DeviceDataManager.sharedManager.sendCarbEntry(entry)
+            do {
+                try WCSession.default().sendCarbEntryMessage(entry,
+                    replyHandler: { (suggestion) in
+                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                    },
+                    errorHandler: { (error) in
+                        ExtensionDelegate.shared().present(error)
+                    }
+                )
+            } catch {
+                presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a carb entry send attempt fails"),
+                    message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a carb entry send attempt fails"),
+                    preferredStyle: .alert,
+                    actions: [WKAlertAction.dismissAction()]
+                )
+                return
+            }
         }
 
-        dismissController()
+        dismiss()
     }
 
+    // MARK: - Crown Sequencer
+
+    fileprivate var accumulatedRotation: Double = 0
+}
+
+fileprivate let rotationsPerCarb: Double = 1/24
+
+extension AddCarbsInterfaceController: WKCrownDelegate {
+    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
+        accumulatedRotation += rotationalDelta
+
+        let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
+        carbValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerCarb))
+        accumulatedRotation = remainder
+    }
 }

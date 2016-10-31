@@ -11,31 +11,34 @@ import LocalAuthentication
 import LoopKit
 
 
-class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
+final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        let spellOutFormatter = NumberFormatter()
+        spellOutFormatter.numberStyle = .spellOut
+
+        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: recommendedBolus)) ?? "0")
 
         bolusAmountTextField.becomeFirstResponder()
-    }
-
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
 
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
     var recommendedBolus: Double = 0 {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
         }
     }
+
+    var maxBolus: Double = 25
 
     private(set) var bolus: Double?
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.stringFromNumber(recommendedBolus)
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
         }
     }
 
@@ -43,34 +46,42 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
 
     // MARK: - Actions
 
-    @IBAction func authenticateBolus(sender: AnyObject) {
+    @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
+
+        guard let text = bolusAmountTextField?.text, let bolus = decimalFormatter.number(from: text)?.doubleValue,
+            let amountString = decimalFormatter.string(from: NSNumber(value: bolus)) else {
+            return
+        }
+
+        guard bolus <= maxBolus else {
+            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), decimalFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
+            return
+        }
 
         let context = LAContext()
 
-        if context.canEvaluatePolicy(.DeviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.DeviceOwnerAuthentication,
-                                   localizedReason: NSLocalizedString("Please authenticate to bolus", comment: "The message displayed during a device authentication prompt for bolus specification"),
+        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
+            context.evaluatePolicy(.deviceOwnerAuthentication,
+                                   localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString),
                                    reply: { (success, error) in
                 if success {
-                    self.setBolusAndClose(sender)
+                    self.setBolusAndClose(bolus)
                 }
             })
         } else {
-            setBolusAndClose(sender)
+            setBolusAndClose(bolus)
         }
     }
 
-    private func setBolusAndClose(sender: AnyObject) {
-        if let text = bolusAmountTextField?.text, bolus = decimalFormatter.numberFromString(text)?.doubleValue {
-            self.bolus = bolus
+    private func setBolusAndClose(_ bolus: Double) {
+        self.bolus = bolus
 
-            self.performSegueWithIdentifier("close", sender: sender)
-        }
+        self.performSegue(withIdentifier: "close", sender: nil)
     }
 
-    private lazy var decimalFormatter: NSNumberFormatter = {
-        let numberFormatter = NSNumberFormatter()
+    private lazy var decimalFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
 
         numberFormatter.maximumSignificantDigits = 3
         numberFormatter.minimumFractionDigits = 1
@@ -78,9 +89,15 @@ class BolusViewController: UITableViewController, IdentifiableClass, UITextField
         return numberFormatter
     }()
 
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
+
+        bolusAmountTextField.resignFirstResponder()
+    }
+
     // MARK: - UITextFieldDelegate
 
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
 
         return true

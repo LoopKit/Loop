@@ -12,17 +12,19 @@ import UIKit
 extension UIColor {
     @nonobjc static var tintColor: UIColor? = nil
 
-    @nonobjc static let secondaryLabelColor = UIColor(red: 142 / 255, green: 142 / 255, blue: 147 / 255, alpha: 1)
+    @nonobjc static let secondaryLabelColor = UIColor.HIGGrayColor()
+
+    @nonobjc static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
-    @nonobjc static let glucoseTintColor = UIColor.HIGTealBlueColor()
+    @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
 
     @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
 
-    @nonobjc static let COBTintColor = UIColor.HIGYellowColor()
+    @nonobjc static let COBTintColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
 
-    @nonobjc static let doseTintColor = UIColor.HIGGreenColor()
+    @nonobjc static let doseTintColor = UIColor.HIGOrangeColor()
 
     @nonobjc static let freshColor = UIColor.HIGGreenColor()
 
@@ -30,7 +32,7 @@ extension UIColor {
 
     @nonobjc static let staleColor = UIColor.HIGRedColor()
 
-    @nonobjc static let unknownColor = UIColor.HIGGrayColor().colorWithAlphaComponent(0.5)
+    @nonobjc static let unknownColor = UIColor(red: 198 / 255, green: 199 / 255, blue: 201 / 255, alpha: 1)
 
     @nonobjc static let deleteColor = UIColor.HIGRedColor()
 
@@ -42,7 +44,7 @@ extension UIColor {
     }
 
     private static func HIGYellowColor() -> UIColor {
-        return UIColor(red: 1, green: 204 / 255, blue: 0 / 255, alpha: 1)
+        return UIColor(red: 1, green: 204 / 255, blue: 0, alpha: 1)
     }
 
     private static func HIGOrangeColor() -> UIColor {

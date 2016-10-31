@@ -9,18 +9,18 @@
 import Foundation
 
 enum AbsorptionTimeType {
-    case Fast
-    case Medium
-    case Slow
+    case fast
+    case medium
+    case slow
 }
 
 
 struct CarbEntryUserInfo {
     let value: Double
     let absorptionTimeType: AbsorptionTimeType
-    let startDate: NSDate
+    let startDate: Date
 
-    init(value: Double, absorptionTimeType: AbsorptionTimeType, startDate: NSDate) {
+    init(value: Double, absorptionTimeType: AbsorptionTimeType, startDate: Date) {
         self.value = value
         self.absorptionTimeType = absorptionTimeType
         self.startDate = startDate
@@ -34,11 +34,11 @@ extension AbsorptionTimeType: RawRepresentable {
     init?(rawValue: RawValue) {
         switch rawValue {
         case 0:
-            self = .Fast
+            self = .fast
         case 1:
-            self = .Medium
+            self = .medium
         case 2:
-            self = .Slow
+            self = .slow
         default:
             return nil
         }
@@ -46,11 +46,11 @@ extension AbsorptionTimeType: RawRepresentable {
 
     var rawValue: RawValue {
         switch self {
-        case .Fast:
+        case .fast:
             return 0
-        case .Medium:
+        case .medium:
             return 1
-        case .Slow:
+        case .slow:
             return 2
         }
     }
@@ -58,17 +58,17 @@ extension AbsorptionTimeType: RawRepresentable {
 
 
 extension CarbEntryUserInfo: RawRepresentable {
-    typealias RawValue = [String: AnyObject]
+    typealias RawValue = [String: Any]
 
     static let version = 1
     static let name = "CarbEntryUserInfo"
 
     init?(rawValue: RawValue) {
-        guard rawValue["v"] as? Int == self.dynamicType.version && rawValue["name"] as? String == CarbEntryUserInfo.name,
+        guard rawValue["v"] as? Int == type(of: self).version && rawValue["name"] as? String == CarbEntryUserInfo.name,
             let value = rawValue["cv"] as? Double,
-            absorptionTimeRaw = rawValue["ca"] as? Int,
-            absorptionTime = AbsorptionTimeType(rawValue: absorptionTimeRaw),
-            startDate = rawValue["sd"] as? NSDate else
+            let absorptionTimeRaw = rawValue["ca"] as? Int,
+            let absorptionTime = AbsorptionTimeType(rawValue: absorptionTimeRaw),
+            let startDate = rawValue["sd"] as? Date else
         {
             return nil
         }
@@ -80,7 +80,7 @@ extension CarbEntryUserInfo: RawRepresentable {
 
     var rawValue: RawValue {
         return [
-            "v": self.dynamicType.version,
+            "v": type(of: self).version,
             "name": CarbEntryUserInfo.name,
             "cv": value,
             "ca": absorptionTimeType.rawValue,

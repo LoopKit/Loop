@@ -8,30 +8,67 @@
 
 import UIKit
 
-class ReservoirVolumeHUDView: HUDView {
+final class ReservoirVolumeHUDView: HUDView {
 
-    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private weak var levelMaskView: LevelMaskView!
 
-    private lazy var numberFormatter: NSNumberFormatter = {
-        let formatter = NSNumberFormatter()
-        formatter.numberStyle = .DecimalStyle
-        formatter.minimumFractionDigits = 1
+    @IBOutlet private weak var volumeLabel: UILabel!
 
-        return formatter
-    }()
+    override func awakeFromNib() {
+        super.awakeFromNib()
 
-    var reservoirVolume: Double? {
-        didSet {
-            if let volume = reservoirVolume, units = numberFormatter.stringFromNumber(volume) {
-                caption.text = "\(units) U"
-            }
-        }
+        tintColor = .unknownColor
+        volumeLabel.isHidden = true
+
+        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
     var reservoirLevel: Double? {
         didSet {
-            imageView.image = UIImage.reservoirHUDImageWithLevel(reservoirLevel)
+            levelMaskView.value = reservoirLevel ?? 1.0
+
+            switch reservoirLevel {
+            case .none:
+                tintColor = .unknownColor
+                volumeLabel.isHidden = true
+            case let x? where x > 0.25:
+                tintColor = .secondaryLabelColor
+                volumeLabel.isHidden = true
+            case let x? where x > 0.10:
+                tintColor = .agingColor
+                volumeLabel.textColor = tintColor
+                volumeLabel.isHidden = false
+            default:
+                tintColor = .staleColor
+                volumeLabel.textColor = tintColor
+                volumeLabel.isHidden = false
+            }
         }
     }
 
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+
+        return formatter
+    }()
+
+    private lazy var numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+
+        return formatter
+    }()
+
+    func setReservoirVolume(volume: Double, at date: Date) {
+        if let units = numberFormatter.string(from: NSNumber(value: volume)) {
+            volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
+            let time = timeFormatter.string(from: date)
+            caption?.text = time
+
+            accessibilityValue = String(format: NSLocalizedString("%1$@ units remaining at %2$@", comment: "Accessibility format string for (1: localized volume)(2: time)"), units, time)
+        }
+    }
 }

@@ -9,12 +9,12 @@
 import Foundation
 
 
-extension NSDateFormatter {
+extension DateFormatter {
     static func ISO8601StrictDateFormatter() -> Self {
         let dateFormatter = self.init()
 
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
         return dateFormatter
     }

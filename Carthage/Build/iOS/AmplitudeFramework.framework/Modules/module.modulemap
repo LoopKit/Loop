@@ -1,6 +1,0 @@
-framework module AmplitudeFramework {
-  umbrella header "AmplitudeFramework.h"
-
-  export *
-  module * { export * }
-}

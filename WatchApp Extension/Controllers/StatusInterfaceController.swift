@@ -10,78 +10,76 @@ import WatchKit
 import Foundation
 
 
-class StatusInterfaceController: ContextInterfaceController {
+final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
-    @IBOutlet var graphImage: WKInterfaceImage!
-    @IBOutlet var loopHUDImage: WKInterfaceImage!
-    @IBOutlet var loopTimer: WKInterfaceTimer!
-    @IBOutlet var glucoseLabel: WKInterfaceLabel!
-    @IBOutlet var eventualGlucoseLabel: WKInterfaceLabel!
-    @IBOutlet var statusLabel: WKInterfaceLabel!
+    @IBOutlet weak var graphImage: WKInterfaceImage!
+    @IBOutlet weak var loopHUDImage: WKInterfaceImage!
+    @IBOutlet weak var loopTimer: WKInterfaceTimer!
+    @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
+    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
+    @IBOutlet weak var statusLabel: WKInterfaceLabel!
 
-    override func updateFromContext(context: WatchContext?) {
-        super.updateFromContext(context)
+    private var lastContext: WatchContext?
 
-        resetInterface()
+    func update(with context: WatchContext?) {
+        lastContext = context
 
-        dispatch_async(dispatch_get_main_queue()) {
-            if let date = context?.loopLastRunDate {
-                self.loopTimer.setDate(date)
-                self.loopTimer.setHidden(false)
-                self.loopTimer.start()
+        if let date = context?.loopLastRunDate {
+            self.loopTimer.setDate(date as Date)
+            self.loopTimer.setHidden(false)
+            self.loopTimer.start()
 
-                let loopImage: LoopImage
+            let loopImage: LoopImage
 
-                switch date.timeIntervalSinceNow {
-                case let t where t.minutes <= 5:
-                    loopImage = .Fresh
-                case let t where t.minutes <= 15:
-                    loopImage = .Aging
-                default:
-                    loopImage = .Stale
-                }
-
-                self.loopHUDImage.setLoopImage(loopImage)
+            switch date.timeIntervalSinceNow {
+            case let t where t.minutes <= 5:
+                loopImage = .Fresh
+            case let t where t.minutes <= 15:
+                loopImage = .Aging
+            default:
+                loopImage = .Stale
             }
+
+            self.loopHUDImage.setLoopImage(loopImage)
+        } else {
+            loopTimer.setHidden(true)
+            loopHUDImage.setLoopImage(.Unknown)
         }
 
-        let numberFormatter = NSNumberFormatter()
+        let numberFormatter = NumberFormatter()
 
-        dispatch_async(dispatch_get_main_queue()) {
-            if let glucose = context?.glucose, unit = context?.preferredGlucoseUnit {
-                let glucoseValue = glucose.doubleValueForUnit(unit)
-                let trend = context?.glucoseTrendDescription ?? ""
+        if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
+            let glucoseValue = glucose.doubleValue(for: unit)
+            let trend = context?.glucoseTrend?.symbol ?? ""
 
-                self.glucoseLabel.setText((numberFormatter.stringFromNumber(glucoseValue) ?? "") + trend)
-                self.glucoseLabel.setHidden(false)
-            }
-
-            if let eventualGlucose = context?.eventualGlucose, unit = context?.preferredGlucoseUnit {
-                let glucoseValue = eventualGlucose.doubleValueForUnit(unit)
-
-                self.eventualGlucoseLabel.setText(numberFormatter.stringFromNumber(glucoseValue))
-                self.eventualGlucoseLabel.setHidden(false)
-            }
+            self.glucoseLabel.setText((numberFormatter.string(from: NSNumber(value: glucoseValue)) ?? "") + trend)
+            self.glucoseLabel.setHidden(false)
+        } else {
+            glucoseLabel.setHidden(true)
         }
-    }
 
-    private func resetInterface() {
-        loopTimer.setHidden(true)
+        if let eventualGlucose = context?.eventualGlucose, let unit = context?.preferredGlucoseUnit {
+            let glucoseValue = eventualGlucose.doubleValue(for: unit)
+
+            self.eventualGlucoseLabel.setText(numberFormatter.string(from: NSNumber(value: glucoseValue)))
+            self.eventualGlucoseLabel.setHidden(false)
+        } else {
+            eventualGlucoseLabel.setHidden(true)
+        }
+
+        // TODO: Other elements
         statusLabel.setHidden(true)
         graphImage.setHidden(true)
-        glucoseLabel.setHidden(true)
-        eventualGlucoseLabel.setHidden(true)
-        loopHUDImage.setLoopImage(.Unknown)
     }
 
     // MARK: - Menu Items
 
     @IBAction func addCarbs() {
-        presentControllerWithName(AddCarbsInterfaceController.className, context: nil)
+        presentController(withName: AddCarbsInterfaceController.className, context: nil)
     }
 
     @IBAction func setBolus() {
-        presentControllerWithName(BolusInterfaceController.className, context: nil)
+        presentController(withName: BolusInterfaceController.className, context: lastContext?.bolusSuggestion)
     }
 
 }

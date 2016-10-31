@@ -8,16 +8,26 @@
 
 import UIKit
 
-class SwitchTableViewCell: UITableViewCell {
+
+final class SwitchTableViewCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel!
 
-    @IBOutlet var `switch`: UISwitch?
+    @IBOutlet weak var subtitleLabel: UILabel?
+
+    @IBOutlet weak var `switch`: UISwitch?
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        contentView.layoutMargins.left = separatorInset.left
+        contentView.layoutMargins.right = separatorInset.left
+    }
 
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        `switch`?.removeTarget(nil, action: nil, forControlEvents: .ValueChanged)
+        `switch`?.removeTarget(nil, action: nil, for: .valueChanged)
     }
 
 }

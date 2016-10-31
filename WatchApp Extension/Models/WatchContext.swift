@@ -10,22 +10,29 @@ import Foundation
 import HealthKit
 
 
-class WatchContext: NSObject, RawRepresentable {
-    typealias RawValue = [String: AnyObject]
+final class WatchContext: NSObject, RawRepresentable {
+    typealias RawValue = [String: Any]
 
-    private let version = 2
+    private let version = 3
 
     var preferredGlucoseUnit: HKUnit?
+    var maxBolus: Double?
 
     var glucose: HKQuantity?
-    var glucoseTrend: Int?
+    var glucoseTrend: GlucoseTrend?
     var eventualGlucose: HKQuantity?
-    var glucoseDate: NSDate?
+    var glucoseDate: Date?
 
-    var loopLastRunDate: NSDate?
+    var loopLastRunDate: Date?
     var lastNetTempBasalDose: Double?
-    var lastNetTempBasalDate: NSDate?
+    var lastNetTempBasalDate: Date?
     var recommendedBolusDose: Double?
+
+    var bolusSuggestion: BolusSuggestionUserInfo? {
+        guard let recommended = recommendedBolusDose else { return nil }
+
+        return BolusSuggestionUserInfo(recommendedBolus: recommended, maxBolus: maxBolus)
+    }
 
     var COB: Double?
     var IOB: Double?
@@ -45,7 +52,7 @@ class WatchContext: NSObject, RawRepresentable {
         }
 
         if let unitString = rawValue["gu"] as? String {
-            let unit = HKUnit(fromString: unitString)
+            let unit = HKUnit(from: unitString)
             preferredGlucoseUnit = unit
 
             if let glucoseValue = rawValue["gv"] as? Double {
@@ -56,23 +63,27 @@ class WatchContext: NSObject, RawRepresentable {
                 eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
             }
         }
-        glucoseTrend = rawValue["gt"] as? Int
-        glucoseDate = rawValue["gd"] as? NSDate
+
+        if let rawTrend = rawValue["gt"] as? Int {
+            glucoseTrend = GlucoseTrend(rawValue: rawTrend)
+        }
+        glucoseDate = rawValue["gd"] as? Date
 
         IOB = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
         reservoirPercentage = rawValue["rp"] as? Double
         batteryPercentage = rawValue["bp"] as? Double
 
-        loopLastRunDate = rawValue["ld"] as? NSDate
+        loopLastRunDate = rawValue["ld"] as? Date
         lastNetTempBasalDose = rawValue["ba"] as? Double
-        lastNetTempBasalDate = rawValue["bad"] as? NSDate
+        lastNetTempBasalDate = rawValue["bad"] as? Date
         recommendedBolusDose = rawValue["rbo"] as? Double
         COB = rawValue["cob"] as? Double
+        maxBolus = rawValue["mb"] as? Double
     }
 
     var rawValue: RawValue {
-        var raw: [String: AnyObject] = [
+        var raw: [String: Any] = [
             "v": version
         ]
 
@@ -82,37 +93,20 @@ class WatchContext: NSObject, RawRepresentable {
         raw["cob"] = COB
 
         if let unit = preferredGlucoseUnit {
-            raw["egv"] = eventualGlucose?.doubleValueForUnit(unit)
+            raw["egv"] = eventualGlucose?.doubleValue(for: unit)
             raw["gu"] = unit.unitString
-            raw["gv"] = glucose?.doubleValueForUnit(unit)
+            raw["gv"] = glucose?.doubleValue(for: unit)
         }
 
-        raw["gt"] = glucoseTrend
+        raw["gt"] = glucoseTrend?.rawValue
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
+        raw["mb"] = maxBolus
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
 
         return raw
-    }
-
-    var glucoseTrendDescription: String {
-        let direction: String
-        switch glucoseTrend {
-        case let x? where x < -10:
-            direction = "⇊"
-        case let x? where x < 0:
-            direction = "↓"
-        case let x? where x > 10:
-            direction = "⇈"
-        case let x? where x > 0:
-            direction = "↑"
-        default:
-            direction = "→"
-        }
-
-        return direction
     }
 }

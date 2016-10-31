@@ -1,27 +1,24 @@
 //
 //  NSBundle.swift
-//  Naterade
+//  Loop
 //
-//  Created by Nathan Racklyeft on 9/7/15.
-//  Copyright © 2015 Nathan Racklyeft. All rights reserved.
+//  Created by Nate Racklyeft on 7/28/16.
+//  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
 import Foundation
 
-extension NSBundle {
-    var shortVersionString: String! {
-        return objectForInfoDictionaryKey("CFBundleShortVersionString") as? String
+
+extension Bundle {
+    var shortVersionString: String {
+        return object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
     }
 
-    private var remoteSettingsPath: String? {
-        return NSBundle.mainBundle().pathForResource("RemoteSettings", ofType: "plist")
+    var bundleDisplayName: String {
+        return object(forInfoDictionaryKey: "CFBundleDisplayName") as! String
     }
 
-    var remoteSettings: [String: String]? {
-        guard let path = remoteSettingsPath else {
-            return nil
-        }
-
-        return NSDictionary(contentsOfFile: path) as? [String: String]
+    var localizedNameAndVersion: String {
+        return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundleDisplayName, shortVersionString)
     }
 }
