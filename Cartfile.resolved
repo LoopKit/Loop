@@ -1,4 +1,4 @@
-github "amplitude/Amplitude-iOS" "v3.8.5"
+github "amplitude/Amplitude-iOS" "v3.10.0"
 github "mddub/G4ShareSpy" "v0.3.0"
 github "LoopKit/LoopKit" "v1.1.0"
 github "i-schuetz/SwiftCharts" "0.5"
