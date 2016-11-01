@@ -86,7 +86,7 @@ Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](http
 
 # Getting Started
 
-Fork and clone this repository so you can commit the changes you'll make below.
+[Fork](https://help.github.com/articles/fork-a-repo/) and [clone](https://help.github.com/articles/cloning-a-repository/) this repository so you can commit the changes you'll make below.
 
 [Sign up for the Loop Users announcement list](https://groups.google.com/forum/#!forum/loop-ios-users) to stay informed of critical issues that may arise.
 
