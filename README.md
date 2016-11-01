@@ -96,6 +96,10 @@ Fork and clone this repository so you can commit the changes you'll make below.
 
 Open `Loop.xcodeproj` in Xcode. In the Project Navigator on the left-hand side, open `Loop.xcconfig`. Change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to a unique reverse-domain name of your choosing.
 
+## In-App Setup
+
+Follow the instructions at [In-app-setup].
+
 ## Configuring Services
 
 Loop optionally supports select third-party remote services, which are configured in the Settings screen.
