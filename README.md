@@ -32,10 +32,11 @@ Please understand that this project:
   <thead>
     <tr>
       <td colspan="2" rowspan="4"></td>
-      <th colspan="3">Insulin Pump</th>
+      <th colspan="4">Insulin Pump</th>
     </tr>
     <tr>
-      <th>MM 522/722</th>
+      <th>MM 515/715<sup><a href="#hw2">2</a></sup></th>
+      <th>MM 522/722<sup><a href="#hw2">2</a></sup></th>
       <th>MM 523/723<sup><a href="#hw3">3</a></sup></th>
       <th>MM 554/754<sup><a href="#hw3">3</a></sup></th>
     </tr>
@@ -44,18 +45,21 @@ Please understand that this project:
     <tr>
       <th rowspan="4">CGM</th>
       <th>Dexcom G4<sup><a href="#hw1">1</a> </sup></th>
-      <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅</td>
+      <td>✅</td>
       <td>✅</td>
       <td>✅</td>
     </tr>
     <tr>
       <th>Dexcom G5</th>
-      <td>✅<sup><a href="#hw2">2</a></sup></td>
+      <td>✅</td>
+      <td>✅</td>
       <td>✅</td>
       <td>✅</td>
     </tr>
     <tr>
       <th>MM CGM</th>
+      <td>❌<sup></td>
       <td>❌<sup><a href="#hw4">4</a></sup></td>
       <td>✅</td>
       <td>✅</td>
