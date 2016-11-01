@@ -162,6 +162,7 @@ SWIFT_CLASS("_TtC7CarbKit28CarbEntryTableViewController")
 @interface HKQuantitySample (SWIFT_EXTENSION(CarbKit))
 @property (nonatomic, readonly, copy) NSString * _Nullable foodType;
 @property (nonatomic, readonly) BOOL createdByCurrentApp;
+@property (nonatomic, readonly, copy) NSString * _Nullable externalId;
 @end
 
 
