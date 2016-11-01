@@ -98,7 +98,7 @@ Open `Loop.xcodeproj` in Xcode. In the Project Navigator on the left-hand side, 
 
 ## In-App Setup
 
-Follow the instructions at [In-app-setup](In-app-setup).
+Follow the instructions at [In-app-setup](https://github.com/LoopKit/Loop/wiki/In-app-setup).
 
 ## Configuring Services
 
