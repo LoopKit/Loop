@@ -74,7 +74,7 @@ Please understand that this project:
 
 ### Mac and Xcode
 
-To build Loop you will need a Mac, and have Xcode 8 installed on it.  You will need to use git, either from the command line, or with a GUI like the Github Desktop Client.  You can build Loop without an Apple Developer Account, but any apps built this way will expire after a week, so signing up for the $99 developer account is recommended.
+To build Loop you will need a Mac, and have Xcode 8 installed on it. You can build Loop without an Apple Developer Account, but any apps built this way will expire after a week, so signing up for the $99 developer account is recommended.
 
 ### iOS Phone
 
@@ -90,34 +90,11 @@ Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](http
 
 # Getting Started
 
-[Fork](https://help.github.com/articles/fork-a-repo/) and [clone](https://help.github.com/articles/cloning-a-repository/) this repository so you can commit the changes you'll make below.
-
 [Sign up for the Loop Users announcement list](https://groups.google.com/forum/#!forum/loop-ios-users) to stay informed of critical issues that may arise.
 
-## Assigning a Bundle Identifier
+[Please visit the Wiki for a "Guide to Loop" setup, installation, FAQs, and use.](https://github.com/LoopKit/Loop/wiki)
 
-[![Assigning a bundle identifier](/Documentation/Assigning%20a%20bundle%20identifier.png?raw=true)](/Documentation/Assigning%20a%20bundle%20identifier.png)
-
-Open `Loop.xcodeproj` in Xcode. In the Project Navigator on the left-hand side, open `Loop.xcconfig`. Change the value of `MAIN_APP_BUNDLE_IDENTIFIER` to a unique reverse-domain name of your choosing.
-
-## In-App Setup
-
-Follow the instructions at [In-app-setup](https://github.com/LoopKit/Loop/wiki/In-app-setup).
-
-## Configuring Services
-
-Loop optionally supports select third-party remote services, which are configured in the Settings screen.
-
-| Service                | Description
-| ---------------------- | -------------
-| Dexcom Share           | Downloads glucose data if a local G5 Transmitter or G4 Receiver with Share is not available.
-| Nightscout             | Uploads treatments and other pump data. Note that you will need to set "Nightscout history uploading" to "On" in Settings for treatments to be fetched from your pump and uploaded to Nightscout.
-| mLab                   | Uploads diagnostic data about each loop run, as well as app errors. At this time, it is strongly recommended that you configure this service in case retrospective analysis is needed.
-| Amplitude              | Tracks private, single-user behavioral and system analytics (no health data is sent)
-
-# Making it Your Own
-
-[Please visit the Wiki for more info on customizing the app](https://github.com/LoopKit/Loop/wiki/Personalizing-Your-App-Name-&-Icon)
+(Note: there is also a tab for the Wiki at the top of this page)
 
 # License and Code of Conduct
 
