@@ -103,8 +103,9 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case insulinSensitivity
         case maxBasal
         case maxBolus
+        case isBatteryLithium
 
-        static let count = 10
+        static let count = 11
     }
 
     fileprivate enum ServiceRow: Int {
@@ -271,6 +272,16 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxBolus))!) U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .isBatteryLithium:
+                
+                let configCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+                configCell.`switch`?.isOn = dataManager.loopManager.batteryIsLithium
+                configCell.titleLabel.text = NSLocalizedString("Pump Battery Is Lithium", comment: "The title text for the lithium battery enabled switch cell")
+                
+                configCell.`switch`?.addTarget(self, action: #selector(batteryIsLithiumEnabledChanged(_:)), for: .valueChanged)
+                if let sentrySupported = dataManager.pumpState?.pumpModel?.hasMySentry, sentrySupported {
+                    configCell.isHidden = true
                 }
             }
 
@@ -456,6 +467,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
             case .receiverEnabled:
                 break
+            case .isBatteryLithium:
+                break
             }
         case .devices:
             let vc = RileyLinkDeviceTableViewController()
@@ -539,6 +552,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         dataManager.loopManager.dosingEnabled = sender.isOn
     }
 
+    func batteryIsLithiumEnabledChanged(_ sender: UISwitch) {
+        dataManager.loopManager.batteryIsLithium = sender.isOn
+    }
+    
     func deviceConnectionChanged(_ connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convert(CGPoint.zero, to: tableView)
 
