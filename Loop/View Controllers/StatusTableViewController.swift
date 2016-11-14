@@ -147,7 +147,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             charts.startDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
-            let oldRecommendedTempBasal = self.recommendedTempBasal
             var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
             if let glucoseStore = dataManager.glucoseStore {
@@ -274,6 +273,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 self.charts.prerender()
 
                 // Show/hide the recommended temp basal row
+                let oldRecommendedTempBasal = self.recommendedTempBasal
                 self.recommendedTempBasal = newRecommendedTempBasal
                 switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
                 case (let old?, let new?) where old != new:
