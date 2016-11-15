@@ -698,6 +698,13 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             UserDefaults.standard.preferredInsulinDataSource = preferredInsulinDataSource
         }
     }
+    
+    /// The Default battery chemistry is Alkline
+    var batteryChemistry = UserDefaults.standard.batteryChemistry ?? .alkline {
+        didSet {
+            UserDefaults.standard.batteryChemistry = batteryChemistry
+        }
+    }
 
     // MARK: G5 Transmitter
 

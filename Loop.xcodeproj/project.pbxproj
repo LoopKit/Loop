@@ -156,6 +156,8 @@
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
+		C5C743CC1DDB4817004F63B6 /* BatteryChemistryType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C743CB1DDB4817004F63B6 /* BatteryChemistryType.swift */; };
+		C5C743CE1DDB4900004F63B6 /* BatteryTypeSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5C743CD1DDB4900004F63B6 /* BatteryTypeSelectionTableViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -390,6 +392,8 @@
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
+		C5C743CB1DDB4817004F63B6 /* BatteryChemistryType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryChemistryType.swift; sourceTree = "<group>"; };
+		C5C743CD1DDB4900004F63B6 /* BatteryTypeSelectionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryTypeSelectionTableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -488,6 +492,7 @@
 				43EA28611D517E42001BC233 /* SensorDisplayable.swift */,
 				43C418B41CE0575200405B6A /* ShareGlucose+GlucoseKit.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
+				C5C743CB1DDB4817004F63B6 /* BatteryChemistryType.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -665,6 +670,7 @@
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
+				C5C743CD1DDB4900004F63B6 /* BatteryTypeSelectionTableViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -1028,6 +1034,7 @@
 			files = (
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
+				C5C743CE1DDB4900004F63B6 /* BatteryTypeSelectionTableViewController.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
 				430DA58E1D4AEC230097D1CA /* NSBundle.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
@@ -1095,6 +1102,7 @@
 				433EA4C21D9F39C900CD78FB /* PumpIDTableViewController.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
+				C5C743CC1DDB4817004F63B6 /* BatteryChemistryType.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				434F54611D28859B002A9274 /* ServiceCredential.swift in Sources */,
 				436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */,
