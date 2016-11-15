@@ -9,13 +9,13 @@
 import Foundation
 
 enum BatteryChemistryType: Int, CustomStringConvertible {
-    case alkline = 0
+    case alkaline = 0
     case lithium
     
     var description: String {
         switch self {
-        case .alkline:
-            return NSLocalizedString("Alkline", comment: "Describing the battery chemistry as Alkline")
+        case .alkaline:
+            return NSLocalizedString("Alkaline", comment: "Describing the battery chemistry as Alkaline")
         case .lithium:
             return NSLocalizedString("Lithium", comment: "Describing the battery chemistry as Lithium")
         }

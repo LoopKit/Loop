@@ -370,7 +370,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
-    /// NonMySentry Battery Calculation for Alkline and Lithuim  #141
+    /// NonMySentry Battery Calculation for Alkaline and Lithuim  #141
     ///
     /// - parameter currVoltage: Current Voltage Reading from Pump
     ///
@@ -387,7 +387,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             maxVoltage = 1.58
             batteryNotification = 0.12
         }else{
-            // if Alkline (default) set min and max linear voltages
+            // if Alkaline (default) set min and max linear voltages
             minVoltage = 1.26
             maxVoltage = 1.58
             batteryNotification = 0.19
@@ -737,8 +737,8 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
     
-    /// The Default battery chemistry is Alkline
-    var batteryChemistry = UserDefaults.standard.batteryChemistry ?? .alkline {
+    /// The Default battery chemistry is Alkaline
+    var batteryChemistry = UserDefaults.standard.batteryChemistry ?? .alkaline {
         didSet {
             UserDefaults.standard.batteryChemistry = batteryChemistry
         }
