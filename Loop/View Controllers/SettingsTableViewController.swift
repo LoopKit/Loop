@@ -276,6 +276,9 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .batteryChemistry:
                 configCell.textLabel?.text = NSLocalizedString("Pump Battery Type", comment: "The title text for the battery type value")
                 configCell.detailTextLabel?.text = String(describing: dataManager.batteryChemistry)
+                if let sentrySupported = dataManager.pumpState?.pumpModel?.hasMySentry, sentrySupported {
+                    configCell.isHidden = true
+                }
             }
 
             cell = configCell
