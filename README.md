@@ -7,7 +7,7 @@
 
 Loop is an app template for building an automated insulin delivery system. It is a stone resting on the boulders of work done by many others.
 
-Loop is built on top of [LoopKit](https://github.com/LoopKit/LoopKit). LoopKit is a set of frameworks that provide data storage, retrieval, and calcluation, as well as boilerplate view controllers used in Loop.
+Loop is built on top of [LoopKit](https://github.com/LoopKit/LoopKit). LoopKit is a set of frameworks that provide data storage, retrieval, and calculation, as well as boilerplate view controllers used in Loop.
 
 Please understand that this project:
 - Is highly experimental
