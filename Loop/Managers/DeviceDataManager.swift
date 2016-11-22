@@ -57,6 +57,36 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
     }
 
+    var latestPumpStatus: RileyLinkKit.PumpStatus?
+
+    var pumpBatteryPercentRemaining: Int? {
+        get {
+            if let status = latestPumpStatusFromMySentry {
+                return status.batteryRemainingPercent
+            } else if let status = latestPumpStatus {
+                return batteryChemistry.percentageRemaining(voltage: status.batteryVolts)
+            } else {
+                return nil
+            }
+        }
+    }
+
+    // Battery monitor
+    func observeBatteryDuring(_ block: () -> Void) {
+        let oldPct = pumpBatteryPercentRemaining
+        block()
+        if let newPtc = pumpBatteryPercentRemaining {
+            if newPtc == 0 {
+                NotificationManager.sendPumpBatteryLowNotification()
+            }
+
+            if let oldPct = oldPct, newPtc - oldPct >= 50 {
+                AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
+            }
+        }
+    }
+
+
     // MARK: - RileyLink
 
     @objc private func receivedRileyLinkManagerNotification(_ note: Notification) {
@@ -158,12 +188,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             return
         }
 
-        // Report battery changes to Analytics
-        if let latestPumpStatusFromMySentry = latestPumpStatusFromMySentry, status.batteryRemainingPercent - latestPumpStatusFromMySentry.batteryRemainingPercent >= 50 {
-            AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
+        observeBatteryDuring {
+            latestPumpStatusFromMySentry = status
         }
-
-        latestPumpStatusFromMySentry = status
 
         // Gather PumpStatus from MySentry packet
         let pumpStatus: NightscoutUploadKit.PumpStatus?
@@ -214,10 +241,6 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             self.updateReservoirVolume(status.reservoirRemainingUnits, at: pumpDate, withTimeLeft: TimeInterval(minutes: Double(status.reservoirRemainingMinutes)))
         }
 
-        // Check for an empty battery. Sentry packets are still broadcast for a few hours after this value reaches 0.
-        if status.batteryRemainingPercent == 0 {
-            NotificationManager.sendPumpBatteryLowNotification()
-        }
     }
 
     /**
@@ -351,14 +374,14 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                 let nsPumpStatus: NightscoutUploadKit.PumpStatus?
                 switch result {
                 case .success(let (status, date)):
+                    self.observeBatteryDuring {
+                        self.latestPumpStatus = status
+                    }
+
                     self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
                     let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
-                    
-                    //Non MySentry Battery Status #141
-                    if let sentrySupported = self.pumpState?.pumpModel?.hasMySentry , !sentrySupported {
-                        self.setBatteryStatusforNonMySentryPumps(currVoltage: status.batteryVolts)
-                    }
-                    
+
+
                     nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 case .failure(let error):
                     self.troubleshootPumpComms(using: device)

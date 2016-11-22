@@ -252,14 +252,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
                 
-                //Non-MySentry Battery Status here we don't have My Sentry (status)
-                if dataManager.x22BatteryPercentRemaining >= 0 {batteryLevelHUD.batteryLevel = dataManager.x22BatteryPercentRemaining}
-                
                 reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
-            if let status = dataManager.latestPumpStatusFromMySentry {
-                batteryLevelHUD.batteryLevel = Double(status.batteryRemainingPercent) / 100
+            if let batteryPct = dataManager.pumpBatteryPercentRemaining {
+                batteryLevelHUD.batteryLevel = Double(batteryPct) / 100
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
