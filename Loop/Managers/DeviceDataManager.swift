@@ -59,12 +59,13 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     var latestPumpStatus: RileyLinkKit.PumpStatus?
 
-    var pumpBatteryPercentRemaining: Int? {
+    // Returns a value in the range 0 - 1
+    var pumpBatteryChargeRemaining: Double? {
         get {
             if let status = latestPumpStatusFromMySentry {
-                return status.batteryRemainingPercent
+                return Double(status.batteryRemainingPercent) / 100
             } else if let status = latestPumpStatus {
-                return batteryChemistry.percentageRemaining(voltage: status.batteryVolts)
+                return batteryChemistry.chargeRemaining(voltage: status.batteryVolts)
             } else {
                 return nil
             }
@@ -73,9 +74,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     // Battery monitor
     func observeBatteryDuring(_ block: () -> Void) {
-        let oldPct = pumpBatteryPercentRemaining
+        let oldPct = pumpBatteryChargeRemaining
         block()
-        if let newPtc = pumpBatteryPercentRemaining {
+        if let newPtc = pumpBatteryChargeRemaining {
             if newPtc == 0 {
                 NotificationManager.sendPumpBatteryLowNotification()
             }
@@ -390,38 +391,6 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
             }
-        }
-    }
-
-    /// NonMySentry Battery Calculation for Alkaline and Lithuim  #141
-    ///
-    /// - parameter currVoltage: Current Voltage Reading from Pump
-    ///
-    public var x22BatteryPercentRemaining : Double = -1
-    
-    private func setBatteryStatusforNonMySentryPumps(currVoltage : Double){
-        var minVoltage : Double
-        var maxVoltage : Double
-        var batteryNotification : Double
-     
-        // if Lithium set min and max linear voltages
-        if (self.batteryChemistry == .lithium){
-            minVoltage = 1.32
-            maxVoltage = 1.58
-            batteryNotification = 0.12
-        }else{
-            // if Alkaline (default) set min and max linear voltages
-            minVoltage = 1.26
-            maxVoltage = 1.58
-            batteryNotification = 0.19
-        }
-     
-        // Linear EQ ((currVoltage - minVoltage)/(maxVoltage - minVoltage))
-        self.x22BatteryPercentRemaining = ((currVoltage - minVoltage)/(maxVoltage - minVoltage))
-        
-        // Notify if <= batteryNotification setpoint
-        if self.x22BatteryPercentRemaining <= (batteryNotification){
-            NotificationManager.sendPumpBatteryLowNotification()
         }
     }
 

@@ -2,7 +2,7 @@
 //  BatteryChemistryType.swift
 //  Loop
 //
-//  Created by Jeremy Lucas on 11/15/16 pattern derived from Nathan Racklyeft.
+//  Created by Jeremy Lucas on 11/15/16
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
@@ -39,8 +39,8 @@ enum BatteryChemistryType: Int, CustomStringConvertible {
         }
     }
 
-    func percentageRemaining(voltage: Double) -> Int {
-        let computed =  Int((voltage - self.minVoltage)/(self.maxVoltage - self.minVoltage)*100+0.5)
-        return max(min(computed, 100), 0)
+    func chargeRemaining(voltage: Double) -> Double {
+        let computed = (voltage - self.minVoltage)/(self.maxVoltage - self.minVoltage)
+        return max(min(computed, 1), 0)
     }
 }
