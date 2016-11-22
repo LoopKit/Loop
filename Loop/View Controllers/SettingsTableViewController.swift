@@ -103,8 +103,9 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case insulinSensitivity
         case maxBasal
         case maxBolus
+        case batteryChemistry
 
-        static let count = 10
+        static let count = 11
     }
 
     fileprivate enum ServiceRow: Int {
@@ -271,6 +272,12 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxBolus))!) U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .batteryChemistry:
+                configCell.textLabel?.text = NSLocalizedString("Pump Battery Type", comment: "The title text for the battery type value")
+                configCell.detailTextLabel?.text = String(describing: dataManager.batteryChemistry)
+                if let sentrySupported = dataManager.pumpState?.pumpModel?.hasMySentry, sentrySupported {
+                    configCell.isHidden = true
                 }
             }
 
@@ -456,6 +463,12 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
             case .receiverEnabled:
                 break
+            case .batteryChemistry:
+                let vc = BatteryTypeSelectionTableViewController.insulinDataSource(dataManager.batteryChemistry)
+                vc.title = sender?.textLabel?.text
+                vc.delegate = self
+                
+                show(vc, sender: sender)
             }
         case .devices:
             let vc = RileyLinkDeviceTableViewController()
@@ -605,6 +618,15 @@ extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate
     }
 }
 
+extension SettingsTableViewController: BatteryTypeSelectionTableViewControllerDelegate {
+    func batteryTypeSelectionTableViewControllerDidChangeSelectedIndex(_ controller: BatteryTypeSelectionTableViewController) {
+        if let selectedIndex = controller.selectedIndex, let dataSource = BatteryChemistryType(rawValue: selectedIndex) {
+            dataManager.batteryChemistry = dataSource
+            
+            tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.batteryChemistry.rawValue, section: Section.configuration.rawValue)], with: .none)
+        }
+    }
+}
 
 extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
     func textFieldTableViewControllerDidEndEditing(_ controller: TextFieldTableViewController) {
