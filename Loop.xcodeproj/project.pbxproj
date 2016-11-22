@@ -156,6 +156,12 @@
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
+		C1C73EF71DE3D0230022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73EF91DE3D0230022FC89 /* InfoPlist.strings */; };
+		C1C73EFD1DE3D0240022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73EFF1DE3D0240022FC89 /* InfoPlist.strings */; };
+		C1C73F021DE3D0250022FC89 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F041DE3D0250022FC89 /* Localizable.strings */; };
+		C1C73F081DE3D0260022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0A1DE3D0260022FC89 /* InfoPlist.strings */; };
+		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
+		C1C73F121DE3D0280022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F141DE3D0280022FC89 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -390,6 +396,15 @@
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
+		C1C73EF81DE3D0230022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1C73EFA1DE3D0230022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Main.strings; sourceTree = "<group>"; };
+		C1C73EFE1DE3D0240022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1C73F031DE3D0250022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C1C73F051DE3D0250022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Interface.strings; sourceTree = "<group>"; };
+		C1C73F091DE3D0260022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1C73F0E1DE3D0270022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1C73F131DE3D0280022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C1C73F151DE3D0280022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -521,6 +536,8 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
+				C1C73F0A1DE3D0260022FC89 /* InfoPlist.strings */,
+				C1C73F041DE3D0250022FC89 /* Localizable.strings */,
 				43846AD81D8FA84B00799272 /* gallery.ckcomplication */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
@@ -553,6 +570,7 @@
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
 			isa = PBXGroup;
 			children = (
+				C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */,
 				43A943771B926B7B0051FA24 /* Assets.xcassets */,
 				43F5C2D61B92A4DC003EB13D /* Info.plist */,
 				43A943741B926B7B0051FA24 /* Interface.storyboard */,
@@ -563,6 +581,7 @@
 		43A943821B926B7B0051FA24 /* WatchApp Extension */ = {
 			isa = PBXGroup;
 			children = (
+				C1C73EF91DE3D0230022FC89 /* InfoPlist.strings */,
 				43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */,
 				43846AD41D8FA67800799272 /* Base.lproj */,
 				43A943911B926B7B0051FA24 /* Info.plist */,
@@ -600,6 +619,7 @@
 		43E2D8D21D20BF42004DA55F /* DoseMathTests */ = {
 			isa = PBXGroup;
 			children = (
+				C1C73F141DE3D0280022FC89 /* InfoPlist.strings */,
 				43E2D8E01D20C0CB004DA55F /* Fixtures */,
 				43E2D8D31D20BF42004DA55F /* DoseMathTests.swift */,
 				43E2D8D51D20BF42004DA55F /* Info.plist */,
@@ -720,6 +740,7 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
+				C1C73EFF1DE3D0240022FC89 /* InfoPlist.strings */,
 				43E2D90F1D20C581004DA55F /* Info.plist */,
 				43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */,
 			);
@@ -938,8 +959,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				43776F9C1B8022E90074EA36 /* LaunchScreen.storyboard in Resources */,
+				C1C73F081DE3D0260022FC89 /* InfoPlist.strings in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
 				434F54591D28805E002A9274 /* ButtonTableViewCell.xib in Resources */,
+				C1C73F021DE3D0250022FC89 /* Localizable.strings in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				43846AD91D8FA84B00799272 /* gallery.ckcomplication in Resources */,
 				434F545B1D2880D4002A9274 /* AuthenticationTableViewCell.xib in Resources */,
@@ -951,6 +974,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43A943781B926B7B0051FA24 /* Assets.xcassets in Resources */,
+				C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */,
 				43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -960,6 +984,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43846AD51D8FA67800799272 /* Base.lproj in Resources */,
+				C1C73EF71DE3D0230022FC89 /* InfoPlist.strings in Resources */,
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -969,6 +994,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43E2D8F21D20C0DB004DA55F /* recommend_temp_basal_no_change_glucose.json in Resources */,
+				C1C73F121DE3D0280022FC89 /* InfoPlist.strings in Resources */,
 				43E2D8F61D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json in Resources */,
 				43E2D8F41D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json in Resources */,
 				43E2D8EF1D20C0DB004DA55F /* recommend_temp_basal_high_and_falling.json in Resources */,
@@ -986,6 +1012,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1C73EFD1DE3D0240022FC89 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1185,6 +1212,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				43776F961B8022E90074EA36 /* Base */,
+				C1C73EFA1DE3D0230022FC89 /* it */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -1193,6 +1221,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				43776F9B1B8022E90074EA36 /* Base */,
+				C1C73F151DE3D0280022FC89 /* it */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -1201,8 +1230,57 @@
 			isa = PBXVariantGroup;
 			children = (
 				43A943751B926B7B0051FA24 /* Base */,
+				C1C73F051DE3D0250022FC89 /* it */,
 			);
 			name = Interface.storyboard;
+			sourceTree = "<group>";
+		};
+		C1C73EF91DE3D0230022FC89 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73EF81DE3D0230022FC89 /* it */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C1C73EFF1DE3D0240022FC89 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73EFE1DE3D0240022FC89 /* it */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C1C73F041DE3D0250022FC89 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73F031DE3D0250022FC89 /* it */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		C1C73F0A1DE3D0260022FC89 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73F091DE3D0260022FC89 /* it */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73F0E1DE3D0270022FC89 /* it */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		C1C73F141DE3D0280022FC89 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C1C73F131DE3D0280022FC89 /* it */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1425,6 +1503,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
@@ -1441,6 +1520,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
@@ -1458,6 +1538,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
@@ -1472,6 +1553,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
