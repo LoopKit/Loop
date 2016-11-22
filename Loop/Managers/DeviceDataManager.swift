@@ -74,14 +74,14 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     // Battery monitor
     func observeBatteryDuring(_ block: () -> Void) {
-        let oldPct = pumpBatteryChargeRemaining
+        let oldVal = pumpBatteryChargeRemaining
         block()
-        if let newPtc = pumpBatteryChargeRemaining {
-            if newPtc == 0 {
+        if let newVal = pumpBatteryChargeRemaining {
+            if newVal == 0 {
                 NotificationManager.sendPumpBatteryLowNotification()
             }
 
-            if let oldPct = oldPct, newPtc - oldPct >= 50 {
+            if let oldVal = oldVal, newVal - oldVal >= 0.5 {
                 AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
             }
         }
