@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import MinimedKit
 
 protocol RadioSelectionTableViewControllerDelegate: class {
     func radioSelectionTableViewControllerDidChangeSelectedIndex(_ controller: RadioSelectionTableViewController)

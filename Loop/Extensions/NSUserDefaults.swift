@@ -10,7 +10,6 @@ import Foundation
 import LoopKit
 import MinimedKit
 
-
 extension UserDefaults {
 
     private enum Key: String {

@@ -10,6 +10,7 @@ import UIKit
 import HealthKit
 import LoopKit
 import RileyLinkKit
+import MinimedKit
 
 private let ConfigCellIdentifier = "ConfigTableViewCell"
 
