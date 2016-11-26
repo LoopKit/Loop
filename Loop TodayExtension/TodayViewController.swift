@@ -40,25 +40,27 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If there's an update, use NCUpdateResult.NewData
         
         if let context = TodayExtensionContext().load() {
-            if context.hasLatestGlucose {
-                glucoseHUD.set(context.latestGlucose, for: HKUnit.milligramsPerDeciliterUnit(), from: nil)
+            if let latestGlucose = context.latestGlucose {
+                glucoseHUD.set(latestGlucose, for: HKUnit.milligramsPerDeciliterUnit(), from: nil)
             }
             
-            if context.hasBattery {
-                batteryHUD.batteryLevel = Double(context.batteryPercentage)
+            if let batteryPercentage = context.batteryPercentage {
+                batteryHUD.batteryLevel = Double(batteryPercentage)
             }
-                
-            if context.hasReservoir {
-                reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(context.reservoir.unitVolume / Double(context.reservoirCapacity))))
-                reservoirVolumeHUD.setReservoirVolume(volume: context.reservoir.unitVolume, at: context.reservoir.startDate)
+            
+            if let reservoir = context.reservoir {
+                reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(reservoir.capacity))))
+                reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
-            if context.hasBasal {
-                basalRateHUD.setNetBasalRate(context.netBasalRate, percent: context.netBasalPercent, at: context.basalStartDate)
+            if let basal = context.basal {
+                basalRateHUD.setNetBasalRate(basal.netRate, percent: basal.netPercentage, at: basal.startDate)
             }
-            
-            loopCompletionHUD.dosingEnabled = false
-            loopCompletionHUD.dosingEnabled = context.dosingEnabled
+
+            if let loop = context.loop {
+                loopCompletionHUD.dosingEnabled = loop.dosingEnabled
+                loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
+            }
             
             completionHandler(NCUpdateResult.newData)
         }

@@ -45,31 +45,35 @@ final class TodayExtensionDataManager: NSObject {
             // a fully configured app. Inject some baseline debug data to let us test the
             // experience. This data will be overwritten by actual data below, if available.
             context.batteryPercentage = 0.25
-            context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5)
-            context.reservoirCapacity = 200
-            context.netBasalRate = 2.1
-            context.netBasalPercent = 0.6
-            context.basalStartDate = Date() - TimeInterval(250)
+            context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
+            context.basal = BasalContext(netRate: 2.1, netPercentage: 0.6, startDate: Date() - TimeInterval(250))
         #endif
 
-        context.dosingEnabled = dataManager.loopManager.dosingEnabled
+        dataManager.loopManager.getLoopStatus {
+            (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
+            let dataManager = self.dataManager
+            
+            context.loop = LoopContext(
+                dosingEnabled: dataManager.loopManager.dosingEnabled,
+                lastCompleted: lastLoopCompleted)
 
-        if let glucose = glucoseStore.latestGlucose {
-            context.latestGlucose = glucose
-        }
+            if let glucose = glucoseStore.latestGlucose {
+                context.latestGlucose = glucose
+            }
+            
+            if let reservoir = dataManager.doseStore.lastReservoirValue,
+               let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
+                context.reservoir = ReservoirValueContext(
+                    startDate: reservoir.startDate,
+                    unitVolume: reservoir.unitVolume,
+                    capacity: capacity)
+            }
+            
+            if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
+                context.batteryPercentage = Double(batteryPercentage) / 100.0
+            }
         
-        if let reservoir = dataManager.doseStore.lastReservoirValue {
-            context.reservoir = reservoir
+            completionHandler(context)
         }
-        
-        if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
-            context.reservoirCapacity = capacity
-        }
-        
-        if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
-            context.batteryPercentage = Double(batteryPercentage) / 100.0
-        }
-        
-        completionHandler(context)
     }
 }

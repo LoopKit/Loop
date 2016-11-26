@@ -15,10 +15,18 @@ import MinimedKit
 struct ReservoirValueContext: ReservoirValue {
     var startDate: Date
     var unitVolume: Double
+    var capacity: Int
 }
 
-struct GlucoseContext {
-    var sample: HKQuantitySample
+struct LoopContext {
+    var dosingEnabled: Bool
+    var lastCompleted: Date?
+}
+
+struct BasalContext {
+    var netRate: Double
+    var netPercentage: Double
+    var startDate: Date
 }
 
 // Context passed between Loop and the Today Extension. For now it's all one way
@@ -27,9 +35,9 @@ class TodayExtensionContext {
     var data: [String:Any] = [:]
     let storage = UserDefaults(suiteName: "group.com.loudnate.Loop")
     
-    var hasLatestGlucose: Bool = false
-    var latestGlucose: GlucoseValue {
+    var latestGlucose: GlucoseValue? {
         get {
+            if data["gv"] == nil { return nil }
             return HKQuantitySample(
                 type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
                 quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(),
@@ -38,64 +46,62 @@ class TodayExtensionContext {
                 end: data["gd"] as! Date)
         }
         set(lgv) {
-            data["gd"] = lgv.startDate
-            data["gv"] = lgv.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+            data["gd"] = lgv?.startDate
+            data["gv"] = lgv?.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
         }
     }
     
-    var hasBattery: Bool = false
-    var batteryPercentage: Double {
+    var batteryPercentage: Double? {
         get {
-            return data["bp"] as! Double
+            if data["bp"] == nil { return nil }
+            return data["bp"] as? Double
         }
         set(bp) {
             data["bp"] = bp
         }
     }
     
-    var hasReservoir: Bool = false
-    var reservoir: ReservoirValue {
+    var reservoir: ReservoirValueContext? {
         get {
+            if data["rsd"] == nil { return nil }
             return ReservoirValueContext(
                 startDate: data["rsd"] as! Date,
-                unitVolume: data["ruv"] as! Double)
+                unitVolume: data["ruv"] as! Double,
+                capacity: data["rc"] as! Int)
         }
-        set(rv) {
-            data["rsd"] = rv.startDate
-            data["ruv"] = rv.unitVolume
+        set(rvc) {
+            data["rsd"] = rvc?.startDate
+            data["ruv"] = rvc?.unitVolume
+            data["rc"] = rvc?.capacity
         }
     }
     
-    var reservoirCapacity: Int {
+    var loop: LoopContext? {
         get {
-            return data["rc"] as! Int
+            if data["lde"] == nil { return nil }
+            return LoopContext(
+                dosingEnabled: data["lde"] as! Bool,
+                lastCompleted: data["llc"] as! Date?)
         }
-        set(rc) {
-            data["rc"] = rc
+        set(l) {
+            data["lde"] = l?.dosingEnabled
+            data["llc"] = l?.lastCompleted
         }
     }
     
-    var dosingEnabled: Bool {
+    var basal: BasalContext? {
         get {
-            return data["de"] as! Bool
+            if data["bnr"] == nil { return nil }
+            return BasalContext(
+                netRate: data["bnr"] as! Double,
+                netPercentage: data["bnp"] as! Double,
+                startDate: data["bsd"] as! Date)
         }
-        set(de) {
-            data["de"] = de
+        set(b) {
+            data["bnr"] = b?.netRate
+            data["bnp"] = b?.netPercentage
+            data["bsd"] = b?.startDate
         }
-    }
-    
-    var hasBasal: Bool = false
-    var netBasalRate: Double {
-        get      { return data["nbr"] as! Double }
-        set(de)  { data["nbr"] = de              }
-    }
-    var netBasalPercent: Double {
-        get      { return data["nbp"] as! Double }
-        set(dp)  { data["nbp"] = dp              }
-    }
-    var basalStartDate: Date {
-        get      { return data["bsd"] as! Date   }
-        set(bsd) { data["bsd"] = bsd             }
     }
     
     func save() {
@@ -105,12 +111,9 @@ class TodayExtensionContext {
     func load() -> TodayExtensionContext? {
         if let data = storage?.object(forKey: "TodayExtensionContext") as! [String:Any]? {
             self.data = data
-            self.hasLatestGlucose = data["gv"] != nil
-            self.hasBattery = data["bp"] != nil
-            self.hasReservoir = data["ruv"] != nil
-            self.hasBasal = data["nbr"] != nil
             return self
         }
+        
         return nil
     }
 }
