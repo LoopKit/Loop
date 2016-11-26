@@ -384,39 +384,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }()
 
     // MARK: - HUD Data
-
+    
     private var lastTempBasal: DoseEntry? {
         didSet {
-            guard let scheduledBasal = dataManager.basalRateSchedule?.between(start: Date(), end: Date()).first else {
-                return
-            }
-
-            let netBasalRate: Double
-            let netBasalPercent: Double
-            let basalStartDate: Date
-
-            if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = dataManager.maximumBasalRatePerHour {
-                netBasalRate = lastTempBasal.value - scheduledBasal.value
-                basalStartDate = lastTempBasal.startDate
-
-                if netBasalRate < 0 {
-                    netBasalPercent = netBasalRate / scheduledBasal.value
-                } else {
-                    netBasalPercent = netBasalRate / (maxBasal - scheduledBasal.value)
+            let (netBasalRate, netBasalPercent, basalStartDate) = self.dataManager.loopManager.calculateNetBasalRate()
+            
+            if let rate = netBasalRate, let percent = netBasalPercent, let date = basalStartDate {
+                DispatchQueue.main.async {
+                    self.basalRateHUD.setNetBasalRate(rate, percent: percent, at: date)
                 }
-            } else {
-                netBasalRate = 0
-                netBasalPercent = 0
-
-                if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > scheduledBasal.startDate {
-                    basalStartDate = lastTempBasal.endDate
-                } else {
-                    basalStartDate = scheduledBasal.startDate
-                }
-            }
-
-            DispatchQueue.main.async {
-                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, at: basalStartDate)
             }
         }
     }

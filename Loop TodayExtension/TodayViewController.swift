@@ -53,8 +53,8 @@ class TodayViewController: UIViewController, NCWidgetProviding {
                 reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
-            if let basal = context.basal {
-                basalRateHUD.setNetBasalRate(basal.netRate, percent: basal.netPercentage, at: basal.startDate)
+            if let netBasal = context.netBasal {
+                basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.startDate)
             }
 
             if let loop = context.loop {

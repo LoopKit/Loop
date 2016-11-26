@@ -61,6 +61,11 @@ final class TodayExtensionDataManager: NSObject {
                 context.latestGlucose = glucose
             }
             
+            let (netBasalRate, netBasalPercentage, basalStartDate) = dataManager.loopManager.calculateNetBasalRate()
+            if let rate = netBasalRate, let percentage = netBasalPercentage, let startDate = basalStartDate {
+                context.netBasal = NetBasalContext(rate: rate, percentage: percentage, startDate: startDate)
+            }
+            
             if let reservoir = dataManager.doseStore.lastReservoirValue,
                let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
                 context.reservoir = ReservoirValueContext(

@@ -23,9 +23,9 @@ struct LoopContext {
     var lastCompleted: Date?
 }
 
-struct BasalContext {
-    var netRate: Double
-    var netPercentage: Double
+struct NetBasalContext {
+    var rate: Double
+    var percentage: Double
     var startDate: Date
 }
 
@@ -89,18 +89,18 @@ class TodayExtensionContext {
         }
     }
     
-    var basal: BasalContext? {
+    var netBasal: NetBasalContext? {
         get {
-            if data["bnr"] == nil { return nil }
-            return BasalContext(
-                netRate: data["bnr"] as! Double,
-                netPercentage: data["bnp"] as! Double,
-                startDate: data["bsd"] as! Date)
+            if data["nbr"] == nil { return nil }
+            return NetBasalContext(
+                rate: data["nbr"] as! Double,
+                percentage: data["nbp"] as! Double,
+                startDate: data["nbsd"] as! Date)
         }
         set(b) {
-            data["bnr"] = b?.netRate
-            data["bnp"] = b?.netPercentage
-            data["bsd"] = b?.startDate
+            data["nbr"] = b?.rate
+            data["nbp"] = b?.percentage
+            data["nbsd"] = b?.startDate
         }
     }
     
