@@ -15,8 +15,12 @@ import CoreData
 
 class TodayViewController: UIViewController, NCWidgetProviding {
     
+    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
     @IBOutlet weak var glucoseHUD: GlucoseHUDView!
-        
+    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
+    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
+    @IBOutlet weak var batteryHUD: BatteryLevelHUDView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view from its nib.
@@ -36,10 +40,29 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If there's an update, use NCUpdateResult.NewData
         
         if let context = TodayExtensionContext().load() {
-            glucoseHUD.set(context.latestGlucose, for: HKUnit.milligramsPerDeciliterUnit(), from: nil)
-        }
+            if context.hasLatestGlucose {
+                glucoseHUD.set(context.latestGlucose, for: HKUnit.milligramsPerDeciliterUnit(), from: nil)
+            }
+            
+            if context.hasBattery {
+                batteryHUD.batteryLevel = Double(context.batteryPercentage)
+            }
+                
+            if context.hasReservoir {
+                reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(context.reservoir.unitVolume / Double(context.reservoirCapacity))))
+                reservoirVolumeHUD.setReservoirVolume(volume: context.reservoir.unitVolume, at: context.reservoir.startDate)
+            }
 
-        completionHandler(NCUpdateResult.newData)
+            if context.hasBasal {
+                basalRateHUD.setNetBasalRate(context.netBasalRate, percent: context.netBasalPercent, at: context.basalStartDate)
+            }
+            
+            loopCompletionHUD.dosingEnabled = false
+            loopCompletionHUD.dosingEnabled = context.dosingEnabled
+            
+            completionHandler(NCUpdateResult.newData)
+        }
+        
     }
     
 }

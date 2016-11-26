@@ -772,8 +772,8 @@
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
-				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */,
+				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1470,6 +1470,7 @@
 				);
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

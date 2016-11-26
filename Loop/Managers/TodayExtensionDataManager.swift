@@ -12,11 +12,11 @@ import CarbKit
 import LoopKit
 
 final class TodayExtensionDataManager: NSObject {
-    unowned let deviceDataManager: DeviceDataManager
+    unowned let dataManager: DeviceDataManager
     private var lastContext: TodayExtensionContext?
 
     init(deviceDataManager: DeviceDataManager) {
-        self.deviceDataManager = deviceDataManager
+        self.dataManager = deviceDataManager
         super.init()
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
@@ -32,25 +32,44 @@ final class TodayExtensionDataManager: NSObject {
         }
     }
 
-
     private func createContext(_ completionHandler: @escaping (_ context: TodayExtensionContext?) -> Void) {
-        guard let glucoseStore = self.deviceDataManager.glucoseStore else {
+        guard let glucoseStore = self.dataManager.glucoseStore else {
             completionHandler(nil)
             return
         }
 
-        // let reservoir = deviceDataManager.doseStore.lastReservoirValue
-        // let maxBolus = deviceDataManager.maximumBolus
+        let context = TodayExtensionContext()
+        
+        #if IOS_SIMULATOR
+            // If we're in the simulator, there's a higher likelihood that we don't have
+            // a fully configured app. Inject some baseline debug data to let us test the
+            // experience. This data will be overwritten by actual data below, if available.
+            context.batteryPercentage = 0.25
+            context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5)
+            context.reservoirCapacity = 200
+            context.netBasalRate = 2.1
+            context.netBasalPercent = 0.6
+            context.basalStartDate = Date() - TimeInterval(250)
+        #endif
+
+        context.dosingEnabled = dataManager.loopManager.dosingEnabled
 
         if let glucose = glucoseStore.latestGlucose {
-            deviceDataManager.loopManager.getLoopStatus {
-                (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
-
-                let context = TodayExtensionContext()
-                context.latestGlucose = glucose
-                
-                completionHandler(context)
-            }
+            context.latestGlucose = glucose
         }
+        
+        if let reservoir = dataManager.doseStore.lastReservoirValue {
+            context.reservoir = reservoir
+        }
+        
+        if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
+            context.reservoirCapacity = capacity
+        }
+        
+        if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
+            context.batteryPercentage = Double(batteryPercentage) / 100.0
+        }
+        
+        completionHandler(context)
     }
 }

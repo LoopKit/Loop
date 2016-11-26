@@ -288,7 +288,11 @@
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="320" height="37"/>
                     <connections>
+                        <outlet property="basalRateHUD" destination="rxv-4Y-WIp" id="eSX-yy-aa2"/>
+                        <outlet property="batteryHUD" destination="6hm-aW-Inx" id="O5o-RL-ziO"/>
                         <outlet property="glucoseHUD" destination="OBl-Fq-V35" id="02G-gc-Mz6"/>
+                        <outlet property="loopCompletionHUD" destination="TjP-cY-NvD" id="5ox-eX-zc6"/>
+                        <outlet property="reservoirVolumeHUD" destination="8f8-sc-GIm" id="aD9-yu-778"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vXp-U4-Rya" userLabel="First Responder" sceneMemberID="firstResponder"/>
