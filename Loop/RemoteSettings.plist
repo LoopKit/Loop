@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+	<key>mLabAPIKey</key>
+	<string>ue9YdDL4NQJ0iJ5iLGv17QAZC0R5-TLO</string>
+	<key>mLabAPIHost</key>
+	<string>https://api.mlab.com/api/1/</string>
+	<key>mLabAPIPath</key>
+	<string>databases/loop/collections</string>
+	<key>AmplitudeAPIKey</key>
+	<string></string>
+	<key>ShareAccountName</key>
+	<string>aem1350</string>
+	<key>ShareAccountPassword</key>
+	<string>Stigmata0699</string>
+	<key>AzureAppServiceURL</key>
+	<string>https://openapsapi.azurewebsites.net</string>
+	<key>AzureAppServiceTempBasalAPI</key>
+	<string>api/openapstempbasals</string>
+	<key>AzureAppServiceStatusAPI</key>
+	<string>api/devices</string>
+	<key>NightscoutSiteURL</key>
+	<string>https://webhead.azurewebsites.net</string>
+	<key>NightscoutAPISecret</key>
+	<string>$ithL0rdS@mIsHere</string>
+</dict>
 </plist>

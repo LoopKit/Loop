@@ -28,7 +28,7 @@ struct NotificationManager {
         case BolusStartDate
     }
     
-    private static func sendAlertPushNotification(alert: String){
+    static func sendAlertPushNotification(alert: String){
         let logger = DiagnosticLogger()
         let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
         let date = NSDate()
@@ -202,4 +202,7 @@ struct NotificationManager {
 
         UNUserNotificationCenter.current().add(request)
     }
+    
+   
+
 }

@@ -42,6 +42,8 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             enableRileyLinkHeartbeatIfNeeded()
         }
     }
+    
+
 
     var receiverEnabled: Bool {
         get {
@@ -440,7 +442,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                     completion(LoopError.communicationError)
                 } else {
                     self.loopManager.recordBolus(units, at: Date())
-                    completion(nil)
+                     completion(nil)
                 }
             }
         }

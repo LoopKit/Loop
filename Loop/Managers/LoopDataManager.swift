@@ -681,6 +681,7 @@ final class LoopDataManager {
             self.lastBolus = (units: units, date: date)
             self.notify(forChange: .bolus)
         }
+        NotificationManager.sendAlertPushNotification(alert: String(format:"%.1f", units) + "U Bolus successfully enacted")
     }
     
     private func addLoopTempBasalNotification(glucose: GlucoseValue, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
