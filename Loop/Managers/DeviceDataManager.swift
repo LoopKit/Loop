@@ -366,6 +366,12 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
         device.assertIdleListening()
 
+        assertCurrentPumpStatus(device: device) {
+            self.assertCurrentPumpCGMData(device: device);
+        }
+    }
+
+    private func assertCurrentPumpStatus(device: RileyLinkDevice, _ completion: (() -> Void)? = nil) {
         // How long should we wait before we poll for new pump data?
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
 
@@ -391,7 +397,48 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                     nsPumpStatus = nil
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+                completion?()
             }
+        }
+    }
+
+    private func assertCurrentPumpCGMData(device: RileyLinkDevice, _ completion: (() -> Void)? = nil) {
+        let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
+
+        if fetchGlucoseSince.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) {
+            device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
+                switch result {
+                case .success(let glucoseEvents):
+
+                    defer {
+                        _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
+                    }
+
+                    for timestampedGlucoseEvent in glucoseEvents {
+
+                        guard let glucoseEntry = timestampedGlucoseEvent.glucoseEvent as? SensorValueGlucoseEvent else {
+                            continue
+                        }
+
+                        self.glucoseStore?.addGlucose(
+                            HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEntry.sgv)),
+                            date: timestampedGlucoseEvent.date,
+                            isDisplayOnly: false,
+                            device: nil
+                        ) { (success, _, error) in
+                            if let error = error {
+                                self.logger.addError(error, fromSource: "GlucoseStore")
+                            }
+
+                            if success {
+                                NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
+                            }
+                        }
+                    }
+                case .failure(let error):
+                    self.logger.addError(error, fromSource: "PumpOps")
+                }
+            })
         }
     }
 
