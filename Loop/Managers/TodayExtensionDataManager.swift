@@ -81,7 +81,10 @@ final class TodayExtensionDataManager: NSObject {
             }
         
             if let lastPoint = predictedGlucose?.last {
-                context.eventualGlucose = String(describing: lastPoint)
+                context.eventualGlucose = String(
+                        format: NSLocalizedString("Eventually %@",
+                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"),
+                    String(describing: lastPoint))
             }
             
             completionHandler(context)
