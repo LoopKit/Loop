@@ -25,7 +25,6 @@ final class TodayExtensionDataManager: NSObject {
     @objc private func update(_ notification: Notification) {
         createContext { (context) in
             if let context = context {
-                // TODO: check against last context to see if anything changed
                 context.save()
                 self.lastContext = context
             }
@@ -46,7 +45,7 @@ final class TodayExtensionDataManager: NSObject {
             // experience. This data will be overwritten by actual data below, if available.
             context.batteryPercentage = 0.25
             context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
-            context.basal = BasalContext(netRate: 2.1, netPercentage: 0.6, startDate: Date() - TimeInterval(250))
+            context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
         #endif
 
         dataManager.loopManager.getLoopStatus {
@@ -58,7 +57,9 @@ final class TodayExtensionDataManager: NSObject {
                 lastCompleted: lastLoopCompleted)
 
             if let glucose = glucoseStore.latestGlucose {
-                context.latestGlucose = glucose
+                context.glucose = GlucoseContext(
+                    latest: glucose,
+                    sensor: dataManager.sensorInfo)
             }
             
             let (netBasalRate, netBasalPercentage, basalStartDate) = dataManager.loopManager.calculateNetBasalRate()

@@ -40,8 +40,8 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If there's an update, use NCUpdateResult.NewData
         
         if let context = TodayExtensionContext().load() {
-            if let latestGlucose = context.latestGlucose {
-                glucoseHUD.set(latestGlucose, for: HKUnit.milligramsPerDeciliterUnit(), from: nil)
+            if let glucose = context.glucose {
+                glucoseHUD.set(glucose.latest, for: HKUnit.milligramsPerDeciliterUnit(), from: glucose.sensor)
             }
             
             if let batteryPercentage = context.batteryPercentage {

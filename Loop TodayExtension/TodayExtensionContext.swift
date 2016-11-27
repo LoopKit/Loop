@@ -5,6 +5,7 @@
 //  Created by Bharat Mediratta on 11/25/16.
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
+//  This class allows Loop to pass context data to the Today Extension.
 
 import Foundation
 import HealthKit
@@ -29,25 +30,50 @@ struct NetBasalContext {
     var startDate: Date
 }
 
-// Context passed between Loop and the Today Extension. For now it's all one way
-// traffic from Loop.
+struct SensorDisplayableContext: SensorDisplayable {
+    var isStateValid: Bool
+    var stateDescription: String
+    var trendType: GlucoseTrend?
+    var isLocal: Bool
+}
+
+struct GlucoseContext {
+    var latest: GlucoseValue
+    var sensor: SensorDisplayable?
+}
+
 class TodayExtensionContext {
     var data: [String:Any] = [:]
     let storage = UserDefaults(suiteName: "group.com.loudnate.Loop")
     
-    var latestGlucose: GlucoseValue? {
+    var glucose: GlucoseContext? {
         get {
-            if data["gv"] == nil { return nil }
-            return HKQuantitySample(
-                type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
-                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(),
-                                     doubleValue: data["gv"] as! Double),
-                start: data["gd"] as! Date,
-                end: data["gd"] as! Date)
+            if data["gcgv"] == nil { return nil }
+            
+            var sensor: SensorDisplayableContext? = nil
+            if data["gcsv"] != nil {
+                sensor = SensorDisplayableContext(
+                    isStateValid: data["gcsv"] as! Bool,
+                    stateDescription: data["gcsd"] as! String,
+                    trendType: data["gcst"] as? GlucoseTrend,
+                    isLocal: data["gcsl"] as! Bool)
+            }
+            return GlucoseContext(
+                latest: HKQuantitySample(
+                    type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
+                    quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(),
+                                         doubleValue: data["gcgv"] as! Double),
+                    start: data["gcgd"] as! Date,
+                    end: data["gcgd"] as! Date),
+                sensor: sensor)
         }
         set(lgv) {
-            data["gd"] = lgv?.startDate
-            data["gv"] = lgv?.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+            data["gcgv"] = lgv?.latest.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+            data["gcgd"] = lgv?.latest.startDate
+            data["gcsv"] = lgv?.sensor?.isStateValid
+            data["gcsd"] = lgv?.sensor?.stateDescription
+            data["gcst"] = lgv?.sensor?.trendType
+            data["gcsl"] = lgv?.sensor?.isLocal
         }
     }
     
