@@ -20,6 +20,7 @@ class TodayViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var basalRateHUD: BasalRateHUDView!
     @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
     @IBOutlet weak var batteryHUD: BatteryLevelHUDView!
+    @IBOutlet weak var subtitleLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +39,7 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If an error is encountered, use NCUpdateResult.Failed
         // If there's no update required, use NCUpdateResult.NoData
         // If there's an update, use NCUpdateResult.NewData
+        
         
         if let context = TodayExtensionContext().load() {
             if let glucose = context.glucose {
@@ -61,6 +63,15 @@ class TodayViewController: UIViewController, NCWidgetProviding {
                 loopCompletionHUD.dosingEnabled = loop.dosingEnabled
                 loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
             }
+
+            if let eventualGlucose = context.eventualGlucose {
+                subtitleLabel.text = eventualGlucose
+                subtitleLabel.textColor = UIColor.secondaryLabelColor
+                subtitleLabel.alpha = 1
+            } else {
+                subtitleLabel.alpha = 0
+            }
+            
             
             completionHandler(NCUpdateResult.newData)
         }

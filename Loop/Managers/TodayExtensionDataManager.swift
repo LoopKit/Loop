@@ -46,6 +46,7 @@ final class TodayExtensionDataManager: NSObject {
             context.batteryPercentage = 0.25
             context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
             context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
+            context.eventualGlucose = "Eventually 101 mg/dL"
         #endif
 
         dataManager.loopManager.getLoopStatus {
@@ -79,6 +80,10 @@ final class TodayExtensionDataManager: NSObject {
                 context.batteryPercentage = Double(batteryPercentage) / 100.0
             }
         
+            if let lastPoint = predictedGlucose?.last {
+                context.eventualGlucose = String(describing: lastPoint)
+            }
+            
             completionHandler(context)
         }
     }

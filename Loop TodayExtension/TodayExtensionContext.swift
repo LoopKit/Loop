@@ -130,6 +130,15 @@ class TodayExtensionContext {
         }
     }
     
+    var eventualGlucose: String? {
+        get {
+            return data["eg"] as? String
+        }
+        set(eg) {
+            data["eg"] = eg
+        }
+    }
+    
     func save() {
         storage?.set(data, forKey: "TodayExtensionContext")
     }
