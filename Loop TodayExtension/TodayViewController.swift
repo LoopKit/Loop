@@ -41,8 +41,8 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If there's an update, use NCUpdateResult.NewData
         
         
-        if let context = TodayExtensionContext().load() {
-            if let glucose = context.glucose {
+        if let context = UserDefaults.shared()?.todayExtensionContext {
+            if let glucose = context.latestGlucose {
                 glucoseHUD.set(glucose.latest, for: HKUnit.milligramsPerDeciliterUnit(), from: glucose.sensor)
             }
             
@@ -71,11 +71,14 @@ class TodayViewController: UIViewController, NCWidgetProviding {
             } else {
                 subtitleLabel.alpha = 0
             }
-            
-            
+
+            // Right now we always act as if there's new data.
+            // TODO: keep track of data changes and return .noData if necessary
             completionHandler(NCUpdateResult.newData)
+        } else {
+            completionHandler(NCUpdateResult.failed)
         }
-        
+
     }
     
 }

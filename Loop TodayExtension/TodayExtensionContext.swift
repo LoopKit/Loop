@@ -13,7 +13,7 @@ import LoopKit
 import InsulinKit
 import MinimedKit
 
-struct ReservoirValueContext: ReservoirValue {
+struct ReservoirContext: ReservoirValue {
     var startDate: Date
     var unitVolume: Double
     var capacity: Int
@@ -42,113 +42,115 @@ struct GlucoseContext {
     var sensor: SensorDisplayable?
 }
 
-class TodayExtensionContext {
-    var data: [String:Any] = [:]
-    let storage = UserDefaults(suiteName: "group.com.loudnate.Loop")
+final class TodayExtensionContext: NSObject, RawRepresentable {
+    typealias RawValue = [String: Any]
+    private let version = 1
     
-    var glucose: GlucoseContext? {
-        get {
-            if data["gcgv"] == nil { return nil }
-            
-            var sensor: SensorDisplayableContext? = nil
-            if data["gcsv"] != nil {
-                sensor = SensorDisplayableContext(
-                    isStateValid: data["gcsv"] as! Bool,
-                    stateDescription: data["gcsd"] as! String,
-                    trendType: data["gcst"] as? GlucoseTrend,
-                    isLocal: data["gcsl"] as! Bool)
-            }
-            return GlucoseContext(
+    var latestGlucose: GlucoseContext?
+    var reservoir: ReservoirContext?
+    var loop: LoopContext?
+    var netBasal: NetBasalContext?
+    var batteryPercentage: Double?
+    var eventualGlucose: String?
+    
+    override init() {
+        super.init()
+    }
+    
+    required init?(rawValue: RawValue) {
+        super.init()
+        let raw = rawValue
+        
+        if let unitString = raw["latestGlucose_unit"] as? String,
+           let latestValue = raw["latestGlucose_value"] as? Double,
+           let startDate = raw["latestGlucose_startDate"] as? Date {
+            latestGlucose = GlucoseContext(
                 latest: HKQuantitySample(
                     type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
-                    quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(),
-                                         doubleValue: data["gcgv"] as! Double),
-                    start: data["gcgd"] as! Date,
-                    end: data["gcgd"] as! Date),
-                sensor: sensor)
-        }
-        set(lgv) {
-            data["gcgv"] = lgv?.latest.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
-            data["gcgd"] = lgv?.latest.startDate
-            data["gcsv"] = lgv?.sensor?.isStateValid
-            data["gcsd"] = lgv?.sensor?.stateDescription
-            data["gcst"] = lgv?.sensor?.trendType
-            data["gcsl"] = lgv?.sensor?.isLocal
-        }
-    }
-    
-    var batteryPercentage: Double? {
-        get {
-            if data["bp"] == nil { return nil }
-            return data["bp"] as? Double
-        }
-        set(bp) {
-            data["bp"] = bp
-        }
-    }
-    
-    var reservoir: ReservoirValueContext? {
-        get {
-            if data["rsd"] == nil { return nil }
-            return ReservoirValueContext(
-                startDate: data["rsd"] as! Date,
-                unitVolume: data["ruv"] as! Double,
-                capacity: data["rc"] as! Int)
-        }
-        set(rvc) {
-            data["rsd"] = rvc?.startDate
-            data["ruv"] = rvc?.unitVolume
-            data["rc"] = rvc?.capacity
-        }
-    }
-    
-    var loop: LoopContext? {
-        get {
-            if data["lde"] == nil { return nil }
-            return LoopContext(
-                dosingEnabled: data["lde"] as! Bool,
-                lastCompleted: data["llc"] as! Date?)
-        }
-        set(l) {
-            data["lde"] = l?.dosingEnabled
-            data["llc"] = l?.lastCompleted
-        }
-    }
-    
-    var netBasal: NetBasalContext? {
-        get {
-            if data["nbr"] == nil { return nil }
-            return NetBasalContext(
-                rate: data["nbr"] as! Double,
-                percentage: data["nbp"] as! Double,
-                startDate: data["nbsd"] as! Date)
-        }
-        set(b) {
-            data["nbr"] = b?.rate
-            data["nbp"] = b?.percentage
-            data["nbsd"] = b?.startDate
-        }
-    }
-    
-    var eventualGlucose: String? {
-        get {
-            return data["eg"] as? String
-        }
-        set(eg) {
-            data["eg"] = eg
-        }
-    }
-    
-    func save() {
-        storage?.set(data, forKey: "TodayExtensionContext")
-    }
-    
-    func load() -> TodayExtensionContext? {
-        if let data = storage?.object(forKey: "TodayExtensionContext") as! [String:Any]? {
-            self.data = data
-            return self
+                    quantity: HKQuantity(unit: HKUnit(from: unitString), doubleValue: latestValue),
+                    start: startDate,
+                    end: startDate),
+                sensor: nil)
+            
+            if let state = raw["latestGlucose_sensor_isStateValid"] as? Bool,
+               let desc = raw["latestGlucose_sensor_stateDescription"] as? String,
+               let local = raw["latestGlucose_sensor_isLocal"] as? Bool {
+                latestGlucose?.sensor = SensorDisplayableContext(
+                    isStateValid: state,
+                    stateDescription: desc,
+                    trendType: raw["latestGlucose_sensor_trendType"] as? GlucoseTrend,
+                    isLocal: local)
+            }
         }
         
-        return nil
+        batteryPercentage = raw["batteryPercentage"] as? Double
+        
+        if let startDate = raw["reservoir_startDate"] as? Date,
+           let unitVolume = raw["reservoir_unitVolume"] as? Double,
+           let capacity = raw["reservoir_capacity"] as? Int {
+            reservoir = ReservoirContext(startDate: startDate, unitVolume: unitVolume, capacity: capacity)
+        }
+
+        if let dosingEnabled = raw["loop_dosingEnabled"] as? Bool,
+           let lastCompleted = raw["loop_lastCompleted"] as? Date {
+            loop = LoopContext(dosingEnabled: dosingEnabled, lastCompleted: lastCompleted)
+        }
+        
+        if let rate = raw["netBasal_rate"] as? Double,
+           let percentage = raw["netBasal_percentage"] as? Double,
+           let startDate = raw["netBasal_startDate"] as? Date {
+            netBasal = NetBasalContext(rate: rate, percentage: percentage, startDate: startDate)
+        }
+        
+        eventualGlucose = raw["eventualGlucose"] as? String
+    }
+    
+    var rawValue: RawValue {
+        var raw: RawValue = [
+            "version": version
+        ]
+
+        if let glucose = latestGlucose {
+            // TODO: use the users preferred unit type here
+            raw["latestGlucose_value"] = glucose.latest.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+            raw["latestGlucose_startDate"] = glucose.latest.startDate
+            raw["latestGlucose_unit"] = HKUnit.milligramsPerDeciliterUnit().unitString
+        }
+
+        if let sensor = latestGlucose?.sensor {
+            raw["latestGlucose_sensor_isStateValid"] = sensor.isStateValid
+            raw["latestGlucose_sensor_stateDescription"] = sensor.stateDescription
+            raw["latestGlucose_sensor_isLocal"] = sensor.isLocal
+            
+            if let trendType = sensor.trendType {
+                raw["latestGlucose_sensor_trendType"] = trendType.rawValue
+            }
+        }
+
+        if let batteryPercentage = batteryPercentage {
+            raw["batteryPercentage"] = batteryPercentage
+        }
+        
+        if let reservoir = reservoir {
+            raw["reservoir_startDate"] = reservoir.startDate
+            raw["reservoir_unitVolume"] = reservoir.unitVolume
+            raw["reservoir_capacity"] = reservoir.capacity
+        }
+        
+        if let loop = loop {
+            raw["loop_dosingEnabled"] = loop.dosingEnabled
+            raw["loop_lastCompleted"] = loop.lastCompleted
+        }
+        
+        if let netBasal = netBasal {
+            raw["netBasal_percentage"] = netBasal.percentage
+            raw["netBasal_startDate"] = netBasal.startDate
+        }
+        
+        if let eventualGlucose = eventualGlucose {
+            raw["eventualGlucose"] = eventualGlucose
+        }
+        
+        return raw
     }
 }

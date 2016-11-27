@@ -25,7 +25,7 @@ final class TodayExtensionDataManager: NSObject {
     @objc private func update(_ notification: Notification) {
         createContext { (context) in
             if let context = context {
-                context.save()
+                UserDefaults.shared()?.todayExtensionContext = context
                 self.lastContext = context
             }
         }
@@ -37,20 +37,23 @@ final class TodayExtensionDataManager: NSObject {
             return
         }
 
-        let context = TodayExtensionContext()
-        
-        #if IOS_SIMULATOR
-            // If we're in the simulator, there's a higher likelihood that we don't have
-            // a fully configured app. Inject some baseline debug data to let us test the
-            // experience. This data will be overwritten by actual data below, if available.
-            context.batteryPercentage = 0.25
-            context.reservoir = ReservoirValueContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
-            context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-            context.eventualGlucose = "Eventually 101 mg/dL"
-        #endif
-
         dataManager.loopManager.getLoopStatus {
             (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
+            
+            let context = TodayExtensionContext()
+        
+            #if IOS_SIMULATOR
+                // If we're in the simulator, there's a higher likelihood that we don't have
+                // a fully configured app. Inject some baseline debug data to let us test the
+                // experience. This data will be overwritten by actual data below, if available.
+                context.batteryPercentage = 0.25
+                context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
+                context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
+                context.eventualGlucose = String(
+                    format: NSLocalizedString("Eventually %@", comment: ""),
+                    String(describing: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.0)))
+            #endif
+
             let dataManager = self.dataManager
             
             context.loop = LoopContext(
@@ -58,7 +61,7 @@ final class TodayExtensionDataManager: NSObject {
                 lastCompleted: lastLoopCompleted)
 
             if let glucose = glucoseStore.latestGlucose {
-                context.glucose = GlucoseContext(
+                context.latestGlucose = GlucoseContext(
                     latest: glucose,
                     sensor: dataManager.sensorInfo)
             }
@@ -70,7 +73,7 @@ final class TodayExtensionDataManager: NSObject {
             
             if let reservoir = dataManager.doseStore.lastReservoirValue,
                let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
-                context.reservoir = ReservoirValueContext(
+                context.reservoir = ReservoirContext(
                     startDate: reservoir.startDate,
                     unitVolume: reservoir.unitVolume,
                     capacity: capacity)
@@ -82,9 +85,8 @@ final class TodayExtensionDataManager: NSObject {
         
             if let lastPoint = predictedGlucose?.last {
                 context.eventualGlucose = String(
-                        format: NSLocalizedString("Eventually %@",
-                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"),
-                    String(describing: lastPoint))
+                    format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"),
+                    String(describing: lastPoint.quantity))
             }
             
             completionHandler(context)

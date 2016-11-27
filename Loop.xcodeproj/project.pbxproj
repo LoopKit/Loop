@@ -175,6 +175,8 @@
 		4F70C2101DE8FAC5006380B7 /* TodayExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */; };
 		4F70C2121DE900EA006380B7 /* TodayExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* TodayExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */; };
+		4FC8C8011DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */; };
+		4FC8C8021DEB943800A1452E /* NSUserDefaults+TodayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
@@ -435,6 +437,7 @@
 		4F70C1FD1DE8E662006380B7 /* Loop TodayExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop TodayExtension.entitlements"; sourceTree = "<group>"; };
 		4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayExtensionContext.swift; sourceTree = "<group>"; };
+		4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+TodayExtension.swift"; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
@@ -702,6 +705,7 @@
 				436A0E7A1D7DE13400D6475D /* NSNumberFormatter.swift */,
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
+				4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
@@ -1186,6 +1190,7 @@
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				437CCAE01D285C7B0075D2C3 /* ServiceAuthentication.swift in Sources */,
+				4FC8C8011DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift in Sources */,
 				4302F4E51D4EA75100F0FCAF /* DoseStore.swift in Sources */,
 				430DA5901D4B0E4C0097D1CA /* MySentryPumpStatusMessageBody.swift in Sources */,
 				4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */,
@@ -1278,6 +1283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FC8C8021DEB943800A1452E /* NSUserDefaults+TodayExtension.swift in Sources */,
 				4F70C20B1DE8E9F4006380B7 /* GlucoseTrend.swift in Sources */,
 				4F70C1FB1DE8E45E006380B7 /* NSTimeInterval.swift in Sources */,
 				4F70C1FA1DE8E42D006380B7 /* ReservoirVolumeHUDView.swift in Sources */,
