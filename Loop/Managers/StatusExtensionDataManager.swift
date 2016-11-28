@@ -24,7 +24,7 @@ final class StatusExtensionDataManager {
 
         self.dataManager.glucoseStore?.preferredUnit() {
             (unit, error) in
-            if error != nil {
+            if error == nil {
                 self.createContext(unit) { (context) in
                     if let context = context {
                         UserDefaults.shared()?.statusExtensionContext = context
@@ -61,6 +61,7 @@ final class StatusExtensionDataManager {
                 context.eventualGlucose = 119.123
             #endif
 
+            let preferredUnit = preferredUnit ?? HKUnit.milligramsPerDeciliterUnit()
             context.preferredUnit = preferredUnit
             
             context.loop = LoopContext(
@@ -68,8 +69,12 @@ final class StatusExtensionDataManager {
                 lastCompleted: lastLoopCompleted)
 
             if let glucose = glucoseStore.latestGlucose {
+                // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
+                // convert the latest glucose to those units just to be sure.
                 context.latestGlucose = GlucoseContext(
-                    latest: glucose,
+                    latest: GlucoseValueContext(
+                        quantity: HKQuantity(unit: preferredUnit, doubleValue: glucose.quantity.doubleValue(for:preferredUnit)),
+                        startDate: glucose.startDate),
                     sensor: dataManager.sensorInfo)
             }
             
@@ -91,8 +96,7 @@ final class StatusExtensionDataManager {
             }
         
             if let lastPoint = predictedGlucose?.last {
-                context.eventualGlucose =
-                    lastPoint.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+                context.eventualGlucose = lastPoint.quantity.doubleValue(for: preferredUnit)
             }
             
             completionHandler(context)

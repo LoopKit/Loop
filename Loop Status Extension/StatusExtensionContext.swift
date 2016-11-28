@@ -42,6 +42,11 @@ struct GlucoseContext {
     var sensor: SensorDisplayable?
 }
 
+struct GlucoseValueContext: GlucoseValue {
+    var quantity: HKQuantity
+    var startDate: Date
+}
+
 final class StatusExtensionContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
@@ -113,7 +118,7 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             "version": version
         ]
 
-        raw["preferredUnits"] = preferredUnit?.unitString
+        raw["preferredUnit"] = preferredUnit?.unitString
         
         if let glucose = latestGlucose,
            let preferredUnit = preferredUnit {
@@ -147,6 +152,7 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         }
         
         if let netBasal = netBasal {
+            raw["netBasal_rate"] = netBasal.rate
             raw["netBasal_percentage"] = netBasal.percentage
             raw["netBasal_startDate"] = netBasal.startDate
         }
