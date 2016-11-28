@@ -539,7 +539,8 @@ final class LoopDataManager {
 
         guard
             lastBolus == nil,  // Don't recommend changes if a bolus was just set
-            let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictionWithRetrospectiveEffect,
+            let predictedGlucose = self.predictedGlucose,
+            let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
                 maxBasalRate: maxBasal,
                 glucoseTargetRange: glucoseTargetRange,
