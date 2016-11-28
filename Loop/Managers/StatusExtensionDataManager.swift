@@ -11,13 +11,11 @@ import UIKit
 import CarbKit
 import LoopKit
 
-final class StatusExtensionDataManager: NSObject {
+final class StatusExtensionDataManager {
     unowned let dataManager: DeviceDataManager
-    private var lastContext: StatusExtensionContext?
 
     init(deviceDataManager: DeviceDataManager) {
         self.dataManager = deviceDataManager
-        super.init()
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
@@ -26,7 +24,6 @@ final class StatusExtensionDataManager: NSObject {
         createContext { (context) in
             if let context = context {
                 UserDefaults.shared()?.statusExtensionContext = context
-                self.lastContext = context
             }
         }
     }
