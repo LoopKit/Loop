@@ -940,9 +940,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     private(set) var watchManager: WatchDataManager!
     
-    // MARK: - TodayExtension
+    // MARK: - Status Extension
     
-    private(set) var todayExtensionManager: TodayExtensionDataManager!
+    private(set) var statusExtensionManager: StatusExtensionDataManager!
 
     // MARK: - Initialization
 
@@ -1000,7 +1000,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
         loopManager = LoopDataManager(deviceDataManager: self)
         watchManager = WatchDataManager(deviceDataManager: self)
-        todayExtensionManager = TodayExtensionDataManager(deviceDataManager: self)
+        statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self

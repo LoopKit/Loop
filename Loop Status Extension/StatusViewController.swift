@@ -1,6 +1,6 @@
 //
-//  TodayViewController.swift
-//  Loop TodayExtension
+//  StatusViewController.swift
+//  Loop Status Extension
 //
 //  Created by Bharat Mediratta on 11/25/16.
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
@@ -13,7 +13,7 @@ import GlucoseKit
 import LoopKit
 import CoreData
 
-class TodayViewController: UIViewController, NCWidgetProviding {
+class StatusViewController: UIViewController, NCWidgetProviding {
     
     @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
     @IBOutlet weak var glucoseHUD: GlucoseHUDView!
@@ -41,7 +41,7 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         // If there's an update, use NCUpdateResult.NewData
         
         
-        if let context = UserDefaults.shared()?.todayExtensionContext {
+        if let context = UserDefaults.shared()?.statusExtensionContext {
             if let glucose = context.latestGlucose {
                 glucoseHUD.set(glucose.latest, for: HKUnit.milligramsPerDeciliterUnit(), from: glucose.sensor)
             }

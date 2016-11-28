@@ -153,9 +153,9 @@
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
-		4F70C1E11DE8DCA7006380B7 /* TodayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* TodayViewController.swift */; };
+		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
-		4F70C1E81DE8DCA7006380B7 /* Loop TodayExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop TodayExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4F70C1ED1DE8DEDA006380B7 /* GlucoseHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4337615E1D52F487004A3647 /* GlucoseHUDView.swift */; };
 		4F70C1EE1DE8DF06006380B7 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		4F70C1EF1DE8DF15006380B7 /* HUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */; };
@@ -172,11 +172,11 @@
 		4F70C1FB1DE8E45E006380B7 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4F70C1FC1DE8E5FB006380B7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
 		4F70C20B1DE8E9F4006380B7 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
-		4F70C2101DE8FAC5006380B7 /* TodayExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */; };
-		4F70C2121DE900EA006380B7 /* TodayExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */; };
-		4F70C2131DE90339006380B7 /* TodayExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */; };
-		4FC8C8011DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */; };
-		4FC8C8021DEB943800A1452E /* NSUserDefaults+TodayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */; };
+		4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */; };
+		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
+		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
+		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
+		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
@@ -210,7 +210,7 @@
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4F70C1DB1DE8DCA7006380B7;
-			remoteInfo = "Loop TodayExtension";
+			remoteInfo = "Loop Status Extension";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -273,7 +273,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				4F70C1E81DE8DCA7006380B7 /* Loop TodayExtension.appex in Embed App Extensions */,
+				4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,15 +429,15 @@
 		43FBEDD71D73843700B21F22 /* LevelMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelMaskView.swift; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
-		4F70C1DC1DE8DCA7006380B7 /* Loop TodayExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop TodayExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Status Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
-		4F70C1E01DE8DCA7006380B7 /* TodayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewController.swift; sourceTree = "<group>"; };
+		4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
 		4F70C1E31DE8DCA7006380B7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		4F70C1E51DE8DCA7006380B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4F70C1FD1DE8E662006380B7 /* Loop TodayExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop TodayExtension.entitlements"; sourceTree = "<group>"; };
-		4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayExtensionDataManager.swift; sourceTree = "<group>"; };
-		4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodayExtensionContext.swift; sourceTree = "<group>"; };
-		4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+TodayExtension.swift"; sourceTree = "<group>"; };
+		4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Status Extension.entitlements"; sourceTree = "<group>"; };
+		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
+		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
+		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
@@ -557,7 +557,7 @@
 			isa = PBXGroup;
 			children = (
 				43776F8E1B8022E90074EA36 /* Loop */,
-				4F70C1DF1DE8DCA7006380B7 /* Loop TodayExtension */,
+				4F70C1DF1DE8DCA7006380B7 /* Loop Status Extension */,
 				43A943731B926B7B0051FA24 /* WatchApp */,
 				43A943821B926B7B0051FA24 /* WatchApp Extension */,
 				43F78D2C1C8FC58F002152D1 /* LoopTests */,
@@ -576,7 +576,7 @@
 				43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */,
 				43E2D8D11D20BF42004DA55F /* DoseMathTests.xctest */,
 				43E2D90B1D20C581004DA55F /* LoopTests.xctest */,
-				4F70C1DC1DE8DCA7006380B7 /* Loop TodayExtension.appex */,
+				4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -705,7 +705,7 @@
 				436A0E7A1D7DE13400D6475D /* NSNumberFormatter.swift */,
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
-				4FC8C8001DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift */,
+				4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43DE92501C541832001FFDE1 /* UIColor.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
@@ -776,7 +776,7 @@
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */,
 				43EB40851C82646A00472A8C /* StatusChartManager.swift */,
-				4F70C20F1DE8FAC5006380B7 /* TodayExtensionDataManager.swift */,
+				4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 			);
 			path = Managers;
@@ -791,16 +791,16 @@
 			path = LoopTests;
 			sourceTree = "<group>";
 		};
-		4F70C1DF1DE8DCA7006380B7 /* Loop TodayExtension */ = {
+		4F70C1DF1DE8DCA7006380B7 /* Loop Status Extension */ = {
 			isa = PBXGroup;
 			children = (
-				4F70C1FD1DE8E662006380B7 /* Loop TodayExtension.entitlements */,
-				4F70C1E01DE8DCA7006380B7 /* TodayViewController.swift */,
+				4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */,
+				4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */,
 				4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */,
 				4F70C1E51DE8DCA7006380B7 /* Info.plist */,
-				4F70C2111DE900EA006380B7 /* TodayExtensionContext.swift */,
+				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
 			);
-			path = "Loop TodayExtension";
+			path = "Loop Status Extension";
 			sourceTree = SOURCE_ROOT;
 		};
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
@@ -924,9 +924,9 @@
 			productReference = 43E2D90B1D20C581004DA55F /* LoopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4F70C1DB1DE8DCA7006380B7 /* Loop TodayExtension */ = {
+		4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4F70C1EB1DE8DCA8006380B7 /* Build configuration list for PBXNativeTarget "Loop TodayExtension" */;
+			buildConfigurationList = 4F70C1EB1DE8DCA8006380B7 /* Build configuration list for PBXNativeTarget "Loop Status Extension" */;
 			buildPhases = (
 				4F70C1D81DE8DCA7006380B7 /* Sources */,
 				4F70C1D91DE8DCA7006380B7 /* Frameworks */,
@@ -936,9 +936,9 @@
 			);
 			dependencies = (
 			);
-			name = "Loop TodayExtension";
-			productName = "Loop TodayExtension";
-			productReference = 4F70C1DC1DE8DCA7006380B7 /* Loop TodayExtension.appex */;
+			name = "Loop Status Extension";
+			productName = "Loop Status Extension";
+			productReference = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -1030,7 +1030,7 @@
 			projectRoot = "";
 			targets = (
 				43776F8B1B8022E90074EA36 /* Loop */,
-				4F70C1DB1DE8DCA7006380B7 /* Loop TodayExtension */,
+				4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */,
 				43A943711B926B7B0051FA24 /* WatchApp */,
 				43A9437D1B926B7B0051FA24 /* WatchApp Extension */,
 				43E2D8D01D20BF42004DA55F /* DoseMathTests */,
@@ -1142,7 +1142,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F70C2131DE90339006380B7 /* TodayExtensionContext.swift in Sources */,
+				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
@@ -1190,7 +1190,7 @@
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				437CCAE01D285C7B0075D2C3 /* ServiceAuthentication.swift in Sources */,
-				4FC8C8011DEB93E400A1452E /* NSUserDefaults+TodayExtension.swift in Sources */,
+				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				4302F4E51D4EA75100F0FCAF /* DoseStore.swift in Sources */,
 				430DA5901D4B0E4C0097D1CA /* MySentryPumpStatusMessageBody.swift in Sources */,
 				4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */,
@@ -1215,7 +1215,7 @@
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				4331E07A1C85650D00FBE832 /* ChartAxisValueDoubleLog.swift in Sources */,
 				434F54611D28859B002A9274 /* ServiceCredential.swift in Sources */,
-				4F70C2101DE8FAC5006380B7 /* TodayExtensionDataManager.swift in Sources */,
+				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
 				436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint.swift in Sources */,
@@ -1283,7 +1283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FC8C8021DEB943800A1452E /* NSUserDefaults+TodayExtension.swift in Sources */,
+				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				4F70C20B1DE8E9F4006380B7 /* GlucoseTrend.swift in Sources */,
 				4F70C1FB1DE8E45E006380B7 /* NSTimeInterval.swift in Sources */,
 				4F70C1FA1DE8E42D006380B7 /* ReservoirVolumeHUDView.swift in Sources */,
@@ -1293,13 +1293,13 @@
 				4F70C1F61DE8E3F1006380B7 /* BatteryLevelHUDView.swift in Sources */,
 				4F70C1F51DE8E3E9006380B7 /* BasalStateView.swift in Sources */,
 				4F70C1F41DE8E3E1006380B7 /* BasalRateHUDView.swift in Sources */,
-				4F70C2121DE900EA006380B7 /* TodayExtensionContext.swift in Sources */,
+				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
 				4F70C1F31DE8DF47006380B7 /* NSNumberFormatter.swift in Sources */,
 				4F70C1F21DE8DF3A006380B7 /* UIColor.swift in Sources */,
 				4F70C1F01DE8DF22006380B7 /* SensorDisplayable.swift in Sources */,
 				4F70C1EF1DE8DF15006380B7 /* HUDView.swift in Sources */,
 				4F70C1ED1DE8DEDA006380B7 /* GlucoseHUDView.swift in Sources */,
-				4F70C1E11DE8DCA7006380B7 /* TodayViewController.swift in Sources */,
+				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1323,7 +1323,7 @@
 		};
 		4F70C1E71DE8DCA7006380B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4F70C1DB1DE8DCA7006380B7 /* Loop TodayExtension */;
+			target = 4F70C1DB1DE8DCA7006380B7 /* Loop Status Extension */;
 			targetProxy = 4F70C1E61DE8DCA7006380B7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1643,7 +1643,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CODE_SIGN_ENTITLEMENTS = "Loop TodayExtension/Loop TodayExtension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
@@ -1651,9 +1651,9 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = "Loop TodayExtension/Info.plist";
+				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).todayextension";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statusextension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -1667,7 +1667,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CODE_SIGN_ENTITLEMENTS = "Loop TodayExtension/Loop TodayExtension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
@@ -1675,9 +1675,9 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				INFOPLIST_FILE = "Loop TodayExtension/Info.plist";
+				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).todayextension";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statusextension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
@@ -1741,7 +1741,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4F70C1EB1DE8DCA8006380B7 /* Build configuration list for PBXNativeTarget "Loop TodayExtension" */ = {
+		4F70C1EB1DE8DCA8006380B7 /* Build configuration list for PBXNativeTarget "Loop Status Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F70C1E91DE8DCA8006380B7 /* Debug */,

@@ -11,10 +11,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Today View Controller-->
+        <!--Status View Controller-->
         <scene sceneID="SeL-id-ebs">
             <objects>
-                <viewController id="64E-I5-5c4" customClass="TodayViewController" customModule="Loop_TodayExtension" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="64E-I5-5c4" customClass="StatusViewController" customModule="Loop_Status_Extension" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="RlU-UG-7QV"/>
                         <viewControllerLayoutGuide type="bottom" id="Vi1-50-EGe"/>
@@ -26,7 +26,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="70"/>
                                 <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TjP-cY-NvD" customClass="LoopCompletionHUDView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TjP-cY-NvD" customClass="LoopCompletionHUDView" customModule="Loop_Status_Extension">
                                         <rect key="frame" x="0.0" y="0.0" width="75" height="70"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="4 min ago" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3hj-xw-5hX">
@@ -35,7 +35,7 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kd4-vy-VV0" customClass="LoopStateView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kd4-vy-VV0" customClass="LoopStateView" customModule="Loop_Status_Extension">
                                                 <rect key="frame" x="16" y="8" width="44" height="44"/>
                                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <constraints>
@@ -68,7 +68,7 @@
                                             <outlet property="loopStateView" destination="Kd4-vy-VV0" id="WPq-iQ-fej"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OBl-Fq-V35" customClass="GlucoseHUDView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OBl-Fq-V35" customClass="GlucoseHUDView" customModule="Loop_Status_Extension">
                                         <rect key="frame" x="75" y="0.0" width="75" height="70"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="10:09 AM" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JPl-Fg-Pk3">
@@ -125,7 +125,7 @@
                                             <outlet property="unitLabel" destination="FEb-Rh-yqa" id="pG5-cY-ck1"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rxv-4Y-WIp" customClass="BasalRateHUDView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rxv-4Y-WIp" customClass="BasalRateHUDView" customModule="Loop_Status_Extension">
                                         <rect key="frame" x="150" y="0.0" width="75" height="70"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-0.85 U" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="15E-EE-C2Y">
@@ -140,7 +140,7 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dhF-pk-g7M" customClass="BasalStateView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dhF-pk-g7M" customClass="BasalStateView" customModule="Loop_Status_Extension">
                                                 <rect key="frame" x="16" y="8" width="44" height="30"/>
                                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <constraints>
@@ -169,7 +169,7 @@
                                             <outlet property="caption" destination="tNN-n0-2QL" id="Sd1-6u-FBZ"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8f8-sc-GIm" customClass="ReservoirVolumeHUDView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8f8-sc-GIm" customClass="ReservoirVolumeHUDView" customModule="Loop_Status_Extension">
                                         <rect key="frame" x="225" y="0.0" width="75" height="70"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="10:09 AM" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LGI-ua-HoN">
@@ -184,7 +184,7 @@
                                                     <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="reservoir" translatesAutoresizingMaskIntoConstraints="NO" id="NFF-qN-PTj">
                                                         <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
                                                     </imageView>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FgS-py-wOE" customClass="LevelMaskView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FgS-py-wOE" customClass="LevelMaskView" customModule="Loop_Status_Extension">
                                                         <rect key="frame" x="0.0" y="5" width="44" height="39"/>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="image" keyPath="maskImage" value="reservoir_mask"/>
@@ -231,7 +231,7 @@
                                             <outlet property="volumeLabel" destination="egB-jf-pOe" id="qKa-Qt-JJZ"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6hm-aW-Inx" customClass="BatteryLevelHUDView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6hm-aW-Inx" customClass="BatteryLevelHUDView" customModule="Loop_Status_Extension">
                                         <rect key="frame" x="300" y="0.0" width="75" height="70"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100%" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cXW-I0-TPd">
@@ -246,7 +246,7 @@
                                                     <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="battery" translatesAutoresizingMaskIntoConstraints="NO" id="AXS-VK-mIB">
                                                         <rect key="frame" x="9" y="0.0" width="26" height="44"/>
                                                     </imageView>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KEF-mY-dmf" customClass="LevelMaskView" customModule="Loop_TodayExtension" customModuleProvider="target">
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KEF-mY-dmf" customClass="LevelMaskView" customModule="Loop_Status_Extension">
                                                         <rect key="frame" x="0.0" y="2" width="44" height="42"/>
                                                         <userDefinedRuntimeAttributes>
                                                             <userDefinedRuntimeAttribute type="image" keyPath="maskImage" value="battery_mask"/>

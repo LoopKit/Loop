@@ -1,5 +1,5 @@
 //
-//  NSUserDefaults+TodayExtension.swift
+//  NSUserDefaults+StatusExtension.swift
 //  Loop
 //
 //  Created by Bharat Mediratta on 11/27/16.
@@ -11,23 +11,23 @@ import Foundation
 extension UserDefaults {
     
     private enum Key: String {
-        case TodayExtensionContext = "com.loudnate.Loop.TodayExtensionContext"
+        case StatusExtensionContext = "com.loudnate.Loop.StatusExtensionContext"
     }
 
     static func shared() -> UserDefaults? {
         return UserDefaults(suiteName: "group.com.loudnate.Loop")
     }
 
-    var todayExtensionContext: TodayExtensionContext? {
+    var statusExtensionContext: StatusExtensionContext? {
         get {
-            if let rawValue = dictionary(forKey: Key.TodayExtensionContext.rawValue) {
-                return TodayExtensionContext(rawValue: rawValue)
+            if let rawValue = dictionary(forKey: Key.StatusExtensionContext.rawValue) {
+                return StatusExtensionContext(rawValue: rawValue)
             } else {
                 return nil
             }
         }
         set {
-            set(newValue?.rawValue, forKey: Key.TodayExtensionContext.rawValue)
+            set(newValue?.rawValue, forKey: Key.StatusExtensionContext.rawValue)
         }
     }
 }

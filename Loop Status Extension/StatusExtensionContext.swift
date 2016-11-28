@@ -1,11 +1,11 @@
 //
-//  TodayExtensionContext.swift
-//  Loop
+//  StatusExtensionContext.swift
+//  Loop Status Extension
 //
 //  Created by Bharat Mediratta on 11/25/16.
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
-//  This class allows Loop to pass context data to the Today Extension.
+//  This class allows Loop to pass context data to the Loop Status Extension.
 
 import Foundation
 import HealthKit
@@ -42,7 +42,7 @@ struct GlucoseContext {
     var sensor: SensorDisplayable?
 }
 
-final class TodayExtensionContext: NSObject, RawRepresentable {
+final class StatusExtensionContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
     

@@ -1,5 +1,5 @@
 //
-//  TodayExtensionDataManager.swift
+//  StatusExtensionDataManager.swift
 //  Loop
 //
 //  Created by Bharat Mediratta on 11/25/16.
@@ -11,9 +11,9 @@ import UIKit
 import CarbKit
 import LoopKit
 
-final class TodayExtensionDataManager: NSObject {
+final class StatusExtensionDataManager: NSObject {
     unowned let dataManager: DeviceDataManager
-    private var lastContext: TodayExtensionContext?
+    private var lastContext: StatusExtensionContext?
 
     init(deviceDataManager: DeviceDataManager) {
         self.dataManager = deviceDataManager
@@ -25,13 +25,13 @@ final class TodayExtensionDataManager: NSObject {
     @objc private func update(_ notification: Notification) {
         createContext { (context) in
             if let context = context {
-                UserDefaults.shared()?.todayExtensionContext = context
+                UserDefaults.shared()?.statusExtensionContext = context
                 self.lastContext = context
             }
         }
     }
 
-    private func createContext(_ completionHandler: @escaping (_ context: TodayExtensionContext?) -> Void) {
+    private func createContext(_ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
         guard let glucoseStore = self.dataManager.glucoseStore else {
             completionHandler(nil)
             return
@@ -40,7 +40,7 @@ final class TodayExtensionDataManager: NSObject {
         dataManager.loopManager.getLoopStatus {
             (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
             
-            let context = TodayExtensionContext()
+            let context = StatusExtensionContext()
         
             #if IOS_SIMULATOR
                 // If we're in the simulator, there's a higher likelihood that we don't have
