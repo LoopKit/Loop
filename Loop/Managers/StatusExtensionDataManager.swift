@@ -21,14 +21,20 @@ final class StatusExtensionDataManager {
     }
 
     @objc private func update(_ notification: Notification) {
-        createContext { (context) in
-            if let context = context {
-                UserDefaults.shared()?.statusExtensionContext = context
+
+        self.dataManager.glucoseStore?.preferredUnit() {
+            (unit, error) in
+            if error != nil {
+                self.createContext(unit) { (context) in
+                    if let context = context {
+                        UserDefaults.shared()?.statusExtensionContext = context
+                    }
+                }
             }
         }
     }
 
-    private func createContext(_ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
+    private func createContext(_ preferredUnit: HKUnit?, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
         guard let glucoseStore = self.dataManager.glucoseStore else {
             completionHandler(nil)
             return
@@ -37,6 +43,12 @@ final class StatusExtensionDataManager {
         dataManager.loopManager.getLoopStatus {
             (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
             
+            if error != nil {
+                // TODO: unclear how to handle the error here properly.
+                completionHandler(nil)
+            }
+            
+            let dataManager = self.dataManager
             let context = StatusExtensionContext()
         
             #if IOS_SIMULATOR
@@ -46,12 +58,10 @@ final class StatusExtensionDataManager {
                 context.batteryPercentage = 0.25
                 context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
                 context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-                context.eventualGlucose = String(
-                    format: NSLocalizedString("Eventually %@", comment: ""),
-                    String(describing: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.0)))
+                context.eventualGlucose = 119.123
             #endif
 
-            let dataManager = self.dataManager
+            context.preferredUnit = preferredUnit
             
             context.loop = LoopContext(
                 dosingEnabled: dataManager.loopManager.dosingEnabled,
@@ -81,9 +91,8 @@ final class StatusExtensionDataManager {
             }
         
             if let lastPoint = predictedGlucose?.last {
-                context.eventualGlucose = String(
-                    format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"),
-                    String(describing: lastPoint.quantity))
+                context.eventualGlucose =
+                    lastPoint.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
             }
             
             completionHandler(context)

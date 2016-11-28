@@ -46,12 +46,13 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
     
+    var preferredUnit: HKUnit?
     var latestGlucose: GlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
-    var eventualGlucose: String?
+    var eventualGlucose: Double?
     
     override init() {
         super.init()
@@ -61,13 +62,15 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         super.init()
         let raw = rawValue
         
-        if let unitString = raw["latestGlucose_unit"] as? String,
+        if let preferredUnitString = raw["preferredUnit"] as? String,
            let latestValue = raw["latestGlucose_value"] as? Double,
            let startDate = raw["latestGlucose_startDate"] as? Date {
+            
+            preferredUnit = HKUnit(from: preferredUnitString)
             latestGlucose = GlucoseContext(
                 latest: HKQuantitySample(
                     type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
-                    quantity: HKQuantity(unit: HKUnit(from: unitString), doubleValue: latestValue),
+                    quantity: HKQuantity(unit: HKUnit(from: preferredUnitString), doubleValue: latestValue),
                     start: startDate,
                     end: startDate),
                 sensor: nil)
@@ -102,7 +105,7 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             netBasal = NetBasalContext(rate: rate, percentage: percentage, startDate: startDate)
         }
         
-        eventualGlucose = raw["eventualGlucose"] as? String
+        eventualGlucose = raw["eventualGlucose"] as? Double
     }
     
     var rawValue: RawValue {
@@ -110,11 +113,12 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             "version": version
         ]
 
-        if let glucose = latestGlucose {
-            // TODO: use the users preferred unit type here
-            raw["latestGlucose_value"] = glucose.latest.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit())
+        raw["preferredUnits"] = preferredUnit?.unitString
+        
+        if let glucose = latestGlucose,
+           let preferredUnit = preferredUnit {
+            raw["latestGlucose_value"] = glucose.latest.quantity.doubleValue(for: preferredUnit)
             raw["latestGlucose_startDate"] = glucose.latest.startDate
-            raw["latestGlucose_unit"] = HKUnit.milligramsPerDeciliterUnit().unitString
         }
 
         if let sensor = latestGlucose?.sensor {
