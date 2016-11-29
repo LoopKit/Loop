@@ -83,10 +83,16 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             if let state = raw["latestGlucose_sensor_isStateValid"] as? Bool,
                let desc = raw["latestGlucose_sensor_stateDescription"] as? String,
                let local = raw["latestGlucose_sensor_isLocal"] as? Bool {
+                
+                var glucoseTrend: GlucoseTrend?
+                if let trendType = raw["latestGlucose_sensor_trendType"] as? Int {
+                    glucoseTrend = GlucoseTrend(rawValue: trendType)
+                }
+                
                 latestGlucose?.sensor = SensorDisplayableContext(
                     isStateValid: state,
                     stateDescription: desc,
-                    trendType: raw["latestGlucose_sensor_trendType"] as? GlucoseTrend,
+                    trendType: glucoseTrend,
                     isLocal: local)
             }
         }
