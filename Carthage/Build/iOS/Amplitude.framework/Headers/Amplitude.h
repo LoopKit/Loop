@@ -318,6 +318,25 @@
 
 - (void)identify:(AMPIdentify *)identify;
 
+/**
+ Update user properties using operations provided via Identify API. If outOfSession is `YES` then the identify event is logged with a session id of -1 and does not trigger any session-handling logic.
+
+ To update user properties, first create an AMPIdentify object. For example if you wanted to set a user's gender, and then increment their karma count by 1, you would do:
+
+ AMPIdentify *identify = [[[AMPIdentify identify] set:@"gender" value:@"male"] add:@"karma" value:[NSNumber numberWithInt:1]];
+
+ Then you would pass this AMPIdentify object to the identify function to send to the server:
+
+ [[Amplitude instance] identify:identify outOfSession:YES];
+
+ @param identify                   An AMPIdentify object with the intended user property operations
+ @param outOfSession               Whether to log identify event out of session
+
+ @see [User Properties and User Property Operations](https://github.com/amplitude/Amplitude-iOS#user-properties-and-user-property-operations)
+
+ */
+
+- (void)identify:(AMPIdentify *)identify outOfSession:(BOOL) outOfSession;
 
 /**
 

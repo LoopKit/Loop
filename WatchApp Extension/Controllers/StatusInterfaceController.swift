@@ -12,12 +12,12 @@ import Foundation
 
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
-    @IBOutlet var graphImage: WKInterfaceImage!
-    @IBOutlet var loopHUDImage: WKInterfaceImage!
-    @IBOutlet var loopTimer: WKInterfaceTimer!
-    @IBOutlet var glucoseLabel: WKInterfaceLabel!
-    @IBOutlet var eventualGlucoseLabel: WKInterfaceLabel!
-    @IBOutlet var statusLabel: WKInterfaceLabel!
+    @IBOutlet weak var graphImage: WKInterfaceImage!
+    @IBOutlet weak var loopHUDImage: WKInterfaceImage!
+    @IBOutlet weak var loopTimer: WKInterfaceTimer!
+    @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
+    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
+    @IBOutlet weak var statusLabel: WKInterfaceLabel!
 
     private var lastContext: WatchContext?
 

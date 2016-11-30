@@ -147,7 +147,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             charts.startDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
-            let oldRecommendedTempBasal = self.recommendedTempBasal
             var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
             if let glucoseStore = dataManager.glucoseStore {
@@ -170,7 +169,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
 
                     reloadGroup.enter()
-                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, error) -> Void in
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) -> Void in
                         if error != nil {
                             self.needsRefresh = true
                         }
@@ -274,6 +273,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 self.charts.prerender()
 
                 // Show/hide the recommended temp basal row
+                let oldRecommendedTempBasal = self.recommendedTempBasal
                 self.recommendedTempBasal = newRecommendedTempBasal
                 switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
                 case (let old?, let new?) where old != new:
@@ -782,9 +782,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - HUDs
 
-    @IBOutlet var loopCompletionHUD: LoopCompletionHUDView!
+    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
 
-    @IBOutlet var glucoseHUD: GlucoseHUDView! {
+    @IBOutlet weak var glucoseHUD: GlucoseHUDView! {
         didSet {
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
@@ -811,9 +811,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    @IBOutlet var basalRateHUD: BasalRateHUDView!
+    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
 
-    @IBOutlet var reservoirVolumeHUD: ReservoirVolumeHUDView!
+    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
 
-    @IBOutlet var batteryLevelHUD: BatteryLevelHUDView!
+    @IBOutlet weak var batteryLevelHUD: BatteryLevelHUDView!
 }

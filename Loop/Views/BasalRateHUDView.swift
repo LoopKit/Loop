@@ -11,9 +11,9 @@ import UIKit
 
 final class BasalRateHUDView: HUDView {
 
-    @IBOutlet private var basalStateView: BasalStateView!
+    @IBOutlet private weak var basalStateView: BasalStateView!
 
-    @IBOutlet private var basalRateLabel: UILabel! {
+    @IBOutlet private weak var basalRateLabel: UILabel! {
         didSet {
             basalRateLabel?.text = String(format: basalRateFormatString, "–")
             basalRateLabel?.textColor = .doseTintColor

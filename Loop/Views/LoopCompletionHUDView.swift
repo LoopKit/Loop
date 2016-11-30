@@ -10,7 +10,7 @@ import UIKit
 
 final class LoopCompletionHUDView: HUDView {
 
-    @IBOutlet private var loopStateView: LoopStateView!
+    @IBOutlet private weak var loopStateView: LoopStateView!
 
     override func awakeFromNib() {
         super.awakeFromNib()
