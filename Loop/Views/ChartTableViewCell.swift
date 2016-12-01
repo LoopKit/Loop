@@ -11,11 +11,11 @@ import UIKit
 
 final class ChartTableViewCell: UITableViewCell {
 
-    @IBOutlet var chartContentView: ChartContentView!
+    @IBOutlet weak var chartContentView: ChartContentView!
 
-    @IBOutlet var titleLabel: UILabel?
+    @IBOutlet weak var titleLabel: UILabel?
 
-    @IBOutlet var subtitleLabel: UILabel?
+    @IBOutlet weak var subtitleLabel: UILabel?
 
     override func prepareForReuse() {
         super.prepareForReuse()

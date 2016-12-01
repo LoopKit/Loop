@@ -8,6 +8,7 @@
 
 import Foundation
 import NightscoutUploadKit
+import CarbKit
 import HealthKit
 import InsulinKit
 import LoopKit
@@ -34,20 +35,20 @@ class NightscoutDataManager {
                 return
         }
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, _, insulinOnBoard, loopError) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, _, insulinOnBoard, carbsOnBoard, loopError) in
             
             self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
                 if let getBolusError = getBolusError {
                     self.deviceDataManager.logger.addError(getBolusError, fromSource: "NightscoutDataManager")
                 }
-                self.uploadLoopStatus(insulinOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: loopError ?? getBolusError)
+                self.uploadLoopStatus(insulinOnBoard, carbsOnBoard: carbsOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: loopError ?? getBolusError)
             }
         }
     }
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    func uploadLoopStatus(_ insulinOnBoard: InsulinValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
+    func uploadLoopStatus(_ insulinOnBoard: InsulinValue? = nil, carbsOnBoard: CarbValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
 
         guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
             return
@@ -61,6 +62,14 @@ class NightscoutDataManager {
             iob = IOBStatus(timestamp: insulinOnBoard.startDate, iob: insulinOnBoard.value)
         } else {
             iob = nil
+        }
+
+        let cob: COBStatus?
+
+        if let carbsOnBoard = carbsOnBoard {
+            cob = COBStatus(cob: carbsOnBoard.quantity.doubleValue(for: HKUnit.gram()), timestamp: carbsOnBoard.startDate)
+        } else {
+            cob = nil
         }
         
         let predicted: PredictedBG?
@@ -93,7 +102,7 @@ class NightscoutDataManager {
         let loopName = Bundle.main.bundleDisplayName
         let loopVersion = Bundle.main.shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 

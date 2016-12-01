@@ -21,7 +21,7 @@ import ShareClient
 import xDripG5
 
 
-final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
+final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
 
     // MARK: - Utilities
 
@@ -118,6 +118,10 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
+    /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
+    /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and 
+    /// G4 Receiver are reliable as hearbeats, but users who find their resources extremely constrained
+    /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
     private func enableRileyLinkHeartbeatIfNeeded() {
         if transmitter != nil {
             rileyLinkManager.timerTickEnabled = true //SCOTT
@@ -302,7 +306,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         - Success(status, date): The pump status, and the resolved date according to the pump's clock
         - Failure(error): An error describing why the command failed
      */
-    private func readPumpData(_ completion: @escaping (Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
+    private func readPumpData(_ completion: @escaping (RileyLinkKit.Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
             completion(.failure(LoopError.configurationError))
             return
@@ -835,6 +839,66 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         logger.addError(error, fromSource: "CarbStore")
     }
 
+    func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.upload(nsCarbEntries) { (result) in
+            switch result {
+            case .success(let ids):
+                // Pass new ids back
+                completionHandler(ids)
+            case .failure(let error):
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            }
+        }
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasModifiedEntries entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+        
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.modifyTreatments(nsCarbEntries) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(entries.map { $0.externalId ?? "" } )
+            }
+        }
+
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], withCompletion completionHandler: @escaping ([String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        uploader.deleteTreatmentsById(ids) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(ids)
+            }
+        }
+        completionHandler([])
+    }
+
+
     // MARK: - GlucoseKit
 
     let glucoseStore: GlucoseStore? = GlucoseStore()
@@ -935,6 +999,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
+        carbStore?.syncDelegate = self
         doseStore.delegate = self
 
         if UserDefaults.standard.receiverEnabled {
