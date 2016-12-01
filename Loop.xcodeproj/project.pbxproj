@@ -549,6 +549,7 @@
 				43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */,
 				43E397A21D56B9E40028E321 /* Glucose.swift */,
 				4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */,
+				43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */,
 				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
 				430DA58F1D4B0E4C0097D1CA /* MySentryPumpStatusMessageBody.swift */,
@@ -664,7 +665,6 @@
 			children = (
 				435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */,
 				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
-				43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */,
 				435400331C9F878D00D5819C /* SetBolusUserInfo.swift */,
 				43DE925B1C547A20001FFDE1 /* WatchContext.swift */,
 			);
