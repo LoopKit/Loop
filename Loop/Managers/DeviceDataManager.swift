@@ -155,9 +155,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
     /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
     private func enableRileyLinkHeartbeatIfNeeded() {
         if transmitter != nil {
-            rileyLinkManager.timerTickEnabled = false
+            rileyLinkManager.timerTickEnabled = true //SCOTT
         } else if receiverEnabled {
-            rileyLinkManager.timerTickEnabled = false
+            rileyLinkManager.timerTickEnabled = true //SCOTT
         } else {
             rileyLinkManager.timerTickEnabled = true
         }
