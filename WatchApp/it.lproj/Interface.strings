@@ -1,0 +1,63 @@
+/* Class = "WKInterfaceButton"; title = "🌮"; ObjectID = "0fo-Z3-hTi"; */
+"0fo-Z3-hTi.title" = "🌮";
+
+/* Class = "WKInterfaceLabel"; text = "GRAMS"; ObjectID = "18G-mT-92P"; */
+"18G-mT-92P.text" = "GR";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.accessibilityLabel" = "Aggiungi";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.title" = "+";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.accessibilityLabel" = "Sottrarre";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.title" = "−";
+
+/* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "E5r-2c-UZm"; */
+"E5r-2c-UZm.text" = "15";
+
+/* Class = "WKInterfaceMenuItem"; title = "Carbs"; ObjectID = "Fhb-O2-qgq"; */
+"Fhb-O2-qgq.title" = "CHO";
+
+/* Class = "WKInterfaceMenuItem"; title = "Bolus"; ObjectID = "ONR-Fr-rMn"; */
+"ONR-Fr-rMn.title" = "Boli";
+
+/* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
+"Qsq-p5-1J0.title" = "Boli";
+
+/* Class = "WKInterfaceLabel"; text = "Alert Label"; ObjectID = "XkS-y5-khE"; */
+"XkS-y5-khE.text" = "Allarme Etichetta";
+
+/* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
+"b6f-3I-jki.title" = "Aggiungi Cho";
+
+/* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
+"dPF-QZ-sh6.title" = "🍕";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.accessibilityLabel" = "Aggiungi";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.title" = "+";
+
+/* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
+"gAn-qe-OvX.title" = "🍭";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.accessibilityLabel" = "Sottrarre";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.title" = "−";
+
+/* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
+"mpK-zY-UvA.text" = "0.000";
+
+/* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
+"rNf-Mh-tID.title" = "Loop";
+
+/* Class = "WKInterfaceLabel"; text = "UNITS"; ObjectID = "rV7-d9-n6u"; */
+"rV7-d9-n6u.text" = "UNITA'";
+

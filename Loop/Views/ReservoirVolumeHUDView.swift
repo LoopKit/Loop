@@ -10,9 +10,9 @@ import UIKit
 
 final class ReservoirVolumeHUDView: HUDView {
 
-    @IBOutlet private var levelMaskView: LevelMaskView!
+    @IBOutlet private weak var levelMaskView: LevelMaskView!
 
-    @IBOutlet private var volumeLabel: UILabel!
+    @IBOutlet private weak var volumeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()

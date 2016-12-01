@@ -38,4 +38,12 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
             return .flat
         }
     }
+
+    var isLocal: Bool {
+        return true
+    }
+
+    var batteryPercentage: Int {
+        return batteryRemainingPercent
+    }
 }
