@@ -45,6 +45,12 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBOutlet weak var bolusAmountTextField: UITextField!
 
     // MARK: - Actions
+    
+   
+    @IBAction func considerRecommended(_ sender: Any) {
+        bolusAmountTextField?.text = recommendedBolusAmountLabel?.text
+        bolusAmountTextField.resignFirstResponder()
+    }
 
     @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
