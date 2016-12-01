@@ -1373,6 +1373,9 @@
 				4F70C1E31DE8DCA7006380B7 /* Base */,
 			);
 			name = MainInterface.storyboard;
+			path = "Loop Status Extension";
+			sourceTree = "<unknown>";
+		};
 		C1C73EF91DE3D0230022FC89 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
