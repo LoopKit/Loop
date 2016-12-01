@@ -11,7 +11,7 @@ import UIKit
 
 final class BatteryLevelHUDView: HUDView {
 
-    @IBOutlet private var levelMaskView: LevelMaskView!
+    @IBOutlet private weak var levelMaskView: LevelMaskView!
 
     override func awakeFromNib() {
         super.awakeFromNib()

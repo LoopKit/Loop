@@ -10,7 +10,7 @@ import UIKit
 
 class HUDView: UIView {
 
-    @IBOutlet var caption: UILabel! {
+    @IBOutlet weak var caption: UILabel! {
         didSet {
             caption?.text = "—"
         }

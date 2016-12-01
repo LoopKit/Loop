@@ -76,6 +76,8 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 
 @property (nonatomic, readonly) SubgRfspyVersionState firmwareState;
 
+@property (nonatomic, readonly, nullable) NSString *bleFirmwareVersion;
+
 @property (nonatomic, readonly, nullable) NSDate *lastIdle;
 
 @property (nonatomic) BOOL timerTickEnabled;

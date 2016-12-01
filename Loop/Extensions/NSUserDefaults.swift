@@ -8,7 +8,7 @@
 
 import Foundation
 import LoopKit
-
+import MinimedKit
 
 extension UserDefaults {
 
@@ -27,8 +27,10 @@ extension UserDefaults {
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
+        case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
+        case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -177,6 +179,16 @@ extension UserDefaults {
         }
     }
 
+    var pumpRegion: PumpRegion? {
+        get {
+            // Defaults to 0 / northAmerica
+            return PumpRegion(rawValue: integer(forKey: Key.PumpRegion.rawValue))
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.PumpRegion.rawValue)
+        }
+    }
+
     var pumpTimeZone: TimeZone? {
         get {
             if let offset = object(forKey: Key.PumpTimeZone.rawValue) as? NSNumber {
@@ -217,6 +229,19 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.G5TransmitterID.rawValue)
+        }
+    }
+    
+    var batteryChemistry: BatteryChemistryType? {
+        get {
+            return BatteryChemistryType(rawValue: integer(forKey: Key.BatteryChemistry.rawValue))
+        }
+        set {
+            if let batteryChemistry = newValue {
+                set(batteryChemistry.rawValue, forKey: Key.BatteryChemistry.rawValue)
+            } else {
+                removeObject(forKey: Key.BatteryChemistry.rawValue)
+            }
         }
     }
 

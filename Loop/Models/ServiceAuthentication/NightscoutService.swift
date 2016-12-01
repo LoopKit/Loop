@@ -20,7 +20,7 @@ struct NightscoutService: ServiceAuthentication {
         credentials = [
             ServiceCredential(
                 title: NSLocalizedString("Site URL", comment: "The title of the nightscout site URL credential"),
-                placeholder: NSLocalizedString("http://mysite.azurewebsites.net", comment: "The placeholder text for the nightscout site URL credential"),
+                placeholder: NSLocalizedString("https://mysite.azurewebsites.net", comment: "The placeholder text for the nightscout site URL credential"),
                 isSecret: false,
                 keyboardType: .URL,
                 value: siteURL?.absoluteString
@@ -58,21 +58,18 @@ struct NightscoutService: ServiceAuthentication {
         return credentials[1].value
     }
 
-    var isAuthorized: Bool = false
+    var isAuthorized: Bool = true
 
     mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let siteURL = siteURL, let APISecret = APISecret else {
+            isAuthorized = false
             completion(false, nil)
             return
         }
 
         let uploader = NightscoutUploader(siteURL: siteURL, APISecret: APISecret)
         uploader.checkAuth { (error) in
-            if let error = error {
-                completion(false, error)
-            } else {
-                completion(true, nil)
-            }
+            completion(true, error)
         }
         self.uploader = uploader
     }

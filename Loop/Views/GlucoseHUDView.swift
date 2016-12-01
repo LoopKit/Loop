@@ -13,27 +13,55 @@ import HealthKit
 
 final class GlucoseHUDView: HUDView {
 
-    @IBOutlet private var unitLabel: UILabel! {
+    @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
             unitLabel.text = "–"
             unitLabel.textColor = .glucoseTintColor
         }
     }
 
-    @IBOutlet private var glucoseLabel: UILabel! {
+    @IBOutlet private weak var glucoseLabel: UILabel! {
         didSet {
             glucoseLabel.text = "–"
             glucoseLabel.textColor = .glucoseTintColor
         }
     }
 
-    @IBOutlet private var alertLabel: UILabel! {
+    @IBOutlet private weak var alertLabel: UILabel! {
         didSet {
             alertLabel.alpha = 0
             alertLabel.backgroundColor = UIColor.agingColor
             alertLabel.textColor = UIColor.white
             alertLabel.layer.cornerRadius = 9
             alertLabel.clipsToBounds = true
+        }
+    }
+
+    private enum SensorAlertState {
+        case ok
+        case missing
+        case invalid
+        case remote
+    }
+
+    private var sensorAlertState = SensorAlertState.ok {
+        didSet {
+            var alertLabelAlpha: CGFloat = 1
+
+            switch sensorAlertState {
+            case .ok:
+                alertLabelAlpha = 0
+            case .missing, .invalid:
+                alertLabel.backgroundColor = UIColor.agingColor
+                alertLabel.text = "!"
+            case .remote:
+                alertLabel.backgroundColor = UIColor.unknownColor
+                alertLabel.text = "☁︎"
+            }
+
+            UIView.animate(withDuration: 0.25, animations: {
+                self.alertLabel.alpha = alertLabelAlpha
+            })
         }
     }
 
@@ -56,16 +84,19 @@ final class GlucoseHUDView: HUDView {
             accessibilityStrings.append(trend.localizedDescription)
         }
 
-        if sensor?.isStateValid == false {
+        if sensor == nil {
+            sensorAlertState = .missing
+        } else if sensor!.isStateValid == false {
+            sensorAlertState = .invalid
             accessibilityStrings.append(NSLocalizedString("Needs attention", comment: "Accessibility label component for glucose HUD describing an invalid state"))
+        } else if sensor!.isLocal == false {
+            sensorAlertState = .remote
+        } else {
+            sensorAlertState = .ok
         }
 
         unitLabel.text = unitStrings.joined(separator: " ")
         accessibilityValue = accessibilityStrings.joined(separator: ", ")
-
-        UIView.animate(withDuration: 0.25, animations: { 
-            self.alertLabel.alpha = sensor?.isStateValid == true ? 0 : 1
-        }) 
     }
 
     private lazy var timeFormatter: DateFormatter = {
