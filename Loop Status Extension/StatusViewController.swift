@@ -42,7 +42,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         let preferredUnit = context.preferredUnit ?? HKUnit.milligramsPerDeciliterUnit()
         
         if let glucose = context.latestGlucose {
-            glucoseHUD.set(glucose.latest, for: preferredUnit, from: glucose.sensor)
+            glucoseHUD.set(glucoseQuantity: glucose.latest.quantity.doubleValue(for: preferredUnit),
+                           glucoseStartDate: glucose.latest.startDate,
+                           for: preferredUnit, from: glucose.sensor)
         }
         
         if let batteryPercentage = context.batteryPercentage {

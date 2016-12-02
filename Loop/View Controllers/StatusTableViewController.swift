@@ -267,7 +267,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
-                    self.glucoseHUD.set(glucose, for: self.charts.glucoseUnit, from: self.dataManager.sensorInfo)
+                    self.glucoseHUD.set(glucoseQuantity: glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                                        glucoseStartDate: glucose.startDate,
+                                        for: self.charts.glucoseUnit, from: self.dataManager.sensorInfo)
                 }
 
                 self.charts.prerender()
