@@ -62,7 +62,7 @@ struct DoseMath {
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
-        allowPredictiveTempBelowRange: Bool = false
+        allowPredictiveTempBelowRange: Bool
     ) -> (rate: Double, duration: TimeInterval)? {
         guard glucose.count > 1 else {
             return nil
