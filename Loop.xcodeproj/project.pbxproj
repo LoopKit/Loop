@@ -958,13 +958,8 @@
 		43776F841B8022E90074EA36 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-<<<<<<< HEAD
-				LastSwiftUpdateCheck = 0810;
-				LastUpgradeCheck = 0800;
-=======
 				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0810;
->>>>>>> dev
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
 					43776F8B1B8022E90074EA36 = {
