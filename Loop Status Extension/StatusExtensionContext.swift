@@ -11,7 +11,6 @@ import Foundation
 import HealthKit
 import LoopKit
 import InsulinKit
-import MinimedKit
 
 struct ReservoirContext: ReservoirValue {
     var startDate: Date

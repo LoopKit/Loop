@@ -156,7 +156,6 @@
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
 		4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4F70C1ED1DE8DEDA006380B7 /* GlucoseHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4337615E1D52F487004A3647 /* GlucoseHUDView.swift */; };
-		4F70C1EE1DE8DF06006380B7 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		4F70C1EF1DE8DF15006380B7 /* HUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBB1CD6DE6A003C8C80 /* HUDView.swift */; };
 		4F70C1F01DE8DF22006380B7 /* SensorDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA28611D517E42001BC233 /* SensorDisplayable.swift */; };
 		4F70C1F21DE8DF3A006380B7 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE92501C541832001FFDE1 /* UIColor.swift */; };
@@ -506,7 +505,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F70C1EE1DE8DF06006380B7 /* LoopKit.framework in Frameworks */,
 				4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

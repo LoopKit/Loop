@@ -9,8 +9,6 @@
 import UIKit
 import NotificationCenter
 import HealthKit
-import GlucoseKit
-import LoopKit
 import CoreData
 
 class StatusViewController: UIViewController, NCWidgetProviding {
