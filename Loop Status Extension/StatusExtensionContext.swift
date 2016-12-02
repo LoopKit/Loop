@@ -9,10 +9,8 @@
 
 import Foundation
 import HealthKit
-import LoopKit
-import InsulinKit
 
-struct ReservoirContext: ReservoirValue {
+struct ReservoirContext {
     var startDate: Date
     var unitVolume: Double
     var capacity: Int
@@ -37,20 +35,16 @@ struct SensorDisplayableContext: SensorDisplayable {
 }
 
 struct GlucoseContext {
-    var latest: GlucoseValue
-    var sensor: SensorDisplayable?
-}
-
-struct GlucoseValueContext: GlucoseValue {
-    var quantity: HKQuantity
+    var quantity: Double
     var startDate: Date
+    var sensor: SensorDisplayable?
 }
 
 final class StatusExtensionContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
     
-    var preferredUnit: HKUnit?
+    var preferredUnitDisplayString: String?
     var latestGlucose: GlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
@@ -66,17 +60,14 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         super.init()
         let raw = rawValue
         
-        if let preferredUnitString = raw["preferredUnit"] as? String,
+        if let preferredString = raw["preferredUnitDisplayString"] as? String,
            let latestValue = raw["latestGlucose_value"] as? Double,
            let startDate = raw["latestGlucose_startDate"] as? Date {
             
-            preferredUnit = HKUnit(from: preferredUnitString)
+            preferredUnitDisplayString = preferredString
             latestGlucose = GlucoseContext(
-                latest: HKQuantitySample(
-                    type: HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!,
-                    quantity: HKQuantity(unit: HKUnit(from: preferredUnitString), doubleValue: latestValue),
-                    start: startDate,
-                    end: startDate),
+                quantity: latestValue,
+                startDate: startDate,
                 sensor: nil)
             
             if let state = raw["latestGlucose_sensor_isStateValid"] as? Bool,
@@ -123,12 +114,12 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             "version": version
         ]
 
-        raw["preferredUnit"] = preferredUnit?.unitString
+        raw["preferredUnitDisplayString"] = preferredUnitDisplayString
         
         if let glucose = latestGlucose,
-           let preferredUnit = preferredUnit {
-            raw["latestGlucose_value"] = glucose.latest.quantity.doubleValue(for: preferredUnit)
-            raw["latestGlucose_startDate"] = glucose.latest.startDate
+           preferredUnitDisplayString != nil {
+            raw["latestGlucose_value"] = glucose.quantity
+            raw["latestGlucose_startDate"] = glucose.startDate
         }
 
         if let sensor = latestGlucose?.sensor {

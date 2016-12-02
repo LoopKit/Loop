@@ -36,15 +36,22 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return
         }
 
-        // It's possible that Loop couldn't pull the preferred unit for some reason so
-        // we might have a nil value here. Fall back on mg/DL for now in that case.
-        // This should go away with https://github.com/LoopKit/LoopKit/issues/27
-        let preferredUnit = context.preferredUnit ?? HKUnit.milligramsPerDeciliterUnit()
+        // We should never have the case where there's glucose values but no preferred
+        // unit. However, if that case were to happen we might show quantities against
+        // the wrong units and that could be very harmful. So unless there's a preferred
+        // unit, assume that none of the rest of the data is reliable.
+        guard
+            let preferredUnitDisplayString = context.preferredUnitDisplayString
+        else {
+            completionHandler(NCUpdateResult.failed)
+            return
+        }
         
         if let glucose = context.latestGlucose {
-            glucoseHUD.set(glucoseQuantity: glucose.latest.quantity.doubleValue(for: preferredUnit),
-                           glucoseStartDate: glucose.latest.startDate,
-                           for: preferredUnit, from: glucose.sensor)
+            glucoseHUD.set(glucoseQuantity: glucose.quantity,
+                           at: glucose.startDate,
+                           for: preferredUnitDisplayString,
+                           from: glucose.sensor)
         }
         
         if let batteryPercentage = context.batteryPercentage {
@@ -66,7 +73,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         if let eventualGlucose = context.eventualGlucose {
-            let quantity = HKQuantity(unit: preferredUnit,
+            let quantity = HKQuantity(unit: HKUnit(from: preferredUnitDisplayString),
                                       doubleValue: eventualGlucose.rounded())
             subtitleLabel.text = String(
                     format: NSLocalizedString(

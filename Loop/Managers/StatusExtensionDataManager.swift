@@ -24,7 +24,7 @@ final class StatusExtensionDataManager {
 
         self.dataManager.glucoseStore?.preferredUnit() {
             (unit, error) in
-            if error == nil {
+            if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
                         UserDefaults.shared()?.statusExtensionContext = context
@@ -34,12 +34,12 @@ final class StatusExtensionDataManager {
         }
     }
 
-    private func createContext(_ preferredUnit: HKUnit?, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
+    private func createContext(_ preferredUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
         guard let glucoseStore = self.dataManager.glucoseStore else {
             completionHandler(nil)
             return
         }
-
+        
         dataManager.loopManager.getLoopStatus {
             (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
             
@@ -61,9 +61,7 @@ final class StatusExtensionDataManager {
                 context.eventualGlucose = 119.123
             #endif
 
-            let preferredUnit = preferredUnit ?? HKUnit.milligramsPerDeciliterUnit()
-            context.preferredUnit = preferredUnit
-            
+            context.preferredUnitDisplayString = preferredUnit.glucoseUnitDisplayString
             context.loop = LoopContext(
                 dosingEnabled: dataManager.loopManager.dosingEnabled,
                 lastCompleted: lastLoopCompleted)
@@ -72,9 +70,8 @@ final class StatusExtensionDataManager {
                 // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
                 // convert the latest glucose to those units just to be sure.
                 context.latestGlucose = GlucoseContext(
-                    latest: GlucoseValueContext(
-                        quantity: HKQuantity(unit: preferredUnit, doubleValue: glucose.quantity.doubleValue(for:preferredUnit)),
-                        startDate: glucose.startDate),
+                    quantity: glucose.quantity.doubleValue(for: preferredUnit),
+                    startDate: glucose.startDate,
                     sensor: dataManager.sensorInfo)
             }
             
