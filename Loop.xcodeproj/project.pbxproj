@@ -151,6 +151,8 @@
 		43FBEDD81D73843700B21F22 /* LevelMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FBEDD71D73843700B21F22 /* LevelMaskView.swift */; };
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
+		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4F526D5F1DF2459000A04910 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
 		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
@@ -175,7 +177,6 @@
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
-		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
@@ -433,6 +434,7 @@
 		43FBEDD71D73843700B21F22 /* LevelMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelMaskView.swift; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
+		4F526D5E1DF2459000A04910 /* HKUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKUnit.swift; sourceTree = "<group>"; };
 		4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Status Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NotificationCenter.framework; path = System/Library/Frameworks/NotificationCenter.framework; sourceTree = SDKROOT; };
 		4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
@@ -810,6 +812,7 @@
 				4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */,
 				4F70C1E51DE8DCA7006380B7 /* Info.plist */,
 				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
+				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
 			);
 			path = "Loop Status Extension";
 			sourceTree = SOURCE_ROOT;
@@ -1299,6 +1302,7 @@
 			files = (
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				4F70C20B1DE8E9F4006380B7 /* GlucoseTrend.swift in Sources */,
+				4F526D5F1DF2459000A04910 /* HKUnit.swift in Sources */,
 				4F70C1FB1DE8E45E006380B7 /* NSTimeInterval.swift in Sources */,
 				4F70C1FA1DE8E42D006380B7 /* ReservoirVolumeHUDView.swift in Sources */,
 				4F70C1F91DE8E409006380B7 /* LoopStateView.swift in Sources */,
