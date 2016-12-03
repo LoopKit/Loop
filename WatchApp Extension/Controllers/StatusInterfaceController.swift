@@ -46,7 +46,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             loopHUDImage.setLoopImage(.Unknown)
         }
 
-        let numberFormatter = NumberFormatter()
+        let numberFormatter = NumberFormatter(); numberFormatter.usesSignificantDigits=true; numberFormatter.minimumSignificantDigits = 2; numberFormatter.maximumSignificantDigits = 3
 
         if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
             let glucoseValue = glucose.doubleValue(for: unit)

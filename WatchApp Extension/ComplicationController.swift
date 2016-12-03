@@ -40,10 +40,13 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     // MARK: - Timeline Population
 
-    private lazy var formatter = NumberFormatter()
+ //   private lazy var formatter = NumberFormatter()
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
 
+        let formatter = NumberFormatter(); formatter.usesSignificantDigits = true; formatter.minimumSignificantDigits = 2; formatter.maximumSignificantDigits = 3
+
+        
         switch complication.family {
         case .modularSmall:
             if let context = ExtensionDelegate.shared().lastContext,
@@ -69,6 +72,9 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
+        
+        let formatter = NumberFormatter(); formatter.usesSignificantDigits = true; formatter.minimumSignificantDigits = 2; formatter.maximumSignificantDigits = 3
+        
         if let context = ExtensionDelegate.shared().lastContext,
             let glucose = context.glucose,
             let unit = context.preferredGlucoseUnit,
