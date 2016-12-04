@@ -21,7 +21,7 @@ import ShareClient
 import xDripG5
 
 
-final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
+final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseStoreDelegate, TransmitterDelegate, ReceiverDelegate {
 
     // MARK: - Utilities
 
@@ -42,6 +42,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
             enableRileyLinkHeartbeatIfNeeded()
         }
     }
+    
+
 
     var receiverEnabled: Bool {
         get {
@@ -306,7 +308,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         - Success(status, date): The pump status, and the resolved date according to the pump's clock
         - Failure(error): An error describing why the command failed
      */
-    private func readPumpData(_ completion: @escaping (Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
+    private func readPumpData(_ completion: @escaping (RileyLinkKit.Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
             completion(.failure(LoopError.configurationError))
             return
@@ -323,12 +325,60 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                     completion(.failure(LoopError.configurationError))
                     return
                 }
+        let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                
+                if let sentrySupported = self.pumpState?.pumpModel?.larger , !sentrySupported {
+                    self.setBatteryDataforNonMySentryPumps(voltage: status.batteryVolts)
+                    }
+                
+                let nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: ops.pumpState.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
+                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
                 completion(.success(status: status, date: date))
             case .failure(let error):
                 self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
                 completion(.failure(error))
             }
         }
+    }
+    
+    /**
+     jlucasvt
+     x22 Battery Voltage, Lithium Decay Display, and Notifications.
+     Code added here to store battery voltage, broacast battery percentage, and notify of battery status for x22 pumps.
+     Broadcast Remaining Percentage is based on the pumps ability to continue to broadcast to RileyLink using a Lithium Battery.
+     This is NOT the actual pump battery % status that is shown on pump.  The ability to broadcast stops hours before the pump battery
+     staus shows battery low status.
+     */
+    
+    // Local Variable to store Battery Broadcast Remaining Percentage.
+    var x22BatteryBroadcastRemaining: Double = -1
+    
+    // Local Variable to store Battery Voltage Reading from Pump
+    var batteryVoltage: Double = -1
+    
+    //x22 pump Lithium Ion Decay Schedule (Approximately 7 day's of 100% Loop Usage)
+    private func setBatteryDataforNonMySentryPumps(voltage : Double){
+        
+        var percentage: Double
+        
+        if voltage >= 1.56{                             //100%
+            percentage = 1
+        }else if voltage < 1.56 && voltage >= 1.53{     //75%
+            percentage = 0.75
+        }else if voltage < 1.53 && voltage >= 1.50{     //50%
+            percentage = 0.50
+        }else if voltage < 1.50 && voltage >= 1.47{     //25%
+            percentage = 0.25
+        }else if voltage < 1.47{                        //0%
+            percentage = 0
+            NotificationManager.sendPumpBatteryLowNotification()
+        }else{
+            percentage = -1
+        }
+        
+        self.batteryVoltage = voltage
+        self.x22BatteryBroadcastRemaining = percentage
+        
     }
 
     /**
@@ -392,7 +442,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                     completion(LoopError.communicationError)
                 } else {
                     self.loopManager.recordBolus(units, at: Date())
-                    completion(nil)
+                     completion(nil)
                 }
             }
         }
@@ -839,6 +889,66 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         logger.addError(error, fromSource: "CarbStore")
     }
 
+    func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.upload(nsCarbEntries) { (result) in
+            switch result {
+            case .success(let ids):
+                // Pass new ids back
+                completionHandler(ids)
+            case .failure(let error):
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            }
+        }
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasModifiedEntries entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+        
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
+
+        uploader.modifyTreatments(nsCarbEntries) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(entries.map { $0.externalId ?? "" } )
+            }
+        }
+
+    }
+
+    func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], withCompletion completionHandler: @escaping ([String]) -> Void) {
+
+        guard let uploader = remoteDataManager.nightscoutUploader else {
+            completionHandler([])
+            return
+        }
+
+        uploader.deleteTreatmentsById(ids) { (error) in
+            if let error = error {
+                self.logger.addError(error, fromSource: "NightscoutUploader")
+                completionHandler([])
+            } else {
+                completionHandler(ids)
+            }
+        }
+        completionHandler([])
+    }
+
+
     // MARK: - GlucoseKit
 
     let glucoseStore: GlucoseStore? = GlucoseStore()
@@ -939,6 +1049,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self
+        carbStore?.syncDelegate = self
         doseStore.delegate = self
 
         if UserDefaults.standard.receiverEnabled {
