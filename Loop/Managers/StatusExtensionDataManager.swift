@@ -27,7 +27,7 @@ final class StatusExtensionDataManager {
             if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
-                        UserDefaults.shared()?.statusExtensionContext = context
+                        UserDefaults.appGroup?.statusExtensionContext = context
                     }
                 }
             }

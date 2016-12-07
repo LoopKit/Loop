@@ -11,11 +11,13 @@ import Foundation
 extension UserDefaults {
     
     private enum Key: String {
-        case StatusExtensionContext = "com.loudnate.Loop.StatusExtensionContext"
+        case StatusExtensionContext = "com.loopkit.Loop.StatusExtensionContext"
     }
 
-    static func shared() -> UserDefaults? {
-        return UserDefaults(suiteName: "group.com.loudnate.Loop")
+    class var appGroup: UserDefaults? {
+        get {
+            return UserDefaults(suiteName: "group.com.loudnate.Loop")
+        }
     }
 
     var statusExtensionContext: StatusExtensionContext? {
