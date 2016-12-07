@@ -50,7 +50,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         if let glucose = context.latestGlucose {
             glucoseHUD.set(glucoseQuantity: glucose.quantity,
                            at: glucose.startDate,
-                           for: preferredUnitDisplayString,
+                           unitDisplayString: preferredUnitDisplayString,
                            from: glucose.sensor)
         }
         

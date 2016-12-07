@@ -269,7 +269,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
                     self.glucoseHUD.set(glucoseQuantity: glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
                                         at: glucose.startDate,
-                                        for: self.charts.glucoseUnit.glucoseUnitDisplayString,
+                                        unitDisplayString: self.charts.glucoseUnit.glucoseUnitDisplayString,
                                         from: self.dataManager.sensorInfo)
                 }
 

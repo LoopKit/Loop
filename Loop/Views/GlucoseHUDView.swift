@@ -64,7 +64,7 @@ final class GlucoseHUDView: HUDView {
         }
     }
 
-    func set(glucoseQuantity: Double, at glucoseStartDate: Date, for unitDisplayString: String, from sensor: SensorDisplayable?) {
+    func set(glucoseQuantity: Double, at glucoseStartDate: Date, unitDisplayString: String, from sensor: SensorDisplayable?) {
         var accessibilityStrings = [String]()
 
         let time = timeFormatter.string(from: glucoseStartDate)
