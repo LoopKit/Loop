@@ -10,10 +10,10 @@ import Foundation
 import InsulinKit
 import LoopKit
 
-class NetBasal {
-    var rate: Double
-    var percent: Double
-    var startDate: Date
+struct NetBasal {
+    let rate: Double
+    let percent: Double
+    let startDate: Date
     
     init(lastTempBasal: DoseEntry?, maxBasal: Double?, scheduledBasal: AbsoluteScheduleValue<Double>) {
         if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = maxBasal {
