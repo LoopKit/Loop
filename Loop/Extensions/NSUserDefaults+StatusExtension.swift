@@ -16,7 +16,7 @@ extension UserDefaults {
 
     class var appGroup: UserDefaults? {
         get {
-            return UserDefaults(suiteName: "group.com.loudnate.Loop")
+            return UserDefaults(suiteName: Bundle.appGroupSuiteName)
         }
     }
 
