@@ -14,12 +14,6 @@ extension UserDefaults {
         case StatusExtensionContext = "com.loopkit.Loop.StatusExtensionContext"
     }
 
-    class var appGroup: UserDefaults? {
-        get {
-            return UserDefaults(suiteName: Bundle.appGroupSuiteName)
-        }
-    }
-
     var statusExtensionContext: StatusExtensionContext? {
         get {
             if let rawValue = dictionary(forKey: Key.StatusExtensionContext.rawValue) {

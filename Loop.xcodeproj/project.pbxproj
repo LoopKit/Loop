@@ -154,6 +154,7 @@
 		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4F526D5F1DF2459000A04910 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
+		4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
 		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
@@ -176,8 +177,6 @@
 		4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */; };
 		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
-		4F90489D1DF8E5AB00EC7511 /* NSBundle+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F90489C1DF8E5AB00EC7511 /* NSBundle+Loop.swift */; };
-		4F90489F1DF8E5DF00EC7511 /* NSBundle+LoopStatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F90489E1DF8E5DF00EC7511 /* NSBundle+LoopStatusExtension.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
@@ -447,8 +446,6 @@
 		4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Status Extension.entitlements"; sourceTree = "<group>"; };
 		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
-		4F90489C1DF8E5AB00EC7511 /* NSBundle+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSBundle+Loop.swift"; sourceTree = "<group>"; };
-		4F90489E1DF8E5DF00EC7511 /* NSBundle+LoopStatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSBundle+LoopStatusExtension.swift"; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
@@ -720,7 +717,6 @@
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
 				430DA58D1D4AEC230097D1CA /* NSBundle.swift */,
-				4F90489C1DF8E5AB00EC7511 /* NSBundle+Loop.swift */,
 				43CE7CDD1CA8B63E003CC1B0 /* Data.swift */,
 				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				436A0E7A1D7DE13400D6475D /* NSNumberFormatter.swift */,
@@ -821,7 +817,6 @@
 				4F70C1E51DE8DCA7006380B7 /* Info.plist */,
 				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
 				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
-				4F90489E1DF8E5DF00EC7511 /* NSBundle+LoopStatusExtension.swift */,
 			);
 			path = "Loop Status Extension";
 			sourceTree = SOURCE_ROOT;
@@ -1237,7 +1232,6 @@
 				437CEEC01CD6FCD8003C8C80 /* BasalRateHUDView.swift in Sources */,
 				43E2D8C61D204678004DA55F /* KeychainManager.swift in Sources */,
 				437CEECA1CD84DB7003C8C80 /* BatteryLevelHUDView.swift in Sources */,
-				4F90489D1DF8E5AB00EC7511 /* NSBundle+Loop.swift in Sources */,
 				433EA4C21D9F39C900CD78FB /* PumpIDTableViewController.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
@@ -1311,6 +1305,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				4F70C20B1DE8E9F4006380B7 /* GlucoseTrend.swift in Sources */,
 				4F526D5F1DF2459000A04910 /* HKUnit.swift in Sources */,
@@ -1318,7 +1313,6 @@
 				4F70C1FA1DE8E42D006380B7 /* ReservoirVolumeHUDView.swift in Sources */,
 				4F70C1F91DE8E409006380B7 /* LoopStateView.swift in Sources */,
 				4F70C1F81DE8E403006380B7 /* LoopCompletionHUDView.swift in Sources */,
-				4F90489F1DF8E5DF00EC7511 /* NSBundle+LoopStatusExtension.swift in Sources */,
 				4F70C1F71DE8E3FD006380B7 /* LevelMaskView.swift in Sources */,
 				4F70C1F61DE8E3F1006380B7 /* BatteryLevelHUDView.swift in Sources */,
 				4F70C1F51DE8E3E9006380B7 /* BasalStateView.swift in Sources */,

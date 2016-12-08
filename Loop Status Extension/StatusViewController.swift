@@ -31,7 +31,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
     
     func widgetPerformUpdate(completionHandler: (@escaping (NCUpdateResult) -> Void)) {
-        guard let context = UserDefaults.appGroup?.statusExtensionContext else {
+        guard
+            let context = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext
+        else {
             completionHandler(NCUpdateResult.failed)
             return
         }

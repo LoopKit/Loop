@@ -26,7 +26,7 @@ final class StatusExtensionDataManager {
             if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
-                        UserDefaults.appGroup?.statusExtensionContext = context
+                        UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext = context
                     }
                 }
             }
