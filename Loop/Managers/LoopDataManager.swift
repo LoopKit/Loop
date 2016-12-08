@@ -378,6 +378,20 @@ final class LoopDataManager {
 
         return startDate
     }
+    
+    var lastNetBasal: NetBasal? {
+        get {
+            guard
+                let scheduledBasal = deviceDataManager.basalRateSchedule?.between(start: Date(), end: Date()).first
+            else {
+                return nil
+            }
+
+            return NetBasal(lastTempBasal: lastTempBasal,
+                            maxBasal: deviceDataManager.maximumBasalRatePerHour,
+                            scheduledBasal: scheduledBasal)
+        }
+    }
 
     private func updateCarbEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
         if let carbStore = deviceDataManager.carbStore {
@@ -670,38 +684,6 @@ final class LoopDataManager {
         }
     }
     
-    func calculateNetBasalRate() -> (Double?, Double?, Date?) {
-        guard let scheduledBasal = deviceDataManager.basalRateSchedule?.between(start: Date(), end: Date()).first else {
-            return (nil, nil, nil)
-        }
-        
-        let netBasalRate: Double
-        let netBasalPercent: Double
-        let basalStartDate: Date
-        
-        if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = deviceDataManager.maximumBasalRatePerHour {
-            netBasalRate = lastTempBasal.value - scheduledBasal.value
-            basalStartDate = lastTempBasal.startDate
-            
-            if netBasalRate < 0 {
-                netBasalPercent = netBasalRate / scheduledBasal.value
-            } else {
-                netBasalPercent = netBasalRate / (maxBasal - scheduledBasal.value)
-            }
-        } else {
-            netBasalRate = 0
-            netBasalPercent = 0
-            
-            if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > scheduledBasal.startDate {
-                basalStartDate = lastTempBasal.endDate
-            } else {
-                basalStartDate = scheduledBasal.startDate
-            }
-        }
-        
-        return (netBasalRate, netBasalPercent, basalStartDate)
-    }
-
     /**
      Informs the loop algorithm of an enacted bolus
 
@@ -715,7 +697,6 @@ final class LoopDataManager {
         }
     }
 }
-
 
 extension LoopDataManager {
     /// Generates a diagnostic report about the current state

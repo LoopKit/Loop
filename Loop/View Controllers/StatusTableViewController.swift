@@ -390,11 +390,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     
     private var lastTempBasal: DoseEntry? {
         didSet {
-            let (netBasalRate, netBasalPercent, basalStartDate) = self.dataManager.loopManager.calculateNetBasalRate()
-            
-            if let rate = netBasalRate, let percent = netBasalPercent, let date = basalStartDate {
+            if let lastNetBasal = self.dataManager.loopManager.lastNetBasal {
                 DispatchQueue.main.async {
-                    self.basalRateHUD.setNetBasalRate(rate, percent: percent, at: date)
+                    self.basalRateHUD.setNetBasalRate(lastNetBasal.rate, percent: lastNetBasal.percent, at: lastNetBasal.startDate)
                 }
             }
         }

@@ -22,8 +22,7 @@ final class StatusExtensionDataManager {
 
     @objc private func update(_ notification: Notification) {
 
-        self.dataManager.glucoseStore?.preferredUnit() {
-            (unit, error) in
+        self.dataManager.glucoseStore?.preferredUnit() { (unit, error) in
             if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
@@ -75,9 +74,8 @@ final class StatusExtensionDataManager {
                     sensor: dataManager.sensorInfo)
             }
             
-            let (netBasalRate, netBasalPercentage, basalStartDate) = dataManager.loopManager.calculateNetBasalRate()
-            if let rate = netBasalRate, let percentage = netBasalPercentage, let startDate = basalStartDate {
-                context.netBasal = NetBasalContext(rate: rate, percentage: percentage, startDate: startDate)
+            if let lastNetBasal = dataManager.loopManager.lastNetBasal {
+                context.netBasal = NetBasalContext(rate: lastNetBasal.rate, percentage: lastNetBasal.percent, startDate: lastNetBasal.startDate)
             }
             
             if let reservoir = dataManager.doseStore.lastReservoirValue,
