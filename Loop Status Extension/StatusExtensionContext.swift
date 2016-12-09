@@ -11,33 +11,33 @@ import Foundation
 import HealthKit
 
 struct ReservoirContext {
-    var startDate: Date
-    var unitVolume: Double
-    var capacity: Int
+    let startDate: Date
+    let unitVolume: Double
+    let capacity: Int
 }
 
 struct LoopContext {
-    var dosingEnabled: Bool
-    var lastCompleted: Date?
+    let dosingEnabled: Bool
+    let lastCompleted: Date?
 }
 
 struct NetBasalContext {
-    var rate: Double
-    var percentage: Double
-    var startDate: Date
+    let rate: Double
+    let percentage: Double
+    let startDate: Date
 }
 
 struct SensorDisplayableContext: SensorDisplayable {
-    var isStateValid: Bool
-    var stateDescription: String
-    var trendType: GlucoseTrend?
-    var isLocal: Bool
+    let isStateValid: Bool
+    let stateDescription: String
+    let trendType: GlucoseTrend?
+    let isLocal: Bool
 }
 
 struct GlucoseContext {
-    var quantity: Double
-    var startDate: Date
-    var sensor: SensorDisplayable?
+    let quantity: Double
+    let startDate: Date
+    let sensor: SensorDisplayable?
 }
 
 final class StatusExtensionContext: NSObject, RawRepresentable {
@@ -63,13 +63,8 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         if let preferredString = raw["preferredUnitDisplayString"] as? String,
            let latestValue = raw["latestGlucose_value"] as? Double,
            let startDate = raw["latestGlucose_startDate"] as? Date {
-            
-            preferredUnitDisplayString = preferredString
-            latestGlucose = GlucoseContext(
-                quantity: latestValue,
-                startDate: startDate,
-                sensor: nil)
-            
+ 
+            var sensor: SensorDisplayableContext? = nil
             if let state = raw["latestGlucose_sensor_isStateValid"] as? Bool,
                let desc = raw["latestGlucose_sensor_stateDescription"] as? String,
                let local = raw["latestGlucose_sensor_isLocal"] as? Bool {
@@ -79,12 +74,18 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
                     glucoseTrend = GlucoseTrend(rawValue: trendType)
                 }
                 
-                latestGlucose?.sensor = SensorDisplayableContext(
+                sensor = SensorDisplayableContext(
                     isStateValid: state,
                     stateDescription: desc,
                     trendType: glucoseTrend,
                     isLocal: local)
             }
+            
+            preferredUnitDisplayString = preferredString
+            latestGlucose = GlucoseContext(
+                quantity: latestValue,
+                startDate: startDate,
+                sensor: sensor)
         }
         
         batteryPercentage = raw["batteryPercentage"] as? Double
