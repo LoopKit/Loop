@@ -559,8 +559,7 @@ final class LoopDataManager {
                 maxBasalRate: maxBasal,
                 glucoseTargetRange: glucoseTargetRange,
                 insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates,
-                allowPredictiveTempBelowRange: true
+                basalRateSchedule: basalRates
             )
         else {
             recommendedTempBasal = nil
