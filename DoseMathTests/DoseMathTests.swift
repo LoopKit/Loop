@@ -97,7 +97,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertNil(dose)
@@ -112,7 +113,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertNil(dose)
@@ -132,7 +134,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -148,7 +151,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -197,7 +201,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
@@ -218,7 +223,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertNil(dose)
@@ -238,7 +244,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
@@ -259,7 +266,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
@@ -309,7 +317,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -325,7 +334,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -375,7 +385,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(3.0, dose!.rate)
@@ -391,7 +402,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(1.425, dose!.rate, accuracy: 1.0 / 40.0)
@@ -407,7 +419,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(1.475, dose!.rate, accuracy: 1.0 / 40.0)
@@ -423,7 +436,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqual(3.0, dose!.rate)
@@ -438,7 +452,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertEqualWithAccuracy(2.975, dose!.rate, accuracy: 1.0 / 40.0)
@@ -451,7 +466,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            allowPredictiveTempBelowRange: false
         )
 
         XCTAssertNil(dose)

@@ -147,7 +147,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             charts.startDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
-            let oldRecommendedTempBasal = self.recommendedTempBasal
             var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
             if let glucoseStore = dataManager.glucoseStore {
@@ -252,12 +251,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
                     reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
-
+                
                 reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
-            if let status = dataManager.latestPumpStatusFromMySentry {
-                batteryLevelHUD.batteryLevel = Double(status.batteryRemainingPercent) / 100
+            if let level = dataManager.pumpBatteryChargeRemaining {
+                batteryLevelHUD.batteryLevel = level
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
@@ -274,6 +273,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 self.charts.prerender()
 
                 // Show/hide the recommended temp basal row
+                let oldRecommendedTempBasal = self.recommendedTempBasal
                 self.recommendedTempBasal = newRecommendedTempBasal
                 switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
                 case (let old?, let new?) where old != new:

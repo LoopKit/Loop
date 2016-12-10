@@ -10,7 +10,6 @@ import Foundation
 import LoopKit
 import MinimedKit
 
-
 extension UserDefaults {
 
     private enum Key: String {
@@ -31,6 +30,7 @@ extension UserDefaults {
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
+        case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -229,6 +229,19 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.G5TransmitterID.rawValue)
+        }
+    }
+    
+    var batteryChemistry: BatteryChemistryType? {
+        get {
+            return BatteryChemistryType(rawValue: integer(forKey: Key.BatteryChemistry.rawValue))
+        }
+        set {
+            if let batteryChemistry = newValue {
+                set(batteryChemistry.rawValue, forKey: Key.BatteryChemistry.rawValue)
+            } else {
+                removeObject(forKey: Key.BatteryChemistry.rawValue)
+            }
         }
     }
 
