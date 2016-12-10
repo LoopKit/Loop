@@ -21,4 +21,12 @@ extension Bundle {
     var localizedNameAndVersion: String {
         return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundleDisplayName, shortVersionString)
     }
+    
+    private var mainAppBundleIdentifier: String? {
+        return object(forInfoDictionaryKey: "MainAppBundleIdentifier") as? String
+    }
+    
+    var appGroupSuiteName: String {
+        return "group.\(mainAppBundleIdentifier!)"
+    }
 }
