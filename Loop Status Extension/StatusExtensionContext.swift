@@ -40,7 +40,7 @@ struct GlucoseContext {
     let sensor: SensorDisplayable?
 }
 
-final class StatusExtensionContext: NSObject, RawRepresentable {
+final class StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
     
@@ -52,12 +52,9 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
     var batteryPercentage: Double?
     var eventualGlucose: Double?
     
-    override init() {
-        super.init()
-    }
+    init() { }
     
     required init?(rawValue: RawValue) {
-        super.init()
         let raw = rawValue
         
         if let preferredString = raw["preferredUnitDisplayString"] as? String,
@@ -159,5 +156,12 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         }
         
         return raw
+    }
+}
+
+
+extension StatusExtensionContext: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return String(reflecting: rawValue)
     }
 }

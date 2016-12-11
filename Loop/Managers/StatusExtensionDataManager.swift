@@ -20,13 +20,17 @@ final class StatusExtensionDataManager {
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
 
+    fileprivate var defaults: UserDefaults? {
+        return UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+    }
+
     @objc private func update(_ notification: Notification) {
 
         self.dataManager.glucoseStore?.preferredUnit() { (unit, error) in
             if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
-                        UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext = context
+                        self.defaults?.statusExtensionContext = context
                     }
                 }
             }
@@ -96,5 +100,15 @@ final class StatusExtensionDataManager {
             
             completionHandler(context)
         }
+    }
+}
+
+
+extension StatusExtensionDataManager: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return [
+            "## StatusExtensionDataManager",
+            "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))"
+        ].joined(separator: "\n")
     }
 }

@@ -975,11 +975,11 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     // MARK: - WatchKit
 
-    private(set) var watchManager: WatchDataManager!
+    fileprivate var watchManager: WatchDataManager!
     
     // MARK: - Status Extension
     
-    private(set) var statusExtensionManager: StatusExtensionDataManager!
+    fileprivate var statusExtensionManager: StatusExtensionDataManager!
 
     // MARK: - Initialization
 
@@ -1075,7 +1075,11 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "workoutModeEnabled: \(workoutModeEnabled)",
             "maximumBasalRatePerHour: \(maximumBasalRatePerHour)",
             "maximumBolus: \(maximumBolus)",
-            String(reflecting: rileyLinkManager)
+            String(reflecting: rileyLinkManager),
+            String(reflecting: statusExtensionManager!),
+            "",
+            "## NSUserDefaults",
+            String(reflecting: UserDefaults.standard.dictionaryRepresentation())
         ].joined(separator: "\n")
     }
 }
