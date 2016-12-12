@@ -267,7 +267,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
-                    self.glucoseHUD.set(glucose, for: self.charts.glucoseUnit, from: self.dataManager.sensorInfo)
+                    self.glucoseHUD.set(glucoseQuantity: glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                                        at: glucose.startDate,
+                                        unitDisplayString: self.charts.glucoseUnit.glucoseUnitDisplayString,
+                                        from: self.dataManager.sensorInfo)
                 }
 
                 self.charts.prerender()
@@ -384,39 +387,13 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }()
 
     // MARK: - HUD Data
-
+    
     private var lastTempBasal: DoseEntry? {
         didSet {
-            guard let scheduledBasal = dataManager.basalRateSchedule?.between(start: Date(), end: Date()).first else {
-                return
-            }
-
-            let netBasalRate: Double
-            let netBasalPercent: Double
-            let basalStartDate: Date
-
-            if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = dataManager.maximumBasalRatePerHour {
-                netBasalRate = lastTempBasal.value - scheduledBasal.value
-                basalStartDate = lastTempBasal.startDate
-
-                if netBasalRate < 0 {
-                    netBasalPercent = netBasalRate / scheduledBasal.value
-                } else {
-                    netBasalPercent = netBasalRate / (maxBasal - scheduledBasal.value)
+            if let lastNetBasal = self.dataManager.loopManager.lastNetBasal {
+                DispatchQueue.main.async {
+                    self.basalRateHUD.setNetBasalRate(lastNetBasal.rate, percent: lastNetBasal.percent, at: lastNetBasal.startDate)
                 }
-            } else {
-                netBasalRate = 0
-                netBasalPercent = 0
-
-                if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > scheduledBasal.startDate {
-                    basalStartDate = lastTempBasal.endDate
-                } else {
-                    basalStartDate = scheduledBasal.startDate
-                }
-            }
-
-            DispatchQueue.main.async {
-                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, at: basalStartDate)
             }
         }
     }
