@@ -117,8 +117,8 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
 
         raw["preferredUnitString"] = preferredUnitString
         
-        if let glucose = latestGlucose,
-           preferredUnitString != nil {
+        if preferredUnitString != nil,
+            let glucose = latestGlucose {
             raw["latestGlucose_value"] = glucose.quantity
             raw["latestGlucose_startDate"] = glucose.startDate
         }
