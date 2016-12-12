@@ -20,13 +20,17 @@ final class StatusExtensionDataManager {
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
 
+    fileprivate var defaults: UserDefaults? {
+        return UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+    }
+
     @objc private func update(_ notification: Notification) {
 
         self.dataManager.glucoseStore?.preferredUnit() { (unit, error) in
             if error == nil, let unit = unit {
                 self.createContext(unit) { (context) in
                     if let context = context {
-                        UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext = context
+                        self.defaults?.statusExtensionContext = context
                     }
                 }
             }
@@ -57,10 +61,11 @@ final class StatusExtensionDataManager {
                 context.batteryPercentage = 0.25
                 context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
                 context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-                context.eventualGlucose = 119.123
+                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.123)
+                    .doubleValue(for: preferredUnit)
             #endif
 
-            context.preferredUnitDisplayString = preferredUnit.glucoseUnitDisplayString
+            context.preferredUnitString = preferredUnit.unitString
             context.loop = LoopContext(
                 dosingEnabled: dataManager.loopManager.dosingEnabled,
                 lastCompleted: lastLoopCompleted)
@@ -96,5 +101,15 @@ final class StatusExtensionDataManager {
             
             completionHandler(context)
         }
+    }
+}
+
+
+extension StatusExtensionDataManager: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return [
+            "## StatusExtensionDataManager",
+            "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))"
+        ].joined(separator: "\n")
     }
 }
