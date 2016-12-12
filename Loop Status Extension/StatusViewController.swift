@@ -10,9 +10,10 @@ import UIKit
 import NotificationCenter
 import HealthKit
 import CoreData
+import HUDViewKit
 
 class StatusViewController: UIViewController, NCWidgetProviding {
-    
+
     @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
     @IBOutlet weak var glucoseHUD: GlucoseHUDView!
     @IBOutlet weak var basalRateHUD: BasalRateHUDView!
