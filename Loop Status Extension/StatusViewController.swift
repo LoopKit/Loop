@@ -43,7 +43,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         // the wrong units and that could be very harmful. So unless there's a preferred
         // unit, assume that none of the rest of the data is reliable.
         guard
-            let preferredUnitDisplayString = context.preferredUnitDisplayString
+            let preferredUnitString = context.preferredUnitString
         else {
             completionHandler(NCUpdateResult.failed)
             return
@@ -52,7 +52,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         if let glucose = context.latestGlucose {
             glucoseHUD.set(glucoseQuantity: glucose.quantity,
                            at: glucose.startDate,
-                           unitDisplayString: preferredUnitDisplayString,
+                           unitString: preferredUnitString,
                            from: glucose.sensor)
         }
         
@@ -74,14 +74,16 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
         }
 
-        if let eventualGlucose = context.eventualGlucose {
-            let quantity = HKQuantity(unit: HKUnit(from: preferredUnitDisplayString),
-                                      doubleValue: eventualGlucose.rounded())
+        let preferredUnit = HKUnit(from: preferredUnitString)
+        let formatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
+        if let eventualGlucose = context.eventualGlucose,
+           let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose)) {
             subtitleLabel.text = String(
                     format: NSLocalizedString(
-                        "Eventually %@",
-                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"),
-                    String(describing: quantity))
+                        "Eventually %1$@ %2$@",
+                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
+                    eventualGlucoseNumberString,
+                    preferredUnit.glucoseUnitDisplayString)
             subtitleLabel.alpha = 1
         } else {
             subtitleLabel.alpha = 0
