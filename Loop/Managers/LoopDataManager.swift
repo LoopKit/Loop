@@ -378,6 +378,20 @@ final class LoopDataManager {
 
         return startDate
     }
+    
+    var lastNetBasal: NetBasal? {
+        get {
+            guard
+                let scheduledBasal = deviceDataManager.basalRateSchedule?.between(start: Date(), end: Date()).first
+            else {
+                return nil
+            }
+
+            return NetBasal(lastTempBasal: lastTempBasal,
+                            maxBasal: deviceDataManager.maximumBasalRatePerHour,
+                            scheduledBasal: scheduledBasal)
+        }
+    }
 
     private func updateCarbEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
         if let carbStore = deviceDataManager.carbStore {
@@ -545,8 +559,7 @@ final class LoopDataManager {
                 maxBasalRate: maxBasal,
                 glucoseTargetRange: glucoseTargetRange,
                 insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates,
-                allowPredictiveTempBelowRange: true
+                basalRateSchedule: basalRates
             )
         else {
             recommendedTempBasal = nil
@@ -669,7 +682,7 @@ final class LoopDataManager {
             self.setRecommendedTempBasal(resultsHandler)
         }
     }
-
+    
     /**
      Informs the loop algorithm of an enacted bolus
 
@@ -683,7 +696,6 @@ final class LoopDataManager {
         }
     }
 }
-
 
 extension LoopDataManager {
     /// Generates a diagnostic report about the current state
