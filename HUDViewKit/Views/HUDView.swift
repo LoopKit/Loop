@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HUDView: UIView {
+public class HUDView: UIView {
 
     @IBOutlet weak var caption: UILabel! {
         didSet {

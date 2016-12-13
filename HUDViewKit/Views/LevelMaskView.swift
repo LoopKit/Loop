@@ -11,7 +11,7 @@ import UIKit
 // Displays a variable-height level indicator, masked by an image.
 // Inspired by https://github.com/carekit-apple/CareKit/blob/master/CareKit/CareCard/OCKHeartView.h
 
-class LevelMaskView: UIView {
+public class LevelMaskView: UIView {
 
     var value: Double = 1.0 {
         didSet {
@@ -44,7 +44,7 @@ class LevelMaskView: UIView {
 
     private var maskImageView: UIView?
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
 
         guard let maskImage = maskImage else { return }
@@ -60,7 +60,7 @@ class LevelMaskView: UIView {
         }
     }
 
-    override func tintColorDidChange() {
+    override public func tintColorDidChange() {
         super.tintColorDidChange()
 
         fillView?.backgroundColor = tintColor

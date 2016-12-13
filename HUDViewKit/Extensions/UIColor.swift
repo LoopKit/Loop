@@ -12,7 +12,7 @@ import UIKit
 extension UIColor {
     @nonobjc static var tintColor: UIColor? = nil
 
-    @nonobjc static let secondaryLabelColor = UIColor.HIGGrayColor()
+    @nonobjc public static let secondaryLabelColor = UIColor.HIGGrayColor()
 
     @nonobjc static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
 

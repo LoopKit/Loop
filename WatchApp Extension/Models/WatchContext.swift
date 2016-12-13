@@ -8,7 +8,7 @@
 
 import Foundation
 import HealthKit
-
+import HUDViewKit
 
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]

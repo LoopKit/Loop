@@ -24,7 +24,6 @@
 		4328E02A1CFBE2C500E199AA /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0241CFBE2C500E199AA /* UIColor.swift */; };
 		4328E02B1CFBE2C500E199AA /* WKAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0251CFBE2C500E199AA /* WKAlertAction.swift */; };
 		4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E02E1CFBF81800E199AA /* WKInterfaceImage.swift */; };
-		4328E0301CFBFAEB00E199AA /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */; };
 		4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0341CFC0AE100E199AA /* WatchDataManager.swift */; };
 		432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */; };
@@ -121,7 +120,6 @@
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */; };
 		43E397A31D56B9E40028E321 /* Glucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E397A21D56B9E40028E321 /* Glucose.swift */; };
-		43EA285F1D50ED3D001BC233 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40851C82646A00472A8C /* StatusChartManager.swift */; };
 		43F41C331D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */; };
 		43F41C351D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */; };
@@ -1354,11 +1352,9 @@
 				4328E0281CFBE2C500E199AA /* CLKComplicationTemplate.swift in Sources */,
 				4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */,
 				43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */,
-				43EA285F1D50ED3D001BC233 /* GlucoseTrend.swift in Sources */,
 				4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */,
 				43CB2B2B1D924D450079823D /* WCSession.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
-				4328E0301CFBFAEB00E199AA /* NSTimeInterval.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */,
 				43DE925D1C547A20001FFDE1 /* WatchContext.swift in Sources */,
@@ -1849,6 +1845,7 @@
 		4F7528901DFE1DC600C322D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
@@ -1875,6 +1872,7 @@
 		4F7528911DFE1DC600C322D6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
@@ -1970,6 +1968,7 @@
 				4F7528911DFE1DC600C322D6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
