@@ -41,11 +41,11 @@ struct GlucoseContext {
     let sensor: SensorDisplayable?
 }
 
-final class StatusExtensionContext: NSObject, RawRepresentable {
+final class StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 1
     
-    var preferredUnitDisplayString: String?
+    var preferredUnitString: String?
     var latestGlucose: GlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
@@ -53,15 +53,12 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
     var batteryPercentage: Double?
     var eventualGlucose: Double?
     
-    override init() {
-        super.init()
-    }
+    init() { }
     
     required init?(rawValue: RawValue) {
-        super.init()
         let raw = rawValue
         
-        if let preferredString = raw["preferredUnitDisplayString"] as? String,
+        if let preferredString = raw["preferredUnitString"] as? String,
            let latestValue = raw["latestGlucose_value"] as? Double,
            let startDate = raw["latestGlucose_startDate"] as? Date {
  
@@ -82,7 +79,7 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
                     isLocal: local)
             }
             
-            preferredUnitDisplayString = preferredString
+            preferredUnitString = preferredString
             latestGlucose = GlucoseContext(
                 quantity: latestValue,
                 startDate: startDate,
@@ -116,10 +113,10 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
             "version": version
         ]
 
-        raw["preferredUnitDisplayString"] = preferredUnitDisplayString
+        raw["preferredUnitString"] = preferredUnitString
         
-        if let glucose = latestGlucose,
-           preferredUnitDisplayString != nil {
+        if preferredUnitString != nil,
+            let glucose = latestGlucose {
             raw["latestGlucose_value"] = glucose.quantity
             raw["latestGlucose_startDate"] = glucose.startDate
         }
@@ -160,5 +157,12 @@ final class StatusExtensionContext: NSObject, RawRepresentable {
         }
         
         return raw
+    }
+}
+
+
+extension StatusExtensionContext: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return String(reflecting: rawValue)
     }
 }
