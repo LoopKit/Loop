@@ -135,6 +135,8 @@
 		43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
+		4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		4F2C15751E0209FA00E160D4 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
@@ -1341,6 +1343,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F2C15751E0209FA00E160D4 /* GlucoseTrend.swift in Sources */,
+				4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */,
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
