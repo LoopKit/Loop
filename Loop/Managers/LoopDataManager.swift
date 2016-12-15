@@ -39,6 +39,14 @@ final class LoopDataManager {
             notify(forChange: .preferences)
         }
     }
+    
+    var batteryIsLithium: Bool {
+        didSet {
+            UserDefaults.standard.batteryIsLithium = batteryIsLithium
+            
+            notify(forChange: .preferences)
+        }
+    }
 
     var retrospectiveCorrectionEnabled: Bool {
         didSet {
@@ -52,6 +60,7 @@ final class LoopDataManager {
         self.deviceDataManager = deviceDataManager
 
         dosingEnabled = UserDefaults.standard.dosingEnabled
+        batteryIsLithium = UserDefaults.standard.batteryIsLithium
         retrospectiveCorrectionEnabled = UserDefaults.standard.retrospectiveCorrectionEnabled
 
         // Observe changes
