@@ -54,6 +54,15 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    var fetchPumpGlucoseEnabled: Bool {
+        get {
+            return UserDefaults.standard.fetchPumpGlucoseEnabled
+        }
+        set {
+            UserDefaults.standard.fetchPumpGlucoseEnabled = newValue
+        }
+    }
+
     var sensorInfo: SensorDisplayable? {
         return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
     }
@@ -367,7 +376,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         device.assertIdleListening()
 
         assertCurrentPumpStatus(device: device) {
-            self.assertCurrentPumpCGMData(device: device);
+            if UserDefaults.standard.fetchPumpGlucoseEnabled {
+                self.assertCurrentPumpCGMData(device: device)
+            }
         }
     }
 

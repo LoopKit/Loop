@@ -25,6 +25,7 @@ extension UserDefaults {
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
+        case PumpFetchGlucoseEnabled = "com.loopkit.Loop.FetchPumpGlucoseEnabled"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
@@ -211,6 +212,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.G4ReceiverEnabled.rawValue)
+        }
+    }
+
+    var fetchPumpGlucoseEnabled: Bool {
+        get {
+            return bool(forKey: Key.PumpFetchGlucoseEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.PumpFetchGlucoseEnabled.rawValue)
         }
     }
 

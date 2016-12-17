@@ -97,6 +97,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case pumpID = 0
         case transmitterID
         case receiverEnabled
+        case fetchPumpGlucose
         case glucoseTargetRange
         case insulinActionDuration
         case basalRate
@@ -106,7 +107,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case maxBolus
         case batteryChemistry
 
-        static let count = 11
+        static let count = 12
     }
 
     fileprivate enum ServiceRow: Int {
@@ -189,6 +190,17 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 return switchCell
             }
 
+            if case .fetchPumpGlucose = ConfigurationRow(rawValue: indexPath.row)! {
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+
+                switchCell.`switch`?.isOn = dataManager.fetchPumpGlucoseEnabled
+                switchCell.titleLabel.text = NSLocalizedString("Fetch Pump Glucose", comment: "The title text for the fetch pump glocose enabled switch cell")
+
+                switchCell.`switch`?.addTarget(self, action: #selector(fetchPumpGlucoseEnabledChanged(_:)), for: .valueChanged)
+
+                return switchCell
+            }
+
             let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
@@ -199,6 +211,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 configCell.textLabel?.text = NSLocalizedString("G5 Transmitter ID", comment: "The title text for the Dexcom G5 transmitter ID config value")
                 configCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
             case .receiverEnabled:
+                break
+            case .fetchPumpGlucose:
                 break
             case .basalRate:
                 configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
@@ -466,6 +480,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
             case .receiverEnabled:
                 break
+            case .fetchPumpGlucose:
+                break
             case .batteryChemistry:
                 let vc = RadioSelectionTableViewController.batteryChemistryType(dataManager.batteryChemistry)
                 vc.title = sender?.textLabel?.text
@@ -572,6 +588,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     func receiverEnabledChanged(_ sender: UISwitch) {
         dataManager.receiverEnabled = sender.isOn
+    }
+
+    func fetchPumpGlucoseEnabledChanged(_ sender: UISwitch) {
+        dataManager.fetchPumpGlucoseEnabled = sender.isOn
     }
 
     // MARK: - DailyValueScheduleTableViewControllerDelegate
