@@ -32,13 +32,13 @@ public final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    var loopInProgress = false {
+    public var loopInProgress = false {
         didSet {
             loopStateView.animated = loopInProgress
         }
     }
 
-    func assertTimer(_ active: Bool = true) {
+    public func assertTimer(_ active: Bool = true) {
         if active && window != nil, let date = lastLoopCompleted {
             initTimer(date)
         } else {

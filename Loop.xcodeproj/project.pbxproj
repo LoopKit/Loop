@@ -137,6 +137,9 @@
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4F2C15751E0209FA00E160D4 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
+		4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */; };
+		4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
+		4F2C15831E0757E600E160D4 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
@@ -440,6 +443,7 @@
 		43FBEDD71D73843700B21F22 /* LevelMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelMaskView.swift; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
+		4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+WatchApp.swift"; sourceTree = "<group>"; };
 		4F526D5E1DF2459000A04910 /* HKUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKUnit.swift; sourceTree = "<group>"; };
 		4F526D601DF8D9A900A04910 /* NetBasal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBasal.swift; sourceTree = "<group>"; };
 		4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Status Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -555,6 +559,7 @@
 				4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */,
 				4328E0231CFBE2C500E199AA /* NSUserDefaults.swift */,
 				4328E0241CFBE2C500E199AA /* UIColor.swift */,
+				4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */,
 				43CB2B2A1D924D450079823D /* WCSession.swift */,
 				4328E0251CFBE2C500E199AA /* WKAlertAction.swift */,
 				4328E02E1CFBF81800E199AA /* WKInterfaceImage.swift */,
@@ -1264,6 +1269,7 @@
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
+				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
 				430DA58E1D4AEC230097D1CA /* NSBundle.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				437CCADA1D284ADF0075D2C3 /* AuthenticationTableViewCell.swift in Sources */,
@@ -1350,6 +1356,7 @@
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				4328E0291CFBE2C500E199AA /* NSUserDefaults.swift in Sources */,
 				4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */,
+				4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */,
 				4328E02A1CFBE2C500E199AA /* UIColor.swift in Sources */,
 				4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */,
 				4328E02B1CFBE2C500E199AA /* WKAlertAction.swift in Sources */,
@@ -1388,6 +1395,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F2C15831E0757E600E160D4 /* HKUnit.swift in Sources */,
 				4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,

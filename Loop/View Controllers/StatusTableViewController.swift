@@ -10,6 +10,7 @@ import UIKit
 import CarbKit
 import GlucoseKit
 import HealthKit
+import HUDViewKit
 import InsulinKit
 import LoopKit
 import SwiftCharts
