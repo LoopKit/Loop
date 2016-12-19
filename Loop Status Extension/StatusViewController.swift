@@ -6,11 +6,11 @@
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
-import UIKit
-import NotificationCenter
-import HealthKit
 import CoreData
-import HUDViewKit
+import HealthKit
+import LoopUI
+import NotificationCenter
+import UIKit
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 

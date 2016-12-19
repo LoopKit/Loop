@@ -12,9 +12,9 @@ import CoreData
 import G4ShareSpy
 import GlucoseKit
 import HealthKit
-import HUDViewKit
 import InsulinKit
 import LoopKit
+import LoopUI
 import MinimedKit
 import NightscoutUploadKit
 import RileyLinkKit

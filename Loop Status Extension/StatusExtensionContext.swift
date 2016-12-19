@@ -9,7 +9,7 @@
 
 import Foundation
 import HealthKit
-import HUDViewKit
+import LoopUI
 
 struct ReservoirContext {
     let startDate: Date

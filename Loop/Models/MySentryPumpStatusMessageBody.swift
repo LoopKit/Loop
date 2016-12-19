@@ -6,8 +6,8 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import HUDViewKit
 import LoopKit
+import LoopUI
 import MinimedKit
 
 
@@ -21,7 +21,7 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
         }
     }
 
-    public var trendType: HUDViewKit.GlucoseTrend? {
+    public var trendType: LoopUI.GlucoseTrend? {
         guard case .active = glucose else {
             return nil
         }
