@@ -9,7 +9,7 @@
 import UIKit
 
 
-public final class BasalRateHUDView: HUDView {
+public final class BasalRateHUDView: BaseHUDView {
 
     @IBOutlet private weak var basalStateView: BasalStateView!
 

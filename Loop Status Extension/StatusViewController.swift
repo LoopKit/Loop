@@ -14,13 +14,39 @@ import UIKit
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 
-    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
-    @IBOutlet weak var glucoseHUD: GlucoseHUDView!
-    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
-    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
-    @IBOutlet weak var batteryHUD: BatteryLevelHUDView!
+    @IBOutlet weak var hudView: HUDView!
     @IBOutlet weak var subtitleLabel: UILabel!
-    
+
+    var loopCompletionHUD: LoopCompletionHUDView! {
+        get {
+            return hudView.view.loopCompletionHUD
+        }
+    }
+
+    var glucoseHUD: GlucoseHUDView! {
+        get {
+            return hudView.view.glucoseHUD
+        }
+    }
+
+    var basalRateHUD: BasalRateHUDView! {
+        get {
+            return hudView.view.basalRateHUD
+        }
+    }
+
+    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
+        get {
+            return hudView.view.reservoirVolumeHUD
+        }
+    }
+
+    var batteryHUD: BatteryLevelHUDView! {
+        get {
+            return hudView.view.batteryHUD
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         subtitleLabel.alpha = 0

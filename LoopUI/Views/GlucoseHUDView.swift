@@ -10,7 +10,7 @@ import UIKit
 import HealthKit
 
 
-public final class GlucoseHUDView: HUDView {
+public final class GlucoseHUDView: BaseHUDView {
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {

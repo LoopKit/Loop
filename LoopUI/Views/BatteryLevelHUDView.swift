@@ -9,7 +9,7 @@
 import UIKit
 
 
-public final class BatteryLevelHUDView: HUDView {
+public final class BatteryLevelHUDView: BaseHUDView {
 
     @IBOutlet private weak var levelMaskView: LevelMaskView!
 

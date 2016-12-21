@@ -8,7 +8,7 @@
 
 import UIKit
 
-public final class ReservoirVolumeHUDView: HUDView {
+public final class ReservoirVolumeHUDView: BaseHUDView {
 
     @IBOutlet private weak var levelMaskView: LevelMaskView!
 

@@ -8,7 +8,7 @@
 
 import UIKit
 
-public final class LoopCompletionHUDView: HUDView {
+public final class LoopCompletionHUDView: BaseHUDView {
 
     @IBOutlet private weak var loopStateView: LoopStateView!
 
