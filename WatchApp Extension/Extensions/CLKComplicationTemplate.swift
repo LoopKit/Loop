@@ -24,3 +24,46 @@ extension CLKComplicationTemplateModularSmallStackText {
     }
 
 }
+extension CLKComplicationTemplateCircularSmallStackText {
+    
+    convenience init?(line1: String?, date: Date?) {
+        guard let line1 = line1, let date = date else {
+            return nil
+        }
+        
+        self.init()
+        
+        line1TextProvider = CLKSimpleTextProvider(text: line1)
+        line2TextProvider = CLKTimeTextProvider(date: date)
+    }
+    
+}
+extension CLKComplicationTemplateModularLargeTallBody {
+    
+    convenience init?(line1: String?, date: Date?) {
+        guard let line1 = line1, let date = date else {
+            return nil
+        }
+        
+        self.init()
+        
+        bodyTextProvider = CLKSimpleTextProvider(text: line1)
+        headerTextProvider = CLKTimeTextProvider(date: date)
+    }
+    
+}
+extension CLKComplicationTemplateExtraLargeStackText {
+    
+    convenience init?(line1: String?, date: Date?) {
+        guard let line1 = line1, let date = date else {
+            return nil
+        }
+        
+        self.init()
+        
+        highlightLine2 = false
+        line1TextProvider = CLKSimpleTextProvider(text: line1)
+        line2TextProvider = CLKTimeTextProvider(date: date)
+    }
+    
+}
