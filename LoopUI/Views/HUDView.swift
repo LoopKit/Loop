@@ -20,8 +20,13 @@ public class HUDView: UIStackView {
         let nib = bundle.loadNibNamed("HUDView", owner: self, options:nil)
         if let stackView = nib?[0] as? UIStackView {
             self.addSubview(stackView)
-            self.autoresizesSubviews = true
-            stackView.translatesAutoresizingMaskIntoConstraints = false
+
+            // Use AutoLayout to have the stack view fill its entire container.
+            let horizontalConstraint = NSLayoutConstraint(item: stackView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0)
+            let verticalConstraint = NSLayoutConstraint(item: stackView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0)
+            let widthConstraint = NSLayoutConstraint(item: stackView, attribute: .width, relatedBy: .equal, toItem: self, attribute: .width, multiplier: 1, constant: 0)
+            let heightConstraint = NSLayoutConstraint(item: stackView, attribute: .height, relatedBy: .equal, toItem: self, attribute: .height, multiplier: 1, constant: 0)
+            self.addConstraints([horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint])
         }
     }
 
