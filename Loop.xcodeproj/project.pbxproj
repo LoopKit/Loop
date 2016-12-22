@@ -142,9 +142,8 @@
 		4F2C15831E0757E600E160D4 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4F2C15851E075B8700E160D4 /* LoopUI.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F75288D1DFE1DC600C322D6 /* LoopUI.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4F2C15931E09BF2C00E160D4 /* HUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2C15921E09BF2C00E160D4 /* HUDView.swift */; };
-		4F2C15951E09BF3C00E160D4 /* HUDStackView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15941E09BF3C00E160D4 /* HUDStackView.xib */; };
+		4F2C15951E09BF3C00E160D4 /* HUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15941E09BF3C00E160D4 /* HUDView.xib */; };
 		4F2C15971E09E94E00E160D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15961E09E94E00E160D4 /* Assets.xcassets */; };
-		4F2C15991E0A0FF400E160D4 /* HUDStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2C15981E0A0FF400E160D4 /* HUDStackView.swift */; };
 		4F526D5D1DF0FD6500A04910 /* InsulinKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43C6407B1DA051850093E25D /* InsulinKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
@@ -449,9 +448,8 @@
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
 		4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+WatchApp.swift"; sourceTree = "<group>"; };
 		4F2C15921E09BF2C00E160D4 /* HUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
-		4F2C15941E09BF3C00E160D4 /* HUDStackView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HUDStackView.xib; sourceTree = "<group>"; };
+		4F2C15941E09BF3C00E160D4 /* HUDView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HUDView.xib; sourceTree = "<group>"; };
 		4F2C15961E09E94E00E160D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		4F2C15981E0A0FF400E160D4 /* HUDStackView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUDStackView.swift; sourceTree = "<group>"; };
 		4F526D5E1DF2459000A04910 /* HKUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HKUnit.swift; sourceTree = "<group>"; };
 		4F526D601DF8D9A900A04910 /* NetBasal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetBasal.swift; sourceTree = "<group>"; };
 		4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Loop Status Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -847,7 +845,7 @@
 				4F7528931DFE1E1600C322D6 /* Views */,
 				4F75288D1DFE1DC600C322D6 /* LoopUI.h */,
 				4F75288E1DFE1DC600C322D6 /* Info.plist */,
-				4F2C15941E09BF3C00E160D4 /* HUDStackView.xib */,
+				4F2C15941E09BF3C00E160D4 /* HUDView.xib */,
 				4F2C15961E09E94E00E160D4 /* Assets.xcassets */,
 			);
 			path = LoopUI;
@@ -866,7 +864,6 @@
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */,
 				4F2C15921E09BF2C00E160D4 /* HUDView.swift */,
-				4F2C15981E0A0FF400E160D4 /* HUDStackView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1238,7 +1235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F2C15971E09E94E00E160D4 /* Assets.xcassets in Resources */,
-				4F2C15951E09BF3C00E160D4 /* HUDStackView.xib in Resources */,
+				4F2C15951E09BF3C00E160D4 /* HUDView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1429,7 +1426,6 @@
 				4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */,
 				4F7528A41DFE204900C322D6 /* UIColor.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
-				4F2C15991E0A0FF400E160D4 /* HUDStackView.swift in Sources */,
 				4F7528A21DFE200B00C322D6 /* LevelMaskView.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,
 				4F75289A1DFE1F6000C322D6 /* BasalRateHUDView.swift in Sources */,

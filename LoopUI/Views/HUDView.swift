@@ -8,18 +8,21 @@
 
 import UIKit
 
-public class HUDView: UIView {
-    let nibName:String = "HUDStackView"
-    public var view: HUDStackView!
+public class HUDView: UIStackView {
+    @IBOutlet public weak var loopCompletionHUD: LoopCompletionHUDView!
+    @IBOutlet public weak var glucoseHUD: GlucoseHUDView!
+    @IBOutlet public weak var basalRateHUD: BasalRateHUDView!
+    @IBOutlet public weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
+    @IBOutlet public weak var batteryHUD: BatteryLevelHUDView!
 
     func setup() {
         let bundle = Bundle(for: type(of: self))
-        let nib = UINib(nibName: self.nibName, bundle: bundle)
-        let instances = nib.instantiate(withOwner: self, options: nil)
-        self.view = instances[0] as! HUDStackView
-        self.view.frame = bounds
-        self.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        self.addSubview(self.view)
+        let nib = bundle.loadNibNamed("HUDView", owner: self, options:nil)
+        if let stackView = nib?[0] as? UIStackView {
+            self.addSubview(stackView)
+            self.autoresizesSubviews = true
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+        }
     }
 
     public override init(frame: CGRect) {
@@ -27,7 +30,7 @@ public class HUDView: UIView {
         setup()
     }
 
-    public required init?(coder aDecoder: NSCoder) {
+    public required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
     }

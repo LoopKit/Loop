@@ -19,31 +19,31 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     var loopCompletionHUD: LoopCompletionHUDView! {
         get {
-            return hudView.view.loopCompletionHUD
+            return hudView.loopCompletionHUD
         }
     }
 
     var glucoseHUD: GlucoseHUDView! {
         get {
-            return hudView.view.glucoseHUD
+            return hudView.glucoseHUD
         }
     }
 
     var basalRateHUD: BasalRateHUDView! {
         get {
-            return hudView.view.basalRateHUD
+            return hudView.basalRateHUD
         }
     }
 
     var reservoirVolumeHUD: ReservoirVolumeHUDView! {
         get {
-            return hudView.view.reservoirVolumeHUD
+            return hudView.reservoirVolumeHUD
         }
     }
 
     var batteryHUD: BatteryLevelHUDView! {
         get {
-            return hudView.view.batteryHUD
+            return hudView.batteryHUD
         }
     }
 
