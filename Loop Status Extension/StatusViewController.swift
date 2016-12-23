@@ -34,7 +34,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
 
     @objc private func openLoopApp(_: Any) {
-        if let url = URL(string: "Loop://") {
+        if let url = Bundle.main.mainAppUrl {
             self.extensionContext?.open(url)
         }
     }

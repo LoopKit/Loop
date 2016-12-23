@@ -29,4 +29,12 @@ extension Bundle {
     var appGroupSuiteName: String {
         return "group.\(mainAppBundleIdentifier!)"
     }
+
+    var mainAppUrl: URL? {
+        if let mainAppBundleIdentifier = mainAppBundleIdentifier {
+            return URL(string: mainAppBundleIdentifier + "://")
+        } else {
+            return nil
+        }
+    }
 }

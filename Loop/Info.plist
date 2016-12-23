@@ -7,7 +7,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>Loop</string>
+				<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
 			</array>
 		</dict>
 	</array>
