@@ -32,7 +32,7 @@ extension Bundle {
 
     var mainAppUrl: URL? {
         if let mainAppBundleIdentifier = mainAppBundleIdentifier {
-            return URL(string: mainAppBundleIdentifier + "://")
+            return URL(string: "\(mainAppBundleIdentifier)://")
         } else {
             return nil
         }
