@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import LoopKit
 import HealthKit
 
 
@@ -65,14 +64,15 @@ final class GlucoseHUDView: HUDView {
         }
     }
 
-    func set(_ glucoseValue: GlucoseValue, for unit: HKUnit, from sensor: SensorDisplayable?) {
+    func set(glucoseQuantity: Double, at glucoseStartDate: Date, unitString: String, from sensor: SensorDisplayable?) {
         var accessibilityStrings = [String]()
 
-        let time = timeFormatter.string(from: glucoseValue.startDate)
+        let time = timeFormatter.string(from: glucoseStartDate)
         caption?.text = time
+        let unit = HKUnit(from: unitString)
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        if let valueString = numberFormatter.string(from: NSNumber(value: glucoseValue.quantity.doubleValue(for: unit))) {
+        if let valueString = numberFormatter.string(from: NSNumber(value: glucoseQuantity)) {
             glucoseLabel.text = valueString
             accessibilityStrings.append(String(format: NSLocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
