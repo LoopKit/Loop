@@ -20,7 +20,7 @@ extension CLKComplicationTemplateModularSmallStackText {
         self.init()
 
         line1TextProvider = CLKSimpleTextProvider(text: line1)
-        line2TextProvider = CLKTimeTextProvider(date: date)
+        line2TextProvider = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
     }
 
 }
@@ -34,7 +34,7 @@ extension CLKComplicationTemplateCircularSmallStackText {
         self.init()
         
         line1TextProvider = CLKSimpleTextProvider(text: line1)
-        line2TextProvider = CLKTimeTextProvider(date: date)
+        line2TextProvider = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
     }
     
 }
@@ -48,7 +48,7 @@ extension CLKComplicationTemplateModularLargeTallBody {
         self.init()
         
         bodyTextProvider = CLKSimpleTextProvider(text: line1)
-        headerTextProvider = CLKTimeTextProvider(date: date)
+        headerTextProvider = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
     }
     
 }
@@ -63,7 +63,7 @@ extension CLKComplicationTemplateExtraLargeStackText {
         
         highlightLine2 = false
         line1TextProvider = CLKSimpleTextProvider(text: line1)
-        line2TextProvider = CLKTimeTextProvider(date: date)
+        line2TextProvider = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
     }
     
 }
