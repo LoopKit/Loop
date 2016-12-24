@@ -45,7 +45,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if context != &self.context {
+        guard context == &self.context else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
