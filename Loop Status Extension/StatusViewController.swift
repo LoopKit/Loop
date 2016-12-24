@@ -27,30 +27,29 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         super.viewDidLoad()
         subtitleLabel.alpha = 0
         subtitleLabel.textColor = UIColor.secondaryLabelColor
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
+        
         defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
         if let defaults = defaults {
             defaults.addObserver(
                 self,
                 forKeyPath: defaults.statusExtensionContextObservableKey,
-                options: [.new, .initial],
-                context: nil)
+                options: [],
+                context: &context)
         }
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-
+    deinit {
         if let defaults = defaults {
             defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey)
         }
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if context != &self.context {
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+            return
+        }
+        
         update()
     }
     
