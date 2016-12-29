@@ -64,7 +64,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
     }
 
     var sensorInfo: SensorDisplayable? {
-        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry ?? latestGlucoseFromPumpHistory
     }
 
     var latestPumpStatus: RileyLinkKit.PumpStatus?
@@ -176,6 +176,8 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
     // MARK: Pump data
 
     var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
+
+    fileprivate var latestGlucoseFromPumpHistory: PumpGlucoseHistorySensorDisplayable?
 
     /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
@@ -425,7 +427,15 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                         _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
                     }
 
-                    for timestampedGlucoseEvent in glucoseEvents {
+                    let relativeEvents = glucoseEvents.filter({ (e: TimestampedGlucoseEvent) -> Bool in
+                        return e.glucoseEvent is RelativeTimestampedGlucoseEvent
+                    })
+
+                    if let latestSensorEvent = relativeEvents.last?.glucoseEvent as? RelativeTimestampedGlucoseEvent {
+                        self.latestGlucoseFromPumpHistory = PumpGlucoseHistorySensorDisplayable(latestSensorEvent)
+                    }
+
+                    for timestampedGlucoseEvent in relativeEvents {
 
                         guard let glucoseEntry = timestampedGlucoseEvent.glucoseEvent as? SensorValueGlucoseEvent else {
                             continue
