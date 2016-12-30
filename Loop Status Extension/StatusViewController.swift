@@ -20,8 +20,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var batteryHUD: BatteryLevelHUDView!
     @IBOutlet weak var subtitleLabel: UILabel!
     
-    var context: StatusExtensionContext?
+    var statusExtensionContext: StatusExtensionContext?
     var defaults: UserDefaults?
+    final var observationContext = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,18 +38,18 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self,
                 forKeyPath: defaults.statusExtensionContextObservableKey,
                 options: [],
-                context: &context)
+                context: &observationContext)
         }
     }
     
     deinit {
         if let defaults = defaults {
-            defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey)
+            defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey, context: &observationContext)
         }
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        guard context == &self.context else {
+        guard context == &observationContext else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
