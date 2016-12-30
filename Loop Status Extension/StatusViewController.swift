@@ -51,12 +51,21 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         super.viewDidLoad()
         subtitleLabel.alpha = 0
         subtitleLabel.textColor = UIColor.secondaryLabelColor
+
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
+        view.addGestureRecognizer(tapGestureRecognizer)
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-    
+
+    @objc private func openLoopApp(_: Any) {
+        if let url = Bundle.main.mainAppUrl {
+            self.extensionContext?.open(url)
+        }
+    }
+
     func widgetPerformUpdate(completionHandler: (@escaping (NCUpdateResult) -> Void)) {
         guard
             let context = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext
