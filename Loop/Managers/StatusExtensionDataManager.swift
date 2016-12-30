@@ -91,8 +91,8 @@ final class StatusExtensionDataManager {
                     capacity: capacity)
             }
             
-            if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
-                context.batteryPercentage = Double(batteryPercentage) / 100.0
+            if let batteryPercentage = dataManager.pumpBatteryChargeRemaining {
+                context.batteryPercentage = batteryPercentage
             }
         
             if let lastPoint = predictedGlucose?.last {
