@@ -109,6 +109,7 @@ extension StatusExtensionDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             "## StatusExtensionDataManager",
+            "appGroupName: \(Bundle.main.appGroupSuiteName)",
             "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))"
         ].joined(separator: "\n")
     }
