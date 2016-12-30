@@ -251,7 +251,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
                     reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
-                
                 reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 

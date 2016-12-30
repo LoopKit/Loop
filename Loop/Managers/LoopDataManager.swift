@@ -668,7 +668,7 @@ final class LoopDataManager {
 
                     self.lastTempBasal = DoseEntry(type: .tempBasal, startDate: startDate, endDate: endDate, value: body.rate, unit: .unitsPerHour)
                     self.recommendedTempBasal = nil
-
+                    self.addLoopTempBasalNotification(glucose: (self.deviceDataManager.glucoseStore?.latestGlucose)!,prediction: self.predictedGlucose!,recommendedTempBasal: recommendedTempBasal)
                     resultsHandler(true, nil)
                 }
             case .failure(let error):
@@ -694,7 +694,24 @@ final class LoopDataManager {
             self.lastBolus = (units: units, date: date)
             self.notify(forChange: .bolus)
         }
+        NotificationManager.sendAlertPushNotification(alert: String(format:"%.1f", units) + "U Bolus successfully enacted")
     }
+    
+    private func addLoopTempBasalNotification(glucose: GlucoseValue, prediction: [GlucoseValue], recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
+        let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
+        let logger = DiagnosticLogger();
+        let unit = HKUnit.milligramsPerDeciliterUnit()
+        let pushMessage: [String: AnyObject] = [
+            "bg": glucose.quantity.doubleValue(for: unit) as AnyObject,
+            "temp": "absolute" as AnyObject,
+            "received": true as AnyObject,
+            "rate": recommendedTempBasal!.rate as AnyObject,
+            "duration": recommendedTempBasal!.duration.minutes as AnyObject,
+            "timestamp": dateFormatter.string(from: recommendedTempBasal!.recommendedDate) as AnyObject,
+            "eventualBG": round(prediction.last!.quantity.doubleValue(for: unit)) as AnyObject]
+        logger.loopPushNotification(message: pushMessage, loopAlert: false);
+    }
+
 }
 
 extension LoopDataManager {
