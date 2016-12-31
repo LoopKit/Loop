@@ -25,8 +25,16 @@ extension Bundle {
     private var mainAppBundleIdentifier: String? {
         return object(forInfoDictionaryKey: "MainAppBundleIdentifier") as? String
     }
-    
+
     var appGroupSuiteName: String {
-        return "group.\(mainAppBundleIdentifier!)"
+        return object(forInfoDictionaryKey: "AppGroupIdentifier") as! String
+    }
+
+    var mainAppUrl: URL? {
+        if let mainAppBundleIdentifier = mainAppBundleIdentifier {
+            return URL(string: "\(mainAppBundleIdentifier)://")
+        } else {
+            return nil
+        }
     }
 }
