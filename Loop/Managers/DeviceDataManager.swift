@@ -415,8 +415,16 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    private func updatePumpCGMSensorStatus(_ events: [TimestampedGlucoseEvent]) -> Void {
+        let sensorEvents = events.filter({ $0.glucoseEvent is RelativeTimestampedGlucoseEvent })
+
+        if let latestSensorEvent = sensorEvents.last?.glucoseEvent as? RelativeTimestampedGlucoseEvent {
+            self.latestGlucoseFromPumpHistory = PumpGlucoseHistorySensorDisplayable(latestSensorEvent)
+        }
+    }
+
     private func assertCurrentPumpCGMData(device: RileyLinkDevice, _ completion: (() -> Void)? = nil) {
-        let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
+        let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate.addingTimeInterval(TimeInterval(minutes: 1)) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
 
         if fetchGlucoseSince.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) {
             device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
@@ -427,35 +435,26 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                         _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
                     }
 
-                    let relativeEvents = glucoseEvents.filter({ (e: TimestampedGlucoseEvent) -> Bool in
-                        return e.glucoseEvent is RelativeTimestampedGlucoseEvent
+                    self.updatePumpCGMSensorStatus(glucoseEvents)
+
+                    let glucoseValues = glucoseEvents
+                        .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > fetchGlucoseSince })
+                        .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
+                            let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
+                            let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEvent.sgv))
+                            return (quantity: quantity, date: e.date, isDisplayOnly: false)
+                        })
+
+                    self.glucoseStore?.addGlucoseValues(glucoseValues, device: nil, resultHandler:  { (success, _, error) in
+                        if let error = error {
+                            self.logger.addError(error, fromSource: "GlucoseStore")
+                        }
+                        
+                        if success {
+                            NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
+                        }
                     })
 
-                    if let latestSensorEvent = relativeEvents.last?.glucoseEvent as? RelativeTimestampedGlucoseEvent {
-                        self.latestGlucoseFromPumpHistory = PumpGlucoseHistorySensorDisplayable(latestSensorEvent)
-                    }
-
-                    for timestampedGlucoseEvent in relativeEvents {
-
-                        guard let glucoseEntry = timestampedGlucoseEvent.glucoseEvent as? SensorValueGlucoseEvent else {
-                            continue
-                        }
-
-                        self.glucoseStore?.addGlucose(
-                            HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEntry.sgv)),
-                            date: timestampedGlucoseEvent.date,
-                            isDisplayOnly: false,
-                            device: nil
-                        ) { (success, _, error) in
-                            if let error = error {
-                                self.logger.addError(error, fromSource: "GlucoseStore")
-                            }
-
-                            if success {
-                                NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
-                            }
-                        }
-                    }
                 case .failure(let error):
                     self.logger.addError(error, fromSource: "PumpOps")
                 }
