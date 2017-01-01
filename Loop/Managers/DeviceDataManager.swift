@@ -14,6 +14,7 @@ import GlucoseKit
 import HealthKit
 import InsulinKit
 import LoopKit
+import LoopUI
 import MinimedKit
 import NightscoutUploadKit
 import RileyLinkKit

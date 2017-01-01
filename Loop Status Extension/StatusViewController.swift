@@ -6,20 +6,47 @@
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
-import UIKit
-import NotificationCenter
-import HealthKit
 import CoreData
+import HealthKit
+import LoopUI
+import NotificationCenter
+import UIKit
 
 class StatusViewController: UIViewController, NCWidgetProviding {
-    
-    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
-    @IBOutlet weak var glucoseHUD: GlucoseHUDView!
-    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
-    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
-    @IBOutlet weak var batteryHUD: BatteryLevelHUDView!
+
+    @IBOutlet weak var hudView: HUDView!
     @IBOutlet weak var subtitleLabel: UILabel!
-    
+
+    var loopCompletionHUD: LoopCompletionHUDView! {
+        get {
+            return hudView.loopCompletionHUD
+        }
+    }
+
+    var glucoseHUD: GlucoseHUDView! {
+        get {
+            return hudView.glucoseHUD
+        }
+    }
+
+    var basalRateHUD: BasalRateHUDView! {
+        get {
+            return hudView.basalRateHUD
+        }
+    }
+
+    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
+        get {
+            return hudView.reservoirVolumeHUD
+        }
+    }
+
+    var batteryHUD: BatteryLevelHUDView! {
+        get {
+            return hudView.batteryHUD
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         subtitleLabel.alpha = 0
