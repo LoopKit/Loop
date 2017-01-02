@@ -55,7 +55,7 @@ public final class LoopStateView: UIView {
         super.init(frame: frame)
 
         shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = nil
+        shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
@@ -65,7 +65,7 @@ public final class LoopStateView: UIView {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = nil
+        shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
