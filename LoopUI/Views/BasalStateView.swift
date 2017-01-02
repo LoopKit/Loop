@@ -9,14 +9,14 @@
 import UIKit
 
 
-final class BasalStateView: UIView {
+public final class BasalStateView: UIView {
     var netBasalPercent: Double = 0 {
         didSet {
             animateToPath(drawPath())
         }
     }
 
-    override class var layerClass : AnyClass {
+    override public class var layerClass : AnyClass {
         return CAShapeLayer.self
     }
 
@@ -34,7 +34,7 @@ final class BasalStateView: UIView {
         shapeLayer.path = drawPath()
     }
 
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 2
@@ -44,7 +44,7 @@ final class BasalStateView: UIView {
         shapeLayer.path = drawPath()
     }
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
 
         shapeLayer.path = drawPath()
