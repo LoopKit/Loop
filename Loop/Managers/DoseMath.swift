@@ -140,6 +140,7 @@ struct DoseMath {
      - parameter glucoseTargetRange: The schedule of target glucose ranges
      - parameter insulinSensitivity: The schedule of insulin sensitivities, in Units of insulin per glucose-unit
      - parameter basalRateSchedule:  The schedule of basal rates
+     - parameter pendingBolusAmount: The amount of insulin in any issued, but not confirmed, boluses
      - parameter minimumBGGuard:     If minBG is less than or equal to this value, no recommendation will be made
 
      - returns: The recommended bolus
@@ -151,10 +152,11 @@ struct DoseMath {
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
+        pendingBolusAmount: Double,
         minimumBGGuard: GlucoseThreshold
-    ) -> Double {
+    ) -> BolusRecommendation {
         guard glucose.count > 1 else {
-            return 0
+            return BolusRecommendation(amount: 0)
         }
 
         let eventualGlucose = glucose.last!
@@ -163,24 +165,42 @@ struct DoseMath {
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
 
         guard minGlucose.quantity >= minimumBGGuard.quantity else {
-            return 0
+            return BolusRecommendation(amount: 0)
         }
 
         let targetGlucose = eventualGlucoseTargets.maxValue
         let currentSensitivity = insulinSensitivity.quantity(at: date).doubleValue(for: glucoseTargetRange.unit)
 
-        var doseUnits = (eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
-
+        let doseUnits = (eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
+        
+        let pendingTempBasalInsulin: Double
+        
         if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
             let normalBasalRate = basalRateSchedule.value(at: date)
             let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
             let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
 
-            doseUnits -= max(0, remainingUnits)
+            pendingTempBasalInsulin = max(0, remainingUnits)
+        } else {
+            pendingTempBasalInsulin = 0
         }
+        
+        // All outstanding potential insulin delivery
+        let pendingInsulin = pendingTempBasalInsulin + pendingBolusAmount
+        
+        // Round to pump accuracy increments
+        let roundedAmount = round(max(0, (doseUnits - pendingInsulin)) * 40) / 40
+        
+        // Cap at max bolus amount
+        let cappedAmount = min(maxBolus, max(0, roundedAmount))
+        
+        
+        //        if minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue &&
+        //            eventualGlucoseTargets{
+        //
+        //        }
 
-        doseUnits = round(doseUnits * 40) / 40
-
-        return min(maxBolus, max(0, doseUnits))
+        
+        return BolusRecommendation(amount: cappedAmount, notice: nil, minBG: minGlucose, eventualBG: eventualGlucose, pendingInsulin: pendingInsulin)
     }
 }

@@ -619,15 +619,17 @@ final class LoopDataManager {
         }
 
         let pendingBolusAmount: Double = lastBolus?.units ?? 0
+        
+        let bolusRecommendation = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                                              lastTempBasal: self.lastTempBasal,
+                                                                              maxBolus: maxBolus,
+                                                                              glucoseTargetRange: glucoseTargetRange,
+                                                                              insulinSensitivity: insulinSensitivity,
+                                                                              basalRateSchedule: basalRates,
+                                                                              pendingBolusAmount: pendingBolusAmount,
+                                                                              minimumBGGuard: minimumBGGuard)
 
-        return max(0, DoseMath.recommendBolusFromPredictedGlucose(glucose,
-            lastTempBasal: self.lastTempBasal,
-            maxBolus: maxBolus,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates,
-            minimumBGGuard: minimumBGGuard
-        ) - pendingBolusAmount)
+        return bolusRecommendation.amount
     }
 
     func getRecommendedBolus(_ resultsHandler: @escaping (_ units: Double?, _ error: Error?) -> Void) {
