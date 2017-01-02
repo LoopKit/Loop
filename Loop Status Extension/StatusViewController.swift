@@ -17,6 +17,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var hudView: HUDView!
     @IBOutlet weak var subtitleLabel: UILabel!
 
+    var statusExtensionContext: StatusExtensionContext?
+    var defaults: UserDefaults?
+    final var observationContext = 1
+
     var loopCompletionHUD: LoopCompletionHUDView! {
         get {
             return hudView.loopCompletionHUD
@@ -54,6 +58,30 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
+
+        defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+        if let defaults = defaults {
+            defaults.addObserver(
+                self,
+                forKeyPath: defaults.statusExtensionContextObservableKey,
+                options: [],
+                context: &observationContext)
+        }
+    }
+    
+    deinit {
+        if let defaults = defaults {
+            defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey, context: &observationContext)
+        }
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard context == &observationContext else {
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+            return
+        }
+        
+        update()
     }
     
     override func didReceiveMemoryWarning() {
@@ -67,13 +95,18 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
 
     func widgetPerformUpdate(completionHandler: (@escaping (NCUpdateResult) -> Void)) {
+        let result = update()
+        completionHandler(result)
+    }
+    
+    @discardableResult
+    func update() -> NCUpdateResult {
         guard
-            let context = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)?.statusExtensionContext
+            let context = defaults?.statusExtensionContext
         else {
-            completionHandler(NCUpdateResult.failed)
-            return
+            return NCUpdateResult.failed
         }
-
+        
         // We should never have the case where there's glucose values but no preferred
         // unit. However, if that case were to happen we might show quantities against
         // the wrong units and that could be very harmful. So unless there's a preferred
@@ -81,8 +114,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         guard
             let preferredUnitString = context.preferredUnitString
         else {
-            completionHandler(NCUpdateResult.failed)
-            return
+            return NCUpdateResult.failed
         }
         
         if let glucose = context.latestGlucose {
@@ -124,10 +156,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         } else {
             subtitleLabel.alpha = 0
         }
-
+        
         // Right now we always act as if there's new data.
         // TODO: keep track of data changes and return .noData if necessary
-        completionHandler(NCUpdateResult.newData)
+        return NCUpdateResult.newData
     }
-    
 }
