@@ -9,6 +9,8 @@
 import UIKit
 
 public final class LoopStateView: UIView {
+    var firstDataUpdate = true
+    
     enum Freshness {
         case fresh
         case aging
@@ -55,7 +57,7 @@ public final class LoopStateView: UIView {
         super.init(frame: frame)
 
         shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = nil
+        shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
@@ -65,7 +67,7 @@ public final class LoopStateView: UIView {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 8
-        shapeLayer.fillColor = nil
+        shapeLayer.fillColor = UIColor.clear.cgColor
         shapeLayer.strokeColor = freshness.color.cgColor
 
         shapeLayer.path = drawPath()
@@ -112,7 +114,7 @@ public final class LoopStateView: UIView {
 
                     let group = CAAnimationGroup()
                     group.animations = [path, width]
-                    group.duration = 1
+                    group.duration = firstDataUpdate ? 0 : 1
                     group.repeatCount = HUGE
                     group.autoreverses = true
                     group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
@@ -122,6 +124,7 @@ public final class LoopStateView: UIView {
                     shapeLayer.removeAnimation(forKey: type(of: self).AnimationKey)
                 }
             }
+            firstDataUpdate = false
         }
     }
 }

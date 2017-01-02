@@ -12,10 +12,12 @@ import UIKit
 // Inspired by https://github.com/carekit-apple/CareKit/blob/master/CareKit/CareCard/OCKHeartView.h
 
 public class LevelMaskView: UIView {
+    var firstDataUpdate = true
 
     var value: Double = 1.0 {
         didSet {
-            animateFill()
+            animateFill(duration: firstDataUpdate ? 0 : 1.25)
+            firstDataUpdate = false
         }
     }
 
@@ -66,8 +68,8 @@ public class LevelMaskView: UIView {
         fillView?.backgroundColor = tintColor
     }
 
-    private func animateFill() {
-        UIView.animate(withDuration: 1.25, delay: 0, options: .beginFromCurrentState, animations: {
+    private func animateFill(duration: TimeInterval) {
+        UIView.animate(withDuration: duration, delay: 0, options: .beginFromCurrentState, animations: {
             self.updateFillViewFrame()
         }, completion: nil)
     }
