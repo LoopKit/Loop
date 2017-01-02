@@ -10,6 +10,7 @@ import UIKit
 
 
 public final class BasalStateView: UIView {
+
     var netBasalPercent: Double = 0 {
         didSet {
             animateToPath(drawPath())
@@ -30,8 +31,6 @@ public final class BasalStateView: UIView {
         shapeLayer.lineWidth = 2
         shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
         shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
-
-        shapeLayer.path = drawPath()
     }
 
     required public init?(coder aDecoder: NSCoder) {
@@ -40,14 +39,10 @@ public final class BasalStateView: UIView {
         shapeLayer.lineWidth = 2
         shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
         shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
-
-        shapeLayer.path = drawPath()
     }
 
     override public func layoutSubviews() {
         super.layoutSubviews()
-
-        shapeLayer.path = drawPath()
     }
 
     private func drawPath() -> CGPath {
@@ -75,14 +70,16 @@ public final class BasalStateView: UIView {
     private static let AnimationKey = "com.loudnate.Naterade.shapePathAnimation"
 
     private func animateToPath(_ path: CGPath) {
-        let animation = CABasicAnimation(keyPath: "path")
-        animation.fromValue = shapeLayer.path ?? drawPath()
-        animation.toValue = path
-        animation.duration = 1
-        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+        if shapeLayer.path != nil {
+            let animation = CABasicAnimation(keyPath: "path")
+            animation.fromValue = shapeLayer.path ?? drawPath()
+            animation.toValue = path
+            animation.duration = 1
+            animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
-        shapeLayer.add(animation, forKey: type(of: self).AnimationKey)
-        
+            shapeLayer.add(animation, forKey: type(of: self).AnimationKey)
+        }
+
         shapeLayer.path = path
     }
 }
