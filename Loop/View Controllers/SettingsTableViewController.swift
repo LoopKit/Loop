@@ -76,28 +76,25 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    fileprivate enum Section: Int {
+    fileprivate enum Section: Int, CaseCountable {
         case loop = 0
         case devices
         case configuration
         case services
-
-        static let count = 4
     }
 
-    fileprivate enum LoopRow: Int {
+    fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
         case preferredInsulinDataSource
         case diagnostic
-
-        static let count = 3
     }
 
-    fileprivate enum ConfigurationRow: Int {
+    fileprivate enum ConfigurationRow: Int, CaseCountable {
         case pumpID = 0
         case transmitterID
         case receiverEnabled
         case glucoseTargetRange
+        case minimumBGGuard
         case insulinActionDuration
         case basalRate
         case carbRatio
@@ -105,17 +102,13 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case maxBasal
         case maxBolus
         case batteryChemistry
-
-        static let count = 11
     }
 
-    fileprivate enum ServiceRow: Int {
+    fileprivate enum ServiceRow: Int, CaseCountable {
         case share = 0
         case nightscout
         case mLab
         case amplitude
-
-        static let count = 4
     }
 
     fileprivate lazy var valueNumberFormatter: NumberFormatter = {
@@ -127,7 +120,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         return formatter
     }()
-
+    
     // MARK: - UITableViewDataSource
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -240,6 +233,14 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     let maxTarget = valueNumberFormatter.string(from: NSNumber(value: value.maxValue)) ?? "—"
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.glucoseUnitDisplayString)
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+            case .minimumBGGuard:
+                configCell.textLabel?.text = NSLocalizedString("Minimum BG Guard", comment: "The title text for the minimum bg guard setting")
+                
+                if let minimumBGGuard = dataManager.minimumBGGuard {
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for minimum bg guard. (1: value)(2: bg unit)"), minimumBGGuard.value, minimumBGGuard.unit.glucoseUnitDisplayString)
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -464,6 +465,24 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     show(scheduleVC, sender: sender)
                 }
+            case .minimumBGGuard:
+                if let minBGGuard = dataManager.minimumBGGuard {
+                    let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnits: minBGGuard.unit)
+                    vc.delegate = self
+                    self.show(vc, sender: sender)
+                } else if let glucoseStore = dataManager.glucoseStore {
+                    glucoseStore.preferredUnit({ (unit, error) -> Void in
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                self.presentAlertController(with: error)
+                            } else if let unit = unit {
+                                let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnits: unit)
+                                vc.delegate = self
+                                self.show(vc, sender: sender)
+                            }
+                        }
+                    })
+                }
             case .receiverEnabled:
                 break
             case .batteryChemistry:
@@ -589,6 +608,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
                         dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, workoutRange: controller.workoutRange, timeZone: controller.timeZone)
                     }
+                case .minimumBGGuard:
+                    if let controller = controller as? GlucoseRangeScheduleTableViewController {
+                        dataManager.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, workoutRange: controller.workoutRange, timeZone: controller.timeZone)
+                    }
                 case let row:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {
                         switch row {
@@ -676,6 +699,11 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                     dataManager.maximumBolus = units
                 } else {
                     dataManager.maximumBolus = nil
+                }
+            case .minimumBGGuard:
+                if let controller = controller as? GlucoseThresholdTableViewController,
+                    let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
+                    dataManager.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnits, value: minBGGuard)
                 }
             default:
                 assertionFailure()

@@ -817,6 +817,13 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
     }
+    
+    var minimumBGGuard: GlucoseThreshold? = UserDefaults.standard.minimumBGGuard {
+        didSet {
+            UserDefaults.standard.minimumBGGuard = minimumBGGuard
+            AnalyticsManager.sharedManager.didChangeMinimumBGGuard()
+        }
+    }
 
     var workoutModeEnabled: Bool? {
         guard let range = glucoseTargetRangeSchedule else {
