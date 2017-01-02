@@ -51,6 +51,7 @@ struct DoseMath {
      - parameter glucoseTargetRange:            The schedule of target glucose ranges
      - parameter insulinSensitivity:            The schedule of insulin sensitivities, in Units of insulin per glucose-unit
      - parameter basalRateSchedule:             The schedule of basal rates
+     - parameter minimumBGGuard:                Loop will always 0 temp if minBG is less than or equal to this value.
 
      - returns: The recommended basal rate and duration
      */
@@ -60,7 +61,8 @@ struct DoseMath {
         maxBasalRate: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
-        basalRateSchedule: BasalRateSchedule
+        basalRateSchedule: BasalRateSchedule,
+        minimumBGGuard: GlucoseThreshold
     ) -> (rate: Double, duration: TimeInterval)? {
         guard glucose.count > 1 else {
             return nil
@@ -77,9 +79,7 @@ struct DoseMath {
         var rate: Double?
         var duration = TimeInterval(minutes: 30)
 
-        let alwaysLowTempBGThreshold: Double = 55 // mg/dL
-
-        if minGlucose.quantity.doubleValue(for: HKUnit.milligramsPerDeciliterUnit()) <= alwaysLowTempBGThreshold {
+        if minGlucose.quantity <= minimumBGGuard.quantity {
             rate = 0
         } else if minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < minGlucoseTargets.minValue && eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) <= eventualGlucoseTargets.minValue {
             let targetGlucose = HKQuantity(unit: glucoseTargetRange.unit, doubleValue: (minGlucoseTargets.minValue + minGlucoseTargets.maxValue) / 2)
@@ -140,6 +140,7 @@ struct DoseMath {
      - parameter glucoseTargetRange: The schedule of target glucose ranges
      - parameter insulinSensitivity: The schedule of insulin sensitivities, in Units of insulin per glucose-unit
      - parameter basalRateSchedule:  The schedule of basal rates
+     - parameter minimumBGGuard:     If minBG is less than or equal to this value, no recommendation will be made
 
      - returns: The recommended bolus
      */
@@ -149,7 +150,8 @@ struct DoseMath {
         maxBolus: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
-        basalRateSchedule: BasalRateSchedule
+        basalRateSchedule: BasalRateSchedule,
+        minimumBGGuard: GlucoseThreshold
     ) -> Double {
         guard glucose.count > 1 else {
             return 0
@@ -159,10 +161,8 @@ struct DoseMath {
         let minGlucose = glucose.min { $0.quantity < $1.quantity }!
 
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
-        // Use between to opt-out of the override.
-        let minGlucoseTargets = glucoseTargetRange.between(start: minGlucose.startDate, end: minGlucose.startDate).first!.value
 
-        guard minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) >= minGlucoseTargets.minValue else {
+        guard minGlucose.quantity >= minimumBGGuard.quantity else {
             return 0
         }
 

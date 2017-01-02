@@ -545,7 +545,8 @@ final class LoopDataManager {
             maxBasal = deviceDataManager.maximumBasalRatePerHour,
             let glucoseTargetRange = deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
-            let basalRates = deviceDataManager.basalRateSchedule
+            let basalRates = deviceDataManager.basalRateSchedule,
+            let minimumBGGuard = deviceDataManager.minimumBGGuard
         else {
             error = LoopError.missingDataError("Loop configuration data not set")
             throw error!
@@ -559,7 +560,8 @@ final class LoopDataManager {
                 maxBasalRate: maxBasal,
                 glucoseTargetRange: glucoseTargetRange,
                 insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates
+                basalRateSchedule: basalRates,
+                minimumBGGuard: minimumBGGuard
             )
         else {
             recommendedTempBasal = nil
@@ -600,7 +602,8 @@ final class LoopDataManager {
             let maxBolus = self.deviceDataManager.maximumBolus,
             let glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
-            let basalRates = self.deviceDataManager.basalRateSchedule
+            let basalRates = self.deviceDataManager.basalRateSchedule,
+            let minimumBGGuard = self.deviceDataManager.minimumBGGuard
         else {
             throw LoopError.missingDataError("Bolus prediction and configuration data not found")
         }
@@ -622,7 +625,8 @@ final class LoopDataManager {
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates
+            basalRateSchedule: basalRates,
+            minimumBGGuard: minimumBGGuard
         ) - pendingBolusAmount)
     }
 
