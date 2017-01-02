@@ -68,7 +68,7 @@ public class LevelMaskView: UIView {
         fillView?.backgroundColor = tintColor
     }
 
-    private func animateFill(duration: Double) {
+    private func animateFill(duration: TimeInterval) {
         UIView.animate(withDuration: duration, delay: 0, options: .beginFromCurrentState, animations: {
             self.updateFillViewFrame()
         }, completion: nil)
