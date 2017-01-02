@@ -171,7 +171,15 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                         self.charts.alternatePredictedGlucoseValues = predictedGlucose ?? []
 
                         if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
-                            self.eventualGlucoseDescription = String(describing: lastPoint)
+                            let formatter = NumberFormatter.glucoseFormatter(for: self.charts.glucoseUnit)
+                            if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: lastPoint.scalar)) {
+                                self.eventualGlucoseDescription = String(
+                                    format: NSLocalizedString(
+                                        "%1$@ %2$@",
+                                        comment: "The unit format describing the eventual glucose value. (1: localized glucose value description) (2: localized glucose units description)"),
+                                    eventualGlucoseNumberString,
+                                    self.charts.glucoseUnit.glucoseUnitDisplayString)
+                            }
                         }
 
                         reloadGroup.leave()
