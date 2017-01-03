@@ -562,7 +562,30 @@ class RecommendBolusTests: XCTestCase {
         )
 
         XCTAssertEqual(1.325, dose.amount)
+        XCTAssertEqual("Current glucose is below target range, but is predicted to rise.", dose.notice!)
     }
+
+    func testDroppingBelowRangeThenRising() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_dropping_then_rising")
+
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               lastTempBasal: nil,
+                                                               maxBolus: maxBolus,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               pendingBolusAmount: 0,
+                                                               minimumBGGuard: minimumBGGuard
+        )
+        
+        XCTAssertEqual(1.325, dose.amount)
+        XCTAssertEqual("Glucose is predicted to be 80 mg/dL at 6:30 PM and eventually rise above target.", dose.notice!)
+
+
+
+    }
+
 
     func testStartLowEndHighWithPendingBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")

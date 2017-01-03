@@ -12,15 +12,9 @@ import LoopKit
 struct BolusRecommendation {
     let amount: Double
     let notice: String?
-    let minBG: GlucoseValue?
-    let eventualBG: GlucoseValue?
-    let pendingInsulin: Double?
-    
-    init(amount: Double, notice: String? = nil, minBG: GlucoseValue? = nil, eventualBG: GlucoseValue? = nil, pendingInsulin: Double? = nil) {
+
+    init(amount: Double, notice: String? = nil) {
         self.amount = amount
         self.notice = notice
-        self.minBG = minBG
-        self.eventualBG = eventualBG
-        self.pendingInsulin = pendingInsulin
     }
 }

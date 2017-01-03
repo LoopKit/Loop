@@ -571,7 +571,7 @@ final class LoopDataManager {
         recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.rate, duration: tempBasal.duration)
     }
 
-    func addCarbEntryAndRecommendBolus(_ carbEntry: CarbEntry, resultsHandler: @escaping (_ units: Double?, _ error: Error?) -> Void) {
+    func addCarbEntryAndRecommendBolus(_ carbEntry: CarbEntry, resultsHandler: @escaping (_ recommendation: BolusRecommendation?, _ error: Error?) -> Void) {
         if let carbStore = deviceDataManager.carbStore {
             carbStore.addCarbEntry(carbEntry) { (success, _, error) in
                 self.dataAccessQueue.async {
@@ -596,7 +596,7 @@ final class LoopDataManager {
         }
     }
 
-    private func recommendBolus() throws -> Double {
+    private func recommendBolus() throws -> BolusRecommendation {
         guard let
             glucose = self.predictedGlucose,
             let maxBolus = self.deviceDataManager.maximumBolus,
@@ -629,14 +629,14 @@ final class LoopDataManager {
                                                                               pendingBolusAmount: pendingBolusAmount,
                                                                               minimumBGGuard: minimumBGGuard)
 
-        return bolusRecommendation.amount
+        return bolusRecommendation
     }
 
-    func getRecommendedBolus(_ resultsHandler: @escaping (_ units: Double?, _ error: Error?) -> Void) {
+    func getRecommendedBolus(_ resultsHandler: @escaping (_ units: BolusRecommendation?, _ error: Error?) -> Void) {
         dataAccessQueue.async {
             do {
-                let units = try self.recommendBolus()
-                resultsHandler(units, nil)
+                let recommendation = try self.recommendBolus()
+                resultsHandler(recommendation, nil)
             } catch let error {
                 resultsHandler(nil, error)
             }
