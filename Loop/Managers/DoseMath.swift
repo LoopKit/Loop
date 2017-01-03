@@ -195,24 +195,31 @@ struct DoseMath {
         // Cap at max bolus amount
         let cappedAmount = min(maxBolus, max(0, roundedAmount))
 
+        let numberFormatter = NumberFormatter.glucoseFormatter(for: glucoseTargetRange.unit)
+        let eventualBGValueStr = numberFormatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit)))!
+        let eventualBG = "\(eventualBGValueStr) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
+
+
         let notice: String?
         if cappedAmount > 0 && minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
             if minGlucose.startDate == glucose[0].startDate {
-                notice = NSLocalizedString("Current glucose is below target range, but is predicted to rise.", comment: "Message when offering bolus prediction even though bg is below range.")
+                notice = String(format: NSLocalizedString("Current glucose is below target range. Recommendation is based on eventual predicted BG of %3$@", comment: "Message when offering bolus prediction even though bg is below range. (1: eventual BG)"), eventualBG)
             } else {
                 let timeFormatter = DateFormatter()
                 timeFormatter.dateStyle = .none
                 timeFormatter.timeStyle = .short
                 let time = timeFormatter.string(from: minGlucose.startDate)
 
-                let numberFormatter = NumberFormatter.glucoseFormatter(for: glucoseTargetRange.unit)
-
                 let minBGValue = numberFormatter.string(from: NSNumber(value: minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit)))!
 
                 let minBGStr = "\(minBGValue) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
 
-                notice = String(format: NSLocalizedString("Glucose is predicted to be %1$@ at %2$@ and eventually rise above target.", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose number)(2: glucose time)"), minBGStr, time)
+                notice = String(format: NSLocalizedString("Glucose is estimated to be %1$@ at %2$@. Recommendation is based on eventual predicted BG of %3$@", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose number)(2: glucose time)(3: eventual BG)"), minBGStr, time, eventualBG)
             }
+        } else if eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
+
+            let bgStr = "\(eventualBG) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
+            notice = String(format: NSLocalizedString("Eventual glucose is %1$@. No bolus recommended.", comment: "Notice when eventual glucose is below range, so no bolus is recommended.  (1: eventual glucose number)"), bgStr)
         } else {
             notice = nil
         }
