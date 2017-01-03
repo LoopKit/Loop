@@ -47,6 +47,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
             noticeLabel?.text = bolusRecommendation?.notice
+            tableView.reloadData()
         }
     }
 
@@ -55,6 +56,9 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let cob = carbsOnBoard, let cobStr = decimalFormatter.string(from: NSNumber(value: cob)) {
                 cobLabel?.text = cobStr
             }
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
 
@@ -62,6 +66,9 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         didSet {
             if let iob = insulinOnBoard, let iobStr = decimalFormatter.string(from: NSNumber(value: iob)) {
                 iobLabel?.text = iobStr
+            }
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
             }
         }
     }
@@ -181,7 +188,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     private lazy var decimalFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
 
-        numberFormatter.maximumSignificantDigits = 3
+        numberFormatter.maximumSignificantDigits = 2
         numberFormatter.minimumFractionDigits = 1
 
         return numberFormatter
