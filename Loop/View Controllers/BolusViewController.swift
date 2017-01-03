@@ -13,22 +13,56 @@ import LoopKit
 
 final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
+    fileprivate enum Rows: Int, CaseCountable {
+        case iob = 0
+        case cob
+        case notice
+        case recommended
+        case entry
+    }
+
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         let spellOutFormatter = NumberFormatter()
         spellOutFormatter.numberStyle = .spellOut
 
-        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: recommendedBolus)) ?? "0")
+        let amount = bolusRecommendation?.amount ?? 0
+        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: amount)) ?? "0")
 
         bolusAmountTextField.becomeFirstResponder()
     
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
-    var recommendedBolus: Double = 0 {
+    var loopError: Error? = nil {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
+            noticeLabel?.text = String(describing: loopError)
+        }
+    }
+
+    var bolusRecommendation: BolusRecommendation? = nil {
+        didSet {
+            let amount = bolusRecommendation?.amount ?? 0
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
+            noticeLabel?.text = bolusRecommendation?.notice
+        }
+    }
+
+    var carbsOnBoard: Double? = nil {
+        didSet {
+            if let cob = carbsOnBoard, let cobStr = decimalFormatter.string(from: NSNumber(value: cob)) {
+                cobLabel?.text = cobStr
+            }
+        }
+    }
+
+    var insulinOnBoard: Double? = nil {
+        didSet {
+            if let iob = insulinOnBoard, let iobStr = decimalFormatter.string(from: NSNumber(value: iob)) {
+                iobLabel?.text = iobStr
+            }
         }
     }
 
@@ -38,9 +72,37 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
-            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: recommendedBolus))
+            let amount = bolusRecommendation?.amount ?? 0
+            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
         }
     }
+
+    @IBOutlet weak var noticeLabel: UILabel? {
+        didSet {
+            if let error = loopError {
+                noticeLabel?.text = String(describing: error)
+            } else if let notice = bolusRecommendation?.notice {
+                noticeLabel?.text = notice
+            }
+        }
+    }
+
+    @IBOutlet weak var iobLabel: UILabel? {
+        didSet {
+            if let iob = insulinOnBoard {
+                iobLabel?.text = decimalFormatter.string(from: NSNumber(value: iob))
+            }
+        }
+    }
+
+    @IBOutlet weak var cobLabel: UILabel? {
+        didSet {
+            if let cob = carbsOnBoard {
+                cobLabel?.text = decimalFormatter.string(from: NSNumber(value: cob))
+            }
+        }
+    }
+
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if (indexPath.row == 0) {
@@ -55,7 +117,23 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             ]
         }
     }
-    
+
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if indexPath.row == Rows.iob.rawValue && self.insulinOnBoard == nil {
+            return 0
+        }
+        if indexPath.row == Rows.cob.rawValue && self.carbsOnBoard == nil {
+            return 0
+        }
+        if indexPath.row == Rows.notice.rawValue {
+            let noticeText = self.noticeLabel?.text
+            if noticeText == nil || noticeText!.isEmpty {
+                return 0
+            }
+        }
+        return super.tableView(tableView, heightForRowAt: indexPath)
+    }
+
     @objc
     func acceptRecommendedBolus() {
         bolusAmountTextField?.text = recommendedBolusAmountLabel?.text
