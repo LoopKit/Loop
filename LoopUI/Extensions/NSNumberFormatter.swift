@@ -14,10 +14,8 @@ extension NumberFormatter {
     public static func glucoseFormatter(for unit: HKUnit) -> NumberFormatter {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
-        numberFormatter.minimumFractionDigits = unit.preferredMinimumFractionDigits
-        numberFormatter.maximumSignificantDigits = 3
-        numberFormatter.usesSignificantDigits = true
-
+        numberFormatter.minimumFractionDigits = unit.preferredFractionDigits
+        numberFormatter.maximumFractionDigits = unit.preferredFractionDigits
         return numberFormatter
     }
 }
