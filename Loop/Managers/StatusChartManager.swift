@@ -89,11 +89,11 @@ final class StatusChartsManager {
     var glucoseValues: [GlucoseValue] = [] {
         didSet {
             let unitString = glucoseUnit.glucoseUnitDisplayString
-
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: glucoseUnit)
             glucosePoints = glucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: glucoseFormatter)
                 )
             }
         }
@@ -115,11 +115,12 @@ final class StatusChartsManager {
     var predictedGlucoseValues: [GlucoseValue] = [] {
         didSet {
             let unitString = glucoseUnit.glucoseUnitDisplayString
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: glucoseUnit)
 
             predictedGlucosePoints = predictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: glucoseFormatter)
                 )
             }
         }
@@ -128,11 +129,12 @@ final class StatusChartsManager {
     var alternatePredictedGlucoseValues: [GlucoseValue] = [] {
         didSet {
             let unitString = glucoseUnit.glucoseUnitDisplayString
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: glucoseUnit)
 
             alternatePredictedGlucosePoints = alternatePredictedGlucoseValues.map {
                 return ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: integerFormatter)
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: glucoseFormatter)
                 )
             }
         }
