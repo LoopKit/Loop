@@ -194,7 +194,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
                 switchCell.`switch`?.isOn = dataManager.fetchPumpGlucoseEnabled
-                switchCell.titleLabel.text = NSLocalizedString("Fetch Pump Glucose", comment: "The title text for the fetch pump glocose enabled switch cell")
+                switchCell.titleLabel.text = NSLocalizedString("Fetch Enlite Data", comment: "The title text for the fetch enlite data enabled switch cell")
 
                 switchCell.`switch`?.addTarget(self, action: #selector(fetchPumpGlucoseEnabledChanged(_:)), for: .valueChanged)
 

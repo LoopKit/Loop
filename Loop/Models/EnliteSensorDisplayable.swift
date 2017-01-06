@@ -1,5 +1,5 @@
 //
-//  PumpGlucoseHistorySensorDisplayable.swift
+//  EnliteSensorDisplayable.swift
 //  Loop
 //
 //  Created by Timothy Mecklem on 12/28/16.
@@ -10,7 +10,7 @@ import Foundation
 import LoopUI
 import MinimedKit
 
-struct PumpGlucoseHistorySensorDisplayable: SensorDisplayable {
+struct EnliteSensorDisplayable: SensorDisplayable {
     public let isStateValid: Bool
     public let trendType: LoopUI.GlucoseTrend? = nil
     public let isLocal = true
