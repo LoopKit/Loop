@@ -12,6 +12,7 @@ import GlucoseKit
 import HealthKit
 import InsulinKit
 import LoopKit
+import LoopUI
 import SwiftCharts
 
 
@@ -759,16 +760,26 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - HUDs
 
-    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
-
-    @IBOutlet weak var glucoseHUD: GlucoseHUDView! {
+    @IBOutlet weak var hudView: HUDView! {
         didSet {
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
-
+            
             if cgmAppURL != nil {
                 glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
+        }
+    }
+    
+    var loopCompletionHUD: LoopCompletionHUDView! {
+        get {
+            return hudView.loopCompletionHUD
+        }
+    }
+    
+    var glucoseHUD: GlucoseHUDView! {
+        get {
+            return hudView.glucoseHUD
         }
     }
 
@@ -788,9 +799,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
-
-    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
-
-    @IBOutlet weak var batteryLevelHUD: BatteryLevelHUDView!
+    var basalRateHUD: BasalRateHUDView! {
+        get {
+            return hudView.basalRateHUD
+        }
+    }
+    
+    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
+        get {
+            return hudView.reservoirVolumeHUD
+        }
+    }
+    
+    var batteryLevelHUD: BatteryLevelHUDView! {
+        get {
+            return hudView.batteryHUD
+        }
+    }
 }

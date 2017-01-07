@@ -8,23 +8,23 @@
 
 import UIKit
 
-final class LoopCompletionHUDView: HUDView {
+public final class LoopCompletionHUDView: BaseHUDView {
 
     @IBOutlet private weak var loopStateView: LoopStateView!
 
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
 
         updateDisplay(nil)
     }
 
-    var dosingEnabled = false {
+    public var dosingEnabled = false {
         didSet {
             loopStateView.open = !dosingEnabled
         }
     }
 
-    var lastLoopCompleted: Date? {
+    public var lastLoopCompleted: Date? {
         didSet {
             updateTimer = nil
             loopInProgress = false
@@ -32,13 +32,13 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    var loopInProgress = false {
+    public var loopInProgress = false {
         didSet {
             loopStateView.animated = loopInProgress
         }
     }
 
-    func assertTimer(_ active: Bool = true) {
+    public func assertTimer(_ active: Bool = true) {
         if active && window != nil, let date = lastLoopCompleted {
             initTimer(date)
         } else {
@@ -112,7 +112,7 @@ final class LoopCompletionHUDView: HUDView {
         }
     }
 
-    override func didMoveToWindow() {
+    override public func didMoveToWindow() {
         super.didMoveToWindow()
 
         assertTimer()

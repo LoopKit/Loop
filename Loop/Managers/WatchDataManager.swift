@@ -118,7 +118,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     context.maxBolus = maxBolus
 
                     if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                        context.glucoseTrend = trend
+                        context.glucoseTrendRawValue = trend.rawValue
                     }
 
                     completionHandler(context)
