@@ -660,7 +660,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         if dataManager.transmitterEnabled == false {
             dataManager.transmitterEnabled = true
             disableReceiver()
-            tableView.insertRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .bottom)
+            tableView.insertRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
 
@@ -669,7 +669,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             dataManager.transmitterEnabled = false
             let switchCell = tableView.cellForRow(at: IndexPath(row: CgmRow.transmitterEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
             switchCell.`switch`?.setOn(false, animated: true)
-            tableView.deleteRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .bottom)
+            tableView.deleteRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
 
