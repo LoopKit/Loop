@@ -12,6 +12,7 @@ import GlucoseKit
 import HealthKit
 import InsulinKit
 import LoopKit
+import LoopUI
 import SwiftCharts
 
 
@@ -251,12 +252,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
                     reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
-
+                
                 reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
-            if let status = dataManager.latestPumpStatusFromMySentry {
-                batteryLevelHUD.batteryLevel = Double(status.batteryRemainingPercent) / 100
+            if let level = dataManager.pumpBatteryChargeRemaining {
+                batteryLevelHUD.batteryLevel = level
             }
 
             loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
@@ -267,7 +268,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
-                    self.glucoseHUD.set(glucose, for: self.charts.glucoseUnit, from: self.dataManager.sensorInfo)
+                    self.glucoseHUD.set(glucoseQuantity: glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                                        at: glucose.startDate,
+                                        unitString: self.charts.glucoseUnit.unitString,
+                                        from: self.dataManager.sensorInfo)
                 }
 
                 self.charts.prerender()
@@ -384,39 +388,13 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }()
 
     // MARK: - HUD Data
-
+    
     private var lastTempBasal: DoseEntry? {
         didSet {
-            guard let scheduledBasal = dataManager.basalRateSchedule?.between(start: Date(), end: Date()).first else {
-                return
-            }
-
-            let netBasalRate: Double
-            let netBasalPercent: Double
-            let basalStartDate: Date
-
-            if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = dataManager.maximumBasalRatePerHour {
-                netBasalRate = lastTempBasal.value - scheduledBasal.value
-                basalStartDate = lastTempBasal.startDate
-
-                if netBasalRate < 0 {
-                    netBasalPercent = netBasalRate / scheduledBasal.value
-                } else {
-                    netBasalPercent = netBasalRate / (maxBasal - scheduledBasal.value)
+            if let lastNetBasal = self.dataManager.loopManager.lastNetBasal {
+                DispatchQueue.main.async {
+                    self.basalRateHUD.setNetBasalRate(lastNetBasal.rate, percent: lastNetBasal.percent, at: lastNetBasal.startDate)
                 }
-            } else {
-                netBasalRate = 0
-                netBasalPercent = 0
-
-                if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > scheduledBasal.startDate {
-                    basalStartDate = lastTempBasal.endDate
-                } else {
-                    basalStartDate = scheduledBasal.startDate
-                }
-            }
-
-            DispatchQueue.main.async {
-                self.basalRateHUD.setNetBasalRate(netBasalRate, percent: netBasalPercent, at: basalStartDate)
             }
         }
     }
@@ -782,16 +760,26 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     // MARK: - HUDs
 
-    @IBOutlet weak var loopCompletionHUD: LoopCompletionHUDView!
-
-    @IBOutlet weak var glucoseHUD: GlucoseHUDView! {
+    @IBOutlet weak var hudView: HUDView! {
         didSet {
             let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
-
+            
             if cgmAppURL != nil {
                 glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
+        }
+    }
+    
+    var loopCompletionHUD: LoopCompletionHUDView! {
+        get {
+            return hudView.loopCompletionHUD
+        }
+    }
+    
+    var glucoseHUD: GlucoseHUDView! {
+        get {
+            return hudView.glucoseHUD
         }
     }
 
@@ -811,9 +799,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    @IBOutlet weak var basalRateHUD: BasalRateHUDView!
-
-    @IBOutlet weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
-
-    @IBOutlet weak var batteryLevelHUD: BatteryLevelHUDView!
+    var basalRateHUD: BasalRateHUDView! {
+        get {
+            return hudView.basalRateHUD
+        }
+    }
+    
+    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
+        get {
+            return hudView.reservoirVolumeHUD
+        }
+    }
+    
+    var batteryLevelHUD: BatteryLevelHUDView! {
+        get {
+            return hudView.batteryHUD
+        }
+    }
 }

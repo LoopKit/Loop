@@ -231,6 +231,44 @@
  */
 - (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups outOfSession:(BOOL) outOfSession;
 
+/**
+ Tracks an event. Events are saved locally.
+
+ Uploads are batched to occur every 30 events or every 30 seconds (whichever comes first), as well as on app close.
+
+ @param eventType                The name of the event you wish to track.
+ @param eventProperties          You can attach additional data to any event by passing a NSDictionary object with property: value pairs.
+ @param groups                   You can specify event-level groups for this user by passing a NSDictionary object with groupType: groupName pairs. Note the keys need to be strings, and the values can either be strings or an array of strings.
+ @param longLongtimestamp        You can specify a custom timestamp by passing the milliseconds since epoch UTC time as a long long.
+ @param outOfSession             If YES, will track the event as out of session. Useful for push notification events.
+
+ @see [Tracking Events](https://github.com/amplitude/amplitude-ios#tracking-events)
+
+ @see [Setting Groups](https://github.com/amplitude/Amplitude-iOS#setting-groups)
+
+ @see [Tracking Sessions](https://github.com/amplitude/Amplitude-iOS#tracking-sessions)
+ */
+- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withLongLongTimestamp:(long long) timestamp outOfSession:(BOOL)outOfSession;
+
+/**
+ Tracks an event. Events are saved locally.
+
+ Uploads are batched to occur every 30 events or every 30 seconds (whichever comes first), as well as on app close.
+
+ @param eventType                The name of the event you wish to track.
+ @param eventProperties          You can attach additional data to any event by passing a NSDictionary object with property: value pairs.
+ @param groups                   You can specify event-level groups for this user by passing a NSDictionary object with groupType: groupName pairs. Note the keys need to be strings, and the values can either be strings or an array of strings.
+ @param timestamp                You can specify a custom timestamp by passing an NSNumber representing the milliseconds since epoch UTC time. We recommend using [NSNumber numberWithLongLong:milliseconds] to create the value. If nil is passed in, then the event will be timestamped with the current time.
+ @param outOfSession             If YES, will track the event as out of session. Useful for push notification events.
+
+ @see [Tracking Events](https://github.com/amplitude/amplitude-ios#tracking-events)
+
+ @see [Setting Groups](https://github.com/amplitude/Amplitude-iOS#setting-groups)
+
+ @see [Tracking Sessions](https://github.com/amplitude/Amplitude-iOS#tracking-sessions)
+ */
+- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withTimestamp:(NSNumber*) timestamp outOfSession:(BOOL)outOfSession;
+
 /**-----------------------------------------------------------------------------
  * @name Logging Revenue
  * -----------------------------------------------------------------------------
