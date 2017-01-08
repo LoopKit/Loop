@@ -102,7 +102,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         static let count = 2
     }
 
-    fileprivate enum CgmRow: Int {
+    fileprivate enum CGMRow: Int {
         case receiverEnabled = 0
         case transmitterEnabled
         case transmitterID  // optional, only displayed if transmitterEnabled
@@ -155,9 +155,9 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             return PumpRow.count
         case .cgm:
             if dataManager.transmitterEnabled {
-                return CgmRow.count
+                return CGMRow.count
             } else {
-                return CgmRow.count - 1
+                return CGMRow.count - 1
             }
         case .configuration:
             return ConfigurationRow.count
@@ -210,7 +210,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             }
             cell = configCell
         case .cgm:
-            if case .receiverEnabled = CgmRow(rawValue: indexPath.row)! {
+            if case .receiverEnabled = CGMRow(rawValue: indexPath.row)! {
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
                 switchCell.`switch`?.isOn = dataManager.receiverEnabled
@@ -221,7 +221,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 return switchCell
             }
 
-            if case .transmitterEnabled = CgmRow(rawValue: indexPath.row)! {
+            if case .transmitterEnabled = CGMRow(rawValue: indexPath.row)! {
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
                 switchCell.`switch`?.isOn = dataManager.transmitterEnabled
@@ -234,7 +234,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             }
 
             let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
-            switch CgmRow(rawValue: indexPath.row)! {
+            switch CGMRow(rawValue: indexPath.row)! {
             case .transmitterEnabled:
                 break
             case .transmitterID:
@@ -416,7 +416,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 show(vc, sender: sender)
             }
         case .cgm:
-            let row = CgmRow(rawValue: indexPath.row)!
+            let row = CGMRow(rawValue: indexPath.row)!
             switch row {
             case .transmitterEnabled:
                 break
@@ -660,16 +660,16 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         if dataManager.transmitterEnabled == false {
             dataManager.transmitterEnabled = true
             disableReceiver()
-            tableView.insertRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
+            tableView.insertRows(at: [IndexPath(row: CGMRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
 
     func disableTransmitter() {
         if dataManager.transmitterEnabled {
             dataManager.transmitterEnabled = false
-            let switchCell = tableView.cellForRow(at: IndexPath(row: CgmRow.transmitterEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+            let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.transmitterEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
             switchCell.`switch`?.setOn(false, animated: true)
-            tableView.deleteRows(at: [IndexPath(row: CgmRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
+            tableView.deleteRows(at: [IndexPath(row: CGMRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
 
@@ -683,7 +683,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     func disableReceiver() {
         dataManager.receiverEnabled = false
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CgmRow.receiverEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.receiverEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
         switchCell.`switch`?.setOn(false, animated: true)
     }
 
@@ -776,7 +776,7 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                     assertionFailure()
                 }
             case .cgm:
-                switch CgmRow(rawValue: indexPath.row)! {
+                switch CGMRow(rawValue: indexPath.row)! {
                 case .transmitterID:
                     dataManager.transmitterID = controller.value
                 default:
