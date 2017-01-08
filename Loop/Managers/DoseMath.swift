@@ -163,8 +163,7 @@ struct DoseMath {
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
 
         guard minGlucose.quantity >= minimumBGGuard.quantity else {
-            let notice = NSLocalizedString("Predicted glucose is below your minimum BG Guard setting.", comment: "Notice message when recommending bolus when BG is below minimum BG guard.")
-            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: notice)
+            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: .glucoseBelowMinimumGuard)
         }
 
         let targetGlucose = eventualGlucoseTargets.maxValue
@@ -178,23 +177,12 @@ struct DoseMath {
         // Cap at max bolus amount
         let cappedAmount = min(maxBolus, max(0, roundedAmount))
 
-        let notice: String?
+        let notice: BolusRecommendationNotice?
         if cappedAmount > 0 && minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
             if minGlucose.startDate == glucose[0].startDate {
-                notice = NSLocalizedString("Glucose is below target range.", comment: "Message when offering bolus prediction even though bg is below range.")
+                notice = .currentGlucoseBelowTarget
             } else {
-                let timeFormatter = DateFormatter()
-                timeFormatter.dateStyle = .none
-                timeFormatter.timeStyle = .short
-                let time = timeFormatter.string(from: minGlucose.startDate)
-
-                let numberFormatter = NumberFormatter.glucoseFormatter(for: glucoseTargetRange.unit)
-                
-                let minBGValue = numberFormatter.string(from: NSNumber(value: minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit)))!
-
-                let minBGStr = "\(minBGValue) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
-
-                notice = String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
+                notice = .predictedGlucoseBelowTarget(minGlucose: minGlucose, unit: glucoseTargetRange.unit)
             }
         } else {
             notice = nil

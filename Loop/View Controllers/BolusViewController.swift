@@ -78,7 +78,11 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
-            noticeLabel?.text = bolusRecommendation?.notice
+            if let notice = bolusRecommendation?.notice {
+                noticeLabel?.text = String(describing: notice)
+            } else {
+                noticeLabel?.text = nil
+            }
             reload()
         }
     }
@@ -165,7 +169,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let error = loopError {
                 noticeLabel?.text = error.localizedDescription
             } else if let notice = bolusRecommendation?.notice {
-                noticeLabel?.text = notice
+                noticeLabel?.text = String(describing: notice)
             } else {
                 noticeLabel?.text = nil
             }

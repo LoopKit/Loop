@@ -476,7 +476,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartHighEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
 
-        var dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
@@ -535,7 +535,7 @@ class RecommendBolusTests: XCTestCase {
         )
 
         XCTAssertEqual(1.325, dose.amount)
-        XCTAssertEqual("Glucose is below target range.", dose.notice!)
+        XCTAssertEqual(BolusRecommendationNotice.currentGlucoseBelowTarget, dose.notice!)
     }
 
     func testDroppingBelowRangeThenRising() {
@@ -552,10 +552,7 @@ class RecommendBolusTests: XCTestCase {
         )
         
         XCTAssertEqual(1.325, dose.amount)
-        XCTAssertEqual("Predicted glucose at 6:30 PM is 80 mg/dL.", dose.notice!)
-
-
-
+        XCTAssertEqual(BolusRecommendationNotice.predictedGlucoseBelowTarget(minGlucose: glucose[1], unit: glucoseTargetRange.unit), dose.notice!)
     }
 
 
