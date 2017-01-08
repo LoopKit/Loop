@@ -154,7 +154,7 @@ struct DoseMath {
         minimumBGGuard: GlucoseThreshold
     ) -> BolusRecommendation {
         guard glucose.count > 1 else {
-            return BolusRecommendation(amount: 0)
+            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }
 
         let eventualGlucose = glucose.last!

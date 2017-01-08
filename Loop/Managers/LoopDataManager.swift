@@ -261,7 +261,17 @@ final class LoopDataManager {
         }
     }
 
-    func getPendingInsulin() throws -> Double {
+
+
+    /**
+     Computes amount of insulin from boluses that have been issued and not confirmed, and
+     remaining insulin delivery from temporary basal rate adjustments above scheduled rate 
+     that are still in progress.
+
+     *This method should only be called from the `dataAccessQueue`*
+
+     **/
+    private func getPendingInsulin() throws -> Double {
 
         guard let basalRates = deviceDataManager.basalRateSchedule else {
             throw LoopError.configurationError

@@ -83,6 +83,9 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             } else {
                 noticeLabel?.text = nil
             }
+            if let pendingInsulin = bolusRecommendation?.pendingInsulin {
+                self.pendingInsulin = pendingInsulin
+            }
             reload()
         }
     }

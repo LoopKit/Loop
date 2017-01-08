@@ -686,11 +686,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     vc.activeInsulin = iob?.value
                     vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
                     vc.loopError = error
-                    do {
-                        vc.pendingInsulin = try self.dataManager.loopManager.getPendingInsulin()
-                    } catch let error {
-                        vc.loopError = error
-                    }
 
                     if let glucose = glucose, let lastPoint = glucose.last {
                         vc.eventualGlucose = lastPoint
