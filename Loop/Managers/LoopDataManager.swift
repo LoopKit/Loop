@@ -658,7 +658,6 @@ final class LoopDataManager {
 
         let bolusRecommendation = DoseMath.recommendBolusFromPredictedGlucose(
             glucose,
-            lastTempBasal: self.lastTempBasal,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
