@@ -676,12 +676,23 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
-            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, iob, cob, error) in
-                vc.insulinOnBoard = iob?.value
-                vc.carbsOnBoard = cob?.quantity.doubleValue(for: HKUnit.gram())
+            self.dataManager.loopManager.getLoopStatus({ (glucose, _, _, _, _, iob, cob, error) in
+                vc.glucoseUnit = self.charts.glucoseUnit
+                vc.activeInsulin = iob?.value
+                vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
                 vc.loopError = error
+                do {
+                    vc.pendingInsulin = try self.dataManager.loopManager.getPendingInsulin()
+                } catch let error {
+                    vc.loopError = error
+                }
+
+                if let glucose = glucose, let lastPoint = glucose.last {
+                    vc.eventualGlucose = lastPoint
+                }
+
             })
-            
+
         case let vc as PredictionTableViewController:
             vc.dataManager = dataManager
         case let vc as SettingsTableViewController:
@@ -709,7 +720,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                             self.reloadData()
                         }
                     } else if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
-                        self.performSegue(withIdentifier: BolusViewController.className, sender: bolus)
+                        self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
                         self.needsRefresh = true
                     } else {
                         self.needsRefresh = true
