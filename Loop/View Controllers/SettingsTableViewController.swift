@@ -629,11 +629,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     // MARK: - Device mangement
 
-    func dosingEnabledChanged(_ sender: UISwitch) {
+    @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.dosingEnabled = sender.isOn
     }
 
-    func deviceConnectionChanged(_ connectSwitch: UISwitch) {
+    @objc private func deviceConnectionChanged(_ connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convert(CGPoint.zero, to: tableView)
 
         if let indexPath = tableView.indexPathForRow(at: switchOrigin), indexPath.section == Section.devices.rawValue
@@ -648,7 +648,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    func transmitterEnabledChanged(_ sender: UISwitch) {
+    @objc private func transmitterEnabledChanged(_ sender: UISwitch) {
         if sender.isOn {
             enableTransmitter()
         } else {
@@ -656,7 +656,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    func enableTransmitter() {
+    private func enableTransmitter() {
         if dataManager.transmitterEnabled == false {
             dataManager.transmitterEnabled = true
             disableReceiver()
@@ -664,7 +664,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    func disableTransmitter() {
+    private func disableTransmitter() {
         if dataManager.transmitterEnabled {
             dataManager.transmitterEnabled = false
             let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.transmitterEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
@@ -673,7 +673,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    func receiverEnabledChanged(_ sender: UISwitch) {
+    @objc private func receiverEnabledChanged(_ sender: UISwitch) {
         dataManager.receiverEnabled = sender.isOn
 
         if sender.isOn {
@@ -681,7 +681,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    func disableReceiver() {
+    private func disableReceiver() {
         dataManager.receiverEnabled = false
         let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.receiverEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
         switchCell.`switch`?.setOn(false, animated: true)
