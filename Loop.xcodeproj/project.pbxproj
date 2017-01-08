@@ -1352,6 +1352,7 @@
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
+				C178249E1E19B62300D9D25C /* GlucoseThreshold.swift in Sources */,
 				43F41C351D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
 				43EB40861C82646A00472A8C /* StatusChartManager.swift in Sources */,
 				C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */,
