@@ -20,7 +20,7 @@ extension UserDefaults {
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case G4ReceiverEnabled = "com.loudnate.Loop.G4ReceiverEnabled"
-        case G5TransmitterEnabled = "com.loopkit.Loop.TransmitterEnabled"
+        case G5TransmitterEnabled = "com.loopkit.Loop.G5TransmitterEnabled"
         case G5TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
