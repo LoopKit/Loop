@@ -146,7 +146,6 @@ struct DoseMath {
      */
     static func recommendBolusFromPredictedGlucose(_ glucose: [GlucoseValue],
         atDate date: Date = Date(),
-        lastTempBasal: DoseEntry?,
         maxBolus: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
