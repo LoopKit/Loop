@@ -52,11 +52,11 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
     {
         var rval = ""
-        if let iob = activeInsulin, let iobStr = decimalFormatter.string(from: NSNumber(value: iob))
+        if let iob = activeInsulin, let iobStr = insulinFormatter.string(from: NSNumber(value: iob))
         {
             rval = String(format: NSLocalizedString("Active Insulin %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr + " U")
         }
-        if let pending = pendingInsulin, pending > 0, let pendingStr = decimalFormatter.string(from: NSNumber(value: pending))
+        if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: NSNumber(value: pending))
         {
             rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
         }
@@ -77,7 +77,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
-            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
+            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
             if let notice = bolusRecommendation?.notice {
                 noticeLabel?.text = String(describing: notice)
             } else {
@@ -160,7 +160,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
-            recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
+            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
         }
     }
 
@@ -241,13 +241,13 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
 
-        guard let text = bolusAmountTextField?.text, let bolus = decimalFormatter.number(from: text)?.doubleValue,
-            let amountString = decimalFormatter.string(from: NSNumber(value: bolus)) else {
+        guard let text = bolusAmountTextField?.text, let bolus = bolusUnitsFormatter.number(from: text)?.doubleValue,
+            let amountString = bolusUnitsFormatter.string(from: NSNumber(value: bolus)) else {
             return
         }
 
         guard bolus <= maxBolus else {
-            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), decimalFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
+            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
             return
         }
 
@@ -272,7 +272,17 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         self.performSegue(withIdentifier: "close", sender: nil)
     }
 
-    private lazy var decimalFormatter: NumberFormatter = {
+    private lazy var bolusUnitsFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+
+        numberFormatter.maximumSignificantDigits = 3
+        numberFormatter.minimumFractionDigits = 1
+
+        return numberFormatter
+    }()
+
+
+    private lazy var insulinFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
 
         numberFormatter.numberStyle = .decimal
