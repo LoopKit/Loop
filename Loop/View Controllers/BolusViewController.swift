@@ -44,9 +44,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     }
 
     func reload() {
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
+        self.tableView.reloadData()
     }
 
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
@@ -69,7 +67,9 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var loopError: Error? = nil {
         didSet {
-            noticeLabel?.text = loopError?.localizedDescription
+            if let error = loopError {
+                noticeLabel?.text = error.localizedDescription
+            }
             reload()
         }
     }
@@ -169,6 +169,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let error = loopError {
                 noticeLabel?.text = error.localizedDescription
             } else if let notice = bolusRecommendation?.notice {
+                print("Setting \(notice)")
                 noticeLabel?.text = String(describing: notice)
             } else {
                 noticeLabel?.text = nil

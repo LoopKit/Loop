@@ -660,11 +660,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
             if let maxBolus = self.dataManager.maximumBolus {
-                vc.maxBolus = maxBolus
+                DispatchQueue.main.async {
+                    vc.maxBolus = maxBolus
+                }
             }
 
             if let recommendation = sender as? BolusRecommendation {
-                vc.bolusRecommendation = recommendation
+                DispatchQueue.main.async {
+                    vc.bolusRecommendation = recommendation
+                }
             } else {
                 self.dataManager.loopManager.getRecommendedBolus { (recommendation, error) -> Void in
                     if let error = error {
@@ -677,20 +681,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
             self.dataManager.loopManager.getLoopStatus({ (glucose, _, _, _, _, iob, cob, error) in
-                vc.glucoseUnit = self.charts.glucoseUnit
-                vc.activeInsulin = iob?.value
-                vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
-                vc.loopError = error
-                do {
-                    vc.pendingInsulin = try self.dataManager.loopManager.getPendingInsulin()
-                } catch let error {
+                DispatchQueue.main.async {
+                    vc.glucoseUnit = self.charts.glucoseUnit
+                    vc.activeInsulin = iob?.value
+                    vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
                     vc.loopError = error
-                }
+                    do {
+                        vc.pendingInsulin = try self.dataManager.loopManager.getPendingInsulin()
+                    } catch let error {
+                        vc.loopError = error
+                    }
 
-                if let glucose = glucose, let lastPoint = glucose.last {
-                    vc.eventualGlucose = lastPoint
+                    if let glucose = glucose, let lastPoint = glucose.last {
+                        vc.eventualGlucose = lastPoint
+                    }
                 }
-
             })
 
         case let vc as PredictionTableViewController:
