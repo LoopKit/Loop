@@ -13,7 +13,7 @@ struct BolusRecommendation {
     let amount: Double
     let notice: String?
 
-    init(amount: Double, notice: String? = nil) {
+    init(amount: Double, pendingInsulin: Double? = nil, notice: String? = nil) {
         self.amount = amount
         self.notice = notice
     }

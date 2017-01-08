@@ -261,6 +261,31 @@ final class LoopDataManager {
         }
     }
 
+    func getPendingInsulin() throws -> Double {
+
+        guard let basalRates = deviceDataManager.basalRateSchedule else {
+            throw LoopError.configurationError
+        }
+
+        let pendingTempBasalInsulin: Double
+        let date = Date()
+
+        if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
+            let normalBasalRate = basalRates.value(at: date)
+            let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
+            let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
+
+            pendingTempBasalInsulin = max(0, remainingUnits)
+        } else {
+            pendingTempBasalInsulin = 0
+        }
+
+        let pendingBolusAmount: Double = lastBolus?.units ?? 0
+
+        // All outstanding potential insulin delivery
+        return pendingTempBasalInsulin + pendingBolusAmount
+    }
+
     func modelPredictedGlucose(using inputs: [PredictionInputEffect], resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ error: Error?) -> Void) {
         dataAccessQueue.async { 
             guard let
@@ -479,21 +504,32 @@ final class LoopDataManager {
      */
     private func updatePredictedGlucoseAndRecommendedBasal() throws {
         guard let
-            glucose = self.deviceDataManager.glucoseStore?.latestGlucose,
-            let pumpStatusDate = self.deviceDataManager.doseStore.lastReservoirValue?.startDate
+            glucose = self.deviceDataManager.glucoseStore?.latestGlucose
+            else {
+                self.predictedGlucose = nil
+                throw LoopError.missingDataError("Glucose")
+        }
+
+        guard let
+            pumpStatusDate = self.deviceDataManager.doseStore.lastReservoirValue?.startDate
         else {
             self.predictedGlucose = nil
-            throw LoopError.missingDataError("Cannot predict glucose due to missing input data")
+            throw LoopError.missingDataError("Reservoir")
         }
 
         let startDate = Date()
         let recencyInterval = TimeInterval(minutes: 15)
 
-        guard startDate.timeIntervalSince(glucose.startDate) <= recencyInterval &&
-              startDate.timeIntervalSince(pumpStatusDate) <= recencyInterval
+        guard startDate.timeIntervalSince(glucose.startDate) <= recencyInterval
         else {
             self.predictedGlucose = nil
-            throw LoopError.staleDataError("Glucose Date: \(glucose.startDate) or Pump status date: \(pumpStatusDate) older than \(recencyInterval.minutes) min")
+            throw LoopError.glucoseTooOld(startDate.timeIntervalSince(glucose.startDate))
+        }
+
+        guard startDate.timeIntervalSince(pumpStatusDate) <= recencyInterval
+        else {
+            self.predictedGlucose = nil
+            throw LoopError.pumpDataTooOld(startDate.timeIntervalSince(pumpStatusDate))
         }
 
         guard let
@@ -502,7 +538,7 @@ final class LoopDataManager {
             let insulinEffect = self.insulinEffect else
         {
             self.predictedGlucose = nil
-            throw LoopError.missingDataError("Cannot predict glucose due to missing effect data")
+            throw LoopError.missingDataError("Glucose effects")
         }
 
         var error: Error?
@@ -548,7 +584,7 @@ final class LoopDataManager {
             let basalRates = deviceDataManager.basalRateSchedule,
             let minimumBGGuard = deviceDataManager.minimumBGGuard
         else {
-            error = LoopError.missingDataError("Loop configuration data not set")
+            error = LoopError.configurationError
             throw error!
         }
 
@@ -592,7 +628,7 @@ final class LoopDataManager {
                 }
             }
         } else {
-            resultsHandler(nil, LoopError.missingDataError("CarbStore not configured"))
+            resultsHandler(nil, LoopError.configurationError)
         }
     }
 
@@ -605,7 +641,7 @@ final class LoopDataManager {
             let basalRates = self.deviceDataManager.basalRateSchedule,
             let minimumBGGuard = self.deviceDataManager.minimumBGGuard
         else {
-            throw LoopError.missingDataError("Bolus prediction and configuration data not found")
+            throw LoopError.configurationError
         }
 
         let recencyInterval = TimeInterval(minutes: 15)
@@ -615,19 +651,20 @@ final class LoopDataManager {
         }
 
         guard abs(predictedInterval) <= recencyInterval else {
-            throw LoopError.staleDataError("Glucose is \(predictedInterval.minutes) min old")
+            throw LoopError.glucoseTooOld(predictedInterval)
         }
 
-        let pendingBolusAmount: Double = lastBolus?.units ?? 0
-        
-        let bolusRecommendation = DoseMath.recommendBolusFromPredictedGlucose(glucose,
-                                                                              lastTempBasal: self.lastTempBasal,
-                                                                              maxBolus: maxBolus,
-                                                                              glucoseTargetRange: glucoseTargetRange,
-                                                                              insulinSensitivity: insulinSensitivity,
-                                                                              basalRateSchedule: basalRates,
-                                                                              pendingBolusAmount: pendingBolusAmount,
-                                                                              minimumBGGuard: minimumBGGuard)
+        let pendingInsulin = try self.getPendingInsulin()
+
+        let bolusRecommendation = DoseMath.recommendBolusFromPredictedGlucose(
+            glucose,
+            lastTempBasal: self.lastTempBasal,
+            maxBolus: maxBolus,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivity,
+            basalRateSchedule: basalRates,
+            pendingInsulin: pendingInsulin,
+            minimumBGGuard: minimumBGGuard)
 
         return bolusRecommendation
     }
@@ -650,7 +687,7 @@ final class LoopDataManager {
         }
 
         guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < TimeInterval(minutes: 5) else {
-            resultsHandler(false, LoopError.staleDataError("Recommended temp basal is \(recommendedTempBasal.recommendedDate.timeIntervalSinceNow.minutes) min old"))
+            resultsHandler(false, LoopError.recommendationExpired(recommendedTempBasal.recommendedDate.timeIntervalSinceNow))
             return
         }
 

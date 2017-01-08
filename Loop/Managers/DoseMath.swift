@@ -135,12 +135,11 @@ struct DoseMath {
 
      - parameter glucose:            The ascending timeline of predicted glucose values
      - parameter date:               The date at which the bolus would apply. Defaults to the current date.
-     - parameter lastTempBasal:      The last-set temporary basal
      - parameter maxBolus:           The maximum bolus, used to constrain the output
      - parameter glucoseTargetRange: The schedule of target glucose ranges
      - parameter insulinSensitivity: The schedule of insulin sensitivities, in Units of insulin per glucose-unit
      - parameter basalRateSchedule:  The schedule of basal rates
-     - parameter pendingBolusAmount: The amount of insulin in any issued, but not confirmed, boluses
+     - parameter pendingInsulin:     The amount of insulin in any issued, but not confirmed, boluses and the amount remaining from current tempBasal
      - parameter minimumBGGuard:     If minBG is less than or equal to this value, no recommendation will be made
 
      - returns: The recommended bolus
@@ -152,7 +151,7 @@ struct DoseMath {
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
-        pendingBolusAmount: Double,
+        pendingInsulin: Double,
         minimumBGGuard: GlucoseThreshold
     ) -> BolusRecommendation {
         guard glucose.count > 1 else {
@@ -165,65 +164,43 @@ struct DoseMath {
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
 
         guard minGlucose.quantity >= minimumBGGuard.quantity else {
-            let notice = NSLocalizedString("Glucose is predicted to go below your minimum BG Guard setting. No bolus is recommended.", comment: "Bolus recommendation message when BG is below minimum BG guard.")
-            return BolusRecommendation(amount: 0, notice: notice)
+            let notice = NSLocalizedString("Predicted glucose is below your minimum BG Guard setting.", comment: "Notice message when recommending bolus when BG is below minimum BG guard.")
+            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: notice)
         }
 
         let targetGlucose = eventualGlucoseTargets.maxValue
         let currentSensitivity = insulinSensitivity.quantity(at: date).doubleValue(for: glucoseTargetRange.unit)
 
         let doseUnits = (eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
-        
-        let pendingTempBasalInsulin: Double
-        
-        if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
-            let normalBasalRate = basalRateSchedule.value(at: date)
-            let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
-            let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
 
-            pendingTempBasalInsulin = max(0, remainingUnits)
-        } else {
-            pendingTempBasalInsulin = 0
-        }
-        
-        // All outstanding potential insulin delivery
-        let pendingInsulin = pendingTempBasalInsulin + pendingBolusAmount
-        
         // Round to pump accuracy increments
         let roundedAmount = round(max(0, (doseUnits - pendingInsulin)) * 40) / 40
         
         // Cap at max bolus amount
         let cappedAmount = min(maxBolus, max(0, roundedAmount))
 
-        let numberFormatter = NumberFormatter.glucoseFormatter(for: glucoseTargetRange.unit)
-        let eventualBGValueStr = numberFormatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit)))!
-        let eventualBG = "\(eventualBGValueStr) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
-
-
         let notice: String?
         if cappedAmount > 0 && minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
             if minGlucose.startDate == glucose[0].startDate {
-                notice = String(format: NSLocalizedString("Current glucose is below target range. Recommendation is based on eventual predicted BG of %3$@", comment: "Message when offering bolus prediction even though bg is below range. (1: eventual BG)"), eventualBG)
+                notice = NSLocalizedString("Glucose is below target range.", comment: "Message when offering bolus prediction even though bg is below range.")
             } else {
                 let timeFormatter = DateFormatter()
                 timeFormatter.dateStyle = .none
                 timeFormatter.timeStyle = .short
                 let time = timeFormatter.string(from: minGlucose.startDate)
 
+                let numberFormatter = NumberFormatter.glucoseFormatter(for: glucoseTargetRange.unit)
+                
                 let minBGValue = numberFormatter.string(from: NSNumber(value: minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit)))!
 
                 let minBGStr = "\(minBGValue) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
 
-                notice = String(format: NSLocalizedString("Glucose is estimated to be %1$@ at %2$@. Recommendation is based on eventual predicted BG of %3$@", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose number)(2: glucose time)(3: eventual BG)"), minBGStr, time, eventualBG)
+                notice = String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
             }
-        } else if eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
-
-            let bgStr = "\(eventualBG) \(glucoseTargetRange.unit.glucoseUnitDisplayString)"
-            notice = String(format: NSLocalizedString("Eventual glucose is %1$@. No bolus recommended.", comment: "Notice when eventual glucose is below range, so no bolus is recommended.  (1: eventual glucose number)"), bgStr)
         } else {
             notice = nil
         }
         
-        return BolusRecommendation(amount: cappedAmount, notice: notice)
+        return BolusRecommendation(amount: cappedAmount, pendingInsulin: pendingInsulin, notice: notice)
     }
 }

@@ -9,18 +9,25 @@
 import UIKit
 import LocalAuthentication
 import LoopKit
+import HealthKit
 
 
 final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {
 
     fileprivate enum Rows: Int, CaseCountable {
-        case iob = 0
-        case cob
-        case notice
+        case notice = 0
+        case eventualGlucose
+        case active
         case recommended
         case entry
+        case deliver
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // This gets rid of the empty space at the top.
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 0.01))
+    }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -32,13 +39,38 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: amount)) ?? "0")
 
         bolusAmountTextField.becomeFirstResponder()
-    
+
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
+    func reload() {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+    }
+
+    func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
+    {
+        var rval = ""
+        if let iob = activeInsulin, let iobStr = decimalFormatter.string(from: NSNumber(value: iob))
+        {
+            rval = String(format: NSLocalizedString("Active Insulin %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr + " U")
+        }
+        if let pending = pendingInsulin, pending > 0, let pendingStr = decimalFormatter.string(from: NSNumber(value: pending))
+        {
+            rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
+        }
+        return rval
+    }
+
+    // MARK: - State
+
+    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
+
     var loopError: Error? = nil {
         didSet {
-            noticeLabel?.text = String(describing: loopError)
+            noticeLabel?.text = loopError?.localizedDescription
+            reload()
         }
     }
 
@@ -47,35 +79,79 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = decimalFormatter.string(from: NSNumber(value: amount))
             noticeLabel?.text = bolusRecommendation?.notice
-            tableView.reloadData()
+            reload()
         }
     }
 
-    var carbsOnBoard: Double? = nil {
+    var eventualGlucoseDescription: String? = nil {
         didSet {
-            if let cob = carbsOnBoard, let cobStr = decimalFormatter.string(from: NSNumber(value: cob)) {
-                cobLabel?.text = cobStr
-            }
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+            eventualGlucoseLabel?.text = eventualGlucoseDescription
         }
     }
 
-    var insulinOnBoard: Double? = nil {
+    var eventualGlucose: GlucoseValue? = nil {
         didSet {
-            if let iob = insulinOnBoard, let iobStr = decimalFormatter.string(from: NSNumber(value: iob)) {
-                iobLabel?.text = iobStr
+            let formatter = NumberFormatter.glucoseFormatter(for: glucoseUnit)
+            if let bg = eventualGlucose,
+               let bgStr = formatter.string(from: NSNumber(value: bg.quantity.doubleValue(for: glucoseUnit))) {
+              eventualGlucoseDescription = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), bgStr + " " + glucoseUnit.glucoseUnitDisplayString)
+            } else {
+                eventualGlucoseDescription = nil
             }
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+            reload()
+       }
+    }
+
+    var activeCarbohydratesDescription: String? = nil {
+        didSet {
+            activeCarbohydratesLabel?.text = activeCarbohydratesDescription
         }
     }
+
+    var activeCarbohydrates: Double? = nil {
+        didSet {
+            if let cob = activeCarbohydrates, let cobStr = integerFormatter.string(from: NSNumber(value: cob)) {
+                activeCarbohydratesDescription = String(format: NSLocalizedString("Active Carbohydrates %@", comment: "The string format describing active carbohydrates. (1: localized glucose value description)"), cobStr + " g")
+            } else {
+                activeCarbohydratesDescription = nil
+            }
+            reload()
+        }
+    }
+
+    var activeInsulinDescription: String? = nil {
+        didSet {
+            activeInsulinLabel?.text = activeInsulinDescription
+        }
+    }
+
+    var activeInsulin: Double? = nil {
+        didSet {
+            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
+            reload()
+        }
+    }
+
+    var pendingInsulin: Double? = nil {
+        didSet {
+            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
+            reload()
+        }
+    }
+
 
     var maxBolus: Double = 25
 
     private(set) var bolus: Double?
+
+
+    // MARK: - IBOutlets
+
+    @IBOutlet weak var eventualGlucoseLabel: UILabel? {
+        didSet {
+            eventualGlucoseLabel?.text = eventualGlucoseDescription
+        }
+    }
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
@@ -87,38 +163,37 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBOutlet weak var noticeLabel: UILabel? {
         didSet {
             if let error = loopError {
-                noticeLabel?.text = String(describing: error)
+                noticeLabel?.text = error.localizedDescription
             } else if let notice = bolusRecommendation?.notice {
                 noticeLabel?.text = notice
+            } else {
+                noticeLabel?.text = nil
             }
         }
     }
 
-    @IBOutlet weak var iobLabel: UILabel? {
+    @IBOutlet weak var activeCarbohydratesLabel: UILabel? {
         didSet {
-            if let iob = insulinOnBoard {
-                iobLabel?.text = decimalFormatter.string(from: NSNumber(value: iob))
-            }
+            activeCarbohydratesLabel?.text = activeCarbohydratesDescription
         }
     }
 
-    @IBOutlet weak var cobLabel: UILabel? {
+    @IBOutlet weak var activeInsulinLabel: UILabel? {
         didSet {
-            if let cob = carbsOnBoard {
-                cobLabel?.text = decimalFormatter.string(from: NSNumber(value: cob))
-            }
+            activeInsulinLabel?.text = activeInsulinDescription
         }
     }
 
+    // MARK: - TableView Delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if (indexPath.row == 0) {
+        if (Rows(rawValue: indexPath.row) == .recommended) {
             acceptRecommendedBolus();
         }
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if (indexPath.row == 0) {
+        if (Rows(rawValue: indexPath.row) == .recommended) {
             cell.accessibilityCustomActions = [
                 UIAccessibilityCustomAction(name: NSLocalizedString("AcceptRecommendedBolus", comment: "Action to copy the recommended Bolus value to the actual Bolus Field"), target: self, selector: #selector(BolusViewController.acceptRecommendedBolus))
             ]
@@ -126,17 +201,25 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == Rows.iob.rawValue && self.insulinOnBoard == nil {
-            return 0
-        }
-        if indexPath.row == Rows.cob.rawValue && self.carbsOnBoard == nil {
-            return 0
-        }
-        if indexPath.row == Rows.notice.rawValue {
-            let noticeText = self.noticeLabel?.text
-            if noticeText == nil || noticeText!.isEmpty {
+        switch Rows(rawValue: indexPath.row)! {
+        case .notice:
+            let text = noticeLabel?.text
+            if text == nil || text!.isEmpty {
                 return 0
             }
+        case .eventualGlucose:
+            let text = eventualGlucoseLabel?.text
+            if text == nil || text!.isEmpty {
+                return 0
+            }
+        case .active:
+            let cobText = activeCarbohydratesLabel?.text
+            let iobText = activeInsulinLabel?.text
+            if (cobText == nil || cobText!.isEmpty) && (iobText == nil || iobText!.isEmpty) {
+                return 0
+            }
+        default:
+            break
         }
         return super.tableView(tableView, heightForRowAt: indexPath)
     }
@@ -188,11 +271,23 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     private lazy var decimalFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
 
-        numberFormatter.maximumSignificantDigits = 2
-        numberFormatter.minimumFractionDigits = 1
+        numberFormatter.numberStyle = .decimal
+        numberFormatter.minimumFractionDigits = 2
+        numberFormatter.maximumFractionDigits = 2
 
         return numberFormatter
     }()
+
+    private lazy var integerFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+
+        numberFormatter.numberStyle = .none
+        numberFormatter.maximumFractionDigits = 0
+
+        return numberFormatter
+    }()
+
+
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
