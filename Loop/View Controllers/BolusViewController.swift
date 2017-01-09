@@ -195,13 +195,13 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     // MARK: - TableView Delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if (Rows(rawValue: indexPath.row) == .recommended) {
+        if case .recommended = Rows(rawValue: indexPath.row)! {
             acceptRecommendedBolus();
         }
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if (Rows(rawValue: indexPath.row) == .recommended) {
+        if case .recommended = Rows(rawValue: indexPath.row)! {
             cell.accessibilityCustomActions = [
                 UIAccessibilityCustomAction(name: NSLocalizedString("AcceptRecommendedBolus", comment: "Action to copy the recommended Bolus value to the actual Bolus Field"), target: self, selector: #selector(BolusViewController.acceptRecommendedBolus))
             ]
