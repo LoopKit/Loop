@@ -6,7 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -28,8 +27,12 @@
                                     <constraint firstAttribute="height" constant="70" id="Pes-zW-tY0"/>
                                 </constraints>
                             </stackView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2gm-Vd-hcP" customClass="ChartContentView" customModule="Loop_Status_Extension" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="70" width="375" height="22"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                <rect key="frame" x="16" y="88" width="343" height="18"/>
+                                <rect key="frame" x="8" y="92" width="359" height="18"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -37,12 +40,16 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="16" id="64k-kp-SIV"/>
-                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" constant="16" id="NC3-TC-TzM"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="O3d-gn-msQ"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="Yms-yl-dwN"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leadingMargin" constant="-16" id="gXw-95-VgT"/>
-                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" constant="4" id="mlS-wa-D71"/>
+                            <constraint firstItem="d8d-rW-z8J" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="2GY-sK-gJb"/>
+                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="top" secondItem="d8d-rW-z8J" secondAttribute="bottom" id="44s-fY-1BF"/>
+                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="top" id="4c5-zh-dsa"/>
+                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="9xs-g9-1BB"/>
+                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="HRz-l7-kl8"/>
+                            <constraint firstItem="d8d-rW-z8J" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="Pin-pS-n5v"/>
+                            <constraint firstItem="d8d-rW-z8J" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="elI-w9-pZM"/>
+                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="epZ-OR-nd1"/>
+                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="eyp-uB-FYQ"/>
+                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" constant="-16" id="rpP-77-R0Z"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
@@ -52,6 +59,7 @@
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="375" height="110"/>
                     <connections>
+                        <outlet property="glucoseChartContentView" destination="2gm-Vd-hcP" id="n9E-lm-E3a"/>
                         <outlet property="hudView" destination="d8d-rW-z8J" id="7Cp-BW-Kpc"/>
                         <outlet property="subtitleLabel" destination="9iF-xY-Bh4" id="PM8-hd-IB3"/>
                     </connections>

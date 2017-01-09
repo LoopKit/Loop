@@ -16,6 +16,18 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     @IBOutlet weak var hudView: HUDView!
     @IBOutlet weak var subtitleLabel: UILabel!
+    @IBOutlet weak var glucoseChartContentView: ChartContentView!
+
+    private lazy var charts: StatusChartsManager = {
+        let charts = StatusChartsManager()
+
+        charts.glucoseDisplayRange = (
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 175)
+        )
+
+        return charts
+    }()
 
     var statusExtensionContext: StatusExtensionContext?
     var defaults: UserDefaults?
@@ -67,14 +79,29 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 options: [],
                 context: &observationContext)
         }
+
+        glucoseChartContentView.chartGenerator = { [unowned self] (frame) in
+            return self.charts.glucoseChartWithFrame(frame)?.view
+        }
+
+        self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
     }
-    
+
     deinit {
         if let defaults = defaults {
             defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey, context: &observationContext)
         }
     }
     
+    func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
+        if (activeDisplayMode == NCWidgetDisplayMode.compact) {
+            self.preferredContentSize = maxSize
+        }
+        else {
+            self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
+        }
+    }
+
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard context == &observationContext else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)

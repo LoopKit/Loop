@@ -171,6 +171,16 @@
 		4F7528A81DFE20CE00C322D6 /* NSNumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0E7A1D7DE13400D6475D /* NSNumberFormatter.swift */; };
 		4F7528A91DFE212600C322D6 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
+		4FAC024B1E22F4BA0087A773 /* ChartContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313EDDF1D8A6BF90060FA79 /* ChartContentView.swift */; };
+		4FAC024C1E22F5760087A773 /* StatusChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EB40851C82646A00472A8C /* StatusChartManager.swift */; };
+		4FAC024D1E22F5B20087A773 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C341D3B623800C11ED6 /* ChartPointsTouchHighlightLayerViewCache.swift */; };
+		4FAC024E1E22F5BC0087A773 /* ChartAxisValueDoubleUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C321D3A17AA00C11ED6 /* ChartAxisValueDoubleUnit.swift */; };
+		4FAC024F1E22F5CC0087A773 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0791C85650D00FBE832 /* ChartAxisValueDoubleLog.swift */; };
+		4FAC02501E22F5E50087A773 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint.swift */; };
+		4FAC02511E22F5F20087A773 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4331E0771C85302200FBE832 /* CGPoint.swift */; };
+		4FAC02521E22F6230087A773 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43880F941D9CD54A009061A8 /* ChartPointsScatterDownTrianglesLayer.swift */; };
+		4FAC02531E22F6360087A773 /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
+		4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
@@ -1427,6 +1437,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */,
+				4FAC02531E22F6360087A773 /* CollectionType.swift in Sources */,
+				4FAC02521E22F6230087A773 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
+				4FAC02511E22F5F20087A773 /* CGPoint.swift in Sources */,
+				4FAC02501E22F5E50087A773 /* ChartPoint.swift in Sources */,
+				4FAC024F1E22F5CC0087A773 /* ChartAxisValueDoubleLog.swift in Sources */,
+				4FAC024E1E22F5BC0087A773 /* ChartAxisValueDoubleUnit.swift in Sources */,
+				4FAC024D1E22F5B20087A773 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
+				4FAC024C1E22F5760087A773 /* StatusChartManager.swift in Sources */,
+				4FAC024B1E22F4BA0087A773 /* ChartContentView.swift in Sources */,
 				4F2C15831E0757E600E160D4 /* HKUnit.swift in Sources */,
 				4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
