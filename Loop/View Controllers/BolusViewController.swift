@@ -16,7 +16,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     fileprivate enum Rows: Int, CaseCountable {
         case notice = 0
-        case eventualGlucose
         case active
         case recommended
         case entry
@@ -43,17 +42,18 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
-    func reload() {
-        self.tableView.reloadData()
-    }
-
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
     {
-        var rval = ""
-        if let iob = activeInsulin, let iobStr = insulinFormatter.string(from: NSNumber(value: iob))
+        let iobStr: String
+        if let iob = activeInsulin, let valueStr = insulinFormatter.string(from: NSNumber(value: iob))
         {
-            rval = String(format: NSLocalizedString("Active Insulin %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr + " U")
+            iobStr = valueStr + " U"
+        } else {
+            iobStr = "-"
         }
+
+        var rval = String(format: NSLocalizedString("Active Insulin: %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr)
+
         if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: NSNumber(value: pending))
         {
             rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
@@ -70,7 +70,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let error = loopError {
                 noticeLabel?.text = error.localizedDescription
             }
-            reload()
         }
     }
 
@@ -86,27 +85,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin
             }
-            reload()
         }
-    }
-
-    var eventualGlucoseDescription: String? = nil {
-        didSet {
-            eventualGlucoseLabel?.text = eventualGlucoseDescription
-        }
-    }
-
-    var eventualGlucose: GlucoseValue? = nil {
-        didSet {
-            let formatter = NumberFormatter.glucoseFormatter(for: glucoseUnit)
-            if let bg = eventualGlucose,
-               let bgStr = formatter.string(from: NSNumber(value: bg.quantity.doubleValue(for: glucoseUnit))) {
-              eventualGlucoseDescription = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), bgStr + " " + glucoseUnit.glucoseUnitDisplayString)
-            } else {
-                eventualGlucoseDescription = nil
-            }
-            reload()
-       }
     }
 
     var activeCarbohydratesDescription: String? = nil {
@@ -117,12 +96,15 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var activeCarbohydrates: Double? = nil {
         didSet {
-            if let cob = activeCarbohydrates, let cobStr = integerFormatter.string(from: NSNumber(value: cob)) {
-                activeCarbohydratesDescription = String(format: NSLocalizedString("Active Carbohydrates %@", comment: "The string format describing active carbohydrates. (1: localized glucose value description)"), cobStr + " g")
+
+            let cobStr: String
+            if let cob = activeCarbohydrates, let str = integerFormatter.string(from: NSNumber(value: cob)) {
+                cobStr = str + " g"
             } else {
-                activeCarbohydratesDescription = nil
+                cobStr = "-"
+
             }
-            reload()
+            activeCarbohydratesDescription = String(format: NSLocalizedString("Active Carbohydrates: %@", comment: "The string format describing active carbohydrates. (1: localized glucose value description)"), cobStr)
         }
     }
 
@@ -135,14 +117,12 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     var activeInsulin: Double? = nil {
         didSet {
             activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
-            reload()
         }
     }
 
     var pendingInsulin: Double? = nil {
         didSet {
             activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
-            reload()
         }
     }
 
@@ -153,12 +133,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
 
     // MARK: - IBOutlets
-
-    @IBOutlet weak var eventualGlucoseLabel: UILabel? {
-        didSet {
-            eventualGlucoseLabel?.text = eventualGlucoseDescription
-        }
-    }
 
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
@@ -206,30 +180,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
                 UIAccessibilityCustomAction(name: NSLocalizedString("AcceptRecommendedBolus", comment: "Action to copy the recommended Bolus value to the actual Bolus Field"), target: self, selector: #selector(BolusViewController.acceptRecommendedBolus))
             ]
         }
-    }
-
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        switch Rows(rawValue: indexPath.row)! {
-        case .notice:
-            let text = noticeLabel?.text
-            if text == nil || text!.isEmpty {
-                return 0
-            }
-        case .eventualGlucose:
-            let text = eventualGlucoseLabel?.text
-            if text == nil || text!.isEmpty {
-                return 0
-            }
-        case .active:
-            let cobText = activeCarbohydratesLabel?.text
-            let iobText = activeInsulinLabel?.text
-            if (cobText == nil || cobText!.isEmpty) && (iobText == nil || iobText!.isEmpty) {
-                return 0
-            }
-        default:
-            break
-        }
-        return super.tableView(tableView, heightForRowAt: indexPath)
     }
 
     @objc
