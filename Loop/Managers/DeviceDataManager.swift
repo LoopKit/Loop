@@ -510,6 +510,10 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
         let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate.addingTimeInterval(TimeInterval(minutes: 1)) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
 
+        guard fetchGlucoseSince.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) else {
+            return
+        }
+
         device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
             switch result {
             case .success(let glucoseEvents):
