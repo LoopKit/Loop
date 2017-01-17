@@ -193,7 +193,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             if case .fetchPumpGlucose = ConfigurationRow(rawValue: indexPath.row)! {
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
-                switchCell.`switch`?.isOn = dataManager.fetchPumpGlucoseEnabled
+                switchCell.`switch`?.isOn = dataManager.fetchEnliteDataEnabled
                 switchCell.titleLabel.text = NSLocalizedString("Fetch Enlite Data", comment: "The title text for the fetch enlite data enabled switch cell")
 
                 switchCell.`switch`?.addTarget(self, action: #selector(fetchPumpGlucoseEnabledChanged(_:)), for: .valueChanged)
@@ -591,7 +591,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     }
 
     func fetchPumpGlucoseEnabledChanged(_ sender: UISwitch) {
-        dataManager.fetchPumpGlucoseEnabled = sender.isOn
+        dataManager.fetchEnliteDataEnabled = sender.isOn
     }
 
     // MARK: - DailyValueScheduleTableViewControllerDelegate

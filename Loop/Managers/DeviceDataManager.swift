@@ -54,12 +54,12 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
-    var fetchPumpGlucoseEnabled: Bool {
+    var fetchEnliteDataEnabled: Bool {
         get {
-            return UserDefaults.standard.fetchPumpGlucoseEnabled
+            return UserDefaults.standard.fetchEnliteDataEnabled
         }
         set {
-            UserDefaults.standard.fetchPumpGlucoseEnabled = newValue
+            UserDefaults.standard.fetchEnliteDataEnabled = newValue
         }
     }
 
@@ -135,6 +135,10 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     @objc private func receivedRileyLinkTimerTickNotification(_ note: Notification) {
         backfillGlucoseFromShareIfNeeded() {
+            if UserDefaults.standard.fetchEnliteDataEnabled {
+                self.assertCurrentEnliteData()
+            }
+
             self.assertCurrentPumpData()
         }
     }
@@ -365,51 +369,43 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    private func pumpDataIsStale() -> Bool {
+        // How long should we wait before we poll for new pump data?
+        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
+
+        return doseStore.lastReservoirValue == nil
+            || doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance
+    }
+
     /**
      Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
      */
     private func assertCurrentPumpData() {
-        guard let device = rileyLinkManager.firstConnectedDevice else {
+        guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
             return
         }
 
         device.assertIdleListening()
 
-        assertCurrentPumpStatus(device: device) {
-            if UserDefaults.standard.fetchPumpGlucoseEnabled {
-                self.assertCurrentEnliteData(device: device)
-            }
-        }
-    }
-
-    private func assertCurrentPumpStatus(device: RileyLinkDevice, _ completion: (() -> Void)? = nil) {
-        // How long should we wait before we poll for new pump data?
-        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
-
-        // If we don't yet have pump status, or it's old, poll for it.
-        if  doseStore.lastReservoirValue == nil ||
-            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
-            readPumpData { (result) in
-                let nsPumpStatus: NightscoutUploadKit.PumpStatus?
-                switch result {
-                case .success(let (status, date)):
-                    self.observeBatteryDuring {
-                        self.latestPumpStatus = status
-                    }
-
-                    self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
-                    let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
-
-
-                    nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                case .failure(let error):
-                    self.troubleshootPumpComms(using: device)
-                    self.nightscoutDataManager.uploadLoopStatus(loopError: error)
-                    nsPumpStatus = nil
+        readPumpData { (result) in
+            let nsPumpStatus: NightscoutUploadKit.PumpStatus?
+            switch result {
+            case .success(let (status, date)):
+                self.observeBatteryDuring {
+                    self.latestPumpStatus = status
                 }
-                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
-                completion?()
+
+                self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
+                let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+
+
+                nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
+            case .failure(let error):
+                self.troubleshootPumpComms(using: device)
+                self.nightscoutDataManager.uploadLoopStatus(loopError: error)
+                nsPumpStatus = nil
             }
+            self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
         }
     }
 
@@ -505,47 +501,47 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
-    private func assertCurrentEnliteData(device: RileyLinkDevice, _ completion: (() -> Void)? = nil) {
-        guard let device = rileyLinkManager.firstConnectedDevice else {
+    private func assertCurrentEnliteData() {
+        guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
             return
         }
 
+        device.assertIdleListening()
+
         let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate.addingTimeInterval(TimeInterval(minutes: 1)) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
 
-        if fetchGlucoseSince.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) {
-            device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
-                switch result {
-                case .success(let glucoseEvents):
+        device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
+            switch result {
+            case .success(let glucoseEvents):
 
-                    defer {
-                        _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
-                    }
+                defer {
+                    _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
+                }
 
-                    self.updateEnliteSensorStatus(glucoseEvents)
+                self.updateEnliteSensorStatus(glucoseEvents)
 
-                    let glucoseValues = glucoseEvents
-                        .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > fetchGlucoseSince })
-                        .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
-                            let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
-                            let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEvent.sgv))
-                            return (quantity: quantity, date: e.date, isDisplayOnly: false)
-                        })
-
-                    self.glucoseStore?.addGlucoseValues(glucoseValues, device: nil, resultHandler:  { (success, _, error) in
-                        if let error = error {
-                            self.logger.addError(error, fromSource: "GlucoseStore")
-                        }
-
-                        if success {
-                            NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
-                        }
+                let glucoseValues = glucoseEvents
+                    .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > fetchGlucoseSince })
+                    .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
+                        let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
+                        let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEvent.sgv))
+                        return (quantity: quantity, date: e.date, isDisplayOnly: false)
                     })
 
-                case .failure(let error):
-                    self.logger.addError(error, fromSource: "PumpOps")
-                }
-            })
-        }
+                self.glucoseStore?.addGlucoseValues(glucoseValues, device: nil, resultHandler:  { (success, _, error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    if success {
+                        NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
+                    }
+                })
+
+            case .failure(let error):
+                self.logger.addError(error, fromSource: "PumpOps")
+            }
+        })
     }
 
     // MARK: - G5 Transmitter
