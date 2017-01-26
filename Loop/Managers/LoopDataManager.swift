@@ -305,6 +305,7 @@ final class LoopDataManager {
     private var carbEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
+            predictedGlucoseWithoutMomentum = nil
 
             // Carb data may be back-dated, so re-calculate the retrospective glucose.
             retrospectivePredictedGlucose = nil
@@ -318,6 +319,7 @@ final class LoopDataManager {
             }
 
             predictedGlucose = nil
+            predictedGlucoseWithoutMomentum = nil
         }
     }
     private var insulinOnBoard: InsulinValue?
@@ -510,6 +512,7 @@ final class LoopDataManager {
 
         let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
         let predictionWithRetrospectiveEffect = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect, retrospectiveGlucoseEffect)
+        let predictionWithoutMomentum = LoopMath.predictGlucose(glucose, effects: carbEffect, insulinEffect)
 
         let predictDiff: Double
 
@@ -521,6 +524,10 @@ final class LoopDataManager {
         } else {
             predictDiff = 0
         }
+
+        let eventualBG: Double = prediction.last?.quantity.doubleValue(for: unit) ?? 0
+        let eventualBGWithRetrospectiveEffect: Double = predictionWithRetrospectiveEffect.last?.quantity.doubleValue(for: unit) ?? 0
+        let eventualBGWithoutMomentum: Double = predictionWithoutMomentum.last?.quantity.doubleValue(for: unit) ?? 0
 
         defer {
             deviceDataManager.logger.addLoopStatus(
@@ -536,12 +543,15 @@ final class LoopDataManager {
                 error: error,
                 prediction: prediction,
                 predictionWithRetrospectiveEffect: predictDiff,
+                eventualBG: eventualBG,
+                eventualBGWithRetrospectiveEffect: eventualBGWithRetrospectiveEffect,
+                eventualBGWithoutMomentum: eventualBGWithoutMomentum,
                 recommendedTempBasal: recommendedTempBasal
             )
         }
 
         self.predictedGlucose = retrospectiveCorrectionEnabled ? predictionWithRetrospectiveEffect : prediction
-        self.predictedGlucoseWithoutMomentum = LoopMath.predictGlucose(glucose, effects: carbEffect, insulinEffect)
+        self.predictedGlucoseWithoutMomentum = predictionWithoutMomentum
 
         guard let
             maxBasal = deviceDataManager.maximumBasalRatePerHour,
