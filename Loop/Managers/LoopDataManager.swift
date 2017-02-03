@@ -543,6 +543,7 @@ final class LoopDataManager {
 
         guard let
             maxBasal = deviceDataManager.maximumBasalRatePerHour,
+            let maxIOB = deviceDataManager.maximumIOB,
             let glucoseTargetRange = deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
             let basalRates = deviceDataManager.basalRateSchedule
@@ -557,9 +558,11 @@ final class LoopDataManager {
             let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
                 maxBasalRate: maxBasal,
+                maxIOB: maxIOB,
                 glucoseTargetRange: glucoseTargetRange,
                 insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates
+                basalRateSchedule: basalRates,
+                insulinOnBoard: self.insulinOnBoard?.value
             )
         else {
             recommendedTempBasal = nil
@@ -598,6 +601,7 @@ final class LoopDataManager {
         guard let
             glucose = self.predictedGlucose,
             let maxBolus = self.deviceDataManager.maximumBolus,
+            let maxIOB = self.deviceDataManager.maximumIOB,
             let glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
             let basalRates = self.deviceDataManager.basalRateSchedule
@@ -620,6 +624,7 @@ final class LoopDataManager {
         return max(0, DoseMath.recommendBolusFromPredictedGlucose(glucose,
             lastTempBasal: self.lastTempBasal,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates

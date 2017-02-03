@@ -11,7 +11,6 @@ import HealthKit
 import InsulinKit
 import LoopKit
 
-
 struct DoseMath {
     /// The allowed precision
     static let basalStrokes: Double = 40
@@ -58,9 +57,12 @@ struct DoseMath {
         atDate date: Date = Date(),
         lastTempBasal: DoseEntry?,
         maxBasalRate: Double,
+        maxIOB: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
-        basalRateSchedule: BasalRateSchedule
+        basalRateSchedule: BasalRateSchedule,
+        allowPredictiveTempBelowRange: Bool = false,
+        insulinOnBoard: Double?
     ) -> (rate: Double, duration: TimeInterval)? {
         guard glucose.count > 1 else {
             return nil
@@ -122,7 +124,13 @@ struct DoseMath {
                 duration = TimeInterval(0)
             }
         }
-
+        if  let iob = insulinOnBoard {
+            if iob > maxIOB {
+                // We hit the max IOB, thus reduce the rate until we are below IOB.
+                rate = minBasalRate
+                // TODO this should log an event to nightscout
+            }
+        }
         if let rate = rate {
             return (rate: rate, duration: duration)
         } else {
@@ -147,9 +155,11 @@ struct DoseMath {
         atDate date: Date = Date(),
         lastTempBasal: DoseEntry?,
         maxBolus: Double,
+        maxIOB: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
-        basalRateSchedule: BasalRateSchedule
+        basalRateSchedule: BasalRateSchedule,
+        insulinOnBoard: Double?
     ) -> Double {
         guard glucose.count > 1 else {
             return 0
@@ -177,6 +187,13 @@ struct DoseMath {
             let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
 
             doseUnits -= max(0, remainingUnits)
+        }
+
+
+        if  let iob = insulinOnBoard {
+            if iob + doseUnits > maxIOB, maxIOB > 0 {
+                doseUnits = maxIOB - iob
+            }
         }
 
         doseUnits = round(doseUnits * 40) / 40
