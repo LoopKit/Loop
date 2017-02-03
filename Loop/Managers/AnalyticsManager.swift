@@ -106,7 +106,10 @@ final class AnalyticsManager {
     func didChangeMaximumBolus() {
         logEvent("Maximum bolus change")
     }
-
+    
+    func didChangeMaximumIOB() {
+        logEvent("Maximum IOB change")
+    }
     // MARK: - Loop Events
 
     func didAddCarbsFromWatch(_ carbs: Double) {
