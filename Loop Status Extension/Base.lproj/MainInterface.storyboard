@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="15G1108" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -21,35 +21,34 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="110"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="70"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="70" id="Pes-zW-tY0"/>
-                                </constraints>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="kUs-Lf-tWm">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="110"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="70"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="70" id="Pes-zW-tY0"/>
+                                        </constraints>
+                                    </stackView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
+                                        <rect key="frame" x="0.0" y="70" width="375" height="0.0"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2gm-Vd-hcP" customClass="ChartContentView" customModule="Loop_Status_Extension" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="70" width="375" height="40"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </view>
+                                </subviews>
                             </stackView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2gm-Vd-hcP" customClass="ChartContentView" customModule="Loop_Status_Extension" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="70" width="375" height="22"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                <rect key="frame" x="8" y="92" width="359" height="18"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="2GY-sK-gJb"/>
-                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="top" secondItem="d8d-rW-z8J" secondAttribute="bottom" id="44s-fY-1BF"/>
-                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="top" id="4c5-zh-dsa"/>
-                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="9xs-g9-1BB"/>
-                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="HRz-l7-kl8"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="Pin-pS-n5v"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="elI-w9-pZM"/>
-                            <constraint firstItem="2gm-Vd-hcP" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="epZ-OR-nd1"/>
-                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="eyp-uB-FYQ"/>
-                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" constant="-16" id="rpP-77-R0Z"/>
+                            <constraint firstItem="kUs-Lf-tWm" firstAttribute="height" secondItem="Vhu-kB-paW" secondAttribute="height" id="DNr-ff-JaZ"/>
+                            <constraint firstItem="kUs-Lf-tWm" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="GED-iu-I0e"/>
+                            <constraint firstItem="kUs-Lf-tWm" firstAttribute="centerX" secondItem="Vhu-kB-paW" secondAttribute="centerX" id="voc-9B-86z"/>
+                            <constraint firstItem="kUs-Lf-tWm" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="wXT-JW-XJS"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>

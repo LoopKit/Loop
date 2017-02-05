@@ -211,7 +211,7 @@ final class StatusChartsManager {
 
     // MARK: - State
 
-    private var glucosePoints: [ChartPoint] = [] {
+    var glucosePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
             xAxisValues = nil

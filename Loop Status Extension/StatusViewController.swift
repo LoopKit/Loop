@@ -11,6 +11,7 @@ import HealthKit
 import LoopUI
 import NotificationCenter
 import UIKit
+import SwiftCharts
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 
@@ -96,9 +97,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
         if (activeDisplayMode == NCWidgetDisplayMode.compact) {
             self.preferredContentSize = maxSize
-        }
-        else {
+        } else {
             self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
+            charts.prerender()
         }
     }
 
@@ -143,7 +144,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         else {
             return NCUpdateResult.failed
         }
-        
+
         if let glucose = context.latestGlucose {
             glucoseHUD.set(glucoseQuantity: glucose.quantity,
                            at: glucose.startDate,
@@ -183,7 +184,34 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         } else {
             subtitleLabel.alpha = 0
         }
-        
+
+        let dateFormatter: DateFormatter = {
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateStyle = .none
+            timeFormatter.timeStyle = .short
+
+            return timeFormatter
+        }()
+
+
+        var startDate = Date()
+        let glucoseFormatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
+        var points: [ChartPoint] = []
+        for i in 1...100 {
+            startDate = startDate.addingTimeInterval(TimeInterval(60))
+            //print(startDate)
+            points.append(
+                ChartPoint(
+                    x: ChartAxisValueDate(date: startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDoubleUnit(Double(i), unitString: "mg/dL", formatter: glucoseFormatter)
+                )
+            )
+        }
+        charts.glucosePoints = points
+
+        charts.prerender()
+        glucoseChartContentView.reloadChart()
+
         // Right now we always act as if there's new data.
         // TODO: keep track of data changes and return .noData if necessary
         return NCUpdateResult.newData
