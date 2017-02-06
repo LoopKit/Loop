@@ -10,31 +10,31 @@ import UIKit
 
 
 extension UIColor {
-    @nonobjc static var tintColor: UIColor? = nil
+    @nonobjc public static var tintColor: UIColor? = nil
 
-    @nonobjc static let secondaryLabelColor = UIColor.HIGGrayColor()
+    @nonobjc public static let secondaryLabelColor = UIColor.HIGGrayColor()
 
-    @nonobjc static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
+    @nonobjc public static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
 
-    @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
+    @nonobjc public static let gridColor = UIColor(white: 193 / 255, alpha: 1)
 
-    @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
+    @nonobjc public static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
 
-    @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
+    @nonobjc public static let IOBTintColor = UIColor.HIGOrangeColor()
 
-    @nonobjc static let COBTintColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
+    @nonobjc public static let COBTintColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
 
-    @nonobjc static let doseTintColor = UIColor.HIGOrangeColor()
+    @nonobjc public static let doseTintColor = UIColor.HIGOrangeColor()
 
-    @nonobjc static let freshColor = UIColor.HIGGreenColor()
+    @nonobjc public static let freshColor = UIColor.HIGGreenColor()
 
-    @nonobjc static let agingColor = UIColor.HIGYellowColor()
+    @nonobjc public static let agingColor = UIColor.HIGYellowColor()
 
-    @nonobjc static let staleColor = UIColor.HIGRedColor()
+    @nonobjc public static let staleColor = UIColor.HIGRedColor()
 
-    @nonobjc static let unknownColor = UIColor(red: 198 / 255, green: 199 / 255, blue: 201 / 255, alpha: 1)
+    @nonobjc public static let unknownColor = UIColor(red: 198 / 255, green: 199 / 255, blue: 201 / 255, alpha: 1)
 
-    @nonobjc static let deleteColor = UIColor.HIGRedColor()
+    @nonobjc public static let deleteColor = UIColor.HIGRedColor()
 
     // MARK: - HIG colors
     // See: https://developer.apple.com/ios/human-interface-guidelines/visual-design/color/

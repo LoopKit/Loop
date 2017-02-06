@@ -61,7 +61,7 @@ final class StatusExtensionDataManager {
                 context.batteryPercentage = 0.25
                 context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
                 context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.123)
+                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 89.123)
                     .doubleValue(for: preferredUnit)
             #endif
 
@@ -91,8 +91,8 @@ final class StatusExtensionDataManager {
                     capacity: capacity)
             }
             
-            if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
-                context.batteryPercentage = Double(batteryPercentage) / 100.0
+            if let batteryPercentage = dataManager.pumpBatteryChargeRemaining {
+                context.batteryPercentage = batteryPercentage
             }
         
             if let lastPoint = predictedGlucose?.last {

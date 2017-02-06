@@ -14,6 +14,10 @@ extension UserDefaults {
         case StatusExtensionContext = "com.loopkit.Loop.StatusExtensionContext"
     }
 
+    var statusExtensionContextObservableKey: String {
+        return Key.StatusExtensionContext.rawValue
+    }
+    
     var statusExtensionContext: StatusExtensionContext? {
         get {
             if let rawValue = dictionary(forKey: Key.StatusExtensionContext.rawValue) {

@@ -9,7 +9,7 @@
 import UIKit
 
 
-final class BasalRateHUDView: HUDView {
+public final class BasalRateHUDView: BaseHUDView {
 
     @IBOutlet private weak var basalStateView: BasalStateView!
 
@@ -24,7 +24,7 @@ final class BasalRateHUDView: HUDView {
 
     private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate.")
 
-    func setNetBasalRate(_ rate: Double, percent: Double, at date: Date) {
+    public func setNetBasalRate(_ rate: Double, percent: Double, at date: Date) {
         let time = timeFormatter.string(from: date)
         caption?.text = time
 
