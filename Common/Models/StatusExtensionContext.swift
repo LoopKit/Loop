@@ -46,6 +46,7 @@ final class StatusExtensionContext: RawRepresentable {
     private let version = 1
     
     var preferredUnitString: String?
+    var historicalGlucose: [GlucoseContext]?
     var latestGlucose: GlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
@@ -129,6 +130,11 @@ final class StatusExtensionContext: RawRepresentable {
             if let trendType = sensor.trendType {
                 raw["latestGlucose_sensor_trendType"] = trendType.rawValue
             }
+        }
+
+        if preferredUnitString != nil,
+            let glucose = historicalGlucose {
+            raw["historicalGlucose"] = historicalGlucose.rawValue
         }
 
         if let batteryPercentage = batteryPercentage {

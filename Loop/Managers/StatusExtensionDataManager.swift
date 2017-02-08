@@ -70,6 +70,8 @@ final class StatusExtensionDataManager {
                 dosingEnabled: dataManager.loopManager.dosingEnabled,
                 lastCompleted: lastLoopCompleted)
 
+            let updateGroup = DispatchGroup()
+
             if let glucose = glucoseStore.latestGlucose {
                 // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
                 // convert the latest glucose to those units just to be sure.
@@ -77,6 +79,22 @@ final class StatusExtensionDataManager {
                     quantity: glucose.quantity.doubleValue(for: preferredUnit),
                     startDate: glucose.startDate,
                     sensor: dataManager.sensorInfo)
+
+                updateGroup.enter()
+                glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(-3 * 60 * 60)), endDate: Date()) {
+                    (values, error) in
+
+                    if (error != nil) {
+                        context.historicalGlucose = values.map({
+                            return GlucoseContext(quantity: $0.quantity.doubleValue(for: preferredUnit), startDate: $0.startDate, sensor: nil)
+                        })
+                    }
+
+                    print("getRecentGlucoseValues")
+                    print(error as Any)
+                    print(values)
+                    updateGroup.leave()
+                }
             }
             
             if let lastNetBasal = dataManager.loopManager.lastNetBasal {
@@ -98,7 +116,9 @@ final class StatusExtensionDataManager {
             if let lastPoint = predictedGlucose?.last {
                 context.eventualGlucose = lastPoint.quantity.doubleValue(for: preferredUnit)
             }
-            
+
+            _ = updateGroup.wait(timeout: DispatchTime.distantFuture)
+
             completionHandler(context)
         }
     }
