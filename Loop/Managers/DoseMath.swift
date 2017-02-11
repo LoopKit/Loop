@@ -162,7 +162,7 @@ struct DoseMath {
         // Use between to opt-out of the override.
         let minGlucoseTargets = glucoseTargetRange.between(start: minGlucose.startDate, end: minGlucose.startDate).first!.value
 
-        guard minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) >= minGlucoseTargets.minValue else {
+        guard minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) >= 75 else {
             return 0
         }
 
