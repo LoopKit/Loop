@@ -44,6 +44,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
 
+        var templateEntry: CLKComplicationTimelineEntry?
         switch complication.family {
         case .modularSmall:
             if let context = ExtensionDelegate.shared().lastContext,
@@ -53,13 +54,50 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
                 let date = context.glucoseDate, date.timeIntervalSinceNow.minutes >= -15,
                 let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: date)
             {
-                handler(CLKComplicationTimelineEntry(date: date, complicationTemplate: template))
+                templateEntry = CLKComplicationTimelineEntry(date: date, complicationTemplate: template)
             } else {
-                handler(nil)
+                templateEntry = nil
+            }
+        case .modularLarge:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let date = context.glucoseDate, date.timeIntervalSinceNow.minutes >= -15,
+                let template = CLKComplicationTemplateModularLargeTallBody(line1: glucoseString, date: date)
+            {
+                templateEntry = CLKComplicationTimelineEntry(date: date, complicationTemplate: template)
+            } else {
+                templateEntry = nil
+            }
+        case .circularSmall:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let date = context.glucoseDate, date.timeIntervalSinceNow.minutes >= -15,
+                let template = CLKComplicationTemplateCircularSmallStackText(line1: glucoseString, date: date)
+            {
+                templateEntry = CLKComplicationTimelineEntry(date: date, complicationTemplate: template)
+            } else {
+                templateEntry = nil
+            }
+        case .extraLarge:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let date = context.glucoseDate, date.timeIntervalSinceNow.minutes >= -15,
+                let template = CLKComplicationTemplateExtraLargeStackText(line1: glucoseString, date: date)
+            {
+                templateEntry = CLKComplicationTimelineEntry(date: date, complicationTemplate: template)
+            } else {
+                templateEntry = nil
             }
         default:
-            handler(nil)
+            templateEntry = nil
         }
+        handler(templateEntry)
     }
     
     func getTimelineEntries(for complication: CLKComplication, before date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
@@ -69,17 +107,60 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEntries(for complication: CLKComplication, after date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
         // Call the handler with the timeline entries after to the given date
-        if let context = ExtensionDelegate.shared().lastContext,
-            let glucose = context.glucose,
-            let unit = context.preferredGlucoseUnit,
-            let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
-            let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
-            let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: glucoseDate)
-        {
-            handler([CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)])
-        } else {
-            handler(nil)
+        var templateEntry: [CLKComplicationTimelineEntry]?
+        switch complication.family {
+        case .modularSmall:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
+                let template = CLKComplicationTemplateModularSmallStackText(line1: glucoseString, date: glucoseDate)
+            {
+                templateEntry = [CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)]
+            } else {
+                templateEntry = nil
+            }
+        case .modularLarge:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
+                let template = CLKComplicationTemplateModularLargeTallBody(line1: glucoseString, date: glucoseDate)
+            {
+                templateEntry = [CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)]
+            } else {
+                templateEntry = nil
+            }
+        case .circularSmall:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
+                let template = CLKComplicationTemplateCircularSmallStackText(line1: glucoseString, date: glucoseDate)
+            {
+                templateEntry = [CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)]
+            } else {
+                templateEntry = nil
+            }
+        case .extraLarge:
+            if let context = ExtensionDelegate.shared().lastContext,
+                let glucose = context.glucose,
+                let unit = context.preferredGlucoseUnit,
+                let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+                let glucoseDate = context.glucoseDate, glucoseDate.timeIntervalSince(date) > 0,
+                let template = CLKComplicationTemplateExtraLargeStackText(line1: glucoseString, date: glucoseDate)
+            {
+                templateEntry = [CLKComplicationTimelineEntry(date: glucoseDate, complicationTemplate: template)]
+            } else {
+                templateEntry = nil
+            }
+        default:
+            templateEntry = nil
         }
+        handler(templateEntry)
     }
 
     // MARK: - Placeholder Templates
@@ -92,6 +173,27 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
             template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
 
+            handler(template)
+        case .modularLarge:
+            let template = CLKComplicationTemplateModularLargeTallBody()
+            
+            template.bodyTextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
+            template.headerTextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
+            
+            handler(template)
+        case .circularSmall:
+            let template = CLKComplicationTemplateCircularSmallStackText()
+            
+            template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
+            template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
+            
+            handler(template)
+        case .extraLarge:
+            let template = CLKComplicationTemplateExtraLargeStackText()
+            
+            template.line1TextProvider = CLKSimpleTextProvider(text: "--", shortText: "--", accessibilityLabel: "No glucose value available")
+            template.line2TextProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "mg/dL")
+            
             handler(template)
         default:
             handler(nil)
