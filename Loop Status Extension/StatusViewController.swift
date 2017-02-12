@@ -202,6 +202,16 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     y: ChartAxisValueDoubleUnit(Double($0.quantity), unitString: preferredUnitString, formatter: glucoseFormatter)
                 )
             }
+
+            if let predictedGlucose = context.predictedGlucose {
+                charts.predictedGlucosePoints = predictedGlucose.map {
+                    ChartPoint(
+                        x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                        y: ChartAxisValueDoubleUnit(Double($0.quantity), unitString: preferredUnitString, formatter: glucoseFormatter)
+                    )
+                }
+            }
+            
             charts.prerender()
             glucoseChartContentView.reloadChart()
         }
