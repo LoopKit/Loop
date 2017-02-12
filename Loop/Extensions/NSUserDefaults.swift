@@ -20,6 +20,7 @@ extension UserDefaults {
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case G4ReceiverEnabled = "com.loudnate.Loop.G4ReceiverEnabled"
+        case G5TransmitterEnabled = "com.loopkit.Loop.G5TransmitterEnabled"
         case G5TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
@@ -223,6 +224,22 @@ extension UserDefaults {
         }
     }
 
+    var transmitterEnabled: Bool {
+        get {
+            if object(forKey: Key.G5TransmitterEnabled.rawValue) == nil {
+                // Old versions of Loop used the existence of transmitterID to indicate
+                // that the transmitter is enabled. Upgrade to the new format now. The
+                // transmitter is enabled if there's a 6 character transmitter ID
+                set(transmitterID?.characters.count == 6, forKey: Key.G5TransmitterEnabled.rawValue)
+            }
+
+            return bool(forKey: Key.G5TransmitterEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.G5TransmitterEnabled.rawValue)
+        }
+    }
+    
     var transmitterID: String? {
         get {
             return string(forKey: Key.G5TransmitterID.rawValue)
