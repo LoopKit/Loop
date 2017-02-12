@@ -84,6 +84,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         glucoseChartContentView.chartGenerator = { [unowned self] (frame) in
             return self.charts.glucoseChartWithFrame(frame)?.view
         }
+        self.charts.prerender()
 
         self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
         glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact
@@ -98,10 +99,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
         if (activeDisplayMode == NCWidgetDisplayMode.compact) {
             self.preferredContentSize = maxSize
-            glucoseChartContentView.isHidden = true
         } else {
             self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
-            glucoseChartContentView.isHidden = false
         }
     }
 
@@ -111,8 +110,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             _ in
             if self.extensionContext?.widgetActiveDisplayMode == .compact {
                 self.glucoseChartContentView.alpha = 0
+                self.glucoseChartContentView.isHidden = true
             } else {
                 self.glucoseChartContentView.alpha = 1
+                self.glucoseChartContentView.isHidden = false
             }
         })
     }

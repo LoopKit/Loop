@@ -73,7 +73,7 @@ final class StatusExtensionDataManager {
             let updateGroup = DispatchGroup()
 
             updateGroup.enter()
-            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(-1 * 3600)), endDate: Date()) {
+            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(hours: -1)), endDate: Date()) {
                 (values, error) in
 
                 if (error != nil) {
@@ -84,16 +84,18 @@ final class StatusExtensionDataManager {
                     // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
                     // convert all glucose values to the preferred unit just to be sure.
                     context.glucose = values.map({
-                        return GlucoseContext(startDate: $0.startDate,
-                                              quantity: $0.quantity.doubleValue(for: preferredUnit))
+                        return GlucoseContext(
+                            startDate: $0.startDate,
+                            quantity: $0.quantity.doubleValue(for: preferredUnit))
                     })
                     context.sensor = dataManager.sensorInfo
 
                     // Only tranfer the predicted glucose if we have glucose history
                     if let predictedGlucose = predictedGlucose {
                         context.predictedGlucose = predictedGlucose.map({
-                            return GlucoseContext(startDate: $0.startDate,
-                                                  quantity: $0.quantity.doubleValue(for: preferredUnit))
+                            return GlucoseContext(
+                                startDate: $0.startDate,
+                                quantity: $0.quantity.doubleValue(for: preferredUnit))
                         })
                     }
                 }
@@ -101,7 +103,10 @@ final class StatusExtensionDataManager {
             }
 
             if let lastNetBasal = dataManager.loopManager.lastNetBasal {
-                context.netBasal = NetBasalContext(rate: lastNetBasal.rate, percentage: lastNetBasal.percent, startDate: lastNetBasal.startDate)
+                context.netBasal = NetBasalContext(
+                    rate: lastNetBasal.rate,
+                    percentage: lastNetBasal.percent,
+                    startDate: lastNetBasal.startDate)
             }
             
             if let reservoir = dataManager.doseStore.lastReservoirValue,
@@ -120,9 +125,9 @@ final class StatusExtensionDataManager {
                 context.eventualGlucose = lastPoint.quantity.doubleValue(for: preferredUnit)
             }
 
-            _ = updateGroup.wait(timeout: DispatchTime.distantFuture)
-
-            completionHandler(context)
+            updateGroup.notify(queue: DispatchQueue.global(qos: .background), execute: {
+                completionHandler(context)
+            })
         }
     }
 }
