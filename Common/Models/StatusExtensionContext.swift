@@ -36,18 +36,18 @@ struct SensorDisplayableContext: SensorDisplayable {
 }
 
 struct GlucoseContext {
-    let quantity: Double
     let startDate: Date
-    let sensor: SensorDisplayable?
+    let quantity: Double
 }
 
 final class StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
-    private let version = 1
+    private let version = 2
     
     var preferredUnitString: String?
-    var historicalGlucose: [GlucoseContext]?
-    var latestGlucose: GlucoseContext?
+    var glucose: [GlucoseContext]?
+    var predictedGlucose: [GlucoseContext]?
+    var sensor: SensorDisplayable?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
     var netBasal: NetBasalContext?
@@ -59,11 +59,7 @@ final class StatusExtensionContext: RawRepresentable {
     required init?(rawValue: RawValue) {
         let raw = rawValue
         
-        if let preferredString = raw["preferredUnitString"] as? String,
-           let latestValue = raw["latestGlucose_value"] as? Double,
-           let startDate = raw["latestGlucose_startDate"] as? Date {
- 
-            var sensor: SensorDisplayableContext? = nil
+        if let preferredString = raw["preferredUnitString"] as? String {
             if let state = raw["latestGlucose_sensor_isStateValid"] as? Bool,
                let desc = raw["latestGlucose_sensor_stateDescription"] as? String,
                let local = raw["latestGlucose_sensor_isLocal"] as? Bool {
@@ -81,12 +77,20 @@ final class StatusExtensionContext: RawRepresentable {
             }
             
             preferredUnitString = preferredString
-            latestGlucose = GlucoseContext(
-                quantity: latestValue,
-                startDate: startDate,
-                sensor: sensor)
+            
+            if let dates = raw["glucose_dates"] as? [Date],
+                let quantities = raw["glucose_quantities"] as? [Double],
+                quantities.count == dates.count {
+                glucose = zip(dates, quantities).map{GlucoseContext(startDate: $0, quantity: $1)}
+            }
+
+            if let dates = raw["predicted_glucose_dates"] as? [Date],
+                let quantities = raw["predicted_glucose_quantities"] as? [Double],
+                quantities.count == dates.count {
+                predictedGlucose = zip(dates, quantities).map{GlucoseContext(startDate: $0, quantity: $1)}
+            }
         }
-        
+
         batteryPercentage = raw["batteryPercentage"] as? Double
         
         if let startDate = raw["reservoir_startDate"] as? Date,
@@ -116,26 +120,27 @@ final class StatusExtensionContext: RawRepresentable {
 
         raw["preferredUnitString"] = preferredUnitString
         
-        if preferredUnitString != nil,
-            let glucose = latestGlucose {
-            raw["latestGlucose_value"] = glucose.quantity
-            raw["latestGlucose_startDate"] = glucose.startDate
-        }
-
-        if let sensor = latestGlucose?.sensor {
-            raw["latestGlucose_sensor_isStateValid"] = sensor.isStateValid
-            raw["latestGlucose_sensor_stateDescription"] = sensor.stateDescription
-            raw["latestGlucose_sensor_isLocal"] = sensor.isLocal
-            
-            if let trendType = sensor.trendType {
-                raw["latestGlucose_sensor_trendType"] = trendType.rawValue
+        if preferredUnitString != nil {
+            if let glucose = glucose {
+                raw["glucose_dates"] = glucose.map({$0.startDate})
+                raw["glucose_quantities"] = glucose.map({$0.quantity})
+            }
+            if let glucose = predictedGlucose {
+                raw["predicted_glucose_dates"] = glucose.map({$0.startDate})
+                raw["predicted_glucose_quantities"] = glucose.map({$0.quantity})
             }
         }
 
-        if preferredUnitString != nil,
-            let glucose = historicalGlucose {
-            raw["historicalGlucose"] = historicalGlucose.rawValue
+        if let sensor = sensor {
+            raw["glucose_sensor_isStateValid"] = sensor.isStateValid
+            raw["glucose_sensor_stateDescription"] = sensor.stateDescription
+            raw["glucose_sensor_isLocal"] = sensor.isLocal
+            
+            if let trendType = sensor.trendType {
+                raw["glucose_sensor_trendType"] = trendType.rawValue
+            }
         }
+
 
         if let batteryPercentage = batteryPercentage {
             raw["batteryPercentage"] = batteryPercentage

@@ -72,31 +72,34 @@ final class StatusExtensionDataManager {
 
             let updateGroup = DispatchGroup()
 
-            if let glucose = glucoseStore.latestGlucose {
-                // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
-                // convert the latest glucose to those units just to be sure.
-                context.latestGlucose = GlucoseContext(
-                    quantity: glucose.quantity.doubleValue(for: preferredUnit),
-                    startDate: glucose.startDate,
-                    sensor: dataManager.sensorInfo)
+            updateGroup.enter()
+            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(-1 * 3600)), endDate: Date()) {
+                (values, error) in
 
-                updateGroup.enter()
-                glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(-3 * 60 * 60)), endDate: Date()) {
-                    (values, error) in
+                if (error != nil) {
+                    context.glucose = nil
+                    context.sensor = nil
+                    context.predictedGlucose = nil
+                } else {
+                    // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
+                    // convert all glucose values to the preferred unit just to be sure.
+                    context.glucose = values.map({
+                        return GlucoseContext(startDate: $0.startDate,
+                                              quantity: $0.quantity.doubleValue(for: preferredUnit))
+                    })
+                    context.sensor = dataManager.sensorInfo
 
-                    if (error != nil) {
-                        context.historicalGlucose = values.map({
-                            return GlucoseContext(quantity: $0.quantity.doubleValue(for: preferredUnit), startDate: $0.startDate, sensor: nil)
+                    // Only tranfer the predicted glucose if we have glucose history
+                    if let predictedGlucose = predictedGlucose {
+                        context.predictedGlucose = predictedGlucose.map({
+                            return GlucoseContext(startDate: $0.startDate,
+                                                  quantity: $0.quantity.doubleValue(for: preferredUnit))
                         })
                     }
-
-                    print("getRecentGlucoseValues")
-                    print(error as Any)
-                    print(values)
-                    updateGroup.leave()
                 }
+                updateGroup.leave()
             }
-            
+
             if let lastNetBasal = dataManager.loopManager.lastNetBasal {
                 context.netBasal = NetBasalContext(rate: lastNetBasal.rate, percentage: lastNetBasal.percent, startDate: lastNetBasal.startDate)
             }

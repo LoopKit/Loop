@@ -99,7 +99,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             self.preferredContentSize = maxSize
         } else {
             self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
-            charts.prerender()
         }
     }
 
@@ -145,11 +144,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return NCUpdateResult.failed
         }
 
-        if let glucose = context.latestGlucose {
-            glucoseHUD.set(glucoseQuantity: glucose.quantity,
-                           at: glucose.startDate,
+        if let lastGlucose = context.glucose?.last {
+            glucoseHUD.set(glucoseQuantity: lastGlucose.quantity,
+                           at: lastGlucose.startDate,
                            unitString: preferredUnitString,
-                           from: glucose.sensor)
+                           from: context.sensor)
         }
         
         if let batteryPercentage = context.batteryPercentage {
@@ -194,23 +193,18 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }()
 
 
-        var startDate = Date()
-        let glucoseFormatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
-        var points: [ChartPoint] = []
-        for i in 1...100 {
-            startDate = startDate.addingTimeInterval(TimeInterval(60))
-            //print(startDate)
-            points.append(
-                ChartPoint(
-                    x: ChartAxisValueDate(date: startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit(Double(i), unitString: "mg/dL", formatter: glucoseFormatter)
-                )
-            )
-        }
-        charts.glucosePoints = points
+        if let glucose = context.glucose {
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
 
-        charts.prerender()
-        glucoseChartContentView.reloadChart()
+            charts.glucosePoints = glucose.map {
+                ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDoubleUnit(Double($0.quantity), unitString: preferredUnitString, formatter: glucoseFormatter)
+                )
+            }
+            charts.prerender()
+            glucoseChartContentView.reloadChart()
+        }
 
         // Right now we always act as if there's new data.
         // TODO: keep track of data changes and return .noData if necessary
