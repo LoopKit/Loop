@@ -86,6 +86,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
+        glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact
     }
 
     deinit {
@@ -97,9 +98,23 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
         if (activeDisplayMode == NCWidgetDisplayMode.compact) {
             self.preferredContentSize = maxSize
+            glucoseChartContentView.isHidden = true
         } else {
             self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
+            glucoseChartContentView.isHidden = false
         }
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil, completion: {
+            _ in
+            if self.extensionContext?.widgetActiveDisplayMode == .compact {
+                self.glucoseChartContentView.alpha = 0
+            } else {
+                self.glucoseChartContentView.alpha = 1
+            }
+        })
     }
 
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
