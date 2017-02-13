@@ -67,9 +67,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var loopError: Error? = nil {
         didSet {
-            if let error = loopError {
-                noticeLabel?.text = error.localizedDescription
-            }
+            updateNotice();
         }
     }
 
@@ -77,11 +75,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
-            if let notice = bolusRecommendation?.notice {
-                noticeLabel?.text = String(describing: notice)
-            } else {
-                noticeLabel?.text = nil
-            }
+            updateNotice();
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin
             }
@@ -143,13 +137,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     @IBOutlet weak var noticeLabel: UILabel? {
         didSet {
-            if let error = loopError {
-                noticeLabel?.text = "⚠ " + error.localizedDescription
-            } else if let notice = bolusRecommendation?.notice {
-                noticeLabel?.text = "⚠ " + String(describing: notice)
-            } else {
-                noticeLabel?.text = nil
-            }
+            updateNotice();
         }
     }
 
@@ -253,6 +241,16 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
         return numberFormatter
     }()
+
+    private func updateNotice() {
+        if let error = loopError {
+            noticeLabel?.text = "⚠ " + error.localizedDescription
+        } else if let notice = bolusRecommendation?.notice {
+            noticeLabel?.text = "⚠ " + String(describing: notice)
+        } else {
+            noticeLabel?.text = nil
+        }
+    }
 
 
 
