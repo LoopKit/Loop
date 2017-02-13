@@ -660,15 +660,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
             if let maxBolus = self.dataManager.maximumBolus {
-                DispatchQueue.main.async {
-                    vc.maxBolus = maxBolus
-                }
+                vc.maxBolus = maxBolus
             }
 
             if let recommendation = sender as? BolusRecommendation {
-                DispatchQueue.main.async {
-                    vc.bolusRecommendation = recommendation
-                }
+                vc.bolusRecommendation = recommendation
             } else {
                 self.dataManager.loopManager.getRecommendedBolus { (recommendation, error) -> Void in
                     if let error = error {
