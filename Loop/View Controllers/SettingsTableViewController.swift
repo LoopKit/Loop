@@ -104,6 +104,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
+        case minimumBGGuard
         case insulinActionDuration
         case basalRate
         case carbRatio
@@ -803,6 +804,13 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                 }
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
+                case .minimumBGGuard:
+                    if let controller = controller as? GlucoseThresholdTableViewController,
+                        let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
+                        dataManager.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnits, value: minBGGuard)
+                    } else {
+                        dataManager.minimumBGGuard = nil
+                    }
                 case .insulinActionDuration:
                     if let value = controller.value, let duration = valueNumberFormatter.number(from: value)?.doubleValue {
                         dataManager.insulinActionDuration = TimeInterval(hours: duration)
@@ -823,13 +831,6 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                     }
                 default:
                     assertionFailure()
-                }
-            case .minimumBGGuard:
-                if let controller = controller as? GlucoseThresholdTableViewController,
-                    let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
-                    dataManager.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnits, value: minBGGuard)
-                } else {
-                    dataManager.minimumBGGuard = nil
                 }
             default:
                 assertionFailure()
