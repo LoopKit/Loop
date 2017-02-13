@@ -146,7 +146,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             if let error = loopError {
                 noticeLabel?.text = "⚠ " + error.localizedDescription
             } else if let notice = bolusRecommendation?.notice {
-                print("Setting \(notice)")
                 noticeLabel?.text = "⚠ " + String(describing: notice)
             } else {
                 noticeLabel?.text = nil
