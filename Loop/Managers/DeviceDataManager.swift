@@ -54,6 +54,15 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    var transmitterEnabled: Bool {
+        get {
+            return UserDefaults.standard.transmitterEnabled
+        }
+        set {
+            return UserDefaults.standard.transmitterEnabled = newValue
+        }
+    }
+
     var sensorInfo: SensorDisplayable? {
         return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
     }
@@ -1057,7 +1066,10 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             receiver?.delegate = self
         }
 
-        if let transmitterID = UserDefaults.standard.transmitterID, transmitterID.characters.count == 6 {
+        if UserDefaults.standard.transmitterEnabled,
+            let transmitterID = UserDefaults.standard.transmitterID,
+            transmitterID.characters.count == 6 {
+
             transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
             transmitter?.delegate = self
         }
@@ -1078,6 +1090,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "latestGlucoseG4: \(latestGlucoseG4)",
             "pumpState: \(String(reflecting: pumpState))",
             "preferredInsulinDataSource: \(preferredInsulinDataSource)",
+            "transmitterEnabled: \(transmitterEnabled)",
             "transmitterID: \(transmitterID)",
             "glucoseTargetRangeSchedule: \(glucoseTargetRangeSchedule?.debugDescription ?? "")",
             "workoutModeEnabled: \(workoutModeEnabled)",
