@@ -27,7 +27,7 @@ extension UIAlertController {
         formatter.allowsFractionalUnits = false
         formatter.unitsStyle = .full
 
-        for interval in [1, 2].map({ TimeInterval(hours: $0) }) {
+        for interval in [0.5, 1, 2].map({ TimeInterval(hours: $0) }) {
             let duration = NSLocalizedString("For %1$@", comment: "The format string used to describe a finite workout targets duration")
 
             addAction(UIAlertAction(title: String(format: duration, formatter.string(from: interval)!), style: .default) { _ in
