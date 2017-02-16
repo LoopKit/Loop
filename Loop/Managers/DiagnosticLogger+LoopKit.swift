@@ -26,6 +26,22 @@ extension DiagnosticLogger {
         addError(String(describing: message), fromSource: source)
     }
 
+    func quantityValue(_ from: GlucoseValue, unit: HKUnit) -> Any {
+        let value = from.quantity.doubleValue(for: unit)
+        guard !value.isNaN else {
+            return "NaN"
+        }
+        return value
+    }
+
+    func quantityValue(_ from: GlucoseEffect, unit: HKUnit) -> Any {
+        let value = from.quantity.doubleValue(for: unit)
+        guard !value.isNaN else {
+            return "NaN"
+        }
+        return value
+    }
+
     func addLoopStatus(startDate: Date, endDate: Date, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: Error?, prediction: [GlucoseValue], predictionWithRetrospectiveEffect: Double, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
 
         let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
@@ -36,7 +52,7 @@ extension DiagnosticLogger {
             "duration": endDate.timeIntervalSince(startDate),
             "glucose": [
                 "startDate": dateFormatter.string(from: glucose.startDate),
-                "value": glucose.quantity.doubleValue(for: unit),
+                "value": quantityValue(glucose, unit: unit),
                 "unit": unit.unitString
             ],
             "input": effects.reduce([:], { (previous, item) -> [String: Any] in
@@ -44,7 +60,7 @@ extension DiagnosticLogger {
                 input[item.0] = item.1.map {
                     [
                         "startDate": dateFormatter.string(from: $0.startDate),
-                        "value": $0.quantity.doubleValue(for: unit),
+                        "value": quantityValue($0, unit: unit),
                         "unit": unit.unitString
                     ]
                 }
@@ -53,11 +69,11 @@ extension DiagnosticLogger {
             "prediction": prediction.map { (value) -> [String: Any] in
                 [
                     "startDate": dateFormatter.string(from: value.startDate),
-                    "value": value.quantity.doubleValue(for: unit),
+                    "value": quantityValue(value, unit: unit),
                     "unit": unit.unitString
                 ]
             },
-            "prediction_retrospect_delta": predictionWithRetrospectiveEffect
+            "prediction_retrospect_delta": predictionWithRetrospectiveEffect.isNaN ? "NaN" : predictionWithRetrospectiveEffect
         ]
 
         if let error = error {
