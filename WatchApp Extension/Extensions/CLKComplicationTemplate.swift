@@ -44,13 +44,18 @@ extension CLKComplicationTemplate {
         }
 
         let glucoseText = CLKSimpleTextProvider(text: glucoseStrings.joined(), shortText: glucoseString, accessibilityLabel: accessibilityStrings.joined(separator: ", "))
-        let timeText = CLKTimeTextProvider(date: date)
+        let timeText = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
 
         switch family {
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
             template.line1TextProvider = glucoseText
             template.line2TextProvider = timeText
+            return template
+        case .modularLarge:
+            let template = CLKComplicationTemplateModularLargeTallBody()
+            template.bodyTextProvider = glucoseText
+            template.headerTextProvider = timeText
             return template
         case .circularSmall:
             let template = CLKComplicationTemplateCircularSmallSimpleText()
