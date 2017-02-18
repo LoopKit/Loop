@@ -451,6 +451,7 @@
 		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
+		730B68AF1E580615008FDFFB /* WatchApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WatchApp.entitlements; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_tamp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
@@ -636,6 +637,7 @@
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
 			isa = PBXGroup;
 			children = (
+				730B68AF1E580615008FDFFB /* WatchApp.entitlements */,
 				C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */,
 				43A943771B926B7B0051FA24 /* Assets.xcassets */,
 				43F5C2D61B92A4DC003EB13D /* Info.plist */,
