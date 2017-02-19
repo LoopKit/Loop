@@ -22,13 +22,13 @@ enum LoopError: Error {
     case missingDataError(String)
 
     // Glucose data is too old to perform action
-    case glucoseTooOld(TimeInterval)
+    case glucoseTooOld(date: Date)
 
     // Pump data is too old to perform action
-    case pumpDataTooOld(TimeInterval)
+    case pumpDataTooOld(date: Date)
 
     // Recommendation Expired
-    case recommendationExpired(TimeInterval)
+    case recommendationExpired(date: Date)
 }
 
 extension LoopError: LocalizedError {
@@ -48,14 +48,14 @@ extension LoopError: LocalizedError {
             return NSLocalizedString("No connected devices, or failure during device connection", comment: "The error message displayed for device connection errors.")
         case .missingDataError(let details):
             return String(format: NSLocalizedString("Missing data: %1$@", comment: "The error message for missing data. (1: missing data details)"), details)
-        case .glucoseTooOld(let age):
-            let minutes = formatter.string(from: age) ?? ""
+        case .glucoseTooOld(let date):
+            let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Glucose data is %1$@ old", comment: "The error message when glucose data is too old to be used. (1: glucose data age in minutes)"), minutes)
-        case .pumpDataTooOld(let age):
-            let minutes = formatter.string(from: age) ?? ""
+        case .pumpDataTooOld(let date):
+            let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Pump data is %1$@ old", comment: "The error message when pump data is too old to be used. (1: pump data age in minutes)"), minutes)
-        case .recommendationExpired(let age):
-            let minutes = formatter.string(from: age) ?? ""
+        case .recommendationExpired(let date):
+            let minutes = formatter.string(from: -date.timeIntervalSinceNow) ?? ""
             return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
         }
     }

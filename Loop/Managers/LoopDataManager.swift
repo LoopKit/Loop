@@ -533,13 +533,13 @@ final class LoopDataManager {
         guard startDate.timeIntervalSince(glucose.startDate) <= recencyInterval
         else {
             self.predictedGlucose = nil
-            throw LoopError.glucoseTooOld(startDate.timeIntervalSince(glucose.startDate))
+            throw LoopError.glucoseTooOld(date: glucose.startDate)
         }
 
         guard startDate.timeIntervalSince(pumpStatusDate) <= recencyInterval
         else {
             self.predictedGlucose = nil
-            throw LoopError.pumpDataTooOld(startDate.timeIntervalSince(pumpStatusDate))
+            throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
 
         guard let
@@ -655,13 +655,13 @@ final class LoopDataManager {
         }
 
         let recencyInterval = TimeInterval(minutes: 15)
-
-        guard let predictedInterval = glucose.first?.startDate.timeIntervalSinceNow else {
+        
+        guard let glucoseDate = glucose.first?.startDate else {
             throw LoopError.missingDataError("No glucose data found")
         }
 
-        guard abs(predictedInterval) <= recencyInterval else {
-            throw LoopError.glucoseTooOld(predictedInterval)
+        guard abs(glucoseDate.timeIntervalSinceNow) <= recencyInterval else {
+            throw LoopError.glucoseTooOld(date: glucoseDate)
         }
 
         let pendingInsulin = try self.getPendingInsulin()
@@ -695,8 +695,8 @@ final class LoopDataManager {
             return
         }
 
-        guard recommendedTempBasal.recommendedDate.timeIntervalSinceNow < TimeInterval(minutes: 5) else {
-            resultsHandler(false, LoopError.recommendationExpired(recommendedTempBasal.recommendedDate.timeIntervalSinceNow))
+        guard abs(recommendedTempBasal.recommendedDate.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            resultsHandler(false, LoopError.recommendationExpired(date: recommendedTempBasal.recommendedDate))
             return
         }
 
