@@ -212,7 +212,7 @@ final class LoopDataManager {
             }
         }
 
-        if self.predictedGlucose == nil {
+        if (self.predictedGlucose == nil || self.predictedGlucoseWithoutMomentum == nil) {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
@@ -340,6 +340,7 @@ final class LoopDataManager {
     private var carbEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
+            predictedGlucoseWithoutMomentum = nil
 
             // Carb data may be back-dated, so re-calculate the retrospective glucose.
             retrospectivePredictedGlucose = nil
@@ -353,6 +354,7 @@ final class LoopDataManager {
             }
 
             predictedGlucose = nil
+            predictedGlucoseWithoutMomentum = nil
         }
     }
     private var insulinOnBoard: InsulinValue?
@@ -371,6 +373,7 @@ final class LoopDataManager {
             recommendedTempBasal = nil
         }
     }
+    private var predictedGlucoseWithoutMomentum: [GlucoseValue]?
     private var retrospectivePredictedGlucose: [GlucoseValue]? {
         didSet {
             retrospectiveGlucoseEffect = []
@@ -555,6 +558,7 @@ final class LoopDataManager {
 
         let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
         let predictionWithRetrospectiveEffect = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect, retrospectiveGlucoseEffect)
+        let predictionWithoutMomentum = LoopMath.predictGlucose(glucose, effects: carbEffect, insulinEffect)
 
         let predictDiff: Double
 
@@ -566,6 +570,10 @@ final class LoopDataManager {
         } else {
             predictDiff = 0
         }
+
+        let eventualBG: Double = prediction.last?.quantity.doubleValue(for: unit) ?? 0
+        let eventualBGWithRetrospectiveEffect: Double = predictionWithRetrospectiveEffect.last?.quantity.doubleValue(for: unit) ?? 0
+        let eventualBGWithoutMomentum: Double = predictionWithoutMomentum.last?.quantity.doubleValue(for: unit) ?? 0
 
         defer {
             deviceDataManager.logger.addLoopStatus(
@@ -581,11 +589,15 @@ final class LoopDataManager {
                 error: error,
                 prediction: prediction,
                 predictionWithRetrospectiveEffect: predictDiff,
+                eventualBG: eventualBG,
+                eventualBGWithRetrospectiveEffect: eventualBGWithRetrospectiveEffect,
+                eventualBGWithoutMomentum: eventualBGWithoutMomentum,
                 recommendedTempBasal: recommendedTempBasal
             )
         }
 
         self.predictedGlucose = retrospectiveCorrectionEnabled ? predictionWithRetrospectiveEffect : prediction
+        self.predictedGlucoseWithoutMomentum = predictionWithoutMomentum
 
         guard let
             maxBasal = deviceDataManager.maximumBasalRatePerHour,
@@ -645,6 +657,7 @@ final class LoopDataManager {
     private func recommendBolus() throws -> BolusRecommendation {
         guard let
             glucose = self.predictedGlucose,
+            let glucoseWithoutMomentum = self.predictedGlucoseWithoutMomentum,
             let maxBolus = self.deviceDataManager.maximumBolus,
             let glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
@@ -666,16 +679,29 @@ final class LoopDataManager {
 
         let pendingInsulin = try self.getPendingInsulin()
 
-        let bolusRecommendation = DoseMath.recommendBolusFromPredictedGlucose(
-            glucose,
+        let recommendationWithMomentum = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates,
             pendingInsulin: pendingInsulin,
-            minimumBGGuard: minimumBGGuard)
+            minimumBGGuard: minimumBGGuard
+        )
 
-        return bolusRecommendation
+        let recommendationWithoutMomentum = DoseMath.recommendBolusFromPredictedGlucose(glucoseWithoutMomentum,
+            maxBolus: maxBolus,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivity,
+            basalRateSchedule: basalRates,
+            pendingInsulin: pendingInsulin,
+            minimumBGGuard: minimumBGGuard
+        )
+        
+        if (recommendationWithMomentum.amount > recommendationWithoutMomentum.amount) {
+            return recommendationWithoutMomentum
+        } else {
+            return recommendationWithMomentum
+        }
     }
 
     func getRecommendedBolus(_ resultsHandler: @escaping (_ units: BolusRecommendation?, _ error: Error?) -> Void) {

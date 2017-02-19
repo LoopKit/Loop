@@ -97,7 +97,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     }
 
     fileprivate enum CGMRow: Int, CaseCountable {
-        case receiverEnabled = 0
+        case fetchEnlite = 0
+        case receiverEnabled
         case transmitterEnabled
         case transmitterID  // optional, only displayed if transmitterEnabled
     }
@@ -199,6 +200,17 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             }
             cell = configCell
         case .cgm:
+            if case .fetchEnlite = CGMRow(rawValue: indexPath.row)! {
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+
+                switchCell.`switch`?.isOn = dataManager.fetchEnliteDataEnabled
+                switchCell.titleLabel.text = NSLocalizedString("Fetch Enlite Data", comment: "The title text for the fetch enlite data enabled switch cell")
+
+                switchCell.`switch`?.addTarget(self, action: #selector(fetchEnliteEnabledChanged(_:)), for: .valueChanged)
+
+                return switchCell
+            }
+
             if case .receiverEnabled = CGMRow(rawValue: indexPath.row)! {
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
@@ -224,6 +236,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
             let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
             switch CGMRow(rawValue: indexPath.row)! {
+            case .fetchEnlite:
+                break
             case .transmitterEnabled:
                 break
             case .transmitterID:
@@ -416,6 +430,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .cgm:
             let row = CGMRow(rawValue: indexPath.row)!
             switch row {
+            case .fetchEnlite:
+                break
             case .transmitterEnabled:
                 break
             case .transmitterID:
@@ -680,6 +696,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         if dataManager.transmitterEnabled == false {
             dataManager.transmitterEnabled = true
             disableReceiver()
+            disableEnlite()
             tableView.insertRows(at: [IndexPath(row: CGMRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
@@ -698,12 +715,28 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         if sender.isOn {
             disableTransmitter()
+            disableEnlite()
         }
     }
 
     private func disableReceiver() {
         dataManager.receiverEnabled = false
         let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.receiverEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+        switchCell.`switch`?.setOn(false, animated: true)
+    }
+
+    func fetchEnliteEnabledChanged(_ sender: UISwitch) {
+        dataManager.fetchEnliteDataEnabled = sender.isOn
+
+        if sender.isOn {
+            disableTransmitter()
+            disableReceiver();
+        }
+    }
+
+    private func disableEnlite() {
+        dataManager.fetchEnliteDataEnabled = false
+        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.fetchEnlite.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
         switchCell.`switch`?.setOn(false, animated: true)
     }
 
