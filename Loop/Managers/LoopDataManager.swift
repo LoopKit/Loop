@@ -397,6 +397,11 @@ final class LoopDataManager {
     }
 
     private func updateCarbEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
+        guard let effectStartDate = effectStartDate else {
+            completionHandler(nil, LoopError.missingDataError("Glucose data not available"))
+            return
+        }
+        
         if let carbStore = deviceDataManager.carbStore {
             carbStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
                 if let error = error {
