@@ -899,6 +899,13 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
     }
+    
+    var minimumBGGuard: GlucoseThreshold? = UserDefaults.standard.minimumBGGuard {
+        didSet {
+            UserDefaults.standard.minimumBGGuard = minimumBGGuard
+            AnalyticsManager.sharedManager.didChangeMinimumBGGuard()
+        }
+    }
 
     var workoutModeEnabled: Bool? {
         guard let range = glucoseTargetRangeSchedule else {
@@ -1078,7 +1085,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
 
-        carbStore = CarbStore(
+         carbStore = CarbStore(
             defaultAbsorptionTimes: (fast: TimeInterval(hours: 2), medium: TimeInterval(hours: 3), slow: TimeInterval(hours: 4)),
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule

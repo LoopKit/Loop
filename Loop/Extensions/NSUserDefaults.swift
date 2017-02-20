@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import MinimedKit
+import HealthKit
 
 extension UserDefaults {
 
@@ -33,6 +34,7 @@ extension UserDefaults {
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
         case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
+        case MinimumBGGuard = "com.loopkit.Loop.MinimumBGGuard"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -269,6 +271,19 @@ extension UserDefaults {
             } else {
                 removeObject(forKey: Key.BatteryChemistry.rawValue)
             }
+        }
+    }
+    
+    var minimumBGGuard: GlucoseThreshold? {
+        get {
+            if let rawValue = dictionary(forKey: Key.MinimumBGGuard.rawValue) {
+                return GlucoseThreshold(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.MinimumBGGuard.rawValue)
         }
     }
 
