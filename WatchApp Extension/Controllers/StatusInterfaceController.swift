@@ -48,9 +48,9 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         
         guard let glucose = context?.glucose,
             let unit = context?.preferredGlucoseUnit
-         else {
-                glucoseLabel.setHidden(true)
-                eventualGlucoseLabel.setHidden(true)
+        else {
+            glucoseLabel.setHidden(true)
+            eventualGlucoseLabel.setHidden(true)
             return
         }
 
