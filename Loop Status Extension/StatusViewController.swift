@@ -81,10 +81,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 context: &observationContext)
         }
 
+        self.charts.prerender()
         glucoseChartContentView.chartGenerator = { [unowned self] (frame) in
             return self.charts.glucoseChartWithFrame(frame)?.view
         }
-        self.charts.prerender()
 
         self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
         glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact
