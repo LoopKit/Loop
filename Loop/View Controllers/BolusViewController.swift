@@ -65,12 +65,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
 
-    var loopError: Error? = nil {
-        didSet {
-            updateNotice();
-        }
-    }
-
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
@@ -243,9 +237,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     }()
 
     private func updateNotice() {
-        if let error = loopError {
-            noticeLabel?.text = "⚠ " + error.localizedDescription
-        } else if let notice = bolusRecommendation?.notice {
+        if let notice = bolusRecommendation?.notice {
             noticeLabel?.text = "⚠ " + String(describing: notice)
         } else {
             noticeLabel?.text = nil

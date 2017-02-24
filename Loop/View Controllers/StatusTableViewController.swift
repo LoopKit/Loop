@@ -676,12 +676,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
-            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, iob, cob, error) in
+            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, iob, cob, _) in
                 DispatchQueue.main.async {
                     vc.glucoseUnit = self.charts.glucoseUnit
                     vc.activeInsulin = iob?.value
                     vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
-                    vc.loopError = error
                 }
             })
 
