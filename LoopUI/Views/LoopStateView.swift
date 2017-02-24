@@ -8,7 +8,7 @@
 
 import UIKit
 
-public final class LoopStateView: UIView {
+public final class LoopStateView: UIButton {
     var firstDataUpdate = true
     
     enum Freshness {

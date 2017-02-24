@@ -16,7 +16,7 @@ import LoopUI
 import SwiftCharts
 
 
-final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
+final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate, HUDViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,6 +57,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         chartPanGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
+
+        hudView.delegate = self
 
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
@@ -403,6 +405,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         didSet {
             DispatchQueue.main.async {
                 self.loopCompletionHUD.lastLoopCompleted = self.lastLoopCompleted
+            }
+        }
+    }
+
+    func statusTapped() {
+        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
+            if let error = error {
+                self.presentAlertController(with: error)
             }
         }
     }
