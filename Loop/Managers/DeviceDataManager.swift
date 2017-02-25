@@ -355,7 +355,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
      */
     private func readPumpData(_ completion: @escaping (RileyLinkKit.Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
-            completion(.failure(LoopError.configurationError))
+            completion(.failure(LoopError.connectionError))
             return
         }
 
@@ -366,8 +366,9 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                 clock.timeZone = ops.pumpState.timeZone
 
                 guard let date = clock.date else {
-                    self.logger.addError("Could not interpret pump clock: \(clock)", fromSource: "RileyLink")
-                    completion(.failure(LoopError.configurationError))
+                    let errorStr = "Could not interpret pump clock: \(clock)"
+                    self.logger.addError(errorStr, fromSource: "RileyLink")
+                    completion(.failure(LoopError.invalidData(details: errorStr)))
                     return
                 }
                 completion(.success(status: status, date: date))
@@ -435,7 +436,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
 
         guard let ops = device.ops else {
-            completion(LoopError.configurationError)
+            completion(LoopError.configurationError("PumpOps"))
             return
         }
 

@@ -274,7 +274,7 @@ final class LoopDataManager {
     private func getPendingInsulin() throws -> Double {
 
         guard let basalRates = deviceDataManager.basalRateSchedule else {
-            throw LoopError.configurationError
+            throw LoopError.configurationError("Basal Rate Schedule")
         }
 
         let pendingTempBasalInsulin: Double
@@ -301,7 +301,7 @@ final class LoopDataManager {
             guard let
                 glucose = self.deviceDataManager.glucoseStore?.latestGlucose
             else {
-                resultsHandler(nil, LoopError.missingDataError("Cannot predict glucose due to missing input data"))
+                resultsHandler(nil, LoopError.missingDataError(details: "Cannot predict glucose due to missing input data", recovery: "Check your CGM data source"))
                 return
             }
 
@@ -433,7 +433,7 @@ final class LoopDataManager {
 
     private func updateCarbEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
         guard let effectStartDate = effectStartDate else {
-            completionHandler(nil, LoopError.missingDataError("Glucose data not available"))
+            completionHandler(nil, LoopError.missingDataError(details: "Glucose data not available", recovery: "Check your CGM data source"))
             return
         }
         
@@ -446,7 +446,7 @@ final class LoopDataManager {
                 completionHandler(effects, error)
             }
         } else {
-            completionHandler(nil, LoopError.missingDataError("CarbStore not available"))
+            completionHandler(nil, LoopError.missingDataError(details: "CarbStore not available", recovery: nil))
         }
     }
 
@@ -462,7 +462,7 @@ final class LoopDataManager {
 
     private func updateGlucoseMomentumEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
         guard let glucoseStore = deviceDataManager.glucoseStore else {
-            completionHandler(nil, LoopError.missingDataError("GlucoseStore not available"))
+            completionHandler(nil, LoopError.missingDataError(details: "GlucoseStore not available", recovery: nil))
             return
         }
         glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
@@ -485,7 +485,7 @@ final class LoopDataManager {
             let insulinEffect = self.insulinEffect
         else {
             self.retrospectivePredictedGlucose = nil
-            throw LoopError.missingDataError("Cannot retrospect glucose due to missing input data")
+            throw LoopError.missingDataError(details: "Cannot retrospect glucose due to missing input data", recovery: nil)
         }
 
         guard let change = glucoseChange else {
@@ -525,14 +525,14 @@ final class LoopDataManager {
             glucose = self.deviceDataManager.glucoseStore?.latestGlucose
             else {
                 self.predictedGlucose = nil
-                throw LoopError.missingDataError("Glucose")
+                throw LoopError.missingDataError(details: "Glucose", recovery: "Check your CGM data source")
         }
 
         guard let
             pumpStatusDate = self.deviceDataManager.doseStore.lastReservoirValue?.startDate
         else {
             self.predictedGlucose = nil
-            throw LoopError.missingDataError("Reservoir")
+            throw LoopError.missingDataError(details: "Reservoir", recovery: "Check that your pump is in range")
         }
 
         let startDate = Date()
@@ -556,7 +556,7 @@ final class LoopDataManager {
             let insulinEffect = self.insulinEffect else
         {
             self.predictedGlucose = nil
-            throw LoopError.missingDataError("Glucose effects")
+            throw LoopError.missingDataError(details: "Glucose effects", recovery: nil)
         }
 
         var error: Error?
@@ -604,14 +604,17 @@ final class LoopDataManager {
         self.predictedGlucose = retrospectiveCorrectionEnabled ? predictionWithRetrospectiveEffect : prediction
         self.predictedGlucoseWithoutMomentum = predictionWithoutMomentum
 
+        guard let minimumBGGuard = self.deviceDataManager.minimumBGGuard else {
+            throw LoopError.configurationError("Minimum BG Guard")
+        }
+
         guard let
             maxBasal = deviceDataManager.maximumBasalRatePerHour,
             let glucoseTargetRange = deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = deviceDataManager.insulinSensitivitySchedule,
-            let basalRates = deviceDataManager.basalRateSchedule,
-            let minimumBGGuard = deviceDataManager.minimumBGGuard
+            let basalRates = deviceDataManager.basalRateSchedule
         else {
-            error = LoopError.configurationError
+            error = LoopError.configurationError("Check settings")
             throw error!
         }
 
@@ -655,27 +658,30 @@ final class LoopDataManager {
                 }
             }
         } else {
-            resultsHandler(nil, LoopError.configurationError)
+            resultsHandler(nil, LoopError.configurationError("Carb Store"))
         }
     }
 
     private func recommendBolus() throws -> BolusRecommendation {
+        guard let minimumBGGuard = self.deviceDataManager.minimumBGGuard else {
+            throw LoopError.configurationError("Minimum BG Guard")
+        }
+
         guard let
             glucose = self.predictedGlucose,
             let glucoseWithoutMomentum = self.predictedGlucoseWithoutMomentum,
             let maxBolus = self.deviceDataManager.maximumBolus,
             let glucoseTargetRange = self.deviceDataManager.glucoseTargetRangeSchedule,
             let insulinSensitivity = self.deviceDataManager.insulinSensitivitySchedule,
-            let basalRates = self.deviceDataManager.basalRateSchedule,
-            let minimumBGGuard = self.deviceDataManager.minimumBGGuard
+            let basalRates = self.deviceDataManager.basalRateSchedule
         else {
-            throw LoopError.configurationError
+            throw LoopError.configurationError("Check Settings")
         }
 
         let recencyInterval = TimeInterval(minutes: 15)
         
         guard let glucoseDate = glucose.first?.startDate else {
-            throw LoopError.missingDataError("No glucose data found")
+            throw LoopError.missingDataError(details: "No glucose data found", recovery: "Check your CGM source")
         }
 
         guard abs(glucoseDate.timeIntervalSinceNow) <= recencyInterval else {
@@ -737,7 +743,7 @@ final class LoopDataManager {
         }
 
         guard let ops = device.ops else {
-            resultsHandler(false, LoopError.configurationError)
+            resultsHandler(false, LoopError.configurationError("PumpOps"))
             return
         }
 
