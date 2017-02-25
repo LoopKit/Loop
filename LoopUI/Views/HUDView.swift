@@ -8,25 +8,12 @@
 
 import UIKit
 
-public protocol HUDViewDelegate: class {
-    func statusTapped()
-}
-
-
 public class HUDView: UIStackView, NibLoadable {
-
-
     @IBOutlet public weak var loopCompletionHUD: LoopCompletionHUDView!
     @IBOutlet public weak var glucoseHUD: GlucoseHUDView!
     @IBOutlet public weak var basalRateHUD: BasalRateHUDView!
     @IBOutlet public weak var reservoirVolumeHUD: ReservoirVolumeHUDView!
     @IBOutlet public weak var batteryHUD: BatteryLevelHUDView!
-
-    weak public var delegate: HUDViewDelegate?
-
-    @IBAction func stateViewTapped() {
-        delegate?.statusTapped()
-    }
 
     func setup() {
         let stackView = HUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIStackView

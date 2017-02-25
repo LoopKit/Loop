@@ -16,7 +16,7 @@ import LoopUI
 import SwiftCharts
 
 
-final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate, HUDViewDelegate {
+final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,8 +57,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         chartPanGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
         tableView.addGestureRecognizer(chartPanGestureRecognizer)
         charts.panGestureRecognizer = chartPanGestureRecognizer
-
-        hudView.delegate = self
 
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
@@ -405,14 +403,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         didSet {
             DispatchQueue.main.async {
                 self.loopCompletionHUD.lastLoopCompleted = self.lastLoopCompleted
-            }
-        }
-    }
-
-    func statusTapped() {
-        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
-            if let error = error {
-                self.presentAlertController(with: error)
             }
         }
     }
@@ -781,12 +771,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBOutlet weak var hudView: HUDView! {
         didSet {
-            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
-            glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
+            let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
+            glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
             if cgmAppURL != nil {
                 glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
+            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLastError(_:)))
+            loopCompletionHUD.addGestureRecognizer(statusTapGestureRecognizer)
+            loopCompletionHUD.accessibilityHint = NSLocalizedString("Show last loop error", comment: "Loop Completion HUD accessibility hint")
         }
     }
     
@@ -811,6 +804,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return nil
         }
     }
+
+    @objc private func showLastError(_: Any) {
+        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
+            if let error = error {
+                self.presentAlertController(with: error)
+            }
+        }
+    }
+
 
     @objc private func openCGMApp(_: Any) {
         if let url = cgmAppURL {
