@@ -163,7 +163,7 @@ struct DoseMath {
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
 
         guard minGlucose.quantity >= minimumBGGuard.quantity else {
-            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: .glucoseBelowMinimumGuard)
+            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: .glucoseBelowMinimumGuard(minGlucose: minGlucose, unit: glucoseTargetRange.unit))
         }
 
         let targetGlucose = eventualGlucoseTargets.maxValue
@@ -180,7 +180,7 @@ struct DoseMath {
         let notice: BolusRecommendationNotice?
         if cappedAmount > 0 && minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
             if minGlucose.startDate == glucose[0].startDate {
-                notice = .currentGlucoseBelowTarget
+                notice = .currentGlucoseBelowTarget(glucose: minGlucose, unit: glucoseTargetRange.unit)
             } else {
                 notice = .predictedGlucoseBelowTarget(minGlucose: minGlucose, unit: glucoseTargetRange.unit)
             }
