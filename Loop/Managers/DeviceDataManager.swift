@@ -14,6 +14,7 @@ import GlucoseKit
 import HealthKit
 import InsulinKit
 import LoopKit
+import LoopUI
 import MinimedKit
 import NightscoutUploadKit
 import RileyLinkKit
@@ -53,8 +54,26 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    var transmitterEnabled: Bool {
+        get {
+            return UserDefaults.standard.transmitterEnabled
+        }
+        set {
+            return UserDefaults.standard.transmitterEnabled = newValue
+        }
+    }
+
+    var fetchEnliteDataEnabled: Bool {
+        get {
+            return UserDefaults.standard.fetchEnliteDataEnabled
+        }
+        set {
+            UserDefaults.standard.fetchEnliteDataEnabled = newValue
+        }
+    }
+
     var sensorInfo: SensorDisplayable? {
-        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry
+        return latestGlucoseG5 ?? latestGlucoseG4 ?? latestGlucoseFromShare ?? latestPumpStatusFromMySentry ?? latestEnliteData
     }
 
     var latestPumpStatus: RileyLinkKit.PumpStatus?
@@ -125,6 +144,10 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
 
     @objc private func receivedRileyLinkTimerTickNotification(_ note: Notification) {
         backfillGlucoseFromShareIfNeeded() {
+            if UserDefaults.standard.fetchEnliteDataEnabled {
+                self.assertCurrentEnliteData()
+            }
+
             self.assertCurrentPumpData()
         }
     }
@@ -355,42 +378,43 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    private func pumpDataIsStale() -> Bool {
+        // How long should we wait before we poll for new pump data?
+        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
+
+        return doseStore.lastReservoirValue == nil
+            || doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance
+    }
+
     /**
      Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
      */
     private func assertCurrentPumpData() {
-        guard let device = rileyLinkManager.firstConnectedDevice else {
+        guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
             return
         }
 
         device.assertIdleListening()
 
-        // How long should we wait before we poll for new pump data?
-        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
-
-        // If we don't yet have pump status, or it's old, poll for it.
-        if  doseStore.lastReservoirValue == nil ||
-            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
-            readPumpData { (result) in
-                let nsPumpStatus: NightscoutUploadKit.PumpStatus?
-                switch result {
-                case .success(let (status, date)):
-                    self.observeBatteryDuring {
-                        self.latestPumpStatus = status
-                    }
-
-                    self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
-                    let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
-
-
-                    nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
-                case .failure(let error):
-                    self.troubleshootPumpComms(using: device)
-                    self.nightscoutDataManager.uploadLoopStatus(loopError: error)
-                    nsPumpStatus = nil
+        readPumpData { (result) in
+            let nsPumpStatus: NightscoutUploadKit.PumpStatus?
+            switch result {
+            case .success(let (status, date)):
+                self.observeBatteryDuring {
+                    self.latestPumpStatus = status
                 }
-                self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+
+                self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
+                let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+
+
+                nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
+            case .failure(let error):
+                self.troubleshootPumpComms(using: device)
+                self.nightscoutDataManager.uploadLoopStatus(loopError: error)
+                nsPumpStatus = nil
             }
+            self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
         }
     }
 
@@ -472,6 +496,65 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                 }
             }
         }
+    }
+
+    // MARK: - Enlite
+
+    fileprivate var latestEnliteData: EnliteSensorDisplayable?
+
+    private func updateEnliteSensorStatus(_ events: [TimestampedGlucoseEvent]) {
+        let sensorEvents = events.filter({ $0.glucoseEvent is RelativeTimestampedGlucoseEvent })
+
+        if let latestSensorEvent = sensorEvents.last?.glucoseEvent as? RelativeTimestampedGlucoseEvent {
+            self.latestEnliteData = EnliteSensorDisplayable(latestSensorEvent)
+        }
+    }
+
+    private func assertCurrentEnliteData() {
+        guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
+            return
+        }
+
+        device.assertIdleListening()
+
+        let fetchGlucoseSince = glucoseStore?.latestGlucose?.startDate.addingTimeInterval(TimeInterval(minutes: 1)) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
+
+        guard fetchGlucoseSince.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) else {
+            return
+        }
+
+        device.ops?.getGlucoseHistoryEvents(since: fetchGlucoseSince, completion: { (result) in
+            switch result {
+            case .success(let glucoseEvents):
+
+                defer {
+                    _ = self.remoteDataManager.nightscoutUploader?.processGlucoseEvents(glucoseEvents, source: device.deviceURI)
+                }
+
+                self.updateEnliteSensorStatus(glucoseEvents)
+
+                let glucoseValues = glucoseEvents
+                    .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > fetchGlucoseSince })
+                    .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
+                        let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
+                        let quantity = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucoseEvent.sgv))
+                        return (quantity: quantity, date: e.date, isDisplayOnly: false)
+                    })
+
+                self.glucoseStore?.addGlucoseValues(glucoseValues, device: nil, resultHandler:  { (success, _, error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "GlucoseStore")
+                    }
+
+                    if success {
+                        NotificationCenter.default.post(name: .GlucoseUpdated, object: self)
+                    }
+                })
+
+            case .failure(let error):
+                self.logger.addError(error, fromSource: "PumpOps")
+            }
+        })
     }
 
     // MARK: - G5 Transmitter
@@ -816,6 +899,13 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
         }
     }
+    
+    var minimumBGGuard: GlucoseThreshold? = UserDefaults.standard.minimumBGGuard {
+        didSet {
+            UserDefaults.standard.minimumBGGuard = minimumBGGuard
+            AnalyticsManager.sharedManager.didChangeMinimumBGGuard()
+        }
+    }
 
     var workoutModeEnabled: Bool? {
         guard let range = glucoseTargetRangeSchedule else {
@@ -995,7 +1085,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
 
-        carbStore = CarbStore(
+         carbStore = CarbStore(
             defaultAbsorptionTimes: (fast: TimeInterval(hours: 2), medium: TimeInterval(hours: 3), slow: TimeInterval(hours: 4)),
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
@@ -1049,7 +1139,10 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             receiver?.delegate = self
         }
 
-        if let transmitterID = UserDefaults.standard.transmitterID, transmitterID.characters.count == 6 {
+        if UserDefaults.standard.transmitterEnabled,
+            let transmitterID = UserDefaults.standard.transmitterID,
+            transmitterID.characters.count == 6 {
+
             transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
             transmitter?.delegate = self
         }
@@ -1070,6 +1163,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "latestGlucoseG4: \(latestGlucoseG4)",
             "pumpState: \(String(reflecting: pumpState))",
             "preferredInsulinDataSource: \(preferredInsulinDataSource)",
+            "transmitterEnabled: \(transmitterEnabled)",
             "transmitterID: \(transmitterID)",
             "glucoseTargetRangeSchedule: \(glucoseTargetRangeSchedule?.debugDescription ?? "")",
             "workoutModeEnabled: \(workoutModeEnabled)",

@@ -61,7 +61,7 @@ final class StatusExtensionDataManager {
                 context.batteryPercentage = 0.25
                 context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
                 context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.123)
+                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 89.123)
                     .doubleValue(for: preferredUnit)
             #endif
 
@@ -109,6 +109,7 @@ extension StatusExtensionDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             "## StatusExtensionDataManager",
+            "appGroupName: \(Bundle.main.appGroupSuiteName)",
             "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))"
         ].joined(separator: "\n")
     }

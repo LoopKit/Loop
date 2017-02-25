@@ -10,7 +10,7 @@ import UIKit
 import HealthKit
 
 
-final class GlucoseHUDView: HUDView {
+public final class GlucoseHUDView: BaseHUDView {
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
@@ -64,7 +64,7 @@ final class GlucoseHUDView: HUDView {
         }
     }
 
-    func set(glucoseQuantity: Double, at glucoseStartDate: Date, unitString: String, from sensor: SensorDisplayable?) {
+    public func set(glucoseQuantity: Double, at glucoseStartDate: Date, unitString: String, from sensor: SensorDisplayable?) {
         var accessibilityStrings = [String]()
 
         let time = timeFormatter.string(from: glucoseStartDate)

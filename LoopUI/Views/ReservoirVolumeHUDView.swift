@@ -8,13 +8,13 @@
 
 import UIKit
 
-final class ReservoirVolumeHUDView: HUDView {
+public final class ReservoirVolumeHUDView: BaseHUDView {
 
     @IBOutlet private weak var levelMaskView: LevelMaskView!
 
     @IBOutlet private weak var volumeLabel: UILabel!
 
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
 
         tintColor = .unknownColor
@@ -23,7 +23,7 @@ final class ReservoirVolumeHUDView: HUDView {
         accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
-    var reservoirLevel: Double? {
+    public var reservoirLevel: Double? {
         didSet {
             levelMaskView.value = reservoirLevel ?? 1.0
 
@@ -62,7 +62,7 @@ final class ReservoirVolumeHUDView: HUDView {
         return formatter
     }()
 
-    func setReservoirVolume(volume: Double, at date: Date) {
+    public func setReservoirVolume(volume: Double, at date: Date) {
         if let units = numberFormatter.string(from: NSNumber(value: volume)) {
             volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
             let time = timeFormatter.string(from: date)
