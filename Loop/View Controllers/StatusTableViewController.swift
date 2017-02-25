@@ -771,12 +771,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBOutlet weak var hudView: HUDView! {
         didSet {
-            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
-            glucoseHUD.addGestureRecognizer(tapGestureRecognizer)
+            let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
+            glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
             if cgmAppURL != nil {
                 glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
+            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLastError(_:)))
+            loopCompletionHUD.addGestureRecognizer(statusTapGestureRecognizer)
+            loopCompletionHUD.accessibilityHint = NSLocalizedString("Show last loop error", comment: "Loop Completion HUD accessibility hint")
         }
     }
     
@@ -799,6 +802,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return url
         } else {
             return nil
+        }
+    }
+
+    @objc private func showLastError(_: Any) {
+        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
+            if let error = error {
+                self.presentAlertController(with: error)
+            }
         }
     }
 
