@@ -11,9 +11,9 @@ import HealthKit
 // Code in this extension is duplicated from:
 //   https://github.com/LoopKit/LoopKit/blob/master/LoopKit/HKUnit.swift
 // to avoid pulling in the LoopKit extension since it's not extension-API safe.
-public extension HKUnit {
+extension HKUnit {
     // A formatting helper for determining the preferred decimal style for a given unit
-    var preferredMinimumFractionDigits: Int {
+    var preferredFractionDigits: Int {
         if self.unitString == "mg/dL" {
             return 0
         } else {
