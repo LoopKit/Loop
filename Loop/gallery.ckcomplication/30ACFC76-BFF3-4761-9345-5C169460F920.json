@@ -1,0 +1,27 @@
+{
+  "tintColor" : {
+    "green" : 0.5843138,
+    "red" : 1,
+    "alpha" : 1,
+    "blue" : 0
+  },
+  "class" : "CLKComplicationTemplateUtilitarianSmallFlat",
+  "textProvider" : {
+    "textProviders" : [
+      {
+        "shortText" : "120",
+        "class" : "CLKLocalizableSimpleTextProvider",
+        "text" : "120↘︎"
+      },
+      {
+        "class" : "CLKRelativeDateTextProvider",
+        "relativeDateStyle" : 0,
+        "calendarUnits" : 64,
+        "date" : 509858751.808347
+      }
+    ],
+    "class" : "CLKLocalizableCompoundTextProvider",
+    "formatKey" : "UtilitarianSmallFlat"
+  },
+  "version" : 30000
+}
