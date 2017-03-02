@@ -31,6 +31,7 @@
 		<string>CLKComplicationFamilyExtraLarge</string>
 		<string>CLKComplicationFamilyUtilitarianSmallFlat</string>
 		<string>CLKComplicationFamilyUtilitarianLarge</string>
+		<string>CLKComplicationFamilyModularLarge</string>
 	</array>
 	<key>NSExtension</key>
 	<dict>
