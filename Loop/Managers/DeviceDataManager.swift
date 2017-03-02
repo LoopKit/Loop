@@ -230,7 +230,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
 
         // Trigger device status upload, even if something is wrong with pumpStatus
-        nightscoutDataManager.uploadDeviceStatus(pumpStatus)
+        nightscoutDataManager.uploadDeviceStatus(pumpStatus, rileylinkDevice: device)
 
         backfillGlucoseFromShareIfNeeded()
 
@@ -326,6 +326,8 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             return
         }
 
+        print("Fetching history with RileyLink \"\(device.name)\"")
+
         let startDate = doseStore.pumpEventQueryAfterDate
 
         device.ops?.getHistoryEvents(since: startDate) { (result) in
@@ -339,6 +341,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                     completionHandler(error)
                 }
             case .failure(let error):
+                self.rileyLinkManager.deprioritizeDevice(device: device)
                 self.logger.addError("Failed to fetch history: \(error)", fromSource: "RileyLink")
 
                 completionHandler(error)
@@ -414,7 +417,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                 self.nightscoutDataManager.uploadLoopStatus(loopError: error)
                 nsPumpStatus = nil
             }
-            self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+            self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus, rileylinkDevice: device)
         }
     }
 
@@ -486,15 +489,20 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         // How long we should wait before we re-tune the RileyLink
         let tuneTolerance = TimeInterval(minutes: 14)
 
+        print("auto-tune \(device.name)")
+
         if device.lastTuned == nil || device.lastTuned!.timeIntervalSinceNow <= -tuneTolerance {
             device.tunePump { (result) in
                 switch result {
                 case .success(let scanResult):
-                    self.logger.addError("Device auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                    self.logger.addError("Device \(device.name ?? "") auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
                 case .failure(let error):
-                    self.logger.addError("Device auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                    self.logger.addError("Device \(device.name ?? "") auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                    self.rileyLinkManager.deprioritizeDevice(device: device)
                 }
             }
+        } else {
+            rileyLinkManager.deprioritizeDevice(device: device)
         }
     }
 
@@ -1053,12 +1061,15 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             }
         }
 
-        uploader.upload(timestampedPumpEvents, forSource: "loop://\(UIDevice.current.name)", from: pumpModel) { (error) in
-            if let error = error {
+        let nsEvents = NightscoutPumpEvents.translate(timestampedPumpEvents, eventSource: "loop://\(UIDevice.current.name)", includeCarbs: false)
+
+        uploader.upload(nsEvents) { (result) in
+            switch result {
+            case .success( _):
+                completionHandler(objectIDs)
+            case .failure(let error):
                 self.logger.addError(error, fromSource: "NightscoutUploadKit")
                 completionHandler([])
-            } else {
-                completionHandler(objectIDs)
             }
         }
     }
