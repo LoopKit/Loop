@@ -9,11 +9,11 @@
 import UIKit
 
 
-final class BatteryLevelHUDView: HUDView {
+public final class BatteryLevelHUDView: BaseHUDView {
 
     @IBOutlet private weak var levelMaskView: LevelMaskView!
 
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
 
         tintColor = .unknownColor
@@ -29,7 +29,7 @@ final class BatteryLevelHUDView: HUDView {
     }()
 
 
-    var batteryLevel: Double? {
+    public var batteryLevel: Double? {
         didSet {
             if let value = batteryLevel, let level = numberFormatter.string(from: NSNumber(value: value)) {
                 caption.text = level

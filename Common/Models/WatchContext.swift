@@ -9,7 +9,6 @@
 import Foundation
 import HealthKit
 
-
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
@@ -19,7 +18,7 @@ final class WatchContext: NSObject, RawRepresentable {
     var maxBolus: Double?
 
     var glucose: HKQuantity?
-    var glucoseTrend: GlucoseTrend?
+    var glucoseTrendRawValue: Int?
     var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
@@ -64,9 +63,7 @@ final class WatchContext: NSObject, RawRepresentable {
             }
         }
 
-        if let rawTrend = rawValue["gt"] as? Int {
-            glucoseTrend = GlucoseTrend(rawValue: rawTrend)
-        }
+        glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
 
         IOB = rawValue["iob"] as? Double
@@ -98,7 +95,7 @@ final class WatchContext: NSObject, RawRepresentable {
             raw["gv"] = glucose?.doubleValue(for: unit)
         }
 
-        raw["gt"] = glucoseTrend?.rawValue
+        raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate

@@ -1,10 +1,11 @@
 {
   "supported complication families" : {
-    "3" : "CFB33AC2-7CD0-43A0-804F-F9A0EEC37480.json",
-    "6" : "E87B02EB-57B2-4E9D-B371-E0BA2DD55C19.json",
-    "4" : "B922BD0B-9601-45C9-B84D-ECB9C8235322.json",
-    "0" : "69B78E1F-415D-4E9E-8E56-E486517658FC.json",
-    "7" : "AB5AF86D-FF8F-493B-A738-4BB590C8A45E.json"
+    "3" : "7F209C4B-314F-4875-9072-3CFD6C18AE3A.json",
+    "1" : "0912322A-F7BA-487C-B910-60ADD3B22910.json",
+    "6" : "E5D4D16F-B048-454F-BAD4-A1D92E65F650.json",
+    "4" : "2F588D19-9780-4727-B5CB-DFE7945469E4.json",
+    "0" : "2A9C2659-183D-468D-A20D-704A6D9F7875.json",
+    "7" : "1163D5A6-1BB9-41D4-B6A0-60DCDFD52EC3.json"
   },
-  "client ID" : "com.loudnate.Loop.watchkitapp.watchkitextension"
+  "client ID" : "com.loopkit.Loop.watchkitapp.watchkitextension"
 }

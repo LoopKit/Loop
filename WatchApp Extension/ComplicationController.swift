@@ -81,13 +81,18 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         let template: CLKComplicationTemplate?
         
         let glucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "120↘︎", shortTextKey: "120")
-        let timeText = CLKTimeTextProvider(date: Date())
+        let timeText = CLKRelativeDateTextProvider(date: Date(), style: .natural, units: .minute)
 
         switch complication.family {
         case .modularSmall:
             let modularSmall = CLKComplicationTemplateModularSmallStackText()
             modularSmall.line1TextProvider = glucoseText
             modularSmall.line2TextProvider = timeText
+            template = modularSmall
+        case .modularLarge:
+            let modularSmall = CLKComplicationTemplateModularLargeTallBody()
+            modularSmall.bodyTextProvider = glucoseText
+            modularSmall.headerTextProvider = timeText
             template = modularSmall
         case .circularSmall:
             let circularSmall = CLKComplicationTemplateCircularSmallSimpleText()
