@@ -1,0 +1,31 @@
+{
+  "tintColor" : {
+    "green" : 0.5843138,
+    "red" : 1,
+    "alpha" : 1,
+    "blue" : 0
+  },
+  "class" : "CLKComplicationTemplateUtilitarianLargeFlat",
+  "textProvider" : {
+    "textProviders" : [
+      {
+        "shortText" : "120",
+        "class" : "CLKLocalizableSimpleTextProvider",
+        "text" : "120↘︎"
+      },
+      {
+        "class" : "CLKLocalizableSimpleTextProvider",
+        "text" : "75"
+      },
+      {
+        "class" : "CLKRelativeDateTextProvider",
+        "relativeDateStyle" : 0,
+        "calendarUnits" : 64,
+        "date" : 509858751.802992
+      }
+    ],
+    "class" : "CLKLocalizableCompoundTextProvider",
+    "formatKey" : "UtilitarianLargeFlat"
+  },
+  "version" : 30000
+}
