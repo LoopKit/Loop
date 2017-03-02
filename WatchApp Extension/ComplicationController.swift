@@ -103,7 +103,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             extraLarge.line1TextProvider = glucoseText
             extraLarge.line2TextProvider = timeText
             template = extraLarge
-        case .utilitarianSmallFlat:
+        case .utilitarianSmall, .utilitarianSmallFlat:
             let utilitarianSmallFlat = CLKComplicationTemplateUtilitarianSmallFlat()
             utilitarianSmallFlat.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianSmallFlat", textProviders: [glucoseText, timeText])
             template = utilitarianSmallFlat
@@ -112,8 +112,6 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             let eventualGlucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "75")
             utilitarianLarge.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: [glucoseText, eventualGlucoseText, timeText])
             template = utilitarianLarge
-        default:
-            template = nil
         }
 
         template?.tintColor = UIColor.tintColor
