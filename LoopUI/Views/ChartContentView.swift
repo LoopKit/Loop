@@ -8,9 +8,9 @@
 
 import UIKit
 
-class ChartContentView: UIView {
+public class ChartContentView: UIView {
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
 
         if chartView == nil || chartView!.frame != bounds {
@@ -20,12 +20,12 @@ class ChartContentView: UIView {
         }
     }
 
-    func reloadChart() {
+    public func reloadChart() {
         chartView = nil
         setNeedsLayout()
     }
 
-    var chartGenerator: ((CGRect) -> UIView?)? {
+    public var chartGenerator: ((CGRect) -> UIView?)? {
         didSet {
             chartView = nil
             setNeedsLayout()
