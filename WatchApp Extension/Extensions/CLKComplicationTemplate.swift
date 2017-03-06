@@ -28,15 +28,14 @@ extension CLKComplicationTemplate {
             return nil
         }
 
-        var glucoseStrings = [glucoseString]
+        let glucoseAndTrend = "\(glucoseString)\(context.glucoseTrend?.symbol ?? " ")"
         var accessibilityStrings = [glucoseString]
 
         if let trend = context.glucoseTrend {
-            glucoseStrings.append(trend.symbol)
             accessibilityStrings.append(trend.localizedDescription)
         }
 
-        let glucoseAndTrendText = CLKSimpleTextProvider(text: glucoseStrings.joined(), shortText: glucoseString, accessibilityLabel: accessibilityStrings.joined(separator: ", "))
+        let glucoseAndTrendText = CLKSimpleTextProvider(text: glucoseAndTrend, shortText: glucoseString, accessibilityLabel: accessibilityStrings.joined(separator: ", "))
         let timeText = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
 
         let timeFormatter = DateFormatter()
@@ -65,13 +64,7 @@ extension CLKComplicationTemplate {
             return template
         case .utilitarianSmall, .utilitarianSmallFlat:
             let template = CLKComplicationTemplateUtilitarianSmallFlat()
-            let format = NSLocalizedString("UtilitarianSmallFlat", tableName: "ckcomplication", comment: "Utilitarian small flat format string (1: Glucose & Trend symbol) (2: Time)")
-
-            template.textProvider = CLKSimpleTextProvider(text: String(format: format, arguments: [
-                    glucoseString,
-                    timeFormatter.string(from: date)
-                ]
-            ))
+            template.textProvider = CLKSimpleTextProvider(text: glucoseString)
 
             return template
         case .utilitarianLarge:
@@ -86,7 +79,7 @@ extension CLKComplicationTemplate {
             let format = NSLocalizedString("UtilitarianLargeFlat", tableName: "ckcomplication", comment: "Utilitarian large flat format string (1: Glucose & Trend symbol) (2: Eventual Glucose) (3: Time)")
 
             template.textProvider = CLKSimpleTextProvider(text: String(format: format, arguments: [
-                    glucoseStrings.joined(),
+                    glucoseAndTrend,
                     eventualGlucoseText,
                     timeFormatter.string(from: date)
                 ]
