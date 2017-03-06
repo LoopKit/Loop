@@ -69,6 +69,7 @@ final class LoopDataManager {
             center.addObserver(forName: .PumpStatusUpdated, object: deviceDataManager, queue: nil) { (note) -> Void in
                 self.dataAccessQueue.async {
                     // Assuming insulin data is never back-dated, we don't need to remove the retrospective glucose effects
+                    // TODO: What about a deletion?
                     self.insulinEffect = nil
                     self.insulinOnBoard = nil
                     self.loop()
@@ -131,7 +132,16 @@ final class LoopDataManager {
     private func update() throws {
         let updateGroup = DispatchGroup()
 
-        if glucoseChange == nil, let glucoseStore = deviceDataManager.glucoseStore {
+        guard let glucoseStore = deviceDataManager.glucoseStore else {
+            throw LoopError.configurationError("GlucoseStore")
+        }
+
+        // Fetch glucose effects as far back as we want to make retroactive analysis
+        guard let effectStartDate = glucoseStore.latestGlucose?.startDate.addingTimeInterval(-glucoseStore.reflectionDataInterval) else {
+            throw LoopError.missingDataError(details: "Glucose data not available", recovery: "Check your CGM data source")
+        }
+
+        if glucoseChange == nil {
             updateGroup.enter()
             glucoseStore.getRecentGlucoseChange { (values, error) in
                 if let error = error {
@@ -145,48 +155,57 @@ final class LoopDataManager {
 
         if glucoseMomentumEffect == nil {
             updateGroup.enter()
-            updateGlucoseMomentumEffect { (effects, error) in
-                if error == nil {
-                    self.glucoseMomentumEffect = effects
-                } else {
+            glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
+                if let error = error, effects.count == 0 {
+                    self.deviceDataManager.logger.addError(error, fromSource: "GlucoseStore")
                     self.glucoseMomentumEffect = nil
-                }
-                updateGroup.leave()
-            }
-        }
-
-        if carbEffect == nil {
-            updateGroup.enter()
-            updateCarbEffect { (effects, error) in
-                if error == nil {
-                    self.carbEffect = effects
                 } else {
-                    self.carbEffect = nil
+                    self.glucoseMomentumEffect = effects
                 }
+
                 updateGroup.leave()
             }
         }
 
-        if carbsOnBoardSeries == nil, let carbStore = deviceDataManager.carbStore {
-            updateGroup.enter()
-            carbStore.getCarbsOnBoardValues { (values, error) in
-                if let error = error {
-                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
-                }
+        if let carbStore = deviceDataManager.carbStore {
+            if carbEffect == nil {
+                updateGroup.enter()
 
-                self.carbsOnBoardSeries = values
-                updateGroup.leave()
+                carbStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
+                    if let error = error {
+                        self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
+                        self.carbEffect = nil
+                    } else {
+                        self.carbEffect = effects
+                    }
+
+                    updateGroup.leave()
+                }
+            }
+
+            if carbsOnBoardSeries == nil {
+                updateGroup.enter()
+                carbStore.getCarbsOnBoardValues(startDate: effectStartDate) { (values, error) in
+                    if let error = error {
+                        self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
+                    }
+
+                    self.carbsOnBoardSeries = values
+                    updateGroup.leave()
+                }
             }
         }
 
         if insulinEffect == nil {
             updateGroup.enter()
-            updateInsulinEffect { (effects, error) in
-                if error == nil {
-                    self.insulinEffect = effects
-                } else {
+            deviceDataManager.doseStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                     self.insulinEffect = nil
+                } else {
+                    self.insulinEffect = effects
                 }
+
                 updateGroup.leave()
             }
         }
@@ -196,9 +215,10 @@ final class LoopDataManager {
             deviceDataManager.doseStore.insulinOnBoardAtDate(Date()) { (value, error) in
                 if let error = error {
                     self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
+                    self.insulinOnBoard = nil
+                } else {
+                    self.insulinOnBoard = value
                 }
-
-                self.insulinOnBoard = value
                 updateGroup.leave()
             }
         }
@@ -213,7 +233,7 @@ final class LoopDataManager {
             }
         }
 
-        if (self.predictedGlucose == nil || self.predictedGlucoseWithoutMomentum == nil) {
+        if self.predictedGlucose == nil {
             do {
                 try self.updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
@@ -341,7 +361,6 @@ final class LoopDataManager {
     private var carbEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
-            predictedGlucoseWithoutMomentum = nil
 
             // Carb data may be back-dated, so re-calculate the retrospective glucose.
             retrospectivePredictedGlucose = nil
@@ -355,7 +374,6 @@ final class LoopDataManager {
             }
 
             predictedGlucose = nil
-            predictedGlucoseWithoutMomentum = nil
         }
     }
     private var insulinOnBoard: InsulinValue?
@@ -372,6 +390,7 @@ final class LoopDataManager {
     private var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
+            predictedGlucoseWithoutMomentum = nil
         }
     }
     private var predictedGlucoseWithoutMomentum: [GlucoseValue]?
@@ -404,20 +423,6 @@ final class LoopDataManager {
         }
     }
 
-    /// The oldest date that should be used for effect calculation
-    private var effectStartDate: Date? {
-        let startDate: Date?
-
-        if let glucoseStore = deviceDataManager.glucoseStore {
-            // Fetch glucose effects as far back as we want to make retroactive analysis
-            startDate = glucoseStore.latestGlucose?.startDate.addingTimeInterval(-glucoseStore.reflectionDataInterval)
-        } else {
-            startDate = nil
-        }
-
-        return startDate
-    }
-    
     var lastNetBasal: NetBasal? {
         get {
             guard
@@ -429,49 +434,6 @@ final class LoopDataManager {
             return NetBasal(lastTempBasal: lastTempBasal,
                             maxBasal: deviceDataManager.maximumBasalRatePerHour,
                             scheduledBasal: scheduledBasal)
-        }
-    }
-
-    private func updateCarbEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
-        guard let effectStartDate = effectStartDate else {
-            completionHandler(nil, LoopError.missingDataError(details: "Glucose data not available", recovery: "Check your CGM data source"))
-            return
-        }
-
-        if let carbStore = deviceDataManager.carbStore {
-            carbStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
-                if let error = error {
-                    self.deviceDataManager.logger.addError(error, fromSource: "CarbStore")
-                }
-
-                completionHandler(effects, error)
-            }
-        } else {
-            completionHandler(nil, LoopError.missingDataError(details: "CarbStore not available", recovery: nil))
-        }
-    }
-
-    private func updateInsulinEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
-        deviceDataManager.doseStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
-            if let error = error {
-                self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
-            }
-
-            completionHandler(effects, error)
-        }
-    }
-
-    private func updateGlucoseMomentumEffect(_ completionHandler: @escaping (_ effects: [GlucoseEffect]?, _ error: Error?) -> Void) {
-        guard let glucoseStore = deviceDataManager.glucoseStore else {
-            completionHandler(nil, LoopError.missingDataError(details: "GlucoseStore not available", recovery: nil))
-            return
-        }
-        glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
-            if let error = error {
-                self.deviceDataManager.logger.addError(error, fromSource: "GlucoseStore")
-            }
-
-            completionHandler(effects, error)
         }
     }
 
@@ -577,7 +539,6 @@ final class LoopDataManager {
             predictDiff = 0
         }
 
-        let eventualBG: Double = prediction.last?.quantity.doubleValue(for: unit) ?? 0
         let eventualBGWithRetrospectiveEffect: Double = predictionWithRetrospectiveEffect.last?.quantity.doubleValue(for: unit) ?? 0
         let eventualBGWithoutMomentum: Double = predictionWithoutMomentum.last?.quantity.doubleValue(for: unit) ?? 0
 
@@ -595,7 +556,6 @@ final class LoopDataManager {
                 error: error,
                 prediction: prediction,
                 predictionWithRetrospectiveEffect: predictDiff,
-                eventualBG: eventualBG,
                 eventualBGWithRetrospectiveEffect: eventualBGWithRetrospectiveEffect,
                 eventualBGWithoutMomentum: eventualBGWithoutMomentum,
                 recommendedTempBasal: recommendedTempBasal

@@ -50,7 +50,7 @@ class NightscoutDataManager {
 
     func uploadLoopStatus(_ insulinOnBoard: InsulinValue? = nil, carbsOnBoard: CarbValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
 
-        guard deviceDataManager.remoteDataManager.nightscoutUploader != nil else {
+        guard deviceDataManager.remoteDataManager.nightscoutService.uploader != nil else {
             return
         }
         
@@ -123,7 +123,7 @@ class NightscoutDataManager {
 
     func uploadDeviceStatus(_ pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, includeUploaderStatus: Bool = true) {
 
-        guard let uploader = deviceDataManager.remoteDataManager.nightscoutUploader else {
+        guard let uploader = deviceDataManager.remoteDataManager.nightscoutService.uploader else {
             return
         }
         
