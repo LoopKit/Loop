@@ -29,20 +29,28 @@ public final class BasalStateView: UIView {
         super.init(frame: frame)
 
         shapeLayer.lineWidth = 2
-        shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
-        shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
+        updateTintColor()
     }
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 2
-        shapeLayer.fillColor = UIColor.doseTintColor.withAlphaComponent(0.5).cgColor
-        shapeLayer.strokeColor = UIColor.doseTintColor.cgColor
+        updateTintColor()
     }
 
     override public func layoutSubviews() {
         super.layoutSubviews()
+    }
+
+    public override func tintColorDidChange() {
+        super.tintColorDidChange()
+        updateTintColor()
+    }
+
+    private func updateTintColor() {
+        shapeLayer.fillColor = tintColor.withAlphaComponent(0.5).cgColor
+        shapeLayer.strokeColor = tintColor.cgColor
     }
 
     private func drawPath() -> CGPath {

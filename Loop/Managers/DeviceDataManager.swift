@@ -86,7 +86,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             } else if let status = latestPumpStatus {
                 return batteryChemistry.chargeRemaining(voltage: status.batteryVolts)
             } else {
-                return nil
+                return statusExtensionManager.context?.batteryPercentage
             }
         }
     }
@@ -105,7 +105,6 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             }
         }
     }
-
 
     // MARK: - RileyLink
 
@@ -1126,9 +1125,12 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
             NotificationCenter.default.addObserver(self, selector: #selector(pumpStateValuesDidChange(_:)), name: .PumpStateValuesDidChange, object: pumpState)
         }
 
-        loopManager = LoopDataManager(deviceDataManager: self)
-        watchManager = WatchDataManager(deviceDataManager: self)
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
+        loopManager = LoopDataManager(
+            deviceDataManager: self,
+            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted
+        )
+        watchManager = WatchDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
 
         carbStore?.delegate = self

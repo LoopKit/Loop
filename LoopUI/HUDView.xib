@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2657" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -32,9 +32,8 @@
                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hzT-nz-NMJ" customClass="LoopStateView" customModule="LoopUI">
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hzT-nz-NMJ" customClass="LoopStateView" customModule="LoopUI" customModuleProvider="target">
                             <rect key="frame" x="16" y="8" width="44" height="44"/>
-                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="44" id="JHr-vn-Fkf"/>
                                 <constraint firstAttribute="width" constant="44" id="OaG-Pa-1wh"/>
@@ -47,7 +46,6 @@
                             </variation>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <accessibility key="accessibilityConfiguration">
                         <accessibilityTraits key="traits" none="YES"/>
                         <bool key="isElement" value="YES"/>
@@ -97,7 +95,6 @@
                             <nil key="highlightedColor"/>
                         </label>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <accessibility key="accessibilityConfiguration" label="Glucose">
                         <bool key="isElement" value="YES"/>
                     </accessibility>
@@ -139,13 +136,11 @@
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YLg-lj-Wuc" customClass="BasalStateView" customModule="LoopUI">
                             <rect key="frame" x="16" y="8" width="44" height="30"/>
-                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="44" id="Efd-Aa-N4k"/>
                             </constraints>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <accessibility key="accessibilityConfiguration" label="Net Basal Rate">
                         <bool key="isElement" value="YES"/>
                     </accessibility>
@@ -178,17 +173,16 @@
                         <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zel-C3-DXB">
                             <rect key="frame" x="16" y="9" width="44" height="44"/>
                             <subviews>
-                                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="reservoir" translatesAutoresizingMaskIntoConstraints="NO" id="pIG-92-8Ul">
-                                    <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
-                                </imageView>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Yoq-iO-9jA" customClass="LevelMaskView" customModule="LoopUI">
                                     <rect key="frame" x="0.0" y="5" width="44" height="39"/>
                                     <userDefinedRuntimeAttributes>
                                         <userDefinedRuntimeAttribute type="image" keyPath="maskImage" value="reservoir_mask"/>
                                     </userDefinedRuntimeAttributes>
                                 </view>
+                                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="reservoir" translatesAutoresizingMaskIntoConstraints="NO" id="pIG-92-8Ul">
+                                    <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
+                                </imageView>
                             </subviews>
-                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstItem="pIG-92-8Ul" firstAttribute="leading" secondItem="Zel-C3-DXB" secondAttribute="leading" id="5jS-nZ-GzJ"/>
                                 <constraint firstItem="pIG-92-8Ul" firstAttribute="top" secondItem="Zel-C3-DXB" secondAttribute="top" id="7di-nd-IEz"/>
@@ -208,7 +202,6 @@
                             <nil key="highlightedColor"/>
                         </label>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <accessibility key="accessibilityConfiguration" label="Reservoir Volume">
                         <bool key="isElement" value="YES"/>
                     </accessibility>
@@ -240,17 +233,16 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="59n-Xc-HCv">
                             <rect key="frame" x="16" y="9" width="44" height="44"/>
                             <subviews>
-                                <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="battery" translatesAutoresizingMaskIntoConstraints="NO" id="iYH-ie-6lu">
-                                    <rect key="frame" x="9" y="0.0" width="26" height="44"/>
-                                </imageView>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sdZ-5W-ddR" customClass="LevelMaskView" customModule="LoopUI">
                                     <rect key="frame" x="0.0" y="2" width="44" height="42"/>
                                     <userDefinedRuntimeAttributes>
                                         <userDefinedRuntimeAttribute type="image" keyPath="maskImage" value="battery_mask"/>
                                     </userDefinedRuntimeAttributes>
                                 </view>
+                                <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="battery" translatesAutoresizingMaskIntoConstraints="NO" id="iYH-ie-6lu">
+                                    <rect key="frame" x="9" y="0.0" width="26" height="44"/>
+                                </imageView>
                             </subviews>
-                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstItem="iYH-ie-6lu" firstAttribute="centerY" secondItem="59n-Xc-HCv" secondAttribute="centerY" id="1wI-BX-xLG"/>
                                 <constraint firstItem="sdZ-5W-ddR" firstAttribute="top" secondItem="59n-Xc-HCv" secondAttribute="top" constant="2" id="6Ur-Tq-K2o"/>
@@ -263,7 +255,6 @@
                             </constraints>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <accessibility key="accessibilityConfiguration" label="Battery Level">
                         <bool key="isElement" value="YES"/>
                     </accessibility>
