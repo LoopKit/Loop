@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11542" systemVersion="15G1108" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -29,20 +29,19 @@
                                 </constraints>
                             </stackView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                <rect key="frame" x="16" y="88" width="343" height="18"/>
+                                <rect key="frame" x="16" y="84" width="343" height="18"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="16" id="64k-kp-SIV"/>
-                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" constant="16" id="NC3-TC-TzM"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="9iF-xY-Bh4" secondAttribute="trailing" id="64k-kp-SIV"/>
+                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leadingMargin" id="NC3-TC-TzM"/>
                             <constraint firstItem="d8d-rW-z8J" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="O3d-gn-msQ"/>
                             <constraint firstItem="d8d-rW-z8J" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="Yms-yl-dwN"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leadingMargin" constant="-16" id="gXw-95-VgT"/>
-                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" constant="4" id="mlS-wa-D71"/>
+                            <constraint firstItem="d8d-rW-z8J" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" id="gXw-95-VgT"/>
+                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" constant="8" id="mlS-wa-D71"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>

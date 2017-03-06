@@ -14,7 +14,16 @@ import UIKit
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 
-    @IBOutlet weak var hudView: HUDView!
+    @IBOutlet weak var hudView: HUDView! {
+        didSet {
+            hudView.loopCompletionHUD.stateColors = .loopStatus
+            hudView.glucoseHUD.stateColors = .cgmStatus
+            hudView.glucoseHUD.tintColor = .glucoseTintColor
+            hudView.basalRateHUD.tintColor = .doseTintColor
+            hudView.reservoirVolumeHUD.stateColors = .pumpStatus
+            hudView.batteryHUD.stateColors = .pumpStatus
+        }
+    }
     @IBOutlet weak var subtitleLabel: UILabel!
 
     var statusExtensionContext: StatusExtensionContext?
@@ -54,7 +63,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     override func viewDidLoad() {
         super.viewDidLoad()
         subtitleLabel.alpha = 0
-        subtitleLabel.textColor = UIColor.secondaryLabelColor
+        subtitleLabel.textColor = .subtitleLabelColor
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
@@ -65,7 +74,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self,
                 forKeyPath: defaults.statusExtensionContextObservableKey,
                 options: [],
-                context: &observationContext)
+                context: &observationContext
+            )
         }
     }
     
@@ -84,10 +94,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         update()
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-
     @objc private func openLoopApp(_: Any) {
         if let url = Bundle.main.mainAppUrl {
             self.extensionContext?.open(url)
@@ -101,27 +107,16 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     
     @discardableResult
     func update() -> NCUpdateResult {
-        guard
-            let context = defaults?.statusExtensionContext
-        else {
-            return NCUpdateResult.failed
-        }
-        
-        // We should never have the case where there's glucose values but no preferred
-        // unit. However, if that case were to happen we might show quantities against
-        // the wrong units and that could be very harmful. So unless there's a preferred
-        // unit, assume that none of the rest of the data is reliable.
-        guard
-            let preferredUnitString = context.preferredUnitString
-        else {
+        guard let context = defaults?.statusExtensionContext else {
             return NCUpdateResult.failed
         }
         
         if let glucose = context.latestGlucose {
-            glucoseHUD.set(glucoseQuantity: glucose.quantity,
-                           at: glucose.startDate,
-                           unitString: preferredUnitString,
-                           from: glucose.sensor)
+            glucoseHUD.setGlucoseQuantity(glucose.value,
+               at: glucose.startDate,
+               unit: glucose.unit,
+               sensor: glucose.sensor
+            )
         }
         
         if let batteryPercentage = context.batteryPercentage {
@@ -142,19 +137,21 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
         }
 
-        let preferredUnit = HKUnit(from: preferredUnitString)
-        let formatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
-        if let eventualGlucose = context.eventualGlucose,
-           let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose)) {
-            subtitleLabel.text = String(
+        subtitleLabel.alpha = 0
+
+        if let eventualGlucose = context.eventualGlucose {
+            let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
+
+            if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
+                subtitleLabel.text = String(
                     format: NSLocalizedString(
                         "Eventually %1$@ %2$@",
                         comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
                     eventualGlucoseNumberString,
-                    preferredUnit.glucoseUnitDisplayString)
-            subtitleLabel.alpha = 1
-        } else {
-            subtitleLabel.alpha = 0
+                    eventualGlucose.unit.glucoseUnitDisplayString
+                )
+                subtitleLabel.alpha = 1
+            }
         }
         
         // Right now we always act as if there's new data.

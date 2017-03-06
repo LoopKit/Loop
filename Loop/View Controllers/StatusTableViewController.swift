@@ -29,13 +29,13 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             notificationCenter.addObserver(forName: .LoopDataUpdated, object: dataManager.loopManager, queue: nil) { _ in
                 DispatchQueue.main.async {
                     self.needsRefresh = true
-                    self.loopCompletionHUD.loopInProgress = false
+                    self.hudView.loopCompletionHUD.loopInProgress = false
                     self.reloadData(animated: true)
                 }
             },
             notificationCenter.addObserver(forName: .LoopRunning, object: dataManager.loopManager, queue: nil) { _ in
                 DispatchQueue.main.async {
-                    self.loopCompletionHUD.loopInProgress = true
+                    self.hudView.loopCompletionHUD.loopInProgress = true
                 }
             },
             notificationCenter.addObserver(forName: .LoopSettingsUpdated, object: dataManager, queue: nil) { _ in
@@ -114,7 +114,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private var active = true {
         didSet {
             reloadData()
-            loopCompletionHUD.assertTimer(active)
+            hudView.loopCompletionHUD.assertTimer(active)
         }
     }
 
@@ -250,17 +250,17 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             if let reservoir = dataManager.doseStore.lastReservoirValue {
                 if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
-                    reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+                    hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
                 }
                 
-                reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+                hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 
             if let level = dataManager.pumpBatteryChargeRemaining {
-                batteryLevelHUD.batteryLevel = level
+                hudView.batteryHUD.batteryLevel = level
             }
 
-            loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
+            hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
@@ -268,10 +268,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
-                    self.glucoseHUD.set(glucoseQuantity: glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
-                                        at: glucose.startDate,
-                                        unitString: self.charts.glucoseUnit.unitString,
-                                        from: self.dataManager.sensorInfo)
+                    self.hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                        at: glucose.startDate,
+                        unit: self.charts.glucoseUnit,
+                        sensor: self.dataManager.sensorInfo
+                    )
                 }
 
                 self.charts.prerender()
@@ -393,7 +394,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         didSet {
             if let lastNetBasal = self.dataManager.loopManager.lastNetBasal {
                 DispatchQueue.main.async {
-                    self.basalRateHUD.setNetBasalRate(lastNetBasal.rate, percent: lastNetBasal.percent, at: lastNetBasal.startDate)
+                    self.hudView.basalRateHUD.setNetBasalRate(lastNetBasal.rate, percent: lastNetBasal.percent, at: lastNetBasal.startDate)
                 }
             }
         }
@@ -402,7 +403,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     private var lastLoopCompleted: Date? {
         didSet {
             DispatchQueue.main.async {
-                self.loopCompletionHUD.lastLoopCompleted = self.lastLoopCompleted
+                self.hudView.loopCompletionHUD.lastLoopCompleted = self.lastLoopCompleted
             }
         }
     }
@@ -770,27 +771,23 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBOutlet weak var hudView: HUDView! {
         didSet {
+            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLastError(_:)))
+            hudView.loopCompletionHUD.addGestureRecognizer(statusTapGestureRecognizer)
+            hudView.loopCompletionHUD.accessibilityHint = NSLocalizedString("Shows last loop error", comment: "Loop Completion HUD accessibility hint")
+
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
-            glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
+            hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
             if cgmAppURL != nil {
-                glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
+                hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
-            let statusTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(showLastError(_:)))
-            loopCompletionHUD.addGestureRecognizer(statusTapGestureRecognizer)
-            loopCompletionHUD.accessibilityHint = NSLocalizedString("Show last loop error", comment: "Loop Completion HUD accessibility hint")
-        }
-    }
-    
-    var loopCompletionHUD: LoopCompletionHUDView! {
-        get {
-            return hudView.loopCompletionHUD
-        }
-    }
-    
-    var glucoseHUD: GlucoseHUDView! {
-        get {
-            return hudView.glucoseHUD
+
+            hudView.loopCompletionHUD.stateColors = .loopStatus
+            hudView.glucoseHUD.stateColors = .cgmStatus
+            hudView.glucoseHUD.tintColor = .glucoseTintColor
+            hudView.basalRateHUD.tintColor = .doseTintColor
+            hudView.reservoirVolumeHUD.stateColors = .pumpStatus
+            hudView.batteryHUD.stateColors = .pumpStatus
         }
     }
 
@@ -815,24 +812,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     @objc private func openCGMApp(_: Any) {
         if let url = cgmAppURL {
             UIApplication.shared.open(url)
-        }
-    }
-
-    var basalRateHUD: BasalRateHUDView! {
-        get {
-            return hudView.basalRateHUD
-        }
-    }
-    
-    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
-        get {
-            return hudView.reservoirVolumeHUD
-        }
-    }
-    
-    var batteryLevelHUD: BatteryLevelHUDView! {
-        get {
-            return hudView.batteryHUD
         }
     }
 }

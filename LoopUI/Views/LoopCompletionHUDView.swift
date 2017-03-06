@@ -12,6 +12,19 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
     @IBOutlet private weak var loopStateView: LoopStateView!
 
+    enum Freshness {
+        case fresh
+        case aging
+        case stale
+        case unknown
+    }
+
+    private(set) var freshness = Freshness.unknown {
+        didSet {
+            updateTintColor()
+        }
+    }
+
     override public func awakeFromNib() {
         super.awakeFromNib()
 
@@ -46,6 +59,29 @@ public final class LoopCompletionHUDView: BaseHUDView {
         }
     }
 
+    public var stateColors: StateColorPalette? {
+        didSet {
+            updateTintColor()
+        }
+    }
+
+    private func updateTintColor() {
+        let tintColor: UIColor?
+
+        switch freshness {
+        case .fresh:
+            tintColor = stateColors?.normal
+        case .aging:
+            tintColor = stateColors?.warning
+        case .stale:
+            tintColor = stateColors?.error
+        case .unknown:
+            tintColor = stateColors?.unknown
+        }
+
+        self.tintColor = tintColor
+    }
+
     private func initTimer(_ startDate: Date) {
         let updateInterval = TimeInterval(minutes: 1)
 
@@ -73,7 +109,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
     private lazy var formatter: DateComponentsFormatter = {
         let formatter = DateComponentsFormatter()
 
-        formatter.allowedUnits = [.hour, .minute]
+        formatter.allowedUnits = [.day, .hour, .minute]
         formatter.maximumUnitCount = 1
         formatter.unitsStyle = .short
 
@@ -86,11 +122,13 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
             switch ago {
             case let t where t.minutes <= 5:
-                loopStateView.freshness = .fresh
+                freshness = .fresh
             case let t where t.minutes <= 15:
-                loopStateView.freshness = .aging
+                freshness = .aging
+            case let t where t.hours <= 12:
+                freshness = .stale
             default:
-                loopStateView.freshness = .stale
+                freshness = .unknown
             }
 
             if let timeString = formatter.string(from: ago) {

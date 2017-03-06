@@ -48,8 +48,9 @@ final class LoopDataManager {
         }
     }
 
-    init(deviceDataManager: DeviceDataManager) {
+    init(deviceDataManager: DeviceDataManager, lastLoopCompleted: Date?) {
         self.deviceDataManager = deviceDataManager
+        self.lastLoopCompleted = lastLoopCompleted
 
         dosingEnabled = UserDefaults.standard.dosingEnabled
         retrospectiveCorrectionEnabled = UserDefaults.standard.retrospectiveCorrectionEnabled
