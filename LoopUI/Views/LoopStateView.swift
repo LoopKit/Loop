@@ -8,33 +8,17 @@
 
 import UIKit
 
-public final class LoopStateView: UIView {
+final class LoopStateView: UIView {
     var firstDataUpdate = true
     
-    enum Freshness {
-        case fresh
-        case aging
-        case stale
-        case unknown
+    override func tintColorDidChange() {
+        super.tintColorDidChange()
 
-        var color: UIColor {
-            switch self {
-            case .fresh:
-                return UIColor.freshColor
-            case .aging:
-                return UIColor.agingColor
-            case .stale:
-                return UIColor.staleColor
-            case .unknown:
-                return UIColor.unknownColor
-            }
-        }
+        updateTintColor()
     }
 
-    var freshness = Freshness.unknown {
-        didSet {
-            shapeLayer.strokeColor = freshness.color.cgColor
-        }
+    private func updateTintColor() {
+        shapeLayer.strokeColor = tintColor.cgColor
     }
 
     var open = false {
@@ -45,7 +29,7 @@ public final class LoopStateView: UIView {
         }
     }
 
-    override public class var layerClass : AnyClass {
+    override class var layerClass : AnyClass {
         return CAShapeLayer.self
     }
 
@@ -58,22 +42,22 @@ public final class LoopStateView: UIView {
 
         shapeLayer.lineWidth = 8
         shapeLayer.fillColor = UIColor.clear.cgColor
-        shapeLayer.strokeColor = freshness.color.cgColor
+        updateTintColor()
 
         shapeLayer.path = drawPath()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
 
         shapeLayer.lineWidth = 8
         shapeLayer.fillColor = UIColor.clear.cgColor
-        shapeLayer.strokeColor = freshness.color.cgColor
+        updateTintColor()
 
         shapeLayer.path = drawPath()
     }
 
-    override public func layoutSubviews() {
+    override func layoutSubviews() {
         super.layoutSubviews()
 
         shapeLayer.path = drawPath()

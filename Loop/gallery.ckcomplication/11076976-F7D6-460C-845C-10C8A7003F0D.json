@@ -18,10 +18,8 @@
         "text" : "75"
       },
       {
-        "class" : "CLKRelativeDateTextProvider",
-        "relativeDateStyle" : 0,
-        "calendarUnits" : 64,
-        "date" : 509858751.802992
+        "class" : "CLKTimeTextProvider",
+        "date" : 510206747.733748
       }
     ],
     "class" : "CLKLocalizableCompoundTextProvider",
