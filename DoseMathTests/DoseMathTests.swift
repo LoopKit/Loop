@@ -53,6 +53,7 @@ struct GlucoseFixtureValue: GlucoseValue {
 class RecommendTempBasalTests: XCTestCase {
 
     fileprivate let maxBasalRate = 3.0
+    fileprivate let maxIOB = 10.0
 
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
@@ -95,9 +96,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -110,9 +113,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -130,9 +135,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -146,9 +153,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -165,9 +174,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -190,9 +201,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -203,9 +216,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -222,9 +237,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -238,9 +255,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -255,9 +274,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -274,9 +295,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(0, dose!.rate)
@@ -290,9 +313,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(3.0, dose!.rate)
@@ -306,9 +331,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqualWithAccuracy(1.425, dose!.rate, accuracy: 1.0 / 40.0)
@@ -322,9 +349,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqualWithAccuracy(1.475, dose!.rate, accuracy: 1.0 / 40.0)
@@ -338,9 +367,11 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqual(3.0, dose!.rate)
@@ -353,13 +384,33 @@ class RecommendTempBasalTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertEqualWithAccuracy(2.975, dose!.rate, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
+    }
+    
+    func testHighAndRisingAtIOB() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
+            
+        let dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+                                                                       atDate: glucose.first!.startDate,
+                                                                       lastTempBasal: nil,
+                                                                       maxBasalRate: maxBasalRate,
+                                                                       maxIOB: maxIOB,
+                                                                       glucoseTargetRange: glucoseTargetRange,
+                                                                       insulinSensitivity: self.insulinSensitivitySchedule,
+                                                                       basalRateSchedule: basalRateSchedule,
+                                                                       insulinOnBoard: maxIOB + 1
+        )
+        
+        XCTAssertEqual(0, dose!.rate)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
     }
 
     func testVeryLowAndRising() {
@@ -369,9 +420,11 @@ class RecommendTempBasalTests: XCTestCase {
                                                                    atDate: glucose.first!.startDate,
                                                                    lastTempBasal: nil,
                                                                    maxBasalRate: maxBasalRate,
+                                                                   maxIOB: maxIOB,
                                                                    glucoseTargetRange: glucoseTargetRange,
                                                                    insulinSensitivity: self.insulinSensitivitySchedule,
-                                                                   basalRateSchedule: basalRateSchedule
+                                                                   basalRateSchedule: basalRateSchedule,
+                                                                   insulinOnBoard: 0
         )
         
         XCTAssertEqual(0.0, dose!.rate)
@@ -383,9 +436,11 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = DoseMath.recommendTempBasalFromPredictedGlucose([],
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0
         )
 
         XCTAssertNil(dose)
@@ -396,6 +451,7 @@ class RecommendTempBasalTests: XCTestCase {
 class RecommendBolusTests: XCTestCase {
 
     fileprivate let maxBolus = 10.0
+    fileprivate let maxIOB = 20.0
 
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
@@ -438,9 +494,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -453,9 +511,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -473,9 +533,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -488,9 +550,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -503,9 +567,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -518,9 +584,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(0, dose)
@@ -533,9 +601,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(1.333, dose, accuracy: 1.0 / 40.0)
@@ -548,9 +618,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(0.067, dose, accuracy: 1.0 / 40.0)
@@ -563,9 +635,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
@@ -583,9 +657,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(0, dose, accuracy: 1e-13)
@@ -603,9 +679,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
@@ -618,9 +696,11 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqual(1.0, dose)
@@ -632,17 +712,38 @@ class RecommendBolusTests: XCTestCase {
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBolus: maxBolus,
+            maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0
         )
 
         XCTAssertEqualWithAccuracy(1.0, dose, accuracy: 1.0 / 40.0)
     }
+    
+    func testHighAndRisingAtIOB() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
+        
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               lastTempBasal: nil,
+                                                               maxBolus: maxBolus,
+                                                               maxIOB: maxIOB,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: self.insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               insulinOnBoard: 20.0
+        )
+        
+        XCTAssertEqual(0.0, dose)
+    }
 
     func testNoInputGlucose() {
-        let dose = DoseMath.recommendBolusFromPredictedGlucose([], lastTempBasal: nil, maxBolus: 4, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule)
+        let dose = DoseMath.recommendBolusFromPredictedGlucose([], lastTempBasal: nil, maxBolus: 4, maxIOB: maxIOB, glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            insulinOnBoard: 0.0)
 
         XCTAssertEqual(0, dose)
     }
