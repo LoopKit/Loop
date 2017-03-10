@@ -47,6 +47,15 @@ final class LoopDataManager {
             notify(forChange: .preferences)
         }
     }
+    
+    var glucoseMomentumEnabled: Bool {
+        didSet {
+            /*
+            UserDefaults.standard.retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
+            */
+            notify(forChange: .preferences)
+        }
+    }
 
     init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
