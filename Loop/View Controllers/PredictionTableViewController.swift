@@ -226,7 +226,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         case .inputs:
             return selectedInputs.count
         case .settings:
-            return 1
+            return 2
         }
     }
 
@@ -390,12 +390,12 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     
     @objc private func glucoseMomentumSwitchChanged(_ sender: UISwitch) {
         dataManager.loopManager.glucoseMomentumEnabled = sender.isOn
-        /*
-        if  let row = selectedInputs.index(where: { $0.input == PredictionInputEffect.retrospection }),
+        
+        if  let row = selectedInputs.index(where: { $0.input == PredictionInputEffect.momentum }),
             let cell = tableView.cellForRow(at: IndexPath(row: row, section: Section.inputs.rawValue)) as? PredictionInputEffectTableViewCell
         {
             cell.enabled = self.dataManager.loopManager.glucoseMomentumEnabled
         }
-        */
+        
     }
 }

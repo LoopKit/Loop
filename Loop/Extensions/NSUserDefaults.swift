@@ -31,6 +31,7 @@ extension UserDefaults {
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
         case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
+        case glucoseMomentumEnabled = "com.loudnate.Loop.glucoseMomentumEnabled"        
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -222,7 +223,16 @@ extension UserDefaults {
             set(newValue, forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
         }
     }
-
+    
+    var glucoseMomentumEnabled: Bool {
+        get {
+            return bool(forKey: Key.glucoseMomentumEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.glucoseMomentumEnabled.rawValue)
+        }
+    }
+    
     var transmitterID: String? {
         get {
             return string(forKey: Key.G5TransmitterID.rawValue)
