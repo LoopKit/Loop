@@ -69,7 +69,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
-            updateNotice();
+            updateNotice()
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin
             }
@@ -131,7 +131,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     @IBOutlet weak var noticeLabel: UILabel? {
         didSet {
-            updateNotice();
+            updateNotice()
         }
     }
 
@@ -150,13 +150,13 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     // MARK: - TableView Delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if case .recommended = Rows(rawValue: indexPath.row)! {
-            acceptRecommendedBolus();
+        if case .recommended? = Rows(rawValue: indexPath.row) {
+            acceptRecommendedBolus()
         }
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if case .recommended = Rows(rawValue: indexPath.row)! {
+        if case .recommended? = Rows(rawValue: indexPath.row) {
             cell.accessibilityCustomActions = [
                 UIAccessibilityCustomAction(name: NSLocalizedString("AcceptRecommendedBolus", comment: "Action to copy the recommended Bolus value to the actual Bolus Field"), target: self, selector: #selector(BolusViewController.acceptRecommendedBolus))
             ]

@@ -15,10 +15,10 @@ import HealthKit
 
 final class GlucoseThresholdTableViewController: TextFieldTableViewController {
     
-    public let glucoseUnits: HKUnit
+    public let glucoseUnit: HKUnit
     
-    init(threshold: Double?, glucoseUnits: HKUnit) {
-        self.glucoseUnits = glucoseUnits
+    init(threshold: Double?, glucoseUnit: HKUnit) {
+        self.glucoseUnit = glucoseUnit
         
         super.init(style: .grouped)
         
@@ -26,10 +26,10 @@ final class GlucoseThresholdTableViewController: TextFieldTableViewController {
         keyboardType = .decimalPad
         contextHelp = NSLocalizedString("When current or forecasted BG is below miminum BG guard, Loop will not recommend a bolus, and will issue temporary basal rates of 0U/hr.", comment: "Instructions on entering minimum BG threshold")
         
-        unit = glucoseUnits.glucoseUnitDisplayString
+        unit = glucoseUnit.glucoseUnitDisplayString
 
         if let threshold = threshold {
-            value = NumberFormatter.glucoseFormatter(for: glucoseUnits).string(from: NSNumber(value: threshold))
+            value = NumberFormatter.glucoseFormatter(for: glucoseUnit).string(from: NSNumber(value: threshold))
         }
 
     }

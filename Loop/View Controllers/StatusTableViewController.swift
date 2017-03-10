@@ -16,6 +16,21 @@ import LoopUI
 import SwiftCharts
 
 
+private struct RefreshContext: OptionSet {
+    let rawValue: Int
+
+    /// Catch-all for lastLoopCompleted, recommendedTempBasal, lastTempBasal, preferences
+    static let status  = RefreshContext(rawValue: 1 << 0)
+
+    static let glucose = RefreshContext(rawValue: 1 << 1)
+    static let insulin = RefreshContext(rawValue: 1 << 2)
+    static let carbs   = RefreshContext(rawValue: 1 << 3)
+    static let targets = RefreshContext(rawValue: 1 << 4)
+
+    static let all: RefreshContext = [.status, .glucose, .insulin, .carbs, .targets]
+}
+
+
 final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
     override func viewDidLoad() {
@@ -26,9 +41,20 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         let application = UIApplication.shared
 
         notificationObservers += [
-            notificationCenter.addObserver(forName: .LoopDataUpdated, object: dataManager.loopManager, queue: nil) { _ in
+            notificationCenter.addObserver(forName: .LoopDataUpdated, object: dataManager.loopManager, queue: nil) { note in
+                let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
-                    self.needsRefresh = true
+                    switch LoopDataManager.LoopUpdateContext(rawValue: context) {
+                    case .none, .bolus?, .preferences?:
+                        self.refreshContext.update(with: .status)
+                    case .carbs?:
+                        self.refreshContext.update(with: .carbs)
+                    case .glucose?:
+                        self.refreshContext.update(with: .glucose)
+                    case .tempBasal?:
+                        self.refreshContext.update(with: .insulin)
+                    }
+
                     self.hudView.loopCompletionHUD.loopInProgress = false
                     self.reloadData(animated: true)
                 }
@@ -40,7 +66,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             },
             notificationCenter.addObserver(forName: .LoopSettingsUpdated, object: dataManager, queue: nil) { _ in
                 DispatchQueue.main.async {
-                    self.needsRefresh = true
+                    self.refreshContext.update(with: .targets)
                     self.reloadData(animated: true)
                 }
             },
@@ -98,7 +124,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
-        needsRefresh = true
+        refreshContext.update(with: .status)
         if visible {
             reloadData(animated: false, to: size)
         }
@@ -118,7 +144,20 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var needsRefresh = true
+    private var refreshContext = RefreshContext.all
+
+    private var chartStartDate: Date {
+        get {
+            return charts.startDate
+        }
+        set {
+            if newValue != chartStartDate {
+                refreshContext = .all
+            }
+
+            charts.startDate = newValue
+        }
+    }
 
     private var visible = false {
         didSet {
@@ -132,11 +171,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     ///
     /// - parameter animated: Whether the updating should be animated if possible
     private func reloadData(animated: Bool = false, to size: CGSize? = nil) {
-        if active && visible && needsRefresh {
-            needsRefresh = false
+        if active && visible && !refreshContext.isEmpty {
             reloading = true
 
-            // How far back should we show data? Use the screen size as a guid.
+            // How far back should we show data? Use the screen size as a guide.
             let minimumSegmentWidth: CGFloat = 50
             let availableWidth = (size ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
             let totalHours = floor(Double(availableWidth / minimumSegmentWidth))
@@ -145,7 +183,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             var components = DateComponents()
             components.minute = 0
             let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, historyHours)))
-            charts.startDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
+            chartStartDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
             let reloadGroup = DispatchGroup()
             var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
@@ -157,31 +195,34 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         self.charts.glucoseUnit = unit
                     }
 
-                    reloadGroup.enter()
-                    glucoseStore.getRecentGlucoseValues(startDate: self.charts.startDate) { (values, error) -> Void in
-                        if let error = error {
-                            self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                            self.needsRefresh = true
-                        } else {
-                            self.charts.glucoseValues = values
-                        }
+                    if self.refreshContext.remove(.glucose) != nil {
+                        reloadGroup.enter()
+                        glucoseStore.getRecentGlucoseValues(startDate: self.chartStartDate) { (values, error) -> Void in
+                            if let error = error {
+                                self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
+                                self.refreshContext.update(with: .glucose)
+                                self.charts.setGlucoseValues([])
+                            } else {
+                                self.charts.setGlucoseValues(values)
+                            }
 
-                        reloadGroup.leave()
+                            reloadGroup.leave()
+                        }
                     }
 
+                    // For now, do this every time
+                    _ = self.refreshContext.remove(.status)
                     reloadGroup.enter()
-                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) -> Void in
-                        if error != nil {
-                            self.needsRefresh = true
-                        }
-
-                        self.charts.predictedGlucoseValues = predictedGlucose ?? []
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, _) -> Void in
+                        self.charts.setPredictedGlucoseValues(predictedGlucose ?? [])
                         newRecommendedTempBasal = recommendedTempBasal
                         self.lastTempBasal = lastTempBasal
                         self.lastLoopCompleted = lastLoopCompleted
 
                         if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                             self.eventualGlucoseDescription = String(describing: lastPoint)
+                        } else {
+                            self.eventualGlucoseDescription = nil
                         }
 
                         reloadGroup.leave()
@@ -191,58 +232,53 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
             }
 
-            reloadGroup.enter()
-            dataManager.doseStore.getInsulinOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
-                if let error = error {
-                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
-                    self.needsRefresh = true
-                }
-
-                self.charts.iobValues = values
-
-                if let index = values.closestIndexPriorToDate(Date()) {
-                    self.currentIOBDescription = String(describing: self.charts.iobPoints[index].y)
-                }
-
-                reloadGroup.leave()
-            }
-
-            reloadGroup.enter()
-            dataManager.doseStore.getRecentNormalizedDoseEntries(startDate: charts.startDate) { (doses, error) -> Void in
-                if let error = error {
-                    self.dataManager.logger.addError(error, fromSource: "DoseStore")
-                    self.needsRefresh = true
-                }
-
-                self.charts.doseEntries = doses
-
-                reloadGroup.leave()
-            }
-
-            reloadGroup.enter()
-            dataManager.doseStore.getTotalRecentUnitsDelivered { (units, _, error) in
-                if error != nil {
-                    self.needsRefresh = true
-                } else {
-                    self.totalDelivery = units
-                }
-
-                reloadGroup.leave()
-            }
-
-            if let carbStore = dataManager.carbStore {
+            if refreshContext.remove(.insulin) != nil {
                 reloadGroup.enter()
-                carbStore.getCarbsOnBoardValues(startDate: charts.startDate) { (values, error) -> Void in
+                dataManager.doseStore.getInsulinOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger.addError(error, fromSource: "DoseStore")
+                        self.refreshContext.update(with: .insulin)
+                        self.charts.setIOBValues([])
+                    } else {
+                        self.charts.setIOBValues(values)
+                    }
+                    reloadGroup.leave()
+                }
+
+                reloadGroup.enter()
+                dataManager.doseStore.getRecentNormalizedDoseEntries(startDate: chartStartDate) { (doses, error) -> Void in
+                    if let error = error {
+                        self.dataManager.logger.addError(error, fromSource: "DoseStore")
+                        self.refreshContext.update(with: .insulin)
+                        self.charts.setDoseEntries([])
+                    } else {
+                        self.charts.setDoseEntries(doses)
+                    }
+                    reloadGroup.leave()
+                }
+
+                reloadGroup.enter()
+                dataManager.doseStore.getTotalRecentUnitsDelivered { (units, _, error) in
+                    if error != nil {
+                        self.refreshContext.update(with: .insulin)
+                        self.totalDelivery = nil
+                    } else {
+                        self.totalDelivery = units
+                    }
+
+                    reloadGroup.leave()
+                }
+            }
+
+            if refreshContext.remove(.carbs) != nil, let carbStore = dataManager.carbStore {
+                reloadGroup.enter()
+                carbStore.getCarbsOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
                     if let error = error {
                         self.dataManager.logger.addError(error, fromSource: "CarbStore")
-                        self.needsRefresh = true
+                        self.refreshContext.update(with: .carbs)
                     }
 
-                    self.charts.cobValues = values
-
-                    if let index = values.closestIndexPriorToDate(Date()) {
-                        self.currentCOBDescription = String(describing: self.charts.cobPoints[index].y)
-                    }
+                    self.charts.setCOBValues(values)
 
                     reloadGroup.leave()
                 }
@@ -262,7 +298,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
-            charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+            if refreshContext.remove(.targets) != nil {
+                charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+            }
 
             workoutMode = dataManager.workoutModeEnabled
 
@@ -273,6 +311,19 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         unit: self.charts.glucoseUnit,
                         sensor: self.dataManager.sensorInfo
                     )
+                }
+
+                // Fetch the current IOB subtitle
+                if let index = self.charts.iobPoints.closestIndexPriorToDate(Date()) {
+                    self.currentIOBDescription = String(describing: self.charts.iobPoints[index].y)
+                } else {
+                    self.currentIOBDescription = nil
+                }
+                // Fetch the current COB subtitle
+                if let index = self.charts.cobPoints.closestIndexPriorToDate(Date()) {
+                    self.currentCOBDescription = String(describing: self.charts.cobPoints[index].y)
+                } else {
+                    self.currentCOBDescription = nil
                 }
 
                 self.charts.prerender()
@@ -583,7 +634,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                                 self.dataManager.logger.addError(error, fromSource: "TempBasal")
                                 self.presentAlertController(with: error)
                             } else if success {
-                                self.needsRefresh = true
+                                self.refreshContext.update(with: .status)
                                 self.reloadData()
                             }
                         }
@@ -650,7 +701,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         case let vc as CarbEntryTableViewController:
             vc.carbStore = dataManager.carbStore
             vc.hidesBottomBarWhenPushed = true
-            self.needsRefresh = true
         case let vc as CarbEntryEditViewController:
             if let carbStore = dataManager.carbStore {
                 vc.defaultAbsorptionTimes = carbStore.defaultAbsorptionTimes
@@ -702,20 +752,19 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             dataManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (recommendation, error) -> Void in
                 DispatchQueue.main.async {
+                    self.refreshContext.update(with: .carbs)
+
                     if let error = error {
                         // Ignore bolus wizard errors
                         if error is CarbStore.CarbStoreError {
                             self.presentAlertController(with: error)
                         } else {
                             self.dataManager.logger.addError(error, fromSource: "Bolus")
-                            self.needsRefresh = true
                             self.reloadData()
                         }
                     } else if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
                         self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
-                        self.needsRefresh = true
                     } else {
-                        self.needsRefresh = true
                         self.reloadData()
                     }
                 }
