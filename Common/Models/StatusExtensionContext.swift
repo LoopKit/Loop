@@ -199,9 +199,10 @@ extension GlucoseContext: RawRepresentable {
 
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
-    private let version = 2
+    private let version = 3
 
-    var latestGlucose: GlucoseContext?
+    var glucose: [GlucoseContext]?
+    var predictedGlucose: [GlucoseContext]?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
     var netBasal: NetBasalContext?
@@ -215,8 +216,12 @@ struct StatusExtensionContext: RawRepresentable {
             return nil
         }
 
-        if let rawValue = rawValue["latestGlucose"] as? GlucoseContext.RawValue {
-            latestGlucose = GlucoseContext(rawValue: rawValue)
+        if let rawValue = rawValue["glucose"] as? [GlucoseContext.RawValue] {
+            glucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["predictedGlucose"] as? [GlucoseContext.RawValue] {
+            predictedGlucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
         }
 
         if let rawValue = rawValue["reservoir"] as? ReservoirContext.RawValue {
@@ -242,7 +247,9 @@ struct StatusExtensionContext: RawRepresentable {
         var raw: RawValue = [
             "version": version
         ]
-        raw["latestGlucose"] = latestGlucose?.rawValue
+
+        raw["glucose"] = glucose?.map({return $0.rawValue})
+        raw["predictedGlucose"] = predictedGlucose?.map({return $0.rawValue})
         raw["reservoir"] = reservoir?.rawValue
         raw["loop"] = loop?.rawValue
         raw["netBasal"] = netBasal?.rawValue

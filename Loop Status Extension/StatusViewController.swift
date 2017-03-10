@@ -97,7 +97,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
-        glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact
+        glucoseChartContentView.alpha = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact ? 0 : 1
     }
 
     deinit {
@@ -110,7 +110,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         if (activeDisplayMode == NCWidgetDisplayMode.compact) {
             self.preferredContentSize = maxSize
         } else {
-            self.preferredContentSize = CGSize(width: maxSize.width, height: 200)
+            self.preferredContentSize = CGSize(width: maxSize.width, height: 210)
         }
     }
 
@@ -120,10 +120,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             _ in
             if self.extensionContext?.widgetActiveDisplayMode == .compact {
                 self.glucoseChartContentView.alpha = 0
-                self.glucoseChartContentView.isHidden = true
             } else {
                 self.glucoseChartContentView.alpha = 1
-                self.glucoseChartContentView.isHidden = false
             }
         })
     }
@@ -157,7 +155,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             glucoseHUD.setGlucoseQuantity(lastGlucose.value,
                at: lastGlucose.startDate,
                unit: lastGlucose.unit,
-               from: lastGlucose.sensor
+               sensor: lastGlucose.sensor
             )
         }
         
@@ -205,13 +203,15 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }()
 
 
-        if let glucose = context.glucose {
-            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: preferredUnit)
+        if let glucose = context.glucose,
+            glucose.count > 0 {
+            let unit = glucose[0].unit
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
 
             charts.glucosePoints = glucose.map {
                 ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                    y: ChartAxisValueDoubleUnit(Double($0.quantity), unitString: preferredUnitString, formatter: glucoseFormatter)
+                    y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
                 )
             }
 
@@ -219,7 +219,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 charts.predictedGlucosePoints = predictedGlucose.map {
                     ChartPoint(
                         x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                        y: ChartAxisValueDoubleUnit(Double($0.quantity), unitString: preferredUnitString, formatter: glucoseFormatter)
+                        y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
                     )
                 }
             }

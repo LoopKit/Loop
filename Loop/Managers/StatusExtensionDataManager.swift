@@ -93,34 +93,26 @@ final class StatusExtensionDataManager {
 
                 if (error != nil) {
                     context.glucose = nil
-                    context.sensor = nil
                     context.predictedGlucose = nil
                 } else {
-                    // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
-                    // convert all glucose values to the preferred unit just to be sure.
                     context.glucose = values.map({
                         return GlucoseContext(
+                            value: $0.quantity.doubleValue(for: glucoseUnit),
+                            unit: glucoseUnit,
                             startDate: $0.startDate,
-                            quantity: $0.quantity.doubleValue(for: preferredUnit))
-                    })
-                    context.sensor = dataManager.sensorInfo
-
-                    if let glucose = glucoseStore.latestGlucose {
-                        context.latestGlucose = GlucoseContext(
-                        value: glucose.quantity.doubleValue(for: glucoseUnit),
-                        unit: glucoseUnit,
-                        startDate: glucose.startDate,
-                        sensor: dataManager.sensorInfo != nil ? SensorDisplayableContext(dataManager.sensorInfo!) : nil
+                            sensor: dataManager.sensorInfo != nil ? SensorDisplayableContext(dataManager.sensorInfo!) : nil
                         )
-                    }
-
+                    })
 
                     // Only tranfer the predicted glucose if we have glucose history
                     if let predictedGlucose = predictedGlucose {
                         context.predictedGlucose = predictedGlucose.map({
                             return GlucoseContext(
+                                value: $0.quantity.doubleValue(for: glucoseUnit),
+                                unit: glucoseUnit,
                                 startDate: $0.startDate,
-                                quantity: $0.quantity.doubleValue(for: preferredUnit))
+                                sensor: nil
+                            )
                         })
                     }
                 }
