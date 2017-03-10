@@ -866,6 +866,14 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    var maximumIOB: Double? = UserDefaults.standard.maximumIOB {
+        didSet {
+            UserDefaults.standard.maximumIOB = maximumIOB
+            
+            AnalyticsManager.sharedManager.didChangeMaximumIOB()
+        }
+    }
+
     // MARK: - CarbKit
 
     let carbStore: CarbStore?
