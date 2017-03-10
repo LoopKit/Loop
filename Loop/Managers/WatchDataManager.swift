@@ -105,25 +105,24 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         let reservoir = deviceDataManager.doseStore.lastReservoirValue
         let maxBolus = deviceDataManager.maximumBolus
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, bolusState, lastLoopCompleted, _, _, error) in
             let eventualGlucose = predictedGlucose?.last
 
-            self.deviceDataManager.loopManager.getRecommendedBolus { (units, error) in
-                glucoseStore.preferredUnit { (unit, error) in
-                    let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
-                    context.reservoir = reservoir?.unitVolume
+            glucoseStore.preferredUnit { (unit, error) in
+                let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
+                context.reservoir = reservoir?.unitVolume
 
-                    context.loopLastRunDate = lastLoopCompleted
-                    context.recommendedBolusDose = units
-                    context.maxBolus = maxBolus
+                context.loopLastRunDate = lastLoopCompleted
+                context.recommendedBolusDose = bolusState?.units
+                context.maxBolus = maxBolus
 
-                    if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                        context.glucoseTrend = trend
-                    }
-
-                    completionHandler(context)
+                if let trend = self.deviceDataManager.sensorInfo?.trendType {
+                    context.glucoseTrend = trend
                 }
+
+                completionHandler(context)
             }
+            
         }
     }
 
@@ -160,7 +159,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
-                self.deviceDataManager.enactBolus(units: bolus.value) { (error) in
+                self.deviceDataManager.loopManager.enactBolus(units: bolus.value) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(bolus.value, atStartDate: bolus.startDate)
                     } else {

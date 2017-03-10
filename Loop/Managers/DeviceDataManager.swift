@@ -394,64 +394,6 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
-    /// Send a bolus command and handle the result
-    ///
-    /// - parameter units:      The number of units to deliver
-    /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
-    ///     - error: An error describing why the command failed
-    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
-        guard units > 0 else {
-            completion(nil)
-            return
-        }
-
-        guard let device = rileyLinkManager.firstConnectedDevice else {
-            completion(LoopError.connectionError)
-            return
-        }
-
-        guard let ops = device.ops else {
-            completion(LoopError.configurationError)
-            return
-        }
-
-        let setBolus = {
-            ops.setNormalBolus(units: units) { (error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "Bolus")
-                    completion(LoopError.communicationError)
-                } else {
-                    self.loopManager.recordBolus(units, at: Date())
-                    completion(nil)
-                }
-            }
-        }
-
-        // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
-        if  doseStore.lastReservoirValue == nil ||
-            doseStore.lastReservoirVolumeDrop < 0 ||
-            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= TimeInterval(minutes: -5)
-        {
-            readPumpData { (result) in
-                switch result {
-                case .success(let (status, date)):
-                    self.doseStore.addReservoirValue(status.reservoir, atDate: date) { (newValue, _, _, error) in
-                        if let error = error {
-                            self.logger.addError(error, fromSource: "Bolus")
-                            completion(error)
-                        } else {
-                            setBolus()
-                        }
-                    }
-                case .failure(let error):
-                    completion(error)
-                }
-            }
-        } else {
-            setBolus()
-        }
-    }
-
     /**
      Attempts to fix an extended communication failure between a RileyLink device and the pump
 

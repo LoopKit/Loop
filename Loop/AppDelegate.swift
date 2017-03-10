@@ -79,7 +79,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             {
                 AnalyticsManager.sharedManager.didRetryBolus()
 
-                dataManager.enactBolus(units: units) { (error) in
+                dataManager.loopManager.enactBolus(units: units) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(units, atStartDate: startDate)
                     }

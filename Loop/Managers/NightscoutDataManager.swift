@@ -35,14 +35,10 @@ class NightscoutDataManager {
                 return
         }
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, _, insulinOnBoard, carbsOnBoard, loopError) in
+        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, bolusState, _, insulinOnBoard, carbsOnBoard, loopError) in
             
-            self.deviceDataManager.loopManager.getRecommendedBolus { (bolusUnits, getBolusError) in
-                if let getBolusError = getBolusError {
-                    self.deviceDataManager.logger.addError(getBolusError, fromSource: "NightscoutDataManager")
-                }
-                self.uploadLoopStatus(insulinOnBoard, carbsOnBoard: carbsOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusUnits, lastTempBasal: lastTempBasal, loopError: loopError ?? getBolusError)
-            }
+
+            self.uploadLoopStatus(insulinOnBoard, carbsOnBoard: carbsOnBoard, predictedGlucose: predictedGlucose, recommendedTempBasal: recommendedTempBasal, recommendedBolus: bolusState?.units, lastTempBasal: lastTempBasal, loopError: loopError)
         }
     }
     

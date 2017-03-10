@@ -22,4 +22,7 @@ enum LoopError: Error {
 
     // Out-of-date required data to perform an action
     case staleDataError(String)
+    
+    // Bolus already in Progress
+    case bolusInProgressError
 }

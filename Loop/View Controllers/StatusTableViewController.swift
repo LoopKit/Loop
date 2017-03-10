@@ -169,7 +169,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
 
                     reloadGroup.enter()
-                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) -> Void in
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, bolusState, lastLoopCompleted, _, _, error) -> Void in
                         if error != nil {
                             self.needsRefresh = true
                         }
@@ -178,6 +178,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         newRecommendedTempBasal = recommendedTempBasal
                         self.lastTempBasal = lastTempBasal
                         self.lastLoopCompleted = lastLoopCompleted
+                        self.pendingBolus = bolusState
 
                         if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                             self.eventualGlucoseDescription = String(describing: lastPoint)
@@ -288,7 +289,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 default:
                     break
                 }
-
+                
+                let newDisplayPendingBolus = self.pendingBolus
+                let oldDisplayPendingBolus = self.displayPendingBolus
+                self.displayPendingBolus = newDisplayPendingBolus
+                switch (oldDisplayPendingBolus, newDisplayPendingBolus) {
+                case (let old?, let new?) where !old.equal(new):
+                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                case (.none, .some):
+                    self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                case (.some, .none):
+                    self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                default:
+                    break
+                }
+                
                 for case let cell as ChartTableViewCell in self.tableView.visibleCells {
                     cell.reloadChart()
 
@@ -304,9 +319,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     private enum Section: Int {
         case status = 0
+        case bolus
         case charts
 
-        static let count = 2
+        static let count = 3
     }
 
     // MARK: - Chart Section Data
@@ -363,7 +379,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
-
+    
+    // what should be displayed
+    private var pendingBolus: LoopDataManager.Bolus?
+    private var bolusDisplayDismissed = false
+    // what the data view currently displays
+    private var displayPendingBolus: LoopDataManager.Bolus?
+    
+    
     private var settingTempBasal: Bool = false {
         didSet {
             if let cell = tableView.cellForRow(at: IndexPath(row: StatusRow.recommendedBasal.rawValue, section: Section.status.rawValue)) {
@@ -434,6 +457,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return ChartRow.count
         case .status:
             return self.recommendedTempBasal == nil ? 0 : StatusRow.count
+        case .bolus:
+            return self.displayPendingBolus == nil ? 0 : 1
         }
     }
 
@@ -497,6 +522,56 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             return cell
+        
+        case .bolus:
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BolusTableViewCell", for: indexPath) as! TitleSubtitleTableViewCell
+        if let pending = self.pendingBolus {
+            let description = pending.description()
+            let kind = pending.kind()
+            cell.titleLabel?.text = "\(description) \(kind)"
+            if pending.carbs > 0 {
+                cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ g @ %2$@", comment: "The format for current carbs and time. (1: localized unit number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: pending.carbs), number: .decimal), timeFormatter.string(from: pending.date))
+            } else {
+                cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U @ %2$@", comment: "The format for current bolus and time. (1: localized unit number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: pending.units), number: .decimal), timeFormatter.string(from: pending.date))
+            }
+            var color : UIColor = UIColor.black
+            let spinWheel = pending.inProgress()
+            
+            switch(pending.state) {
+            case .sent:
+                color = UIColor.orange
+            case .maybefailed:
+                color = UIColor.orange
+            case .failed:
+                color = UIColor.red
+            case .timeout:
+                color = UIColor.red
+            default: _ = true
+            }
+            if cell.explanationLabel != nil {
+                cell.explanationLabel?.text = pending.explanation()
+                
+                
+            }
+            cell.titleLabel?.textColor = color
+            cell.subtitleLabel?.textColor = color
+            
+            if spinWheel {
+                let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                indicatorView.startAnimating()
+                cell.accessoryView = indicatorView
+            } else {
+                cell.accessoryView = nil
+            }
+        } else {
+            cell.titleLabel?.text = "Bolus?"
+            cell.subtitleLabel?.text = "- nil -"
+            cell.accessoryView = nil
+            
+        }
+        cell.selectionStyle = .default
+        
+        return cell
         }
     }
 
@@ -532,6 +607,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
         case .status:
             break
+        case .bolus:
+            break
         }
     }
 
@@ -552,6 +629,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
         case .status:
             return UITableViewAutomaticDimension
+        case .bolus:
+            return 70
         }
     }
 
@@ -588,6 +667,38 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
+        case .bolus:
+            tableView.deselectRow(at: indexPath, animated: true)
+            
+            // clear bolus if in last/failed state
+            if let pending = self.pendingBolus {
+                switch(pending.state) {
+                case .recommended:
+                    setBolus(bolus: pending.units)
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                case .failed:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                    performSegue(withIdentifier: BolusViewController.className, sender: indexPath)
+                case .timeout:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                    performSegue(withIdentifier: BolusViewController.className, sender: indexPath)
+                case .success:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                default:
+                    _ = true
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.needsRefresh = true
+                self.reloadData()
+            }
+            break
+        
         }
     }
 
@@ -716,12 +827,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
         if let bolusViewController = segue.source as? BolusViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
-                let startDate = Date()
-                dataManager.enactBolus(units: bolus) { (error) in
-                    if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: startDate)
-                    }
-                }
+                setBolus(bolus: bolus)
             }
         }
     }
@@ -785,6 +891,24 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     @objc private func openCGMApp(_: Any) {
         if let url = cgmAppURL {
             UIApplication.shared.open(url)
+        }
+    }
+    
+    private func setBolus(bolus: Double) {
+        let now = Date()
+        
+        self.dataManager.loopManager.enactBolus(units: bolus) { (error) in
+            if error != nil {
+                NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: now)
+            }
+            
+            // The delay is mostly for testing, but also nice to prevent
+            // very stupid mistakes.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.needsRefresh = true
+                self.reloadData()
+            }
+            
         }
     }
 

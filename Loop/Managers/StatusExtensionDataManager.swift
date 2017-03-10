@@ -44,7 +44,7 @@ final class StatusExtensionDataManager {
         }
         
         dataManager.loopManager.getLoopStatus {
-            (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
+            (predictedGlucose, _, recommendedTempBasal, lastTempBasal, _, lastLoopCompleted, _, _, error) in
             
             if error != nil {
                 // TODO: unclear how to handle the error here properly.
