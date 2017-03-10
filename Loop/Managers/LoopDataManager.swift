@@ -627,7 +627,8 @@ final class LoopDataManager {
             maxIOB: maxIOB,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates
+            basalRateSchedule: basalRates,
+            insulinOnBoard: self.insulinOnBoard?.value
         ) - pendingBolusAmount)
     }
 

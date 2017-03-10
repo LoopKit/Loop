@@ -125,9 +125,9 @@ struct DoseMath {
         }
         if  let iob = insulinOnBoard {
             if iob > maxIOB {
-                // We hit the max IOB, thus reduce the rate until we are below IOB.
-                rate = minBasalRate
-                // TODO this should log an event to nightscout
+                // We hit the max IOB, cancel the one in progress.
+                rate = 0
+                duration = TimeInterval(0)
             }
         }
         if let rate = rate {

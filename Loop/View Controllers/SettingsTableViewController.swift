@@ -359,11 +359,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
-<<<<<<< HEAD
-            case .pumpID, .transmitterID, .insulinActionDuration, .maxBasal, .maxBolus:
-=======
-            case .pumpID, .transmitterID, .insulinActionDuration, .minBasal, .maxBasal, .maxBolus, .maxIOB:
->>>>>>> 6f8c346... add maxIOB #2
+            case .pumpID, .transmitterID, .insulinActionDuration, .maxBasal, .maxBolus, .maxIOB:
                 let vc: TextFieldTableViewController
 
                 switch row {
