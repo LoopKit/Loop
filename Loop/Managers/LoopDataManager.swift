@@ -212,7 +212,7 @@ final class LoopDataManager {
                         if self.lastBolus.state != .success && reservoir.startDate > expiry && eventDate > expiry {
                             self.lastBolus.state = .failed
                             self.lastBolus.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
-                            self.deviceDataManager.logger.addError("Bolus Failed: \(self.lastBolus) \(timeForBolus)", fromSource: "LoopDataManager")                            
+                            self.deviceDataManager.logger.addError("Bolus Failed: \(self.lastBolus) \(timeForBolus)", fromSource: "LoopDataManager")
                         }
                     }
                 }
@@ -360,6 +360,13 @@ final class LoopDataManager {
 
                 throw error
             }
+        }
+        
+        do {
+            try self.recommendedBolus = self.recommendBolus()
+        } catch let error {
+            self.deviceDataManager.logger.addError(error, fromSource: "RecommendBolus")
+            throw error
         }
     }
 
