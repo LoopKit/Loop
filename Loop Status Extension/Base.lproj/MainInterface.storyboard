@@ -6,8 +6,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -24,16 +22,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QEK-eF-fK6">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="200"/>
+                                <rect key="frame" x="8" y="8" width="359" height="184"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="70"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="70"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="70" id="Pes-zW-tY0"/>
                                         </constraints>
                                     </stackView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                        <rect key="frame" x="0.0" y="70" width="375" height="24"/>
+                                        <rect key="frame" x="0.0" y="70" width="359" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="24" id="EgB-lz-6eX"/>
                                         </constraints>
@@ -42,19 +40,20 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContentView" customModule="LoopUI">
-                                        <rect key="frame" x="0.0" y="94" width="375" height="106"/>
+                                        <rect key="frame" x="0.0" y="94" width="359" height="90"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="200" id="wUI-T0-3W4"/>
+                                    <constraint firstAttribute="height" constant="184" id="wUI-T0-3W4"/>
                                 </constraints>
                             </stackView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="QEK-eF-fK6" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="JQt-ME-MI7"/>
-                            <constraint firstItem="QEK-eF-fK6" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leadingMargin" constant="-16" id="fTS-eP-8qq"/>
-                            <constraint firstItem="QEK-eF-fK6" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" multiplier="16" id="ft0-yq-j8r"/>
+                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="QEK-eF-fK6" secondAttribute="bottom" constant="8" id="8CP-lo-FxM"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" constant="8" id="Rna-hO-xkd"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" constant="8" id="hDE-a8-dTa"/>
+                            <constraint firstAttribute="trailing" secondItem="QEK-eF-fK6" secondAttribute="trailing" constant="8" id="rIV-pZ-0Ap"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
