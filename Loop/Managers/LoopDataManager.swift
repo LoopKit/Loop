@@ -55,7 +55,7 @@ final class LoopDataManager {
         dosingEnabled = UserDefaults.standard.dosingEnabled
         retrospectiveCorrectionEnabled = UserDefaults.standard.retrospectiveCorrectionEnabled
 
-        lastBolus = Bolus(state: .prohibited, units: 0, carbs: 0, date: Date(), sent: nil, allowed: false, message: "Startup", reservoir: nil)
+        bolusState = Bolus(state: .prohibited, units: 0, carbs: 0, date: Date(), sent: nil, allowed: false, message: "Startup", reservoir: nil)
         // Observe changes
         let center = NotificationCenter.default
 
@@ -145,65 +145,65 @@ final class LoopDataManager {
         let updateGroup = DispatchGroup()
         // do bolus first as the rest might throw an exception.
         
-        if self.lastBolus.inProgress() {
-            self.lastBolus.allowed = false
+        if self.bolusState.inProgress() {
+            self.bolusState.allowed = false
             updateGroup.enter()
             // Fuzz time a bit to account for different time on pump and device
-            var date = self.lastBolus.date
-            if let d = self.lastBolus.sent {
+            var date = self.bolusState.date
+            if let d = self.bolusState.sent {
                 date = d
             }
             let startDate = date.addingTimeInterval(TimeInterval(minutes: -2))
             deviceDataManager.doseStore.getRecentNormalizedDoseEntries(startDate: startDate) {
                 (doseEntries, error) in
-                print("getRecentNormalizedDoseEntries", self.lastBolus)
+                print("getRecentNormalizedDoseEntries", self.bolusState)
                 if let error = error {
                     print("getRecentNormalizedDoseEntries", error)
-                    self.deviceDataManager.logger.addError(error, fromSource: "insulinEffectlastBolus")
+                    self.deviceDataManager.logger.addError(error, fromSource: "insulinEffectbolusState")
                 } else {
                     print("getRecentNormalizedDoseEntries", doseEntries)
                     for entry in doseEntries {
                         //                    print(entry.type, entry)
                         if entry.type == .bolus {
-                            if entry.value >= self.lastBolus.units {
-                                self.lastBolus.state = .success
+                            if entry.value >= self.bolusState.units {
+                                self.bolusState.state = .success
                                 self.lastSuccessfulBolus = entry.endDate
-                                self.lastBolus.message = ""
-                                self.deviceDataManager.logger.addMessage("Bolus Success: \(self.lastBolus) \(entry)", "LoopDataManager")
+                                self.bolusState.message = ""
+                                self.deviceDataManager.logger.addMessage("Bolus Success: \(self.bolusState) \(entry)", "LoopDataManager")
                                 break
                             } else {
-                                self.lastBolus.state = .success
+                                self.bolusState.state = .success
                                 self.lastSuccessfulBolus = entry.endDate
                                 let str = self.decimalFormatter.string(from: NSNumber(value: entry.value))!
-                                self.lastBolus.message = "Different amount \(str)"
-                                self.deviceDataManager.logger.addMessage("Bolus Success, but wrong amount: \(self.lastBolus) \(entry)", "LoopDataManager")
+                                self.bolusState.message = "Different amount \(str)"
+                                self.deviceDataManager.logger.addMessage("Bolus Success, but wrong amount: \(self.bolusState) \(entry)", "LoopDataManager")
                                 break
                             }
                         }
                     }
                 }
-                if self.lastBolus.state != .success {
+                if self.bolusState.state != .success {
 
                     if let reservoir = self.deviceDataManager.doseStore.lastReservoirValue {
-                        let timeForBolus = TimeInterval(minutes: (self.lastBolus.units + 1))
+                        let timeForBolus = TimeInterval(minutes: (self.bolusState.units + 1))
                         let expiry = date + timeForBolus
                         
-                        if let start = self.lastBolus.reservoir {
-                            if self.lastBolus.date.timeIntervalSince(start.startDate) > TimeInterval(minutes: 15) {
-                                print("lastBolus.date \(self.lastBolus.date), start.startDate \(start.startDate), more than 15 minutes")
+                        if let start = self.bolusState.reservoir {
+                            if self.bolusState.date.timeIntervalSince(start.startDate) > TimeInterval(minutes: 15) {
+                                print("bolusState.date \(self.bolusState.date), start.startDate \(start.startDate), more than 15 minutes")
                             }
                             let currentUnits = reservoir.unitVolume
                             let drop = start.unitVolume - currentUnits
                             
                             print("Bolus Progress Drop \(drop), current \(currentUnits), start \(start.unitVolume)")
-                            if drop > self.lastBolus.units {
-                                self.lastBolus.state = .success
+                            if drop > self.bolusState.units {
+                                self.bolusState.state = .success
                                 self.lastSuccessfulBolus = reservoir.startDate
                                 
-                                self.lastBolus.message = "\(self.lastBolus.units) U"
+                                self.bolusState.message = "\(self.bolusState.units) U"
                             } else {
                                 let strDrop = self.decimalFormatter.string(from: NSNumber(value: drop))!
-                                self.lastBolus.message = "\(strDrop)/\(self.lastBolus.units) U"
+                                self.bolusState.message = "\(strDrop)/\(self.bolusState.units) U"
                             }
                         }
                         let eventDate = self.deviceDataManager.doseStore.pumpEventQueryAfterDate
@@ -212,10 +212,10 @@ final class LoopDataManager {
                         // TODO investigate if the event and startDate should be OR conditions.
                         //      If we don't wait for the event to be read back, the IOB might
                         //      be wrong though.  Better safe than sorry.
-                        if self.lastBolus.state != .success && reservoir.startDate > expiry && eventDate > expiry {
-                            self.lastBolus.state = .failed
-                            self.lastBolus.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
-                            self.deviceDataManager.logger.addError("Bolus Failed: \(self.lastBolus) \(timeForBolus)", fromSource: "LoopDataManager")
+                        if self.bolusState.state != .success && reservoir.startDate > expiry && eventDate > expiry {
+                            self.bolusState.state = .failed
+                            self.bolusState.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
+                            self.deviceDataManager.logger.addError("Bolus Failed: \(self.bolusState) \(timeForBolus)", fromSource: "LoopDataManager")
                         }
                     }
                 }
@@ -229,44 +229,44 @@ final class LoopDataManager {
             if let reservoir = self.deviceDataManager.doseStore.lastReservoirValue {
                 if reservoir.startDate.timeIntervalSinceNow < TimeInterval(minutes: -15) {
                     print("Bolus not allowed because reservoir too old")
-                    self.lastBolus.allowed = false
-                    self.lastBolus.state = .prohibited
-                    self.lastBolus.message = "Reservoir data too old."
+                    self.bolusState.allowed = false
+                    self.bolusState.state = .prohibited
+                    self.bolusState.message = "Reservoir data too old."
                 } else {
-                    if self.lastBolus.state ==  .prohibited {
-                        self.lastBolus.state = .none
-                        self.lastBolus.message = ""
+                    if self.bolusState.state ==  .prohibited {
+                        self.bolusState.state = .none
+                        self.bolusState.message = ""
                     }
-                    self.lastBolus.allowed = true
+                    self.bolusState.allowed = true
                 }
             } else {
                 print("Bolus not allowed because reservoir not available")
-                self.lastBolus.allowed = false
-                self.lastBolus.state = .prohibited
-                self.lastBolus.message = "Reservoir data not available."
+                self.bolusState.allowed = false
+                self.bolusState.state = .prohibited
+                self.bolusState.message = "Reservoir data not available."
             }
             
-            if self.lastBolus.date.timeIntervalSinceNow < TimeInterval(minutes: -30) {
-                if self.lastBolus.state != .none && self.lastBolus.state != .recommended  {
-                    self.lastBolus.state = .none
-                    self.lastBolus.message = ""
+            if self.bolusState.date.timeIntervalSinceNow < TimeInterval(minutes: -30) {
+                if self.bolusState.state != .none && self.bolusState.state != .recommended  {
+                    self.bolusState.state = .none
+                    self.bolusState.message = ""
                 }
             }
             
-            if self.lastBolus.state == .none || self.lastBolus.state == .recommended {
+            if self.bolusState.state == .none || self.bolusState.state == .recommended {
                 if let units = self.recommendedBolus, units > 0.5 {  // 0.5 shouldn't be static
-                    self.lastBolus.state = .recommended
-                    self.lastBolus.units = units
-                    self.lastBolus.carbs = 0
+                    self.bolusState.state = .recommended
+                    self.bolusState.units = units
+                    self.bolusState.carbs = 0
                 /*
                 } else if let carbs = self.recommendedBolus?.carbRecommendation, carbs > 5 {
-                    self.lastBolus.state = .recommended
-                    self.lastBolus.units = 0
-                    self.lastBolus.carbs = 10 * round(carbs/10 + 1)
+                    self.bolusState.state = .recommended
+                    self.bolusState.units = 0
+                    self.bolusState.carbs = 10 * round(carbs/10 + 1)
                 */
                 } else {
-                    self.lastBolus.state = .none
-                    self.lastBolus.units = 0
+                    self.bolusState.state = .none
+                    self.bolusState.units = 0
                 }
                 
             }
@@ -408,7 +408,7 @@ final class LoopDataManager {
 
             let currentCOB = self.carbsOnBoardSeries?.closestPriorToDate(Date())
 
-            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.lastBolus, self.lastLoopCompleted, self.insulinOnBoard, currentCOB, error ?? self.lastLoopError)
+            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.bolusState, self.lastLoopCompleted, self.insulinOnBoard, currentCOB, error ?? self.lastLoopError)
         }
     }
 
@@ -590,7 +590,7 @@ final class LoopDataManager {
             return val
         }
     }
-    private var lastBolus: Bolus
+    private var bolusState: Bolus
 
     private var lastLoopError: Error? {
         didSet {
@@ -794,7 +794,7 @@ final class LoopDataManager {
         }
 
         guard
-            !lastBolus.inProgress(),  // Don't recommend changes if a bolus was just set
+            !bolusState.inProgress(),  // Don't recommend changes if a bolus was just set
             let predictedGlucose = self.predictedGlucose,
             let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
@@ -857,7 +857,7 @@ final class LoopDataManager {
             throw LoopError.staleDataError("Glucose is \(predictedInterval.minutes) min old")
         }
 
-        let pendingBolusAmount: Double = lastBolus.inProgress() ? lastBolus.units : 0
+        let pendingBolusAmount: Double = bolusState.inProgress() ? bolusState.units : 0
 
         return max(0, DoseMath.recommendBolusFromPredictedGlucose(glucose,
             lastTempBasal: self.lastTempBasal,
@@ -937,7 +937,7 @@ final class LoopDataManager {
     private func recordBolus(_ units: Double, at date: Date, state: BolusState,
                              sent: Date? = nil, message: String? = nil, reservoir: ReservoirValue? = nil) {
         dataAccessQueue.async {
-            self.lastBolus = Bolus(state: state, units: units, carbs: 0.0, date: date,
+            self.bolusState = Bolus(state: state, units: units, carbs: 0.0, date: date,
                                    sent: sent, allowed: false,
                                    message: message ?? "",
                                    reservoir: reservoir)
@@ -953,7 +953,7 @@ final class LoopDataManager {
     ///     - error: An error describing why the command failed
     func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
         let start = Date()
-        guard !self.lastBolus.inProgress() else {
+        guard !self.bolusState.inProgress() else {
             completion(LoopError.bolusInProgressError)
             return
         }
