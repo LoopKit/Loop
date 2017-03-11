@@ -62,9 +62,9 @@ final class StatusChartsManager {
         return numberFormatter
     }()
 
-    private lazy var axisLineColor = UIColor.clear
+    private lazy var axisLineColor = UIColor.axisLineColor
 
-    private lazy var axisLabelSettings: ChartLabelSettings = ChartLabelSettings(font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1), fontColor: UIColor.secondaryLabelColor)
+    private lazy var axisLabelSettings: ChartLabelSettings = ChartLabelSettings(font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1), fontColor: UIColor.axisLabelColor)
 
     private lazy var guideLinesLayerSettings: ChartGuideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: UIColor.gridColor)
 
