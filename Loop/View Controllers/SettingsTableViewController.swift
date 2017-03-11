@@ -566,7 +566,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
             case .minimumBGGuard:
                 if let minBGGuard = dataManager.minimumBGGuard {
-                    let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnits: minBGGuard.unit)
+                    let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnit: minBGGuard.unit)
                     vc.delegate = self
                     vc.indexPath = indexPath
                     vc.title = sender?.textLabel?.text
@@ -577,7 +577,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                             if let error = error {
                                 self.presentAlertController(with: error)
                             } else if let unit = unit {
-                                let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnits: unit)
+                                let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
                                 vc.delegate = self
                                 vc.indexPath = indexPath
                                 vc.title = sender?.textLabel?.text
@@ -730,7 +730,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         if sender.isOn {
             disableTransmitter()
-            disableReceiver();
+            disableReceiver()
         }
     }
 
@@ -840,7 +840,7 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                 case .minimumBGGuard:
                     if let controller = controller as? GlucoseThresholdTableViewController,
                         let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnits, value: minBGGuard)
+                        dataManager.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.minimumBGGuard = nil
                     }

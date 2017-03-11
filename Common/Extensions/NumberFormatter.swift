@@ -20,7 +20,7 @@ extension NumberFormatter {
         return numberFormatter
     }
 
-    public func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
+    func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
         guard let stringValue = string(from: NSNumber(value: value)) else {
             return nil
         }
@@ -35,7 +35,7 @@ extension NumberFormatter {
         )
     }
 
-    @nonobjc public func describingGlucose(_ value: HKQuantity, for unit: HKUnit) -> String? {
+    @nonobjc func describingGlucose(_ value: HKQuantity, for unit: HKUnit) -> String? {
         return describingGlucose(value.doubleValue(for: unit), for: unit)
     }
 

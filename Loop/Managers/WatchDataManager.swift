@@ -137,6 +137,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             )
 
             deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (recommendation, error) in
+                NotificationCenter.default.post(name: .CarbEntriesDidUpdate, object: nil)
+
                 if let error = error {
                     self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
                 } else {
