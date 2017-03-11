@@ -209,6 +209,9 @@ final class LoopDataManager {
                         let eventDate = self.deviceDataManager.doseStore.pumpEventQueryAfterDate
                         // needs a more accurate measurement of how fast the pump is.
                         // this should take into account the real time it takes to give the bolus.
+                        // TODO investigate if the event and startDate should be OR conditions.
+                        //      If we don't wait for the event to be read back, the IOB might
+                        //      be wrong though.  Better safe than sorry.
                         if self.lastBolus.state != .success && reservoir.startDate > expiry && eventDate > expiry {
                             self.lastBolus.state = .failed
                             self.lastBolus.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
