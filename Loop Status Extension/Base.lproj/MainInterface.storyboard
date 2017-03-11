@@ -44,9 +44,6 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                 </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="184" id="wUI-T0-3W4"/>
-                                </constraints>
                             </stackView>
                         </subviews>
                         <constraints>
