@@ -116,13 +116,15 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        coordinator.animate(alongsideTransition: nil, completion: {
-            _ in
+
+        coordinator.animate(alongsideTransition: {
+            (UIViewControllerTransitionCoordinatorContext) -> Void in
             if self.extensionContext?.widgetActiveDisplayMode == .compact {
                 self.glucoseChartContentView.alpha = 0
             } else {
                 self.glucoseChartContentView.alpha = 1
             }
+        }, completion: { (UIViewControllerTransitionCoordinatorContext) -> Void in
         })
     }
 
