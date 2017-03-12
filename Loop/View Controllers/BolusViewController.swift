@@ -96,18 +96,15 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         }
 
         guard bolus <= recommendedBolus else {
-            //1. Create the alert controller.
             let alert = UIAlertController(title: "Exceeds Recommended Bolus", message: "The bolus amount of \(bolus) U is higher than the recommended amount of \(recommendedBolus) U. Please re-enter the amount to confirm.", preferredStyle: .alert)
             
-            //2. Add the text field. You can configure it however you need.
             alert.addTextField { (textField) in
                 textField.text = ""
                 textField.keyboardType = UIKeyboardType.decimalPad
                 textField.autocorrectionType = UITextAutocorrectionType.no
             }
-            // 3. Grab the value from the text field, and print it when the user clicks OK.
+
             alert.addAction(UIAlertAction(title: "Deliver", style: .default, handler: { [weak alert] (_) in
-                //let result = alert?.textFields![0].text // Force unwrapping because we know it exists.
                 let wanted = "\(bolus)"
                 let result = alert?.textFields![0].text
                 if result != nil && result! == wanted {
@@ -120,7 +117,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             
             alert.addAction(UIAlertAction(title: "Back", style: .default, handler: nil))
             
-            // 4. Present the alert.
             self.present(alert, animated: true, completion: nil)
             
             return
