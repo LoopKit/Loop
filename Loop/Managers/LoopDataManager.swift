@@ -140,12 +140,23 @@ final class LoopDataManager {
     }()
     
     private var lastSuccessfulBolus : Date?
-
+    
     private func update() throws {
-        let updateGroup = DispatchGroup()
-        // do bolus first as the rest might throw an exception.
-        
+        var error: Error?
+        do {
+            try updateData()
+        } catch let updateError {
+            error = updateError
+        }
+        updateBolusState()
+        if error != nil {
+            throw error!
+        }
+    }
+    
+    private func updateBolusState() {
         if self.bolusState.inProgress() {
+            let updateGroup = DispatchGroup()
             self.bolusState.allowed = false
             updateGroup.enter()
             // Fuzz time a bit to account for different time on pump and device
@@ -272,6 +283,10 @@ final class LoopDataManager {
             }
             
         }
+    }
+    
+    private func updateData() throws {
+        let updateGroup = DispatchGroup()
 
         if glucoseChange == nil, let glucoseStore = deviceDataManager.glucoseStore {
             updateGroup.enter()
