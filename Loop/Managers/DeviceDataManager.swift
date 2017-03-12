@@ -355,6 +355,16 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    private var needPumpDataRead : Bool = false
+    /**
+     Trigger a pump data read.
+    */
+    public func triggerPumpDataRead() {
+        needPumpDataRead = true
+        assertCurrentPumpData()
+    }
+    
+    private var pumpDataReadInProgress = false
     /**
      Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
      */
@@ -362,14 +372,17 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
-
+        if pumpDataReadInProgress {
+            return
+        }
+        pumpDataReadInProgress = true
         device.assertIdleListening()
 
         // How long should we wait before we poll for new pump data?
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
 
         // If we don't yet have pump status, or it's old, poll for it.
-        if  doseStore.lastReservoirValue == nil ||
+        if  needPumpDataRead || doseStore.lastReservoirValue == nil ||
             doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance {
             readPumpData { (result) in
                 let nsPumpStatus: NightscoutUploadKit.PumpStatus?
@@ -390,6 +403,7 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
                     nsPumpStatus = nil
                 }
                 self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus)
+                self.pumpDataReadInProgress = false
             }
         }
     }

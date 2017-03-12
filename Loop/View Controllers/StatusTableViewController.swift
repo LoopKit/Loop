@@ -178,10 +178,34 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         newRecommendedTempBasal = recommendedTempBasal
                         self.lastTempBasal = lastTempBasal
                         self.lastLoopCompleted = lastLoopCompleted
-                        self.pendingBolus = bolusState
 
                         if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                             self.eventualGlucoseDescription = String(describing: lastPoint)
+                        }
+                        
+                        if let bolus = bolusState {
+                            let inProgress = bolus.inProgress()
+                            
+                            if let pending = self.pendingBolus, !pending.equal(bolus) {
+                                self.bolusDisplayDismissed = false
+                            }
+                            
+                            if bolus.state == .none && bolus.message == "" {
+                                self.bolusDisplayDismissed = false
+                                self.pendingBolus = nil
+                            } else {
+                                self.pendingBolus = bolus
+                            }
+                            
+                            if inProgress {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                                    self.dataManager.triggerPumpDataRead()
+                                }
+                                self.bolusDisplayDismissed = false
+                            }
+                            
+                            // Disable Bolus button.
+                            self.toolbarItems![2].isEnabled = bolus.allowed
                         }
 
                         reloadGroup.leave()
@@ -265,6 +289,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
 
             workoutMode = dataManager.workoutModeEnabled
+            
+            
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
