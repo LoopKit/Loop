@@ -108,20 +108,23 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, bolusState, lastLoopCompleted, _, _, error) in
             let eventualGlucose = predictedGlucose?.last
 
-            glucoseStore.preferredUnit { (unit, error) in
-                let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
-                context.reservoir = reservoir?.unitVolume
 
-                context.loopLastRunDate = lastLoopCompleted
-                context.recommendedBolusDose = bolusState?.units
-                context.maxBolus = maxBolus
+                glucoseStore.preferredUnit { (unit, error) in
+                    let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
+                    context.reservoir = reservoir?.unitVolume
 
-                if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                    context.glucoseTrend = trend
+                    context.loopLastRunDate = lastLoopCompleted
+                    context.recommendedBolusDose = bolusState?.units
+                    context.maxBolus = maxBolus
+
+                    if let trend = self.deviceDataManager.sensorInfo?.trendType {
+                        context.glucoseTrendRawValue = trend.rawValue
+                    }
+
+                    completionHandler(context)
                 }
 
-                completionHandler(context)
-            }
+
             
         }
     }
@@ -135,14 +138,16 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(carbStore.defaultAbsorptionTimes)
             )
 
-            deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (units, error) in
+            deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (recommendation, error) in
+                NotificationCenter.default.post(name: .CarbEntriesDidUpdate, object: nil)
+
                 if let error = error {
                     self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
                 } else {
                     AnalyticsManager.sharedManager.didAddCarbsFromWatch(carbEntry.value)
                 }
 
-                completionHandler?(units)
+                completionHandler?(recommendation?.amount)
             }
         } else {
             completionHandler?(nil)

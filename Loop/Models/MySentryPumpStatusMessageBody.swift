@@ -7,20 +7,21 @@
 //
 
 import LoopKit
+import LoopUI
 import MinimedKit
 
 
 extension MySentryPumpStatusMessageBody: SensorDisplayable {
-    var isStateValid: Bool {
+    public var isStateValid: Bool {
         switch glucose {
-        case .active, .off:
+        case .active:
             return true
         default:
             return false
         }
     }
 
-    var trendType: GlucoseTrend? {
+    public var trendType: LoopUI.GlucoseTrend? {
         guard case .active = glucose else {
             return nil
         }
@@ -39,7 +40,7 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
         }
     }
 
-    var isLocal: Bool {
+    public var isLocal: Bool {
         return true
     }
 

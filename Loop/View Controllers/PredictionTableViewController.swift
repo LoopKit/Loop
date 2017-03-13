@@ -142,9 +142,9 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                         if let error = error {
                             self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                             self.needsRefresh = true
-                            // TODO: Display error in the cell
+                            self.charts.setGlucoseValues([])
                         } else {
-                            self.charts.glucoseValues = values
+                            self.charts.setGlucoseValues(values)
                         }
 
                         reloadGroup.leave()
@@ -157,7 +157,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                         }
 
                         self.retrospectivePredictedGlucose = retrospectivePredictedGlucose
-                        self.charts.predictedGlucoseValues = predictedGlucose ?? []
+                        self.charts.setPredictedGlucoseValues(predictedGlucose ?? [])
                         
                         reloadGroup.leave()
                     }
@@ -168,7 +168,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                             self.needsRefresh = true
                         }
 
-                        self.charts.alternatePredictedGlucoseValues = predictedGlucose ?? []
+                        self.charts.setAlternatePredictedGlucoseValues(predictedGlucose ?? [])
 
                         if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
                             self.eventualGlucoseDescription = String(describing: lastPoint)

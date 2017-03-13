@@ -81,13 +81,18 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         let template: CLKComplicationTemplate?
         
         let glucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "120↘︎", shortTextKey: "120")
-        let timeText = CLKTimeTextProvider(date: Date())
+        let timeText = CLKRelativeDateTextProvider(date: Date(), style: .natural, units: .minute)
 
         switch complication.family {
         case .modularSmall:
             let modularSmall = CLKComplicationTemplateModularSmallStackText()
             modularSmall.line1TextProvider = glucoseText
             modularSmall.line2TextProvider = timeText
+            template = modularSmall
+        case .modularLarge:
+            let modularSmall = CLKComplicationTemplateModularLargeTallBody()
+            modularSmall.bodyTextProvider = glucoseText
+            modularSmall.headerTextProvider = timeText
             template = modularSmall
         case .circularSmall:
             let circularSmall = CLKComplicationTemplateCircularSmallSimpleText()
@@ -98,17 +103,15 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             extraLarge.line1TextProvider = glucoseText
             extraLarge.line2TextProvider = timeText
             template = extraLarge
-        case .utilitarianSmallFlat:
+        case .utilitarianSmall, .utilitarianSmallFlat:
             let utilitarianSmallFlat = CLKComplicationTemplateUtilitarianSmallFlat()
-            utilitarianSmallFlat.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianSmallFlat", textProviders: [glucoseText, timeText])
+            utilitarianSmallFlat.textProvider = glucoseText
             template = utilitarianSmallFlat
         case .utilitarianLarge:
             let utilitarianLarge = CLKComplicationTemplateUtilitarianLargeFlat()
             let eventualGlucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "75")
-            utilitarianLarge.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: [glucoseText, eventualGlucoseText, timeText])
+            utilitarianLarge.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: [glucoseText, eventualGlucoseText, CLKTimeTextProvider(date: Date())])
             template = utilitarianLarge
-        default:
-            template = nil
         }
 
         template?.tintColor = UIColor.tintColor
