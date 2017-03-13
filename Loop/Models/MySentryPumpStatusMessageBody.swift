@@ -14,7 +14,7 @@ import MinimedKit
 extension MySentryPumpStatusMessageBody: SensorDisplayable {
     public var isStateValid: Bool {
         switch glucose {
-        case .active, .off:
+        case .active:
             return true
         default:
             return false

@@ -8,38 +8,29 @@
 
 import UIKit
 
-public final class ReservoirVolumeHUDView: BaseHUDView {
-
-    @IBOutlet private weak var levelMaskView: LevelMaskView!
+public final class ReservoirVolumeHUDView: LevelHUDView {
 
     @IBOutlet private weak var volumeLabel: UILabel!
 
     override public func awakeFromNib() {
         super.awakeFromNib()
 
-        tintColor = .unknownColor
         volumeLabel.isHidden = true
-
-        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
     public var reservoirLevel: Double? {
         didSet {
-            levelMaskView.value = reservoirLevel ?? 1.0
+            level = reservoirLevel
 
             switch reservoirLevel {
             case .none:
-                tintColor = .unknownColor
                 volumeLabel.isHidden = true
             case let x? where x > 0.25:
-                tintColor = .secondaryLabelColor
                 volumeLabel.isHidden = true
             case let x? where x > 0.10:
-                tintColor = .agingColor
                 volumeLabel.textColor = tintColor
                 volumeLabel.isHidden = false
             default:
-                tintColor = .staleColor
                 volumeLabel.textColor = tintColor
                 volumeLabel.isHidden = false
             }

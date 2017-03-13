@@ -9,17 +9,7 @@
 import UIKit
 
 
-public final class BatteryLevelHUDView: BaseHUDView {
-
-    @IBOutlet private weak var levelMaskView: LevelMaskView!
-
-    override public func awakeFromNib() {
-        super.awakeFromNib()
-
-        tintColor = .unknownColor
-
-        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
-    }
+public final class BatteryLevelHUDView: LevelHUDView {
 
     private lazy var numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -27,7 +17,6 @@ public final class BatteryLevelHUDView: BaseHUDView {
 
         return formatter
     }()
-
 
     public var batteryLevel: Double? {
         didSet {
@@ -38,18 +27,7 @@ public final class BatteryLevelHUDView: BaseHUDView {
                 caption.text = nil
             }
 
-            switch batteryLevel {
-            case .none:
-                tintColor = .unknownColor
-            case let x? where x > 0.25:
-                tintColor = .secondaryLabelColor
-            case let x? where x > 0.10:
-                tintColor = .agingColor
-            default:
-                tintColor = .staleColor
-            }
-
-            levelMaskView.value = batteryLevel ?? 1.0
+            level = batteryLevel
         }
     }
 

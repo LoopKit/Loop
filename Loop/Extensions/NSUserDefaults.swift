@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import MinimedKit
+import HealthKit
 
 extension UserDefaults {
 
@@ -26,12 +27,14 @@ extension UserDefaults {
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
+        case FetchEnliteDataEnabled = "com.loopkit.Loop.FetchEnliteDataEnabled"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
         case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
+        case MinimumBGGuard = "com.loopkit.Loop.MinimumBGGuard"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -215,6 +218,15 @@ extension UserDefaults {
         }
     }
 
+    var fetchEnliteDataEnabled: Bool {
+        get {
+            return bool(forKey: Key.FetchEnliteDataEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.FetchEnliteDataEnabled.rawValue)
+        }
+    }
+
     var retrospectiveCorrectionEnabled: Bool {
         get {
             return bool(forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
@@ -259,6 +271,19 @@ extension UserDefaults {
             } else {
                 removeObject(forKey: Key.BatteryChemistry.rawValue)
             }
+        }
+    }
+    
+    var minimumBGGuard: GlucoseThreshold? {
+        get {
+            if let rawValue = dictionary(forKey: Key.MinimumBGGuard.rawValue) {
+                return GlucoseThreshold(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.MinimumBGGuard.rawValue)
         }
     }
 
