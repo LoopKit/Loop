@@ -101,3 +101,13 @@ extension ChartPoint {
 }
 
 
+extension ChartPoint: TimelineValue {
+    public var startDate: Date {
+        if let dateValue = x as? ChartAxisValueDate {
+            return dateValue.date
+        } else {
+            return Date.distantPast
+        }
+    }
+}
+

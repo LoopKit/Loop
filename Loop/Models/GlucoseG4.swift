@@ -10,6 +10,7 @@ import Foundation
 import G4ShareSpy
 import HealthKit
 import LoopKit
+import LoopUI
 
 
 extension GlucoseG4: GlucoseValue {
@@ -24,11 +25,11 @@ extension GlucoseG4: GlucoseValue {
 
 
 extension GlucoseG4: SensorDisplayable {
-    var isStateValid: Bool {
+    public var isStateValid: Bool {
         return glucose >= 20
     }
 
-    var stateDescription: String {
+    public var stateDescription: String {
         if isStateValid {
             return NSLocalizedString("OK", comment: "Sensor state description for the valid state")
         } else {
@@ -36,11 +37,11 @@ extension GlucoseG4: SensorDisplayable {
         }
     }
 
-    var trendType: GlucoseTrend? {
+    public var trendType: GlucoseTrend? {
         return GlucoseTrend(rawValue: Int(trend))
     }
 
-    var isLocal: Bool {
+    public var isLocal: Bool {
         return true
     }
 }

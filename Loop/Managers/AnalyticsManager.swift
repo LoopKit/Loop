@@ -110,6 +110,11 @@ final class AnalyticsManager {
     func didChangeMaximumIOB() {
         logEvent("Maximum IOB change")
     }
+
+    func didChangeMinimumBGGuard() {
+        logEvent("Minimum BG Guard change")
+    }
+
     // MARK: - Loop Events
 
     func didAddCarbsFromWatch(_ carbs: Double) {

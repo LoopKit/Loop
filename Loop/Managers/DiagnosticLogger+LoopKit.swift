@@ -26,7 +26,7 @@ extension DiagnosticLogger {
         addError(String(describing: message), fromSource: source)
     }
 
-    func addLoopStatus(startDate: Date, endDate: Date, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: Error?, prediction: [GlucoseValue], predictionWithRetrospectiveEffect: Double, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
+    func addLoopStatus(startDate: Date, endDate: Date, glucose: GlucoseValue, effects: [String: [GlucoseEffect]], error: Error?, prediction: [GlucoseValue], predictionWithRetrospectiveEffect: Double, eventualBGWithRetrospectiveEffect: Double, eventualBGWithoutMomentum: Double, recommendedTempBasal: LoopDataManager.TempBasalRecommendation?) {
 
         let dateFormatter = DateFormatter.ISO8601StrictDateFormatter()
         let unit = HKUnit.milligramsPerDeciliterUnit()
@@ -57,7 +57,9 @@ extension DiagnosticLogger {
                     "unit": unit.unitString
                 ]
             },
-            "prediction_retrospect_delta": predictionWithRetrospectiveEffect
+            "prediction_retrospect_delta": predictionWithRetrospectiveEffect,
+            "eventualBGWithRetrospectiveEffect": eventualBGWithRetrospectiveEffect,
+            "eventualBGWithoutMomentum": eventualBGWithoutMomentum
         ]
 
         if let error = error {
