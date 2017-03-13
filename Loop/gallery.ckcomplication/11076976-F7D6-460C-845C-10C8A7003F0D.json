@@ -1,0 +1,29 @@
+{
+  "tintColor" : {
+    "green" : 0.5843138,
+    "red" : 1,
+    "alpha" : 1,
+    "blue" : 0
+  },
+  "class" : "CLKComplicationTemplateUtilitarianLargeFlat",
+  "textProvider" : {
+    "textProviders" : [
+      {
+        "shortText" : "120",
+        "class" : "CLKLocalizableSimpleTextProvider",
+        "text" : "120↘︎"
+      },
+      {
+        "class" : "CLKLocalizableSimpleTextProvider",
+        "text" : "75"
+      },
+      {
+        "class" : "CLKTimeTextProvider",
+        "date" : 510206747.733748
+      }
+    ],
+    "class" : "CLKLocalizableCompoundTextProvider",
+    "formatKey" : "UtilitarianLargeFlat"
+  },
+  "version" : 30000
+}

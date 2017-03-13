@@ -239,7 +239,7 @@
  @param eventType                The name of the event you wish to track.
  @param eventProperties          You can attach additional data to any event by passing a NSDictionary object with property: value pairs.
  @param groups                   You can specify event-level groups for this user by passing a NSDictionary object with groupType: groupName pairs. Note the keys need to be strings, and the values can either be strings or an array of strings.
- @param longLongtimestamp        You can specify a custom timestamp by passing the milliseconds since epoch UTC time as a long long.
+ @param longLongTimestamp        You can specify a custom timestamp by passing the milliseconds since epoch UTC time as a long long.
  @param outOfSession             If YES, will track the event as out of session. Useful for push notification events.
 
  @see [Tracking Events](https://github.com/amplitude/amplitude-ios#tracking-events)
@@ -248,7 +248,7 @@
 
  @see [Tracking Sessions](https://github.com/amplitude/Amplitude-iOS#tracking-sessions)
  */
-- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withLongLongTimestamp:(long long) timestamp outOfSession:(BOOL)outOfSession;
+- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withLongLongTimestamp:(long long) longLongTimestamp outOfSession:(BOOL)outOfSession;
 
 /**
  Tracks an event. Events are saved locally.
@@ -292,7 +292,7 @@
 
  Tracks revenue. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
- @param productidentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
+ @param productIdentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
  @param quantity                 The number of products in the transaction. Revenue amount is calculated as quantity * price
  @param price                    The price of the products in the transaction. Revenue amount is calculated as quantity * price
 
@@ -308,7 +308,7 @@
 
  For validating revenue, use [[Amplitude instance] logRevenue:@"com.company.app.productId" quantity:1 price:[NSNumber numberWithDouble:3.99] receipt:transactionReceipt]
 
- @param productidentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
+ @param productIdentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
  @param quantity                 The number of products in the transaction. Revenue amount is calculated as quantity * price
  @param price                    The price of the products in the transaction. Revenue amount is calculated as quantity * price
  @param receipt                  The receipt data from the App Store. Required if you want to verify this revenue event.
@@ -326,7 +326,7 @@
 
  To track revenue from a user, create an AMPRevenue object each time the user generates revenue, and set the revenue properties (productIdentifier, price, quantity). logRevenuev2: takes in an AMPRevenue object. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
- @param AMPRevenue object       revenue object contains all revenue information
+ @param revenue AMPRevenue object       revenue object contains all revenue information
 
  @see [Tracking Revenue](https://github.com/amplitude/Amplitude-iOS#tracking-revenue)
  */
@@ -527,6 +527,13 @@
  @returns the deviceId.
  */
 - (NSString*)getDeviceId;
+
+/**
+ Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you are doing. This can be used in conjunction with setUserId:nil to anonymize users after they log out. With a nil userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
+
+ @see [Logging Out Users](https://github.com/amplitude/Amplitude-iOS#logging-out-and-anonymous-users)
+ */
+- (void)regenerateDeviceId;
 
 /**
  Fetches the current sessionId, an identifier used by Amplitude to group together events tracked during the same session.

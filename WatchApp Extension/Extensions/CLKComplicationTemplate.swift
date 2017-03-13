@@ -28,51 +28,63 @@ extension CLKComplicationTemplate {
             return nil
         }
 
-        var glucoseStrings = [glucoseString]
+        let glucoseAndTrend = "\(glucoseString)\(context.glucoseTrend?.symbol ?? " ")"
         var accessibilityStrings = [glucoseString]
-        var eventualGlucoseText: CLKSimpleTextProvider?
 
         if let trend = context.glucoseTrend {
-            glucoseStrings.append(trend.symbol)
             accessibilityStrings.append(trend.localizedDescription)
         }
 
-        if  let eventualGlucose = context.eventualGlucose,
-            let eventualGlucoseString = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
-        {
-            eventualGlucoseText = CLKSimpleTextProvider(text: eventualGlucoseString)
-        }
+        let glucoseAndTrendText = CLKSimpleTextProvider(text: glucoseAndTrend, shortText: glucoseString, accessibilityLabel: accessibilityStrings.joined(separator: ", "))
+        let timeText = CLKRelativeDateTextProvider(date: date, style: .natural, units: .minute)
 
-        let glucoseText = CLKSimpleTextProvider(text: glucoseStrings.joined(), shortText: glucoseString, accessibilityLabel: accessibilityStrings.joined(separator: ", "))
-        let timeText = CLKTimeTextProvider(date: date)
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
 
         switch family {
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
-            template.line1TextProvider = glucoseText
+            template.line1TextProvider = glucoseAndTrendText
             template.line2TextProvider = timeText
+            return template
+        case .modularLarge:
+            let template = CLKComplicationTemplateModularLargeTallBody()
+            template.bodyTextProvider = glucoseAndTrendText
+            template.headerTextProvider = timeText
             return template
         case .circularSmall:
             let template = CLKComplicationTemplateCircularSmallSimpleText()
-            template.textProvider = glucoseText
+            template.textProvider = CLKSimpleTextProvider(text: glucoseString)
             return template
         case .extraLarge:
             let template = CLKComplicationTemplateExtraLargeStackText()
-            template.line1TextProvider = glucoseText
+            template.line1TextProvider = glucoseAndTrendText
             template.line2TextProvider = timeText
             return template
-        case .utilitarianSmallFlat:
+        case .utilitarianSmall, .utilitarianSmallFlat:
             let template = CLKComplicationTemplateUtilitarianSmallFlat()
-            template.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianSmallFlat", textProviders: [glucoseText, timeText])
+            template.textProvider = CLKSimpleTextProvider(text: glucoseString)
+
             return template
         case .utilitarianLarge:
-            let template = CLKComplicationTemplateUtilitarianLargeFlat()
-            let providers: [CLKTextProvider?] = [glucoseText, eventualGlucoseText, timeText]
+            var eventualGlucoseText = ""
+            if  let eventualGlucose = context.eventualGlucose,
+                let eventualGlucoseString = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+            {
+                eventualGlucoseText = eventualGlucoseString
+            }
 
-            template.textProvider = CLKSimpleTextProvider.localizableTextProvider(withStringsFileFormatKey: "UtilitarianLargeFlat", textProviders: providers.flatMap({ $0 }))
+            let template = CLKComplicationTemplateUtilitarianLargeFlat()
+            let format = NSLocalizedString("UtilitarianLargeFlat", tableName: "ckcomplication", comment: "Utilitarian large flat format string (1: Glucose & Trend symbol) (2: Eventual Glucose) (3: Time)")
+
+            template.textProvider = CLKSimpleTextProvider(text: String(format: format, arguments: [
+                    glucoseAndTrend,
+                    eventualGlucoseText,
+                    timeFormatter.string(from: date)
+                ]
+            ))
             return template
-        default:
-            return nil
         }
     }
 }
