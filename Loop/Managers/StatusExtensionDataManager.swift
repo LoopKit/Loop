@@ -11,6 +11,7 @@ import UIKit
 import CarbKit
 import LoopKit
 
+
 final class StatusExtensionDataManager {
     unowned let dataManager: DeviceDataManager
 
@@ -24,11 +25,14 @@ final class StatusExtensionDataManager {
         return UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
     }
 
-    @objc private func update(_ notification: Notification) {
+    var context: StatusExtensionContext? {
+        return defaults?.statusExtensionContext
+    }
 
+    @objc private func update(_ notification: Notification) {
         self.dataManager.glucoseStore?.preferredUnit() { (unit, error) in
             if error == nil, let unit = unit {
-                self.createContext(unit) { (context) in
+                self.createContext(glucoseUnit: unit) { (context) in
                     if let context = context {
                         self.defaults?.statusExtensionContext = context
                     }
@@ -37,7 +41,7 @@ final class StatusExtensionDataManager {
         }
     }
 
-    private func createContext(_ preferredUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
+    private func createContext(glucoseUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
         guard let glucoseStore = self.dataManager.glucoseStore else {
             completionHandler(nil)
             return
@@ -45,38 +49,49 @@ final class StatusExtensionDataManager {
         
         dataManager.loopManager.getLoopStatus {
             (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
-            
-            if error != nil {
-                // TODO: unclear how to handle the error here properly.
-                completionHandler(nil)
-            }
-            
+
             let dataManager = self.dataManager
-            let context = StatusExtensionContext()
+            var context = StatusExtensionContext()
         
             #if IOS_SIMULATOR
                 // If we're in the simulator, there's a higher likelihood that we don't have
                 // a fully configured app. Inject some baseline debug data to let us test the
                 // experience. This data will be overwritten by actual data below, if available.
                 context.batteryPercentage = 0.25
-                context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 42.5, capacity: 200)
-                context.netBasal = NetBasalContext(rate: 2.1, percentage: 0.6, startDate: Date() - TimeInterval(250))
-                context.eventualGlucose = HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 119.123)
-                    .doubleValue(for: preferredUnit)
+                context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 160, capacity: 300)
+                context.netBasal = NetBasalContext(
+                    rate: 2.1,
+                    percentage: 0.6,
+                    startDate:
+                    Date(timeIntervalSinceNow: -250)
+                )
+                context.eventualGlucose = GlucoseContext(
+                    value: 89.123,
+                    unit: HKUnit.milligramsPerDeciliterUnit(),
+                    startDate: Date(timeIntervalSinceNow: TimeInterval(hours: 4)),
+                    sensor: nil
+                )
+
+                let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
+            #else
+                guard error == nil else {
+                    // TODO: unclear how to handle the error here properly.
+                    completionHandler(nil)
+                    return
+                }
             #endif
 
-            context.preferredUnitString = preferredUnit.unitString
             context.loop = LoopContext(
                 dosingEnabled: dataManager.loopManager.dosingEnabled,
                 lastCompleted: lastLoopCompleted)
 
             if let glucose = glucoseStore.latestGlucose {
-                // It's possible that the unit came in nil and we defaulted to mg/dL. To account for that case,
-                // convert the latest glucose to those units just to be sure.
                 context.latestGlucose = GlucoseContext(
-                    quantity: glucose.quantity.doubleValue(for: preferredUnit),
+                    value: glucose.quantity.doubleValue(for: glucoseUnit),
+                    unit: glucoseUnit,
                     startDate: glucose.startDate,
-                    sensor: dataManager.sensorInfo)
+                    sensor: dataManager.sensorInfo != nil ? SensorDisplayableContext(dataManager.sensorInfo!) : nil
+                )
             }
             
             if let lastNetBasal = dataManager.loopManager.lastNetBasal {
@@ -88,15 +103,21 @@ final class StatusExtensionDataManager {
                 context.reservoir = ReservoirContext(
                     startDate: reservoir.startDate,
                     unitVolume: reservoir.unitVolume,
-                    capacity: capacity)
+                    capacity: capacity
+                )
             }
             
-            if let batteryPercentage = dataManager.latestPumpStatusFromMySentry?.batteryRemainingPercent {
-                context.batteryPercentage = Double(batteryPercentage) / 100.0
+            if let batteryPercentage = dataManager.pumpBatteryChargeRemaining {
+                context.batteryPercentage = batteryPercentage
             }
         
             if let lastPoint = predictedGlucose?.last {
-                context.eventualGlucose = lastPoint.quantity.doubleValue(for: preferredUnit)
+                context.eventualGlucose = GlucoseContext(
+                    value: lastPoint.quantity.doubleValue(for: glucoseUnit),
+                    unit: glucoseUnit,
+                    startDate: lastPoint.startDate,
+                    sensor: nil
+                )
             }
             
             completionHandler(context)
@@ -110,7 +131,8 @@ extension StatusExtensionDataManager: CustomDebugStringConvertible {
         return [
             "## StatusExtensionDataManager",
             "appGroupName: \(Bundle.main.appGroupSuiteName)",
-            "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))"
+            "statusExtensionContext: \(String(reflecting: defaults?.statusExtensionContext))",
+            ""
         ].joined(separator: "\n")
     }
 }
