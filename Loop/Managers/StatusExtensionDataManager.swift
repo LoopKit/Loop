@@ -91,7 +91,8 @@ final class StatusExtensionDataManager {
             glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(hours: -2)), endDate: Date()) {
                 (values, error) in
 
-                if (error != nil) {
+                if let error = error {
+                    self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                     context.glucose = nil
                     context.predictedGlucose = nil
                 } else {

@@ -124,7 +124,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             } else {
                 self.glucoseChartContentView.alpha = 1
             }
-        }, completion: { (UIViewControllerTransitionCoordinatorContext) -> Void in
         })
     }
 
@@ -197,11 +196,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         let dateFormatter: DateFormatter = {
-            let timeFormatter = DateFormatter()
-            timeFormatter.dateStyle = .none
-            timeFormatter.timeStyle = .short
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .none
+            dateFormatter.timeStyle = .short
 
-            return timeFormatter
+            return dateFormatter
         }()
 
 
@@ -217,7 +216,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 )
             }
 
-            // Start the chart from the oldest data we have in our context
+            // Anchor the start date of the chart to the earliest date we have in our historical glucose
             if let earliestDate = glucose.map({ $0.startDate }).min() {
                 charts.startDate = earliestDate
             }
