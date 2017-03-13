@@ -88,7 +88,7 @@ final class StatusExtensionDataManager {
             let updateGroup = DispatchGroup()
 
             updateGroup.enter()
-            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(hours: -1)), endDate: Date()) {
+            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(hours: -2)), endDate: Date()) {
                 (values, error) in
 
                 if (error != nil) {

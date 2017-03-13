@@ -217,6 +217,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 )
             }
 
+            // Start the chart from the oldest data we have in our context
+            if let earliestDate = glucose.map({ $0.startDate }).min() {
+                charts.startDate = earliestDate
+            }
+
             if let predictedGlucose = context.predictedGlucose {
                 charts.predictedGlucosePoints = predictedGlucose.map {
                     ChartPoint(
@@ -225,7 +230,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     )
                 }
             }
-            
+
             charts.prerender()
             glucoseChartContentView.reloadChart()
         }
