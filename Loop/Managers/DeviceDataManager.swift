@@ -291,6 +291,11 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
     }
 
+    /**
+    Track pump history fetching
+    */
+    public var lastPumpHistorySuccess : Date? = nil
+    public var lastPumpHistoryAttempt : Date? = nil
 
     /**
      Polls the pump for new history events and stores them.
@@ -304,15 +309,16 @@ final class DeviceDataManager: CarbStoreDelegate, CarbStoreSyncDelegate, DoseSto
         }
 
         let startDate = doseStore.pumpEventQueryAfterDate
-
+        let attemptDate = Date()
         device.ops?.getHistoryEvents(since: startDate) { (result) in
+            self.lastPumpHistoryAttempt = attemptDate
             switch result {
             case let .success(events, _):
                 self.doseStore.add(events) { (error) in
                     if let error = error {
                         self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
                     }
-
+                    self.lastPumpHistorySuccess = attemptDate
                     completionHandler(error)
                 }
             case .failure(let error):

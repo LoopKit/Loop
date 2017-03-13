@@ -167,14 +167,10 @@ final class LoopDataManager {
             let startDate = date.addingTimeInterval(TimeInterval(minutes: -2))
             deviceDataManager.doseStore.getRecentNormalizedDoseEntries(startDate: startDate) {
                 (doseEntries, error) in
-                print("getRecentNormalizedDoseEntries", self.bolusState)
                 if let error = error {
-                    print("getRecentNormalizedDoseEntries", error)
                     self.deviceDataManager.logger.addError(error, fromSource: "insulinEffectbolusState")
                 } else {
-                    print("getRecentNormalizedDoseEntries", doseEntries)
                     for entry in doseEntries {
-                        //                    print(entry.type, entry)
                         if entry.type == .bolus {
                             if entry.value >= self.bolusState.units {
                                 self.bolusState.state = .success
@@ -196,20 +192,19 @@ final class LoopDataManager {
                 if self.bolusState.state != .success {
 
                     if let reservoir = self.deviceDataManager.doseStore.lastReservoirValue {
-                        let timeForBolus = TimeInterval(minutes: (self.bolusState.units + 1))
-                        let expiry = date + timeForBolus
                         
                         if let start = self.bolusState.reservoir {
-                            if self.bolusState.date.timeIntervalSince(start.startDate) > TimeInterval(minutes: 15) {
-                                print("bolusState.date \(self.bolusState.date), start.startDate \(start.startDate), more than 15 minutes")
-                            }
                             let currentUnits = reservoir.unitVolume
                             let drop = start.unitVolume - currentUnits
                             
                             print("Bolus Progress Drop \(drop), current \(currentUnits), start \(start.unitVolume)")
                             if drop > self.bolusState.units {
-                                self.bolusState.state = .success
-                                self.lastSuccessfulBolus = reservoir.startDate
+                                /*  Cannot declare success as this would cause the next bolus
+                                    to take into account                                 */
+                                if self.deviceDataManager.preferredInsulinDataSource != .pumpHistory {
+                                    self.bolusState.state = .success
+                                    self.lastSuccessfulBolus = reservoir.startDate
+                                }
                                 
                                 self.bolusState.message = "\(self.bolusState.units) U"
                             } else {
@@ -218,12 +213,12 @@ final class LoopDataManager {
                             }
                         }
                         let eventDate = self.deviceDataManager.doseStore.pumpEventQueryAfterDate
-                        // needs a more accurate measurement of how fast the pump is.
-                        // this should take into account the real time it takes to give the bolus.
-                        // TODO investigate if the event and startDate should be OR conditions.
-                        //      If we don't wait for the event to be read back, the IOB might
-                        //      be wrong though.  Better safe than sorry.
-                        if self.bolusState.state != .success && reservoir.startDate > expiry && eventDate > expiry {
+                        let historyDate = self.deviceDataManager.lastPumpHistorySuccess ?? eventDate
+                        // Needs a more accurate measurement of how fast the pump is.
+                        // (this should take into account the real time it takes to give the bolus.)
+                        let timeForBolus = TimeInterval(minutes: (self.bolusState.units + 1))                        
+                        let expiry = date + timeForBolus
+                        if self.bolusState.state != .success && reservoir.startDate > expiry && historyDate > expiry {
                             self.bolusState.state = .failed
                             self.bolusState.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
                             self.deviceDataManager.logger.addError("Bolus Failed: \(self.bolusState) \(timeForBolus)", fromSource: "LoopDataManager")
