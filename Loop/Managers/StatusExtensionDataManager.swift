@@ -87,8 +87,11 @@ final class StatusExtensionDataManager {
 
             let updateGroup = DispatchGroup()
 
+            let chartStartDate = Date().addingTimeInterval(TimeInterval(hours: -2))
+            let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
+
             updateGroup.enter()
-            glucoseStore.getRecentGlucoseValues(startDate: Date().addingTimeInterval(TimeInterval(hours: -2)), endDate: Date()) {
+            glucoseStore.getRecentGlucoseValues(startDate: chartStartDate, endDate: Date()) {
                 (values, error) in
 
                 if let error = error {
@@ -147,6 +150,17 @@ final class StatusExtensionDataManager {
                     startDate: lastPoint.startDate,
                     sensor: nil
                 )
+            }
+
+            if let targetRanges = self.dataManager.glucoseTargetRangeSchedule {
+                context.targetRanges = targetRanges.between(start: chartStartDate, end: chartEndDate)
+                    .map({
+                        return TargetRangeContext(
+                            startDate: $0.startDate,
+                            endDate: $0.endDate,
+                            minValue: $0.value.minValue,
+                            maxValue: $0.value.maxValue)
+                    })
             }
 
             updateGroup.notify(queue: DispatchQueue.global(qos: .background), execute: {

@@ -46,6 +46,14 @@ struct GlucoseContext {
     }
 }
 
+struct TargetRangeContext {
+    let startDate: Date
+    let endDate: Date
+    let minValue: Double
+    let maxValue: Double
+}
+
+
 extension ReservoirContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
@@ -197,6 +205,36 @@ extension GlucoseContext: RawRepresentable {
     }
 }
 
+extension TargetRangeContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "startDate": startDate,
+            "endDate": endDate,
+            "minValue": minValue,
+            "maxValue": maxValue
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let startDate = rawValue["startDate"] as? Date,
+            let endDate = rawValue["endDate"] as? Date,
+            let minValue = rawValue["minValue"] as? Double,
+            let maxValue = rawValue["maxValue"] as? Double
+            else {
+                return nil
+        }
+
+        self.startDate = startDate
+        self.endDate = endDate
+        self.minValue = minValue
+        self.maxValue = maxValue
+    }
+}
+
+
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 3
@@ -208,6 +246,7 @@ struct StatusExtensionContext: RawRepresentable {
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
     var eventualGlucose: GlucoseContext?
+    var targetRanges: [TargetRangeContext]?
     
     init() { }
     
@@ -241,6 +280,10 @@ struct StatusExtensionContext: RawRepresentable {
         if let rawValue = rawValue["eventualGlucose"] as? GlucoseContext.RawValue {
             eventualGlucose = GlucoseContext(rawValue: rawValue)
         }
+
+        if let rawValue = rawValue["targetRanges"] as? [TargetRangeContext.RawValue] {
+            targetRanges = rawValue.flatMap({return TargetRangeContext(rawValue: $0)})
+        }
     }
     
     var rawValue: RawValue {
@@ -255,6 +298,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
         raw["eventualGlucose"] = eventualGlucose?.rawValue
+        raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
         return raw
     }
 }
