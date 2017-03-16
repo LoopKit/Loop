@@ -143,5 +143,4 @@ extension StatusChartsManager {
             )
         }
     }
-
 }

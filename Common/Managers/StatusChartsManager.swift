@@ -9,11 +9,7 @@
 import Foundation
 import HealthKit
 
-// TODO: Remove this dependency
-import LoopKit
-
 import SwiftCharts
-
 
 final class StatusChartsManager {
 
@@ -97,12 +93,6 @@ final class StatusChartsManager {
         }
     }
 
-    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? {
-        didSet {
-            targetGlucosePoints = []
-        }
-    }
-
     var glucoseDisplayRange: (min: HKQuantity, max: HKQuantity)? {
         didSet {
             if let range = glucoseDisplayRange {
@@ -148,19 +138,19 @@ final class StatusChartsManager {
     /// The chart points for alternate predicted glucose
     var alternatePredictedGlucosePoints: [ChartPoint]?
 
-    private var targetGlucosePoints: [ChartPoint] = [] {
+    internal var targetGlucosePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
     }
 
-    private var targetOverridePoints: [ChartPoint] = [] {
+    internal var targetOverridePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
     }
 
-    private var targetOverrideDurationPoints: [ChartPoint] = [] {
+    internal var targetOverrideDurationPoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
@@ -218,7 +208,7 @@ final class StatusChartsManager {
         }
     }
 
-    private var xAxisValues: [ChartAxisValue]? {
+    internal var xAxisValues: [ChartAxisValue]? {
         didSet {
             if let xAxisValues = xAxisValues, xAxisValues.count > 1 {
                 xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: axisLineColor)
@@ -616,7 +606,7 @@ final class StatusChartsManager {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    private func generateXAxisValues() {
+    internal func generateXAxisValues() {
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h a"
 
@@ -650,28 +640,6 @@ final class StatusChartsManager {
         self.xAxisValues = xAxisValues
     }
 
-    /// Runs any necessary steps before rendering charts
-    func prerender() {
-        if xAxisValues == nil {
-            generateXAxisValues()
-        }
-
-        if  let xAxisValues = xAxisValues, xAxisValues.count > 1,
-            targetGlucosePoints.count == 0,
-            let targets = glucoseTargetRangeSchedule
-        {
-            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(targets, xAxisValues: xAxisValues)
-
-            if let override = targets.temporaryOverride {
-                targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, xAxisValues: xAxisValues)
-
-                targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverrideDuration(override, xAxisValues: xAxisValues)
-            } else {
-                targetOverridePoints = []
-                targetOverrideDurationPoints = []
-            }
-        }
-    }
 }
 
 
