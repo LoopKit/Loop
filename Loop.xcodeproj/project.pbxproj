@@ -162,6 +162,7 @@
 		4F08DE891E7BB729006741EA /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */; };
 		4F08DE8A1E7BB729006741EA /* ChartAxisValueDoubleUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */; };
 		4F08DE8B1E7BB72C006741EA /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE801E7BB6F1006741EA /* CGPoint.swift */; };
+		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F20AE621E6B879C00D07A06 /* ReservoirVolumeHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */; };
 		4F20AE631E6B87B100D07A06 /* ChartContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313EDDF1D8A6BF90060FA79 /* ChartContentView.swift */; };
 		4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
@@ -502,6 +503,7 @@
 		4F08DE801E7BB6F1006741EA /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
 		4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsScatterDownTrianglesLayer.swift; path = Views/ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
 		4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsTouchHighlightLayerViewCache.swift; path = Views/ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
+		4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CollectionType+Loop.swift"; sourceTree = "<group>"; };
 		4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+WatchApp.swift"; sourceTree = "<group>"; };
 		4F2C15921E09BF2C00E160D4 /* HUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
 		4F2C15941E09BF3C00E160D4 /* HUDView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HUDView.xib; sourceTree = "<group>"; };
@@ -795,7 +797,7 @@
 			children = (
 				C17884621D51A7A400405663 /* BatteryIndicator.swift */,
 				4346D1F51C78501000ABAFE3 /* ChartPoint+Loop.swift */,
-				43649A621C7A347F00523D7F /* CollectionType.swift */,
+				4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */,
 				43CE7CDD1CA8B63E003CC1B0 /* Data.swift */,
 				4302F4E41D4EA75100F0FCAF /* DoseStore.swift */,
 				C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */,
@@ -982,6 +984,7 @@
 			children = (
 				4F08DE801E7BB6F1006741EA /* CGPoint.swift */,
 				4F08DE751E7B3113006741EA /* ChartPoint.swift */,
+				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
@@ -1445,6 +1448,7 @@
 				4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */,
 				438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
+				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				4F08DE701E7B04D8006741EA /* StatusChartsManager+LoopKit.swift in Sources */,
 				437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */,
