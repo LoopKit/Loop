@@ -46,13 +46,12 @@ struct GlucoseContext {
     }
 }
 
-struct TargetRangeContext {
+struct DatedRangeContext {
     let startDate: Date
     let endDate: Date
     let minValue: Double
     let maxValue: Double
 }
-
 
 extension ReservoirContext: RawRepresentable {
     typealias RawValue = [String: Any]
@@ -205,7 +204,7 @@ extension GlucoseContext: RawRepresentable {
     }
 }
 
-extension TargetRangeContext: RawRepresentable {
+extension DatedRangeContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var rawValue: RawValue {
@@ -223,8 +222,8 @@ extension TargetRangeContext: RawRepresentable {
             let endDate = rawValue["endDate"] as? Date,
             let minValue = rawValue["minValue"] as? Double,
             let maxValue = rawValue["maxValue"] as? Double
-            else {
-                return nil
+        else {
+            return nil
         }
 
         self.startDate = startDate
@@ -233,7 +232,6 @@ extension TargetRangeContext: RawRepresentable {
         self.maxValue = maxValue
     }
 }
-
 
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
@@ -246,7 +244,8 @@ struct StatusExtensionContext: RawRepresentable {
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
     var eventualGlucose: GlucoseContext?
-    var targetRanges: [TargetRangeContext]?
+    var targetRanges: [DatedRangeContext]?
+    var temporaryOverride: DatedRangeContext?
     
     init() { }
     
@@ -281,8 +280,12 @@ struct StatusExtensionContext: RawRepresentable {
             eventualGlucose = GlucoseContext(rawValue: rawValue)
         }
 
-        if let rawValue = rawValue["targetRanges"] as? [TargetRangeContext.RawValue] {
-            targetRanges = rawValue.flatMap({return TargetRangeContext(rawValue: $0)})
+        if let rawValue = rawValue["targetRanges"] as? [DatedRangeContext.RawValue] {
+            targetRanges = rawValue.flatMap({return DatedRangeContext(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["temporaryOverride"] as? DatedRangeContext.RawValue {
+            temporaryOverride = DatedRangeContext(rawValue: rawValue)
         }
     }
     
@@ -299,6 +302,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["batteryPercentage"] = batteryPercentage
         raw["eventualGlucose"] = eventualGlucose?.rawValue
         raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
+        raw["temporaryOverride"] = temporaryOverride?.rawValue
         return raw
     }
 }

@@ -155,12 +155,20 @@ final class StatusExtensionDataManager {
             if let targetRanges = self.dataManager.glucoseTargetRangeSchedule {
                 context.targetRanges = targetRanges.between(start: chartStartDate, end: chartEndDate)
                     .map({
-                        return TargetRangeContext(
+                        return DatedRangeContext(
                             startDate: $0.startDate,
                             endDate: $0.endDate,
                             minValue: $0.value.minValue,
                             maxValue: $0.value.maxValue)
                     })
+
+                if let override = targetRanges.temporaryOverride {
+                    context.temporaryOverride = DatedRangeContext(
+                        startDate: override.startDate,
+                        endDate: override.endDate,
+                        minValue: override.value.minValue,
+                        maxValue: override.value.maxValue)
+                }
             }
 
             updateGroup.notify(queue: DispatchQueue.global(qos: .background), execute: {
