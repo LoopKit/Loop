@@ -46,6 +46,7 @@ struct AmplitudeService: ServiceAuthentication {
 
         isAuthorized = true
         let client = Amplitude()
+        client.disableLocationListening()
         client.initializeApiKey(APIKey)
         self.client = client
         completion(true, nil)

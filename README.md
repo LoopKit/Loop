@@ -92,7 +92,9 @@ Bluetooth LE communication with Minimed pumps is enabled by the [RileyLink](http
 
 [Sign up for the Loop Users announcement list](https://groups.google.com/forum/#!forum/loop-ios-users) to stay informed of critical issues that may arise.
 
-[Please visit the Wiki for a "Guide to Loop" setup, installation, FAQs, and use.](https://github.com/LoopKit/Loop/wiki)
+Please use the [Guide to Loop](https://github.com/LoopKit/Loop/wiki/Guide) for building, installation, and configuration instructions.
+
+For FAQs and other tips, refer to the [Wiki](https://github.com/LoopKit/Loop/wiki)
 
 (Note: there is also a tab for the Wiki at the top of this page)
 
