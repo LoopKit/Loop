@@ -827,7 +827,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
-            if cgmAppURL != nil {
+            if dataManager.cgm?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
 
@@ -840,16 +840,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var cgmAppURL: URL? {
-        if let url = URL(string: "dexcomcgm://"), UIApplication.shared.canOpenURL(url) {
-            return url
-        } else if let url = URL(string: "dexcomshare://"), UIApplication.shared.canOpenURL(url) {
-            return url
-        } else {
-            return nil
-        }
-    }
-
     @objc private func showLastError(_: Any) {
         self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
             if let error = error {
@@ -859,7 +849,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let url = cgmAppURL {
+        if let url = dataManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }
