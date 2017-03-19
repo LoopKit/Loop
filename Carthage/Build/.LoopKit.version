@@ -1,0 +1,31 @@
+{
+  "commitish" : "v1.2.0",
+  "iOS" : [
+    {
+      "hash" : "39b7d5e328d18f5e74999899b0076235c9d54bd15d46424dd73aad788b2b6f49",
+      "name" : "GlucoseKit"
+    },
+    {
+      "hash" : "49b6b6a93ce6d998a076fdb1c214180f9fc3b97476eaf44940bd129f71b53614",
+      "name" : "InsulinKit"
+    },
+    {
+      "hash" : "0f45afa7db60cf0a19b516abfb8bc8644cc007764ac8fba82e562e8187137780",
+      "name" : "LoopKit"
+    },
+    {
+      "hash" : "856f3f0541b74cba5343004a111fa643e28681b6252ad867411cd831eaf0b437",
+      "name" : "CarbKit"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3\nBuild version 8W143q",
+  "watchOS" : [
+
+  ],
+  "tvOS" : [
+
+  ],
+  "Mac" : [
+
+  ]
+}
