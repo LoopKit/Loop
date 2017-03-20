@@ -205,6 +205,7 @@
 		C11C87DD1E21E53500BB71D3 /* GlucoseThreshold.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249D1E19B62300D9D25C /* GlucoseThreshold.swift */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C12F21A71DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json */; };
+		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
@@ -1503,6 +1504,7 @@
 				43E2D8DB1D20C03B004DA55F /* NSTimeInterval.swift in Sources */,
 				43E2D8D41D20BF42004DA55F /* DoseMathTests.swift in Sources */,
 				C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */,
+				C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */,
 				C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
