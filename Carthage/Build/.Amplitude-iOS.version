@@ -1,0 +1,19 @@
+{
+  "commitish" : "v3.14.1",
+  "iOS" : [
+    {
+      "hash" : "2ed52d964ee60f4433debd7ff9d8cab49462a21b06f36cdd868e5873dfb5eb7b",
+      "name" : "Amplitude"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3\nBuild version 8W143q",
+  "watchOS" : [
+
+  ],
+  "tvOS" : [
+
+  ],
+  "Mac" : [
+
+  ]
+}
