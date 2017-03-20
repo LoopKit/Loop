@@ -25,6 +25,9 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate {
 
     let logger = DiagnosticLogger()
 
+    /// Remember the launch date of the app for diagnostic reporting
+    fileprivate let launchDate = Date()
+
     /// Manages all the RileyLinks
     let rileyLinkManager: RileyLinkDeviceManager
 
@@ -841,7 +844,9 @@ extension DeviceDataManager: CGMManagerDelegate {
 extension DeviceDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
+            Bundle.main.localizedNameAndVersion,
             "## DeviceDataManager",
+            "launchDate: \(launchDate)",
             "cgm: \(cgm)",
             "latestPumpStatusFromMySentry: \(latestPumpStatusFromMySentry)",
             "pumpState: \(String(reflecting: pumpState))",
