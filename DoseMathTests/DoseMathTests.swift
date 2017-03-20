@@ -535,7 +535,15 @@ class RecommendBolusTests: XCTestCase {
         )
 
         XCTAssertEqual(1.325, dose.amount)
-        XCTAssertEqual(BolusRecommendationNotice.currentGlucoseBelowTarget, dose.notice!)
+
+        if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose, let units) = dose.notice! {
+            XCTAssertEqual(units, HKUnit.milligramsPerDeciliterUnit())
+            XCTAssertEqual(glucose.quantity.doubleValue(for: units), 60)
+        } else {
+            XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
+        }
+
+        //XCTAssertEqual(BolusRecommendationNotice.currentGlucoseBelowTarget(glucose: GlucoseValue(56), unit: HKUnit.milligramsPerDeciliterUnit()), dose.notice!)
     }
 
     func testDroppingBelowRangeThenRising() {
