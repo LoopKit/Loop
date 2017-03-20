@@ -376,8 +376,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
         case .loop:
-            let bundle = Bundle.main
-            return bundle.localizedNameAndVersion
+            return Bundle.main.localizedNameAndVersion
         case .pump:
             return NSLocalizedString("Pump", comment: "The title of the pump section in settings")
         case .cgm:

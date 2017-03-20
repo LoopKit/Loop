@@ -14,7 +14,7 @@ import InsulinKit
 import LoopKit
 import RileyLinkKit
 
-class NightscoutDataManager {
+final class NightscoutDataManager {
 
     unowned let deviceDataManager: DeviceDataManager
     
@@ -29,10 +29,11 @@ class NightscoutDataManager {
     
     @objc func loopDataUpdated(_ note: Notification) {
         guard
+            deviceDataManager.remoteDataManager.nightscoutService.uploader != nil,
             let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
             case .tempBasal = context
-            else {
+        else {
                 return
         }
 
@@ -109,7 +110,7 @@ class NightscoutDataManager {
 
     }
     
-    func getUploaderStatus() -> UploaderStatus {
+    private func getUploaderStatus() -> UploaderStatus {
         // Gather UploaderStatus
         let uploaderDevice = UIDevice.current
 

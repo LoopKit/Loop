@@ -52,6 +52,26 @@ final class StatusChartsManager {
 
     var panGestureRecognizer: UIPanGestureRecognizer?
 
+    func didReceiveMemoryWarning() {
+        xAxisValues = nil
+        glucosePoints = []
+        predictedGlucosePoints = []
+        alternatePredictedGlucosePoints = nil
+        targetGlucosePoints = []
+        targetOverridePoints = []
+        targetOverrideDurationPoints = []
+        iobPoints = []
+        cobPoints = []
+        basalDosePoints = []
+        bolusDosePoints = []
+        allDosePoints = []
+
+        glucoseChartCache = nil
+        iobChartCache = nil
+        cobChartCache = nil
+        doseChartCache = nil
+    }
+
     // MARK: - Data
 
     /// The earliest date on the X-axis
