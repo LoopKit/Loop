@@ -15,19 +15,16 @@ extension UserDefaults {
 
     private enum Key: String {
         case BasalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
+        case cgmSettings = "com.loopkit.Loop.cgmSettings"
         case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case DosingEnabled = "com.loudnate.Naterade.DosingEnabled"
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
-        case G4ReceiverEnabled = "com.loudnate.Loop.G4ReceiverEnabled"
-        case G5TransmitterEnabled = "com.loopkit.Loop.G5TransmitterEnabled"
-        case G5TransmitterID = "com.loudnate.Naterade.TransmitterID"
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
-        case FetchEnliteDataEnabled = "com.loopkit.Loop.FetchEnliteDataEnabled"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
@@ -60,6 +57,42 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.CarbRatioSchedule.rawValue)
+        }
+    }
+
+    var cgm: CGM? {
+        get {
+            if let rawValue = dictionary(forKey: Key.cgmSettings.rawValue) {
+                return CGM(rawValue: rawValue)
+            } else {
+                // Migrate the "version 0" case. Further format changes should be handled in the CGM initializer
+                defer {
+                    removeObject(forKey: "com.loopkit.Loop.G5TransmitterEnabled")
+                    removeObject(forKey: "com.loudnate.Loop.G4ReceiverEnabled")
+                    removeObject(forKey: "com.loopkit.Loop.FetchEnliteDataEnabled")
+                    removeObject(forKey: "com.loudnate.Naterade.TransmitterID")
+                }
+
+                if bool(forKey: "com.loudnate.Loop.G4ReceiverEnabled") {
+                    self.cgm = .g4
+                    return .g4
+                }
+
+                if bool(forKey: "com.loopkit.Loop.FetchEnliteDataEnabled") {
+                    self.cgm = .enlite
+                    return .enlite
+                }
+
+                if let transmitterID = string(forKey: "com.loudnate.Naterade.TransmitterID"), transmitterID.characters.count == 6 {
+                    self.cgm = .g5(transmitterID: transmitterID)
+                    return .g5(transmitterID: transmitterID)
+                }
+
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.cgmSettings.rawValue)
         }
     }
 
@@ -209,24 +242,6 @@ extension UserDefaults {
         }
     }
 
-    var receiverEnabled: Bool {
-        get {
-            return bool(forKey: Key.G4ReceiverEnabled.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.G4ReceiverEnabled.rawValue)
-        }
-    }
-
-    var fetchEnliteDataEnabled: Bool {
-        get {
-            return bool(forKey: Key.FetchEnliteDataEnabled.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.FetchEnliteDataEnabled.rawValue)
-        }
-    }
-
     var retrospectiveCorrectionEnabled: Bool {
         get {
             return bool(forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
@@ -236,31 +251,6 @@ extension UserDefaults {
         }
     }
 
-    var transmitterEnabled: Bool {
-        get {
-            if object(forKey: Key.G5TransmitterEnabled.rawValue) == nil {
-                // Old versions of Loop used the existence of transmitterID to indicate
-                // that the transmitter is enabled. Upgrade to the new format now. The
-                // transmitter is enabled if there's a 6 character transmitter ID
-                set(transmitterID?.characters.count == 6, forKey: Key.G5TransmitterEnabled.rawValue)
-            }
-
-            return bool(forKey: Key.G5TransmitterEnabled.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.G5TransmitterEnabled.rawValue)
-        }
-    }
-    
-    var transmitterID: String? {
-        get {
-            return string(forKey: Key.G5TransmitterID.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.G5TransmitterID.rawValue)
-        }
-    }
-    
     var batteryChemistry: BatteryChemistryType? {
         get {
             return BatteryChemistryType(rawValue: integer(forKey: Key.BatteryChemistry.rawValue))
