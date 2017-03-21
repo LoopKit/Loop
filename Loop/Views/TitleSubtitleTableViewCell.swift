@@ -18,6 +18,8 @@ class TitleSubtitleTableViewCell: UITableViewCell {
         }
     }
 
+    @IBOutlet weak var explanationLabel: UILabel!
+    
     override func layoutSubviews() {
         super.layoutSubviews()
 

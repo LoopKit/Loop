@@ -213,7 +213,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     // For now, do this every time
                     _ = self.refreshContext.remove(.status)
                     reloadGroup.enter()
-                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, _) -> Void in
+
+                    self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, bolusState, lastLoopCompleted, _, _, _) -> Void in
                         self.charts.setPredictedGlucoseValues(predictedGlucose ?? [])
                         newRecommendedTempBasal = recommendedTempBasal
                         self.lastTempBasal = lastTempBasal
@@ -223,6 +224,31 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                             self.eventualGlucoseDescription = String(describing: lastPoint)
                         } else {
                             self.eventualGlucoseDescription = nil
+                        }
+                        
+                        if let bolus = bolusState {
+                            let inProgress = bolus.inProgress()
+                            
+                            if let pending = self.pendingBolus, !pending.equal(bolus) {
+                                self.bolusDisplayDismissed = false
+                            }
+                            
+                            if bolus.state == .none && bolus.message == "" {
+                                self.bolusDisplayDismissed = false
+                                self.pendingBolus = nil
+                            } else {
+                                self.pendingBolus = bolus
+                            }
+                            
+                            if inProgress {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 15) {
+                                    self.dataManager.triggerPumpDataRead()
+                                }
+                                self.bolusDisplayDismissed = false
+                            }
+                            
+                            // Disable Bolus button.
+                            self.toolbarItems![2].isEnabled = bolus.allowed
                         }
 
                         reloadGroup.leave()
@@ -303,6 +329,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             workoutMode = dataManager.workoutModeEnabled
+            
+            
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 if let glucose = self.dataManager.glucoseStore?.latestGlucose {
@@ -341,7 +369,21 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 default:
                     break
                 }
-
+                
+                let newDisplayPendingBolus = self.pendingBolus
+                let oldDisplayPendingBolus = self.displayPendingBolus
+                self.displayPendingBolus = newDisplayPendingBolus
+                switch (oldDisplayPendingBolus, newDisplayPendingBolus) {
+                case (let old?, let new?) where !old.equal(new):
+                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                case (.none, .some):
+                    self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                case (.some, .none):
+                    self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.bolus.rawValue)], with: animated ? .top : .none)
+                default:
+                    break
+                }
+                
                 for case let cell as ChartTableViewCell in self.tableView.visibleCells {
                     cell.reloadChart()
 
@@ -357,9 +399,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     private enum Section: Int {
         case status = 0
+        case bolus
         case charts
 
-        static let count = 2
+        static let count = 3
     }
 
     // MARK: - Chart Section Data
@@ -416,7 +459,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
-
+    
+    // what should be displayed
+    private var pendingBolus: LoopDataManager.Bolus?
+    private var bolusDisplayDismissed = false
+    // what the data view currently displays
+    private var displayPendingBolus: LoopDataManager.Bolus?
+    
+    
     private var settingTempBasal: Bool = false {
         didSet {
             if let cell = tableView.cellForRow(at: IndexPath(row: StatusRow.recommendedBasal.rawValue, section: Section.status.rawValue)) {
@@ -487,6 +537,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             return ChartRow.count
         case .status:
             return self.recommendedTempBasal == nil ? 0 : StatusRow.count
+        case .bolus:
+            return self.displayPendingBolus == nil ? 0 : 1
         }
     }
 
@@ -550,6 +602,56 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
 
             return cell
+        
+        case .bolus:
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BolusTableViewCell", for: indexPath) as! TitleSubtitleTableViewCell
+        if let pending = self.pendingBolus {
+            let description = pending.description()
+            let kind = pending.kind()
+            cell.titleLabel?.text = "\(description) \(kind)"
+            if pending.carbs > 0 {
+                cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ g @ %2$@", comment: "The format for current carbs and time. (1: localized unit number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: pending.carbs), number: .decimal), timeFormatter.string(from: pending.date))
+            } else {
+                cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U @ %2$@", comment: "The format for current bolus and time. (1: localized unit number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: pending.units), number: .decimal), timeFormatter.string(from: pending.date))
+            }
+            var color : UIColor = UIColor.black
+            let spinWheel = pending.inProgress()
+            
+            switch(pending.state) {
+            case .sent:
+                color = UIColor.orange
+            case .maybefailed:
+                color = UIColor.orange
+            case .failed:
+                color = UIColor.red
+            case .timeout:
+                color = UIColor.red
+            default: _ = true
+            }
+            if cell.explanationLabel != nil {
+                cell.explanationLabel?.text = pending.explanation()
+                
+                
+            }
+            cell.titleLabel?.textColor = color
+            cell.subtitleLabel?.textColor = color
+            
+            if spinWheel {
+                let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                indicatorView.startAnimating()
+                cell.accessoryView = indicatorView
+            } else {
+                cell.accessoryView = nil
+            }
+        } else {
+            cell.titleLabel?.text = "Bolus?"
+            cell.subtitleLabel?.text = "- nil -"
+            cell.accessoryView = nil
+            
+        }
+        cell.selectionStyle = .default
+        
+        return cell
         }
     }
 
@@ -585,6 +687,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
         case .status:
             break
+        case .bolus:
+            break
         }
     }
 
@@ -605,6 +709,8 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
         case .status:
             return UITableViewAutomaticDimension
+        case .bolus:
+            return 70
         }
     }
 
@@ -641,6 +747,37 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
+        case .bolus:
+            tableView.deselectRow(at: indexPath, animated: true)
+            
+            // clear bolus if in last/failed state
+            if let pending = self.pendingBolus {
+                switch(pending.state) {
+                case .recommended:
+                    setBolus(bolus: pending.units)
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                case .failed:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                    performSegue(withIdentifier: BolusViewController.className, sender: indexPath)
+                case .timeout:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                    performSegue(withIdentifier: BolusViewController.className, sender: indexPath)
+                case .success:
+                    self.bolusDisplayDismissed = true
+                    self.pendingBolus = nil
+                default:
+                    _ = true
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.reloadData()
+            }
+            break
+        
         }
     }
 
@@ -727,7 +864,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
-            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, iob, cob, _) in
+            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, _, iob, cob, _) in
                 DispatchQueue.main.async {
                     vc.glucoseUnit = self.charts.glucoseUnit
                     vc.activeInsulin = iob?.value
@@ -775,12 +912,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
         if let bolusViewController = segue.source as? BolusViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
-                let startDate = Date()
-                dataManager.enactBolus(units: bolus) { (error) in
-                    if error != nil {
-                        NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: startDate)
-                    }
-                }
+                setBolus(bolus: bolus)
             }
         }
     }
@@ -851,7 +983,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     @objc private func showLastError(_: Any) {
-        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
+        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, _, error) -> Void in
             if let error = error {
                 self.presentAlertController(with: error)
             }
@@ -863,4 +995,22 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             UIApplication.shared.open(url)
         }
     }
+    
+    private func setBolus(bolus: Double) {
+        let now = Date()
+        
+        self.dataManager.loopManager.enactBolus(units: bolus) { (error) in
+            if error != nil {
+                NotificationManager.sendBolusFailureNotificationForAmount(bolus, atStartDate: now)
+            }
+            
+            // The delay is mostly for testing, but also nice to prevent
+            // very stupid mistakes.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.reloadData()
+            }
+            
+        }
+    }
+
 }

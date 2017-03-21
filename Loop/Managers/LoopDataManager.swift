@@ -13,6 +13,7 @@ import InsulinKit
 import LoopKit
 import MinimedKit
 import HealthKit
+import RileyLinkKit
 
 
 final class LoopDataManager {
@@ -55,6 +56,7 @@ final class LoopDataManager {
         dosingEnabled = UserDefaults.standard.dosingEnabled
         retrospectiveCorrectionEnabled = UserDefaults.standard.retrospectiveCorrectionEnabled
 
+        bolusState = Bolus(state: .prohibited, units: 0, carbs: 0, date: Date(), sent: nil, allowed: false, message: "Startup", reservoir: nil)
         // Observe changes
         let center = NotificationCenter.default
 
@@ -128,8 +130,159 @@ final class LoopDataManager {
             NotificationCenter.default.removeObserver(observer)
         }
     }
-
+    
+    private lazy var decimalFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.usesSignificantDigits = false
+        numberFormatter.minimumIntegerDigits = 1
+        numberFormatter.minimumFractionDigits = 1
+        numberFormatter.maximumFractionDigits = 1
+        
+        return numberFormatter
+    }()
+    
+    private var lastSuccessfulBolus : Date?
+    
     private func update() throws {
+        var error: Error?
+        do {
+            try updateData()
+        } catch let updateError {
+            error = updateError
+        }
+        updateBolusState()
+        if error != nil {
+            throw error!
+        }
+    }
+    
+    private func updateBolusState() {
+        if self.bolusState.inProgress() {
+            let updateGroup = DispatchGroup()
+            self.bolusState.allowed = false
+            updateGroup.enter()
+            // Fuzz time a bit to account for different time on pump and device
+            var date = self.bolusState.date
+            if let d = self.bolusState.sent {
+                date = d
+            }
+            let startDate = date.addingTimeInterval(TimeInterval(minutes: -2))
+            deviceDataManager.doseStore.getRecentNormalizedDoseEntries(startDate: startDate) {
+                (doseEntries, error) in
+                if let error = error {
+                    self.deviceDataManager.logger.addError(error, fromSource: "insulinEffectbolusState")
+                } else {
+                    for entry in doseEntries {
+                        if entry.type == .bolus {
+                            if entry.value >= self.bolusState.units {
+                                self.bolusState.state = .success
+                                self.lastSuccessfulBolus = entry.endDate
+                                self.bolusState.message = ""
+                                self.deviceDataManager.logger.addMessage("Bolus Success: \(self.bolusState) \(entry)", "LoopDataManager")
+                                break
+                            } else {
+                                self.bolusState.state = .success
+                                self.lastSuccessfulBolus = entry.endDate
+                                let str = self.decimalFormatter.string(from: NSNumber(value: entry.value))!
+                                self.bolusState.message = "Different amount \(str)"
+                                self.deviceDataManager.logger.addMessage("Bolus Success, but wrong amount: \(self.bolusState) \(entry)", "LoopDataManager")
+                                break
+                            }
+                        }
+                    }
+                }
+                if self.bolusState.state != .success {
+
+                    if let reservoir = self.deviceDataManager.doseStore.lastReservoirValue {
+                        
+                        if let start = self.bolusState.reservoir {
+                            let currentUnits = reservoir.unitVolume
+                            let drop = start.unitVolume - currentUnits
+                            
+                            print("Bolus Progress Drop \(drop), current \(currentUnits), start \(start.unitVolume)")
+                            if drop > self.bolusState.units {
+                                /*  Cannot declare success as this would cause the next bolus
+                                    to take into account                                 */
+                                if self.deviceDataManager.preferredInsulinDataSource != .pumpHistory {
+                                    self.bolusState.state = .success
+                                    self.lastSuccessfulBolus = reservoir.startDate
+                                }
+                                
+                                self.bolusState.message = "\(self.bolusState.units) U"
+                            } else {
+                                let strDrop = self.decimalFormatter.string(from: NSNumber(value: drop))!
+                                self.bolusState.message = "\(strDrop)/\(self.bolusState.units) U"
+                            }
+                        }
+                        let eventDate = self.deviceDataManager.doseStore.pumpEventQueryAfterDate
+                        let historyDate = self.deviceDataManager.lastPumpHistorySuccess ?? eventDate
+                        // Needs a more accurate measurement of how fast the pump is.
+                        // (this should take into account the real time it takes to give the bolus.)
+                        let timeForBolus = TimeInterval(minutes: (self.bolusState.units + 1))                        
+                        let expiry = date + timeForBolus
+                        if self.bolusState.state != .success && reservoir.startDate > expiry && historyDate > expiry {
+                            self.bolusState.state = .failed
+                            self.bolusState.message = "\(reservoir.startDate) > \(expiry) [\(timeForBolus)]"
+                            self.deviceDataManager.logger.addError("Bolus Failed: \(self.bolusState) \(timeForBolus)", fromSource: "LoopDataManager")
+                        }
+                    }
+                }
+                
+                updateGroup.leave()
+            }
+        } else {
+            // No Bolus in progress, update state.
+            //
+            // TODO this should use IOB, not reservoirValue as that's more accurate.
+            if let reservoir = self.deviceDataManager.doseStore.lastReservoirValue {
+                if reservoir.startDate.timeIntervalSinceNow < TimeInterval(minutes: -15) {
+                    print("Bolus not allowed because reservoir too old")
+                    self.bolusState.allowed = false
+                    self.bolusState.state = .prohibited
+                    self.bolusState.message = "Reservoir data too old."
+                } else {
+                    if self.bolusState.state ==  .prohibited {
+                        self.bolusState.state = .none
+                        self.bolusState.message = ""
+                    }
+                    self.bolusState.allowed = true
+                }
+            } else {
+                print("Bolus not allowed because reservoir not available")
+                self.bolusState.allowed = false
+                self.bolusState.state = .prohibited
+                self.bolusState.message = "Reservoir data not available."
+            }
+            
+            if self.bolusState.date.timeIntervalSinceNow < TimeInterval(minutes: -30) {
+                if self.bolusState.state != .none && self.bolusState.state != .recommended  {
+                    self.bolusState.state = .none
+                    self.bolusState.message = ""
+                }
+            }
+            
+            if self.bolusState.state == .none || self.bolusState.state == .recommended {
+                if let units = self.recommendedBolus, units.amount > 0.5 {  // 0.5 shouldn't be static
+                    self.bolusState.state = .recommended
+                    self.bolusState.units = units.amount
+                    self.bolusState.carbs = 0
+                /*
+                } else if let carbs = self.recommendedBolus?.carbRecommendation, carbs > 5 {
+                    self.bolusState.state = .recommended
+                    self.bolusState.units = 0
+                    self.bolusState.carbs = 10 * round(carbs/10 + 1)
+                */
+                } else {
+                    self.bolusState.state = .none
+                    self.bolusState.units = 0
+                }
+                
+            }
+            
+        }
+    }
+    
+    private func updateData() throws {
         let updateGroup = DispatchGroup()
 
         guard let glucoseStore = deviceDataManager.glucoseStore else {
@@ -242,6 +395,13 @@ final class LoopDataManager {
                 throw error
             }
         }
+        
+        do {
+            try self.recommendedBolus = self.recommendBolus()
+        } catch let error {
+            self.deviceDataManager.logger.addError(error, fromSource: "RecommendBolus")
+            throw error
+        }
     }
 
     private func notify(forChange context: LoopUpdateContext) {
@@ -266,7 +426,8 @@ final class LoopDataManager {
         - carbsOnBoard          Current carbs on board
         - error:                An error in the current state of the loop, or one that happened during the last attempt to loop.
      */
-    func getLoopStatus(_ resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ retrospectivePredictedGlucose: [GlucoseValue]?, _ recommendedTempBasal: TempBasalRecommendation?, _ lastTempBasal: DoseEntry?, _ lastLoopCompleted: Date?, _ insulinOnBoard: InsulinValue?, _ carbsOnBoard: CarbValue?, _ error: Error?) -> Void) {
+    func getLoopStatus(_ resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ retrospectivePredictedGlucose: [GlucoseValue]?, _ recommendedTempBasal: TempBasalRecommendation?, _ lastTempBasal: DoseEntry?, _ bolusState: Bolus?,
+        _ lastLoopCompleted: Date?, _ insulinOnBoard: InsulinValue?, _ carbsOnBoard: CarbValue?, _ error: Error?) -> Void) {
         dataAccessQueue.async {
             var error: Error?
 
@@ -278,7 +439,7 @@ final class LoopDataManager {
 
             let currentCOB = self.carbsOnBoardSeries?.closestPriorToDate(Date())
 
-            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.lastLoopCompleted, self.insulinOnBoard, currentCOB, error ?? self.lastLoopError)
+            resultsHandler(self.predictedGlucose, self.retrospectivePredictedGlucose, self.recommendedTempBasal, self.lastTempBasal, self.bolusState, self.lastLoopCompleted, self.insulinOnBoard, currentCOB, error ?? self.lastLoopError)
         }
     }
 
@@ -311,7 +472,7 @@ final class LoopDataManager {
             pendingTempBasalInsulin = 0
         }
 
-        let pendingBolusAmount: Double = lastBolus?.units ?? 0
+        let pendingBolusAmount: Double = bolusState.inProgress() ? bolusState.units : 0
 
         // All outstanding potential insulin delivery
         return pendingTempBasalInsulin + pendingBolusAmount
@@ -369,10 +530,6 @@ final class LoopDataManager {
     private var carbsOnBoardSeries: [CarbValue]?
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
-            if let bolusDate = lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
-                lastBolus = nil
-            }
-
             predictedGlucose = nil
         }
     }
@@ -390,6 +547,7 @@ final class LoopDataManager {
     private var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
+            recommendedBolus = nil
             predictedGlucoseWithoutMomentum = nil
         }
     }
@@ -405,9 +563,103 @@ final class LoopDataManager {
         }
     }
     private var recommendedTempBasal: TempBasalRecommendation?
+    private var recommendedBolus: BolusRecommendation?
 
     private var lastTempBasal: DoseEntry?
-    private var lastBolus: (units: Double, date: Date)?
+
+    enum BolusState : String {
+        case none  // none given
+        case prohibited // not allowed
+        case recommended // recommendation
+        // command sent to pump
+        case sent
+        // initial states
+        case pending
+        case maybefailed
+        // result
+        case failed
+        case success
+        case timeout
+    }
+    struct Bolus {
+        var state : BolusState = .none
+        var units : Double = 0.0
+        var carbs : Double = 0.0
+        var date : Date
+        var sent : Date?
+        // if a new bolus is allowed
+        var allowed : Bool = false
+        var message : String = ""
+        
+        var reservoir: ReservoirValue? = nil
+        
+        func equal(_ other: Bolus) -> Bool {
+            return state == other.state && date == other.date && units == other.units && message == other.message && allowed == other.allowed
+        }
+        
+        func inProgress() -> Bool {
+            return state == .pending || state == .maybefailed || state == .sent
+        }
+        
+        func description() -> String {
+            switch state {
+            case .none: return ""
+            case .prohibited: return "Prohibited"
+            case .recommended: return "Recommended"
+                
+            case .sent: return "Pending"
+            case .pending: return "Delivering"
+            case .maybefailed: return "Maybe failed"
+                
+            case .failed: return "Failed"
+            case .success: return "Successful"
+            case .timeout: return "Timed out"
+            }
+        }
+        
+        func kind() -> String {
+            if state == .recommended && carbs > 0 {
+                return "Carbs"
+            }
+            return "Bolus"
+        }
+        
+        func explanation() -> String {
+            var val = ""
+            switch state {
+            case .none:
+                val = ""
+            case .prohibited:
+                val = "Unsafe"
+            case .recommended:
+                if units > 0 {
+                    val = "Recommended value, tap to enact."
+                } else if carbs > 0 {
+                    val = "Eat \(carbs) g fast acting carbs like juice, glucose tabs, etc."
+                }
+            case .sent:
+                val = "Sending command to pump."
+            case .pending:
+                val = "(can turn phone off)."
+            case .maybefailed:
+                val = "Comm Error."
+                
+            case .failed:
+                val = "Tap to retry now."
+            case .success:
+                val = "Success!"
+            case .timeout:
+                val = "Timeout - Check pump!"
+                
+            }
+            if message != "" {
+                val = "\(val) - \(message)"
+            }
+            return val
+        }
+    }
+    private var bolusState: Bolus
+
     private var lastLoopError: Error? {
         didSet {
             if lastLoopError != nil {
@@ -580,7 +832,7 @@ final class LoopDataManager {
         }
 
         guard
-            lastBolus == nil,  // Don't recommend changes if a bolus was just set
+            !bolusState.inProgress(),  // Don't recommend changes if a bolus was just set
             let predictedGlucose = self.predictedGlucose,
             let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
@@ -648,6 +900,7 @@ final class LoopDataManager {
         guard abs(glucoseDate.timeIntervalSinceNow) <= recencyInterval else {
             throw LoopError.glucoseTooOld(date: glucoseDate)
         }
+
 
         let pendingInsulin = try self.getPendingInsulin()
 
@@ -734,15 +987,99 @@ final class LoopDataManager {
     }
     
     /**
-     Informs the loop algorithm of an enacted bolus
-
+     Informs the loop algorithm of an enacted bolus, overrides previous one!
+     
      - parameter units: The amount of insulin
-     - parameter date:  The date the bolus was set
+     - parameter date:  The date the bolus was initially set
+     - parameter state: initial state of this bolus (.pending or .maybefailed or .sent)
+     - parameter sent date: The date the bolus was successfully submitted to the pump.
+     - parameter message: potential (failure) message
      */
-    func recordBolus(_ units: Double, at date: Date) {
+    private func recordBolus(_ units: Double, at date: Date, state: BolusState,
+                             sent: Date? = nil, message: String? = nil, reservoir: ReservoirValue? = nil) {
         dataAccessQueue.async {
-            self.lastBolus = (units: units, date: date)
+            self.bolusState = Bolus(state: state, units: units, carbs: 0.0, date: date,
+                                   sent: sent, allowed: false,
+                                   message: message ?? "",
+                                   reservoir: reservoir)
             self.notify(forChange: .bolus)
+        }
+    }
+    
+    private let bolusQueue: DispatchQueue = DispatchQueue(label: "com.loudnate.Naterade.LoopDataManager.bolusQueue", qos: .utility)
+    /// Send a bolus command and handle the result
+    ///
+    /// - parameter units:      The number of units to deliver
+    /// - parameter completion: A closure called after the command is complete. This closure takes a single argument:
+    ///     - error: An error describing why the command failed
+    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
+        let start = Date()
+        guard !self.bolusState.inProgress() else {
+            completion(LoopError.bolusInProgressError)
+            return
+        }
+        guard units > 0 else {
+            completion(nil)
+            self.recordBolus(units, at: start, state: .success, message: "Zero")
+            return
+        }
+        
+        guard let device = self.deviceDataManager.rileyLinkManager.firstConnectedDevice else {
+            completion(LoopError.connectionError)
+            self.recordBolus(units, at: start, state: .failed, message: "Connection Error")
+            return
+        }
+        
+        guard let ops = device.ops else {
+            completion(LoopError.configurationError("No device ops"))
+            self.recordBolus(units, at: start, state: .failed, message: "Configuration Error")
+            return
+        }
+        
+        self.recordBolus(units, at: start, state: .sent)
+        bolusQueue.async {
+            self.tryBolus(ops: ops, tries: 0, start: start, units: units, completion: completion)
+        }
+    }
+    
+    private func tryBolus(ops: PumpOps, tries: Int, start: Date, units: Double, completion: @escaping (_ error: Error?) -> Void) {
+        
+        let tries = tries + 1
+        let reservoir = self.deviceDataManager.doseStore.lastReservoirValue
+        
+        ops.setNormalBolus(units: units) { (error) in
+            if let error = error {
+                // first housekeeping
+                self.deviceDataManager.logger.addError(error, fromSource: "Bolus")
+                
+                let str = "\(error)"
+                var retry = false
+                //noResponse("Sent PumpMessage(carelink, powerOn, 681652, 00)")
+                //unknownResponse("a9 69 9a c6 e9 725665 55 6b25", "Sent PumpMessage(carelink, powerOn, 681652, 00)")
+                
+                if (str.contains("noResponse(") || str.contains("unknownResponse(")) && str.contains("powerOn") {
+                    retry = true
+                }
+                // TODO make this smarter in retrying.
+                // TODO recognize "bolus in progress"
+                if retry && tries <= 3 {
+                    self.recordBolus(units, at: start, state: .sent,
+                                     message: "Try \(tries): \(error)")
+                    self.bolusQueue.asyncAfter(deadline: .now() + 5.0) {
+                        self.tryBolus(ops: ops, tries: tries, start: start, units: units, completion: completion)
+                    }
+                } else {
+                    self.recordBolus(units, at: start, state: .maybefailed,
+                                     message: "After \(tries) tries: \(error)",
+                        reservoir: reservoir)
+                    //self.readAndProcessPumpData()
+                    completion(LoopError.communicationError)
+                }
+            } else {
+                self.recordBolus(units, at: start, state: .pending, sent: Date(), message: nil,
+                                 reservoir: reservoir)
+                completion(nil)
+            }
         }
     }
 }
@@ -754,13 +1091,14 @@ extension LoopDataManager {
     ///
     /// - parameter completionHandler: A closure called once the report has been generated. The closure takes a single argument of the report string.
     func generateDiagnosticReport(_ completionHandler: @escaping (_ report:     String) -> Void) {
-        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, lastLoopCompleted, insulinOnBoard, carbsOnBoard, error) in
+        getLoopStatus { (predictedGlucose, retrospectivePredictedGlucose, recommendedTempBasal, lastTempBasal, bolusState, lastLoopCompleted, insulinOnBoard, carbsOnBoard, error) in
             let report = [
                 "## LoopDataManager",
                 "predictedGlucose: \(predictedGlucose ?? [])",
                 "retrospectivePredictedGlucose: \(retrospectivePredictedGlucose ?? [])",
                 "recommendedTempBasal: \(recommendedTempBasal)",
                 "lastTempBasal: \(lastTempBasal)",
+                "recommendedBolus: \(bolusState?.units)",
                 "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
                 "insulinOnBoard: \(insulinOnBoard)",
                 "carbsOnBoard: \(carbsOnBoard)",

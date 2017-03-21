@@ -36,5 +36,9 @@ final class DiagnosticLogger {
             NSLog("%@: %@", collection, message)
         }
     }
+    
+    func addMessage(_ message: String, _ collection: String) {
+        addMessage(["message": message], toCollection: collection)
+    }
 }
 

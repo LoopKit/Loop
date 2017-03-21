@@ -313,6 +313,11 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
+    /**
+    Track pump history fetching
+    */
+    public var lastPumpHistorySuccess : Date? = nil
+    public var lastPumpHistoryAttempt : Date? = nil
 
     /**
      Polls the pump for new history events and stores them.
@@ -328,15 +333,16 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         print("Fetching history with RileyLink \"\(device.name)\"")
 
         let startDate = doseStore.pumpEventQueryAfterDate
-
+        let attemptDate = Date()
         device.ops?.getHistoryEvents(since: startDate) { (result) in
+            self.lastPumpHistoryAttempt = attemptDate
             switch result {
             case let .success(events, _):
                 self.doseStore.add(events) { (error) in
                     if let error = error {
                         self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
                     }
-
+                    self.lastPumpHistorySuccess = attemptDate
                     completionHandler(error)
                 }
             case .failure(let error):
@@ -381,6 +387,17 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         }
     }
 
+    private var needPumpDataRead : Bool = false
+    /**
+     Trigger a pump data read.
+    */
+    public func triggerPumpDataRead() {
+        needPumpDataRead = true
+        assertCurrentPumpData()
+    }
+    
+    private var pumpDataReadInProgress = false
+
     private func pumpDataIsStale() -> Bool {
         // How long should we wait before we poll for new pump data?
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
@@ -396,7 +413,10 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
         guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
             return
         }
-
+        if pumpDataReadInProgress {
+            return
+        }
+        pumpDataReadInProgress = true
         device.assertIdleListening()
 
         readPumpData { (result) in
@@ -406,76 +426,20 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate, Transmitter
                 self.observeBatteryDuring {
                     self.latestPumpStatus = status
                 }
-
                 self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
                 let battery = BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+
 
 
                 nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
             case .failure(let error):
                 self.troubleshootPumpComms(using: device)
                 self.nightscoutDataManager.uploadLoopStatus(loopError: error)
+
                 nsPumpStatus = nil
             }
             self.nightscoutDataManager.uploadDeviceStatus(nsPumpStatus, rileylinkDevice: device)
-        }
-    }
-
-    /// Send a bolus command and handle the result
-    ///
-    /// - parameter units:      The number of units to deliver
-    /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
-    ///     - error: An error describing why the command failed
-    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
-        guard units > 0 else {
-            completion(nil)
-            return
-        }
-
-        guard let device = rileyLinkManager.firstConnectedDevice else {
-            completion(LoopError.connectionError)
-            return
-        }
-
-        guard let ops = device.ops else {
-            completion(LoopError.configurationError("PumpOps"))
-            return
-        }
-
-        let setBolus = {
-            ops.setNormalBolus(units: units) { (error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "Bolus")
-                    completion(LoopError.communicationError)
-                } else {
-                    self.loopManager.recordBolus(units, at: Date())
-                    completion(nil)
-                }
-            }
-        }
-
-        // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
-        if  doseStore.lastReservoirValue == nil ||
-            doseStore.lastReservoirVolumeDrop < 0 ||
-            doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= TimeInterval(minutes: -6)
-        {
-            readPumpData { (result) in
-                switch result {
-                case .success(let (status, date)):
-                    self.doseStore.addReservoirValue(status.reservoir, atDate: date) { (newValue, _, _, error) in
-                        if let error = error {
-                            self.logger.addError(error, fromSource: "Bolus")
-                            completion(error)
-                        } else {
-                            setBolus()
-                        }
-                    }
-                case .failure(let error):
-                    completion(error)
-                }
-            }
-        } else {
-            setBolus()
+            self.pumpDataReadInProgress = false
         }
     }
 

@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -346,6 +347,62 @@
                                     <outlet property="backgroundView" destination="vSf-ph-T9I" id="BFh-Fj-OMr"/>
                                     <outlet property="subtitleLabel" destination="5gz-kZ-iF1" id="Ih8-Lb-7FQ"/>
                                     <outlet property="titleLabel" destination="k3F-Na-7mn" id="Mrt-ZL-fKG"/>
+                                </connections>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="BolusTableViewCell" rowHeight="65" id="hMa-YA-oXn" customClass="TitleSubtitleTableViewCell" customModule="Loop" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="142" width="375" height="65"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="hMa-YA-oXn" id="FsA-zW-4n5">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="65"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="e8U-gR-K4N">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="65"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </view>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Last Bolus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dwo-Ux-d6o">
+                                            <rect key="frame" x="8" y="13" width="76" height="18"/>
+                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="2 U @ 12:12 PM" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XWk-nw-R3d">
+                                            <rect key="frame" x="92" y="13" width="275" height="18"/>
+                                            <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Some explanation" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ggl-5l-GOZ">
+                                            <rect key="frame" x="8" y="36" width="359" height="16"/>
+                                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="dwo-Ux-d6o" firstAttribute="leading" secondItem="FsA-zW-4n5" secondAttribute="leadingMargin" id="72i-1M-0pX"/>
+                                        <constraint firstItem="ggl-5l-GOZ" firstAttribute="top" secondItem="XWk-nw-R3d" secondAttribute="bottom" constant="5" id="JhL-Ez-tfv"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="XWk-nw-R3d" secondAttribute="trailing" id="LGR-X9-7NG"/>
+                                        <constraint firstItem="dwo-Ux-d6o" firstAttribute="top" secondItem="FsA-zW-4n5" secondAttribute="topMargin" constant="5" id="LyK-ib-VXX"/>
+                                        <constraint firstItem="XWk-nw-R3d" firstAttribute="leading" secondItem="dwo-Ux-d6o" secondAttribute="trailing" constant="8" symbolic="YES" id="Ous-Nj-FlG"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="ggl-5l-GOZ" secondAttribute="bottom" constant="5" id="QCh-qv-kNn"/>
+                                        <constraint firstItem="ggl-5l-GOZ" firstAttribute="top" secondItem="dwo-Ux-d6o" secondAttribute="bottom" constant="5" id="ZaH-uB-fX5"/>
+                                        <constraint firstItem="XWk-nw-R3d" firstAttribute="top" secondItem="FsA-zW-4n5" secondAttribute="topMargin" constant="5" id="Zp9-E5-dhH"/>
+                                        <constraint firstItem="ggl-5l-GOZ" firstAttribute="leading" secondItem="FsA-zW-4n5" secondAttribute="leadingMargin" id="cob-oj-0Fx"/>
+                                        <constraint firstItem="ggl-5l-GOZ" firstAttribute="trailing" secondItem="FsA-zW-4n5" secondAttribute="trailingMargin" id="nAK-LX-XU9"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="e8U-gR-K4N" secondAttribute="trailing" id="7u6-Wt-fI0"/>
+                                    <constraint firstItem="e8U-gR-K4N" firstAttribute="leading" secondItem="hMa-YA-oXn" secondAttribute="leading" id="UPH-aT-D1r"/>
+                                    <constraint firstAttribute="bottom" secondItem="e8U-gR-K4N" secondAttribute="bottom" id="Z22-BY-HUw"/>
+                                    <constraint firstItem="e8U-gR-K4N" firstAttribute="top" secondItem="hMa-YA-oXn" secondAttribute="top" id="ahO-xv-eb4"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="backgroundView" destination="e8U-gR-K4N" id="i2U-5Z-yuZ"/>
+                                    <outlet property="explanationLabel" destination="ggl-5l-GOZ" id="jvi-Io-0fr"/>
+                                    <outlet property="subtitleLabel" destination="XWk-nw-R3d" id="X7d-8x-NTf"/>
+                                    <outlet property="titleLabel" destination="dwo-Ux-d6o" id="iDJ-yJ-X24"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartTableViewCell" rowHeight="200" id="FEV-fX-i48" customClass="ChartTableViewCell" customModule="Loop" customModuleProvider="target">

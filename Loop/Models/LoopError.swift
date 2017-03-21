@@ -21,6 +21,12 @@ enum LoopError: Error {
     // Missing data required to perform an action
     case missingDataError(details: String, recovery: String?)
 
+    // Out-of-date required data to perform an action
+    case staleDataError(String)
+    
+    // Bolus already in Progress
+    case bolusInProgressError
+
     // Glucose data is too old to perform action
     case glucoseTooOld(date: Date)
 
@@ -71,7 +77,8 @@ extension LoopError: LocalizedError {
             return String(format: NSLocalizedString("Recommendation expired: %1$@ old", comment: "The error message when a recommendation has expired. (1: age of recommendation in minutes)"), minutes)
         case .invalidData(let details):
             return String(format: NSLocalizedString("Invalid data: %1$@", comment: "The error message when invalid data was encountered. (1: details of invalid data)"), details)
-
+        default:
+            return String(format: NSLocalizedString("Invalid data: %1$@", comment: "The error message when invalid data was encountered. (1: details of invalid data)"), "no details")
         }
     }
 }
