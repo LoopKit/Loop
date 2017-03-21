@@ -26,6 +26,7 @@ extension UserDefaults {
         case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
         case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
         case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
+        case MaximumIOB = "com.loudnate.Naterade.MaximumIOB"
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case FetchEnliteDataEnabled = "com.loopkit.Loop.FetchEnliteDataEnabled"
         case PumpID = "com.loudnate.Naterade.PumpID"
@@ -148,6 +149,20 @@ extension UserDefaults {
                 set(maximumBolus, forKey: Key.MaximumBolus.rawValue)
             } else {
                 removeObject(forKey: Key.MaximumBolus.rawValue)
+            }
+        }
+    }
+    var maximumIOB: Double? {
+        get {
+            let value = double(forKey: Key.MaximumIOB.rawValue)
+            
+            return value > 0 ? value : nil
+        }
+        set {
+            if let maximumIOB = newValue {
+                set(maximumIOB, forKey: Key.MaximumIOB.rawValue)
+            } else {
+                removeObject(forKey: Key.MaximumIOB.rawValue)
             }
         }
     }

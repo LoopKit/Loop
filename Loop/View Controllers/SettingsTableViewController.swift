@@ -112,6 +112,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case insulinSensitivity
         case maxBasal
         case maxBolus
+        case maxIOB
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -334,8 +335,15 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+            case .maxIOB:
+                configCell.textLabel?.text = NSLocalizedString("Maximum IOB", comment: "The title text for the maximum insulin-on-board value")
+            
+                if let maxIOB = dataManager.maximumIOB {
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxIOB))!) U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
             }
-
             cell = configCell
         case .devices:
             let deviceCell = tableView.dequeueReusableCell(withIdentifier: RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
@@ -406,9 +414,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         switch Section(rawValue: indexPath.section)! {
         case .pump:
             let row = PumpRow(rawValue: indexPath.row)!
-            switch row {
-            case .pumpID:
-                let vc: TextFieldTableViewController
+            //switch row {
+                var vc: TextFieldTableViewController
                 switch row {
                 case .pumpID:
                     vc = PumpIDTableViewController(pumpID: dataManager.pumpID, region: dataManager.pumpState?.pumpRegion)
@@ -420,6 +427,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 vc.delegate = self
 
                 show(vc, sender: indexPath)
+            /*
             case .batteryChemistry:
                 let vc = RadioSelectionTableViewController.batteryChemistryType(dataManager.batteryChemistry)
                 vc.title = sender?.textLabel?.text
@@ -427,6 +435,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 show(vc, sender: sender)
             }
+ *          */
         case .cgm:
             let row = CGMRow(rawValue: indexPath.row)!
             switch row {
@@ -455,7 +464,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
-            case .insulinActionDuration, .maxBasal, .maxBolus:
+            case .insulinActionDuration, .maxBasal, .maxBolus, .maxIOB:
                 let vc: TextFieldTableViewController
 
                 switch row {
@@ -465,6 +474,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     vc = .maxBasal(dataManager.maximumBasalRatePerHour)
                 case .maxBolus:
                     vc = .maxBolus(dataManager.maximumBolus)
+                case .maxIOB:
+                    vc = .maxIOB(dataManager.maximumIOB)
                 default:
                     fatalError()
                 }
@@ -862,9 +873,16 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                     } else {
                         dataManager.maximumBolus = nil
                     }
+                case .maxIOB:
+                    if let value = controller.value, let units = valueNumberFormatter.number(from: value)?.doubleValue {
+                        dataManager.maximumIOB = units
+                    } else {
+                        dataManager.maximumIOB = nil
+                    }
                 default:
                     assertionFailure()
                 }
+
             default:
                 assertionFailure()
             }

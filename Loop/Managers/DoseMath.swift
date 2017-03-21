@@ -11,7 +11,6 @@ import HealthKit
 import InsulinKit
 import LoopKit
 
-
 struct DoseMath {
     /// The allowed precision
     static let basalStrokes: Double = 40
@@ -59,9 +58,11 @@ struct DoseMath {
         atDate date: Date = Date(),
         lastTempBasal: DoseEntry?,
         maxBasalRate: Double,
+        maxIOB: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
+        insulinOnBoard: Double?,
         minimumBGGuard: GlucoseThreshold
     ) -> (rate: Double, duration: TimeInterval)? {
         guard glucose.count > 1 else {
@@ -122,7 +123,13 @@ struct DoseMath {
                 duration = TimeInterval(0)
             }
         }
-
+        if  let iob = insulinOnBoard {
+            if iob > maxIOB {
+                // We hit the max IOB, cancel the one in progress.
+                rate = 0
+                duration = TimeInterval(0)
+            }
+        }
         if let rate = rate {
             return (rate: rate, duration: duration)
         } else {
@@ -147,9 +154,11 @@ struct DoseMath {
     static func recommendBolusFromPredictedGlucose(_ glucose: [GlucoseValue],
         atDate date: Date = Date(),
         maxBolus: Double,
+        maxIOB: Double,
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
+        insulinOnBoard: Double?,
         pendingInsulin: Double,
         minimumBGGuard: GlucoseThreshold
     ) -> BolusRecommendation {
@@ -175,7 +184,7 @@ struct DoseMath {
         let roundedAmount = round(max(0, (doseUnits - pendingInsulin)) * 40) / 40
         
         // Cap at max bolus amount
-        let cappedAmount = min(maxBolus, max(0, roundedAmount))
+        var cappedAmount = min(maxBolus, max(0, roundedAmount))
 
         let notice: BolusRecommendationNotice?
         if cappedAmount > 0 && minGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) < eventualGlucoseTargets.minValue {
@@ -187,7 +196,14 @@ struct DoseMath {
         } else {
             notice = nil
         }
-        
+
+        // Cap at maxium iob, if provided.
+        if  let iob = insulinOnBoard {
+            if iob + cappedAmount + pendingInsulin > maxIOB, maxIOB > 0 {
+                cappedAmount = max(0, maxIOB - iob - pendingInsulin)
+            }
+        }
+
         return BolusRecommendation(amount: cappedAmount, pendingInsulin: pendingInsulin, notice: notice)
     }
 }

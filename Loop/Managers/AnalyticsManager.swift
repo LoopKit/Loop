@@ -107,6 +107,10 @@ final class AnalyticsManager {
         logEvent("Maximum bolus change")
     }
     
+    func didChangeMaximumIOB() {
+        logEvent("Maximum IOB change")
+    }
+
     func didChangeMinimumBGGuard() {
         logEvent("Minimum BG Guard change")
     }
