@@ -11,6 +11,14 @@ import HealthKit
 
 import SwiftCharts
 
+protocol TargetPointsCalculator {
+    var glucosePoints: [ChartPoint] { get }
+    var overridePoints: [ChartPoint] { get }
+    var overrideDurationPoints: [ChartPoint] { get }
+
+    func calculate(_ xAxisValues: [ChartAxisValue]?)
+}
+
 final class StatusChartsManager {
 
     // MARK: - Configuration
@@ -158,19 +166,21 @@ final class StatusChartsManager {
     /// The chart points for alternate predicted glucose
     var alternatePredictedGlucosePoints: [ChartPoint]?
 
-    internal var targetGlucosePoints: [ChartPoint] = [] {
+    var targetPointsCalculator: TargetPointsCalculator?
+
+    private var targetGlucosePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
     }
 
-    internal var targetOverridePoints: [ChartPoint] = [] {
+    private var targetOverridePoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
     }
 
-    internal var targetOverrideDurationPoints: [ChartPoint] = [] {
+    private var targetOverrideDurationPoints: [ChartPoint] = [] {
         didSet {
             glucoseChart = nil
         }
@@ -660,8 +670,20 @@ final class StatusChartsManager {
         self.xAxisValues = xAxisValues
     }
 
-}
+    /// Runs any necessary steps before rendering charts
+    func prerender() {
+        if xAxisValues == nil {
+            generateXAxisValues()
+        }
 
+        if let calculator = targetPointsCalculator {
+            calculator.calculate(xAxisValues)
+            targetGlucosePoints = calculator.glucosePoints
+            targetOverridePoints = calculator.overridePoints
+            targetOverrideDurationPoints = calculator.overrideDurationPoints
+        }
+    }
+}
 
 private extension HKUnit {
     var glucoseUnitYAxisSegmentSize: Double {

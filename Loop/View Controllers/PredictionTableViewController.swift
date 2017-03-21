@@ -181,7 +181,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                 }
             }
 
-            charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+            charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(dataManager.glucoseTargetRangeSchedule)
 
             reloadGroup.notify(queue: DispatchQueue.main) {
                 self.charts.prerender()

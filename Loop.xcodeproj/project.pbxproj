@@ -151,7 +151,6 @@
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
 		4F08DE6D1E799EC7006741EA /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
 		4F08DE6E1E799ED1006741EA /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
-		4F08DE721E7B10AC006741EA /* StatusChartsManager+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE711E7B10AC006741EA /* StatusChartsManager+Extension.swift */; };
 		4F08DE771E7B31C0006741EA /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE751E7B3113006741EA /* ChartPoint.swift */; };
 		4F08DE791E7B57C9006741EA /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE751E7B3113006741EA /* ChartPoint.swift */; };
 		4F08DE7E1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */; };
@@ -167,6 +166,8 @@
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4F08DE9D1E81D0E9006741EA /* StatusChartsManager+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C1ABC1E5568A80067F1AE /* StatusChartsManager+LoopKit.swift */; };
+		4F08DEA11E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DEA01E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift */; };
+		4F08DEA31E81E12D006741EA /* DatedRangedContextCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DEA21E81E12D006741EA /* DatedRangedContextCalculator.swift */; };
 		4F20AE621E6B879C00D07A06 /* ReservoirVolumeHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */; };
 		4F20AE631E6B87B100D07A06 /* ChartContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313EDDF1D8A6BF90060FA79 /* ChartContentView.swift */; };
 		4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
@@ -502,7 +503,6 @@
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
 		4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StatusChartsManager.swift; path = Managers/StatusChartsManager.swift; sourceTree = "<group>"; };
-		4F08DE711E7B10AC006741EA /* StatusChartsManager+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StatusChartsManager+Extension.swift"; sourceTree = "<group>"; };
 		4F08DE751E7B3113006741EA /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleUnit.swift; sourceTree = "<group>"; };
@@ -510,6 +510,8 @@
 		4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsScatterDownTrianglesLayer.swift; path = Views/ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
 		4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsTouchHighlightLayerViewCache.swift; path = Views/ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
 		4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CollectionType+Loop.swift"; sourceTree = "<group>"; };
+		4F08DEA01E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeScheduleCalculator.swift; sourceTree = "<group>"; };
+		4F08DEA21E81E12D006741EA /* DatedRangedContextCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatedRangedContextCalculator.swift; sourceTree = "<group>"; };
 		4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+WatchApp.swift"; sourceTree = "<group>"; };
 		4F2C15921E09BF2C00E160D4 /* HUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
 		4F2C15941E09BF3C00E160D4 /* HUDView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HUDView.xib; sourceTree = "<group>"; };
@@ -882,6 +884,7 @@
 				430C1ABC1E5568A80067F1AE /* StatusChartsManager+LoopKit.swift */,
 				4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
+				4F08DEA01E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -921,7 +924,7 @@
 				4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */,
 				43BFF0BE1E45C8EA00FF19A9 /* UIColor+Widget.swift */,
 				4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */,
-				4F08DE711E7B10AC006741EA /* StatusChartsManager+Extension.swift */,
+				4F08DEA21E81E12D006741EA /* DatedRangedContextCalculator.swift */,
 			);
 			path = "Loop Status Extension";
 			sourceTree = "<group>";
@@ -1454,6 +1457,7 @@
 				4309786E1E73DAD100BEBC82 /* CGM.swift in Sources */,
 				43F5173D1D713DB0000FA422 /* RadioSelectionTableViewController.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
+				4F08DEA11E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */,
@@ -1564,9 +1568,9 @@
 				4F08DE8A1E7BB729006741EA /* ChartAxisValueDoubleUnit.swift in Sources */,
 				4F08DE891E7BB729006741EA /* ChartAxisValueDoubleLog.swift in Sources */,
 				43BFF0CD1E466C8400FF19A9 /* StateColorPalette.swift in Sources */,
+				4F08DEA31E81E12D006741EA /* DatedRangedContextCalculator.swift in Sources */,
 				4F08DE8B1E7BB72C006741EA /* CGPoint.swift in Sources */,
 				43BFF0C21E464ACB00FF19A9 /* UIColor.swift in Sources */,
-				4F08DE721E7B10AC006741EA /* StatusChartsManager+Extension.swift in Sources */,
 				4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */,
 				4F08DE871E7BB726006741EA /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,

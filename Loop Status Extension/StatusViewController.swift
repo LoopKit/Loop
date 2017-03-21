@@ -231,8 +231,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
             }
 
-            charts.targetRanges = context.targetRanges
-            charts.temporaryOverride = context.temporaryOverride
+            charts.targetPointsCalculator = DatedRangeContextCalculator(targetRanges: context.targetRanges, temporaryOverride: context.temporaryOverride)
 
             charts.prerender()
             glucoseChartContentView.reloadChart()
