@@ -687,7 +687,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             tableView.insertRows(at: [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         } else {
             removeG5TransmitterIDRow()
-            dataManager.cgm = nil
+            dataManager.cgm = .share
         }
         tableView.endUpdates()
     }
@@ -699,7 +699,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             setEnliteSwitchOff()
             dataManager.cgm = .g4
         } else {
-            dataManager.cgm = nil
+            dataManager.cgm = .share
         }
         tableView.endUpdates()
     }
@@ -711,7 +711,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             setG4SwitchOff()
             dataManager.cgm = .enlite
         } else {
-            dataManager.cgm = nil
+            dataManager.cgm = .share
         }
         tableView.endUpdates()
     }
