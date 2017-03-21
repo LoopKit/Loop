@@ -180,21 +180,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         subtitleLabel.alpha = 0
 
-        if let eventualGlucose = context.eventualGlucose {
-            let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
-
-            if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
-                subtitleLabel.text = String(
-                    format: NSLocalizedString(
-                        "Eventually %1$@ %2$@",
-                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
-                    eventualGlucoseNumberString,
-                    eventualGlucose.unit.glucoseUnitDisplayString
-                )
-                subtitleLabel.alpha = 1
-            }
-        }
-
         let dateFormatter: DateFormatter = {
             let dateFormatter = DateFormatter()
             dateFormatter.dateStyle = .none
@@ -221,13 +206,29 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 charts.startDate = earliestDate
             }
 
-            if let predictedGlucose = context.predictedGlucose {
+            if let predictedGlucose = context.predictedGlucose?.samples {
                 charts.predictedGlucosePoints = predictedGlucose.map {
                     ChartPoint(
                         x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
                         y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
                     )
                 }
+
+                if let eventualGlucose = predictedGlucose.last {
+                    let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
+
+                    if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
+                        subtitleLabel.text = String(
+                            format: NSLocalizedString(
+                                "Eventually %1$@ %2$@",
+                                comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
+                            eventualGlucoseNumberString,
+                            eventualGlucose.unit.glucoseUnitDisplayString
+                        )
+                        subtitleLabel.alpha = 1
+                    }
+                }
+
             }
 
             charts.targetRanges = context.targetRanges

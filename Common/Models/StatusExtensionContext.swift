@@ -45,6 +45,21 @@ struct GlucoseContext {
     }
 }
 
+struct PredictedGlucoseContext {
+    let values: [Double]
+    let unit: HKUnit
+    let startDate: Date
+    let interval: TimeInterval
+
+    var samples: [GlucoseContext] {
+        var result: [GlucoseContext] = []
+        for (i, v) in values.enumerated() {
+            result.append(GlucoseContext(value: v, unit: unit, startDate: startDate.addingTimeInterval(Double(i) * interval)))
+        }
+        return result
+    }
+}
+
 struct DatedRangeContext {
     let startDate: Date
     let endDate: Date
@@ -194,6 +209,35 @@ extension GlucoseContext: RawRepresentable {
     }
 }
 
+extension PredictedGlucoseContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "values": values,
+            "unit": unit.unitString,
+            "startDate": startDate,
+            "interval": interval
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let values = rawValue["values"] as? [Double],
+            let unitString = rawValue["unit"] as? String,
+            let startDate = rawValue["startDate"] as? Date,
+            let interval = rawValue["interval"] as? TimeInterval
+        else {
+            return nil
+        }
+
+        self.values = values
+        self.unit = HKUnit(from: unitString)
+        self.startDate = startDate
+        self.interval = interval
+    }
+}
+
 extension DatedRangeContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
@@ -228,12 +272,11 @@ struct StatusExtensionContext: RawRepresentable {
     private let version = 3
 
     var glucose: [GlucoseContext]?
-    var predictedGlucose: [GlucoseContext]?
+    var predictedGlucose: PredictedGlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
-    var eventualGlucose: GlucoseContext?
     var targetRanges: [DatedRangeContext]?
     var temporaryOverride: DatedRangeContext?
     var sensor: SensorDisplayableContext?
@@ -249,8 +292,8 @@ struct StatusExtensionContext: RawRepresentable {
             glucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
         }
 
-        if let rawValue = rawValue["predictedGlucose"] as? [GlucoseContext.RawValue] {
-            predictedGlucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
+        if let rawValue = rawValue["predictedGlucose"] as? PredictedGlucoseContext.RawValue {
+            predictedGlucose = PredictedGlucoseContext(rawValue: rawValue)
         }
 
         if let rawValue = rawValue["reservoir"] as? ReservoirContext.RawValue {
@@ -266,10 +309,6 @@ struct StatusExtensionContext: RawRepresentable {
         }
 
         batteryPercentage = rawValue["batteryPercentage"] as? Double
-
-        if let rawValue = rawValue["eventualGlucose"] as? GlucoseContext.RawValue {
-            eventualGlucose = GlucoseContext(rawValue: rawValue)
-        }
 
         if let rawValue = rawValue["targetRanges"] as? [DatedRangeContext.RawValue] {
             targetRanges = rawValue.flatMap({return DatedRangeContext(rawValue: $0)})
@@ -290,12 +329,11 @@ struct StatusExtensionContext: RawRepresentable {
         ]
 
         raw["glucose"] = glucose?.map({return $0.rawValue})
-        raw["predictedGlucose"] = predictedGlucose?.map({return $0.rawValue})
+        raw["predictedGlucose"] = predictedGlucose?.rawValue
         raw["reservoir"] = reservoir?.rawValue
         raw["loop"] = loop?.rawValue
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
-        raw["eventualGlucose"] = eventualGlucose?.rawValue
         raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
         raw["temporaryOverride"] = temporaryOverride?.rawValue
         raw["sensor"] = sensor?.rawValue

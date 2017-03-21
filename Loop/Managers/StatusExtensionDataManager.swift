@@ -65,11 +65,11 @@ final class StatusExtensionDataManager {
                     startDate:
                     Date(timeIntervalSinceNow: -250)
                 )
-                context.eventualGlucose = GlucoseContext(
-                    value: 89.123,
+                context.predictedGlucose = PredictedGlucoseContext(
+                    values: (1...48).map { 89.123 + Double($0 * 5) },
                     unit: HKUnit.milligramsPerDeciliterUnit(),
-                    startDate: Date(timeIntervalSinceNow: TimeInterval(hours: 4))
-                )
+                    startDate: Date(),
+                    interval: TimeInterval(minutes: 5))
 
                 let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
             #else
@@ -109,14 +109,13 @@ final class StatusExtensionDataManager {
                     })
 
                     // Only tranfer the predicted glucose if we have glucose history
-                    if let predictedGlucose = predictedGlucose {
-                        context.predictedGlucose = predictedGlucose.map({
-                            return GlucoseContext(
-                                value: $0.quantity.doubleValue(for: glucoseUnit),
-                                unit: glucoseUnit,
-                                startDate: $0.startDate
-                            )
-                        })
+                    if let predictedGlucose = predictedGlucose,
+                        predictedGlucose.count > 1 {
+                        context.predictedGlucose = PredictedGlucoseContext(
+                            values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
+                            unit: glucoseUnit,
+                            startDate: predictedGlucose[0].startDate,
+                            interval: predictedGlucose[1].startDate.timeIntervalSince(predictedGlucose[0].startDate))
                     }
                 }
                 updateGroup.leave()
@@ -142,14 +141,6 @@ final class StatusExtensionDataManager {
                 context.batteryPercentage = batteryPercentage
             }
         
-            if let lastPoint = predictedGlucose?.last {
-                context.eventualGlucose = GlucoseContext(
-                    value: lastPoint.quantity.doubleValue(for: glucoseUnit),
-                    unit: glucoseUnit,
-                    startDate: lastPoint.startDate
-                )
-            }
-
             if let targetRanges = self.dataManager.glucoseTargetRangeSchedule {
                 context.targetRanges = targetRanges.between(start: chartStartDate, end: chartEndDate)
                     .map({
