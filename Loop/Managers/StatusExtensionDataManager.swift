@@ -68,8 +68,7 @@ final class StatusExtensionDataManager {
                 context.eventualGlucose = GlucoseContext(
                     value: 89.123,
                     unit: HKUnit.milligramsPerDeciliterUnit(),
-                    startDate: Date(timeIntervalSinceNow: TimeInterval(hours: 4)),
-                    sensor: nil
+                    startDate: Date(timeIntervalSinceNow: TimeInterval(hours: 4))
                 )
 
                 let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
@@ -105,8 +104,7 @@ final class StatusExtensionDataManager {
                         return GlucoseContext(
                             value: $0.quantity.doubleValue(for: glucoseUnit),
                             unit: glucoseUnit,
-                            startDate: $0.startDate,
-                            sensor: dataManager.sensorInfo != nil ? SensorDisplayableContext(dataManager.sensorInfo!) : nil
+                            startDate: $0.startDate
                         )
                     })
 
@@ -116,8 +114,7 @@ final class StatusExtensionDataManager {
                             return GlucoseContext(
                                 value: $0.quantity.doubleValue(for: glucoseUnit),
                                 unit: glucoseUnit,
-                                startDate: $0.startDate,
-                                sensor: nil
+                                startDate: $0.startDate
                             )
                         })
                     }
@@ -149,8 +146,7 @@ final class StatusExtensionDataManager {
                 context.eventualGlucose = GlucoseContext(
                     value: lastPoint.quantity.doubleValue(for: glucoseUnit),
                     unit: glucoseUnit,
-                    startDate: lastPoint.startDate,
-                    sensor: nil
+                    startDate: lastPoint.startDate
                 )
             }
 
@@ -171,6 +167,14 @@ final class StatusExtensionDataManager {
                         minValue: override.value.minValue,
                         maxValue: override.value.maxValue)
                 }
+            }
+
+            if let sensorInfo = dataManager.sensorInfo {
+                context.sensor = SensorDisplayableContext(
+                    isStateValid: sensorInfo.isStateValid,
+                    stateDescription: sensorInfo.stateDescription,
+                    trendType: sensorInfo.trendType,
+                    isLocal: sensorInfo.isLocal)
             }
 
             updateGroup.notify(queue: DispatchQueue.global(qos: .background), execute: {

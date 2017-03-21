@@ -39,7 +39,6 @@ struct GlucoseContext {
     let value: Double
     let unit: HKUnit
     let startDate: Date
-    let sensor: SensorDisplayableContext?
 
     var quantity: HKQuantity {
         return HKQuantity(unit: unit, doubleValue: value)
@@ -173,14 +172,11 @@ extension GlucoseContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var rawValue: RawValue {
-        var raw: RawValue = [
+        return [
             "value": value,
             "unit": unit.unitString,
             "startDate": startDate
         ]
-        raw["sensor"] = sensor?.rawValue
-
-        return raw
     }
 
     init?(rawValue: RawValue) {
@@ -195,12 +191,6 @@ extension GlucoseContext: RawRepresentable {
         self.value = value
         self.unit = HKUnit(from: unitString)
         self.startDate = startDate
-
-        if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
-            self.sensor = SensorDisplayableContext(rawValue: rawValue)
-        } else {
-            self.sensor = nil
-        }
     }
 }
 
@@ -246,6 +236,7 @@ struct StatusExtensionContext: RawRepresentable {
     var eventualGlucose: GlucoseContext?
     var targetRanges: [DatedRangeContext]?
     var temporaryOverride: DatedRangeContext?
+    var sensor: SensorDisplayableContext?
     
     init() { }
     
@@ -287,6 +278,10 @@ struct StatusExtensionContext: RawRepresentable {
         if let rawValue = rawValue["temporaryOverride"] as? DatedRangeContext.RawValue {
             temporaryOverride = DatedRangeContext(rawValue: rawValue)
         }
+
+        if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
+            sensor = SensorDisplayableContext(rawValue: rawValue)
+        }
     }
     
     var rawValue: RawValue {
@@ -303,6 +298,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["eventualGlucose"] = eventualGlucose?.rawValue
         raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
         raw["temporaryOverride"] = temporaryOverride?.rawValue
+        raw["sensor"] = sensor?.rawValue
         return raw
     }
 }

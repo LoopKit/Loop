@@ -156,7 +156,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             glucoseHUD.setGlucoseQuantity(lastGlucose.value,
                at: lastGlucose.startDate,
                unit: lastGlucose.unit,
-               sensor: lastGlucose.sensor
+               sensor: context.sensor
             )
         }
         
