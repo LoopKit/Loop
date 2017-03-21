@@ -87,7 +87,9 @@ final class StatusExtensionDataManager {
 
             let updateGroup = DispatchGroup()
 
-            let chartStartDate = Date().addingTimeInterval(TimeInterval(hours: -2))
+            // We can only access the last 30 minutes of data if the device is locked.
+            // Cap it there so that we have a consistent view in the widget.
+            let chartStartDate = Date().addingTimeInterval(TimeInterval(minutes: -30))
             let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             updateGroup.enter()
