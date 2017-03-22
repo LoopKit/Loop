@@ -25,7 +25,6 @@ class DatedRangeContextCalculator: TargetPointsCalculator {
 
     func calculate(_ xAxisValues: [ChartAxisValue]?) {
         if let xAxisValues = xAxisValues, xAxisValues.count > 1,
-            glucosePoints.count == 0,
             let targetRanges = targetRanges
         {
             glucosePoints = ChartPoint.pointsForDatedRanges(targetRanges, xAxisValues: xAxisValues)

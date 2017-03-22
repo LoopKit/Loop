@@ -166,7 +166,11 @@ final class StatusChartsManager {
     /// The chart points for alternate predicted glucose
     var alternatePredictedGlucosePoints: [ChartPoint]?
 
-    var targetPointsCalculator: TargetPointsCalculator?
+    var targetPointsCalculator: TargetPointsCalculator? {
+        didSet {
+            targetGlucosePoints = []
+        }
+    }
 
     private var targetGlucosePoints: [ChartPoint] = [] {
         didSet {
@@ -676,7 +680,8 @@ final class StatusChartsManager {
             generateXAxisValues()
         }
 
-        if let calculator = targetPointsCalculator {
+        if let calculator = targetPointsCalculator,
+           targetGlucosePoints.count == 0 {
             calculator.calculate(xAxisValues)
             targetGlucosePoints = calculator.glucosePoints
             targetOverridePoints = calculator.overridePoints
