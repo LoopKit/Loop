@@ -202,8 +202,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             // Anchor the start date of the chart to the earliest date we have in our historical glucose
-            if let earliestDate = glucose.map({ $0.startDate }).min() {
-                charts.startDate = earliestDate
+            if let first = glucose.first {
+                charts.startDate = first.startDate
             }
 
             if let predictedGlucose = context.predictedGlucose?.samples {
@@ -227,6 +227,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                         )
                         subtitleLabel.alpha = 1
                     }
+
+                    charts.endDate = eventualGlucose.startDate
                 }
 
             }
