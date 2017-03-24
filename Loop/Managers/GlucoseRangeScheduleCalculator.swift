@@ -1,5 +1,5 @@
 //
-//  TargetPointsDelegate.swift
+//  GlucoseRangeScheduleCalculator.swift
 //  Loop
 //
 //  Created by Bharat Mediratta on 3/21/17.
