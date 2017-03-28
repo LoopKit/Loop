@@ -45,8 +45,6 @@ Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<array>
 		<string>bluetooth-central</string>
 		<string>external-accessory</string>
-		<string>fetch</string>
-		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
