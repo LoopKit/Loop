@@ -16,8 +16,6 @@ extension UIColor {
 
     @nonobjc static let cellBackgroundColor = UIColor(white: 239 / 255, alpha: 1)
 
-    @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
-
     @nonobjc static let IOBTintColor = UIColor.HIGOrangeColor()
 
     @nonobjc static let COBTintColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
