@@ -1,4 +1,4 @@
-github "bharat/LoopKit" "ac307dda0690ea53da37715a77015baf5ebd1293"
+github "LoopKit/LoopKit" "b480b45a28b173906e86b9f302c2f86e4b3ac389"
 github "LoopKit/xDripG5" ~> 0.8.0
 github "bharat/SwiftCharts" "0.5.1-extension-api-safe"
 github "mddub/dexcom-share-client-swift" ~> 0.2.1
