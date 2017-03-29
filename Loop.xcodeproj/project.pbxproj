@@ -964,6 +964,8 @@
 		4F7528A61DFE20AE00C322D6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */,
+				4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */,
 				43EA28611D517E42001BC233 /* SensorDisplayable.swift */,
 				43BFF0C81E465B0A00FF19A9 /* StateColorPalette.swift */,
 			);
@@ -984,8 +986,6 @@
 		4FF4D0FB1E1834C400846527 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */,
-				4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */,
 				435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */,
 				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
 				43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */,
