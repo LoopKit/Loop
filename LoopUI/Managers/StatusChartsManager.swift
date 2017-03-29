@@ -385,15 +385,17 @@ public final class StatusChartsManager {
             prediction = ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, lineModels: [lineModel])
         }
 
-        glucoseChartCache = ChartPointsTouchHighlightLayerViewCache(
-            xAxis: xAxis,
-            yAxis: yAxis,
-            innerFrame: innerFrame,
-            chartPoints: glucosePoints + (alternatePredictedGlucosePoints ?? predictedGlucosePoints),
-            tintColor: colors.glucoseTintColor,
-            labelCenterY: chartSettings.top,
-            gestureRecognizer: panGestureRecognizer
-        )
+        if panGestureRecognizer != nil {
+            glucoseChartCache = ChartPointsTouchHighlightLayerViewCache(
+                xAxis: xAxis,
+                yAxis: yAxis,
+                innerFrame: innerFrame,
+                chartPoints: glucosePoints + (alternatePredictedGlucosePoints ?? predictedGlucosePoints),
+                tintColor: colors.glucoseTintColor,
+                labelCenterY: chartSettings.top,
+                gestureRecognizer: panGestureRecognizer
+            )
+        }
 
         let layers: [ChartLayer?] = [
             gridLayer,
@@ -473,15 +475,17 @@ public final class StatusChartsManager {
             return v
         })
 
-        iobChartCache = ChartPointsTouchHighlightLayerViewCache(
-            xAxis: xAxis,
-            yAxis: yAxis,
-            innerFrame: innerFrame,
-            chartPoints: iobPoints,
-            tintColor: UIColor.IOBTintColor,
-            labelCenterY: chartSettings.top,
-            gestureRecognizer: panGestureRecognizer
-        )
+        if panGestureRecognizer != nil {
+            iobChartCache = ChartPointsTouchHighlightLayerViewCache(
+                xAxis: xAxis,
+                yAxis: yAxis,
+                innerFrame: innerFrame,
+                chartPoints: iobPoints,
+                tintColor: UIColor.IOBTintColor,
+                labelCenterY: chartSettings.top,
+                gestureRecognizer: panGestureRecognizer
+            )
+        }
 
         let layers: [ChartLayer?] = [
             gridLayer,
@@ -548,15 +552,17 @@ public final class StatusChartsManager {
         let gridLayer = ChartGuideLinesLayer(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, axis: .xAndY, settings: guideLinesLayerSettings, onlyVisibleX: true, onlyVisibleY: false)
 
 
-        cobChartCache = ChartPointsTouchHighlightLayerViewCache(
-            xAxis: xAxis,
-            yAxis: yAxis,
-            innerFrame: innerFrame,
-            chartPoints: cobPoints,
-            tintColor: UIColor.COBTintColor,
-            labelCenterY: chartSettings.top,
-            gestureRecognizer: panGestureRecognizer
-        )
+        if panGestureRecognizer != nil {
+            cobChartCache = ChartPointsTouchHighlightLayerViewCache(
+                xAxis: xAxis,
+                yAxis: yAxis,
+                innerFrame: innerFrame,
+                chartPoints: cobPoints,
+                tintColor: UIColor.COBTintColor,
+                labelCenterY: chartSettings.top,
+                gestureRecognizer: panGestureRecognizer
+            )
+        }
 
         let layers: [ChartLayer?] = [
             gridLayer,
@@ -631,15 +637,17 @@ public final class StatusChartsManager {
             return v
         })
 
-        doseChartCache = ChartPointsTouchHighlightLayerViewCache(
-            xAxis: xAxis,
-            yAxis: yAxis,
-            innerFrame: innerFrame,
-            chartPoints: allDosePoints,
-            tintColor: colors.doseTintColor,
-            labelCenterY: chartSettings.top,
-            gestureRecognizer: panGestureRecognizer
-        )
+        if panGestureRecognizer != nil {
+            doseChartCache = ChartPointsTouchHighlightLayerViewCache(
+                xAxis: xAxis,
+                yAxis: yAxis,
+                innerFrame: innerFrame,
+                chartPoints: allDosePoints,
+                tintColor: colors.doseTintColor,
+                labelCenterY: chartSettings.top,
+                gestureRecognizer: panGestureRecognizer
+            )
+        }
 
         let layers: [ChartLayer?] = [
             gridLayer,
