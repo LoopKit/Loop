@@ -13,6 +13,7 @@ import GlucoseKit
 import InsulinKit
 import LoopKit
 import SwiftCharts
+import LoopUI
 
 extension StatusChartsManager {
 
