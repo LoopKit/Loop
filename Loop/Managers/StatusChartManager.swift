@@ -20,7 +20,7 @@ final class StatusChartsManager {
     // MARK: - Configuration
 
     private lazy var chartSettings: ChartSettings = {
-        let chartSettings = ChartSettings()
+        var chartSettings = ChartSettings()
         chartSettings.top = 12
         chartSettings.bottom = 0
         chartSettings.trailing = 8

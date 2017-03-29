@@ -100,7 +100,7 @@ final class ShareClientManager: CGMManager {
     var debugDescription: String {
         return [
             "## ShareClientManager",
-            "latestBackfill: \(latestBackfill)",
+            "latestBackfill: \(latestBackfill.debugDescription)",
             ""
         ].joined(separator: "\n")
     }
@@ -149,7 +149,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     override var debugDescription: String {
         return [
             "## G5CGMManager",
-            "latestReading: \(latestReading)",
+            "latestReading: \(latestReading.debugDescription)",
             "transmitter: \(transmitter)",
             super.debugDescription,
             ""
@@ -217,7 +217,7 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
     override var debugDescription: String {
         return [
             "## G4CGMManager",
-            "latestReading: \(latestReading)",
+            "latestReading: \(latestReading.debugDescription)",
             "receiver: \(receiver)",
             super.debugDescription,
             ""
