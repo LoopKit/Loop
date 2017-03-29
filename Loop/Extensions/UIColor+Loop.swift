@@ -10,11 +10,17 @@
 import UIKit
 
 extension UIColor {
+    @nonobjc static let axisLabelColor = secondaryLabelColor
+
+    @nonobjc static let axisLineColor = UIColor.clear
+
     @nonobjc static let doseTintColor = UIColor.HIGOrangeColor()
 
     @nonobjc static let freshColor = UIColor.HIGGreenColor()
 
     @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
 
+    @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
+    
     @nonobjc static let pumpStatusNormal = secondaryLabelColor
 }

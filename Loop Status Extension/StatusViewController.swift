@@ -11,6 +11,7 @@ import HealthKit
 import LoopUI
 import NotificationCenter
 import UIKit
+import SwiftCharts
 
 class StatusViewController: UIViewController, NCWidgetProviding {
 
@@ -25,6 +26,18 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
+    @IBOutlet weak var glucoseChartContentView: ChartContentView!
+
+    private lazy var charts: StatusChartsManager = {
+        let charts = StatusChartsManager()
+
+        charts.glucoseDisplayRange = (
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 175)
+        )
+
+        return charts
+    }()
 
     var statusExtensionContext: StatusExtensionContext?
     var defaults: UserDefaults?
@@ -77,14 +90,43 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 context: &observationContext
             )
         }
+
+        self.charts.prerender()
+        glucoseChartContentView.chartGenerator = { [unowned self] (frame) in
+            return self.charts.glucoseChartWithFrame(frame)?.view
+        }
+
+        self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
+        glucoseChartContentView.alpha = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact ? 0 : 1
     }
-    
+
     deinit {
         if let defaults = defaults {
             defaults.removeObserver(self, forKeyPath: defaults.statusExtensionContextObservableKey, context: &observationContext)
         }
     }
     
+    func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
+        if (activeDisplayMode == NCWidgetDisplayMode.compact) {
+            self.preferredContentSize = maxSize
+        } else {
+            self.preferredContentSize = CGSize(width: maxSize.width, height: 210)
+        }
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        coordinator.animate(alongsideTransition: {
+            (UIViewControllerTransitionCoordinatorContext) -> Void in
+            if self.extensionContext?.widgetActiveDisplayMode == .compact {
+                self.glucoseChartContentView.alpha = 0
+            } else {
+                self.glucoseChartContentView.alpha = 1
+            }
+        })
+    }
+
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         guard context == &observationContext else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
@@ -110,12 +152,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         guard let context = defaults?.statusExtensionContext else {
             return NCUpdateResult.failed
         }
-        
-        if let glucose = context.latestGlucose {
-            glucoseHUD.setGlucoseQuantity(glucose.value,
-               at: glucose.startDate,
-               unit: glucose.unit,
-               sensor: glucose.sensor
+        if let lastGlucose = context.glucose?.last {
+            glucoseHUD.setGlucoseQuantity(lastGlucose.value,
+               at: lastGlucose.startDate,
+               unit: lastGlucose.unit,
+               sensor: context.sensor
             )
         }
         
@@ -139,21 +180,65 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         subtitleLabel.alpha = 0
 
-        if let eventualGlucose = context.eventualGlucose {
-            let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
+        let dateFormatter: DateFormatter = {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .none
+            dateFormatter.timeStyle = .short
 
-            if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
-                subtitleLabel.text = String(
-                    format: NSLocalizedString(
-                        "Eventually %1$@ %2$@",
-                        comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
-                    eventualGlucoseNumberString,
-                    eventualGlucose.unit.glucoseUnitDisplayString
+            return dateFormatter
+        }()
+
+
+        if let glucose = context.glucose,
+            glucose.count > 0 {
+            let unit = glucose[0].unit
+            let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
+
+            charts.glucosePoints = glucose.map {
+                ChartPoint(
+                    x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                    y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
                 )
-                subtitleLabel.alpha = 1
             }
+
+            // Anchor the start date of the chart to the earliest date we have in our historical glucose
+            if let first = glucose.first {
+                charts.startDate = first.startDate
+            }
+
+            if let predictedGlucose = context.predictedGlucose?.samples {
+                charts.predictedGlucosePoints = predictedGlucose.map {
+                    ChartPoint(
+                        x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
+                        y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
+                    )
+                }
+
+                if let eventualGlucose = predictedGlucose.last {
+                    let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
+
+                    if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
+                        subtitleLabel.text = String(
+                            format: NSLocalizedString(
+                                "Eventually %1$@ %2$@",
+                                comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
+                            eventualGlucoseNumberString,
+                            eventualGlucose.unit.glucoseUnitDisplayString
+                        )
+                        subtitleLabel.alpha = 1
+                    }
+
+                    charts.endDate = eventualGlucose.startDate
+                }
+
+            }
+
+            charts.targetPointsCalculator = DatedRangeContextCalculator(targetRanges: context.targetRanges, temporaryOverride: context.temporaryOverride)
+
+            charts.prerender()
+            glucoseChartContentView.reloadChart()
         }
-        
+
         // Right now we always act as if there's new data.
         // TODO: keep track of data changes and return .noData if necessary
         return NCUpdateResult.newData
