@@ -198,12 +198,13 @@ final class LoopDataManager {
 
         if insulinEffect == nil {
             updateGroup.enter()
-            deviceDataManager.doseStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
-                if let error = error {
+            deviceDataManager.doseStore.getGlucoseEffects(start: effectStartDate) { result -> Void in
+                switch result {
+                case .success(let effects):
+                    self.insulinEffect = effects
+                case .failure(let error):
                     self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                     self.insulinEffect = nil
-                } else {
-                    self.insulinEffect = effects
                 }
 
                 updateGroup.leave()
@@ -212,12 +213,13 @@ final class LoopDataManager {
 
         if insulinOnBoard == nil {
             updateGroup.enter()
-            deviceDataManager.doseStore.insulinOnBoardAtDate(Date()) { (value, error) in
-                if let error = error {
+            deviceDataManager.doseStore.insulinOnBoard(at: Date()) { result in
+                switch result {
+                case .success(let values):
+                    self.insulinOnBoard = values
+                case .failure(let error):
                     self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                     self.insulinOnBoard = nil
-                } else {
-                    self.insulinOnBoard = value
                 }
                 updateGroup.leave()
             }
@@ -759,12 +761,12 @@ extension LoopDataManager {
                 "## LoopDataManager",
                 "predictedGlucose: \(predictedGlucose ?? [])",
                 "retrospectivePredictedGlucose: \(retrospectivePredictedGlucose ?? [])",
-                "recommendedTempBasal: \(recommendedTempBasal)",
-                "lastTempBasal: \(lastTempBasal)",
+                "recommendedTempBasal: \(String(describing: recommendedTempBasal))",
+                "lastTempBasal: \(String(describing: lastTempBasal))",
                 "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
-                "insulinOnBoard: \(insulinOnBoard)",
-                "carbsOnBoard: \(carbsOnBoard)",
-                "error: \(error)"
+                "insulinOnBoard: \(String(describing: insulinOnBoard))",
+                "carbsOnBoard: \(String(describing: carbsOnBoard))",
+                "error: \(String(describing: error))"
             ]
             completionHandler(report.joined(separator: "\n"))
         }
