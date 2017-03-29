@@ -9,6 +9,7 @@
 import UIKit
 import HealthKit
 import LoopKit
+import LoopUI
 
 
 class PredictionTableViewController: UITableViewController, IdentifiableClass, UIGestureRecognizerDelegate {
@@ -88,7 +89,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     var dataManager: DeviceDataManager!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: UIColor())
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 60),

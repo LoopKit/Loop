@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import SwiftCharts
+import LoopUI
 
 class GlucoseRangeScheduleCalculator: TargetPointsCalculator {
 

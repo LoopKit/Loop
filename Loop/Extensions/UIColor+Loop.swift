@@ -6,8 +6,8 @@
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
-
 import UIKit
+import LoopUI
 
 extension UIColor {
     @nonobjc static let axisLabelColor = secondaryLabelColor
@@ -23,4 +23,36 @@ extension UIColor {
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
     
     @nonobjc static let pumpStatusNormal = secondaryLabelColor
+}
+
+extension UIColor: ChartColors {
+    public var axisLineColor: UIColor {
+        get {
+            return UIColor.axisLineColor
+        }
+    }
+
+    public var axisLabelColor: UIColor {
+        get {
+            return UIColor.axisLabelColor
+        }
+    }
+
+    public var gridColor: UIColor {
+        get {
+            return UIColor.gridColor
+        }
+    }
+
+    public var glucoseTintColor: UIColor {
+        get {
+            return UIColor.glucoseTintColor
+        }
+    }
+
+    public var doseTintColor: UIColor {
+        get {
+            return UIColor.doseTintColor
+        }
+    }
 }
