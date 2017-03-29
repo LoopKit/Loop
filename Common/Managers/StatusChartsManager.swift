@@ -8,7 +8,7 @@
 
 import Foundation
 import HealthKit
-
+import LoopUI
 import SwiftCharts
 
 protocol TargetPointsCalculator {
