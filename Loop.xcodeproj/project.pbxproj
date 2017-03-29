@@ -201,7 +201,7 @@
 		4FB76FB91E8C42B000B39636 /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		4FB76FBA1E8C42CE00B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
 		4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
-		4FB76FBC1E8C433100B39636 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
+		4FB76FC61E8C57B100B39636 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
@@ -385,7 +385,7 @@
 		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKit.framework; path = Carthage/Build/iOS/RileyLinkKit.framework; sourceTree = "<group>"; };
 		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
-		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
+		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CollectionType.swift; path = Extensions/CollectionType.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
 		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -497,13 +497,12 @@
 		43FBEDD71D73843700B21F22 /* LevelMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevelMaskView.swift; sourceTree = "<group>"; };
 		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = "<group>"; };
 		4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GlucoseG4.swift; path = Loop/Models/GlucoseG4.swift; sourceTree = SOURCE_ROOT; };
-		4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StatusChartsManager.swift; path = Managers/StatusChartsManager.swift; sourceTree = "<group>"; };
 		4F08DE751E7B3113006741EA /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleUnit.swift; sourceTree = "<group>"; };
-		4F08DE801E7BB6F1006741EA /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
-		4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsScatterDownTrianglesLayer.swift; path = Views/ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
-		4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChartPointsTouchHighlightLayerViewCache.swift; path = Views/ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
+		4F08DE801E7BB6F1006741EA /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CGPoint.swift; path = Extensions/CGPoint.swift; sourceTree = "<group>"; };
+		4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
+		4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
 		4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CollectionType+Loop.swift"; sourceTree = "<group>"; };
 		4F08DEA01E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeScheduleCalculator.swift; sourceTree = "<group>"; };
 		4F08DEA21E81E12D006741EA /* DatedRangedContextCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatedRangedContextCalculator.swift; sourceTree = "<group>"; };
@@ -524,6 +523,7 @@
 		4F75288B1DFE1DC600C322D6 /* LoopUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F75288D1DFE1DC600C322D6 /* LoopUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoopUI.h; sourceTree = "<group>"; };
 		4F75288E1DFE1DC600C322D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StatusChartsManager.swift; path = Managers/StatusChartsManager.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteSensorDisplayable.swift; sourceTree = "<group>"; };
@@ -897,7 +897,6 @@
 		4F08DE6B1E799EBE006741EA /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -905,8 +904,6 @@
 		4F08DE821E7BB6FE006741EA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */,
-				4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -928,6 +925,8 @@
 		4F75288C1DFE1DC600C322D6 /* LoopUI */ = {
 			isa = PBXGroup;
 			children = (
+				4FB76FC41E8C576800B39636 /* Extensions */,
+				4FB76FC31E8C575900B39636 /* Managers */,
 				4F7528A61DFE20AE00C322D6 /* Models */,
 				4F7528931DFE1E1600C322D6 /* Views */,
 				4F75288D1DFE1DC600C322D6 /* LoopUI.h */,
@@ -941,6 +940,8 @@
 		4F7528931DFE1E1600C322D6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */,
+				4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */,
 				437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */,
 				43B371851CE583890013C5A6 /* BasalStateView.swift */,
 				437CEEBB1CD6DE6A003C8C80 /* BaseHUDView.swift */,
@@ -966,6 +967,23 @@
 				43BFF0C81E465B0A00FF19A9 /* StateColorPalette.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		4FB76FC31E8C575900B39636 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */,
+			);
+			name = Managers;
+			sourceTree = "<group>";
+		};
+		4FB76FC41E8C576800B39636 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				4F08DE801E7BB6F1006741EA /* CGPoint.swift */,
+				43649A621C7A347F00523D7F /* CollectionType.swift */,
+			);
+			name = Extensions;
 			sourceTree = "<group>";
 		};
 		4FF4D0FA1E1834BD00846527 /* Common */ = {
@@ -995,9 +1013,7 @@
 		4FF4D0FC1E1834CC00846527 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				4F08DE801E7BB6F1006741EA /* CGPoint.swift */,
 				4F08DE751E7B3113006741EA /* ChartPoint.swift */,
-				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
@@ -1581,12 +1597,12 @@
 				43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */,
 				4FB76FB71E8C428600B39636 /* UIColor.swift in Sources */,
 				4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */,
+				4FB76FC61E8C57B100B39636 /* StatusChartsManager.swift in Sources */,
 				4FB76FB41E8C3F7C00B39636 /* ChartAxisValueDoubleUnit.swift in Sources */,
 				4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
 				4F20AE631E6B87B100D07A06 /* ChartContentView.swift in Sources */,
 				4F7528A21DFE200B00C322D6 /* LevelMaskView.swift in Sources */,
-				4FB76FBC1E8C433100B39636 /* StatusChartsManager.swift in Sources */,
 				43BFF0C61E465A4400FF19A9 /* UIColor+HIG.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,
 				4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
