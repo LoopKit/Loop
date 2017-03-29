@@ -242,7 +242,7 @@ final class StatusChartsManager {
         }
     }
 
-    internal var xAxisValues: [ChartAxisValue]? {
+    private var xAxisValues: [ChartAxisValue]? {
         didSet {
             if let xAxisValues = xAxisValues, xAxisValues.count > 1 {
                 xAxisModel = ChartAxisModel(axisValues: xAxisValues, lineColor: axisLineColor)
@@ -640,7 +640,7 @@ final class StatusChartsManager {
         return Chart(frame: frame, layers: layers.flatMap { $0 })
     }
 
-    internal func generateXAxisValues() {
+    private func generateXAxisValues() {
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h a"
 
