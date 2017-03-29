@@ -1,8 +1,8 @@
 {
-  "commitish" : "v0.2.0",
+  "commitish" : "v0.2.1",
   "iOS" : [
     {
-      "hash" : "e3a173c01ed5db4ebf4ef27985cba0fe35b34fa852e438f63e794dc22abae64f",
+      "hash" : "118dcc4a3a4a825d154581ac4419e3827f7378fc1b2548090d1c06a72b5a2fbc",
       "name" : "ShareClient"
     }
   ],
