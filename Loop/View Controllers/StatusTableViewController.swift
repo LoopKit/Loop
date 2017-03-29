@@ -313,8 +313,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
-            if refreshContext.remove(.targets) != nil {
-                charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+            if refreshContext.remove(.targets) != nil,
+               let schedule = dataManager.glucoseTargetRangeSchedule {
+                charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
             }
 
             workoutMode = dataManager.workoutModeEnabled

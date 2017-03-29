@@ -136,6 +136,10 @@ SWIFT_CLASS("_TtC11SwiftCharts9ChartView")
 @interface ChartView : UIView
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
+/**
+  Initialization code shared between all initializers
+*/
+- (void)sharedInit;
 @end
 
 
@@ -152,15 +156,18 @@ SWIFT_CLASS("_TtC11SwiftCharts13ChartBaseView")
 
 SWIFT_CLASS("_TtC11SwiftCharts20ChartCandleStickView")
 @interface ChartCandleStickView : UIView
+@property (nonatomic) BOOL highlighted;
 - (nonnull instancetype)initWithLineX:(CGFloat)lineX width:(CGFloat)width top:(CGFloat)top bottom:(CGFloat)bottom innerRectTop:(CGFloat)innerRectTop innerRectBottom:(CGFloat)innerRectBottom fillColor:(UIColor * _Nonnull)fillColor strokeColor:(UIColor * _Nonnull)strokeColor strokeWidth:(CGFloat)strokeWidth OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (void)drawRect:(CGRect)rect;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
 
+@class UIBezierPath;
 
 SWIFT_CLASS("_TtC11SwiftCharts14ChartLinesView")
 @interface ChartLinesView : UIView
+- (nonnull instancetype)initWithPath:(UIBezierPath * _Nonnull)path frame:(CGRect)frame lineColor:(UIColor * _Nonnull)lineColor lineWidth:(CGFloat)lineWidth animDuration:(float)animDuration animDelay:(float)animDelay dashPattern:(NSArray<NSNumber *> * _Nullable)dashPattern OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end

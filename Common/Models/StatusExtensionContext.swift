@@ -39,11 +39,32 @@ struct GlucoseContext {
     let value: Double
     let unit: HKUnit
     let startDate: Date
-    let sensor: SensorDisplayableContext?
 
     var quantity: HKQuantity {
         return HKQuantity(unit: unit, doubleValue: value)
     }
+}
+
+struct PredictedGlucoseContext {
+    let values: [Double]
+    let unit: HKUnit
+    let startDate: Date
+    let interval: TimeInterval
+
+    var samples: [GlucoseContext] {
+        var result: [GlucoseContext] = []
+        for (i, v) in values.enumerated() {
+            result.append(GlucoseContext(value: v, unit: unit, startDate: startDate.addingTimeInterval(Double(i) * interval)))
+        }
+        return result
+    }
+}
+
+struct DatedRangeContext {
+    let startDate: Date
+    let endDate: Date
+    let minValue: Double
+    let maxValue: Double
 }
 
 extension ReservoirContext: RawRepresentable {
@@ -166,14 +187,11 @@ extension GlucoseContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var rawValue: RawValue {
-        var raw: RawValue = [
+        return [
             "value": value,
             "unit": unit.unitString,
             "startDate": startDate
         ]
-        raw["sensor"] = sensor?.rawValue
-
-        return raw
     }
 
     init?(rawValue: RawValue) {
@@ -188,25 +206,80 @@ extension GlucoseContext: RawRepresentable {
         self.value = value
         self.unit = HKUnit(from: unitString)
         self.startDate = startDate
+    }
+}
 
-        if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
-            self.sensor = SensorDisplayableContext(rawValue: rawValue)
-        } else {
-            self.sensor = nil
+extension PredictedGlucoseContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "values": values,
+            "unit": unit.unitString,
+            "startDate": startDate,
+            "interval": interval
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let values = rawValue["values"] as? [Double],
+            let unitString = rawValue["unit"] as? String,
+            let startDate = rawValue["startDate"] as? Date,
+            let interval = rawValue["interval"] as? TimeInterval
+        else {
+            return nil
         }
+
+        self.values = values
+        self.unit = HKUnit(from: unitString)
+        self.startDate = startDate
+        self.interval = interval
+    }
+}
+
+extension DatedRangeContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "startDate": startDate,
+            "endDate": endDate,
+            "minValue": minValue,
+            "maxValue": maxValue
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let startDate = rawValue["startDate"] as? Date,
+            let endDate = rawValue["endDate"] as? Date,
+            let minValue = rawValue["minValue"] as? Double,
+            let maxValue = rawValue["maxValue"] as? Double
+        else {
+            return nil
+        }
+
+        self.startDate = startDate
+        self.endDate = endDate
+        self.minValue = minValue
+        self.maxValue = maxValue
     }
 }
 
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
-    private let version = 2
+    private let version = 3
 
-    var latestGlucose: GlucoseContext?
+    var glucose: [GlucoseContext]?
+    var predictedGlucose: PredictedGlucoseContext?
     var reservoir: ReservoirContext?
     var loop: LoopContext?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
-    var eventualGlucose: GlucoseContext?
+    var targetRanges: [DatedRangeContext]?
+    var temporaryOverride: DatedRangeContext?
+    var sensor: SensorDisplayableContext?
     
     init() { }
     
@@ -215,8 +288,12 @@ struct StatusExtensionContext: RawRepresentable {
             return nil
         }
 
-        if let rawValue = rawValue["latestGlucose"] as? GlucoseContext.RawValue {
-            latestGlucose = GlucoseContext(rawValue: rawValue)
+        if let rawValue = rawValue["glucose"] as? [GlucoseContext.RawValue] {
+            glucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["predictedGlucose"] as? PredictedGlucoseContext.RawValue {
+            predictedGlucose = PredictedGlucoseContext(rawValue: rawValue)
         }
 
         if let rawValue = rawValue["reservoir"] as? ReservoirContext.RawValue {
@@ -233,8 +310,16 @@ struct StatusExtensionContext: RawRepresentable {
 
         batteryPercentage = rawValue["batteryPercentage"] as? Double
 
-        if let rawValue = rawValue["eventualGlucose"] as? GlucoseContext.RawValue {
-            eventualGlucose = GlucoseContext(rawValue: rawValue)
+        if let rawValue = rawValue["targetRanges"] as? [DatedRangeContext.RawValue] {
+            targetRanges = rawValue.flatMap({return DatedRangeContext(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["temporaryOverride"] as? DatedRangeContext.RawValue {
+            temporaryOverride = DatedRangeContext(rawValue: rawValue)
+        }
+
+        if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
+            sensor = SensorDisplayableContext(rawValue: rawValue)
         }
     }
     
@@ -242,12 +327,16 @@ struct StatusExtensionContext: RawRepresentable {
         var raw: RawValue = [
             "version": version
         ]
-        raw["latestGlucose"] = latestGlucose?.rawValue
+
+        raw["glucose"] = glucose?.map({return $0.rawValue})
+        raw["predictedGlucose"] = predictedGlucose?.rawValue
         raw["reservoir"] = reservoir?.rawValue
         raw["loop"] = loop?.rawValue
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
-        raw["eventualGlucose"] = eventualGlucose?.rawValue
+        raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
+        raw["temporaryOverride"] = temporaryOverride?.rawValue
+        raw["sensor"] = sensor?.rawValue
         return raw
     }
 }

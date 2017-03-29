@@ -20,6 +20,10 @@ extension HKUnit {
             return 1
         }
     }
+
+    static func milligramsPerDeciliterUnit() -> HKUnit {
+        return HKUnit.gramUnit(with: .milli).unitDivided(by: HKUnit.literUnit(with: .deci))
+    }
     
     static func millimolesPerLiterUnit() -> HKUnit {
         return HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter())
