@@ -138,7 +138,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                     }
 
                     reloadGroup.enter()
-                    glucoseStore.getGlucoseValues(start: self.charts.startDate, end: .distantFuture) { result -> Void in
+                    glucoseStore.getGlucoseValues(start: self.charts.startDate) { result -> Void in
                         switch result {
                         case .success(let values):
                             self.charts.setGlucoseValues(values)
