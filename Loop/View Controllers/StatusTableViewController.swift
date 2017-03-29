@@ -394,7 +394,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: UIColor())
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),

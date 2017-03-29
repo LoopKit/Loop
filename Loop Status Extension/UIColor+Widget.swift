@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LoopUI
 
 extension UIColor {
     @nonobjc static let axisLabelColor = subtitleLabelColor
@@ -24,4 +25,36 @@ extension UIColor {
     @nonobjc static let pumpStatusNormal = UIColor(red: 100 / 255, green: 101 / 255, blue: 105 / 255, alpha: 1)
 
     @nonobjc static let subtitleLabelColor = UIColor(white: 0, alpha: 0.4)
+}
+
+extension UIColor: ChartColors {
+    public var axisLineColor: UIColor {
+        get {
+            return UIColor.axisLineColor
+        }
+    }
+
+    public var axisLabelColor: UIColor {
+        get {
+            return UIColor.axisLabelColor
+        }
+    }
+
+    public var gridColor: UIColor {
+        get {
+            return UIColor.gridColor
+        }
+    }
+
+    public var glucoseTintColor: UIColor {
+        get {
+            return UIColor.glucoseTintColor
+        }
+    }
+
+    public var doseTintColor: UIColor {
+        get {
+            return UIColor.doseTintColor
+        }
+    }
 }

@@ -48,7 +48,6 @@
 		435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */; };
 		435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
-		43649A631C7A347F00523D7F /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
 		436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACED1D0BA636004E2427 /* InsulinDataSource.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
@@ -84,12 +83,10 @@
 		43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43A9438F1B926B7B0051FA24 /* Assets.xcassets */; };
 		43A943941B926B7B0051FA24 /* WatchApp.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 43A943721B926B7B0051FA24 /* WatchApp.app */; };
 		43B371881CE597D10013C5A6 /* ShareClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43B371871CE597D10013C5A6 /* ShareClient.framework */; };
-		43BFF0B21E45C18400FF19A9 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
 		43BFF0B51E45C1E700FF19A9 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0BB1E45C80600FF19A9 /* UIColor+Loop.swift */; };
 		43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0BE1E45C8EA00FF19A9 /* UIColor+Widget.swift */; };
-		43BFF0C21E464ACB00FF19A9 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
 		43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */; };
 		43BFF0C61E465A4400FF19A9 /* UIColor+HIG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */; };
 		43BFF0C71E465A4F00FF19A9 /* UIColor+HIG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */; };
@@ -149,16 +146,8 @@
 		43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */; };
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4D5B7A4B1D457CCA00796CA9 /* GlucoseG4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */; };
-		4F08DE6D1E799EC7006741EA /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
-		4F08DE6E1E799ED1006741EA /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
 		4F08DE771E7B31C0006741EA /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE751E7B3113006741EA /* ChartPoint.swift */; };
 		4F08DE791E7B57C9006741EA /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE751E7B3113006741EA /* ChartPoint.swift */; };
-		4F08DE811E7BB6F1006741EA /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE801E7BB6F1006741EA /* CGPoint.swift */; };
-		4F08DE851E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */; };
-		4F08DE861E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */; };
-		4F08DE871E7BB726006741EA /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */; };
-		4F08DE881E7BB726006741EA /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */; };
-		4F08DE8B1E7BB72C006741EA /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE801E7BB6F1006741EA /* CGPoint.swift */; };
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4F08DE9D1E81D0E9006741EA /* StatusChartsManager+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C1ABC1E5568A80067F1AE /* StatusChartsManager+LoopKit.swift */; };
@@ -201,11 +190,18 @@
 		4F7528A71DFE20CE00C322D6 /* SensorDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA28611D517E42001BC233 /* SensorDisplayable.swift */; };
 		4F7528A91DFE212600C322D6 /* GlucoseTrend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA285E1D50ED3D001BC233 /* GlucoseTrend.swift */; };
 		4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
-		4FAC02531E22F6360087A773 /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
 		4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */; };
 		4FB76FB41E8C3F7C00B39636 /* ChartAxisValueDoubleUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */; };
+		4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */; };
+		4FB76FB61E8C426900B39636 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */; };
+		4FB76FB71E8C428600B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
+		4FB76FB81E8C429D00B39636 /* CGPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE801E7BB6F1006741EA /* CGPoint.swift */; };
+		4FB76FB91E8C42B000B39636 /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43649A621C7A347F00523D7F /* CollectionType.swift */; };
+		4FB76FBA1E8C42CE00B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
+		4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
+		4FB76FBC1E8C433100B39636 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE6C1E799EC7006741EA /* StatusChartsManager.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
@@ -1410,7 +1406,6 @@
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
-				4F08DE851E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
 				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
 				430DA58E1D4AEC230097D1CA /* NSBundle.swift in Sources */,
@@ -1428,7 +1423,6 @@
 				43E397A31D56B9E40028E321 /* Glucose.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
-				43649A631C7A347F00523D7F /* CollectionType.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */,
@@ -1441,7 +1435,6 @@
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
 				C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */,
-				4F08DE811E7BB6F1006741EA /* CGPoint.swift in Sources */,
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				4F08DE771E7B31C0006741EA /* ChartPoint.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
@@ -1457,6 +1450,7 @@
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				4F08DEA11E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
+				4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
@@ -1482,7 +1476,6 @@
 				43E2D8C61D204678004DA55F /* KeychainManager.swift in Sources */,
 				439BED2C1E760A7A00B0AED5 /* DexCGMManager.swift in Sources */,
 				433EA4C21D9F39C900CD78FB /* PumpIDTableViewController.swift in Sources */,
-				43BFF0B21E45C18400FF19A9 /* UIColor.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				434F54611D28859B002A9274 /* ServiceCredential.swift in Sources */,
@@ -1494,10 +1487,8 @@
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
 				432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */,
-				4F08DE6D1E799EC7006741EA /* StatusChartsManager.swift in Sources */,
 				43DE92591C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				434F54631D28DD80002A9274 /* ValidatingIndicatorView.swift in Sources */,
-				4F08DE861E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
 				43DE92611C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1559,19 +1550,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */,
-				4FAC02531E22F6360087A773 /* CollectionType.swift in Sources */,
-				4F08DE881E7BB726006741EA /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
+				4FB76FBA1E8C42CE00B39636 /* UIColor.swift in Sources */,
 				4F2C15831E0757E600E160D4 /* HKUnit.swift in Sources */,
 				43E93FB51E4675E800EAB8DB /* NumberFormatter.swift in Sources */,
 				43BFF0CD1E466C8400FF19A9 /* StateColorPalette.swift in Sources */,
 				4F08DEA31E81E12D006741EA /* DatedRangedContextCalculator.swift in Sources */,
-				4F08DE8B1E7BB72C006741EA /* CGPoint.swift in Sources */,
-				43BFF0C21E464ACB00FF19A9 /* UIColor.swift in Sources */,
 				4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */,
-				4F08DE871E7BB726006741EA /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43BFF0C71E465A4F00FF19A9 /* UIColor+HIG.swift in Sources */,
-				4F08DE6E1E799ED1006741EA /* StatusChartsManager.swift in Sources */,
 				4F08DE791E7B57C9006741EA /* ChartPoint.swift in Sources */,
 				43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
@@ -1584,24 +1570,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F20AE621E6B879C00D07A06 /* ReservoirVolumeHUDView.swift in Sources */,
+				4FB76FB91E8C42B000B39636 /* CollectionType.swift in Sources */,
 				4FF4D0F91E17268800846527 /* IdentifiableClass.swift in Sources */,
 				4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */,
 				4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */,
 				4F7528A91DFE212600C322D6 /* GlucoseTrend.swift in Sources */,
 				4F7528A71DFE20CE00C322D6 /* SensorDisplayable.swift in Sources */,
+				4FB76FB61E8C426900B39636 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
 				4F2C15931E09BF2C00E160D4 /* HUDView.swift in Sources */,
 				43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */,
+				4FB76FB71E8C428600B39636 /* UIColor.swift in Sources */,
 				4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */,
 				4FB76FB41E8C3F7C00B39636 /* ChartAxisValueDoubleUnit.swift in Sources */,
 				4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
 				4F20AE631E6B87B100D07A06 /* ChartContentView.swift in Sources */,
 				4F7528A21DFE200B00C322D6 /* LevelMaskView.swift in Sources */,
+				4FB76FBC1E8C433100B39636 /* StatusChartsManager.swift in Sources */,
 				43BFF0C61E465A4400FF19A9 /* UIColor+HIG.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,
+				4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				4F75289A1DFE1F6000C322D6 /* BasalRateHUDView.swift in Sources */,
 				4F75289B1DFE1F6000C322D6 /* BatteryLevelHUDView.swift in Sources */,
 				4F75289C1DFE1F6000C322D6 /* GlucoseHUDView.swift in Sources */,
+				4FB76FB81E8C429D00B39636 /* CGPoint.swift in Sources */,
 				4F75289D1DFE1F6000C322D6 /* BaseHUDView.swift in Sources */,
 				43BFF0C91E465B0A00FF19A9 /* StateColorPalette.swift in Sources */,
 				43E0F0A51E46D1670064F7CE /* LevelHUDView.swift in Sources */,
