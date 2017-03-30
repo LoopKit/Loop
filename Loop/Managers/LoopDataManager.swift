@@ -198,13 +198,12 @@ final class LoopDataManager {
 
         if insulinEffect == nil {
             updateGroup.enter()
-            deviceDataManager.doseStore.getGlucoseEffects(start: effectStartDate, end: .distantFuture) { result -> Void in
-                switch result {
-                case .success(let effects):
-                    self.insulinEffect = effects
-                case .failure(let error):
+            deviceDataManager.doseStore.getGlucoseEffects(startDate: effectStartDate) { (effects, error) -> Void in
+                if let error = error {
                     self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                     self.insulinEffect = nil
+                } else {
+                    self.insulinEffect = effects
                 }
 
                 updateGroup.leave()
@@ -213,13 +212,12 @@ final class LoopDataManager {
 
         if insulinOnBoard == nil {
             updateGroup.enter()
-            deviceDataManager.doseStore.insulinOnBoard(at: Date()) { result in
-                switch result {
-                case .success(let values):
-                    self.insulinOnBoard = values
-                case .failure(let error):
+            deviceDataManager.doseStore.insulinOnBoardAtDate(Date()) { (value, error) in
+                if let error = error {
                     self.deviceDataManager.logger.addError(error, fromSource: "DoseStore")
                     self.insulinOnBoard = nil
+                } else {
+                    self.insulinOnBoard = value
                 }
                 updateGroup.leave()
             }

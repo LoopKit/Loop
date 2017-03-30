@@ -92,11 +92,14 @@ final class StatusExtensionDataManager {
             let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             updateGroup.enter()
-            glucoseStore.getGlucoseValues(start: chartStartDate, end: Date()) {
-                (result) in
+            glucoseStore.getRecentGlucoseValues(startDate: chartStartDate, endDate: Date()) {
+                (values, error) in
 
-                switch result {
-                case .success(let values):
+                if let error = error {
+                    self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
+                    context.glucose = nil
+                    context.predictedGlucose = nil
+                } else {
                     context.glucose = values.map({
                         return GlucoseContext(
                             value: $0.quantity.doubleValue(for: glucoseUnit),
@@ -114,10 +117,6 @@ final class StatusExtensionDataManager {
                             startDate: predictedGlucose[0].startDate,
                             interval: predictedGlucose[1].startDate.timeIntervalSince(predictedGlucose[0].startDate))
                     }
-                case .failure(let error):
-                    self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                    context.glucose = nil
-                    context.predictedGlucose = nil
                 }
                 updateGroup.leave()
             }
