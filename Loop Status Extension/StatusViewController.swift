@@ -29,7 +29,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var glucoseChartContentView: ChartContentView!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager(colors: UIColor())
+        let charts = StatusChartsManager(colors: ChartColorPalette(axisLine: UIColor.axisLineColor, axisLabel: UIColor.axisLabelColor, grid: UIColor.gridColor, glucoseTint: UIColor.glucoseTintColor, doseTint: UIColor.doseTintColor))
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),

@@ -24,35 +24,3 @@ extension UIColor {
     
     @nonobjc static let pumpStatusNormal = secondaryLabelColor
 }
-
-extension UIColor: ChartColors {
-    public var axisLineColor: UIColor {
-        get {
-            return UIColor.axisLineColor
-        }
-    }
-
-    public var axisLabelColor: UIColor {
-        get {
-            return UIColor.axisLabelColor
-        }
-    }
-
-    public var gridColor: UIColor {
-        get {
-            return UIColor.gridColor
-        }
-    }
-
-    public var glucoseTintColor: UIColor {
-        get {
-            return UIColor.glucoseTintColor
-        }
-    }
-
-    public var doseTintColor: UIColor {
-        get {
-            return UIColor.doseTintColor
-        }
-    }
-}
