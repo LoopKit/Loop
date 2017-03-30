@@ -206,13 +206,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                     if self.refreshContext.remove(.glucose) != nil {
                         reloadGroup.enter()
-                        glucoseStore.getRecentGlucoseValues(startDate: self.chartStartDate) { (values, error) -> Void in
-                            if let error = error {
+                        glucoseStore.getGlucoseValues(start: self.chartStartDate, end: .distantFuture) { result -> Void in
+                            switch result {
+                            case .success(let values):
+                                self.charts.setGlucoseValues(values)
+                            case .failure(let error):
                                 self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                                 self.refreshContext.update(with: .glucose)
                                 self.charts.setGlucoseValues([])
-                            } else {
-                                self.charts.setGlucoseValues(values)
                             }
 
                             reloadGroup.leave()
@@ -249,36 +250,39 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             if refreshContext.remove(.insulin) != nil {
                 reloadGroup.enter()
-                dataManager.doseStore.getInsulinOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
-                    if let error = error {
+                dataManager.doseStore.getInsulinOnBoardValues(start: chartStartDate, end: .distantFuture) { result -> Void in
+                    switch result {
+                    case .success(let values):
+                        self.charts.setIOBValues(values)
+                    case .failure(let error):
                         self.dataManager.logger.addError(error, fromSource: "DoseStore")
                         self.refreshContext.update(with: .insulin)
                         self.charts.setIOBValues([])
-                    } else {
-                        self.charts.setIOBValues(values)
                     }
                     reloadGroup.leave()
                 }
 
                 reloadGroup.enter()
-                dataManager.doseStore.getRecentNormalizedDoseEntries(startDate: chartStartDate) { (doses, error) -> Void in
-                    if let error = error {
+                dataManager.doseStore.getNormalizedDoseEntries(start: chartStartDate, end: .distantFuture) { result -> Void in
+                    switch result {
+                    case .failure(let error):
                         self.dataManager.logger.addError(error, fromSource: "DoseStore")
                         self.refreshContext.update(with: .insulin)
                         self.charts.setDoseEntries([])
-                    } else {
+                    case .success(let doses):
                         self.charts.setDoseEntries(doses)
                     }
                     reloadGroup.leave()
                 }
 
                 reloadGroup.enter()
-                dataManager.doseStore.getTotalRecentUnitsDelivered { (units, _, error) in
-                    if error != nil {
+                dataManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { result in
+                    switch result {
+                    case .success(let units):
+                        self.totalDelivery = units.value
+                    case .failure:
                         self.refreshContext.update(with: .insulin)
                         self.totalDelivery = nil
-                    } else {
-                        self.totalDelivery = units
                     }
 
                     reloadGroup.leave()
