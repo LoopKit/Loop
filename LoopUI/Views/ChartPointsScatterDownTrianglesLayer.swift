@@ -9,13 +9,13 @@
 import SwiftCharts
 
 
-class ChartPointsScatterDownTrianglesLayer<T: ChartPoint>: ChartPointsScatterLayer<T> {
+public class ChartPointsScatterDownTrianglesLayer<T: ChartPoint>: ChartPointsScatterLayer<T> {
 
-    required init(xAxis: ChartAxisLayer, yAxis: ChartAxisLayer, innerFrame: CGRect, chartPoints: [T], displayDelay: Float, itemSize: CGSize, itemFillColor: UIColor) {
+    required public init(xAxis: ChartAxisLayer, yAxis: ChartAxisLayer, innerFrame: CGRect, chartPoints: [T], displayDelay: Float, itemSize: CGSize, itemFillColor: UIColor) {
         super.init(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: chartPoints, displayDelay: displayDelay, itemSize: itemSize, itemFillColor: itemFillColor)
     }
 
-    override func drawChartPointModel(context: CGContext, chartPointModel: ChartPointLayerModel<T>) {
+    override public func drawChartPointModel(context: CGContext, chartPointModel: ChartPointLayerModel<T>) {
         let w = self.itemSize.width
         let h = self.itemSize.height
 

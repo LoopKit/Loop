@@ -9,6 +9,7 @@
 import UIKit
 import HealthKit
 import LoopKit
+import LoopUI
 
 
 class PredictionTableViewController: UITableViewController, IdentifiableClass, UIGestureRecognizerDelegate {
@@ -88,7 +89,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     var dataManager: DeviceDataManager!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: ChartColorPalette(axisLine: UIColor.axisLineColor, axisLabel: UIColor.axisLabelColor, grid: UIColor.gridColor, glucoseTint: UIColor.glucoseTintColor, doseTint: UIColor.doseTintColor))
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 60),
@@ -138,13 +139,14 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                     }
 
                     reloadGroup.enter()
-                    glucoseStore.getRecentGlucoseValues(startDate: self.charts.startDate) { (values, error) -> Void in
-                        if let error = error {
+                    glucoseStore.getGlucoseValues(start: self.charts.startDate) { result -> Void in
+                        switch result {
+                        case .success(let values):
+                            self.charts.setGlucoseValues(values)
+                        case .failure(let error):
                             self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                             self.needsRefresh = true
                             self.charts.setGlucoseValues([])
-                        } else {
-                            self.charts.setGlucoseValues(values)
                         }
 
                         reloadGroup.leave()
