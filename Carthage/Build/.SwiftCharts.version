@@ -1,0 +1,13 @@
+{
+  "commitish" : "0.5.1-extension-api-safe",
+  "iOS" : [
+    {
+      "hash" : "62cbb97f5e728e49218735ab23408638315a3951e00b342cbe2ae33aedd99f9e",
+      "name" : "SwiftCharts"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3\nBuild version 8E162",
+  "watchOS" : [
+
+  ]
+}
