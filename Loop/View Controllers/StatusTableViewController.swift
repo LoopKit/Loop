@@ -206,7 +206,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                     if self.refreshContext.remove(.glucose) != nil {
                         reloadGroup.enter()
-                        glucoseStore.getGlucoseValues(start: self.chartStartDate) { result -> Void in
+                        glucoseStore.getGlucoseValues(start: self.chartStartDate, end: .distantFuture) { result -> Void in
                             switch result {
                             case .success(let values):
                                 self.charts.setGlucoseValues(values)
@@ -250,7 +250,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             if refreshContext.remove(.insulin) != nil {
                 reloadGroup.enter()
-                dataManager.doseStore.getInsulinOnBoardValues(start: chartStartDate) { result -> Void in
+                dataManager.doseStore.getInsulinOnBoardValues(start: chartStartDate, end: .distantFuture) { result -> Void in
                     switch result {
                     case .success(let values):
                         self.charts.setIOBValues(values)
@@ -263,7 +263,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                 }
 
                 reloadGroup.enter()
-                dataManager.doseStore.getNormalizedDoseEntries(start: chartStartDate) { result -> Void in
+                dataManager.doseStore.getNormalizedDoseEntries(start: chartStartDate, end: .distantFuture) { result -> Void in
                     switch result {
                     case .failure(let error):
                         self.dataManager.logger.addError(error, fromSource: "DoseStore")

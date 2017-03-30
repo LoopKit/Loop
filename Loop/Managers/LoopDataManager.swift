@@ -198,7 +198,7 @@ final class LoopDataManager {
 
         if insulinEffect == nil {
             updateGroup.enter()
-            deviceDataManager.doseStore.getGlucoseEffects(start: effectStartDate) { result -> Void in
+            deviceDataManager.doseStore.getGlucoseEffects(start: effectStartDate, end: .distantFuture) { result -> Void in
                 switch result {
                 case .success(let effects):
                     self.insulinEffect = effects
