@@ -1,0 +1,29 @@
+{
+  "commitish" : "v1.0",
+  "iOS" : [
+    {
+      "hash" : "a37facbada2a322e4075abf8e8cded5db28183c4fb8c1ff4b71b0e367c22f96b",
+      "name" : "Crypto"
+    },
+    {
+      "hash" : "a18b119321af918976043c720ecb0735d3fca28fc0e93ed410fc0c3ddfe6b709",
+      "name" : "RileyLinkBLEKit"
+    },
+    {
+      "hash" : "9e655df79ad79588ee56a4a83546629e4215fdf3e0d37da2b97fe6a5e72f754f",
+      "name" : "NightscoutUploadKit"
+    },
+    {
+      "hash" : "300d0ec7faad316104dd93a70cd1bdc1212acb2478d043d6cb8e03e87ac242b8",
+      "name" : "RileyLinkKit"
+    },
+    {
+      "hash" : "8064d27b4af52d920e554b3bd1ef0ca9a2fbfc717febd83fc4265382a938ecb3",
+      "name" : "MinimedKit"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3\nBuild version 8E162",
+  "watchOS" : [
+
+  ]
+}

@@ -61,7 +61,7 @@ final class EnliteCGMManager: CGMManager {
     var debugDescription: String {
         return [
             "## EnliteCGMManager",
-            "sensorState: \(sensorState)",
+            "sensorState: \(String(describing: sensorState))",
             ""
         ].joined(separator: "\n")
     }

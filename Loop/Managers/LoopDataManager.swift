@@ -759,12 +759,12 @@ extension LoopDataManager {
                 "## LoopDataManager",
                 "predictedGlucose: \(predictedGlucose ?? [])",
                 "retrospectivePredictedGlucose: \(retrospectivePredictedGlucose ?? [])",
-                "recommendedTempBasal: \(recommendedTempBasal)",
-                "lastTempBasal: \(lastTempBasal)",
+                "recommendedTempBasal: \(String(describing: recommendedTempBasal))",
+                "lastTempBasal: \(String(describing: lastTempBasal))",
                 "lastLoopCompleted: \(lastLoopCompleted ?? .distantPast)",
-                "insulinOnBoard: \(insulinOnBoard)",
-                "carbsOnBoard: \(carbsOnBoard)",
-                "error: \(error)"
+                "insulinOnBoard: \(String(describing: insulinOnBoard))",
+                "carbsOnBoard: \(String(describing: carbsOnBoard))",
+                "error: \(String(describing: error))"
             ]
             completionHandler(report.joined(separator: "\n"))
         }

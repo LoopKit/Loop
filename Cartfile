@@ -1,4 +1,4 @@
-github "LoopKit/LoopKit" ~> 1.2.0
+github "LoopKit/LoopKit" == 1.2.0
 github "LoopKit/xDripG5" ~> 0.8.0
 github "bharat/SwiftCharts" "0.5.1-extension-api-safe"
 github "mddub/dexcom-share-client-swift" ~> 0.2.0
