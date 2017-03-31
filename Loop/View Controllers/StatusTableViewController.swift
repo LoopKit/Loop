@@ -206,16 +206,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                     if self.refreshContext.remove(.glucose) != nil {
                         reloadGroup.enter()
-                        glucoseStore.getGlucoseValues(start: self.chartStartDate) { result -> Void in
-                            switch result {
-                            case .success(let values):
-                                self.charts.setGlucoseValues(values)
-                            case .failure(let error):
-                                self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                                self.refreshContext.update(with: .glucose)
-                                self.charts.setGlucoseValues([])
-                            }
-
+                        glucoseStore.getCachedGlucoseValues(start: self.chartStartDate) {
+                            (values) in
+                            self.charts.setGlucoseValues(values)
                             reloadGroup.leave()
                         }
                     }
