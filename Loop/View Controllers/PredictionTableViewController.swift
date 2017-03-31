@@ -138,9 +138,16 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                     }
 
                     reloadGroup.enter()
-                    glucoseStore.getCachedGlucoseValues(start: self.charts.startDate) {
-                        (values) in
-                        self.charts.setGlucoseValues(values)
+                    glucoseStore.getGlucoseValues(start: self.charts.startDate) { result -> Void in
+                        switch result {
+                        case .success(let values):
+                            self.charts.setGlucoseValues(values)
+                        case .failure(let error):
+                            self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
+                            self.needsRefresh = true
+                            self.charts.setGlucoseValues([])
+                        }
+
                         reloadGroup.leave()
                     }
 
