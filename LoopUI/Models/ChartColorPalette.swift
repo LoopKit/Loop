@@ -6,9 +6,9 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
-/// A collection of colors for displaying state
+/// A palette of colors for displaying charts
 public struct ChartColorPalette {
     public let axisLine: UIColor
     public let axisLabel: UIColor

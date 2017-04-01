@@ -89,7 +89,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     var dataManager: DeviceDataManager!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager(colors: ChartColorPalette(axisLine: UIColor.axisLineColor, axisLabel: UIColor.axisLabelColor, grid: UIColor.gridColor, glucoseTint: UIColor.glucoseTintColor, doseTint: UIColor.doseTintColor))
+        let charts = StatusChartsManager(colors: .default)
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 60),
