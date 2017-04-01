@@ -92,31 +92,24 @@ final class StatusExtensionDataManager {
             let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             updateGroup.enter()
-            glucoseStore.getRecentGlucoseValues(startDate: chartStartDate, endDate: Date()) {
-                (values, error) in
+            glucoseStore.getCachedGlucoseValues(start: chartStartDate, end: Date()) {
+                (values) in
+                context.glucose = values.map({
+                    return GlucoseContext(
+                        value: $0.quantity.doubleValue(for: glucoseUnit),
+                        unit: glucoseUnit,
+                        startDate: $0.startDate
+                    )
+                })
 
-                if let error = error {
-                    self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                    context.glucose = nil
-                    context.predictedGlucose = nil
-                } else {
-                    context.glucose = values.map({
-                        return GlucoseContext(
-                            value: $0.quantity.doubleValue(for: glucoseUnit),
-                            unit: glucoseUnit,
-                            startDate: $0.startDate
-                        )
-                    })
-
-                    // Only tranfer the predicted glucose if we have glucose history
-                    if let predictedGlucose = predictedGlucose,
-                        predictedGlucose.count > 1 {
-                        context.predictedGlucose = PredictedGlucoseContext(
-                            values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
-                            unit: glucoseUnit,
-                            startDate: predictedGlucose[0].startDate,
-                            interval: predictedGlucose[1].startDate.timeIntervalSince(predictedGlucose[0].startDate))
-                    }
+                // Only tranfer the predicted glucose if we have glucose history
+                if let predictedGlucose = predictedGlucose,
+                    predictedGlucose.count > 1 {
+                    context.predictedGlucose = PredictedGlucoseContext(
+                        values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
+                        unit: glucoseUnit,
+                        startDate: predictedGlucose[0].startDate,
+                        interval: predictedGlucose[1].startDate.timeIntervalSince(predictedGlucose[0].startDate))
                 }
                 updateGroup.leave()
             }
