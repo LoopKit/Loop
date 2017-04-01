@@ -227,10 +227,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                         )
                         subtitleLabel.alpha = 1
                     }
-
-                    charts.endDate = eventualGlucose.startDate
                 }
-
             }
 
             charts.targetPointsCalculator = DatedRangeContextCalculator(targetRanges: context.targetRanges, temporaryOverride: context.temporaryOverride)

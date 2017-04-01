@@ -97,7 +97,7 @@ public final class StatusChartsManager {
     }
 
     /// The latest date on the X-axis
-    public var endDate = Date() {
+    private var endDate = Date() {
         didSet {
             if endDate != oldValue {
                 xAxisValues = nil
