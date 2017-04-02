@@ -29,7 +29,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var glucoseChartContentView: ChartContentView!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, glucoseTint: .glucoseTintColor, doseTint: .doseTintColor))
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
@@ -227,10 +227,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                         )
                         subtitleLabel.alpha = 1
                     }
-
-                    charts.endDate = eventualGlucose.startDate
                 }
-
             }
 
             charts.targetPointsCalculator = DatedRangeContextCalculator(targetRanges: context.targetRanges, temporaryOverride: context.temporaryOverride)
