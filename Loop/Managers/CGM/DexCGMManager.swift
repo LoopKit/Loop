@@ -108,18 +108,20 @@ final class ShareClientManager: CGMManager {
 
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
-    private let transmitter: Transmitter
+    private let transmitter: Transmitter?
 
-    init?(transmitterID: String?) {
-        guard let transmitterID = transmitterID else {
-            return nil
+    init(transmitterID: String?) {
+        if let transmitterID = transmitterID {
+            self.transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
+        } else {
+            self.transmitter = nil
         }
-
-        self.transmitter = Transmitter(ID: transmitterID, passiveModeEnabled: true)
 
         super.init()
 
-        self.transmitter.delegate = self
+        self.providesBLEHeartbeat = self.transmitter != nil
+
+        self.transmitter?.delegate = self
     }
 
     override var sensorState: SensorDisplayable? {
@@ -150,7 +152,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
         return [
             "## G5CGMManager",
             "latestReading: \(String(describing: latestReading))",
-            "transmitter: \(transmitter)",
+            "transmitter: \(String(describing: transmitter))",
             super.debugDescription,
             ""
         ].joined(separator: "\n")

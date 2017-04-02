@@ -88,7 +88,7 @@ extension UserDefaults {
                     return .g5(transmitterID: transmitterID)
                 }
 
-                return .share
+                return nil
             }
         }
         set {

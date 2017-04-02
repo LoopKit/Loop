@@ -12,11 +12,10 @@ enum CGM {
     case g5(transmitterID: String?)
     case g4
     case enlite
-    case share
 
     var appURL: URL? {
         switch self {
-        case .g4, .share:
+        case .g4:
             return URL(string: "dexcomshare://")
         case .g5:
             return URL(string: "dexcomcgm://")
@@ -33,8 +32,6 @@ enum CGM {
             return G4CGMManager()
         case .g5(let transmitterID):
             return G5CGMManager(transmitterID: transmitterID)
-        case .share:
-            return ShareClientManager()
         }
     }
 }
@@ -60,8 +57,6 @@ extension CGM: RawRepresentable {
             self = .g4
         case .enlite?:
             self = .enlite
-        case .share?:
-            self = .share
         case .none:
             return nil
         }
@@ -71,7 +66,6 @@ extension CGM: RawRepresentable {
         case g5
         case g4
         case enlite
-        case share
     }
 
     private var type: CGMType {
@@ -79,7 +73,6 @@ extension CGM: RawRepresentable {
         case .g5: return .g5
         case .g4: return .g4
         case .enlite: return .enlite
-        case .share: return .share
         }
     }
 
