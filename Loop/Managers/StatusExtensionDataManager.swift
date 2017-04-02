@@ -101,17 +101,19 @@ final class StatusExtensionDataManager {
                         startDate: $0.startDate
                     )
                 })
-
+                
                 // Only tranfer the predicted glucose if we have glucose history
                 // Drop the first element in predictedGlucose because it is the currentGlucose
                 // and will have a different interval to the next element
                 if let predictedGlucose = predictedGlucose?.dropFirst(),
                     predictedGlucose.count > 1 {
+                    let first = predictedGlucose[predictedGlucose.startIndex]
+                    let second = predictedGlucose[predictedGlucose.startIndex.advanced(by: 1)]
                     context.predictedGlucose = PredictedGlucoseContext(
                         values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
                         unit: glucoseUnit,
-                        startDate: predictedGlucose[1].startDate,
-                        interval: predictedGlucose[2].startDate.timeIntervalSince(predictedGlucose[1].startDate))
+                        startDate: first.startDate,
+                        interval: second.startDate.timeIntervalSince(first.startDate))
                 }
                 updateGroup.leave()
             }
