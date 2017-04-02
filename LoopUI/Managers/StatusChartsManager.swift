@@ -19,11 +19,9 @@ public protocol TargetPointsCalculator {
 }
 
 public final class StatusChartsManager {
-
-    private var colors: ChartColorPalette
-
-    public init(colors: ChartColorPalette) {
+    public init(colors: ChartColorPalette, settings: ChartSettings) {
         self.colors = colors
+        self.chartSettings = settings
 
         axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1), fontColor: colors.axisLabel)
 
@@ -32,17 +30,9 @@ public final class StatusChartsManager {
 
     // MARK: - Configuration
 
-    private lazy var chartSettings: ChartSettings = {
-        var chartSettings = ChartSettings()
-        chartSettings.top = 12
-        chartSettings.bottom = 0
-        chartSettings.trailing = 8
-        chartSettings.axisTitleLabelsToLabelsSpacing = 0
-        chartSettings.labelsToAxisSpacingX = 6
-        chartSettings.labelsWidthY = 30
+    private let colors: ChartColorPalette
 
-        return chartSettings
-    }()
+    private let chartSettings: ChartSettings
 
     /// The amount of horizontal space reserved for fixed margins
     public var fixedHorizontalMargin: CGFloat {

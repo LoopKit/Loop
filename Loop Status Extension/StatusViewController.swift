@@ -29,7 +29,25 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     @IBOutlet weak var glucoseChartContentView: ChartContentView!
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager(colors: ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, glucoseTint: .glucoseTintColor, doseTint: .doseTintColor))
+        let charts = StatusChartsManager(
+            colors: ChartColorPalette(
+                axisLine: .axisLineColor,
+                axisLabel: .axisLabelColor,
+                grid: .gridColor,
+                glucoseTint: .glucoseTintColor,
+                doseTint: .doseTintColor
+            ),
+            settings: {
+                var settings = ChartSettings()
+                settings.top = 4
+                settings.bottom = 8
+                settings.trailing = 8
+                settings.axisTitleLabelsToLabelsSpacing = 0
+                settings.labelsToAxisSpacingX = 6
+                settings.labelsWidthY = 30
+                return settings
+            }()
+        )
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
@@ -75,7 +93,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        subtitleLabel.alpha = 0
+        subtitleLabel.isHidden = true
         subtitleLabel.textColor = .subtitleLabelColor
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
@@ -97,7 +115,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         self.extensionContext?.widgetLargestAvailableDisplayMode = NCWidgetDisplayMode.expanded
-        glucoseChartContentView.alpha = self.extensionContext?.widgetActiveDisplayMode == NCWidgetDisplayMode.compact ? 0 : 1
+        glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode != .expanded
     }
 
     deinit {
@@ -107,10 +125,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
     
     func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
-        if (activeDisplayMode == NCWidgetDisplayMode.compact) {
-            self.preferredContentSize = maxSize
-        } else {
-            self.preferredContentSize = CGSize(width: maxSize.width, height: 210)
+        switch activeDisplayMode {
+        case .compact:
+            preferredContentSize = maxSize
+        case .expanded:
+            preferredContentSize = CGSize(width: maxSize.width, height: 210)
         }
     }
 
@@ -119,11 +138,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         coordinator.animate(alongsideTransition: {
             (UIViewControllerTransitionCoordinatorContext) -> Void in
-            if self.extensionContext?.widgetActiveDisplayMode == .compact {
-                self.glucoseChartContentView.alpha = 0
-            } else {
-                self.glucoseChartContentView.alpha = 1
-            }
+            self.glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode != .expanded
         })
     }
 
@@ -178,7 +193,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
         }
 
-        subtitleLabel.alpha = 0
+        subtitleLabel.isHidden = true
 
         let dateFormatter: DateFormatter = {
             let dateFormatter = DateFormatter()
@@ -225,7 +240,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                             eventualGlucoseNumberString,
                             eventualGlucose.unit.glucoseUnitDisplayString
                         )
-                        subtitleLabel.alpha = 1
+                        subtitleLabel.isHidden = false
                     }
                 }
             }

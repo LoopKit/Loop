@@ -12,7 +12,7 @@ import LoopUI
 extension UIColor {
     @nonobjc static let axisLabelColor = subtitleLabelColor
 
-    @nonobjc static let axisLineColor = subtitleLabelColor
+    @nonobjc static let axisLineColor = UIColor.clear
 
     @nonobjc static let doseTintColor = UIColor(red: 255 / 255, green: 109 / 255, blue: 0, alpha: 1)
 
