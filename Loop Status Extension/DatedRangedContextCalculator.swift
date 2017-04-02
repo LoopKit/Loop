@@ -9,6 +9,8 @@
 import Foundation
 import SwiftCharts
 
+import LoopUI
+
 class DatedRangeContextCalculator: TargetPointsCalculator {
 
     var targetRanges: [DatedRangeContext]?

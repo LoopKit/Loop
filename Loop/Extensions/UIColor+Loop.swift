@@ -6,8 +6,8 @@
 //  Copyright © 2016 LoopKit Authors. All rights reserved.
 //
 
-
 import UIKit
+import LoopUI
 
 extension UIColor {
     @nonobjc static let axisLabelColor = secondaryLabelColor

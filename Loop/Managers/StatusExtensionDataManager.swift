@@ -92,32 +92,28 @@ final class StatusExtensionDataManager {
             let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             updateGroup.enter()
-            glucoseStore.getGlucoseValues(start: chartStartDate, end: Date()) {
-                (result) in
-
-                switch result {
-                case .success(let values):
-                    context.glucose = values.map({
-                        return GlucoseContext(
-                            value: $0.quantity.doubleValue(for: glucoseUnit),
-                            unit: glucoseUnit,
-                            startDate: $0.startDate
-                        )
-                    })
-
-                    // Only tranfer the predicted glucose if we have glucose history
-                    if let predictedGlucose = predictedGlucose,
-                        predictedGlucose.count > 1 {
-                        context.predictedGlucose = PredictedGlucoseContext(
-                            values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
-                            unit: glucoseUnit,
-                            startDate: predictedGlucose[0].startDate,
-                            interval: predictedGlucose[1].startDate.timeIntervalSince(predictedGlucose[0].startDate))
-                    }
-                case .failure(let error):
-                    self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                    context.glucose = nil
-                    context.predictedGlucose = nil
+            glucoseStore.getCachedGlucoseValues(start: chartStartDate, end: Date()) {
+                (values) in
+                context.glucose = values.map({
+                    return GlucoseContext(
+                        value: $0.quantity.doubleValue(for: glucoseUnit),
+                        unit: glucoseUnit,
+                        startDate: $0.startDate
+                    )
+                })
+                
+                // Only tranfer the predicted glucose if we have glucose history
+                // Drop the first element in predictedGlucose because it is the currentGlucose
+                // and will have a different interval to the next element
+                if let predictedGlucose = predictedGlucose?.dropFirst(),
+                    predictedGlucose.count > 1 {
+                    let first = predictedGlucose[predictedGlucose.startIndex]
+                    let second = predictedGlucose[predictedGlucose.startIndex.advanced(by: 1)]
+                    context.predictedGlucose = PredictedGlucoseContext(
+                        values: predictedGlucose.map { $0.quantity.doubleValue(for: glucoseUnit) },
+                        unit: glucoseUnit,
+                        startDate: first.startDate,
+                        interval: second.startDate.timeIntervalSince(first.startDate))
                 }
                 updateGroup.leave()
             }

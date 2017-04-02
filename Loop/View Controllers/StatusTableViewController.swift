@@ -317,9 +317,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
-            if refreshContext.remove(.targets) != nil,
-               let schedule = dataManager.glucoseTargetRangeSchedule {
-                charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
+            if refreshContext.remove(.targets) != nil {
+                if let schedule = dataManager.glucoseTargetRangeSchedule {
+                    charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
+                } else {
+                    charts.targetPointsCalculator = nil
+                }
             }
 
             workoutMode = dataManager.workoutModeEnabled
@@ -394,7 +397,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: .default)
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
