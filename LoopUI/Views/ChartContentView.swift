@@ -14,7 +14,11 @@ public class ChartContentView: UIView {
         super.layoutSubviews()
 
         if chartView == nil || chartView!.frame != bounds {
-            chartView = chartGenerator?(bounds)
+            // 50 is the smallest height in which we should attempt to redraw a chart.
+            // Smaller sizes might be requested mid-animation, so ignore them.
+            if bounds.height > 50 {
+                chartView = chartGenerator?(bounds)
+            }
         } else if chartView!.superview == nil {
             addSubview(chartView!)
         }
