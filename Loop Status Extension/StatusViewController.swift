@@ -209,6 +209,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             let unit = glucose[0].unit
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
 
+            charts.glucoseUnit = unit
             charts.glucosePoints = glucose.map {
                 ChartPoint(
                     x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
@@ -225,20 +226,20 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 charts.predictedGlucosePoints = predictedGlucose.map {
                     ChartPoint(
                         x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                        y: ChartAxisValueDoubleUnit($0.value, unitString: unit.unitString, formatter: glucoseFormatter)
+                        y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: unit), unitString: unit.unitString, formatter: glucoseFormatter)
                     )
                 }
 
                 if let eventualGlucose = predictedGlucose.last {
                     let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
 
-                    if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.value)) {
+                    if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
                                 "Eventually %1$@ %2$@",
                                 comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
                             eventualGlucoseNumberString,
-                            eventualGlucose.unit.glucoseUnitDisplayString
+                            unit.glucoseUnitDisplayString
                         )
                         subtitleLabel.isHidden = false
                     }
