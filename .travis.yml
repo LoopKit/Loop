@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode8.1
+osx_image: xcode8.3
 # xcode_sdk: iphonesimulator10.0
 # xcode_project: Loop.xcodeproj
 # xcode_scheme: Loop
@@ -7,7 +7,7 @@ before_script:
 #     - carthage bootstrap
 script:
     # Build the app target
-    - xcodebuild -project Loop.xcodeproj -scheme Loop build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme Loop build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO | xcpretty
     # Run the test target
-    - xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'name=iPhone SE' test | xcpretty
-    - xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone SE' test | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme LoopTests -destination 'name=iPhone SE' test | xcpretty
+    - set -o pipefail && xcodebuild -project Loop.xcodeproj -scheme DoseMathTests -destination 'name=iPhone SE' test | xcpretty

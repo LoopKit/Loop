@@ -16,7 +16,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-    private(set) lazy var dataManager = DeviceDataManager()
+    private(set) lazy var deviceManager = DeviceDataManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         window?.tintColor = UIColor.tintColor
@@ -27,7 +27,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if  let navVC = window?.rootViewController as? UINavigationController,
             let statusVC = navVC.viewControllers.first as? StatusTableViewController {
-            statusVC.dataManager = dataManager
+            statusVC.dataManager = deviceManager
         }
 
         return true
@@ -49,8 +49,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-
-        dataManager.transmitter?.resumeScanning()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -79,7 +77,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             {
                 AnalyticsManager.sharedManager.didRetryBolus()
 
-                dataManager.enactBolus(units: units) { (error) in
+                deviceManager.enactBolus(units: units) { (error) in
                     if error != nil {
                         NotificationManager.sendBolusFailureNotificationForAmount(units, atStartDate: startDate)
                     }

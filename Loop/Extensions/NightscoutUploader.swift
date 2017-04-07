@@ -6,6 +6,9 @@
 //
 
 import CarbKit
+import CoreData
+import InsulinKit
+import MinimedKit
 import NightscoutUploadKit
 
 
@@ -45,6 +48,33 @@ extension NightscoutUploader: CarbStoreSyncDelegate {
                 completionHandler([])
             } else {
                 completionHandler(ids)
+            }
+        }
+    }
+}
+
+
+extension NightscoutUploader {
+    func upload(_ events: [PersistedPumpEvent], from pumpModel: PumpModel, completion: @escaping (NightscoutUploadKit.Either<[NSManagedObjectID], Error>) -> Void) {
+        var objectIDs = [NSManagedObjectID]()
+        var timestampedPumpEvents = [TimestampedHistoryEvent]()
+
+        for event in events {
+            objectIDs.append(event.objectID)
+
+            if let raw = event.raw, raw.count > 0, let type = MinimedKit.PumpEventType(rawValue: raw[0])?.eventType, let pumpEvent = type.init(availableData: raw, pumpModel: pumpModel) {
+                timestampedPumpEvents.append(TimestampedHistoryEvent(pumpEvent: pumpEvent, date: event.date))
+            }
+        }
+
+        let nsEvents = NightscoutPumpEvents.translate(timestampedPumpEvents, eventSource: "loop://\(UIDevice.current.name)", includeCarbs: false)
+
+        self.upload(nsEvents) { (result) in
+            switch result {
+            case .success( _):
+                completion(.success(objectIDs))
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }

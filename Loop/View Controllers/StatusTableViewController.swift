@@ -99,6 +99,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+
+        if !visible {
+            charts.didReceiveMemoryWarning()
+            refreshContext = .all
+        }
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -197,13 +206,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                     if self.refreshContext.remove(.glucose) != nil {
                         reloadGroup.enter()
-                        glucoseStore.getRecentGlucoseValues(startDate: self.chartStartDate) { (values, error) -> Void in
-                            if let error = error {
+                        glucoseStore.getGlucoseValues(start: self.chartStartDate) { result -> Void in
+                            switch result {
+                            case .success(let values):
+                                self.charts.setGlucoseValues(values)
+                            case .failure(let error):
                                 self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
                                 self.refreshContext.update(with: .glucose)
                                 self.charts.setGlucoseValues([])
-                            } else {
-                                self.charts.setGlucoseValues(values)
                             }
 
                             reloadGroup.leave()
@@ -215,6 +225,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     reloadGroup.enter()
                     self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, _) -> Void in
                         self.charts.setPredictedGlucoseValues(predictedGlucose ?? [])
+
+                        // Retry this refresh again if predicted glucose isn't available
+                        if predictedGlucose == nil {
+                            self.refreshContext.update(with: .status)
+                        }
+
                         newRecommendedTempBasal = recommendedTempBasal
                         self.lastTempBasal = lastTempBasal
                         self.lastLoopCompleted = lastLoopCompleted
@@ -234,36 +250,39 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
             if refreshContext.remove(.insulin) != nil {
                 reloadGroup.enter()
-                dataManager.doseStore.getInsulinOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
-                    if let error = error {
+                dataManager.doseStore.getInsulinOnBoardValues(start: chartStartDate) { result -> Void in
+                    switch result {
+                    case .success(let values):
+                        self.charts.setIOBValues(values)
+                    case .failure(let error):
                         self.dataManager.logger.addError(error, fromSource: "DoseStore")
                         self.refreshContext.update(with: .insulin)
                         self.charts.setIOBValues([])
-                    } else {
-                        self.charts.setIOBValues(values)
                     }
                     reloadGroup.leave()
                 }
 
                 reloadGroup.enter()
-                dataManager.doseStore.getRecentNormalizedDoseEntries(startDate: chartStartDate) { (doses, error) -> Void in
-                    if let error = error {
+                dataManager.doseStore.getNormalizedDoseEntries(start: chartStartDate) { result -> Void in
+                    switch result {
+                    case .failure(let error):
                         self.dataManager.logger.addError(error, fromSource: "DoseStore")
                         self.refreshContext.update(with: .insulin)
                         self.charts.setDoseEntries([])
-                    } else {
+                    case .success(let doses):
                         self.charts.setDoseEntries(doses)
                     }
                     reloadGroup.leave()
                 }
 
                 reloadGroup.enter()
-                dataManager.doseStore.getTotalRecentUnitsDelivered { (units, _, error) in
-                    if error != nil {
+                dataManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { result in
+                    switch result {
+                    case .success(let units):
+                        self.totalDelivery = units.value
+                    case .failure:
                         self.refreshContext.update(with: .insulin)
                         self.totalDelivery = nil
-                    } else {
-                        self.totalDelivery = units
                     }
 
                     reloadGroup.leave()
@@ -299,7 +318,11 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.dosingEnabled
 
             if refreshContext.remove(.targets) != nil {
-                charts.glucoseTargetRangeSchedule = dataManager.glucoseTargetRangeSchedule
+                if let schedule = dataManager.glucoseTargetRangeSchedule {
+                    charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
+                } else {
+                    charts.targetPointsCalculator = nil
+                }
             }
 
             workoutMode = dataManager.workoutModeEnabled
@@ -374,7 +397,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager()
+        let charts = StatusChartsManager(colors: .default, settings: .default)
 
         charts.glucoseDisplayRange = (
             min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 100),
@@ -395,13 +418,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     // MARK: Dose
 
     private var totalDelivery: Double?
-
-    private lazy var integerFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.maximumFractionDigits = 0
-
-        return formatter
-    }()
 
     // MARK: COB
 
@@ -430,14 +446,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             }
         }
     }
-
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-
-        return formatter
-    }()
 
     // MARK: - HUD Data
     
@@ -534,6 +542,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             switch StatusRow(rawValue: indexPath.row)! {
             case .recommendedBasal:
                 if let recommendedTempBasal = recommendedTempBasal {
+                    let timeFormatter = DateFormatter()
+                    timeFormatter.dateStyle = .none
+                    timeFormatter.timeStyle = .short
+
                     cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U/hour @ %2$@", comment: "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: recommendedTempBasal.rate), number: .decimal), timeFormatter.string(from: recommendedTempBasal.recommendedDate))
                     cell.selectionStyle = .default
                 } else {
@@ -570,6 +582,9 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     cell.subtitleLabel?.text = nil
                 }
             case .dose:
+                let integerFormatter = NumberFormatter()
+                integerFormatter.maximumFractionDigits = 0
+
                 if  let total = totalDelivery,
                     let totalString = integerFormatter.string(from: NSNumber(value: total)) {
                     cell.subtitleLabel?.text = String(format: NSLocalizedString("%@ U Total", comment: "The subtitle format describing total insulin. (1: localized insulin total)"), totalString)
@@ -727,14 +742,13 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     }
                 }
             }
-            self.dataManager.loopManager.getLoopStatus({ (_, _, _, _, _, iob, cob, _) in
+            self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, iob, cob, _) in
                 DispatchQueue.main.async {
                     vc.glucoseUnit = self.charts.glucoseUnit
                     vc.activeInsulin = iob?.value
                     vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
                 }
-            })
-
+            }
         case let vc as PredictionTableViewController:
             vc.dataManager = dataManager
         case let vc as SettingsTableViewController:
@@ -827,7 +841,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
-            if cgmAppURL != nil {
+            if dataManager.cgm?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
 
@@ -840,16 +854,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var cgmAppURL: URL? {
-        if let url = URL(string: "dexcomcgm://"), UIApplication.shared.canOpenURL(url) {
-            return url
-        } else if let url = URL(string: "dexcomshare://"), UIApplication.shared.canOpenURL(url) {
-            return url
-        } else {
-            return nil
-        }
-    }
-
     @objc private func showLastError(_: Any) {
         self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
             if let error = error {
@@ -859,7 +863,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let url = cgmAppURL {
+        if let url = dataManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }

@@ -47,7 +47,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         dataManager.rileyLinkManager.deviceScanningEnabled = true
 
-        if dataManager.transmitterEnabled || dataManager.receiverEnabled, let glucoseStore = dataManager.glucoseStore, glucoseStore.authorizationRequired {
+        if case .some = dataManager.cgm, let glucoseStore = dataManager.glucoseStore, glucoseStore.authorizationRequired {
             glucoseStore.authorize({ (success, error) -> Void in
                 // Do nothing for now
             })
@@ -97,10 +97,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     }
 
     fileprivate enum CGMRow: Int, CaseCountable {
-        case fetchEnlite = 0
-        case receiverEnabled
-        case transmitterEnabled
-        case transmitterID  // optional, only displayed if transmitterEnabled
+        case enlite = 0
+        case g4
+        case g5
+        case g5TransmitterID  // only displayed if g5 switched on
     }
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
@@ -144,9 +144,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .pump:
             return PumpRow.count
         case .cgm:
-            if dataManager.transmitterEnabled {
+            switch dataManager.cgm {
+            case .g5?:
                 return CGMRow.count
-            } else {
+            default:
                 return CGMRow.count - 1
             }
         case .configuration:
@@ -167,10 +168,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .dosing:
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
-                switchCell.`switch`?.isOn = dataManager.loopManager.dosingEnabled
+                switchCell.switch?.isOn = dataManager.loopManager.dosingEnabled
                 switchCell.titleLabel.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
-                switchCell.`switch`?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
+                switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
 
                 return switchCell
             case .preferredInsulinDataSource:
@@ -200,53 +201,45 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             }
             cell = configCell
         case .cgm:
-            if case .fetchEnlite = CGMRow(rawValue: indexPath.row)! {
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+            let row = CGMRow(rawValue: indexPath.row)!
+            switch row {
+            case .g5TransmitterID:
+                let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
 
-                switchCell.`switch`?.isOn = dataManager.fetchEnliteDataEnabled
-                switchCell.titleLabel.text = NSLocalizedString("Fetch Enlite Data", comment: "The title text for the fetch enlite data enabled switch cell")
-
-                switchCell.`switch`?.addTarget(self, action: #selector(fetchEnliteEnabledChanged(_:)), for: .valueChanged)
-
-                return switchCell
-            }
-
-            if case .receiverEnabled = CGMRow(rawValue: indexPath.row)! {
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-                switchCell.`switch`?.isOn = dataManager.receiverEnabled
-                switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver enabled switch cell")
-
-                switchCell.`switch`?.addTarget(self, action: #selector(receiverEnabledChanged(_:)), for: .valueChanged)
-
-                return switchCell
-            }
-
-            if case .transmitterEnabled = CGMRow(rawValue: indexPath.row)! {
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-                switchCell.`switch`?.isOn = dataManager.transmitterEnabled
-                switchCell.titleLabel.text = NSLocalizedString("G5 Transmitter", comment: "The title text for the G5 Transmitter enabled switch cell")
-
-                switchCell.`switch`?.addTarget(self, action: #selector(transmitterEnabledChanged(_:)), for: .valueChanged)
-
-                return switchCell
-
-            }
-
-            let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
-            switch CGMRow(rawValue: indexPath.row)! {
-            case .fetchEnlite:
-                break
-            case .transmitterEnabled:
-                break
-            case .transmitterID:
                 configCell.textLabel?.text = NSLocalizedString("G5 Transmitter ID", comment: "The title text for the Dexcom G5 transmitter ID config value")
-                configCell.detailTextLabel?.text = dataManager.transmitterID ?? TapToSetString
-            case .receiverEnabled:
-                break
+
+                if case .g5(let transmitterID)? = dataManager.cgm {
+                    configCell.detailTextLabel?.text = transmitterID ?? TapToSetString
+                }
+
+                cell = configCell
+            default:
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+
+                switch row {
+                case .enlite:
+                    switchCell.switch?.isOn = dataManager.cgm == .enlite
+                    switchCell.titleLabel.text = NSLocalizedString("Sof-Sensor / Enlite", comment: "The title text for the Medtronic sensor switch cell")
+                    switchCell.switch?.addTarget(self, action: #selector(enliteChanged(_:)), for: .valueChanged)
+                case .g4:
+                    switchCell.switch?.isOn = dataManager.cgm == .g4
+                    switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver switch cell")
+                    switchCell.switch?.addTarget(self, action: #selector(g4Changed(_:)), for: .valueChanged)
+                case .g5:
+                    if case .g5? = dataManager.cgm {
+                        switchCell.switch?.isOn = true
+                    } else {
+                        switchCell.switch?.isOn = false
+                    }
+
+                    switchCell.titleLabel.text = NSLocalizedString("G5 Transmitter", comment: "The title text for the G5 Transmitter switch cell")
+                    switchCell.switch?.addTarget(self, action: #selector(g5Changed(_:)), for: .valueChanged)
+                case .g5TransmitterID:
+                    assertionFailure()
+                }
+
+                cell = switchCell
             }
-            cell = configCell
         case .configuration:
             let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
 
@@ -383,8 +376,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch Section(rawValue: section)! {
         case .loop:
-            let bundle = Bundle.main
-            return bundle.localizedNameAndVersion
+            return Bundle.main.localizedNameAndVersion
         case .pump:
             return NSLocalizedString("Pump", comment: "The title of the pump section in settings")
         case .cgm:
@@ -428,28 +420,22 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 show(vc, sender: sender)
             }
         case .cgm:
-            let row = CGMRow(rawValue: indexPath.row)!
-            switch row {
-            case .fetchEnlite:
-                break
-            case .transmitterEnabled:
-                break
-            case .transmitterID:
+            switch CGMRow(rawValue: indexPath.row)! {
+            case .g5TransmitterID:
                 let vc: TextFieldTableViewController
+                var value: String?
 
-                switch row {
-                case .transmitterID:
-                    vc = .transmitterID(dataManager.transmitterID)
-                default:
-                    fatalError()
+                if case .g5(let transmitterID)? = dataManager.cgm {
+                    value = transmitterID
                 }
 
+                vc = .transmitterID(value)
                 vc.title = sender?.textLabel?.text
                 vc.indexPath = indexPath
                 vc.delegate = self
 
                 show(vc, sender: indexPath)
-            case .receiverEnabled:
+            default:
                 break
             }
         case .configuration:
@@ -684,60 +670,76 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         }
     }
 
-    @objc private func transmitterEnabledChanged(_ sender: UISwitch) {
+    // MARK: - CGM State
+
+    // MARK: Model
+
+    /// Temporarily caches the last transmitter ID so curious switch-flippers don't lose it!
+    private var g5TransmitterID: String?
+
+    @objc private func g5Changed(_ sender: UISwitch) {
+        tableView.beginUpdates()
         if sender.isOn {
-            enableTransmitter()
+            setG4SwitchOff()
+            setEnliteSwitchOff()
+            dataManager.cgm = .g5(transmitterID: g5TransmitterID)
+
+            tableView.insertRows(at: [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         } else {
-            disableTransmitter()
+            removeG5TransmitterIDRow()
+            dataManager.cgm = nil
         }
+        tableView.endUpdates()
     }
 
-    private func enableTransmitter() {
-        if dataManager.transmitterEnabled == false {
-            dataManager.transmitterEnabled = true
-            disableReceiver()
-            disableEnlite()
-            tableView.insertRows(at: [IndexPath(row: CGMRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
-        }
-    }
-
-    private func disableTransmitter() {
-        if dataManager.transmitterEnabled {
-            dataManager.transmitterEnabled = false
-            let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.transmitterEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-            switchCell.`switch`?.setOn(false, animated: true)
-            tableView.deleteRows(at: [IndexPath(row: CGMRow.transmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
-        }
-    }
-
-    @objc private func receiverEnabledChanged(_ sender: UISwitch) {
-        dataManager.receiverEnabled = sender.isOn
-
+    @objc private func g4Changed(_ sender: UISwitch) {
+        tableView.beginUpdates()
         if sender.isOn {
-            disableTransmitter()
-            disableEnlite()
+            setG5SwitchOff()
+            setEnliteSwitchOff()
+            dataManager.cgm = .g4
+        } else {
+            dataManager.cgm = nil
         }
+        tableView.endUpdates()
     }
 
-    private func disableReceiver() {
-        dataManager.receiverEnabled = false
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.receiverEnabled.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.`switch`?.setOn(false, animated: true)
-    }
-
-    func fetchEnliteEnabledChanged(_ sender: UISwitch) {
-        dataManager.fetchEnliteDataEnabled = sender.isOn
-
+    @objc func enliteChanged(_ sender: UISwitch) {
+        tableView.beginUpdates()
         if sender.isOn {
-            disableTransmitter()
-            disableReceiver()
+            setG5SwitchOff()
+            setG4SwitchOff()
+            dataManager.cgm = .enlite
+        } else {
+            dataManager.cgm = nil
+        }
+        tableView.endUpdates()
+    }
+
+    // MARK: Views
+
+    private func removeG5TransmitterIDRow() {
+        if case .g5(let transmitterID)? = dataManager.cgm {
+            g5TransmitterID = transmitterID
+            tableView.deleteRows(at: [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section:Section.cgm.rawValue)], with: .top)
         }
     }
 
-    private func disableEnlite() {
-        dataManager.fetchEnliteDataEnabled = false
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.fetchEnlite.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.`switch`?.setOn(false, animated: true)
+    private func setG5SwitchOff() {
+        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g5.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+        switchCell.switch?.setOn(false, animated: true)
+
+        removeG5TransmitterIDRow()
+    }
+
+    private func setG4SwitchOff() {
+        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g4.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+        switchCell.switch?.setOn(false, animated: true)
+    }
+
+    private func setEnliteSwitchOff() {
+        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.enlite.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
+        switchCell.switch?.setOn(false, animated: true)
     }
 
     // MARK: - DailyValueScheduleTableViewControllerDelegate
@@ -830,8 +832,14 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                 }
             case .cgm:
                 switch CGMRow(rawValue: indexPath.row)! {
-                case .transmitterID:
-                    dataManager.transmitterID = controller.value
+                case .g5TransmitterID:
+                    var transmitterID = controller.value
+
+                    if transmitterID?.isEmpty ?? false {
+                        transmitterID = nil
+                    }
+
+                    dataManager.cgm = .g5(transmitterID: transmitterID)
                 default:
                     assertionFailure()
                 }
