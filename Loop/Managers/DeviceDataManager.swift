@@ -707,7 +707,7 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate {
 
     // MARK: - GlucoseKit
 
-    let glucoseStore: GlucoseStore
+    let glucoseStore = GlucoseStore()
     func glucoseStore(_ glucoseStore: GlucoseStore){
     glucoseStore.managedDataInterval = nil
     }
