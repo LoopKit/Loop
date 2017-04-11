@@ -708,9 +708,6 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate {
     // MARK: - GlucoseKit
 
     let glucoseStore = GlucoseStore()
-    func glucoseStore(_ glucoseStore: GlucoseStore){
-    glucoseStore.managedDataInterval = nil
-    }
 
     // MARK: - InsulinKit
 
@@ -749,6 +746,8 @@ final class DeviceDataManager: CarbStoreDelegate, DoseStoreDelegate {
 
     init() {
         let pumpID = UserDefaults.standard.pumpID
+        
+          glucoseStore?.managedDataInterval = nil
 
         doseStore = DoseStore(
             pumpID: pumpID,
