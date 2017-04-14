@@ -18,20 +18,15 @@ extension UserDefaults {
         case cgmSettings = "com.loopkit.Loop.cgmSettings"
         case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
-        case DosingEnabled = "com.loudnate.Naterade.DosingEnabled"
+        case loopSettings = "com.loopkit.Loop.loopSettings"
         case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
-        case GlucoseTargetRangeSchedule = "com.loudnate.Naterade.GlucoseTargetRangeSchedule"
-        case MaximumBasalRatePerHour = "com.loudnate.Naterade.MaximumBasalRatePerHour"
-        case MaximumBolus = "com.loudnate.Naterade.MaximumBolus"
         case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case PumpID = "com.loudnate.Naterade.PumpID"
         case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case PumpRegion = "com.loopkit.Loop.PumpRegion"
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
-        case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
         case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
-        case MinimumBGGuard = "com.loopkit.Loop.MinimumBGGuard"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -105,12 +100,60 @@ extension UserDefaults {
         }
     }
 
-    var dosingEnabled: Bool {
+    var loopSettings: LoopSettings? {
         get {
-            return bool(forKey: Key.DosingEnabled.rawValue)
+            if let rawValue = dictionary(forKey: Key.loopSettings.rawValue) {
+                return LoopSettings(rawValue: rawValue)
+            } else {
+                // Migrate the version 0 case
+                defer {
+                    removeObject(forKey: "com.loudnate.Naterade.DosingEnabled")
+                    removeObject(forKey: "com.loudnate.Naterade.GlucoseTargetRangeSchedule")
+                    removeObject(forKey:  "com.loudnate.Naterade.MaximumBasalRatePerHour")
+                    removeObject(forKey: "com.loudnate.Naterade.MaximumBolus")
+                    removeObject(forKey: "com.loopkit.Loop.MinimumBGGuard")
+                    removeObject(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
+                }
+
+                let glucoseTargetRangeSchedule: GlucoseRangeSchedule?
+                if let rawValue = dictionary(forKey: "com.loudnate.Naterade.GlucoseTargetRangeSchedule") {
+                    glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: rawValue)
+                } else {
+                    glucoseTargetRangeSchedule = nil
+                }
+
+                let minimumBGGuard: GlucoseThreshold?
+                if let rawValue = dictionary(forKey: "com.loopkit.Loop.MinimumBGGuard") {
+                    minimumBGGuard = GlucoseThreshold(rawValue: rawValue)
+                } else {
+                    minimumBGGuard = nil
+                }
+
+                var maximumBasalRatePerHour: Double? = double(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
+                if maximumBasalRatePerHour! <= 0 {
+                    maximumBasalRatePerHour = nil
+                }
+
+                var maximumBolus: Double? = double(forKey: "com.loudnate.Naterade.MaximumBolus")
+                if maximumBolus! <= 0 {
+                    maximumBolus = nil
+                }
+
+                let settings = LoopSettings(
+                    dosingEnabled: bool(forKey: "com.loudnate.Naterade.DosingEnabled"),
+                    glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+                    maximumBasalRatePerHour: maximumBasalRatePerHour,
+                    maximumBolus: maximumBolus,
+                    minimumBGGuard: minimumBGGuard,
+                    retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
+                )
+                self.loopSettings = settings
+
+                return settings
+            }
         }
         set {
-            set(newValue, forKey: Key.DosingEnabled.rawValue)
+            set(newValue?.rawValue, forKey: Key.loopSettings.rawValue)
         }
     }
 
@@ -139,49 +182,6 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.InsulinSensitivitySchedule.rawValue)
-        }
-    }
-
-    var glucoseTargetRangeSchedule: GlucoseRangeSchedule? {
-        get {
-            if let rawValue = dictionary(forKey: Key.GlucoseTargetRangeSchedule.rawValue) {
-                return GlucoseRangeSchedule(rawValue: rawValue)
-            } else {
-                return nil
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.GlucoseTargetRangeSchedule.rawValue)
-        }
-    }
-
-    var maximumBasalRatePerHour: Double? {
-        get {
-            let value = double(forKey: Key.MaximumBasalRatePerHour.rawValue)
-
-            return value > 0 ? value : nil
-        }
-        set {
-            if let maximumBasalRatePerHour = newValue {
-                set(maximumBasalRatePerHour, forKey: Key.MaximumBasalRatePerHour.rawValue)
-            } else {
-                removeObject(forKey: Key.MaximumBasalRatePerHour.rawValue)
-            }
-        }
-    }
-
-    var maximumBolus: Double? {
-        get {
-            let value = double(forKey: Key.MaximumBolus.rawValue)
-
-            return value > 0 ? value : nil
-        }
-        set {
-            if let maximumBolus = newValue {
-                set(maximumBolus, forKey: Key.MaximumBolus.rawValue)
-            } else {
-                removeObject(forKey: Key.MaximumBolus.rawValue)
-            }
         }
     }
 
@@ -242,15 +242,6 @@ extension UserDefaults {
         }
     }
 
-    var retrospectiveCorrectionEnabled: Bool {
-        get {
-            return bool(forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
-        }
-    }
-
     var batteryChemistry: BatteryChemistryType? {
         get {
             return BatteryChemistryType(rawValue: integer(forKey: Key.BatteryChemistry.rawValue))
@@ -261,19 +252,6 @@ extension UserDefaults {
             } else {
                 removeObject(forKey: Key.BatteryChemistry.rawValue)
             }
-        }
-    }
-    
-    var minimumBGGuard: GlucoseThreshold? {
-        get {
-            if let rawValue = dictionary(forKey: Key.MinimumBGGuard.rawValue) {
-                return GlucoseThreshold(rawValue: rawValue)
-            } else {
-                return nil
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.MinimumBGGuard.rawValue)
         }
     }
 

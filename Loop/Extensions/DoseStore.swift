@@ -11,11 +11,11 @@ import MinimedKit
 
 
 // Bridges support for MinimedKit data types
-extension DoseStore {
+extension LoopDataManager {
     /**
      Adds and persists new pump events.
      */
-    func add(_ pumpEvents: [TimestampedHistoryEvent], completionHandler: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
+    func addPumpEvents(_ pumpEvents: [TimestampedHistoryEvent], completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         var events: [NewPumpEvent] = []
         var lastTempBasalAmount: DoseEntry?
         var title: String
@@ -61,6 +61,6 @@ extension DoseStore {
             events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title))
         }
 
-        addPumpEvents(events, completionHandler: completionHandler)
+        addPumpEvents(events, completion: completion)
     }
 }
