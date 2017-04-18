@@ -23,6 +23,17 @@ struct LoopSettings {
 }
 
 
+extension LoopSettings {
+    var enabledEffects: PredictionInputEffect {
+        var inputs = PredictionInputEffect.all
+        if !retrospectiveCorrectionEnabled {
+            inputs.remove(.retrospection)
+        }
+        return inputs
+    }
+}
+
+
 extension LoopSettings: RawRepresentable {
     typealias RawValue = [String: Any]
     private static let version = 1

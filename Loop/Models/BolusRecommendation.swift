@@ -73,3 +73,14 @@ struct BolusRecommendation {
         self.notice = notice
     }
 }
+
+extension BolusRecommendation: Comparable {
+    static func ==(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount == rhs.amount
+    }
+
+    static func <(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount < rhs.amount
+    }
+}
+

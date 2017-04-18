@@ -181,6 +181,9 @@ final class LoopDataManager {
         }
     }
 
+    /// The amount of time since a given date that data should be considered valid
+    var recencyInterval = TimeInterval(minutes: 15)
+
     /// Sets a new time zone for a the schedule-based settings
     ///
     /// - Parameter timeZone: The time zone
@@ -328,6 +331,12 @@ final class LoopDataManager {
 
     // Actions
 
+    func enactRecommendedTempBasal(_ completion: @escaping (_ error: Error?) -> Void) {
+        dataAccessQueue.async {
+            self.setRecommendedTempBasal(completion)
+        }
+    }
+
     /// Runs the "loop"
     ///
     /// Executes an analysis of the current data, and recommends an adjustment to the current
@@ -342,7 +351,7 @@ final class LoopDataManager {
                 try self.update()
 
                 if self.settings.dosingEnabled {
-                    self.setRecommendedTempBasal { (success, error) -> Void in
+                    self.setRecommendedTempBasal { (error) -> Void in
                         self.lastLoopError = error
 
                         if let error = error {
@@ -366,6 +375,27 @@ final class LoopDataManager {
         }
     }
 
+    func getPredictedGlucose(using inputs: PredictionInputEffect, completion: @escaping (_ prediction: Result<[GlucoseValue]>) -> Void) {
+        dataAccessQueue.async {
+            do {
+                completion(.success(try self.predictGlucoseFromCurrentData(using: inputs)))
+            } catch let error {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func getRecommendedBolus(_ resultsHandler: @escaping (_ units: BolusRecommendation?, _ error: Error?) -> Void) {
+        dataAccessQueue.async {
+            do {
+                let recommendation = try self.recommendBolus()
+                resultsHandler(recommendation, nil)
+            } catch let error {
+                resultsHandler(nil, error)
+            }
+        }
+    }
+
     // References to registered notification center observers
     private var carbUpdateObserver: Any?
 
@@ -376,6 +406,7 @@ final class LoopDataManager {
     }
 
     private func update() throws {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
         let updateGroup = DispatchGroup()
 
         // Fetch glucose effects as far back as we want to make retroactive analysis
@@ -533,6 +564,8 @@ final class LoopDataManager {
 
      **/
     private func getPendingInsulin() throws -> Double {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
         guard let basalRates = basalRateSchedule else {
             throw LoopError.configurationError("Basal Rate Schedule")
         }
@@ -556,39 +589,33 @@ final class LoopDataManager {
         return pendingTempBasalInsulin + pendingBolusAmount
     }
 
-    func modelPredictedGlucose(using inputs: [PredictionInputEffect], resultsHandler: @escaping (_ predictedGlucose: [GlucoseValue]?, _ error: Error?) -> Void) {
-        dataAccessQueue.async { 
-            guard let glucose = self.glucoseStore.latestGlucose else {
-                resultsHandler(nil, LoopError.missingDataError(details: "Cannot predict glucose due to missing input data", recovery: "Check your CGM data source"))
-                return
-            }
+    private func predictGlucoseFromCurrentData(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-            var momentum: [GlucoseEffect] = []
-            var effects: [[GlucoseEffect]] = []
-
-            for input in inputs {
-                switch input {
-                case .carbs:
-                    if let carbEffect = self.carbEffect {
-                        effects.append(carbEffect)
-                    }
-                case .insulin:
-                    if let insulinEffect = self.insulinEffect {
-                        effects.append(insulinEffect)
-                    }
-                case .momentum:
-                    if let momentumEffect = self.glucoseMomentumEffect {
-                        momentum = momentumEffect
-                    }
-                case .retrospection:
-                    effects.append(self.retrospectiveGlucoseEffect)
-                }
-            }
-
-            let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: effects)
-
-            resultsHandler(prediction, nil)
+        guard let glucose = self.glucoseStore.latestGlucose else {
+            throw LoopError.missingDataError(details: "Cannot predict glucose due to missing input data", recovery: "Check your CGM data source")
         }
+
+        var momentum: [GlucoseEffect] = []
+        var effects: [[GlucoseEffect]] = []
+
+        if inputs.contains(.carbs), let carbEffect = self.carbEffect {
+            effects.append(carbEffect)
+        }
+
+        if inputs.contains(.insulin), let insulinEffect = self.insulinEffect {
+            effects.append(insulinEffect)
+        }
+
+        if inputs.contains(.momentum), let momentumEffect = self.glucoseMomentumEffect {
+            momentum = momentumEffect
+        }
+
+        if inputs.contains(.retrospection) {
+            effects.append(self.retrospectiveGlucoseEffect)
+        }
+
+        return LoopMath.predictGlucose(glucose, momentum: momentum, effects: effects)
     }
 
     // Calculation
@@ -627,10 +654,8 @@ final class LoopDataManager {
     private var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
-            predictedGlucoseWithoutMomentum = nil
         }
     }
-    private var predictedGlucoseWithoutMomentum: [GlucoseValue]?
     private var retrospectivePredictedGlucose: [GlucoseValue]? {
         didSet {
             retrospectiveGlucoseEffect = []
@@ -665,7 +690,9 @@ final class LoopDataManager {
  
      *This method should only be called from the `dataAccessQueue`*
      */
-    private func updateRetrospectiveGlucoseEffect() throws {
+    private func updateRetrospectiveGlucoseEffect(effectDuration: TimeInterval = TimeInterval(minutes: 60)) throws {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
         guard
             let carbEffect = self.carbEffect,
             let insulinEffect = self.insulinEffect
@@ -698,7 +725,7 @@ final class LoopDataManager {
         let type = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!
         let glucose = HKQuantitySample(type: type, quantity: change.end.quantity, start: change.end.startDate, end: change.end.endDate)
 
-        self.retrospectiveGlucoseEffect = LoopMath.decayEffect(from: glucose, atRate: velocity, for: TimeInterval(minutes: 60))
+        self.retrospectiveGlucoseEffect = LoopMath.decayEffect(from: glucose, atRate: velocity, for: effectDuration)
     }
 
     /**
@@ -707,6 +734,8 @@ final class LoopDataManager {
      *This method should only be called from the `dataAccessQueue`*
      */
     private func updatePredictedGlucoseAndRecommendedBasal() throws {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
         guard let glucose = glucoseStore.latestGlucose else {
             self.predictedGlucose = nil
             throw LoopError.missingDataError(details: "Glucose", recovery: "Check your CGM data source")
@@ -718,7 +747,6 @@ final class LoopDataManager {
         }
 
         let startDate = Date()
-        let recencyInterval = TimeInterval(minutes: 15)
 
         guard startDate.timeIntervalSince(glucose.startDate) <= recencyInterval else {
             self.predictedGlucose = nil
@@ -730,57 +758,13 @@ final class LoopDataManager {
             throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
 
-        guard let
-            momentum = self.glucoseMomentumEffect,
-            let carbEffect = self.carbEffect,
-            let insulinEffect = self.insulinEffect
-        else {
+        guard glucoseMomentumEffect != nil, carbEffect != nil, insulinEffect != nil else {
             self.predictedGlucose = nil
             throw LoopError.missingDataError(details: "Glucose effects", recovery: nil)
         }
 
-        var error: Error?
-
-        let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
-        let predictionWithRetrospectiveEffect = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect, retrospectiveGlucoseEffect)
-        let predictionWithoutMomentum = LoopMath.predictGlucose(glucose, effects: carbEffect, insulinEffect)
-
-        let predictDiff: Double
-
-        let unit = HKUnit.milligramsPerDeciliterUnit()
-        if  let lastA = prediction.last?.quantity.doubleValue(for: unit),
-            let lastB = predictionWithRetrospectiveEffect.last?.quantity.doubleValue(for: unit)
-        {
-            predictDiff = lastB - lastA
-        } else {
-            predictDiff = 0
-        }
-
-        let eventualBGWithRetrospectiveEffect: Double = predictionWithRetrospectiveEffect.last?.quantity.doubleValue(for: unit) ?? 0
-        let eventualBGWithoutMomentum: Double = predictionWithoutMomentum.last?.quantity.doubleValue(for: unit) ?? 0
-
-        defer {
-            logger.addLoopStatus(
-                startDate: startDate,
-                endDate: Date(),
-                glucose: glucose,
-                effects: [
-                    "momentum": momentum,
-                    "carbs": carbEffect,
-                    "insulin": insulinEffect,
-                    "retrospective_glucose": retrospectiveGlucoseEffect
-                ],
-                error: error,
-                prediction: prediction,
-                predictionWithRetrospectiveEffect: predictDiff,
-                eventualBGWithRetrospectiveEffect: eventualBGWithRetrospectiveEffect,
-                eventualBGWithoutMomentum: eventualBGWithoutMomentum,
-                recommendedTempBasal: recommendedTempBasal
-            )
-        }
-
-        self.predictedGlucose = settings.retrospectiveCorrectionEnabled ? predictionWithRetrospectiveEffect : prediction
-        self.predictedGlucoseWithoutMomentum = predictionWithoutMomentum
+        let predictedGlucose = try predictGlucoseFromCurrentData(using: settings.enabledEffects)
+        self.predictedGlucose = predictedGlucose
 
         guard let minimumBGGuard = settings.minimumBGGuard else {
             throw LoopError.configurationError("Minimum BG Guard")
@@ -792,13 +776,11 @@ final class LoopDataManager {
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule
         else {
-            error = LoopError.configurationError("Check settings")
-            throw error!
+            throw LoopError.configurationError("Check settings")
         }
 
         guard
             lastBolus == nil,  // Don't recommend changes if a bolus was just set
-            let predictedGlucose = self.predictedGlucose,
             let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
                 maxBasalRate: maxBasal,
@@ -815,14 +797,16 @@ final class LoopDataManager {
         recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.rate, duration: tempBasal.duration)
     }
 
+    /// *This method should only be called from the `dataAccessQueue`*
     private func recommendBolus() throws -> BolusRecommendation {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
         guard let minimumBGGuard = settings.minimumBGGuard else {
             throw LoopError.configurationError("Minimum BG Guard")
         }
 
-        guard let
-            glucose = predictedGlucose,
-            let glucoseWithoutMomentum = predictedGlucoseWithoutMomentum,
+        guard
+            let predictedGlucose = predictedGlucose,
             let maxBolus = settings.maximumBolus,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
@@ -831,9 +815,7 @@ final class LoopDataManager {
             throw LoopError.configurationError("Check Settings")
         }
 
-        let recencyInterval = TimeInterval(minutes: 15)
-        
-        guard let glucoseDate = glucose.first?.startDate else {
+        guard let glucoseDate = predictedGlucose.first?.startDate else {
             throw LoopError.missingDataError(details: "No glucose data found", recovery: "Check your CGM source")
         }
 
@@ -843,7 +825,7 @@ final class LoopDataManager {
 
         let pendingInsulin = try self.getPendingInsulin()
 
-        let recommendationWithMomentum = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+        let recommendation = DoseMath.recommendBolusFromPredictedGlucose(predictedGlucose,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
@@ -852,41 +834,34 @@ final class LoopDataManager {
             minimumBGGuard: minimumBGGuard
         )
 
-        let recommendationWithoutMomentum = DoseMath.recommendBolusFromPredictedGlucose(glucoseWithoutMomentum,
-            maxBolus: maxBolus,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates,
-            pendingInsulin: pendingInsulin,
-            minimumBGGuard: minimumBGGuard
+        // TODO: This was added in https://github.com/LoopKit/Loop/issues/370, but concerns were raised
+        // that this contradicts users expectations in https://github.com/LoopKit/Loop/issues/435
+        let bolusSafetyEffects = settings.enabledEffects.subtracting([.retrospection, .momentum])
+
+        return min(recommendation,
+            DoseMath.recommendBolusFromPredictedGlucose(
+                try predictGlucoseFromCurrentData(using: bolusSafetyEffects),
+                maxBolus: maxBolus,
+                glucoseTargetRange: glucoseTargetRange,
+                insulinSensitivity: insulinSensitivity,
+                basalRateSchedule: basalRates,
+                pendingInsulin: pendingInsulin,
+                minimumBGGuard: minimumBGGuard
+            )
         )
-        
-        if recommendationWithMomentum.amount > recommendationWithoutMomentum.amount {
-            return recommendationWithoutMomentum
-        } else {
-            return recommendationWithMomentum
-        }
     }
 
-    func getRecommendedBolus(_ resultsHandler: @escaping (_ units: BolusRecommendation?, _ error: Error?) -> Void) {
-        dataAccessQueue.async {
-            do {
-                let recommendation = try self.recommendBolus()
-                resultsHandler(recommendation, nil)
-            } catch let error {
-                resultsHandler(nil, error)
-            }
-        }
-    }
+    /// *This method should only be called from the `dataAccessQueue`*
+    private func setRecommendedTempBasal(_ completion: @escaping (_ error: Error?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-    private func setRecommendedTempBasal(_ resultsHandler: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let recommendedTempBasal = self.recommendedTempBasal else {
-            resultsHandler(true, nil)
+            completion(nil)
             return
         }
 
         guard abs(recommendedTempBasal.recommendedDate.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
-            resultsHandler(false, LoopError.recommendationExpired(date: recommendedTempBasal.recommendedDate))
+            completion(LoopError.recommendationExpired(date: recommendedTempBasal.recommendedDate))
             return
         }
 
@@ -897,17 +872,11 @@ final class LoopDataManager {
                     self.lastTempBasal = basal
                     self.recommendedTempBasal = nil
 
-                    resultsHandler(true, nil)
+                    completion(nil)
                 case .failure(let error):
-                    resultsHandler(false, error)
+                    completion(error)
                 }
             }
-        }
-    }
-
-    func enactRecommendedTempBasal(_ resultsHandler: @escaping (_ success: Bool, _ error: Error?) -> Void) {
-        dataAccessQueue.async {
-            self.setRecommendedTempBasal(resultsHandler)
         }
     }
 }
