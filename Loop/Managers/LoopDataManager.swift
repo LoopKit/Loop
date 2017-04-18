@@ -383,6 +383,10 @@ final class LoopDataManager {
             throw LoopError.missingDataError(details: "Glucose data not available", recovery: "Check your CGM data source")
         }
 
+        guard let insulinActionDuration = self.doseStore.insulinActionDuration else {
+            throw LoopError.configurationError("Missing insulin action duration.")
+        }
+
         if glucoseChange == nil {
             updateGroup.enter()
             glucoseStore.getRecentGlucoseChange { (values, error) in
@@ -417,7 +421,7 @@ final class LoopDataManager {
                     self.logger.addError(error, fromSource: "CarbStore")
                     self.carbEffect = nil
                 } else {
-                    self.carbEffect = effects
+                    self.carbEffect = effects.filterDateRange(effectStartDate, Date.init(timeIntervalSinceNow: insulinActionDuration))
                 }
 
                 updateGroup.leave()
