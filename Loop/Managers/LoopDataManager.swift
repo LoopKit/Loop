@@ -383,10 +383,6 @@ final class LoopDataManager {
             throw LoopError.missingDataError(details: "Glucose data not available", recovery: "Check your CGM data source")
         }
 
-        guard let insulinActionDuration = self.doseStore.insulinActionDuration else {
-            throw LoopError.configurationError("Missing insulin action duration.")
-        }
-
         if glucoseChange == nil {
             updateGroup.enter()
             glucoseStore.getRecentGlucoseChange { (values, error) in
@@ -421,7 +417,7 @@ final class LoopDataManager {
                     self.logger.addError(error, fromSource: "CarbStore")
                     self.carbEffect = nil
                 } else {
-                    self.carbEffect = effects.filterDateRange(effectStartDate, Date.init(timeIntervalSinceNow: insulinActionDuration))
+                    self.carbEffect = effects
                 }
 
                 updateGroup.leave()
@@ -794,7 +790,8 @@ final class LoopDataManager {
             maxBasal = settings.maximumBasalRatePerHour,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
-            let basalRates = basalRateSchedule
+            let basalRates = basalRateSchedule,
+            let insulinActionDuration = insulinActionDuration
         else {
             error = LoopError.configurationError("Check settings")
             throw error!
@@ -809,7 +806,8 @@ final class LoopDataManager {
                 glucoseTargetRange: glucoseTargetRange,
                 insulinSensitivity: insulinSensitivity,
                 basalRateSchedule: basalRates,
-                minimumBGGuard: minimumBGGuard
+                minimumBGGuard: minimumBGGuard,
+                insulinActionDuration: insulinActionDuration
             )
         else {
             recommendedTempBasal = nil
@@ -830,7 +828,8 @@ final class LoopDataManager {
             let maxBolus = settings.maximumBolus,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
-            let basalRates = basalRateSchedule
+            let basalRates = basalRateSchedule,
+            let insulinActionDuration = insulinActionDuration
         else {
             throw LoopError.configurationError("Check Settings")
         }
@@ -853,7 +852,8 @@ final class LoopDataManager {
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates,
             pendingInsulin: pendingInsulin,
-            minimumBGGuard: minimumBGGuard
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         let recommendationWithoutMomentum = DoseMath.recommendBolusFromPredictedGlucose(glucoseWithoutMomentum,
@@ -862,7 +862,8 @@ final class LoopDataManager {
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates,
             pendingInsulin: pendingInsulin,
-            minimumBGGuard: minimumBGGuard
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
         
         if recommendationWithMomentum.amount > recommendationWithoutMomentum.amount {
