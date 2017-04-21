@@ -216,9 +216,10 @@
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		540DED971E14C75F002B2491 /* EnliteSensorDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
+		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DD1E21E53500BB71D3 /* GlucoseThreshold.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249D1E19B62300D9D25C /* GlucoseThreshold.swift */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
-		C12F21A71DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json */; };
+		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
@@ -540,7 +541,8 @@
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteSensorDisplayable.swift; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = "<group>"; };
-		C12F21A61DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_tamp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
+		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
+		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249D1E19B62300D9D25C /* GlucoseThreshold.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThreshold.swift; sourceTree = "<group>"; };
@@ -811,9 +813,10 @@
 				43E2D8E91D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json */,
 				43E2D8EA1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json */,
 				43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */,
-				C12F21A61DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json */,
+				C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */,
 				C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */,
 				C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */,
+				C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -1348,12 +1351,13 @@
 				43E2D8EF1D20C0DB004DA55F /* recommend_temp_basal_high_and_falling.json in Resources */,
 				43E2D8ED1D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json in Resources */,
 				43E2D8F01D20C0DB004DA55F /* recommend_temp_basal_high_and_rising.json in Resources */,
-				C12F21A71DFA79CB00748193 /* recommend_tamp_basal_very_low_end_in_range.json in Resources */,
+				C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */,
 				43E2D8F11D20C0DB004DA55F /* recommend_temp_basal_in_range_and_rising.json in Resources */,
 				43E2D8EE1D20C0DB004DA55F /* recommend_temp_basal_flat_and_high.json in Resources */,
 				C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */,
 				43E2D8F31D20C0DB004DA55F /* recommend_temp_basal_start_high_end_in_range.json in Resources */,
 				43E2D8F51D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json in Resources */,
+				C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */,
 				43E2D8EC1D20C0DB004DA55F /* read_selected_basal_profile.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

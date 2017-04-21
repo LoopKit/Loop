@@ -69,7 +69,7 @@ struct DoseMath {
             return nil
         }
 
-        let eventualGlucose = glucose.filter { $0.startDate < date.addingTimeInterval(insulinActionDuration) }.last!
+        let eventualGlucose = glucose.filter { $0.startDate <= date.addingTimeInterval(insulinActionDuration) }.last!
         
         let minGlucose = glucose.min { $0.quantity < $1.quantity }!
 
@@ -160,7 +160,7 @@ struct DoseMath {
             return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }
 
-        let eventualGlucose = glucose.filter { $0.startDate < date.addingTimeInterval(insulinActionDuration) }.last!
+        let eventualGlucose = glucose.filter { $0.startDate <= date.addingTimeInterval(insulinActionDuration) }.last!
 
         let minGlucose = glucose.min { $0.quantity < $1.quantity }!
 
