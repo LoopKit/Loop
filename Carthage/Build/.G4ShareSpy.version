@@ -2,11 +2,11 @@
   "commitish" : "v0.3.2",
   "iOS" : [
     {
-      "hash" : "beef8d222643827ee443f618e7b67591ec6619103409d11c8ca77a1eb5c1719e",
+      "hash" : "db9044cc4f0523847cfdf9f53175f81aa10eaa34296f397561a239520c1a0f05",
       "name" : "G4ShareSpy"
     }
   ],
-  "xcodeVersion" : "Xcode 8.3\nBuild version 8E162",
+  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
   "watchOS" : [
 
   ],

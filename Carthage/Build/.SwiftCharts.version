@@ -1,13 +1,22 @@
 {
-  "commitish" : "0.5.1-extension-api-safe",
+  "commitish" : "9faad7c38762a177ae01382def605a77c0e61aba",
   "iOS" : [
     {
-      "hash" : "62cbb97f5e728e49218735ab23408638315a3951e00b342cbe2ae33aedd99f9e",
+      "hash" : "8cedb5440ea64a37fdce472fb9d8bd7fc6c273addeb55d1bdc032270d1ca746f",
       "name" : "SwiftCharts"
     }
   ],
-  "xcodeVersion" : "Xcode 8.3\nBuild version 8E162",
+  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
   "watchOS" : [
+
+  ],
+  "tvOS" : [
+    {
+      "hash" : "b19dba671683d7778fb6db6f1aba3dcd5bab80e2faf68e270924e23435610ab5",
+      "name" : "SwiftCharts"
+    }
+  ],
+  "Mac" : [
 
   ]
 }
