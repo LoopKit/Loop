@@ -64,7 +64,6 @@ final class LoopDataManager {
         )
 
         doseStore = DoseStore(
-            pumpID: pumpID,
             insulinActionDuration: insulinActionDuration,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
