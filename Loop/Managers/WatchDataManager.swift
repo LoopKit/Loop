@@ -66,14 +66,13 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     private func sendWatchContext(_ context: WatchContext) {
         if let session = watchSession, session.isPaired && session.isWatchAppInstalled {
-
             let complicationShouldUpdate: Bool
 
             if let lastContext = lastComplicationContext,
                 let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
                 let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
             {
-                let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate as Date).minutes >= 30
+                let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate).minutes >= 30
                 let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
 
                 complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
@@ -95,7 +94,6 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
     }
 
     private func createWatchContext(_ completionHandler: @escaping (_ context: WatchContext?) -> Void) {
-
         let glucose = deviceDataManager.loopManager.glucoseStore.latestGlucose
         let reservoir = deviceDataManager.loopManager.doseStore.lastReservoirValue
         let maxBolus = deviceDataManager.loopManager.settings.maximumBolus

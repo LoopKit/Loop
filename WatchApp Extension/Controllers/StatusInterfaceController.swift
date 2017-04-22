@@ -25,7 +25,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         lastContext = context
 
         if let date = context?.loopLastRunDate {
-            self.loopTimer.setDate(date as Date)
+            self.loopTimer.setDate(date)
             self.loopTimer.setHidden(false)
             self.loopTimer.start()
 

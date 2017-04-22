@@ -656,14 +656,14 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                 if recommendedTempBasal != nil && !settingTempBasal {
                     settingTempBasal = true
-                    self.dataManager.loopManager.enactRecommendedTempBasal { (success, error) -> Void in
+                    self.dataManager.loopManager.enactRecommendedTempBasal { (error) in
                         DispatchQueue.main.async {
                             self.settingTempBasal = false
 
                             if let error = error {
                                 self.dataManager.logger.addError(error, fromSource: "TempBasal")
                                 self.presentAlertController(with: error)
-                            } else if success {
+                            } else {
                                 self.refreshContext.update(with: .status)
                                 self.reloadData()
                             }

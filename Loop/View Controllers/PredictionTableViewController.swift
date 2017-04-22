@@ -164,15 +164,19 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
                 }
 
                 reloadGroup.enter()
-                self.dataManager.loopManager.modelPredictedGlucose(using: self.selectedInputs.flatMap { $0.selected ? $0.input : nil }) { (predictedGlucose, error) in
-                    if error != nil {
+                self.dataManager.loopManager.getPredictedGlucose(using: self.selectedInputs) { (result) in
+                    switch result {
+                    case .failure:
                         self.needsRefresh = true
+                        self.charts.setAlternatePredictedGlucoseValues([])
+                    case .success(let predictedGlucose):
+                        self.charts.setAlternatePredictedGlucoseValues(predictedGlucose)
                     }
-
-                    self.charts.setAlternatePredictedGlucoseValues(predictedGlucose ?? [])
 
                     if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
                         self.eventualGlucoseDescription = String(describing: lastPoint)
+                    } else {
+                        self.eventualGlucoseDescription = nil
                     }
 
                     reloadGroup.leave()
@@ -211,9 +215,9 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
 
     private var eventualGlucoseDescription: String?
 
-    private lazy var selectedInputs: [(input: PredictionInputEffect, selected: Bool)] = [
-        (.carbs, true), (.insulin, true), (.momentum, true), (.retrospection, true)
-    ]
+    private var availableInputs: [PredictionInputEffect] = [.carbs, .insulin, .momentum, .retrospection]
+
+    private var selectedInputs = PredictionInputEffect.all
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.count
@@ -224,7 +228,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         case .charts:
             return 1
         case .inputs:
-            return selectedInputs.count
+            return availableInputs.count
         case .settings:
             return 1
         }
@@ -251,13 +255,13 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         case .inputs:
             let cell = tableView.dequeueReusableCell(withIdentifier: PredictionInputEffectTableViewCell.className, for: indexPath) as! PredictionInputEffectTableViewCell
 
-            let (input, selected) = selectedInputs[indexPath.row]
+            let input = availableInputs[indexPath.row]
 
             cell.titleLabel?.text = input.localizedTitle
-            cell.accessoryType = selected ? .checkmark : .none
+            cell.accessoryType = selectedInputs.contains(input) ? .checkmark : .none
             cell.enabled = input != .retrospection || dataManager.loopManager.settings.retrospectiveCorrectionEnabled
 
-            var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit)
+            var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit) ?? ""
 
             if input == .retrospection,
                 let startGlucose = retrospectivePredictedGlucose?.first,
@@ -330,13 +334,14 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard Section(rawValue: indexPath.section) == .inputs else { return }
 
-        let (input, selected) = selectedInputs[indexPath.row]
+        let input = availableInputs[indexPath.row]
+        let isSelected = selectedInputs.contains(input)
 
         if let cell = tableView.cellForRow(at: indexPath) {
-            cell.accessoryType = !selected ? .checkmark : .none
+            cell.accessoryType = !isSelected ? .checkmark : .none
         }
 
-        selectedInputs[indexPath.row] = (input, !selected)
+        selectedInputs.formSymmetricDifference(input)
 
         tableView.deselectRow(at: indexPath, animated: true)
 
@@ -371,7 +376,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
     @objc private func retrospectiveCorrectionSwitchChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.retrospectiveCorrectionEnabled = sender.isOn
 
-        if  let row = selectedInputs.index(where: { $0.input == PredictionInputEffect.retrospection }),
+        if  let row = availableInputs.index(where: { $0 == .retrospection }),
             let cell = tableView.cellForRow(at: IndexPath(row: row, section: Section.inputs.rawValue)) as? PredictionInputEffectTableViewCell
         {
             cell.enabled = self.dataManager.loopManager.settings.retrospectiveCorrectionEnabled
