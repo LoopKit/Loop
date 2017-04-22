@@ -838,7 +838,7 @@ final class LoopDataManager {
             insulinActionDuration: insulinActionDuration
         )
 
-        return recommendation;
+        return recommendation
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
