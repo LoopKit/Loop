@@ -503,7 +503,6 @@ final class DeviceDataManager {
             }
 
             remoteDataManager.nightscoutService.uploader?.reset()
-            loopManager.doseStore.pumpID = pumpID
 
             UserDefaults.standard.pumpID = pumpID
         }
