@@ -504,6 +504,8 @@ final class DeviceDataManager {
 
             remoteDataManager.nightscoutService.uploader?.reset()
 
+            loopManager.doseStore.resetPumpData()
+
             UserDefaults.standard.pumpID = pumpID
         }
     }
@@ -612,8 +614,7 @@ final class DeviceDataManager {
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
             delegate: self,
-            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted,
-            pumpID: pumpID
+            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted
         )
         watchManager = WatchDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)

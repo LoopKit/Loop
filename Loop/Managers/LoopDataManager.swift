@@ -42,7 +42,6 @@ final class LoopDataManager {
     init(
         delegate: LoopDataManagerDelegate,
         lastLoopCompleted: Date?,
-        pumpID: String?,
         basalRateSchedule: BasalRateSchedule? = UserDefaults.standard.basalRateSchedule,
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.standard.carbRatioSchedule,
         insulinActionDuration: TimeInterval? = UserDefaults.standard.insulinActionDuration,
