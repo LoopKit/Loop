@@ -47,6 +47,14 @@ final class LoopDataManager {
             notify(forChange: .preferences)
         }
     }
+    
+    var glucoseMomentumEnabled: Bool {
+        didSet {
+            UserDefaults.standard.glucoseMomentumEnabled = glucoseMomentumEnabled
+            
+            notify(forChange: .preferences)
+        }
+    }
 
     init(deviceDataManager: DeviceDataManager, lastLoopCompleted: Date?) {
         self.deviceDataManager = deviceDataManager
@@ -54,6 +62,7 @@ final class LoopDataManager {
 
         dosingEnabled = UserDefaults.standard.dosingEnabled
         retrospectiveCorrectionEnabled = UserDefaults.standard.retrospectiveCorrectionEnabled
+        glucoseMomentumEnabled = UserDefaults.standard.glucoseMomentumEnabled
 
         // Observe changes
         let center = NotificationCenter.default
@@ -525,9 +534,13 @@ final class LoopDataManager {
         }
 
         var error: Error?
+        var maybeMomentum = momentum
+        if !glucoseMomentumEnabled {
+            maybeMomentum = []
+        }
 
         let prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect)
-        let predictionWithRetrospectiveEffect = LoopMath.predictGlucose(glucose, momentum: momentum, effects: carbEffect, insulinEffect, retrospectiveGlucoseEffect)
+        let predictionWithRetrospectiveEffect = LoopMath.predictGlucose(glucose, momentum: maybeMomentum, effects: carbEffect, insulinEffect, retrospectiveGlucoseEffect)
         let predictionWithoutMomentum = LoopMath.predictGlucose(glucose, effects: carbEffect, insulinEffect)
 
         let predictDiff: Double

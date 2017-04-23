@@ -31,6 +31,7 @@ extension UserDefaults {
         case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
         case RetrospectiveCorrectionEnabled = "com.loudnate.Loop.RetrospectiveCorrectionEnabled"
         case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
+        case glucoseMomentumEnabled = "com.loopkit.Loop.glucoseMomentumEnabled"        
         case MinimumBGGuard = "com.loopkit.Loop.MinimumBGGuard"
     }
 
@@ -248,6 +249,15 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.RetrospectiveCorrectionEnabled.rawValue)
+        }
+    }
+    
+    var glucoseMomentumEnabled: Bool {
+        get {
+            return bool(forKey: Key.glucoseMomentumEnabled.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.glucoseMomentumEnabled.rawValue)
         }
     }
 

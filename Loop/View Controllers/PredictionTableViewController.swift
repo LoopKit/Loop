@@ -228,7 +228,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         case .inputs:
             return selectedInputs.count
         case .settings:
-            return 1
+            return 2
         }
     }
 
@@ -284,11 +284,21 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
             return cell
         case .settings:
             let cell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-            cell.titleLabel?.text = NSLocalizedString("Enable Retrospective Correction", comment: "Title of the switch which toggles retrospective correction effects")
-            cell.subtitleLabel?.text = NSLocalizedString("This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model.", comment: "The description of the switch which toggles retrospective correction effects")
-            cell.`switch`?.isOn = dataManager.loopManager.retrospectiveCorrectionEnabled
-            cell.`switch`?.addTarget(self, action: #selector(retrospectiveCorrectionSwitchChanged(_:)), for: .valueChanged)
+            switch(indexPath.row) {
+            case 0:
+                cell.titleLabel?.text = NSLocalizedString("Enable Retrospective Correction", comment: "Title of the switch which toggles retrospective correction effects")
+                cell.subtitleLabel?.text = NSLocalizedString("This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model.", comment: "The description of the switch which toggles retrospective correction effects")
+                cell.`switch`?.isOn = dataManager.loopManager.retrospectiveCorrectionEnabled
+                cell.`switch`?.addTarget(self, action: #selector(retrospectiveCorrectionSwitchChanged(_:)), for: .valueChanged)
+            case 1:
+                cell.titleLabel?.text = NSLocalizedString("Enable Glucose Momentum", comment: "Title of the switch which toggles glucose momentum effects")
+                cell.subtitleLabel?.text = NSLocalizedString("This will enable future glucose prediction.", comment: "The description of the switch which toggles glucose momentum effects")
+                cell.`switch`?.isOn = dataManager.loopManager.glucoseMomentumEnabled
+                cell.`switch`?.addTarget(self, action: #selector(glucoseMomentumSwitchChanged(_:)), for: .valueChanged)
+            default:
+                cell.titleLabel?.text = NSLocalizedString("Setting #\(indexPath.row)", comment: "Programmers error.")
+                cell.subtitleLabel?.text = ""
+            }
 
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
 
@@ -378,5 +388,16 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         {
             cell.enabled = self.dataManager.loopManager.retrospectiveCorrectionEnabled
         }
+    }
+    
+    @objc private func glucoseMomentumSwitchChanged(_ sender: UISwitch) {
+        dataManager.loopManager.glucoseMomentumEnabled = sender.isOn
+        
+        if  let row = selectedInputs.index(where: { $0.input == PredictionInputEffect.momentum }),
+            let cell = tableView.cellForRow(at: IndexPath(row: row, section: Section.inputs.rawValue)) as? PredictionInputEffectTableViewCell
+        {
+            cell.enabled = self.dataManager.loopManager.glucoseMomentumEnabled
+        }
+        
     }
 }
