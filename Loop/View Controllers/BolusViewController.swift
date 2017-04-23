@@ -172,7 +172,11 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBOutlet weak var bolusAmountTextField: UITextField!
 
     // MARK: - Actions
-   
+    
+    private func roundedBolus(_ bolus: Double) -> Double {
+        return round(bolus * 10) / 10
+    }
+    
     @IBAction func authenticateBolus(_ sender: Any) {
         bolusAmountTextField.resignFirstResponder()
 
@@ -180,12 +184,51 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             let amountString = bolusUnitsFormatter.string(from: NSNumber(value: bolus)) else {
             return
         }
-
+        
+        let rounded_bolus = roundedBolus(bolus)
+        guard rounded_bolus == bolus else {
+            bolusAmountTextField?.text = "\(rounded_bolus)"
+            presentAlertController(withTitle: NSLocalizedString("Rounded Bolus", comment: "The title of the alert describing a rounded bolus validation error"), message: String(format: NSLocalizedString("The bolus amount has to be a multiple of 0.1, please try again.", comment: "Body of the alert describing a rounding bolus validation error.")))
+            return
+        }
+        
+        guard bolus >= 0 else {
+            presentAlertController(withTitle: NSLocalizedString("Negative Bolus", comment: "The title of the alert describing a negative bolus validation error"), message: String(format: NSLocalizedString("The bolus amount is negative", comment: "Body of the alert describing a negative bolus validation error.")))
+            return
+        }
+        
         guard bolus <= maxBolus else {
             presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
             return
         }
 
+        guard bolus <= recommendedBolus else {
+            let alert = UIAlertController(title: "Exceeds Recommended Bolus", message: "The bolus amount of \(bolus) U is higher than the recommended amount of \(recommendedBolus) U. Please re-enter the amount to confirm.", preferredStyle: .alert)
+            
+            alert.addTextField { (textField) in
+                textField.text = ""
+                textField.keyboardType = UIKeyboardType.decimalPad
+                textField.autocorrectionType = UITextAutocorrectionType.no
+            }
+
+            alert.addAction(UIAlertAction(title: "Deliver", style: .default, handler: { [weak alert] (_) in
+                let wanted = "\(bolus)"
+                let result = alert?.textFields![0].text
+                if result != nil && result! == wanted {
+                    self.setBolusAndClose(bolus)
+                } else {
+                    self.presentAlertController(withTitle: NSLocalizedString("Exceeds Recommended Bolus", comment: "The title of the alert describing a recommended bolus validation error"), message: String(format: NSLocalizedString("The Validation failed (Recommended \(self.recommendedBolus), wanted \(wanted), entered \(result!))", comment: "Body of the alert describing a recommended bolus validation error. (1: The localized recommended bolus value)")))
+                    return
+                }
+            }))
+            
+            alert.addAction(UIAlertAction(title: "Back", style: .default, handler: nil))
+            
+            self.present(alert, animated: true, completion: nil)
+            
+            return
+        }
+        
         let context = LAContext()
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
