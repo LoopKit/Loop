@@ -95,7 +95,11 @@ public final class GlucoseHUDView: BaseHUDView {
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: NSNumber(value: glucoseQuantity)) {
-            glucoseLabel.text = valueString
+            if glucoseStartDate.timeIntervalSinceNow > -TimeInterval(minutes: 15) {
+                glucoseLabel.text = valueString
+            } else {
+                glucoseLabel.text = "-"
+            }
             accessibilityStrings.append(String(format: NSLocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
