@@ -503,7 +503,8 @@ final class DeviceDataManager {
             }
 
             remoteDataManager.nightscoutService.uploader?.reset()
-            loopManager.doseStore.pumpID = pumpID
+
+            loopManager.doseStore.resetPumpData()
 
             UserDefaults.standard.pumpID = pumpID
         }
@@ -613,8 +614,7 @@ final class DeviceDataManager {
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
             delegate: self,
-            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted,
-            pumpID: pumpID
+            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted
         )
         watchManager = WatchDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
@@ -655,8 +655,7 @@ extension DeviceDataManager: CGMManagerDelegate {
 extension DeviceDataManager: DoseStoreDelegate {
     func doseStore(_ doseStore: DoseStore,
         hasEventsNeedingUpload pumpEvents: [PersistedPumpEvent],
-        fromPumpID pumpID: String,
-        withCompletion completionHandler: @escaping (_ uploadedObjects: [NSManagedObjectID]) -> Void
+        completion completionHandler: @escaping (_ uploadedObjects: [NSManagedObjectID]) -> Void
     ) {
         guard let uploader = remoteDataManager.nightscoutService.uploader, let pumpModel = pumpState?.pumpModel else {
             completionHandler(pumpEvents.map({ $0.objectID }))
