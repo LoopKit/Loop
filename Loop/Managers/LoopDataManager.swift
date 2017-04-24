@@ -836,22 +836,7 @@ final class LoopDataManager {
             insulinActionDuration: insulinActionDuration
         )
 
-        // TODO: This was added in https://github.com/LoopKit/Loop/issues/370, but concerns were raised
-        // that this contradicts users expectations in https://github.com/LoopKit/Loop/issues/435
-        let bolusSafetyEffects = settings.enabledEffects.subtracting([.retrospection, .momentum])
-
-        return min(recommendation,
-            DoseMath.recommendBolusFromPredictedGlucose(
-                try predictGlucoseFromCurrentData(using: bolusSafetyEffects),
-                maxBolus: maxBolus,
-                glucoseTargetRange: glucoseTargetRange,
-                insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates,
-                pendingInsulin: pendingInsulin,
-                minimumBGGuard: minimumBGGuard,
-                insulinActionDuration: insulinActionDuration
-            )
-        )
+        return recommendation
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
