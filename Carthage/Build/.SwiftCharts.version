@@ -2,7 +2,7 @@
   "commitish" : "0.6",
   "iOS" : [
     {
-      "hash" : "2707194d4d391df2b09e0a0cf0e2d23dffca1143f058f36e1e3dd82050f7f8f1",
+      "hash" : "326259aba63578ffb93455bb07d2a1919e68d92157e02941c1628fd7704e1efa",
       "name" : "SwiftCharts"
     }
   ],
@@ -12,7 +12,7 @@
   ],
   "tvOS" : [
     {
-      "hash" : "423f389e756a3fea1a2a06e2c4ca4e56f692236c6933f89f6282fa82041436d8",
+      "hash" : "1449a06dc971aeecdf02272698471b91cb6988ea0ef25e474d9e3d3db1e949b3",
       "name" : "SwiftCharts"
     }
   ],
