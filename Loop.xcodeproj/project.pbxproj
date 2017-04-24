@@ -826,7 +826,6 @@
 			children = (
 				C17884621D51A7A400405663 /* BatteryIndicator.swift */,
 				C17824991E1999FA00D9D25C /* CaseCountable.swift */,
-				4331E0771C85302200FBE832 /* CGPoint.swift */,
 				4F6663931E905FD2009E74FC /* ChartColorPalette+Loop.swift */,
 				4346D1F51C78501000ABAFE3 /* ChartPoint+Loop.swift */,
 				4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */,
