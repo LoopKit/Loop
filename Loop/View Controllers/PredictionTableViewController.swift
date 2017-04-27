@@ -42,10 +42,11 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
             }
         ]
 
-        let chartPanGestureRecognizer = UIPanGestureRecognizer()
-        chartPanGestureRecognizer.delegate = self
-        chartPanGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
-        charts.panGestureRecognizer = chartPanGestureRecognizer
+        let gestureRecognizer = UILongPressGestureRecognizer()
+        gestureRecognizer.delegate = self
+        gestureRecognizer.minimumPressDuration = 0.1
+        gestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
+        charts.gestureRecognizer = gestureRecognizer
     }
 
     deinit {
@@ -249,7 +250,7 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
             cell.titleLabel?.textColor = UIColor.secondaryLabelColor
             cell.selectionStyle = .none
 
-            cell.addGestureRecognizer(charts.panGestureRecognizer!)
+            cell.addGestureRecognizer(charts.gestureRecognizer!)
 
             return cell
         case .inputs:
