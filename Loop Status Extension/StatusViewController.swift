@@ -26,7 +26,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
-    @IBOutlet weak var glucoseChartContentView: ChartContentView!
+    @IBOutlet weak var glucoseChartContentView: LoopUI.ChartContentView!
 
     private lazy var charts: StatusChartsManager = {
         let charts = StatusChartsManager(
@@ -44,7 +44,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 settings.trailing = 8
                 settings.axisTitleLabelsToLabelsSpacing = 0
                 settings.labelsToAxisSpacingX = 6
-                settings.labelsWidthY = 30
+                settings.clipInnerFrame = false
                 return settings
             }()
         )

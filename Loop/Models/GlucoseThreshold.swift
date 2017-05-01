@@ -39,3 +39,10 @@ struct GlucoseThreshold: RawRepresentable {
         ]
     }
 }
+
+
+extension GlucoseThreshold: Equatable {
+    static func ==(lhs: GlucoseThreshold, rhs: GlucoseThreshold) -> Bool {
+        return lhs.value == rhs.value
+    }
+}

@@ -20,7 +20,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
         if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
-            handler(date as Date)
+            handler(date)
         } else {
             handler(nil)
         }
@@ -28,7 +28,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     
     func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
         if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
-            handler(date as Date)
+            handler(date)
         } else {
             handler(nil)
         }

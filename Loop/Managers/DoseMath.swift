@@ -62,13 +62,15 @@ struct DoseMath {
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
-        minimumBGGuard: GlucoseThreshold
+        minimumBGGuard: GlucoseThreshold,
+        insulinActionDuration: TimeInterval
     ) -> (rate: Double, duration: TimeInterval)? {
         guard glucose.count > 1 else {
             return nil
         }
 
-        let eventualGlucose = glucose.last!
+        let eventualGlucose = glucose.filter { $0.startDate <= date.addingTimeInterval(insulinActionDuration) }.last!
+        
         let minGlucose = glucose.min { $0.quantity < $1.quantity }!
 
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
@@ -151,13 +153,15 @@ struct DoseMath {
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
         pendingInsulin: Double,
-        minimumBGGuard: GlucoseThreshold
+        minimumBGGuard: GlucoseThreshold,
+        insulinActionDuration: TimeInterval
     ) -> BolusRecommendation {
         guard glucose.count > 1 else {
             return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
         }
 
-        let eventualGlucose = glucose.last!
+        let eventualGlucose = glucose.filter { $0.startDate <= date.addingTimeInterval(insulinActionDuration) }.last!
+
         let minGlucose = glucose.min { $0.quantity < $1.quantity }!
 
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
