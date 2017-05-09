@@ -119,13 +119,13 @@ extension PumpCommsError: LocalizedError {
         case .bolusInProgress:
             return NSLocalizedString("A bolus is already in progress.", comment: "Communications error for a bolus currently running")
         case .crosstalk:
-            return NSLocalizedString("Radio interference detected.", comment: "")
+            return NSLocalizedString("Comms with another pump detected.", comment: "")
         case .noResponse:
             return NSLocalizedString("Pump did not respond.", comment: "")
         case .pumpSuspended:
             return NSLocalizedString("Pump is suspended.", comment: "")
-        case .rfCommsFailure:
-            return NSLocalizedString("Communication Error.", comment: "")
+        case .rfCommsFailure(let msg):
+            return NSLocalizedString("Communication Error: " + msg, comment: "")
         case .rileyLinkTimeout:
             return NSLocalizedString("RileyLink timed out.", comment: "")
         case .unexpectedResponse:
