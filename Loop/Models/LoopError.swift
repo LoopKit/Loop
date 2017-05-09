@@ -125,7 +125,7 @@ extension PumpCommsError: LocalizedError {
         case .pumpSuspended:
             return NSLocalizedString("Pump is suspended.", comment: "")
         case .rfCommsFailure(let msg):
-            return NSLocalizedString("Communication Error: " + msg, comment: "")
+            return msg
         case .rileyLinkTimeout:
             return NSLocalizedString("RileyLink timed out.", comment: "")
         case .unexpectedResponse:
