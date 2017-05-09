@@ -118,7 +118,7 @@ final class AnalyticsManager {
     // MARK: - Loop Events
 
     func didAddCarbsFromWatch(_ carbs: Double) {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
+        logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func didRetryBolus() {
@@ -126,7 +126,7 @@ final class AnalyticsManager {
     }
 
     func didSetBolusFromWatch(_ units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
+        logEvent("Bolus set", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func loopDidSucceed() {
