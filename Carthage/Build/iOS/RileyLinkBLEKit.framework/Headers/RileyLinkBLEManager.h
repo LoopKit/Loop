@@ -27,17 +27,18 @@
 #define RILEYLINK_TIMER_TICK_UUID       @"6e6c7910-b89e-43a5-78af-50c5e2b86f7e"
 #define RILEYLINK_FIRMWARE_VERSION_UUID @"30d99dc9-7c91-4295-a051-0a104d238cf2"
 
+@class RileyLinkBLEDevice;
 
 @interface RileyLinkBLEManager : NSObject
 
-@property (nonatomic, nonnull, readonly, copy) NSArray *rileyLinkList;
+@property (nonatomic, nonnull, readonly, copy) NSArray<RileyLinkBLEDevice *> *rileyLinkList;
 
 - (void)connectPeripheral:(nonnull CBPeripheral *)peripheral;
 - (void)disconnectPeripheral:(nonnull CBPeripheral *)peripheral;
 
 + (nonnull instancetype)sharedManager;
 
-@property (nonatomic, nonnull, strong) NSSet *autoConnectIds;
+@property (nonatomic, nonnull, strong) NSSet<NSString *> *autoConnectIds;
 @property (nonatomic, getter=isScanningEnabled) BOOL scanningEnabled;
 
 /**
