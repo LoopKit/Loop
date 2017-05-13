@@ -15,7 +15,7 @@ import LoopUI
 
 extension GlucoseG4: GlucoseValue {
     public var quantity: HKQuantity {
-        return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
+        return HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: Double(glucose))
     }
 
     public var startDate: Date {

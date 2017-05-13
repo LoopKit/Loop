@@ -110,7 +110,7 @@ public final class StatusChartsManager {
         }
     }
 
-    public var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit() {
+    public var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliter() {
         didSet {
             if glucoseUnit != oldValue {
                 // Regenerate the glucose display points
@@ -695,7 +695,7 @@ public final class StatusChartsManager {
 
 private extension HKUnit {
     var glucoseUnitYAxisSegmentSize: Double {
-        if self == HKUnit.milligramsPerDeciliterUnit() {
+        if self == HKUnit.milligramsPerDeciliter() {
             return 25
         } else {
             return 1

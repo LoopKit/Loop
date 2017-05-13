@@ -93,8 +93,8 @@ class PredictionTableViewController: UITableViewController, IdentifiableClass, U
         let charts = StatusChartsManager(colors: .default, settings: .default)
 
         charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 60),
-            max: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: 200)
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 60),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 200)
         )
 
         return charts

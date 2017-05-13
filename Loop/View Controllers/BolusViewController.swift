@@ -63,7 +63,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     // MARK: - State
 
-    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliterUnit()
+    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliter()
 
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
