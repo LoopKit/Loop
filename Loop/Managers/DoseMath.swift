@@ -31,7 +31,7 @@ struct DoseMath {
      - returns: The determined basal rate, in Units/hour
      */
     private static func calculateTempBasalRateForGlucose(_ currentGlucose: HKQuantity, toTargetGlucose targetGlucose: HKQuantity, insulinSensitivity: HKQuantity, currentBasalRate: Double, maxBasalRate: Double, duration: TimeInterval) -> Double {
-        let unit = HKUnit.milligramsPerDeciliterUnit()
+        let unit = HKUnit.milligramsPerDeciliter()
         let doseUnits = (currentGlucose.doubleValue(for: unit) - targetGlucose.doubleValue(for: unit)) / insulinSensitivity.doubleValue(for: unit)
 
         let rate = min(maxBasalRate, max(0, doseUnits / (duration / TimeInterval(hours: 1)) + currentBasalRate))

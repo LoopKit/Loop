@@ -62,7 +62,7 @@ final class StatusExtensionDataManager {
                 )
                 context.predictedGlucose = PredictedGlucoseContext(
                     values: (1...36).map { 89.123 + Double($0 * 5) }, // 3 hours of linear data
-                    unit: HKUnit.milligramsPerDeciliterUnit(),
+                    unit: HKUnit.milligramsPerDeciliter(),
                     startDate: Date(),
                     interval: TimeInterval(minutes: 5))
 

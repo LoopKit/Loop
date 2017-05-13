@@ -178,7 +178,7 @@ final class DeviceDataManager {
             // Enlite data is included
             if let date = glucoseDateComponents?.date {
                 loopManager.addGlucose([(
-                    quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose)),
+                    quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: Double(glucose)),
                     date: date,
                     isDisplayOnly: false
                 )], from: nil)

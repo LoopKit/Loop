@@ -715,7 +715,7 @@ final class LoopDataManager {
         self.retrospectivePredictedGlucose = retrospectivePrediction
 
         guard let lastGlucose = retrospectivePrediction.last else { return }
-        let glucoseUnit = HKUnit.milligramsPerDeciliterUnit()
+        let glucoseUnit = HKUnit.milligramsPerDeciliter()
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
 
         let discrepancy = change.end.quantity.doubleValue(for: glucoseUnit) - lastGlucose.quantity.doubleValue(for: glucoseUnit) // mg/dL
