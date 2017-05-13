@@ -16,21 +16,6 @@ import LoopUI
 import SwiftCharts
 
 
-private struct RefreshContext: OptionSet {
-    let rawValue: Int
-
-    /// Catch-all for lastLoopCompleted, recommendedTempBasal, lastTempBasal, preferences
-    static let status  = RefreshContext(rawValue: 1 << 0)
-
-    static let glucose = RefreshContext(rawValue: 1 << 1)
-    static let insulin = RefreshContext(rawValue: 1 << 2)
-    static let carbs   = RefreshContext(rawValue: 1 << 3)
-    static let targets = RefreshContext(rawValue: 1 << 4)
-
-    static let all: RefreshContext = [.status, .glucose, .insulin, .carbs, .targets]
-}
-
-
 /// Describes the state within the bolus setting flow
 ///
 /// - recommended: A bolus recommendation was discovered and the bolus view controller is presenting/presented
@@ -41,17 +26,25 @@ private enum BolusState {
 }
 
 
-final class StatusTableViewController: UITableViewController, UIGestureRecognizerDelegate {
+private extension RefreshContext {
+    static let all: RefreshContext = [.status, .glucose, .insulin, .carbs, .targets]
+}
+
+
+final class StatusTableViewController: ChartsTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        charts.glucoseDisplayRange = (
+            min: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 100),
+            max: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 175)
+        )
+
         let notificationCenter = NotificationCenter.default
-        let mainQueue = OperationQueue.main
-        let application = UIApplication.shared
 
         notificationObservers += [
-            notificationCenter.addObserver(forName: .LoopDataUpdated, object: dataManager.loopManager, queue: nil) { note in
+            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { note in
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
@@ -71,25 +64,16 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                     self.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserver(forName: .LoopRunning, object: dataManager.loopManager, queue: nil) { _ in
+            notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { _ in
                 DispatchQueue.main.async {
                     self.hudView.loopCompletionHUD.loopInProgress = true
                 }
-            },
-            notificationCenter.addObserver(forName: .UIApplicationWillResignActive, object: application, queue: mainQueue) { _ in
-                self.active = false
-            },
-            notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive, object: application, queue: mainQueue) { _ in
-                self.active = true
             }
         ]
 
-        let gestureRecognizer = UILongPressGestureRecognizer()
-        gestureRecognizer.delegate = self
-        gestureRecognizer.minimumPressDuration = 0.1
-        gestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
-        tableView.addGestureRecognizer(gestureRecognizer)
-        charts.gestureRecognizer = gestureRecognizer
+        if let gestureRecognizer = charts.gestureRecognizer {
+            tableView.addGestureRecognizer(gestureRecognizer)
+        }
 
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
@@ -100,17 +84,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         toolbarItems![6].tintColor = UIColor.secondaryLabelColor
     }
 
-    deinit {
-        for observer in notificationObservers {
-            NotificationCenter.default.removeObserver(observer)
-        }
-    }
-
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
 
         if !visible {
-            charts.didReceiveMemoryWarning()
             refreshContext = .all
         }
     }
@@ -119,7 +96,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         super.viewWillAppear(animated)
 
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        visible = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -134,28 +110,18 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         if presentedViewController == nil {
             navigationController?.setNavigationBarHidden(false, animated: animated)
         }
-        visible = false
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-
         refreshContext.update(with: .status)
-        if visible {
-            reloadData(animated: false, to: size)
-        }
+
+        super.viewWillTransition(to: size, with: coordinator)
     }
 
     // MARK: - State
 
-    // References to registered notification center observers
-    private var notificationObservers: [Any] = []
-
-    weak var dataManager: DeviceDataManager!
-
-    private var active = true {
+    override var active: Bool {
         didSet {
-            reloadData()
             hudView.loopCompletionHUD.assertTimer(active)
         }
     }
@@ -181,235 +147,220 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    private var visible = false {
-        didSet {
-            reloadData()
-        }
-    }
+    override func reloadData(animated: Bool = false, to size: CGSize? = nil) {
+        guard active && visible && !refreshContext.isEmpty else { return }
 
-    private var reloading = false
+        // How far back should we show data? Use the screen size as a guide.
+        let minimumSegmentWidth: CGFloat = 50
+        let availableWidth = (size ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
+        let totalHours = floor(Double(availableWidth / minimumSegmentWidth))
+        let historyHours = totalHours - (deviceManager.loopManager.insulinActionDuration ?? TimeInterval(hours: 4)).hours
 
-    /// Refetches all data and updates the views. Must be called on the main queue.
-    ///
-    /// - parameter animated: Whether the updating should be animated if possible
-    private func reloadData(animated: Bool = false, to size: CGSize? = nil) {
-        if active && visible && !refreshContext.isEmpty {
-            reloading = true
+        var components = DateComponents()
+        components.minute = 0
+        let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, historyHours)))
+        chartStartDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
-            // How far back should we show data? Use the screen size as a guide.
-            let minimumSegmentWidth: CGFloat = 50
-            let availableWidth = (size ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
-            let totalHours = floor(Double(availableWidth / minimumSegmentWidth))
-            let historyHours = totalHours - (dataManager.loopManager.insulinActionDuration ?? TimeInterval(hours: 4)).hours
+        let reloadGroup = DispatchGroup()
+        var newLastLoopCompleted: Date?
+        var newLastTempBasal: DoseEntry?
+        var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
-            var components = DateComponents()
-            components.minute = 0
-            let date = Date(timeIntervalSinceNow: -TimeInterval(hours: max(1, historyHours)))
-            chartStartDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
+        reloadGroup.enter()
+        deviceManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
+            if let unit = unit {
+                self.charts.glucoseUnit = unit
+            }
 
-            let reloadGroup = DispatchGroup()
-            var newLastLoopCompleted: Date?
-            var newLastTempBasal: DoseEntry?
-            var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
-
-            reloadGroup.enter()
-            dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
-                if let unit = unit {
-                    self.charts.glucoseUnit = unit
-                }
-
-                if self.refreshContext.remove(.glucose) != nil {
-                    reloadGroup.enter()
-                    self.dataManager.loopManager.glucoseStore.getGlucoseValues(start: self.chartStartDate) { (result) -> Void in
-                        switch result {
-                        case .failure(let error):
-                            self.dataManager.logger.addError(error, fromSource: "GlucoseStore")
-                            self.refreshContext.update(with: .glucose)
-                            self.charts.setGlucoseValues([])
-                        case .success(let values):
-                            self.charts.setGlucoseValues(values)
-                        }
-
-                        reloadGroup.leave()
-                    }
-                }
-
-                // For now, do this every time
-                _ = self.refreshContext.remove(.status)
+            if self.refreshContext.remove(.glucose) != nil {
                 reloadGroup.enter()
-                self.dataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, lastError) -> Void in
-                    self.charts.setPredictedGlucoseValues(predictedGlucose ?? [])
-
-                    // Retry this refresh again if predicted glucose isn't available
-                    if predictedGlucose == nil {
-                        self.refreshContext.update(with: .status)
-                    }
-
-                    switch self.bolusState {
-                    case .recommended?, .enacting?:
-                        newRecommendedTempBasal = nil
-                    case .none:
-                        newRecommendedTempBasal = recommendedTempBasal
-                    }
-
-                    newLastTempBasal = lastTempBasal
-                    newLastLoopCompleted = lastLoopCompleted
-
-                    if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
-                        self.eventualGlucoseDescription = String(describing: lastPoint)
-                    } else {
-                        self.eventualGlucoseDescription = nil
+                self.deviceManager.loopManager.glucoseStore.getGlucoseValues(start: self.chartStartDate) { (result) -> Void in
+                    switch result {
+                    case .failure(let error):
+                        self.deviceManager.logger.addError(error, fromSource: "GlucoseStore")
+                        self.refreshContext.update(with: .glucose)
+                        self.charts.setGlucoseValues([])
+                    case .success(let values):
+                        self.charts.setGlucoseValues(values)
                     }
 
                     reloadGroup.leave()
+                }
+            }
+
+            // For now, do this every time
+            _ = self.refreshContext.remove(.status)
+            reloadGroup.enter()
+            self.deviceManager.loopManager.getLoopState { (manager, state) -> Void in
+                self.charts.setPredictedGlucoseValues(state.predictedGlucose ?? [])
+
+                // Retry this refresh again if predicted glucose isn't available
+                if state.predictedGlucose == nil {
+                    self.refreshContext.update(with: .status)
+                }
+
+                switch self.bolusState {
+                case .recommended?, .enacting?:
+                    newRecommendedTempBasal = nil
+                case .none:
+                    newRecommendedTempBasal = state.recommendedTempBasal
+                }
+
+                newLastTempBasal = state.lastTempBasal
+                newLastLoopCompleted = state.lastLoopCompleted
+
+                if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
+                    self.eventualGlucoseDescription = String(describing: lastPoint)
+                } else {
+                    self.eventualGlucoseDescription = nil
+                }
+
+                if self.refreshContext.remove(.targets) != nil {
+                    if let schedule = manager.settings.glucoseTargetRangeSchedule {
+                        self.charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
+                    } else {
+                        self.charts.targetPointsCalculator = nil
+                    }
                 }
 
                 reloadGroup.leave()
             }
 
-            if refreshContext.remove(.insulin) != nil {
-                reloadGroup.enter()
-                dataManager.loopManager.doseStore.getInsulinOnBoardValues(start: chartStartDate) { (result) -> Void in
-                    switch result {
-                    case .failure(let error):
-                        self.dataManager.logger.addError(error, fromSource: "DoseStore")
-                        self.refreshContext.update(with: .insulin)
-                        self.charts.setIOBValues([])
-                    case .success(let values):
-                        self.charts.setIOBValues(values)
-                    }
-                    reloadGroup.leave()
-                }
+            reloadGroup.leave()
+        }
 
-                reloadGroup.enter()
-                dataManager.loopManager.doseStore.getNormalizedDoseEntries(start: chartStartDate) { (result) -> Void in
-                    switch result {
-                    case .failure(let error):
-                        self.dataManager.logger.addError(error, fromSource: "DoseStore")
-                        self.refreshContext.update(with: .insulin)
-                        self.charts.setDoseEntries([])
-                    case .success(let doses):
-                        self.charts.setDoseEntries(doses)
-                    }
-                    reloadGroup.leave()
+        if refreshContext.remove(.insulin) != nil {
+            reloadGroup.enter()
+            deviceManager.loopManager.doseStore.getInsulinOnBoardValues(start: chartStartDate) { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.deviceManager.logger.addError(error, fromSource: "DoseStore")
+                    self.refreshContext.update(with: .insulin)
+                    self.charts.setIOBValues([])
+                case .success(let values):
+                    self.charts.setIOBValues(values)
                 }
-
-                reloadGroup.enter()
-                dataManager.loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { (result) in
-                    switch result {
-                    case .failure:
-                        self.refreshContext.update(with: .insulin)
-                        self.totalDelivery = nil
-                    case .success(let total):
-                        self.totalDelivery = total.value
-                    }
-
-                    reloadGroup.leave()
-                }
+                reloadGroup.leave()
             }
 
-            if refreshContext.remove(.carbs) != nil {
-                reloadGroup.enter()
-                dataManager.loopManager.carbStore.getCarbsOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
-                    if let error = error {
-                        self.dataManager.logger.addError(error, fromSource: "CarbStore")
-                        self.refreshContext.update(with: .carbs)
-                    }
-
-                    self.charts.setCOBValues(values)
-
-                    reloadGroup.leave()
+            reloadGroup.enter()
+            deviceManager.loopManager.doseStore.getNormalizedDoseEntries(start: chartStartDate) { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.deviceManager.logger.addError(error, fromSource: "DoseStore")
+                    self.refreshContext.update(with: .insulin)
+                    self.charts.setDoseEntries([])
+                case .success(let doses):
+                    self.charts.setDoseEntries(doses)
                 }
+                reloadGroup.leave()
             }
 
-            if let reservoir = dataManager.loopManager.doseStore.lastReservoirValue {
-                if let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
-                    hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+            reloadGroup.enter()
+            deviceManager.loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { (result) in
+                switch result {
+                case .failure:
+                    self.refreshContext.update(with: .insulin)
+                    self.totalDelivery = nil
+                case .success(let total):
+                    self.totalDelivery = total.value
                 }
-                
-                hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+
+                reloadGroup.leave()
+            }
+        }
+
+        if refreshContext.remove(.carbs) != nil {
+            reloadGroup.enter()
+            deviceManager.loopManager.carbStore.getCarbsOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
+                if let error = error {
+                    self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                    self.refreshContext.update(with: .carbs)
+                }
+
+                self.charts.setCOBValues(values)
+
+                reloadGroup.leave()
+            }
+        }
+
+        if let reservoir = deviceManager.loopManager.doseStore.lastReservoirValue {
+            if let capacity = deviceManager.pumpState?.pumpModel?.reservoirCapacity {
+                hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+            }
+            
+            hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+        }
+
+        if let level = deviceManager.pumpBatteryChargeRemaining {
+            hudView.batteryHUD.batteryLevel = level
+        }
+
+        hudView.loopCompletionHUD.dosingEnabled = deviceManager.loopManager.settings.dosingEnabled
+
+        workoutMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.workoutModeEnabled
+
+        reloadGroup.notify(queue: .main) {
+            if let glucose = self.deviceManager.loopManager.glucoseStore.latestGlucose {
+                self.hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                    at: glucose.startDate,
+                    unit: self.charts.glucoseUnit,
+                    sensor: self.deviceManager.sensorInfo
+                )
             }
 
-            if let level = dataManager.pumpBatteryChargeRemaining {
-                hudView.batteryHUD.batteryLevel = level
+            // Loop completion HUD
+            self.hudView.loopCompletionHUD.lastLoopCompleted = newLastLoopCompleted
+
+            // Net basal rate HUD
+            let date = newLastTempBasal?.startDate ?? Date()
+            if let scheduledBasal = self.deviceManager.loopManager.basalRateSchedule?.between(start: date,
+                                                                                end: date).first
+            {
+                let netBasal = NetBasal(
+                    lastTempBasal: newLastTempBasal,
+                    maxBasal: self.deviceManager.loopManager.settings.maximumBasalRatePerHour,
+                    scheduledBasal: scheduledBasal
+                )
+
+                self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.startDate)
             }
 
-            hudView.loopCompletionHUD.dosingEnabled = dataManager.loopManager.settings.dosingEnabled
-
-            if refreshContext.remove(.targets) != nil {
-                if let schedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
-                    charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
-                } else {
-                    charts.targetPointsCalculator = nil
-                }
+            // Fetch the current IOB subtitle
+            if let index = self.charts.iobPoints.closestIndexPriorToDate(Date()) {
+                self.currentIOBDescription = String(describing: self.charts.iobPoints[index].y)
+            } else {
+                self.currentIOBDescription = nil
+            }
+            // Fetch the current COB subtitle
+            if let index = self.charts.cobPoints.closestIndexPriorToDate(Date()) {
+                self.currentCOBDescription = String(describing: self.charts.cobPoints[index].y)
+            } else {
+                self.currentCOBDescription = nil
             }
 
-            workoutMode = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.workoutModeEnabled
+            self.charts.prerender()
 
-            reloadGroup.notify(queue: DispatchQueue.main) {
-                if let glucose = self.dataManager.loopManager.glucoseStore.latestGlucose {
-                    self.hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
-                        at: glucose.startDate,
-                        unit: self.charts.glucoseUnit,
-                        sensor: self.dataManager.sensorInfo
-                    )
+            // Show/hide the recommended temp basal row
+            let oldRecommendedTempBasal = self.recommendedTempBasal
+            self.recommendedTempBasal = newRecommendedTempBasal
+            switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
+            case (let old?, let new?) where old != new:
+                self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+            case (.none, .some):
+                self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+            case (.some, .none):
+                self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+            default:
+                break
+            }
+
+            for case let cell as ChartTableViewCell in self.tableView.visibleCells {
+                cell.reloadChart()
+
+                if let indexPath = self.tableView.indexPath(for: cell) {
+                    self.tableView(self.tableView, updateSubtitleFor: cell, at: indexPath)
                 }
-
-                // Loop completion HUD
-                self.hudView.loopCompletionHUD.lastLoopCompleted = newLastLoopCompleted
-
-                // Net basal rate HUD
-                let date = newLastTempBasal?.startDate ?? Date()
-                if let scheduledBasal = self.dataManager.loopManager.basalRateSchedule?.between(start: date,
-                                                                                    end: date).first
-                {
-                    let netBasal = NetBasal(
-                        lastTempBasal: newLastTempBasal,
-                        maxBasal: self.dataManager.loopManager.settings.maximumBasalRatePerHour,
-                        scheduledBasal: scheduledBasal
-                    )
-
-                    self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.startDate)
-                }
-
-                // Fetch the current IOB subtitle
-                if let index = self.charts.iobPoints.closestIndexPriorToDate(Date()) {
-                    self.currentIOBDescription = String(describing: self.charts.iobPoints[index].y)
-                } else {
-                    self.currentIOBDescription = nil
-                }
-                // Fetch the current COB subtitle
-                if let index = self.charts.cobPoints.closestIndexPriorToDate(Date()) {
-                    self.currentCOBDescription = String(describing: self.charts.cobPoints[index].y)
-                } else {
-                    self.currentCOBDescription = nil
-                }
-
-                self.charts.prerender()
-
-                // Show/hide the recommended temp basal row
-                let oldRecommendedTempBasal = self.recommendedTempBasal
-                self.recommendedTempBasal = newRecommendedTempBasal
-                switch (oldRecommendedTempBasal, newRecommendedTempBasal) {
-                case (let old?, let new?) where old != new:
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
-                case (.none, .some):
-                    self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
-                case (.some, .none):
-                    self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
-                default:
-                    break
-                }
-
-                for case let cell as ChartTableViewCell in self.tableView.visibleCells {
-                    cell.reloadChart()
-
-                    if let indexPath = self.tableView.indexPath(for: cell) {
-                        self.tableView(self.tableView, updateSubtitleFor: cell, at: indexPath)
-                    }
-                }
-
-                self.reloading = false
             }
         }
     }
@@ -431,17 +382,6 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
         static let count = 4
     }
-
-    private lazy var charts: StatusChartsManager = {
-        let charts = StatusChartsManager(colors: .default, settings: .default)
-
-        charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 100),
-            max: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 175)
-        )
-
-        return charts
-    }()
 
     // MARK: Glucose
 
@@ -657,12 +597,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
                 if recommendedTempBasal != nil && !settingTempBasal {
                     settingTempBasal = true
-                    self.dataManager.loopManager.enactRecommendedTempBasal { (error) in
+                    self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
                         DispatchQueue.main.async {
                             self.settingTempBasal = false
 
                             if let error = error {
-                                self.dataManager.logger.addError(error, fromSource: "TempBasal")
+                                self.deviceManager.logger.addError(error, fromSource: "TempBasal")
                                 self.presentAlertController(with: error)
                             } else {
                                 self.refreshContext.update(with: .status)
@@ -675,35 +615,12 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         }
     }
 
-    // MARK: - UIGestureRecognizer
-
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-
-    @objc func handlePan(_ gestureRecognizer: UIGestureRecognizer) {
-        switch gestureRecognizer.state {
-        case .possible, .changed:
-            // Follow your dreams!
-            break
-        case .began, .cancelled, .ended, .failed:
-            for case let row as ChartTableViewCell in self.tableView.visibleCells {
-                let forwards = gestureRecognizer.state == .began
-                UIView.animate(withDuration: forwards ? 0.2 : 0.5, delay: forwards ? 0 : 1, animations: {
-                    let alpha: CGFloat = forwards ? 0 : 1
-                    row.titleLabel?.alpha = alpha
-                    row.subtitleLabel?.alpha = alpha
-                })
-            }
-        }
-    }
-
     // MARK: - Actions
 
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         if identifier == CarbEntryEditViewController.className {
-            if dataManager.loopManager.carbStore.authorizationRequired {
-                dataManager.loopManager.carbStore.authorize { (success, error) in
+            if deviceManager.loopManager.carbStore.authorizationRequired {
+                deviceManager.loopManager.carbStore.authorize { (success, error) in
                     if success {
                         self.performSegue(withIdentifier: CarbEntryEditViewController.className, sender: sender)
                     }
@@ -726,43 +643,48 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
         switch targetViewController {
         case let vc as CarbEntryTableViewController:
-            vc.carbStore = dataManager.loopManager.carbStore
+            vc.carbStore = deviceManager.loopManager.carbStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as CarbEntryEditViewController:
-            vc.defaultAbsorptionTimes = dataManager.loopManager.carbStore.defaultAbsorptionTimes
-            vc.preferredUnit = dataManager.loopManager.carbStore.preferredUnit
+            vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
+            vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
         case let vc as InsulinDeliveryTableViewController:
-            vc.doseStore = dataManager.loopManager.doseStore
+            vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
-            if let maxBolus = self.dataManager.loopManager.settings.maximumBolus {
-                vc.maxBolus = maxBolus
-            }
+            self.deviceManager.loopManager.getLoopState { (manager, state) in
+                let maximumBolus = manager.settings.maximumBolus
 
-            if let recommendation = sender as? BolusRecommendation {
-                vc.bolusRecommendation = recommendation
-            } else {
-                self.dataManager.loopManager.getRecommendedBolus { (recommendation, error) -> Void in
-                    if let error = error {
-                        self.dataManager.logger.addError(error, fromSource: "Bolus")
-                    } else if let recommendation = recommendation {
-                        DispatchQueue.main.async {
-                            vc.bolusRecommendation = recommendation
-                        }
+                let activeInsulin = state.insulinOnBoard?.value
+                let activeCarbohydrates = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
+                let bolusRecommendation: BolusRecommendation?
+
+                if let recommendation = sender as? BolusRecommendation {
+                    bolusRecommendation = recommendation
+                } else {
+                    do {
+                        bolusRecommendation = try state.recommendBolus()
+                    } catch let error {
+                        bolusRecommendation = nil
+                        self.deviceManager.logger.addError(error, fromSource: "Bolus")
                     }
                 }
-            }
-            self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, iob, cob, _) in
+
                 DispatchQueue.main.async {
+                    if let maxBolus = maximumBolus {
+                        vc.maxBolus = maxBolus
+                    }
+
                     vc.glucoseUnit = self.charts.glucoseUnit
-                    vc.activeInsulin = iob?.value
-                    vc.activeCarbohydrates = cob?.quantity.doubleValue(for: HKUnit.gram())
+                    vc.activeInsulin = activeInsulin
+                    vc.activeCarbohydrates = activeCarbohydrates
+                    vc.bolusRecommendation = bolusRecommendation
                 }
             }
         case let vc as PredictionTableViewController:
-            vc.dataManager = dataManager
+            vc.deviceManager = deviceManager
         case let vc as SettingsTableViewController:
-            vc.dataManager = dataManager
+            vc.dataManager = deviceManager
         default:
             break
         }
@@ -773,7 +695,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     /// - parameter segue: The unwind segue
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {
         if let carbVC = segue.source as? CarbEntryEditViewController, let updatedEntry = carbVC.updatedCarbEntry {
-            dataManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
+            deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let recommendation):
@@ -786,7 +708,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
                         if error is CarbStore.CarbStoreError {
                             self.presentAlertController(with: error)
                         } else {
-                            self.dataManager.logger.addError(error, fromSource: "Bolus")
+                            self.deviceManager.logger.addError(error, fromSource: "Bolus")
                         }
                     }
                 }
@@ -798,7 +720,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
         if let bolusViewController = segue.source as? BolusViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
                 self.bolusState = .enacting
-                dataManager.enactBolus(units: bolus) { (_) in
+                deviceManager.enactBolus(units: bolus) { (_) in
                     self.bolusState = nil
                 }
             } else {
@@ -828,10 +750,10 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
 
     @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
         if let workoutModeEnabled = workoutMode, workoutModeEnabled {
-            dataManager.loopManager.disableWorkoutMode()
+            deviceManager.loopManager.disableWorkoutMode()
         } else {
             let vc = UIAlertController(workoutDurationSelectionHandler: { (endDate) in
-                self.dataManager.loopManager.enableWorkoutMode(until: endDate)
+                self.deviceManager.loopManager.enableWorkoutMode(until: endDate)
             })
 
             present(vc, animated: true, completion: nil)
@@ -849,7 +771,7 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
-            if dataManager.cgm?.appURL != nil {
+            if deviceManager.cgm?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
 
@@ -863,15 +785,15 @@ final class StatusTableViewController: UITableViewController, UIGestureRecognize
     }
 
     @objc private func showLastError(_: Any) {
-        self.dataManager.loopManager.getLoopStatus { (_, _, _, _, _, _, _, error) -> Void in
-            if let error = error {
+        self.deviceManager.loopManager.getLoopState { (_, state) in
+            if let error = state.error {
                 self.presentAlertController(with: error)
             }
         }
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let url = dataManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
+        if let url = deviceManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }

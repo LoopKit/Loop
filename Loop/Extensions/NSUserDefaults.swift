@@ -14,44 +14,45 @@ import HealthKit
 extension UserDefaults {
 
     private enum Key: String {
-        case BasalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
+        case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
+        case batteryChemistry = "com.loopkit.Loop.BatteryChemistry"
         case cgmSettings = "com.loopkit.Loop.cgmSettings"
-        case CarbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
-        case ConnectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
+        case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
+        case connectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case loopSettings = "com.loopkit.Loop.loopSettings"
-        case InsulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
-        case InsulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
-        case PreferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
-        case PumpID = "com.loudnate.Naterade.PumpID"
-        case PumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
-        case PumpRegion = "com.loopkit.Loop.PumpRegion"
-        case PumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
-        case BatteryChemistry = "com.loopkit.Loop.BatteryChemistry"
+        case insulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
+        case insulinCounteractionEffects = "com.loopkit.Loop.insulinCounteractionEffects"
+        case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
+        case preferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
+        case pumpID = "com.loudnate.Naterade.PumpID"
+        case pumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
+        case pumpRegion = "com.loopkit.Loop.PumpRegion"
+        case pumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
         get {
-            if let rawValue = dictionary(forKey: Key.BasalRateSchedule.rawValue) {
+            if let rawValue = dictionary(forKey: Key.basalRateSchedule.rawValue) {
                 return BasalRateSchedule(rawValue: rawValue)
             } else {
                 return nil
             }
         }
         set {
-            set(newValue?.rawValue, forKey: Key.BasalRateSchedule.rawValue)
+            set(newValue?.rawValue, forKey: Key.basalRateSchedule.rawValue)
         }
     }
 
     var carbRatioSchedule: CarbRatioSchedule? {
         get {
-            if let rawValue = dictionary(forKey: Key.CarbRatioSchedule.rawValue) {
+            if let rawValue = dictionary(forKey: Key.carbRatioSchedule.rawValue) {
                 return CarbRatioSchedule(rawValue: rawValue)
             } else {
                 return nil
             }
         }
         set {
-            set(newValue?.rawValue, forKey: Key.CarbRatioSchedule.rawValue)
+            set(newValue?.rawValue, forKey: Key.carbRatioSchedule.rawValue)
         }
     }
 
@@ -93,10 +94,10 @@ extension UserDefaults {
 
     var connectedPeripheralIDs: [String] {
         get {
-            return array(forKey: Key.ConnectedPeripheralIDs.rawValue) as? [String] ?? []
+            return array(forKey: Key.connectedPeripheralIDs.rawValue) as? [String] ?? []
         }
         set {
-            set(newValue, forKey: Key.ConnectedPeripheralIDs.rawValue)
+            set(newValue, forKey: Key.connectedPeripheralIDs.rawValue)
         }
     }
 
@@ -159,98 +160,98 @@ extension UserDefaults {
 
     var insulinActionDuration: TimeInterval? {
         get {
-            let value = double(forKey: Key.InsulinActionDuration.rawValue)
+            let value = double(forKey: Key.insulinActionDuration.rawValue)
 
             return value > 0 ? value : nil
         }
         set {
             if let insulinActionDuration = newValue {
-                set(insulinActionDuration, forKey: Key.InsulinActionDuration.rawValue)
+                set(insulinActionDuration, forKey: Key.insulinActionDuration.rawValue)
             } else {
-                removeObject(forKey: Key.InsulinActionDuration.rawValue)
+                removeObject(forKey: Key.insulinActionDuration.rawValue)
             }
         }
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
         get {
-            if let rawValue = dictionary(forKey: Key.InsulinSensitivitySchedule.rawValue) {
+            if let rawValue = dictionary(forKey: Key.insulinSensitivitySchedule.rawValue) {
                 return InsulinSensitivitySchedule(rawValue: rawValue)
             } else {
                 return nil
             }
         }
         set {
-            set(newValue?.rawValue, forKey: Key.InsulinSensitivitySchedule.rawValue)
+            set(newValue?.rawValue, forKey: Key.insulinSensitivitySchedule.rawValue)
         }
     }
 
     var preferredInsulinDataSource: InsulinDataSource? {
         get {
-            return InsulinDataSource(rawValue: integer(forKey: Key.PreferredInsulinDataSource.rawValue))
+            return InsulinDataSource(rawValue: integer(forKey: Key.preferredInsulinDataSource.rawValue))
         }
         set {
             if let preferredInsulinDataSource = newValue {
-                set(preferredInsulinDataSource.rawValue, forKey: Key.PreferredInsulinDataSource.rawValue)
+                set(preferredInsulinDataSource.rawValue, forKey: Key.preferredInsulinDataSource.rawValue)
             } else {
-                removeObject(forKey: Key.PreferredInsulinDataSource.rawValue)
+                removeObject(forKey: Key.preferredInsulinDataSource.rawValue)
             }
         }
     }
 
     var pumpID: String? {
         get {
-            return string(forKey: Key.PumpID.rawValue)
+            return string(forKey: Key.pumpID.rawValue)
         }
         set {
-            set(newValue, forKey: Key.PumpID.rawValue)
+            set(newValue, forKey: Key.pumpID.rawValue)
         }
     }
 
     var pumpModelNumber: String? {
         get {
-            return string(forKey: Key.PumpModelNumber.rawValue)
+            return string(forKey: Key.pumpModelNumber.rawValue)
         }
         set {
-            set(newValue, forKey: Key.PumpModelNumber.rawValue)
+            set(newValue, forKey: Key.pumpModelNumber.rawValue)
         }
     }
 
     var pumpRegion: PumpRegion? {
         get {
             // Defaults to 0 / northAmerica
-            return PumpRegion(rawValue: integer(forKey: Key.PumpRegion.rawValue))
+            return PumpRegion(rawValue: integer(forKey: Key.pumpRegion.rawValue))
         }
         set {
-            set(newValue?.rawValue, forKey: Key.PumpRegion.rawValue)
+            set(newValue?.rawValue, forKey: Key.pumpRegion.rawValue)
         }
     }
 
     var pumpTimeZone: TimeZone? {
         get {
-            if let offset = object(forKey: Key.PumpTimeZone.rawValue) as? NSNumber {
+            if let offset = object(forKey: Key.pumpTimeZone.rawValue) as? NSNumber {
                 return TimeZone(secondsFromGMT: offset.intValue)
             } else {
                 return nil
             }
         } set {
             if let value = newValue {
-                set(NSNumber(value: value.secondsFromGMT() as Int), forKey: Key.PumpTimeZone.rawValue)
+                set(NSNumber(value: value.secondsFromGMT() as Int), forKey: Key.pumpTimeZone.rawValue)
             } else {
-                removeObject(forKey: Key.PumpTimeZone.rawValue)
+                removeObject(forKey: Key.pumpTimeZone.rawValue)
             }
         }
     }
 
     var batteryChemistry: BatteryChemistryType? {
         get {
-            return BatteryChemistryType(rawValue: integer(forKey: Key.BatteryChemistry.rawValue))
+            return BatteryChemistryType(rawValue: integer(forKey: Key.batteryChemistry.rawValue))
         }
         set {
             if let batteryChemistry = newValue {
-                set(batteryChemistry.rawValue, forKey: Key.BatteryChemistry.rawValue)
+                set(batteryChemistry.rawValue, forKey: Key.batteryChemistry.rawValue)
             } else {
-                removeObject(forKey: Key.BatteryChemistry.rawValue)
+                removeObject(forKey: Key.batteryChemistry.rawValue)
             }
         }
     }
