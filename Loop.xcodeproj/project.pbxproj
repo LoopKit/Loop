@@ -1089,7 +1089,7 @@
 				4F70C1E71DE8DCA7006380B7 /* PBXTargetDependency */,
 			);
 			name = Loop;
-			productName = Naterade;
+			productName = Loop;
 			productReference = 43776F8C1B8022E90074EA36 /* Loop.app */;
 			productType = "com.apple.product-type.application";
 		};

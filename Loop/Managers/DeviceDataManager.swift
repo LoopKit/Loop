@@ -361,19 +361,27 @@ final class DeviceDataManager {
     /// - parameter units:      The number of units to deliver
     /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
     ///     - error: An error describing why the command failed
-    func enactBolus(units: Double, completion: @escaping (_ error: Error?) -> Void) {
+    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
+        let notify = { (error: Error?) -> Void in
+            if let error = error {
+                NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+            }
+
+            completion(error)
+        }
+
         guard units > 0 else {
-            completion(nil)
+            notify(nil)
             return
         }
 
         guard let device = rileyLinkManager.firstConnectedDevice else {
-            completion(LoopError.connectionError)
+            notify(LoopError.connectionError)
             return
         }
 
         guard let ops = device.ops else {
-            completion(LoopError.configurationError("PumpOps"))
+            notify(LoopError.configurationError("PumpOps"))
             return
         }
 
@@ -381,10 +389,10 @@ final class DeviceDataManager {
             ops.setNormalBolus(units: units) { (error) in
                 if let error = error {
                     self.logger.addError(error, fromSource: "Bolus")
-                    completion(LoopError.communicationError)
+                    notify(error)
                 } else {
                     self.loopManager.addExpectedBolus(units, at: Date())
-                    completion(nil)
+                    notify(nil)
                 }
             }
         }
@@ -401,13 +409,18 @@ final class DeviceDataManager {
                         switch result {
                         case .failure(let error):
                             self.logger.addError(error, fromSource: "Bolus")
-                            completion(error)
+                            notify(error)
                         case .success:
                             setBolus()
                         }
                     }
                 case .failure(let error):
-                    completion(error)
+                    switch error {
+                    case let error as PumpCommsError:
+                        notify(SetBolusError.certain(error))
+                    default:
+                        notify(error)
+                    }
                 }
             }
         } else {
