@@ -93,29 +93,27 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         }
     }
 
-    private func createWatchContext(_ completionHandler: @escaping (_ context: WatchContext?) -> Void) {
-        let glucose = deviceDataManager.loopManager.glucoseStore.latestGlucose
-        let reservoir = deviceDataManager.loopManager.doseStore.lastReservoirValue
-        let maxBolus = deviceDataManager.loopManager.settings.maximumBolus
+    private func createWatchContext(_ completion: @escaping (_ context: WatchContext?) -> Void) {
+        let loopManager = deviceDataManager.loopManager!
 
-        deviceDataManager.loopManager.getLoopStatus { (predictedGlucose, _, recommendedTempBasal, lastTempBasal, lastLoopCompleted, _, _, error) in
-            let eventualGlucose = predictedGlucose?.last
+        let glucose = loopManager.glucoseStore.latestGlucose
+        let reservoir = loopManager.doseStore.lastReservoirValue
 
-            self.deviceDataManager.loopManager.getRecommendedBolus { (recommendation, error) in
-                self.deviceDataManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
-                    let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
-                    context.reservoir = reservoir?.unitVolume
+        loopManager.glucoseStore.preferredUnit { (unit, error) in
+            loopManager.getLoopState { (manager, state) in
+                let eventualGlucose = state.predictedGlucose?.last
+                let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
+                context.reservoir = reservoir?.unitVolume
 
-                    context.loopLastRunDate = lastLoopCompleted
-                    context.recommendedBolusDose = recommendation?.amount
-                    context.maxBolus = maxBolus
+                context.loopLastRunDate = state.lastLoopCompleted
+                context.recommendedBolusDose = try? state.recommendBolus().amount
+                context.maxBolus = manager.settings.maximumBolus
 
-                    if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                        context.glucoseTrendRawValue = trend.rawValue
-                    }
-
-                    completionHandler(context)
+                if let trend = self.deviceDataManager.sensorInfo?.trendType {
+                    context.glucoseTrendRawValue = trend.rawValue
                 }
+
+                completion(context)
             }
         }
     }

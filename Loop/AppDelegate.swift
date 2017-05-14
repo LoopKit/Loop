@@ -27,7 +27,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if  let navVC = window?.rootViewController as? UINavigationController,
             let statusVC = navVC.viewControllers.first as? StatusTableViewController {
-            statusVC.dataManager = deviceManager
+            statusVC.deviceManager = deviceManager
         }
 
         return true

@@ -75,6 +75,7 @@
 		439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED291E76093C00B0AED5 /* CGMManager.swift */; };
 		439BED2C1E760A7A00B0AED5 /* DexCGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED2B1E760A7A00B0AED5 /* DexCGMManager.swift */; };
 		439BED2E1E760BC600B0AED5 /* EnliteCGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED2D1E760BC600B0AED5 /* EnliteCGMManager.swift */; };
+		43A51E211EB6DBDD000736CC /* ChartsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */; };
 		43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A567681C94880B00334FAC /* LoopDataManager.swift */; };
 		43A5676B1C96155700334FAC /* SwitchTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */; };
 		43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43A943741B926B7B0051FA24 /* Interface.storyboard */; };
@@ -429,6 +430,7 @@
 		439BED291E76093C00B0AED5 /* CGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMManager.swift; sourceTree = "<group>"; };
 		439BED2B1E760A7A00B0AED5 /* DexCGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DexCGMManager.swift; sourceTree = "<group>"; };
 		439BED2D1E760BC600B0AED5 /* EnliteCGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteCGMManager.swift; sourceTree = "<group>"; };
+		43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartsTableViewController.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = LoopDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43A5676A1C96155700334FAC /* SwitchTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwitchTableViewCell.swift; sourceTree = "<group>"; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -853,6 +855,7 @@
 				43DBF04B1C93B8D700B3C386 /* BolusViewController.swift */,
 				4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */,
 				43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */,
+				43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */,
 				433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */,
 				C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
@@ -1508,6 +1511,7 @@
 				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
 				436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
+				43A51E211EB6DBDD000736CC /* ChartsTableViewController.swift in Sources */,
 				4346D1F61C78501000ABAFE3 /* ChartPoint+Loop.swift in Sources */,
 				438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */,
 				43D848B21E7DF42500DADCBC /* LoopSettings.swift in Sources */,
