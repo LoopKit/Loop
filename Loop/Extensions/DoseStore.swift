@@ -22,6 +22,7 @@ extension LoopDataManager {
 
         for event in pumpEvents {
             var dose: DoseEntry?
+            var eventType: InsulinKit.PumpEventType?
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:
@@ -53,12 +54,14 @@ extension LoopDataManager {
                         unit: amount.unit
                     )
                 }
+            case is PrimePumpEvent:
+                eventType = .prime
             default:
                 break
             }
 
             title = String(describing: event.pumpEvent)
-            events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title))
+            events.append(NewPumpEvent(date: event.date, dose: dose, isMutable: event.isMutable(), raw: event.pumpEvent.rawData, title: title, type: eventType))
         }
 
         addPumpEvents(events, completion: completion)
