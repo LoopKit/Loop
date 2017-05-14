@@ -26,22 +26,26 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
     private lazy var labelX: UILabel = {
         let label = UILabel()
-        label.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1)
-        label.textColor = UIColor.secondaryLabelColor
+        label.font = self.axisLabelSettings.font
+        label.textColor = self.axisLabelSettings.fontColor
 
         return label
     }()
 
+    private let axisLabelSettings: ChartLabelSettings
+
     private(set) var highlightLayer: ChartPointsTouchHighlightLayer<ChartPoint, UIView>!
 
-    init(xAxis: ChartAxisLayer, yAxis: ChartAxisLayer, innerFrame: CGRect, chartPoints: [ChartPoint], tintColor: UIColor, labelCenterY: CGFloat, gestureRecognizer: UIPanGestureRecognizer? = nil) {
+    init(xAxisLayer: ChartAxisLayer, yAxisLayer: ChartAxisLayer, axisLabelSettings: ChartLabelSettings, chartPoints: [ChartPoint], tintColor: UIColor, gestureRecognizer: UIGestureRecognizer? = nil, onCompleteHighlight: (() -> Void)? = nil) {
+
+        self.axisLabelSettings = axisLabelSettings
 
         highlightLayer = ChartPointsTouchHighlightLayer(
-            xAxis: xAxis,
-            yAxis: yAxis,
-            innerFrame: innerFrame,
+            xAxis: xAxisLayer.axis,
+            yAxis: yAxisLayer.axis,
             chartPoints: chartPoints,
             gestureRecognizer: gestureRecognizer,
+            onCompleteHighlight: onCompleteHighlight,
             modelFilter: { (screenLoc, chartPointModels) -> ChartPointLayerModel<ChartPoint>? in
                 if let index = chartPointModels.map({ $0.screenLoc.x }).findClosestElementIndex(matching: screenLoc.x) {
                     return chartPointModels[index]
@@ -51,12 +55,16 @@ final class ChartPointsTouchHighlightLayerViewCache {
             },
             viewGenerator: { [unowned self] (chartPointModel, layer, chart) -> UIView? in
                 let containerView = self.containerView
-                containerView.frame = chart.bounds
+                containerView.frame = chart.contentView.bounds
                 containerView.alpha = 1  // This is animated to 0 when touch last ended
 
                 let xAxisOverlayView = self.xAxisOverlayView
                 if xAxisOverlayView.superview == nil {
-                    xAxisOverlayView.frame = xAxis.rect.offsetBy(dx: 0, dy: 1)
+                    xAxisOverlayView.frame = CGRect(
+                        origin: CGPoint(x: containerView.bounds.minX,
+                                        y: containerView.bounds.maxY + 1), // Don't clip X line
+                        size: xAxisLayer.frame.size
+                    )
                     xAxisOverlayView.backgroundColor = UIColor.white
                     xAxisOverlayView.isOpaque = true
                     containerView.addSubview(xAxisOverlayView)
@@ -74,9 +82,9 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
                     label.text = text
                     label.sizeToFit()
-                    label.center.y = innerFrame.origin.y - 21
+                    label.center.y = containerView.frame.minY - 21
                     label.center.x = chartPointModel.screenLoc.x
-                    label.frame.origin.x = min(max(label.frame.origin.x, innerFrame.origin.x), innerFrame.maxX - label.frame.size.width)
+                    label.frame.origin.x = min(max(label.frame.origin.x, containerView.bounds.minX), containerView.bounds.maxX - label.frame.size.width)
                     label.frame.origin.makeIntegralInPlaceWithDisplayScale(chart.view.traitCollection.displayScale)
 
                     if label.superview == nil {

@@ -10,12 +10,30 @@ import SwiftCharts
 
 
 public class ChartPointsScatterDownTrianglesLayer<T: ChartPoint>: ChartPointsScatterLayer<T> {
-
-    required public init(xAxis: ChartAxisLayer, yAxis: ChartAxisLayer, innerFrame: CGRect, chartPoints: [T], displayDelay: Float, itemSize: CGSize, itemFillColor: UIColor) {
-        super.init(xAxis: xAxis, yAxis: yAxis, innerFrame: innerFrame, chartPoints: chartPoints, displayDelay: displayDelay, itemSize: itemSize, itemFillColor: itemFillColor)
+    public required init(
+        xAxis: ChartAxis,
+        yAxis: ChartAxis,
+        chartPoints: [T],
+        displayDelay: Float,
+        itemSize: CGSize,
+        itemFillColor: UIColor,
+        optimized: Bool = false,
+        tapSettings: ChartPointsTapSettings<T>? = nil
+    ) {
+        // optimized must be set to false because `generateCGLayer` isn't public and can't be overridden
+        super.init(
+            xAxis: xAxis,
+            yAxis: yAxis,
+            chartPoints: chartPoints,
+            displayDelay: displayDelay,
+            itemSize: itemSize,
+            itemFillColor: itemFillColor,
+            optimized: false,
+            tapSettings: tapSettings
+        )
     }
 
-    override public func drawChartPointModel(context: CGContext, chartPointModel: ChartPointLayerModel<T>) {
+    public override func drawChartPointModel(_ context: CGContext, chartPointModel: ChartPointLayerModel<T>, view: UIView) {
         let w = self.itemSize.width
         let h = self.itemSize.height
 

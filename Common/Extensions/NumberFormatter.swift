@@ -20,19 +20,24 @@ extension NumberFormatter {
         return numberFormatter
     }
 
-    func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
-        guard let stringValue = string(from: NSNumber(value: value)) else {
+    func string(from number: Double, unit: String) -> String? {
+        guard let stringValue = string(from: NSNumber(value: number)) else {
             return nil
         }
 
         return String(
-            format: NSLocalizedString("GLUCOSE_VALUE_AND_UNIT",
-                                      value: "%1$@ %2$@",
-                                      comment: "Format string for combining localized glucose value and unit. (1: glucose value)(2: unit)"
+            format: NSLocalizedString(
+                "QUANTITY_VALUE_AND_UNIT",
+                value: "%1$@ %2$@",
+                comment: "Format string for combining localized numeric value and unit. (1: numeric value)(2: unit)"
             ),
             stringValue,
-            unit.glucoseUnitDisplayString
+            unit
         )
+    }
+
+    func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
+        return string(from: value, unit: unit.glucoseUnitDisplayString)
     }
 
     @nonobjc func describingGlucose(_ value: HKQuantity, for unit: HKUnit) -> String? {

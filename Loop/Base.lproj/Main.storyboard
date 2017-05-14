@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="74s-IX-WF0">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="74s-IX-WF0">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -20,10 +20,10 @@
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="SwitchTableViewCell" id="vah-ss-3Ud" customClass="SwitchTableViewCell" customModule="Loop" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="56" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="55.5" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="vah-ss-3Ud" id="D0A-EB-kmz">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="moR-fS-DWR">
@@ -51,10 +51,10 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ConfigTableViewCell" textLabel="5TX-kX-nBo" detailTextLabel="m9c-SQ-djE" style="IBUITableViewCellStyleValue1" id="0EG-OG-YuT">
-                                <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="99.5" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="0EG-OG-YuT" id="af2-sZ-CY0">
-                                    <rect key="frame" x="0.0" y="0.0" width="342" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="342" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Pump ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5TX-kX-nBo">
@@ -131,7 +131,7 @@
                                 <rect key="frame" x="0.0" y="28" width="375" height="270"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="mQk-9D-0ub" id="B1i-Pw-wSw">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="270"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="269.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FBL-RL-faM" customClass="ChartContentView" customModule="LoopUI">
@@ -176,7 +176,7 @@
                                 <rect key="frame" x="0.0" y="298" width="375" height="64"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Xc2-a9-ojZ" id="a4h-tq-Rnl">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="64"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="63.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" verticalCompressionResistancePriority="751" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bIL-Ub-qYp">
@@ -210,7 +210,7 @@
                                 <rect key="frame" x="0.0" y="362" width="375" height="64"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="I71-cY-0y7" id="0f9-ja-YFt">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="64"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="63.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="252" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zbc-87-wxZ">
@@ -448,7 +448,7 @@
                                         <rect key="frame" x="0.0" y="35" width="375" height="45"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="AUz-zE-m0e" id="m9w-O9-Oa0">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="45"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="⚠ Glucose Predicted Below Range" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k0g-P7-OVN">
@@ -470,7 +470,7 @@
                                         <rect key="frame" x="0.0" y="80" width="375" height="57"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="LZi-Cn-JOA" id="H41-1O-Omj">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="57"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="56.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" fixedFrame="YES" text="Active Insulin: 1.5U" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="viU-7a-kbI">
@@ -498,7 +498,7 @@
                                         <rect key="frame" x="0.0" y="137" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="DoN-m5-O7j" id="3OB-7U-Jvb">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Recommended" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ywT-OR-NnU">
@@ -543,7 +543,7 @@
                                         <rect key="frame" x="0.0" y="181" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="us0-UE-Wqz" id="2fI-OE-GLU">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Bolus" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5oA-6d-ZTL">
@@ -587,7 +587,7 @@
                                         <rect key="frame" x="0.0" y="225" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="efV-tT-gC9" id="nq8-dv-ceA">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ya0-9b-ZAS">
