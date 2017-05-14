@@ -141,4 +141,8 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 @interface HKQuantitySample (SWIFT_EXTENSION(GlucoseKit))
 @end
 
+
+@interface HKUnit (SWIFT_EXTENSION(GlucoseKit))
+@end
+
 #pragma clang diagnostic pop

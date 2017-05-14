@@ -248,12 +248,6 @@ SWIFT_CLASS("_TtC7LoopKit39GlucoseRangeScheduleTableViewController")
 
 
 @interface HKUnit (SWIFT_EXTENSION(LoopKit))
-+ (HKUnit * _Nonnull)milligramsPerDeciliterUnit SWIFT_WARN_UNUSED_RESULT;
-+ (HKUnit * _Nonnull)millimolesPerLiterUnit SWIFT_WARN_UNUSED_RESULT;
-/// A formatting helper for determining the preferred decimal style for a given unit
-@property (nonatomic, readonly) NSInteger preferredFractionDigits;
-/// A presentation helper for the localized unit string
-@property (nonatomic, readonly, copy) NSString * _Nonnull glucoseUnitDisplayString;
 @end
 
 

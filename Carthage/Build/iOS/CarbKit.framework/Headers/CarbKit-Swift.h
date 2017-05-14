@@ -188,6 +188,10 @@ SWIFT_CLASS("_TtC7CarbKit28CarbEntryTableViewController")
 @end
 
 
+@interface HKUnit (SWIFT_EXTENSION(CarbKit))
+@end
+
+
 @interface UITableViewCell (SWIFT_EXTENSION(CarbKit))
 @end
 
