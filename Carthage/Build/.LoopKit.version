@@ -1,24 +1,23 @@
 {
-  "commitish" : "v1.2.2",
   "iOS" : [
     {
-      "hash" : "b257e73d5a6389f11e4cfd318d0beb29b8264112b8745b12fa8ade8ae5ee91dc",
+      "hash" : "ff17afa9c1bc6adb1a9097f10358f3109a2fad7f17a7427a99e3add19f8192c2",
       "name" : "GlucoseKit"
     },
     {
-      "hash" : "04bb237231f0a5d37790fe2344eeb7ce31be323ecd4f6d801821793290445a78",
+      "hash" : "064098139c38ebe785c5882068d75604c9e5f862ef932765389593f4bc56dc92",
       "name" : "InsulinKit"
     },
     {
-      "hash" : "badd5aec3f900f7a1180ccb64d931bb1b749a43afe3e54994395c37a4f0c9870",
-      "name" : "CarbKit"
+      "hash" : "962b86c0793ced4741d32439a9ce836c054a2f2b58214279cfcfb634acea5757",
+      "name" : "LoopKit"
     },
     {
-      "hash" : "b496912bfc7cf165b106c132119beb22b9f6a94f4b6e11a00ca1c705d97592e4",
-      "name" : "LoopKit"
+      "hash" : "b93fe2ceaff06f8748e90e7a83d80b64d7d2b2c52a78ebe6fb59f9ea3eb270c5",
+      "name" : "CarbKit"
     }
   ],
-  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
+  "commitish" : "v1.3.0",
   "watchOS" : [
 
   ],
