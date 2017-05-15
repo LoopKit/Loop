@@ -588,8 +588,6 @@ final class DeviceDataManager {
 
     init() {
         let pumpID = UserDefaults.standard.pumpID
-        
-          glucoseStore?.managedDataInterval = nil
 
         var idleListeningEnabled = true
 

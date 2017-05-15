@@ -92,6 +92,7 @@ final class LoopDataManager {
             UserDefaults.standard.loopSettings = settings
             notify(forChange: .preferences)
             AnalyticsManager.sharedManager.didChangeLoopSettings(from: oldValue, to: settings)
+            glucoseStore?.managedDataInterval = nil
         }
     }
 
