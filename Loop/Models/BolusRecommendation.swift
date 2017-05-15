@@ -10,6 +10,7 @@ import Foundation
 import LoopKit
 import HealthKit
 
+
 enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
     case glucoseBelowMinimumGuard(minGlucose: GlucoseValue, unit: HKUnit)
     case currentGlucoseBelowTarget(glucose: GlucoseValue, unit: HKUnit)
@@ -73,3 +74,15 @@ struct BolusRecommendation {
         self.notice = notice
     }
 }
+
+
+extension BolusRecommendation: Comparable {
+    static func ==(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount == rhs.amount
+    }
+
+    static func <(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount < rhs.amount
+    }
+}
+

@@ -26,6 +26,6 @@ public final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
     }
 
     override public var description: String {
-        return "\(super.description) \(unitString)"
+        return formatter.string(from: scalar, unit: unitString) ?? ""
     }
 }

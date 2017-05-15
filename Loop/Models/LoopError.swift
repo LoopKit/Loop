@@ -7,10 +7,12 @@
 //
 
 import Foundation
+import RileyLinkKit
+
 
 enum LoopError: Error {
-    // Failure during device communication
-    case communicationError
+    // A bolus failed to start
+    case bolusCommand(SetBolusError)
 
     // Missing or unexpected configuration values
     case configurationError(String)
@@ -34,6 +36,7 @@ enum LoopError: Error {
     case invalidData(details: String)
 }
 
+
 extension LoopError: LocalizedError {
 
     public var recoverySuggestion: String? {
@@ -46,14 +49,13 @@ extension LoopError: LocalizedError {
     }
 
     public var errorDescription: String? {
-
         let formatter = DateComponentsFormatter()
         formatter.allowedUnits = [.minute]
         formatter.unitsStyle = .full
 
         switch self {
-        case .communicationError:
-            return NSLocalizedString("Communication Error", comment: "The error message displayed after a communication error.")
+        case .bolusCommand(let error):
+            return error.errorDescription
         case .configurationError(let details):
             return String(format: NSLocalizedString("Configuration Error: %1$@", comment: "The error message displayed for configuration errors. (1: configuration error details)"), details)
         case .connectionError:
@@ -75,4 +77,5 @@ extension LoopError: LocalizedError {
         }
     }
 }
+
 

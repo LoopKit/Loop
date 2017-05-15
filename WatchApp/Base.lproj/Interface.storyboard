@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+    <device id="watch38" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11077"/>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="12029"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -227,11 +231,23 @@
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
             <objects>
-                <notificationController id="YCC-NB-fut">
+                <notificationController id="YCC-NB-fut" customClass="NotificationController" customModule="WatchApp_Extension">
                     <items>
-                        <label alignment="left" text="Alert Label" id="XkS-y5-khE"/>
+                        <group width="1" alignment="left" layout="vertical" id="gMp-VZ-EBe">
+                            <items>
+                                <label alignment="left" text="Bolus Failed" id="jj3-Gq-HBy">
+                                    <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                                </label>
+                                <label alignment="left" text="&lt;body&gt;" numberOfLines="0" id="XkS-y5-khE">
+                                    <fontDescription key="font" style="UICTFontTextStyleBody"/>
+                                </label>
+                            </items>
+                        </group>
                     </items>
-                    <notificationCategory key="notificationCategory" identifier="myCategory" id="JfB-70-Muf"/>
+                    <notificationCategory key="notificationCategory" identifier="bolusFailure" id="JfB-70-Muf">
+                        <color key="sashColor" red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </notificationCategory>
+                    <color key="backgroundColor" red="1" green="0.58431372549019611" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                     <connections>
                         <outlet property="notificationAlertLabel" destination="XkS-y5-khE" id="49B-RR-99y"/>
                     </connections>

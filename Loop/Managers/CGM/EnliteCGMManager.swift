@@ -39,7 +39,7 @@ final class EnliteCGMManager: CGMManager {
                     self.sensorState = EnliteSensorDisplayable(latestSensorEvent)
                 }
 
-                let unit = HKUnit.milligramsPerDeciliterUnit()
+                let unit = HKUnit.milligramsPerDeciliter()
                 let glucoseValues = events
                     // TODO: Is the { $0.date > latestGlucoseDate } filter duplicative?
                     .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > latestGlucoseDate })
