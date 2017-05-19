@@ -51,6 +51,7 @@ final class LoopDataManager {
         self.delegate = delegate
         self.lastLoopCompleted = lastLoopCompleted
         self.settings = settings
+        glucoseStore?.managedDataInterval = nil
 
         carbStore = CarbStore(
             defaultAbsorptionTimes: (
@@ -92,7 +93,6 @@ final class LoopDataManager {
             UserDefaults.standard.loopSettings = settings
             notify(forChange: .preferences)
             AnalyticsManager.sharedManager.didChangeLoopSettings(from: oldValue, to: settings)
-            glucoseStore?.managedDataInterval = nil
         }
     }
 
