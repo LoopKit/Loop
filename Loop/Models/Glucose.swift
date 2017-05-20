@@ -22,7 +22,7 @@ extension Glucose: SensorDisplayable {
         case .ok:
             status = ""
         case .lowBattery:
-            status = NSLocalizedString(" Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
+            status = NSLocalizedString("Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
         case .unknown(let value):
             status = String(format: "%02x", value)
         }

@@ -15,24 +15,47 @@ public final class GlucoseHUDView: BaseHUDView {
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
             unitLabel.text = "–"
-            unitLabel.textColor = .glucoseTintColor
+            unitLabel.textColor = tintColor
         }
     }
 
     @IBOutlet private weak var glucoseLabel: UILabel! {
         didSet {
             glucoseLabel.text = "–"
-            glucoseLabel.textColor = .glucoseTintColor
+            glucoseLabel.textColor = tintColor
         }
     }
 
     @IBOutlet private weak var alertLabel: UILabel! {
         didSet {
             alertLabel.alpha = 0
-            alertLabel.backgroundColor = UIColor.agingColor
             alertLabel.textColor = UIColor.white
             alertLabel.layer.cornerRadius = 9
             alertLabel.clipsToBounds = true
+        }
+    }
+
+    public override func tintColorDidChange() {
+        super.tintColorDidChange()
+
+        unitLabel.textColor = tintColor
+        glucoseLabel.textColor = tintColor
+    }
+
+    public var stateColors: StateColorPalette? {
+        didSet {
+            updateColor()
+        }
+    }
+
+    private func updateColor() {
+        switch sensorAlertState {
+        case .missing, .invalid:
+            alertLabel.backgroundColor = stateColors?.warning
+        case .remote:
+            alertLabel.backgroundColor = stateColors?.unknown
+        case .ok:
+            alertLabel.backgroundColor = stateColors?.normal
         }
     }
 
@@ -51,12 +74,12 @@ public final class GlucoseHUDView: BaseHUDView {
             case .ok:
                 alertLabelAlpha = 0
             case .missing, .invalid:
-                alertLabel.backgroundColor = UIColor.agingColor
                 alertLabel.text = "!"
             case .remote:
-                alertLabel.backgroundColor = UIColor.unknownColor
                 alertLabel.text = "☁︎"
             }
+
+            updateColor()
 
             UIView.animate(withDuration: 0.25, animations: {
                 self.alertLabel.alpha = alertLabelAlpha
@@ -64,12 +87,11 @@ public final class GlucoseHUDView: BaseHUDView {
         }
     }
 
-    public func set(glucoseQuantity: Double, at glucoseStartDate: Date, unitString: String, from sensor: SensorDisplayable?) {
+    public func setGlucoseQuantity(_ glucoseQuantity: Double, at glucoseStartDate: Date, unit: HKUnit, sensor: SensorDisplayable?) {
         var accessibilityStrings = [String]()
 
         let time = timeFormatter.string(from: glucoseStartDate)
         caption?.text = time
-        let unit = HKUnit(from: unitString)
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: NSNumber(value: glucoseQuantity)) {

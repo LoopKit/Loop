@@ -16,10 +16,19 @@ public final class BasalRateHUDView: BaseHUDView {
     @IBOutlet private weak var basalRateLabel: UILabel! {
         didSet {
             basalRateLabel?.text = String(format: basalRateFormatString, "–")
-            basalRateLabel?.textColor = .doseTintColor
+            updateTintColor()
 
             accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
         }
+    }
+
+    public override func tintColorDidChange() {
+        super.tintColorDidChange()
+        updateTintColor()
+    }
+
+    private func updateTintColor() {
+        basalRateLabel?.textColor = tintColor
     }
 
     private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate.")

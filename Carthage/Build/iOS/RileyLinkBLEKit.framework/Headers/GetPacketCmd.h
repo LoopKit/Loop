@@ -13,6 +13,6 @@
 @interface GetPacketCmd : ReceivingPacketCmd
 
 @property (nonatomic, assign) uint8_t listenChannel;
-@property (nonatomic, assign) uint16_t timeoutMS;
+@property (nonatomic, assign) uint32_t timeoutMS;
 
 @end
