@@ -506,36 +506,14 @@ final class LoopDataManager {
         )
     }
 
-    /// Computes amount of insulin from boluses that have been issued and not confirmed, and
-    /// remaining insulin delivery from temporary basal rate adjustments above scheduled rate
-    /// that are still in progress.
+    /// Computes amount of insulin from boluses that have been issued and not confirmed
     ///
-    /// - Returns: The amount of pending insulin, in units
+    /// - Returns: The amount of unconfirmed insulin, in units
     /// - Throws: LoopError.configurationError
-    private func getPendingInsulin() throws -> Double {
+    private func getUnconfirmedInsulin() throws -> Double {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard let basalRates = basalRateSchedule else {
-            throw LoopError.configurationError("Basal Rate Schedule")
-        }
-
-        let pendingTempBasalInsulin: Double
-        let date = Date()
-
-        if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
-            let normalBasalRate = basalRates.value(at: date)
-            let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
-            let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
-
-            pendingTempBasalInsulin = max(0, remainingUnits)
-        } else {
-            pendingTempBasalInsulin = 0
-        }
-
-        let pendingBolusAmount: Double = lastBolus?.units ?? 0
-
-        // All outstanding potential insulin delivery
-        return pendingTempBasalInsulin + pendingBolusAmount
+        return lastBolus?.units ?? 0
     }
 
     /// - Throws: LoopError.missingDataError
@@ -787,14 +765,14 @@ final class LoopDataManager {
             throw LoopError.glucoseTooOld(date: glucoseDate)
         }
 
-        let pendingInsulin = try self.getPendingInsulin()
+        let unconfirmedInsulin = try self.getUnconfirmedInsulin()
 
         let recommendation = DoseMath.recommendBolusFromPredictedGlucose(predictedGlucose,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivity,
             basalRateSchedule: basalRates,
-            pendingInsulin: pendingInsulin,
+            unconfirmedInsulin: unconfirmedInsulin,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )

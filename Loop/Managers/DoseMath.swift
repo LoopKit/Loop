@@ -141,7 +141,7 @@ struct DoseMath {
      - parameter glucoseTargetRange: The schedule of target glucose ranges
      - parameter insulinSensitivity: The schedule of insulin sensitivities, in Units of insulin per glucose-unit
      - parameter basalRateSchedule:  The schedule of basal rates
-     - parameter pendingInsulin:     The amount of insulin in any issued, but not confirmed, boluses and the amount remaining from current tempBasal
+     - parameter unconfirmedInsulin: The amount of insulin in any issued, but not confirmed, boluses
      - parameter minimumBGGuard:     If minBG is less than or equal to this value, no recommendation will be made
 
      - returns: The recommended bolus
@@ -152,12 +152,12 @@ struct DoseMath {
         glucoseTargetRange: GlucoseRangeSchedule,
         insulinSensitivity: InsulinSensitivitySchedule,
         basalRateSchedule: BasalRateSchedule,
-        pendingInsulin: Double,
+        unconfirmedInsulin: Double,
         minimumBGGuard: GlucoseThreshold,
         insulinActionDuration: TimeInterval
     ) -> BolusRecommendation {
         guard glucose.count > 1 else {
-            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin)
+            return BolusRecommendation(amount: 0, unconfirmedInsulin: unconfirmedInsulin)
         }
 
         let eventualGlucose = glucose.filter { $0.startDate <= date.addingTimeInterval(insulinActionDuration) }.last!
@@ -167,7 +167,7 @@ struct DoseMath {
         let eventualGlucoseTargets = glucoseTargetRange.value(at: eventualGlucose.startDate)
 
         guard minGlucose.quantity >= minimumBGGuard.quantity else {
-            return BolusRecommendation(amount: 0, pendingInsulin: pendingInsulin, notice: .glucoseBelowMinimumGuard(minGlucose: minGlucose, unit: glucoseTargetRange.unit))
+            return BolusRecommendation(amount: 0, unconfirmedInsulin: unconfirmedInsulin, notice: .glucoseBelowMinimumGuard(minGlucose: minGlucose, unit: glucoseTargetRange.unit))
         }
 
         let targetGlucose = eventualGlucoseTargets.maxValue
@@ -176,7 +176,7 @@ struct DoseMath {
         let doseUnits = (eventualGlucose.quantity.doubleValue(for: glucoseTargetRange.unit) - targetGlucose) / currentSensitivity
 
         // Round to pump accuracy increments
-        let roundedAmount = round(max(0, (doseUnits - pendingInsulin)) * 40) / 40
+        let roundedAmount = round(max(0, (doseUnits - unconfirmedInsulin)) * 40) / 40
         
         // Cap at max bolus amount
         let cappedAmount = min(maxBolus, max(0, roundedAmount))
@@ -192,6 +192,6 @@ struct DoseMath {
             notice = nil
         }
         
-        return BolusRecommendation(amount: cappedAmount, pendingInsulin: pendingInsulin, notice: notice)
+        return BolusRecommendation(amount: cappedAmount, unconfirmedInsulin: unconfirmedInsulin, notice: notice)
     }
 }

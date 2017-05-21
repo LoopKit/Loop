@@ -386,7 +386,7 @@ final class DeviceDataManager {
         }
 
         let setBolus = {
-            ops.setNormalBolus(units: units) { (error) in
+            ops.setNormalBolus(units: units, cancelExistingTemp: true) { (error) in
                 if let error = error {
                     self.logger.addError(error, fromSource: "Bolus")
                     notify(error)
