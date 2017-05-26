@@ -65,12 +65,12 @@ enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
 
 struct BolusRecommendation {
     let amount: Double
-    let pendingInsulin: Double
+    let unconfirmedInsulin: Double
     let notice: BolusRecommendationNotice?
 
-    init(amount: Double, pendingInsulin: Double, notice: BolusRecommendationNotice? = nil) {
+    init(amount: Double, unconfirmedInsulin: Double, notice: BolusRecommendationNotice? = nil) {
         self.amount = amount
-        self.pendingInsulin = pendingInsulin
+        self.unconfirmedInsulin = unconfirmedInsulin
         self.notice = notice
     }
 }

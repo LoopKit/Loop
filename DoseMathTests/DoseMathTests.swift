@@ -509,7 +509,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -526,7 +526,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
 
@@ -544,7 +544,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
 
@@ -562,7 +562,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
 
@@ -580,7 +580,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
 
@@ -605,7 +605,7 @@ class RecommendBolusTests: XCTestCase {
                                                                glucoseTargetRange: glucoseTargetRange,
                                                                insulinSensitivity: insulinSensitivitySchedule,
                                                                basalRateSchedule: basalRateSchedule,
-                                                               pendingInsulin: 0,
+                                                               unconfirmedInsulin: 0,
                                                                minimumBGGuard: minimumBGGuard,
                                                                insulinActionDuration: insulinActionDuration
         )
@@ -615,7 +615,7 @@ class RecommendBolusTests: XCTestCase {
     }
 
 
-    func testStartLowEndHighWithPendingBolus() {
+    func testStartLowEndHighWithUnconfirmedBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
         
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
@@ -624,7 +624,7 @@ class RecommendBolusTests: XCTestCase {
                                                                glucoseTargetRange: glucoseTargetRange,
                                                                insulinSensitivity: insulinSensitivitySchedule,
                                                                basalRateSchedule: basalRateSchedule,
-                                                               pendingInsulin: 1,
+                                                               unconfirmedInsulin: 1,
                                                                minimumBGGuard: minimumBGGuard,
                                                                insulinActionDuration: insulinActionDuration
         )
@@ -641,7 +641,7 @@ class RecommendBolusTests: XCTestCase {
                                                                glucoseTargetRange: glucoseTargetRange,
                                                                insulinSensitivity: insulinSensitivitySchedule,
                                                                basalRateSchedule: basalRateSchedule,
-                                                               pendingInsulin: 0,
+                                                               unconfirmedInsulin: 0,
                                                                minimumBGGuard: minimumBGGuard,
                                                                insulinActionDuration: insulinActionDuration
         )
@@ -658,7 +658,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -675,7 +675,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -692,7 +692,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -707,7 +707,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0.8,
+            unconfirmedInsulin: 0.8,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -720,7 +720,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -737,7 +737,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -753,7 +753,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration
         )
@@ -770,7 +770,7 @@ class RecommendBolusTests: XCTestCase {
                                                                glucoseTargetRange: glucoseTargetRange,
                                                                insulinSensitivity: self.insulinSensitivitySchedule,
                                                                basalRateSchedule: basalRateSchedule,
-                                                               pendingInsulin: 0,
+                                                               unconfirmedInsulin: 0,
                                                                minimumBGGuard: minimumBGGuard,
                                                                insulinActionDuration: insulinActionDuration
         )
@@ -785,7 +785,7 @@ class RecommendBolusTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            pendingInsulin: 0,
+            unconfirmedInsulin: 0,
             minimumBGGuard: minimumBGGuard,
             insulinActionDuration: insulinActionDuration)
 

@@ -42,7 +42,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         AnalyticsManager.sharedManager.didDisplayBolusScreen()
     }
 
-    func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
+    func generateActiveInsulinDescription(activeInsulin: Double?, unconfirmedInsulin: Double?) -> String
     {
         let iobStr: String
         if let iob = activeInsulin, let valueStr = insulinFormatter.string(from: NSNumber(value: iob))
@@ -54,9 +54,9 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
         var rval = String(format: NSLocalizedString("Active Insulin: %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr)
 
-        if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: NSNumber(value: pending))
+        if let unconfirmed = unconfirmedInsulin, unconfirmed > 0, let unconfirmedStr = insulinFormatter.string(from: NSNumber(value: unconfirmed))
         {
-            rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
+            rval += String(format: NSLocalizedString(" (unconfirmed: %@)", comment: "The string format appended to active insulin that describes unconfirmed insulin. (1: unconfirmed insulin)"), unconfirmedStr + " U")
         }
         return rval
     }
@@ -70,8 +70,8 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
             updateNotice()
-            if let pendingInsulin = bolusRecommendation?.pendingInsulin {
-                self.pendingInsulin = pendingInsulin
+            if let unconfirmedInsulin = bolusRecommendation?.unconfirmedInsulin {
+                self.unconfirmedInsulin = unconfirmedInsulin
             }
         }
     }
@@ -104,13 +104,13 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var activeInsulin: Double? = nil {
         didSet {
-            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
+            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, unconfirmedInsulin: unconfirmedInsulin)
         }
     }
 
-    var pendingInsulin: Double? = nil {
+    var unconfirmedInsulin: Double? = nil {
         didSet {
-            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
+            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, unconfirmedInsulin: unconfirmedInsulin)
         }
     }
 
