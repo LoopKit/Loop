@@ -52,12 +52,18 @@ final class LoopDataManager {
         self.lastLoopCompleted = lastLoopCompleted
         self.settings = settings
 
-        carbStore = CarbStore(
-            defaultAbsorptionTimes: (
+        let defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes
+        if let defaultTimes = UserDefaults.standard.defaultAbsorptionTimes {
+            defaultAbsorptionTimes = defaultTimes
+        } else {
+            defaultAbsorptionTimes = (
                 fast: TimeInterval(hours: 2),
                 medium: TimeInterval(hours: 3),
                 slow: TimeInterval(hours: 4)
-            ),
+            )
+        }
+        carbStore = CarbStore(
+            defaultAbsorptionTimes: defaultAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -116,6 +122,18 @@ final class LoopDataManager {
         set {
             carbStore.carbRatioSchedule = newValue
             UserDefaults.standard.carbRatioSchedule = newValue
+            notify(forChange: .preferences)
+        }
+    }
+    
+    /// The default carb absorption times to be used when entering carbs
+    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes {
+        get {
+            return carbStore.defaultAbsorptionTimes
+        }
+        set {
+            carbStore.defaultAbsorptionTimes = newValue
+            UserDefaults.standard.defaultAbsorptionTimes = newValue
             notify(forChange: .preferences)
         }
     }
