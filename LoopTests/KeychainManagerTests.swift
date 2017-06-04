@@ -24,7 +24,7 @@ class KeychainManagerTests: XCTestCase {
         manager.setNightscoutURL(nil, secret: "foo")
         XCTAssertNil(manager.getNightscoutCredentials())
 
-        manager.setNightscoutURL(NSURL(string: "foo"), secret: nil)
+        manager.setNightscoutURL(URL(string: "foo"), secret: nil)
         XCTAssertNil(manager.getNightscoutCredentials())
     }
 
@@ -45,9 +45,14 @@ class KeychainManagerTests: XCTestCase {
         try manager.setDexcomShareUsername(nil, password: nil)
         XCTAssertNil(manager.getDexcomShareCredentials())
 
-        manager.setNightscoutURL(NSURL(string: "http://mysite.azurewebsites.net")!, secret: "ABCDEFG")
-        let nightscoutCredentials = manager.getNightscoutCredentials()!
-        XCTAssertEqual(NSURL(string: "http://mysite.azurewebsites.net")!, nightscoutCredentials.URL)
+        manager.setNightscoutURL(URL(string: "http://mysite.azurewebsites.net")!, secret: "ABCDEFG")
+        var nightscoutCredentials = manager.getNightscoutCredentials()!
+        XCTAssertEqual(URL(string: "http://mysite.azurewebsites.net")!, nightscoutCredentials.url)
+        XCTAssertEqual("ABCDEFG", nightscoutCredentials.secret)
+
+        manager.setNightscoutURL(URL(string: "http://mysite.azurewebsites.net:4443")!, secret: "ABCDEFG")
+        nightscoutCredentials = manager.getNightscoutCredentials()!
+        XCTAssertEqual(URL(string: "http://mysite.azurewebsites.net:4443")!, nightscoutCredentials.url)
         XCTAssertEqual("ABCDEFG", nightscoutCredentials.secret)
 
         manager.setNightscoutURL(nil, secret: nil)

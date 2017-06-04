@@ -13,26 +13,26 @@ import LoopKit
 
 
 extension XCTestCase {
-    public var bundle: NSBundle {
-        return NSBundle(forClass: self.dynamicType)
+    public var bundle: Bundle {
+        return Bundle(for: type(of: self))
     }
 
-    public func loadFixture<T>(resourceName: String) -> T {
-        let path = bundle.pathForResource(resourceName, ofType: "json")!
-        return try! NSJSONSerialization.JSONObjectWithData(NSData(contentsOfFile: path)!, options: []) as! T
+    public func loadFixture<T>(_ resourceName: String) -> T {
+        let path = bundle.path(forResource: resourceName, ofType: "json")!
+        return try! JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: path)), options: []) as! T
     }
 }
 
 
-public typealias JSONDictionary = [String: AnyObject]
+public typealias JSONDictionary = [String: Any]
 
 
-extension NSDateFormatter {
+extension DateFormatter {
     static func ISO8601LocalTimeDateFormatter() -> Self {
         let dateFormatter = self.init()
 
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
         return dateFormatter
     }
@@ -40,10 +40,10 @@ extension NSDateFormatter {
 
 
 struct GlucoseFixtureValue: GlucoseValue {
-    let startDate: NSDate
+    let startDate: Date
     let quantity: HKQuantity
 
-    init(startDate: NSDate, quantity: HKQuantity) {
+    init(startDate: Date, quantity: HKQuantity) {
         self.startDate = startDate
         self.quantity = quantity
     }
@@ -52,25 +52,25 @@ struct GlucoseFixtureValue: GlucoseValue {
 
 class RecommendTempBasalTests: XCTestCase {
 
-    private let maxBasalRate = 3.0
+    fileprivate let maxBasalRate = 3.0
 
-    func loadGlucoseValueFixture(resourceName: String) -> [GlucoseValue] {
+    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
-        let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
+        let dateFormatter = DateFormatter.ISO8601LocalTimeDateFormatter()
 
         return fixture.map {
             return GlucoseFixtureValue(
-                startDate: dateFormatter.dateFromString($0["date"] as! String)!,
-                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: $0["amount"] as! Double)
+                startDate: dateFormatter.date(from: $0["date"] as! String)!,
+                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: $0["amount"] as! Double)
             )
         }
     }
 
-    func loadBasalRateScheduleFixture(resourceName: String) -> BasalRateSchedule {
+    func loadBasalRateScheduleFixture(_ resourceName: String) -> BasalRateSchedule {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
 
         let items = fixture.map {
-            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
+            return RepeatingScheduleValue(startTime: TimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
         }
 
         return BasalRateSchedule(dailyItems: items)!
@@ -81,11 +81,19 @@ class RecommendTempBasalTests: XCTestCase {
     }
 
     var glucoseTargetRange: GlucoseRangeSchedule {
-        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: NSTimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
+        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
-        return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
+        return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
+    }
+    
+    var minimumBGGuard: GlucoseThreshold {
+        return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter(), value: 55)
+    }
+
+    var insulinActionDuration: TimeInterval {
+        return TimeInterval(hours: 4)
     }
 
     func testNoChange() {
@@ -97,7 +105,9 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
@@ -112,7 +122,9 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
@@ -120,8 +132,8 @@ class RecommendTempBasalTests: XCTestCase {
         // Cancel existing temp basal
         let lastTempBasal = DoseEntry(
             type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
+            startDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: -11)),
+            endDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: 19)),
             value: 0.125,
             unit: .unitsPerHour
         )
@@ -132,11 +144,13 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
     }
 
     func testStartLowEndInRange() {
@@ -148,28 +162,17 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
-
-        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
-            maxBasalRate: maxBasalRate,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
 
         let lastTempBasal = DoseEntry(
             type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
+            startDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: -11)),
+            endDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: 19)),
             value: 1.225,
             unit: .unitsPerHour
         )
@@ -181,89 +184,39 @@ class RecommendTempBasalTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
     }
 
     func testCorrectLowAtMin() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_correct_low_at_min")
 
-        var dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
-            maxBasalRate: maxBasalRate,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
-
-        // Ignore due to existing dose
+        // Cancel existing dose
         var lastTempBasal = DoseEntry(
             type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
+            startDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: -21)),
+            endDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: 9)),
             value: 0.125,
             unit: .unitsPerHour
         )
 
-        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+        var dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
             lastTempBasal: lastTempBasal,
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertNil(dose)
-
-        // Cancel existing dose
-        lastTempBasal = DoseEntry(
-            type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
-            value: 1.225,
-            unit: .unitsPerHour
-        )
-
-        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: lastTempBasal,
-            maxBasalRate: maxBasalRate,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
-
-        // Continue existing dose
-        lastTempBasal = DoseEntry(
-            type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -21)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 9)),
-            value: 0.125,
-            unit: .unitsPerHour
-        )
-
-        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: lastTempBasal,
-            maxBasalRate: maxBasalRate,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqualWithAccuracy(0.125, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(0, dose!.rate)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
 
         // Allow predictive temp below range
         dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
@@ -273,15 +226,16 @@ class RecommendTempBasalTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
 
         lastTempBasal = DoseEntry(
             type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -21)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 9)),
+            startDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: -21)),
+            endDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: 9)),
             value: 0.125,
             unit: .unitsPerHour
         )
@@ -293,11 +247,12 @@ class RecommendTempBasalTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
     }
 
     func testStartHighEndLow() {
@@ -309,45 +264,36 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
     func testStartLowEndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
 
+        // Allow predictive temp below range
         var dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
             lastTempBasal: nil,
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
-
-        // Allow predictive temp below range
-        dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
-            maxBasalRate: maxBasalRate,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
 
         let lastTempBasal = DoseEntry(
             type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
+            startDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: -11)),
+            endDate: glucose.first!.startDate.addingTimeInterval(TimeInterval(minutes: 19)),
             value: 1.225,
             unit: .unitsPerHour
         )
@@ -359,11 +305,12 @@ class RecommendTempBasalTests: XCTestCase {
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
-            allowPredictiveTempBelowRange: true
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 0), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 0), dose!.duration)
     }
 
     func testFlatAndHigh() {
@@ -375,11 +322,13 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(3.0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
     func testHighAndFalling() {
@@ -391,11 +340,13 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqualWithAccuracy(1.425, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
     func testInRangeAndRising() {
@@ -407,11 +358,13 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqualWithAccuracy(1.475, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
     func testHighAndRising() {
@@ -423,14 +376,16 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqual(3.0, dose!.rate)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
 
         // Use mmol sensitivity value
-        let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 3.33)])!
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 3.33)])!
 
         dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
@@ -438,12 +393,50 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertEqualWithAccuracy(2.975, dose!.rate, accuracy: 1.0 / 40.0)
-        XCTAssertEqual(NSTimeInterval(minutes: 30), dose!.duration)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
+
+    func testVeryLowAndRising() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_very_low_end_in_range")
+
+        let dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+                                                                   atDate: glucose.first!.startDate,
+                                                                   lastTempBasal: nil,
+                                                                   maxBasalRate: maxBasalRate,
+                                                                   glucoseTargetRange: glucoseTargetRange,
+                                                                   insulinSensitivity: self.insulinSensitivitySchedule,
+                                                                   basalRateSchedule: basalRateSchedule,
+                                                                   minimumBGGuard: minimumBGGuard,
+                                                                   insulinActionDuration: insulinActionDuration
+        )
+        
+        XCTAssertEqual(0.0, dose!.rate)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
+    }
+
+    func testRiseAfterDIA() {
+        let glucose = loadGlucoseValueFixture("far_future_high_bg_forecast")
+
+        let dose = DoseMath.recommendTempBasalFromPredictedGlucose(glucose,
+                                                                   atDate: glucose.first!.startDate,
+                                                                   lastTempBasal: nil,
+                                                                   maxBasalRate: maxBasalRate,
+                                                                   glucoseTargetRange: glucoseTargetRange,
+                                                                   insulinSensitivity: self.insulinSensitivitySchedule,
+                                                                   basalRateSchedule: basalRateSchedule,
+                                                                   minimumBGGuard: minimumBGGuard,
+                                                                   insulinActionDuration: insulinActionDuration
+        )
+
+        XCTAssertNil(dose)
+    }
+
 
     func testNoInputGlucose() {
         let dose = DoseMath.recommendTempBasalFromPredictedGlucose([],
@@ -451,7 +444,9 @@ class RecommendTempBasalTests: XCTestCase {
             maxBasalRate: maxBasalRate,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
         XCTAssertNil(dose)
@@ -461,25 +456,25 @@ class RecommendTempBasalTests: XCTestCase {
 
 class RecommendBolusTests: XCTestCase {
 
-    private let maxBolus = 10.0
+    fileprivate let maxBolus = 10.0
 
-    func loadGlucoseValueFixture(resourceName: String) -> [GlucoseValue] {
+    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
-        let dateFormatter = NSDateFormatter.ISO8601LocalTimeDateFormatter()
+        let dateFormatter = DateFormatter.ISO8601LocalTimeDateFormatter()
 
         return fixture.map {
             return GlucoseFixtureValue(
-                startDate: dateFormatter.dateFromString($0["date"] as! String)!,
-                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: $0["amount"] as! Double)
+                startDate: dateFormatter.date(from: $0["date"] as! String)!,
+                quantity: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: $0["amount"] as! Double)
             )
         }
     }
 
-    func loadBasalRateScheduleFixture(resourceName: String) -> BasalRateSchedule {
+    func loadBasalRateScheduleFixture(_ resourceName: String) -> BasalRateSchedule {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
 
         let items = fixture.map {
-            return RepeatingScheduleValue(startTime: NSTimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
+            return RepeatingScheduleValue(startTime: TimeInterval(minutes: $0["minutes"] as! Double), value: $0["rate"] as! Double)
         }
 
         return BasalRateSchedule(dailyItems: items)!
@@ -490,11 +485,19 @@ class RecommendBolusTests: XCTestCase {
     }
 
     var glucoseTargetRange: GlucoseRangeSchedule {
-        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: NSTimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
+        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
-        return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
+        return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
+    }
+    
+    var minimumBGGuard: GlucoseThreshold {
+        return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter(), value: 55)
+    }
+
+    var insulinActionDuration: TimeInterval {
+        return TimeInterval(hours: 4)
     }
 
     func testNoChange() {
@@ -502,49 +505,34 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(0, dose.amount)
     }
 
     func testStartHighEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
 
-        var dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
+
         )
 
-        XCTAssertEqual(0, dose)
-
-        // Don't consider net-negative temp basal
-        let lastTempBasal = DoseEntry(
-            type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
-            value: 0.01,
-            unit: .unitsPerHour
-        )
-
-        dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
-            atDate: glucose.first!.startDate,
-            lastTempBasal: lastTempBasal,
-            maxBolus: maxBolus,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
-        )
-
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(0, dose.amount)
     }
 
     func testStartLowEndInRange() {
@@ -552,14 +540,17 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
+
         )
 
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(0, dose.amount)
     }
 
     func testStartHighEndLow() {
@@ -567,14 +558,17 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
+
         )
 
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(0, dose.amount)
     }
 
     func testStartLowEndHigh() {
@@ -582,14 +576,77 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
+
         )
 
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(1.325, dose.amount)
+
+        if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose, let units) = dose.notice! {
+            XCTAssertEqual(units, HKUnit.milligramsPerDeciliter())
+            XCTAssertEqual(glucose.quantity.doubleValue(for: units), 60)
+        } else {
+            XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
+        }
+    }
+
+    func testDroppingBelowRangeThenRising() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_dropping_then_rising")
+
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               maxBolus: maxBolus,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               pendingInsulin: 0,
+                                                               minimumBGGuard: minimumBGGuard,
+                                                               insulinActionDuration: insulinActionDuration
+        )
+        
+        XCTAssertEqual(1.325, dose.amount)
+        XCTAssertEqual(BolusRecommendationNotice.predictedGlucoseBelowTarget(minGlucose: glucose[1], unit: glucoseTargetRange.unit), dose.notice!)
+    }
+
+
+    func testStartLowEndHighWithPendingBolus() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
+        
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               maxBolus: maxBolus,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               pendingInsulin: 1,
+                                                               minimumBGGuard: minimumBGGuard,
+                                                               insulinActionDuration: insulinActionDuration
+        )
+        
+        XCTAssertEqual(0.325, dose.amount)
+    }
+
+    func testStartVeryLowEndHigh() {
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_very_low_end_high")
+        
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               maxBolus: maxBolus,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               pendingInsulin: 0,
+                                                               minimumBGGuard: minimumBGGuard,
+                                                               insulinActionDuration: insulinActionDuration
+        )
+        
+        XCTAssertEqual(0, dose.amount)
     }
 
     func testFlatAndHigh() {
@@ -597,14 +654,16 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(1.333, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(1.333, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndFalling() {
@@ -612,14 +671,16 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(0.067, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.067, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testInRangeAndRising() {
@@ -627,54 +688,44 @@ class RecommendBolusTests: XCTestCase {
 
         var dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.083, dose.amount, accuracy: 1.0 / 40.0)
 
         // Less existing temp
-        var lastTempBasal = DoseEntry(
-            type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -11)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: 19)),
-            value: 1.225,
-            unit: .unitsPerHour
-        )
 
         dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: lastTempBasal,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0.8,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(0, dose, accuracy: 1e-13)
-
-        // But not a finished temp
-        lastTempBasal = DoseEntry(
-            type: .tempBasal,
-            startDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -35)),
-            endDate: glucose.first!.startDate.dateByAddingTimeInterval(NSTimeInterval(minutes: -5)),
-            value: 1.225,
-            unit: .unitsPerHour
-        )
+        XCTAssertEqualWithAccuracy(0, dose.amount, accuracy: 1e-13)
 
         dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: lastTempBasal,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(0.083, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.083, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndRising() {
@@ -682,34 +733,63 @@ class RecommendBolusTests: XCTestCase {
 
         var dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: self.insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqual(1.0, dose)
+        XCTAssertEqual(1.0, dose.amount)
 
         // Use mmol sensitivity value
-        let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiterUnit(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
+        let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
 
         dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
             atDate: glucose.first!.startDate,
-            lastTempBasal: nil,
             maxBolus: maxBolus,
             glucoseTargetRange: glucoseTargetRange,
             insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration
         )
 
-        XCTAssertEqualWithAccuracy(1.0, dose, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(1.0, dose.amount, accuracy: 1.0 / 40.0)
     }
+
+    func testRiseAfterDIA() {
+        let glucose = loadGlucoseValueFixture("far_future_high_bg_forecast")
+
+        let dose = DoseMath.recommendBolusFromPredictedGlucose(glucose,
+                                                               atDate: glucose.first!.startDate,
+                                                               maxBolus: maxBolus,
+                                                               glucoseTargetRange: glucoseTargetRange,
+                                                               insulinSensitivity: self.insulinSensitivitySchedule,
+                                                               basalRateSchedule: basalRateSchedule,
+                                                               pendingInsulin: 0,
+                                                               minimumBGGuard: minimumBGGuard,
+                                                               insulinActionDuration: insulinActionDuration
+        )
+
+        XCTAssertEqual(0.0, dose.amount)
+    }
+
 
     func testNoInputGlucose() {
-        let dose = DoseMath.recommendBolusFromPredictedGlucose([], lastTempBasal: nil, maxBolus: 4, glucoseTargetRange: glucoseTargetRange, insulinSensitivity: insulinSensitivitySchedule,
-            basalRateSchedule: basalRateSchedule)
+        let dose = DoseMath.recommendBolusFromPredictedGlucose([],
+            maxBolus: 4,
+            glucoseTargetRange: glucoseTargetRange,
+            insulinSensitivity: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            pendingInsulin: 0,
+            minimumBGGuard: minimumBGGuard,
+            insulinActionDuration: insulinActionDuration)
 
-        XCTAssertEqual(0, dose)
+        XCTAssertEqual(0, dose.amount)
     }
+
 }

@@ -7,44 +7,53 @@
 //
 
 import Foundation
+import LoopUI
 import xDripG5
 
 
 extension Glucose: SensorDisplayable {
-    var stateDescription: String {
+    public var isStateValid: Bool {
+        return state == .ok && status == .ok
+    }
+
+    public var stateDescription: String {
         let status: String
         switch self.status {
-        case .OK:
+        case .ok:
             status = ""
-        case .LowBattery:
-            status = NSLocalizedString(" Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
-        case .Unknown(let value):
+        case .lowBattery:
+            status = NSLocalizedString("Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
+        case .unknown(let value):
             status = String(format: "%02x", value)
         }
 
-        return String(format: "%1$@ %2$@", String(state), status)
+        return String(format: "%1$@ %2$@", String(describing: state), status)
     }
 
-    var trendType: GlucoseTrend? {
+    public var trendType: GlucoseTrend? {
         guard trend < Int(Int8.max) else {
             return nil
         }
 
         switch trend {
         case let x where x <= -30:
-            return .DownDownDown
+            return .downDownDown
         case let x where x <= -20:
-            return .DownDown
+            return .downDown
         case let x where x <= -10:
-            return .Down
+            return .down
         case let x where x < 10:
-            return .Flat
+            return .flat
         case let x where x < 20:
-            return .Up
+            return .up
         case let x where x < 30:
-            return .UpUp
+            return .upUp
         default:
-            return .UpUpUp
+            return .upUpUp
         }
+    }
+
+    public var isLocal: Bool {
+        return true
     }
 }

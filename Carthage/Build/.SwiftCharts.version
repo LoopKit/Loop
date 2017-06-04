@@ -1,0 +1,22 @@
+{
+  "commitish" : "0.6",
+  "iOS" : [
+    {
+      "hash" : "326259aba63578ffb93455bb07d2a1919e68d92157e02941c1628fd7704e1efa",
+      "name" : "SwiftCharts"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
+  "watchOS" : [
+
+  ],
+  "tvOS" : [
+    {
+      "hash" : "1449a06dc971aeecdf02272698471b91cb6988ea0ef25e474d9e3d3db1e949b3",
+      "name" : "SwiftCharts"
+    }
+  ],
+  "Mac" : [
+
+  ]
+}

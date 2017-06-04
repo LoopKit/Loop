@@ -32,7 +32,7 @@ final class AnalyticsManager {
 
     private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
 
-    private func logEvent(name: String, withProperties properties: [NSObject: AnyObject]? = nil, outOfSession: Bool = false) {
+    private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
         if isSimulator {
             NSLog("\(name) \(properties ?? [:])")
         } else {
@@ -43,7 +43,7 @@ final class AnalyticsManager {
 
     // MARK: - UIApplicationDelegate
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject : AnyObject]?) {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any]?) {
         logEvent("App Launch")
     }
 
@@ -67,7 +67,7 @@ final class AnalyticsManager {
         logEvent("RileyLink Connection")
     }
 
-    func transmitterTimeDidDrift(drift: NSTimeInterval) {
+    func transmitterTimeDidDrift(_ drift: TimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift])
     }
 
@@ -99,26 +99,34 @@ final class AnalyticsManager {
         logEvent("Glucose target range change")
     }
 
-    func didChangeMaximumBasalRate() {
-        logEvent("Maximum basal rate change")
-    }
+    func didChangeLoopSettings(from oldValue: LoopSettings, to newValue: LoopSettings) {
+        logEvent("Loop settings change")
 
-    func didChangeMaximumBolus() {
-        logEvent("Maximum bolus change")
+        if newValue.maximumBasalRatePerHour != oldValue.maximumBasalRatePerHour {
+            logEvent("Maximum basal rate change")
+        }
+
+        if newValue.maximumBolus != oldValue.maximumBolus {
+            logEvent("Maximum bolus change")
+        }
+
+        if newValue.minimumBGGuard != oldValue.minimumBGGuard {
+            logEvent("Minimum BG Guard change")
+        }
     }
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(carbs: Double) {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
+    func didAddCarbsFromWatch(_ carbs: Double) {
+        logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func didRetryBolus() {
         logEvent("Bolus Retry", outOfSession: true)
     }
 
-    func didSetBolusFromWatch(units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
+    func didSetBolusFromWatch(_ units: Double) {
+        logEvent("Bolus set", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func loopDidSucceed() {

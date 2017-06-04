@@ -15,6 +15,6 @@
 @property (readonly) NSString *advertiserID;
 @property (readonly) NSString *vendorID;
 
--(NSString*) generateUUID;
++(NSString*) generateUUID;
 
 @end

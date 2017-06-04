@@ -13,19 +13,14 @@ import ShareClient
 
 final class RemoteDataManager {
 
-    var nightscoutUploader: NightscoutUploader? {
-        return nightscoutService.uploader
-    }
+    var delegate: RemoteDataManagerDelegate?
 
     var nightscoutService: NightscoutService {
         didSet {
             keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
-            UIDevice.currentDevice().batteryMonitoringEnabled = true
+            UIDevice.current.isBatteryMonitoringEnabled = true
+            delegate?.remoteDataManagerDidUpdateServices(self)
         }
-    }
-
-    var shareClient: ShareClient? {
-        return shareService.client
     }
 
     var shareService: ShareService {
@@ -45,9 +40,14 @@ final class RemoteDataManager {
 
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
             nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
-            UIDevice.currentDevice().batteryMonitoringEnabled = true
+            UIDevice.current.isBatteryMonitoringEnabled = true
         } else {
             nightscoutService = NightscoutService(siteURL: nil, APISecret: nil)
         }
     }
+}
+
+
+protocol RemoteDataManagerDelegate: class {
+    func remoteDataManagerDidUpdateServices(_ dataManager: RemoteDataManager)
 }

@@ -231,6 +231,44 @@
  */
 - (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups outOfSession:(BOOL) outOfSession;
 
+/**
+ Tracks an event. Events are saved locally.
+
+ Uploads are batched to occur every 30 events or every 30 seconds (whichever comes first), as well as on app close.
+
+ @param eventType                The name of the event you wish to track.
+ @param eventProperties          You can attach additional data to any event by passing a NSDictionary object with property: value pairs.
+ @param groups                   You can specify event-level groups for this user by passing a NSDictionary object with groupType: groupName pairs. Note the keys need to be strings, and the values can either be strings or an array of strings.
+ @param longLongTimestamp        You can specify a custom timestamp by passing the milliseconds since epoch UTC time as a long long.
+ @param outOfSession             If YES, will track the event as out of session. Useful for push notification events.
+
+ @see [Tracking Events](https://github.com/amplitude/amplitude-ios#tracking-events)
+
+ @see [Setting Groups](https://github.com/amplitude/Amplitude-iOS#setting-groups)
+
+ @see [Tracking Sessions](https://github.com/amplitude/Amplitude-iOS#tracking-sessions)
+ */
+- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withLongLongTimestamp:(long long) longLongTimestamp outOfSession:(BOOL)outOfSession;
+
+/**
+ Tracks an event. Events are saved locally.
+
+ Uploads are batched to occur every 30 events or every 30 seconds (whichever comes first), as well as on app close.
+
+ @param eventType                The name of the event you wish to track.
+ @param eventProperties          You can attach additional data to any event by passing a NSDictionary object with property: value pairs.
+ @param groups                   You can specify event-level groups for this user by passing a NSDictionary object with groupType: groupName pairs. Note the keys need to be strings, and the values can either be strings or an array of strings.
+ @param timestamp                You can specify a custom timestamp by passing an NSNumber representing the milliseconds since epoch UTC time. We recommend using [NSNumber numberWithLongLong:milliseconds] to create the value. If nil is passed in, then the event will be timestamped with the current time.
+ @param outOfSession             If YES, will track the event as out of session. Useful for push notification events.
+
+ @see [Tracking Events](https://github.com/amplitude/amplitude-ios#tracking-events)
+
+ @see [Setting Groups](https://github.com/amplitude/Amplitude-iOS#setting-groups)
+
+ @see [Tracking Sessions](https://github.com/amplitude/Amplitude-iOS#tracking-sessions)
+ */
+- (void)logEvent:(NSString*) eventType withEventProperties:(NSDictionary*) eventProperties withGroups:(NSDictionary*) groups withTimestamp:(NSNumber*) timestamp outOfSession:(BOOL)outOfSession;
+
 /**-----------------------------------------------------------------------------
  * @name Logging Revenue
  * -----------------------------------------------------------------------------
@@ -254,7 +292,7 @@
 
  Tracks revenue. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
- @param productidentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
+ @param productIdentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
  @param quantity                 The number of products in the transaction. Revenue amount is calculated as quantity * price
  @param price                    The price of the products in the transaction. Revenue amount is calculated as quantity * price
 
@@ -270,7 +308,7 @@
 
  For validating revenue, use [[Amplitude instance] logRevenue:@"com.company.app.productId" quantity:1 price:[NSNumber numberWithDouble:3.99] receipt:transactionReceipt]
 
- @param productidentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
+ @param productIdentifier        The identifier for the product in the transaction, e.g. "com.amplitude.productId"
  @param quantity                 The number of products in the transaction. Revenue amount is calculated as quantity * price
  @param price                    The price of the products in the transaction. Revenue amount is calculated as quantity * price
  @param receipt                  The receipt data from the App Store. Required if you want to verify this revenue event.
@@ -288,7 +326,7 @@
 
  To track revenue from a user, create an AMPRevenue object each time the user generates revenue, and set the revenue properties (productIdentifier, price, quantity). logRevenuev2: takes in an AMPRevenue object. This allows us to automatically display data relevant to revenue on the Amplitude website, including average revenue per daily active user (ARPDAU), 7, 30, and 90 day revenue, lifetime value (LTV) estimates, and revenue by advertising campaign cohort and daily/weekly/monthly cohorts.
 
- @param AMPRevenue object       revenue object contains all revenue information
+ @param revenue AMPRevenue object       revenue object contains all revenue information
 
  @see [Tracking Revenue](https://github.com/amplitude/Amplitude-iOS#tracking-revenue)
  */
@@ -318,6 +356,25 @@
 
 - (void)identify:(AMPIdentify *)identify;
 
+/**
+ Update user properties using operations provided via Identify API. If outOfSession is `YES` then the identify event is logged with a session id of -1 and does not trigger any session-handling logic.
+
+ To update user properties, first create an AMPIdentify object. For example if you wanted to set a user's gender, and then increment their karma count by 1, you would do:
+
+ AMPIdentify *identify = [[[AMPIdentify identify] set:@"gender" value:@"male"] add:@"karma" value:[NSNumber numberWithInt:1]];
+
+ Then you would pass this AMPIdentify object to the identify function to send to the server:
+
+ [[Amplitude instance] identify:identify outOfSession:YES];
+
+ @param identify                   An AMPIdentify object with the intended user property operations
+ @param outOfSession               Whether to log identify event out of session
+
+ @see [User Properties and User Property Operations](https://github.com/amplitude/Amplitude-iOS#user-properties-and-user-property-operations)
+
+ */
+
+- (void)identify:(AMPIdentify *)identify outOfSession:(BOOL) outOfSession;
 
 /**
 
@@ -470,6 +527,13 @@
  @returns the deviceId.
  */
 - (NSString*)getDeviceId;
+
+/**
+ Regenerates a new random deviceId for current user. Note: this is not recommended unless you know what you are doing. This can be used in conjunction with setUserId:nil to anonymize users after they log out. With a nil userId and a completely new deviceId, the current user would appear as a brand new user in dashboard.
+
+ @see [Logging Out Users](https://github.com/amplitude/Amplitude-iOS#logging-out-and-anonymous-users)
+ */
+- (void)regenerateDeviceId;
 
 /**
  Fetches the current sessionId, an identifier used by Amplitude to group together events tracked during the same session.

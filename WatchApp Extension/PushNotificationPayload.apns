@@ -1,16 +1,17 @@
 {
     "aps": {
         "alert": {
-            "body": "Test message",
-            "title": "Optional title"
+            "body": "RileyLink timed out. Check your pump before retrying.",
+            "title": "Bolus",
+            "subtitle": "3.5 U bolus failed"
         },
-        "category": "myCategory"
+        "category": "bolusFailure"
     },
     
     "WatchKit Simulator Actions": [
         {
-            "title": "First Button",
-            "identifier": "firstButtonAction"
+            "title": "Retry",
+            "identifier": "retryBolus"
         }
     ],
     

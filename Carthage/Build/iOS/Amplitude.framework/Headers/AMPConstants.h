@@ -4,6 +4,7 @@
 
 extern NSString *const kAMPLibrary;
 extern NSString *const kAMPPlatform;
+extern NSString *const kAMPOSName;
 extern NSString *const kAMPVersion;
 extern NSString *const kAMPEventLogDomain;
 extern NSString *const kAMPEventLogUrl;
@@ -18,6 +19,7 @@ extern const int kAMPEventRemoveBatchSize;
 extern const int kAMPEventUploadPeriodSeconds;
 extern const long kAMPMinTimeBetweenSessionsMillis;
 extern const int kAMPMaxStringLength;
+extern const int kAMPMaxPropertyKeys;
 
 extern NSString *const IDENTIFY_EVENT;
 extern NSString *const AMP_OP_ADD;

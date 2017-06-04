@@ -1,0 +1,13 @@
+/* 
+  ckcomplication.strings
+  Loop
+
+  Created by Nate Racklyeft on 9/18/16.
+  Copyright © 2016 Nathan Racklyeft. All rights reserved.
+*/
+
+/* The complication template example glucose & trend */
+"120↘︎" = "6.7↘︎";
+
+/* The complication template example eventual glucose */
+"75" = "3.0";

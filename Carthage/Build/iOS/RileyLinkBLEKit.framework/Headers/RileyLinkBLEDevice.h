@@ -44,6 +44,7 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 #define CC111X_REG_MDMCFG2  0x0E
 #define CC111X_REG_MDMCFG1  0x0F
 #define CC111X_REG_MDMCFG0  0x10
+#define CC111X_REG_DEVIATN  0x11
 #define CC111X_REG_AGCCTRL2 0x17
 #define CC111X_REG_AGCCTRL1 0x18
 #define CC111X_REG_AGCCTRL0 0x19
@@ -75,9 +76,13 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 
 @property (nonatomic, readonly) SubgRfspyVersionState firmwareState;
 
+@property (nonatomic, readonly, nullable) NSString *bleFirmwareVersion;
+
 @property (nonatomic, readonly, nullable) NSDate *lastIdle;
 
 @property (nonatomic) BOOL timerTickEnabled;
+
+@property (nonatomic) uint32_t idleTimeoutMS;
 
 /**
  Initializes the device with a specified peripheral

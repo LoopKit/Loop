@@ -1,0 +1,19 @@
+{
+  "commitish" : "v0.3.2",
+  "iOS" : [
+    {
+      "hash" : "db9044cc4f0523847cfdf9f53175f81aa10eaa34296f397561a239520c1a0f05",
+      "name" : "G4ShareSpy"
+    }
+  ],
+  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
+  "watchOS" : [
+
+  ],
+  "tvOS" : [
+
+  ],
+  "Mac" : [
+
+  ]
+}

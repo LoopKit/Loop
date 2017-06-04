@@ -10,36 +10,38 @@ import Foundation
 import G4ShareSpy
 import HealthKit
 import LoopKit
-
-
-extension GlucoseG4 {
-    var isValid: Bool {
-        return glucose >= 20
-    }
-}
+import LoopUI
 
 
 extension GlucoseG4: GlucoseValue {
     public var quantity: HKQuantity {
-        return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
+        return HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: Double(glucose))
     }
 
-    public var startDate: NSDate {
+    public var startDate: Date {
         return time
     }
 }
 
 
 extension GlucoseG4: SensorDisplayable {
-    var stateDescription: String {
-        if isValid {
-            return "✓"
+    public var isStateValid: Bool {
+        return glucose >= 20
+    }
+
+    public var stateDescription: String {
+        if isStateValid {
+            return NSLocalizedString("OK", comment: "Sensor state description for the valid state")
         } else {
-            return String(format: "%02x", glucose)
+            return NSLocalizedString("Needs Attention", comment: "Sensor state description for the non-valid state")
         }
     }
 
-    var trendType: GlucoseTrend? {
+    public var trendType: GlucoseTrend? {
         return GlucoseTrend(rawValue: Int(trend))
+    }
+
+    public var isLocal: Bool {
+        return true
     }
 }
