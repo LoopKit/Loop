@@ -84,17 +84,17 @@ extension StatusChartsManager {
         var allDosePoints = [ChartPoint]()
 
         for entry in doseEntries {
-            switch entry.unit {
-            case .unitsPerHour:
+            switch entry.endDate.timeIntervalSince(entry.startDate) {
+            case let time where time > 0:
                 // TODO: Display the DateInterval
                 let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                 let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
                 let zero = ChartAxisValueInt(0)
-                let value = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U/hour", formatter: doseFormatter)
+                let value = ChartAxisValueDoubleLog(actualDouble: entry.unitsPerHour, unitString: "U/hour", formatter: doseFormatter)
 
                 let valuePoints: [ChartPoint]
 
-                if entry.value != 0 {
+                if entry.unitsPerHour != 0 {
                     valuePoints = [
                         ChartPoint(x: startX, y: value),
                         ChartPoint(x: endX, y: value)
@@ -110,13 +110,15 @@ extension StatusChartsManager {
                 ]
 
                 allDosePoints += valuePoints
-            case .units:
-                let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
-                let y = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U", formatter: doseFormatter)
+            default:
+                if entry.type == .bolus && entry.units > 0 {
+                    let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
+                    let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
 
-                let point = ChartPoint(x: x, y: y)
-                bolusDosePoints.append(point)
-                allDosePoints.append(point)
+                    let point = ChartPoint(x: x, y: y)
+                    bolusDosePoints.append(point)
+                    allDosePoints.append(point)
+                }
             }
         }
 

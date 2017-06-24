@@ -13,41 +13,40 @@ import NightscoutUploadKit
 
 
 extension NightscoutUploader: CarbStoreSyncDelegate {
-    public func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
-
+    public func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], completion: @escaping ([String]) -> Void) {
         let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
 
         upload(nsCarbEntries) { (result) in
             switch result {
             case .success(let ids):
                 // Pass new ids back
-                completionHandler(ids)
+                completion(ids)
             case .failure:
-                completionHandler([])
+                completion([])
             }
         }
     }
 
-    public func carbStore(_ carbStore: CarbStore, hasModifiedEntries entries: [CarbEntry], withCompletion completionHandler: @escaping (_ uploadedObjects: [String]) -> Void) {
+    public func carbStore(_ carbStore: CarbStore, hasModifiedEntries entries: [CarbEntry], completion: @escaping (_ uploadedObjects: [String]) -> Void) {
 
         let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
 
         modifyTreatments(nsCarbEntries) { (error) in
             if error != nil {
-                completionHandler([])
+                completion([])
             } else {
-                completionHandler(entries.map { $0.externalId ?? "" } )
+                completion(entries.map { $0.externalID ?? "" } )
             }
         }
     }
 
-    public func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], withCompletion completionHandler: @escaping ([String]) -> Void) {
+    public func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], completion: @escaping ([String]) -> Void) {
 
         deleteTreatmentsById(ids) { (error) in
             if error != nil {
-                completionHandler([])
+                completion([])
             } else {
-                completionHandler(ids)
+                completion(ids)
             }
         }
     }

@@ -400,10 +400,7 @@ final class LoopDataManager {
 
         if retrospectiveGlucoseChange == nil {
             updateGroup.enter()
-            glucoseStore.getRecentGlucoseChange { (change, error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "GlucoseStore")
-                }
+            glucoseStore.getGlucoseChange(start: retrospectiveStart) { (change) in
                 self.retrospectiveGlucoseChange = change
                 updateGroup.leave()
             }
@@ -425,11 +422,12 @@ final class LoopDataManager {
 
         if carbEffect == nil {
             updateGroup.enter()
-            carbStore.getGlucoseEffects(startDate: retrospectiveStart) { (effects, error) -> Void in
-                if let error = error {
+            carbStore.getGlucoseEffects(start: retrospectiveStart) { (result) -> Void in
+                switch result {
+                case .failure(let error):
                     self.logger.addError(error, fromSource: "CarbStore")
                     self.carbEffect = nil
-                } else {
+                case .success(let effects):
                     self.carbEffect = effects
                 }
 
@@ -439,11 +437,7 @@ final class LoopDataManager {
 
         if carbsOnBoardSeries == nil {
             updateGroup.enter()
-            carbStore.getCarbsOnBoardValues(startDate: retrospectiveStart) { (values, error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "CarbStore")
-                }
-
+            carbStore.getCarbsOnBoardValues(start: retrospectiveStart) { (values) in
                 self.carbsOnBoardSeries = values
                 updateGroup.leave()
             }
@@ -522,10 +516,10 @@ final class LoopDataManager {
         let pendingTempBasalInsulin: Double
         let date = Date()
 
-        if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
+        if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > date {
             let normalBasalRate = basalRates.value(at: date)
             let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
-            let remainingUnits = (lastTempBasal.value - normalBasalRate) * remainingTime / TimeInterval(hours: 1)
+            let remainingUnits = (lastTempBasal.unitsPerHour - normalBasalRate) * remainingTime.hours
 
             pendingTempBasalInsulin = max(0, remainingUnits)
         } else {

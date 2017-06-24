@@ -106,10 +106,9 @@ final class NightscoutDataManager {
         }
 
         let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal, tempBasal.unit == .unitsPerHour &&
-            lastTempBasalUploaded?.startDate != tempBasal.startDate {
+        if let tempBasal = lastTempBasal, lastTempBasalUploaded?.startDate != tempBasal.startDate {
             let duration = tempBasal.endDate.timeIntervalSince(tempBasal.startDate)
-            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
+            loopEnacted = LoopEnacted(rate: tempBasal.unitsPerHour, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
         } else {
