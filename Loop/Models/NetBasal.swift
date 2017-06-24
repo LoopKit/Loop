@@ -17,7 +17,7 @@ struct NetBasal {
     
     init(lastTempBasal: DoseEntry?, maxBasal: Double?, scheduledBasal: AbsoluteScheduleValue<Double>) {
         if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = maxBasal {
-            rate = lastTempBasal.value - scheduledBasal.value
+            rate = lastTempBasal.unitsPerHour - scheduledBasal.value
             startDate = lastTempBasal.startDate
             
             if rate < 0 {

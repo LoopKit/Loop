@@ -272,14 +272,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
         if refreshContext.remove(.carbs) != nil {
             reloadGroup.enter()
-            deviceManager.loopManager.carbStore.getCarbsOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
-                if let error = error {
-                    self.deviceManager.logger.addError(error, fromSource: "CarbStore")
-                    self.refreshContext.update(with: .carbs)
-                }
-
+            deviceManager.loopManager.carbStore.getCarbsOnBoardValues(start: chartStartDate) { (values) in
                 self.charts.setCOBValues(values)
-
                 reloadGroup.leave()
             }
         }
