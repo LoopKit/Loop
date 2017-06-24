@@ -55,8 +55,9 @@ final class StatusExtensionDataManager {
                 context.netBasal = NetBasalContext(
                     rate: 2.1,
                     percentage: 0.6,
-                    startDate:
-                    Date(timeIntervalSinceNow: -250)
+                    start:
+                    Date(timeIntervalSinceNow: -250),
+                    end: Date(timeIntervalSinceNow: .minutes(30))
                 )
                 context.predictedGlucose = PredictedGlucoseContext(
                     values: (1...36).map { 89.123 + Double($0 * 5) }, // 3 hours of linear data
@@ -120,7 +121,7 @@ final class StatusExtensionDataManager {
                     scheduledBasal: scheduledBasal
                 )
 
-                context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, startDate: netBasal.startDate)
+                context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, start: netBasal.start, end: netBasal.end)
             }
             
             if let reservoir = manager.doseStore.lastReservoirValue,

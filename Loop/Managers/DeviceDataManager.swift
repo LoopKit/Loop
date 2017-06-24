@@ -627,7 +627,8 @@ final class DeviceDataManager {
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
             delegate: self,
-            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted
+            lastLoopCompleted: statusExtensionManager.context?.loop?.lastCompleted,
+            lastTempBasal: statusExtensionManager.context?.netBasal?.tempBasal
         )
         watchManager = WatchDataManager(deviceDataManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)

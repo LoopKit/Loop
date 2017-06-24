@@ -317,7 +317,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     scheduledBasal: scheduledBasal
                 )
 
-                self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.startDate)
+                self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.start)
             }
 
             // Fetch the current IOB subtitle
