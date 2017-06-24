@@ -23,7 +23,7 @@ final class DeviceDataManager {
 
     // MARK: - Utilities
 
-    let logger = DiagnosticLogger()
+    let logger = DiagnosticLogger.shared!
 
     /// Remember the launch date of the app for diagnostic reporting
     fileprivate let launchDate = Date()
@@ -61,7 +61,7 @@ final class DeviceDataManager {
             }
 
             if let oldVal = oldVal, newVal - oldVal >= 0.5 {
-                AnalyticsManager.sharedManager.pumpBatteryWasReplaced()
+                AnalyticsManager.shared.pumpBatteryWasReplaced()
             }
         }
     }
@@ -93,7 +93,7 @@ final class DeviceDataManager {
                 case is MySentryAlertMessageBody, is MySentryAlertClearedMessageBody:
                     break
                 case let body:
-                    logger.addMessage(["messageType": Int(message.messageType.rawValue), "messageBody": body.txData.hexadecimalString], toCollection: "sentryOther")
+                    logger.forCategory("MySentry").info(["messageType": Int(message.messageType.rawValue), "messageBody": body.txData.hexadecimalString])
                 }
             default:
                 break
@@ -112,7 +112,7 @@ final class DeviceDataManager {
 
         rileyLinkManager.connectDevice(device)
 
-        AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
+        AnalyticsManager.shared.didChangeRileyLinkConnectionState()
     }
 
     func disconnectFromRileyLink(_ device: RileyLinkDevice) {
@@ -120,7 +120,7 @@ final class DeviceDataManager {
 
         rileyLinkManager.disconnectDevice(device)
 
-        AnalyticsManager.sharedManager.didChangeRileyLinkConnectionState()
+        AnalyticsManager.shared.didChangeRileyLinkConnectionState()
 
         if connectedPeripheralIDs.count == 0 {
             NotificationManager.clearPendingNotificationRequests()
@@ -246,7 +246,7 @@ final class DeviceDataManager {
                     }
 
                     if newValue.unitVolume > previousVolume + 1 {
-                        AnalyticsManager.sharedManager.reservoirWasRewound()
+                        AnalyticsManager.shared.reservoirWasRewound()
                     }
                 }
             }

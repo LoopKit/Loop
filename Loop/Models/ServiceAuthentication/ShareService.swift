@@ -11,7 +11,7 @@ import ShareClient
 
 
 // Encapsulates the Dexcom Share client service and its authentication
-struct ShareService: ServiceAuthentication {
+class ShareService: ServiceAuthentication {
     var credentials: [ServiceCredential]
 
     let title: String = NSLocalizedString("Dexcom Share", comment: "The title of the Dexcom Share service")
@@ -53,7 +53,7 @@ struct ShareService: ServiceAuthentication {
 
     var isAuthorized: Bool = false
 
-    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+    func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let username = username, let password = password else {
             completion(false, nil)
             return
@@ -66,7 +66,7 @@ struct ShareService: ServiceAuthentication {
         self.client = client
     }
 
-    mutating func reset() {
+    func reset() {
         credentials[0].value = nil
         credentials[1].value = nil
         isAuthorized = false

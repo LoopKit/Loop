@@ -9,20 +9,11 @@
 import Foundation
 
 
-private let AmplitudeAPIKeyService = "AmplitudeAPIKey"
 private let DexcomShareURL = URL(string: "https://share1.dexcom.com")!
 private let NightscoutAccount = "NightscoutAPI"
 
 
 extension KeychainManager {
-    func setAmplitudeAPIKey(_ key: String?) throws {
-        try replaceGenericPassword(key, forService: AmplitudeAPIKeyService)
-    }
-
-    func getAmplitudeAPIKey() -> String? {
-        return try? getGenericPasswordForService(AmplitudeAPIKeyService)
-    }
-
     func setDexcomShareUsername(_ username: String?, password: String?) throws {
         let credentials: InternetCredentials?
 

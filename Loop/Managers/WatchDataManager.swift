@@ -130,7 +130,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (result) in
                 switch result {
                 case .success(let recommendation):
-                    AnalyticsManager.sharedManager.didAddCarbsFromWatch(carbEntry.value)
+                    AnalyticsManager.shared.didAddCarbsFromWatch(carbEntry.value)
                     completionHandler?(recommendation?.amount)
                 case .failure(let error):
                     self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
@@ -154,7 +154,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
                 self.deviceDataManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                     if error == nil {
-                        AnalyticsManager.sharedManager.didSetBolusFromWatch(bolus.value)
+                        AnalyticsManager.shared.didSetBolusFromWatch(bolus.value)
                     }
 
                     replyHandler([:])

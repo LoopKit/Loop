@@ -23,7 +23,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         NotificationManager.authorize(delegate: self)
 
-        AnalyticsManager.sharedManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+        let bundle = Bundle(for: type(of: self))
+        DiagnosticLogger.shared = DiagnosticLogger(subsystem: bundle.bundleIdentifier!, version: bundle.shortVersionString)
+        DiagnosticLogger.shared?.forCategory("AppDelegate").info(#function)
+
+        AnalyticsManager.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         if  let navVC = window?.rootViewController as? UINavigationController,
             let statusVC = navVC.viewControllers.first as? StatusTableViewController {
@@ -75,7 +79,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 let startDate = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.bolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
-                AnalyticsManager.sharedManager.didRetryBolus()
+                AnalyticsManager.shared.didRetryBolus()
 
                 deviceManager.enactBolus(units: units, at: startDate) { (_) in
                     completionHandler()

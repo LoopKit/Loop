@@ -26,7 +26,7 @@ final class AnalyticsManager {
         }
     }
 
-    static let sharedManager = AnalyticsManager()
+    static let shared = AnalyticsManager()
 
     // MARK: - Helpers
 

@@ -37,7 +37,7 @@ final class LoopDataManager {
 
     unowned let delegate: LoopDataManagerDelegate
 
-    private let logger = DiagnosticLogger()
+    private let logger: CategoryLogger
 
     init(
         delegate: LoopDataManagerDelegate,
@@ -50,6 +50,7 @@ final class LoopDataManager {
         settings: LoopSettings = UserDefaults.standard.loopSettings ?? LoopSettings()
     ) {
         self.delegate = delegate
+        self.logger = DiagnosticLogger.shared!.forCategory("LoopDataManager")
         self.lastLoopCompleted = lastLoopCompleted
         self.lastTempBasal = lastTempBasal
         self.settings = settings
@@ -93,7 +94,7 @@ final class LoopDataManager {
         didSet {
             UserDefaults.standard.loopSettings = settings
             notify(forChange: .preferences)
-            AnalyticsManager.sharedManager.didChangeLoopSettings(from: oldValue, to: settings)
+            AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
     }
 
@@ -160,7 +161,7 @@ final class LoopDataManager {
             UserDefaults.standard.insulinActionDuration = newValue
 
             if oldValue != newValue {
-                AnalyticsManager.sharedManager.didChangeInsulinActionDuration()
+                AnalyticsManager.shared.didChangeInsulinActionDuration()
             }
         }
     }
@@ -355,7 +356,7 @@ final class LoopDataManager {
                         self.lastLoopError = error
 
                         if let error = error {
-                            self.logger.addError(error, fromSource: "TempBasal")
+                            self.logger.error(error)
                         } else {
                             self.lastLoopCompleted = Date()
                         }
@@ -412,7 +413,7 @@ final class LoopDataManager {
             updateGroup.enter()
             glucoseStore.getRecentMomentumEffect { (effects, error) -> Void in
                 if let error = error, effects.count == 0 {
-                    self.logger.addError(error, fromSource: "GlucoseStore")
+                    self.logger.error(error)
                     self.glucoseMomentumEffect = nil
                 } else {
                     self.glucoseMomentumEffect = effects
@@ -427,7 +428,7 @@ final class LoopDataManager {
             carbStore.getGlucoseEffects(start: retrospectiveStart) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.addError(error, fromSource: "CarbStore")
+                    self.logger.error(error)
                     self.carbEffect = nil
                 case .success(let effects):
                     self.carbEffect = effects
@@ -450,7 +451,7 @@ final class LoopDataManager {
             doseStore.getGlucoseEffects(start: retrospectiveStart) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.addError(error, fromSource: "DoseStore")
+                    self.logger.error(error)
                     self.insulinEffect = nil
                 case .success(let effects):
                     self.insulinEffect = effects
@@ -465,7 +466,7 @@ final class LoopDataManager {
             doseStore.insulinOnBoard(at: Date()) { (result) in
                 switch result {
                 case .failure(let error):
-                    self.logger.addError(error, fromSource: "DoseStore")
+                    self.logger.error(error)
                     self.insulinOnBoard = nil
                 case .success(let value):
                     self.insulinOnBoard = value
@@ -480,7 +481,7 @@ final class LoopDataManager {
             do {
                 try updateRetrospectiveGlucoseEffect()
             } catch let error {
-                logger.addError(error, fromSource: "RetrospectiveGlucose")
+                logger.error(error)
             }
         }
 
@@ -488,7 +489,7 @@ final class LoopDataManager {
             do {
                 try updatePredictedGlucoseAndRecommendedBasal()
             } catch let error {
-                logger.addError(error, fromSource: "PredictGlucose")
+                logger.error(error)
 
                 throw error
             }
@@ -624,13 +625,13 @@ final class LoopDataManager {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
 
-            AnalyticsManager.sharedManager.loopDidSucceed()
+            AnalyticsManager.shared.loopDidSucceed()
         }
     }
     fileprivate var lastLoopError: Error? {
         didSet {
             if lastLoopError != nil {
-                AnalyticsManager.sharedManager.loopDidError()
+                AnalyticsManager.shared.loopDidError()
             }
         }
     }
