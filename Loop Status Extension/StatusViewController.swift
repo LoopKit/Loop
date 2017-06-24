@@ -185,7 +185,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         if let netBasal = context.netBasal {
-            basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.startDate)
+            basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
         }
 
         if let loop = context.loop {

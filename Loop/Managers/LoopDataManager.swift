@@ -42,6 +42,7 @@ final class LoopDataManager {
     init(
         delegate: LoopDataManagerDelegate,
         lastLoopCompleted: Date?,
+        lastTempBasal: DoseEntry?,
         basalRateSchedule: BasalRateSchedule? = UserDefaults.standard.basalRateSchedule,
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.standard.carbRatioSchedule,
         insulinActionDuration: TimeInterval? = UserDefaults.standard.insulinActionDuration,
@@ -50,6 +51,7 @@ final class LoopDataManager {
     ) {
         self.delegate = delegate
         self.lastLoopCompleted = lastLoopCompleted
+        self.lastTempBasal = lastTempBasal
         self.settings = settings
 
         carbStore = CarbStore(
