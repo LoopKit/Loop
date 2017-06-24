@@ -6,10 +6,17 @@
 //
 
 import LoopKit
+import CarbKit
 
 
 struct LoopSettings {
     var dosingEnabled = false
+
+    var defaultAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (
+        fast: TimeInterval(hours: 2),
+        medium: TimeInterval(hours: 3),
+        slow: TimeInterval(hours: 4)
+    )
 
     var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
@@ -20,6 +27,7 @@ struct LoopSettings {
     var minimumBGGuard: GlucoseThreshold? = nil
 
     var retrospectiveCorrectionEnabled = false
+
 }
 
 
@@ -50,6 +58,12 @@ extension LoopSettings: RawRepresentable {
             self.dosingEnabled = dosingEnabled
         }
 
+        if let defaultAbsorptionTimesDict = rawValue["defaultAbsorptionTimes"] as? [String : TimeInterval] {
+            self.defaultAbsorptionTimes = (fast: defaultAbsorptionTimesDict["fast"],
+                                           medium: defaultAbsorptionTimesDict["medium"],
+                                           slow: defaultAbsorptionTimesDict["slow"]) as! CarbStore.DefaultAbsorptionTimes
+        }
+
         if let rawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
             self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: rawValue)
         }
@@ -74,6 +88,12 @@ extension LoopSettings: RawRepresentable {
             "retrospectiveCorrectionEnabled": retrospectiveCorrectionEnabled
         ]
 
+        raw["defaultAbsorptionTimes"] = [
+            "fast": defaultAbsorptionTimes.fast,
+            "medium": defaultAbsorptionTimes.medium,
+            "slow": defaultAbsorptionTimes.slow,
+        ]
+        
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus

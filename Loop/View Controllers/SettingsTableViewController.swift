@@ -332,7 +332,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .defaultAbsorptionTimes:
                 configCell.textLabel?.text = NSLocalizedString("Default Absorption Times", comment: "The title text for the default absorption time values")
                 
-                let defaultAbsorptionTimes = dataManager.loopManager.defaultAbsorptionTimes
+                let defaultAbsorptionTimes = dataManager.loopManager.settings.defaultAbsorptionTimes
                 configCell.detailTextLabel?.text = "\(Int(defaultAbsorptionTimes.fast.minutes)), \(Int(defaultAbsorptionTimes.medium.minutes)), \(Int(defaultAbsorptionTimes.slow.minutes))"
             }
 
@@ -574,7 +574,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     }
                 }
             case .defaultAbsorptionTimes:
-                let vc = DefaultAbsorptionTimesTableViewController(defaultAbsorptionTimes: dataManager.loopManager.defaultAbsorptionTimes)
+                let vc = DefaultAbsorptionTimesTableViewController(defaultAbsorptionTimes: dataManager.loopManager.settings.defaultAbsorptionTimes)
                 vc.delegate = self
                 vc.title = sender?.textLabel?.text
                 self.show(vc, sender: sender)
@@ -908,7 +908,7 @@ extension SettingsTableViewController: PumpIDTableViewControllerDelegate {
 
 extension SettingsTableViewController: DefaultAbsorptionTimesTableViewControllerDelegate {
     func defaultAbsorptionTimesTableViewControllerDidEndEditing(_ controller: DefaultAbsorptionTimesTableViewController) {
-        dataManager.loopManager.defaultAbsorptionTimes = controller.defaultAbsorptionTimes
+        dataManager.loopManager.settings.defaultAbsorptionTimes = controller.defaultAbsorptionTimes
         tableView.reloadRows(at: [tableView.indexPathForSelectedRow!], with: .none)
     }
 }
