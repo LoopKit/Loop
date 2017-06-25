@@ -329,11 +329,15 @@ final class DeviceDataManager {
      Ensures pump data is current by either waking and polling, or ensuring we're listening to sentry packets.
      */
     fileprivate func assertCurrentPumpData() {
-        guard let device = rileyLinkManager.firstConnectedDevice, pumpDataIsStale() else {
+        guard let device = rileyLinkManager.firstConnectedDevice else {
             return
         }
 
         device.assertIdleListening()
+
+        guard pumpDataIsStale() else {
+            return
+        }
 
         readPumpData { (result) in
             let nsPumpStatus: NightscoutUploadKit.PumpStatus?
