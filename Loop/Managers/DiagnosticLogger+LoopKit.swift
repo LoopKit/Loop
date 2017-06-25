@@ -13,16 +13,14 @@ import LoopKit
 
 extension DiagnosticLogger {
     func addError(_ message: String, fromSource source: String) {
-        let info = [
-            "source": source,
-            "message": message,
-            "reportedAt": DateFormatter.ISO8601StrictDateFormatter().string(from: Date())
+        let message = [
+            "message": message
         ]
 
-        addMessage(info, toCollection: "errors")
+        forCategory(source).error(message)
     }
 
     func addError(_ message: Error, fromSource source: String) {
-        addError(String(describing: message), fromSource: source)
+        forCategory(source).error(message)
     }
 }

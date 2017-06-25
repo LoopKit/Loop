@@ -32,7 +32,9 @@
 		432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */; };
 		433EA4C21D9F39C900CD78FB /* PumpIDTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433EA4C11D9F39C900CD78FB /* PumpIDTableViewController.swift */; };
 		433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */; };
+		4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4341F4EA1EDB92AC001C936B /* LogglyService.swift */; };
 		43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */; };
+		43441AA01EDB4D390087958C /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43441A9F1EDB4D390087958C /* OSLog.swift */; };
 		4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */; };
 		4346D1F61C78501000ABAFE3 /* ChartPoint+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4346D1F51C78501000ABAFE3 /* ChartPoint+Loop.swift */; };
 		434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
@@ -378,7 +380,9 @@
 		4337615E1D52F487004A3647 /* GlucoseHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseHUDView.swift; sourceTree = "<group>"; };
 		433EA4C11D9F39C900CD78FB /* PumpIDTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PumpIDTableViewController.swift; sourceTree = "<group>"; };
 		433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
+		4341F4EA1EDB92AC001C936B /* LogglyService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogglyService.swift; sourceTree = "<group>"; };
 		43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StatusExtensionContext+LoopKit.swift"; sourceTree = "<group>"; };
+		43441A9F1EDB4D390087958C /* OSLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
 		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartTableViewCell.swift; sourceTree = "<group>"; };
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = "<group>"; };
 		4346D1F51C78501000ABAFE3 /* ChartPoint+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ChartPoint+Loop.swift"; sourceTree = "<group>"; };
@@ -739,6 +743,7 @@
 			isa = PBXGroup;
 			children = (
 				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
+				4341F4EA1EDB92AC001C936B /* LogglyService.swift */,
 				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
 				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
 				437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */,
@@ -842,6 +847,7 @@
 				43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */,
 				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
+				43441A9F1EDB4D390087958C /* OSLog.swift */,
 				43BFF0CA1E466C0900FF19A9 /* StateColorPalette.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43BFF0BB1E45C80600FF19A9 /* UIColor+Loop.swift */,
@@ -1442,6 +1448,7 @@
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				437CCADA1D284ADF0075D2C3 /* AuthenticationTableViewCell.swift in Sources */,
 				439BED2E1E760BC600B0AED5 /* EnliteCGMManager.swift in Sources */,
+				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
 				43BFF0CB1E466C0900FF19A9 /* StateColorPalette.swift in Sources */,
 				438991691E91B571000EEF90 /* ChartPoint.swift in Sources */,
@@ -1500,6 +1507,7 @@
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
 				434F545F1D288345002A9274 /* ShareService.swift in Sources */,
+				43441AA01EDB4D390087958C /* OSLog.swift in Sources */,
 				43CEE6E61E56AFD400CB9116 /* NightscoutUploader.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */,

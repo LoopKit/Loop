@@ -101,7 +101,7 @@ final class StatusTableViewController: ChartsTableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.sharedManager.didDisplayStatusScreen()
+        AnalyticsManager.shared.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
