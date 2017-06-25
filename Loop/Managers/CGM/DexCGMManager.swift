@@ -109,8 +109,7 @@ final class ShareClientManager: CGMManager {
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     private let transmitter: Transmitter?
-    let logger = DiagnosticLogger()
-
+    let logger = DiagnosticLogger.shared!.forCategory("G5CGMManager")
 
     init(transmitterID: String?) {
         if let transmitterID = transmitterID {
@@ -163,13 +162,13 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     // MARK: - TransmitterDelegate
 
     func transmitter(_ transmitter: Transmitter, didError error: Error) {
-        logger.addError(error, fromSource: "xDripG5.Transmitter")
+        logger.error(error)
         delegate?.cgmManager(self, didUpdateWith: .error(error))
     }
 
     func transmitter(_ transmitter: Transmitter, didRead glucose: Glucose) {
         if !glucose.state.hasReliableGlucose {
-            logger.addError(String(describing: glucose.state), fromSource: "xDripG5.Transmitter")
+            logger.error(String(describing: glucose.state))
         }
         
         guard glucose != latestReading, let quantity = glucose.glucose else {
@@ -184,7 +183,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     }
 
     func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
-        logger.addError("Unknown sensor data: " + data.hexadecimalString, fromSource: "xDripG5.Transmitter")
+        logger.error("Unknown sensor data: " + data.hexadecimalString)
         // This can be used for protocol discovery, but isn't necessary for normal operation
     }
 }
