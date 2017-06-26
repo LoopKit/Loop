@@ -25,17 +25,17 @@ final class RemoteDataManager {
 
     var shareService: ShareService {
         didSet {
-            try! keychain.setDexcomShareUsername(shareService.username, password: shareService.password)
+            try! keychain.setDexcomShareUsername(shareService.username, password: shareService.password, url: shareService.url)
         }
     }
 
     private let keychain = KeychainManager()
 
     init() {
-        if let (username, password) = keychain.getDexcomShareCredentials() {
-            shareService = ShareService(username: username, password: password)
+        if let (username, password, url) = keychain.getDexcomShareCredentials() {
+            shareService = ShareService(username: username, password: password, url: url)
         } else {
-            shareService = ShareService(username: nil, password: nil)
+            shareService = ShareService(username: nil, password: nil, url: nil)
         }
 
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
