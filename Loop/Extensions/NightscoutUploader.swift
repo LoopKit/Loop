@@ -13,6 +13,9 @@ import NightscoutUploadKit
 
 
 extension NightscoutUploader: CarbStoreSyncDelegate {
+    static let logger = DiagnosticLogger.shared!.forCategory("NightscoutUploader")
+    
+    
     public func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [CarbEntry], completion: @escaping ([String]) -> Void) {
         let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
 
@@ -21,7 +24,8 @@ extension NightscoutUploader: CarbStoreSyncDelegate {
             case .success(let ids):
                 // Pass new ids back
                 completion(ids)
-            case .failure:
+            case .failure(let error):
+                NightscoutUploader.logger.error(error)
                 completion([])
             }
         }
@@ -32,7 +36,8 @@ extension NightscoutUploader: CarbStoreSyncDelegate {
         let nsCarbEntries = entries.map({ MealBolusNightscoutTreatment(carbEntry: $0)})
 
         modifyTreatments(nsCarbEntries) { (error) in
-            if error != nil {
+            if let error = error {
+                NightscoutUploader.logger.error(error)
                 completion([])
             } else {
                 completion(entries.map { $0.externalID ?? "" } )
@@ -43,8 +48,8 @@ extension NightscoutUploader: CarbStoreSyncDelegate {
     public func carbStore(_ carbStore: CarbStore, hasDeletedEntries ids: [String], completion: @escaping ([String]) -> Void) {
 
         deleteTreatmentsById(ids) { (error) in
-            if error != nil {
-                completion([])
+            if let error = error {
+                NightscoutUploader.logger.error(error)
             } else {
                 completion(ids)
             }

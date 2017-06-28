@@ -685,7 +685,8 @@ extension DeviceDataManager: DoseStoreDelegate {
             case .success(let objects):
                 completionHandler(objects)
             case .failure(let error):
-                self.logger.addError(error, fromSource: "NightscoutUploadKit")
+                let logger = DiagnosticLogger.shared!.forCategory("NightscoutUploader")
+                logger.error(error)
                 completionHandler([])
             }
         }
