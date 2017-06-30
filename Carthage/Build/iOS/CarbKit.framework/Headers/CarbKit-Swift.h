@@ -149,13 +149,16 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 SWIFT_CLASS("_TtC7CarbKit27CarbEntryEditViewController")
 @interface CarbEntryEditViewController : UITableViewController
 @property (nonatomic, strong) HKUnit * _Nonnull preferredUnit;
-@property (nonatomic) NSTimeInterval maxAbsorptionTime;
-@property (nonatomic) NSTimeInterval absorptionTimePickerInterval;
 @property (nonatomic, strong) HKQuantity * _Nonnull maxQuantity;
+/// Entry configuration values. Must be set before presenting.
+@property (nonatomic) NSTimeInterval absorptionTimePickerInterval;
+@property (nonatomic) NSTimeInterval maxAbsorptionTime;
+@property (nonatomic) NSTimeInterval maximumDateFutureInterval;
 - (void)viewDidLoad;
 - (NSInteger)numberOfSectionsInTableView:(UITableView * _Nonnull)tableView SWIFT_WARN_UNUSED_RESULT;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section SWIFT_WARN_UNUSED_RESULT;
 - (UITableViewCell * _Nonnull)tableView:(UITableView * _Nonnull)tableView cellForRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nullable)tableView:(UITableView * _Nonnull)tableView titleForFooterInSection:(NSInteger)section SWIFT_WARN_UNUSED_RESULT;
 - (NSIndexPath * _Nullable)tableView:(UITableView * _Nonnull)tableView willSelectRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath SWIFT_WARN_UNUSED_RESULT;
 - (void)tableView:(UITableView * _Nonnull)tableView didSelectRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
 - (BOOL)shouldPerformSegueWithIdentifier:(NSString * _Nonnull)identifier sender:(id _Nullable)sender SWIFT_WARN_UNUSED_RESULT;
