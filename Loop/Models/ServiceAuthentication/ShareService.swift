@@ -17,6 +17,8 @@ class ShareService: ServiceAuthentication {
     let title: String = NSLocalizedString("Dexcom Share", comment: "The title of the Dexcom Share service")
 
     init(username: String?, password: String?, url: URL?) {
+        // change the contents of the variable below to point to your custom share server
+        let customServer = ""
         credentials = [
             ServiceCredential(
                 title: NSLocalizedString("Username", comment: "The title of the Dexcom share username credential"),
@@ -36,14 +38,23 @@ class ShareService: ServiceAuthentication {
                 value: url?.absoluteString,
                 options: [
                     (title: NSLocalizedString("US", comment: "U.S. share server option title"),
-                     value: DexcomShareURL.absoluteString)
+                     value: DexcomShareURL.absoluteString),
+                    (title: NSLocalizedString("Outside US", comment: "Outside US share server option title"),
+                     value: KnownShareServers.NON_US.rawValue)
+
                 ]
             )
         ]
 
+        if customServer.characters.count > 0 {
+            credentials[2].options?.append(
+                (title: NSLocalizedString("Custom", comment: "Custom share server option title"),
+                value: customServer))
+        }
+
         if let username = username, let password = password, url != nil {
             isAuthorized = true
-            client = ShareClient(username: username, password: password)
+            client = ShareClient(username: username, password: password, shareServer: url!.absoluteString)
         }
     }
 
@@ -74,9 +85,10 @@ class ShareService: ServiceAuthentication {
             return
         }
 
-        let client = ShareClient(username: username, password: password)
+        let client = ShareClient(username: username, password: password, shareServer: url!.absoluteString)
         client.fetchLast(1) { (error, _) in
             completion(true, error)
+
         }
         self.client = client
     }
