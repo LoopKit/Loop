@@ -173,6 +173,20 @@ extension UserDefaults {
         }
     }
 
+    var insulinCounteractionEffects: [GlucoseEffectVelocity]? {
+        get {
+            guard let rawValue = array(forKey: Key.insulinCounteractionEffects.rawValue) as? [GlucoseEffectVelocity.RawValue] else {
+                return nil
+            }
+            return rawValue.flatMap {
+                GlucoseEffectVelocity(rawValue: $0)
+            }
+        }
+        set {
+            set(newValue?.map({ $0.rawValue }), forKey: Key.insulinCounteractionEffects.rawValue)
+        }
+    }
+
     var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
         get {
             if let rawValue = dictionary(forKey: Key.insulinSensitivitySchedule.rawValue) {

@@ -68,11 +68,15 @@ public final class StatusChartsManager {
         basalDosePoints = []
         bolusDosePoints = []
         allDosePoints = []
+        carbEffectPoints = []
+        insulinCounteractionEffectPoints = []
+        allCarbEffectPoints = []
 
         glucoseChartCache = nil
         iobChartCache = nil
         cobChartCache = nil
         doseChartCache = nil
+        carbEffectChartCache = nil
     }
 
     // MARK: - Data
@@ -83,7 +87,8 @@ public final class StatusChartsManager {
             if startDate != oldValue {
                 xAxisValues = nil
 
-                updateEndDate(startDate.addingTimeInterval(TimeInterval(hours: 4)))
+                // Set a new minimum end date
+                endDate = startDate.addingTimeInterval(.hours(3))
             }
         }
     }
@@ -642,6 +647,147 @@ public final class StatusChartsManager {
         
         return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.flatMap { $0 })
     }
+
+    // MARK: - Carb Effect
+
+    /// The chart points for expected carb effect velocity
+    public var carbEffectPoints: [ChartPoint] = [] {
+        didSet {
+            carbEffectChart = nil
+            // don't extend the end date for carb effects
+        }
+    }
+
+    /// The chart points for observed insulin counteraction effect velocity
+    public var insulinCounteractionEffectPoints: [ChartPoint] = [] {
+        didSet {
+            carbEffectChart = nil
+
+            // Extend 1 hour past the seen effect to ensure some future prediction is displayed
+            if let lastDate = insulinCounteractionEffectPoints.last?.x as? ChartAxisValueDate {
+                updateEndDate(lastDate.date.addingTimeInterval(.hours(1)))
+            }
+        }
+    }
+
+    /// The chart points used for selection in the carb effect chart
+    public var allCarbEffectPoints: [ChartPoint] = [] {
+        didSet {
+            carbEffectChart = nil
+        }
+    }
+
+    /// The minimum range to display for COB values.
+    private var carbEffectDisplayRangePoints: [ChartPoint] = [0, 1].map {
+        return ChartPoint(
+            x: ChartAxisValue(scalar: 0),
+            y: ChartAxisValueInt($0)
+        )
+    }
+
+    private var carbEffectChart: Chart?
+
+    private var carbEffectChartCache: ChartPointsTouchHighlightLayerViewCache?
+
+    public func carbEffectChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = carbEffectChart, chart.frame != frame {
+            self.carbEffectChart = nil
+        }
+
+        if carbEffectChart == nil {
+            carbEffectChart = generateCarbEffectChartWithFrame(frame)
+        }
+
+        return carbEffectChart
+    }
+
+    private func generateCarbEffectChartWithFrame(_ frame: CGRect) -> Chart? {
+        guard let xAxisModel = xAxisModel, let xAxisValues = xAxisValues else {
+            return nil
+        }
+
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(carbEffectPoints + allCarbEffectPoints + carbEffectDisplayRangePoints,
+            minSegmentCount: 2,
+            maxSegmentCount: 4,
+            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize / 50,
+            axisValueGenerator: {
+                ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings)
+            },
+            addPaddingSegmentIfEdge: false
+        )
+
+        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
+
+        let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
+
+        let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
+
+        // Carb effect
+        let generateAreaLayer = { (points: [ChartPoint], color: UIColor) -> ChartPointsAreaLayer<ChartPoint>? in
+            var containerPoints = points
+
+            // Create a container line at 0
+            if let first = points.first {
+                containerPoints.insert(ChartPoint(x: first.x, y: ChartAxisValueInt(0)), at: 0)
+            }
+
+            if let last = points.last {
+                containerPoints.append(ChartPoint(x: last.x, y: ChartAxisValueInt(0)))
+            }
+
+            if containerPoints.count > 1 {
+                return ChartPointsAreaLayer<ChartPoint>(
+                    xAxis: xAxisLayer.axis,
+                    yAxis: yAxisLayer.axis,
+                    chartPoints: containerPoints,
+                    areaColor: color,
+                    animDuration: 0,
+                    animDelay: 0,
+                    addContainerPoints: false
+                )
+            } else {
+                return nil
+            }
+        }
+
+        // Grid lines
+        let gridLayer = ChartGuideLinesForValuesLayer(
+            xAxis: xAxisLayer.axis,
+            yAxis: yAxisLayer.axis,
+            settings: guideLinesLayerSettings,
+            axisValuesX: Array(xAxisValues.dropFirst().dropLast()),
+            axisValuesY: yAxisValues
+        )
+
+        if gestureRecognizer != nil {
+            carbEffectChartCache = ChartPointsTouchHighlightLayerViewCache(
+                xAxisLayer: xAxisLayer,
+                yAxisLayer: yAxisLayer,
+                axisLabelSettings: self.axisLabelSettings,
+                chartPoints: allCarbEffectPoints,
+                tintColor: UIColor.COBTintColor,
+                gestureRecognizer: gestureRecognizer
+            )
+        }
+
+        let layers: [ChartLayer?] = [
+            gridLayer,
+            xAxisLayer,
+            yAxisLayer,
+            carbEffectChartCache?.highlightLayer,
+            generateAreaLayer(carbEffectPoints, UIColor.secondaryLabelColor.withAlphaComponent(0.6)),
+            generateAreaLayer(insulinCounteractionEffectPoints, UIColor.COBTintColor.withAlphaComponent(0.7))
+        ]
+
+        return Chart(
+            frame: frame,
+            innerFrame: innerFrame,
+            settings: chartSettings,
+            layers: layers.flatMap { $0 }
+        )
+    }
+
+    // MARK: - Shared Axis
 
     private func generateXAxisValues() {
         let timeFormatter = DateFormatter()
