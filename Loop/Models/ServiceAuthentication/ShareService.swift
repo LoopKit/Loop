@@ -17,8 +17,6 @@ class ShareService: ServiceAuthentication {
     let title: String = NSLocalizedString("Dexcom Share", comment: "The title of the Dexcom Share service")
 
     init(username: String?, password: String?, url: URL?) {
-        // change the contents of the variable below to point to your custom share server
-        let customServer = ""
         credentials = [
             ServiceCredential(
                 title: NSLocalizedString("Username", comment: "The title of the Dexcom share username credential"),
@@ -38,7 +36,7 @@ class ShareService: ServiceAuthentication {
                 value: url?.absoluteString,
                 options: [
                     (title: NSLocalizedString("US", comment: "U.S. share server option title"),
-                     value: DexcomShareURL.absoluteString),
+                     value: KnownShareServers.US.rawValue),
                     (title: NSLocalizedString("Outside US", comment: "Outside US share server option title"),
                      value: KnownShareServers.NON_US.rawValue)
 
@@ -46,15 +44,27 @@ class ShareService: ServiceAuthentication {
             )
         ]
 
-        if customServer.characters.count > 0 {
-            credentials[2].options?.append(
-                (title: NSLocalizedString("Custom", comment: "Custom share server option title"),
-                value: customServer))
-        }
+        /*
+         To enable Loop to use a custom share server, change the value of customServer 
+         and remove the comment markers on line 55 and 62.
 
-        if let username = username, let password = password, url != nil {
+         You can find installation instructions for one such custom share server at
+         https://github.com/dabear/NightscoutShareServer
+         */
+
+        /*
+        let customServer = "https://REPLACEME"
+        let customServerTitle = "Custom"
+
+        credentials[2].options?.append(
+                (title: NSLocalizedString(customServerTitle, comment: "Custom share server option title"),
+                value: customServer))
+        */
+
+
+        if let username = username, let password = password, let url = url {
             isAuthorized = true
-            client = ShareClient(username: username, password: password, shareServer: url!.absoluteString)
+            client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
         }
     }
 
@@ -80,12 +90,12 @@ class ShareService: ServiceAuthentication {
     var isAuthorized: Bool = false
 
     func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
-        guard let username = username, let password = password, url != nil else {
+        guard let username = username, let password = password, let url = url else {
             completion(false, nil)
             return
         }
 
-        let client = ShareClient(username: username, password: password, shareServer: url!.absoluteString)
+        let client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
         client.fetchLast(1) { (error, _) in
             completion(true, error)
 
@@ -103,7 +113,7 @@ class ShareService: ServiceAuthentication {
 }
 
 
-private let DexcomShareURL = URL(string: "https://share1.dexcom.com")!
+private let DexcomShareURL = URL(string: KnownShareServers.US.rawValue)!
 private let DexcomShareServiceLabel = "DexcomShare1"
 
 
