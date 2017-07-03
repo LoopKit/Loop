@@ -28,16 +28,20 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         tableView.register(RileyLinkDeviceTableViewCell.nib(), forCellReuseIdentifier: RileyLinkDeviceTableViewCell.className)
 
         dataManagerObserver = NotificationCenter.default.addObserver(forName: nil, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
-            if let deviceManager = self?.dataManager.rileyLinkManager {
-                switch note.name {
-                case Notification.Name.DeviceManagerDidDiscoverDevice:
-                    self?.tableView.insertRows(at: [IndexPath(row: deviceManager.devices.count - 1, section: Section.devices.rawValue)], with: .automatic)
-                case Notification.Name.DeviceConnectionStateDidChange:
-                  if let device = note.userInfo?[RileyLinkDeviceManager.RileyLinkDeviceKey] as? RileyLinkDevice, let index = deviceManager.devices.index(where: { $0 === device }) {
-                        self?.tableView.reloadRows(at: [IndexPath(row: index, section: Section.devices.rawValue)], with: .none)
+            DispatchQueue.main.async {
+                if let deviceManager = self?.dataManager.rileyLinkManager {
+                    switch note.name {
+                    case Notification.Name.DeviceManagerDidDiscoverDevice:
+                        self?.tableView.insertRows(at: [IndexPath(row: deviceManager.devices.count - 1, section: Section.devices.rawValue)], with: .automatic)
+                    case Notification.Name.DeviceConnectionStateDidChange,
+                         Notification.Name.DeviceRSSIDidChange,
+                         Notification.Name.DeviceNameDidChange:
+                      if let device = note.userInfo?[RileyLinkDeviceManager.RileyLinkDeviceKey] as? RileyLinkDevice, let index = deviceManager.devices.index(where: { $0 === device }) {
+                            self?.tableView.reloadRows(at: [IndexPath(row: index, section: Section.devices.rawValue)], with: .none)
+                        }
+                    default:
+                        break
                     }
-                default:
-                    break
                 }
             }
         }
@@ -46,7 +50,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        dataManager.rileyLinkManager.deviceScanningEnabled = true
+        dataManager.rileyLinkManager.setDeviceScanningEnabled(true)
 
         if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
             dataManager.loopManager.glucoseStore.authorize { (success, error) -> Void in
@@ -60,7 +64,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        dataManager.rileyLinkManager.deviceScanningEnabled = false
+        dataManager.rileyLinkManager.setDeviceScanningEnabled(false)
     }
 
     deinit {

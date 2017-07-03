@@ -41,9 +41,9 @@ class ShareService: ServiceAuthentication {
             )
         ]
 
-        if let username = username, let password = password, url != nil {
+        if let username = username, let password = password, let url = url {
             isAuthorized = true
-            client = ShareClient(username: username, password: password)
+            client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
         }
     }
 
@@ -69,12 +69,12 @@ class ShareService: ServiceAuthentication {
     var isAuthorized: Bool = false
 
     func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
-        guard let username = username, let password = password, url != nil else {
+        guard let username = username, let password = password, let url = url else {
             completion(false, nil)
             return
         }
 
-        let client = ShareClient(username: username, password: password)
+        let client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
         client.fetchLast(1) { (error, _) in
             completion(true, error)
         }

@@ -165,7 +165,7 @@ extension BolusInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
-        pickerValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerValue))
+        pickerValue += Int((accumulatedRotation - remainder) / rotationsPerValue)
         accumulatedRotation = remainder
     }
 }
