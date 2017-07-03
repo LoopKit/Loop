@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -19,29 +18,53 @@
                         <viewControllerLayoutGuide type="bottom" id="Vi1-50-EGe"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Vhu-kB-paW">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="110"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="220"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="70"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="70" id="Pes-zW-tY0"/>
-                                </constraints>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QEK-eF-fK6">
+                                <rect key="frame" x="8" y="0.0" width="359" height="220"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="70"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="70" id="CMw-Lk-A0P"/>
+                                        </constraints>
+                                    </stackView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3n2-yC-jGi">
+                                        <rect key="frame" x="0.0" y="70" width="359" height="40"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" layoutMarginsFollowReadableWidth="YES" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
+                                                <rect key="frame" x="8" y="0.0" width="343" height="40"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="aVA-Mg-CvQ"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="top" secondItem="3n2-yC-jGi" secondAttribute="top" id="HSD-ba-SBR"/>
+                                            <constraint firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="LtS-Ct-5Wl"/>
+                                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="3n2-yC-jGi" secondAttribute="leading" constant="8" id="cIA-WI-DT4"/>
+                                            <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="8" id="x9b-EB-fji"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContentView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="110" width="359" height="110"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" priority="750" constant="100" id="rLK-f9-lLl"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
                             </stackView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                <rect key="frame" x="16" y="84" width="343" height="18"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="trailingMargin" secondItem="9iF-xY-Bh4" secondAttribute="trailing" id="64k-kp-SIV"/>
-                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leadingMargin" id="NC3-TC-TzM"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="O3d-gn-msQ"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="width" secondItem="Vhu-kB-paW" secondAttribute="width" id="Yms-yl-dwN"/>
-                            <constraint firstItem="d8d-rW-z8J" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" id="gXw-95-VgT"/>
-                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="9iF-xY-Bh4" secondAttribute="bottom" constant="8" id="mlS-wa-D71"/>
+                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="QEK-eF-fK6" secondAttribute="bottom" id="8CP-lo-FxM"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="Rna-hO-xkd"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" constant="8" id="hDE-a8-dTa"/>
+                            <constraint firstAttribute="trailing" secondItem="QEK-eF-fK6" secondAttribute="trailing" constant="8" id="rIV-pZ-0Ap"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout"/>
@@ -49,8 +72,9 @@
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-                    <size key="freeformSize" width="375" height="110"/>
+                    <size key="freeformSize" width="375" height="220"/>
                     <connections>
+                        <outlet property="glucoseChartContentView" destination="GVu-hk-PBg" id="gfZ-nx-P6V"/>
                         <outlet property="hudView" destination="d8d-rW-z8J" id="7Cp-BW-Kpc"/>
                         <outlet property="subtitleLabel" destination="9iF-xY-Bh4" id="PM8-hd-IB3"/>
                     </connections>

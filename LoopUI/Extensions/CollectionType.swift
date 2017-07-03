@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import LoopKit
 
 
 extension BidirectionalCollection where Index: Strideable, Iterator.Element: Comparable, Index.Stride == Int {
@@ -72,24 +71,3 @@ extension BidirectionalCollection where Index: Strideable, Iterator.Element: Str
     }
 }
 
-
-public extension Sequence where Iterator.Element: TimelineValue {
-    /// Returns the closest element index in the sorted sequence prior to the specified date
-    ///
-    /// - parameter date: The date to use in the search
-    ///
-    /// - returns: The closest index, if any exist before the specified date
-    func closestIndexPriorToDate(_ date: Date) -> Int? {
-        var closestIndex: Int?
-
-        for (index, value) in self.enumerated() {
-            if value.startDate <= date {
-                closestIndex = index
-            } else {
-                break
-            }
-        }
-
-        return closestIndex
-    }
-}

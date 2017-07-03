@@ -10,11 +10,11 @@ import UIKit
 import SwiftCharts
 
 
-final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
+public final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
 
     let unitString: String?
 
-    init(actualDouble: Double, unitString: String? = nil, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
+    public init(actualDouble: Double, unitString: String? = nil, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
         let screenLocDouble: Double
 
         switch actualDouble {
@@ -31,7 +31,7 @@ final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
         super.init(screenLocDouble: screenLocDouble, actualDouble: actualDouble, formatter: formatter, labelSettings: labelSettings)
     }
 
-    init(screenLocDouble: Double, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
+    public init(screenLocDouble: Double, formatter: NumberFormatter, labelSettings: ChartLabelSettings = ChartLabelSettings()) {
         let actualDouble: Double
 
         switch screenLocDouble {
@@ -48,7 +48,7 @@ final class ChartAxisValueDoubleLog: ChartAxisValueDoubleScreenLoc {
         super.init(screenLocDouble: screenLocDouble, actualDouble: actualDouble, formatter: formatter, labelSettings: labelSettings)
     }
 
-    override var description: String {
+    override public var description: String {
         let suffix = unitString != nil ? " \(unitString!)" : ""
 
         return super.description + suffix

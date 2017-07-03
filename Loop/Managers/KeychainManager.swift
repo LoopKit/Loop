@@ -256,8 +256,8 @@ private extension URLComponents {
 
         host = keychainAttributes[kSecAttrServer as String] as? String
 
-        if let port = keychainAttributes[kSecAttrPort as String] as? NSNumber, port.intValue > 0 {
-            self.port = port as Int?
+        if let port = keychainAttributes[kSecAttrPort as String] as? Int, port > 0 {
+            self.port = port
         }
 
         if let path = keychainAttributes[kSecAttrPath as String] as? String {

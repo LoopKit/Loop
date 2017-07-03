@@ -68,8 +68,8 @@ final class LoopStateView: UIView {
         let lineWidth = lineWidth ?? shapeLayer.lineWidth
         let radius = min(bounds.width / 2, bounds.height / 2) - lineWidth / 2
 
-        let startAngle = open ? CGFloat(-M_PI_4) : 0
-        let endAngle = open ? CGFloat(5 * M_PI_4) : CGFloat(2 * M_PI)
+        let startAngle = open ? -CGFloat.pi / 4 : 0
+        let endAngle = open ? 5 * CGFloat.pi / 4 : 2 * CGFloat.pi
 
         let path = UIBezierPath(
             arcCenter: center,

@@ -10,10 +10,10 @@ import UIKit
 import SwiftCharts
 
 
-final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
+public final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
     let unitString: String
 
-    init(_ double: Double, unitString: String, formatter: NumberFormatter) {
+    public init(_ double: Double, unitString: String, formatter: NumberFormatter) {
         self.unitString = unitString
 
         super.init(double, formatter: formatter)
@@ -25,7 +25,7 @@ final class ChartAxisValueDoubleUnit: ChartAxisValueDouble {
         super.init(double)
     }
 
-    override var description: String {
-        return "\(super.description) \(unitString)"
+    override public var description: String {
+        return formatter.string(from: scalar, unit: unitString) ?? ""
     }
 }

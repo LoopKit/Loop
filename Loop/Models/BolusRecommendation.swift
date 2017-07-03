@@ -10,6 +10,7 @@ import Foundation
 import LoopKit
 import HealthKit
 
+
 enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
     case glucoseBelowMinimumGuard(minGlucose: GlucoseValue, unit: HKUnit)
     case currentGlucoseBelowTarget(glucose: GlucoseValue, unit: HKUnit)
@@ -25,7 +26,7 @@ enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
         case .currentGlucoseBelowTarget(let glucose, let unit):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.describingGlucose(glucose.quantity, for: unit)!
-            return String(format: NSLocalizedString("Current glucose of %1$@ is below target range.", comment: "Message when offering bolus prediction even though bg is below range. (1: glucose value)"), bgStr)
+            return String(format: NSLocalizedString("Current glucose of %1$@ is below target range.", comment: "Message when offering bolus recommendation even though bg is below range. (1: glucose value)"), bgStr)
         case .predictedGlucoseBelowTarget(let minGlucose, let unit):
             let timeFormatter = DateFormatter()
             timeFormatter.dateStyle = .none
@@ -34,7 +35,7 @@ enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
 
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let minBGStr = glucoseFormatter.describingGlucose(minGlucose.quantity, for: unit)!
-            return String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus prediction even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
+            return String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
 
         }
     }
@@ -73,3 +74,15 @@ struct BolusRecommendation {
         self.notice = notice
     }
 }
+
+
+extension BolusRecommendation: Comparable {
+    static func ==(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount == rhs.amount
+    }
+
+    static func <(lhs: BolusRecommendation, rhs: BolusRecommendation) -> Bool {
+        return lhs.amount < rhs.amount
+    }
+}
+

@@ -8,24 +8,28 @@
 
 import UIKit
 
-class ChartContentView: UIView {
+public class ChartContentView: UIView {
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
 
         if chartView == nil || chartView!.frame != bounds {
-            chartView = chartGenerator?(bounds)
+            // 50 is the smallest height in which we should attempt to redraw a chart.
+            // Smaller sizes might be requested mid-animation, so ignore them.
+            if bounds.height > 50 {
+                chartView = chartGenerator?(bounds)
+            }
         } else if chartView!.superview == nil {
             addSubview(chartView!)
         }
     }
 
-    func reloadChart() {
+    public func reloadChart() {
         chartView = nil
         setNeedsLayout()
     }
 
-    var chartGenerator: ((CGRect) -> UIView?)? {
+    public var chartGenerator: ((CGRect) -> UIView?)? {
         didSet {
             chartView = nil
             setNeedsLayout()

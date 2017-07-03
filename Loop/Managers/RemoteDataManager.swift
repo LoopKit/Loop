@@ -19,7 +19,7 @@ final class RemoteDataManager {
         didSet {
             keychain.setNightscoutURL(nightscoutService.siteURL, secret: nightscoutService.APISecret)
             UIDevice.current.isBatteryMonitoringEnabled = true
-            delegate?.remoteDataManagerdidUpdateServices(self)
+            delegate?.remoteDataManagerDidUpdateServices(self)
         }
     }
 
@@ -49,5 +49,5 @@ final class RemoteDataManager {
 
 
 protocol RemoteDataManagerDelegate: class {
-    func remoteDataManagerdidUpdateServices(_ dataManager: RemoteDataManager)
+    func remoteDataManagerDidUpdateServices(_ dataManager: RemoteDataManager)
 }

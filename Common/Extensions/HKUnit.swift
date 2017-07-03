@@ -20,14 +20,18 @@ extension HKUnit {
             return 1
         }
     }
+
+    static func milligramsPerDeciliter() -> HKUnit {
+        return HKUnit.gramUnit(with: .milli).unitDivided(by: HKUnit.literUnit(with: .deci))
+    }
     
-    static func millimolesPerLiterUnit() -> HKUnit {
+    static func millimolesPerLiter() -> HKUnit {
         return HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter())
     }
     
     // A glucose-centric presentation helper for the localized unit string
     var glucoseUnitDisplayString: String {
-        if self == HKUnit.millimolesPerLiterUnit() {
+        if self == HKUnit.millimolesPerLiter() {
             return NSLocalizedString("mmol/L", comment: "The unit display string for millimoles of glucose per liter")
         } else {
             return String(describing: self)
