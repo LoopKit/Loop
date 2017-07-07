@@ -34,7 +34,11 @@ struct ServiceCredential {
         self.placeholder = placeholder
         self.isSecret = isSecret
         self.keyboardType = keyboardType
-        self.value = value
+        self.value = value ?? options?.first?.value
         self.options = options
+    }
+
+    mutating func reset() {
+        self.value = options?.first?.value
     }
 }

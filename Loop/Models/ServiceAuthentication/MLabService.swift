@@ -67,8 +67,8 @@ class MLabService: ServiceAuthentication {
     }
 
     func reset() {
-        credentials[0].value = nil
-        credentials[1].value = nil
+        credentials[0].reset()
+        credentials[1].reset()
         isAuthorized = false
     }
 

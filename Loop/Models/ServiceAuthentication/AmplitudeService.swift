@@ -53,7 +53,7 @@ class AmplitudeService: ServiceAuthentication {
     }
 
     func reset() {
-        credentials[0].value = nil
+        credentials[0].reset()
         isAuthorized = false
         client = nil
     }
