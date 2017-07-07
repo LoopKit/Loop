@@ -9,9 +9,8 @@
 @import CoreBluetooth;
 @import Foundation;
 
-#define RILEYLINK_EVENT_LIST_UPDATED            @"RILEYLINK_EVENT_LIST_UPDATED"
+#define RILEYLINK_EVENT_DEVICE_CREATED          @"RILEYLINK_EVENT_DEVICE_CREATED"
 #define RILEYLINK_IDLE_RESPONSE_RECEIVED        @"RILEYLINK_IDLE_RESPONSE_RECEIVED"
-#define RILEYLINK_EVENT_DEVICE_ADDED            @"RILEYLINK_EVENT_DEVICE_ADDED"
 #define RILEYLINK_EVENT_DEVICE_CONNECTED        @"RILEYLINK_EVENT_DEVICE_CONNECTED"
 #define RILEYLINK_EVENT_DEVICE_DISCONNECTED     @"RILEYLINK_EVENT_DEVICE_DISCONNECTED"
 #define RILEYLINK_EVENT_DEVICE_ATTRS_DISCOVERED @"RILEYLINK_EVENT_DEVICE_ATTRS_DISCOVERED"
@@ -33,13 +32,14 @@
 
 @property (nonatomic, nonnull, readonly, copy) NSArray<RileyLinkBLEDevice *> *rileyLinkList;
 
-- (void)connectPeripheral:(nonnull CBPeripheral *)peripheral;
-- (void)disconnectPeripheral:(nonnull CBPeripheral *)peripheral;
+- (void)connectDevice:(nonnull RileyLinkBLEDevice *)device;
+- (void)disconnectDevice:(nonnull RileyLinkBLEDevice *)device;
 
-+ (nonnull instancetype)sharedManager;
+- (nonnull instancetype)initWithAutoConnectIDs:(nonnull NSSet<NSString *> *)autoConnectIDs;
 
-@property (nonatomic, nonnull, strong) NSSet<NSString *> *autoConnectIds;
-@property (nonatomic, getter=isScanningEnabled) BOOL scanningEnabled;
+@property (nonatomic, nonnull, readonly) NSSet<NSString *> *autoConnectIDs;
+
+- (void)setScanningEnabled:(BOOL)scanningEnabled;
 
 /**
  Converts an array of UUID strings to CBUUID objects, excluding those represented in an array of CBAttribute objects.
