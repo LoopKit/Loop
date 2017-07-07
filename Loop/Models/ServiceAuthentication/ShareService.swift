@@ -36,10 +36,30 @@ class ShareService: ServiceAuthentication {
                 value: url?.absoluteString,
                 options: [
                     (title: NSLocalizedString("US", comment: "U.S. share server option title"),
-                     value: DexcomShareURL.absoluteString)
+                     value: KnownShareServers.US.rawValue),
+                    (title: NSLocalizedString("Outside US", comment: "Outside US share server option title"),
+                     value: KnownShareServers.NON_US.rawValue)
+
                 ]
             )
         ]
+
+        /*
+         To enable Loop to use a custom share server, change the value of customServer 
+         and remove the comment markers on line 55 and 62.
+
+         You can find installation instructions for one such custom share server at
+         https://github.com/dabear/NightscoutShareServer
+         */
+
+        /*
+        let customServer = "https://REPLACEME"
+        let customServerTitle = "Custom"
+
+        credentials[2].options?.append(
+                (title: NSLocalizedString(customServerTitle, comment: "Custom share server option title"),
+                value: customServer))
+        */
 
         if let username = username, let password = password, let url = url {
             isAuthorized = true
@@ -77,6 +97,7 @@ class ShareService: ServiceAuthentication {
         let client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
         client.fetchLast(1) { (error, _) in
             completion(true, error)
+
         }
         self.client = client
     }
@@ -91,7 +112,7 @@ class ShareService: ServiceAuthentication {
 }
 
 
-private let DexcomShareURL = URL(string: "https://share1.dexcom.com")!
+private let DexcomShareURL = URL(string: KnownShareServers.US.rawValue)!
 private let DexcomShareServiceLabel = "DexcomShare1"
 
 
