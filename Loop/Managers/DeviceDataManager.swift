@@ -309,7 +309,7 @@ final class DeviceDataManager {
                     completion(.failure(LoopError.invalidData(details: errorStr)))
                     return
                 }
-                completion(.success(status: status, date: date))
+                completion(.success((status: status, date: date)))
             case .failure(let error):
                 self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
                 completion(.failure(error))

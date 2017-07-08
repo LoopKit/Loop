@@ -134,7 +134,7 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
-        carbValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerCarb))
+        carbValue += Int((accumulatedRotation - remainder) / rotationsPerCarb)
         accumulatedRotation = remainder
     }
 }

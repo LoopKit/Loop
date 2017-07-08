@@ -61,7 +61,6 @@ class ShareService: ServiceAuthentication {
                 value: customServer))
         */
 
-
         if let username = username, let password = password, let url = url {
             isAuthorized = true
             client = ShareClient(username: username, password: password, shareServer: url.absoluteString)
