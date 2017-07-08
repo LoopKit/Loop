@@ -46,7 +46,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        dataManager.rileyLinkManager.deviceScanningEnabled = true
+        dataManager.rileyLinkManager.setDeviceScanningEnabled(true)
 
         if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
             dataManager.loopManager.glucoseStore.authorize { (success, error) -> Void in
@@ -60,7 +60,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        dataManager.rileyLinkManager.deviceScanningEnabled = false
+        dataManager.rileyLinkManager.setDeviceScanningEnabled(false)
     }
 
     deinit {
