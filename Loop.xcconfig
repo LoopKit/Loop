@@ -8,4 +8,4 @@
 
 // Change this on first setup to your own unique organization identifier in
 // reverse-domain name syntax.
-MAIN_APP_BUNDLE_IDENTIFIER = com.loudnate
+MAIN_APP_BUNDLE_IDENTIFIER = com.loopkit
