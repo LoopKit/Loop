@@ -10,6 +10,7 @@ import Foundation
 import LoopKit
 import MinimedKit
 import HealthKit
+import CarbKit
 
 extension UserDefaults {
 
@@ -116,6 +117,12 @@ extension UserDefaults {
                     removeObject(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 }
 
+                let defaultAbsorptionTimes = (
+                    fast: TimeInterval(hours: 2),
+                    medium: TimeInterval(hours: 3),
+                    slow: TimeInterval(hours: 4)
+                )
+
                 let glucoseTargetRangeSchedule: GlucoseRangeSchedule?
                 if let rawValue = dictionary(forKey: "com.loudnate.Naterade.GlucoseTargetRangeSchedule") {
                     glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: rawValue)
@@ -142,6 +149,7 @@ extension UserDefaults {
 
                 let settings = LoopSettings(
                     dosingEnabled: bool(forKey: "com.loudnate.Naterade.DosingEnabled"),
+                    defaultAbsorptionTimes: defaultAbsorptionTimes,
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
@@ -161,7 +169,7 @@ extension UserDefaults {
     var insulinActionDuration: TimeInterval? {
         get {
             let value = double(forKey: Key.insulinActionDuration.rawValue)
-
+            
             return value > 0 ? value : nil
         }
         set {

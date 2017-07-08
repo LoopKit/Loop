@@ -9,6 +9,7 @@
 import UIKit
 import HealthKit
 import LoopKit
+import CarbKit
 import RileyLinkKit
 import MinimedKit
 
@@ -117,6 +118,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case insulinSensitivity
         case maxBasal
         case maxBolus
+        case defaultAbsorptionTimes
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -333,6 +335,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+            case .defaultAbsorptionTimes:
+                configCell.textLabel?.text = NSLocalizedString("Default Absorption Times", comment: "The title text for the default absorption time values")
+                
+                let defaultAbsorptionTimes = dataManager.loopManager.settings.defaultAbsorptionTimes
+                configCell.detailTextLabel?.text = "\(Int(defaultAbsorptionTimes.fast.minutes)), \(Int(defaultAbsorptionTimes.medium.minutes)), \(Int(defaultAbsorptionTimes.slow.minutes))"
             }
 
             cell = configCell
@@ -577,6 +584,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                         }
                     }
                 }
+            case .defaultAbsorptionTimes:
+                let vc = DefaultAbsorptionTimesTableViewController(defaultAbsorptionTimes: dataManager.loopManager.settings.defaultAbsorptionTimes)
+                vc.delegate = self
+                vc.title = sender?.textLabel?.text
+                self.show(vc, sender: sender)
             }
         case .devices:
             let vc = RileyLinkDeviceTableViewController()
@@ -911,5 +923,13 @@ extension SettingsTableViewController: PumpIDTableViewControllerDelegate {
         if let region = controller.region {
             dataManager.pumpState?.pumpRegion = region
         }
+    }
+}
+
+
+extension SettingsTableViewController: DefaultAbsorptionTimesTableViewControllerDelegate {
+    func defaultAbsorptionTimesTableViewControllerDidEndEditing(_ controller: DefaultAbsorptionTimesTableViewController) {
+        dataManager.loopManager.settings.defaultAbsorptionTimes = controller.defaultAbsorptionTimes
+        tableView.reloadRows(at: [tableView.indexPathForSelectedRow!], with: .none)
     }
 }

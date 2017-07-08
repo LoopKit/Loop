@@ -56,11 +56,7 @@ final class LoopDataManager {
         self.settings = settings
 
         carbStore = CarbStore(
-            defaultAbsorptionTimes: (
-                fast: TimeInterval(hours: 2),
-                medium: TimeInterval(hours: 3),
-                slow: TimeInterval(hours: 4)
-            ),
+            defaultAbsorptionTimes: settings.defaultAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -93,6 +89,7 @@ final class LoopDataManager {
     var settings: LoopSettings {
         didSet {
             UserDefaults.standard.loopSettings = settings
+            carbStore.defaultAbsorptionTimes = settings.defaultAbsorptionTimes
             notify(forChange: .preferences)
             AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
