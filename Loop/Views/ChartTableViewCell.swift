@@ -12,7 +12,7 @@ import LoopUI
 
 final class ChartTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var chartContentView: ChartContentView!
+    @IBOutlet weak var chartContentView: ChartContainerView!
 
     @IBOutlet weak var titleLabel: UILabel?
 
