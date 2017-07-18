@@ -487,25 +487,15 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Carb Ratios", comment: "The title of the carb ratios schedule screen")
+                scheduleVC.unit = .gram()
 
                 if let schedule = dataManager.loopManager.carbRatioSchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-
-                    show(scheduleVC, sender: sender)
-                } else {
-                    dataManager.loopManager.carbStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
-                    }
                 }
+
+                show(scheduleVC, sender: sender)
             case .insulinSensitivity:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
 

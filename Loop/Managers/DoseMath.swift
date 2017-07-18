@@ -7,12 +7,13 @@
 //
 
 import Foundation
+import CarbKit
 import HealthKit
 import InsulinKit
 import LoopKit
 
 
-struct DoseMath {
+enum DoseMath {
     /// The allowed precision
     static let basalStrokes: Double = 40
 
