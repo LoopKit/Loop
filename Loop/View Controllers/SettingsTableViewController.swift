@@ -14,6 +14,7 @@ import MinimedKit
 
 private let ConfigCellIdentifier = "ConfigTableViewCell"
 
+private let EnabledString = NSLocalizedString("Enabled", comment: "The detail text describing an enabled setting")
 private let TapToSetString = NSLocalizedString("Tap to set", comment: "The empty-state text for a configuration value")
 
 
@@ -53,7 +54,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             }
         }
 
-        AnalyticsManager.sharedManager.didDisplaySettingsScreen()
+        AnalyticsManager.shared.didDisplaySettingsScreen()
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -118,6 +119,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case share = 0
         case nightscout
         case mLab
+        case loggly
         case amplitude
     }
 
@@ -361,11 +363,16 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 configCell.textLabel?.text = mLabService.title
                 configCell.detailTextLabel?.text = mLabService.databaseName ?? TapToSetString
+            case .loggly:
+                let logglyService = dataManager.logger.logglyService
+
+                configCell.textLabel?.text = logglyService.title
+                configCell.detailTextLabel?.text = logglyService.isAuthorized ? EnabledString : TapToSetString
             case .amplitude:
-                let amplitudeService = AnalyticsManager.sharedManager.amplitudeService
+                let amplitudeService = AnalyticsManager.shared.amplitudeService
 
                 configCell.textLabel?.text = amplitudeService.title
-                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? NSLocalizedString("Enabled", comment: "The detail text describing an enabled setting") : TapToSetString
+                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? EnabledString : TapToSetString
             }
 
             return configCell
@@ -476,25 +483,15 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Carb Ratios", comment: "The title of the carb ratios schedule screen")
+                scheduleVC.unit = .gram()
 
                 if let schedule = dataManager.loopManager.carbRatioSchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-
-                    show(scheduleVC, sender: sender)
-                } else {
-                    dataManager.loopManager.carbStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
-                    }
                 }
+
+                show(scheduleVC, sender: sender)
             case .insulinSensitivity:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
 
@@ -620,11 +617,21 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
 
                 show(vc, sender: sender)
-            case .amplitude:
-                let service = AnalyticsManager.sharedManager.amplitudeService
+            case .loggly:
+                let service = dataManager.logger.logglyService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [unowned self] (service) in
-                    AnalyticsManager.sharedManager.amplitudeService = service
+                    self.dataManager.logger.logglyService = service
+
+                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                }
+
+                show(vc, sender: sender)
+            case .amplitude:
+                let service = AnalyticsManager.shared.amplitudeService
+                let vc = AuthenticationViewController(authentication: service)
+                vc.authenticationObserver = { [unowned self] (service) in
+                    AnalyticsManager.shared.amplitudeService = service
 
                     self.tableView.reloadRows(at: [indexPath], with: .none)
                 }
@@ -746,22 +753,22 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 case .basalRate:
                     if let controller = controller as? SingleValueScheduleTableViewController {
                         dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                        AnalyticsManager.sharedManager.didChangeBasalRateSchedule()
+                        AnalyticsManager.shared.didChangeBasalRateSchedule()
                     }
                 case .glucoseTargetRange:
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
                         dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, workoutRange: controller.workoutRange, timeZone: controller.timeZone)
-                        AnalyticsManager.sharedManager.didChangeGlucoseTargetRangeSchedule()
+                        AnalyticsManager.shared.didChangeGlucoseTargetRangeSchedule()
                     }
                 case let row:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {
                         switch row {
                         case .carbRatio:
                             dataManager.loopManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                            AnalyticsManager.sharedManager.didChangeCarbRatioSchedule()
+                            AnalyticsManager.shared.didChangeCarbRatioSchedule()
                         case .insulinSensitivity:
                             dataManager.loopManager.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                            AnalyticsManager.sharedManager.didChangeInsulinSensitivitySchedule()
+                            AnalyticsManager.shared.didChangeInsulinSensitivitySchedule()
                         default:
                             break
                         }

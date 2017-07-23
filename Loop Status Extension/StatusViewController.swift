@@ -26,7 +26,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
-    @IBOutlet weak var glucoseChartContentView: LoopUI.ChartContentView!
+    @IBOutlet weak var glucoseChartContentView: LoopUI.ChartContainerView!
 
     private lazy var charts: StatusChartsManager = {
         let charts = StatusChartsManager(
@@ -185,7 +185,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         if let netBasal = context.netBasal {
-            basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.startDate)
+            basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
         }
 
         if let loop = context.loop {

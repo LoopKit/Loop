@@ -140,27 +140,50 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #pragma clang diagnostic ignored "-Wproperty-attribute-mismatch"
 #pragma clang diagnostic ignored "-Wduplicate-method-arg"
 @class HKUnit;
+@class HKQuantity;
 @class UITableView;
 @class UITableViewCell;
-@class UIStoryboardSegue;
 @class NSBundle;
 @class NSCoder;
 
 SWIFT_CLASS("_TtC7CarbKit27CarbEntryEditViewController")
 @interface CarbEntryEditViewController : UITableViewController
 @property (nonatomic, strong) HKUnit * _Nonnull preferredUnit;
+@property (nonatomic, strong) HKQuantity * _Nonnull maxQuantity;
+/// Entry configuration values. Must be set before presenting.
+@property (nonatomic) NSTimeInterval absorptionTimePickerInterval;
+@property (nonatomic) NSTimeInterval maxAbsorptionTime;
+@property (nonatomic) NSTimeInterval maximumDateFutureInterval;
 - (void)viewDidLoad;
 - (NSInteger)numberOfSectionsInTableView:(UITableView * _Nonnull)tableView SWIFT_WARN_UNUSED_RESULT;
 - (NSInteger)tableView:(UITableView * _Nonnull)tableView numberOfRowsInSection:(NSInteger)section SWIFT_WARN_UNUSED_RESULT;
 - (UITableViewCell * _Nonnull)tableView:(UITableView * _Nonnull)tableView cellForRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nullable)tableView:(UITableView * _Nonnull)tableView titleForFooterInSection:(NSInteger)section SWIFT_WARN_UNUSED_RESULT;
 - (NSIndexPath * _Nullable)tableView:(UITableView * _Nonnull)tableView willSelectRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath SWIFT_WARN_UNUSED_RESULT;
 - (void)tableView:(UITableView * _Nonnull)tableView didSelectRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath;
-- (void)prepareForSegue:(UIStoryboardSegue * _Nonnull)segue sender:(id _Nullable)sender;
+- (BOOL)shouldPerformSegueWithIdentifier:(NSString * _Nonnull)identifier sender:(id _Nullable)sender SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)initWithStyle:(UITableViewStyle)style OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithNibName:(NSString * _Nullable)nibNameOrNil bundle:(NSBundle * _Nullable)nibBundleOrNil OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+@interface CarbEntryEditViewController (SWIFT_EXTENSION(CarbKit))
+@end
+
+
+@interface CarbEntryEditViewController (SWIFT_EXTENSION(CarbKit))
+@end
+
+
+@interface CarbEntryEditViewController (SWIFT_EXTENSION(CarbKit))
+@end
+
+
+@interface CarbEntryEditViewController (SWIFT_EXTENSION(CarbKit))
+@end
+
+@class UIStoryboardSegue;
 
 SWIFT_CLASS("_TtC7CarbKit28CarbEntryTableViewController")
 @interface CarbEntryTableViewController : UITableViewController
@@ -184,11 +207,16 @@ SWIFT_CLASS("_TtC7CarbKit28CarbEntryTableViewController")
 @interface HKQuantitySample (SWIFT_EXTENSION(CarbKit))
 @property (nonatomic, readonly, copy) NSString * _Nullable foodType;
 @property (nonatomic, readonly) BOOL createdByCurrentApp;
-@property (nonatomic, readonly, copy) NSString * _Nullable externalId;
+@property (nonatomic, readonly, copy) NSString * _Nullable externalID;
 @end
 
 
 @interface HKUnit (SWIFT_EXTENSION(CarbKit))
+@end
+
+
+@interface UIInputView (SWIFT_EXTENSION(CarbKit)) <UIInputViewAudioFeedback>
+@property (nonatomic, readonly) BOOL enableInputClicksWhenVisible;
 @end
 
 

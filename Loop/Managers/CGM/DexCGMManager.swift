@@ -109,6 +109,7 @@ final class ShareClientManager: CGMManager {
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     private let transmitter: Transmitter?
+    let logger = DiagnosticLogger.shared!.forCategory("G5CGMManager")
 
     init(transmitterID: String?) {
         if let transmitterID = transmitterID {
@@ -161,10 +162,15 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     // MARK: - TransmitterDelegate
 
     func transmitter(_ transmitter: Transmitter, didError error: Error) {
+        logger.error(error)
         delegate?.cgmManager(self, didUpdateWith: .error(error))
     }
 
     func transmitter(_ transmitter: Transmitter, didRead glucose: Glucose) {
+        if !glucose.state.hasReliableGlucose {
+            logger.error(String(describing: glucose.state))
+        }
+        
         guard glucose != latestReading, let quantity = glucose.glucose else {
             delegate?.cgmManager(self, didUpdateWith: .noData)
             return
@@ -177,6 +183,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     }
 
     func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
+        logger.error("Unknown sensor data: " + data.hexadecimalString)
         // This can be used for protocol discovery, but isn't necessary for normal operation
     }
 }
@@ -253,5 +260,22 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
     func receiver(_ receiver: Receiver, didLogBluetoothEvent event: String) {
         // Uncomment to debug communication
         // NSLog(["event": "\(event)", "collectedAt": NSDateFormatter.ISO8601StrictDateFormatter().stringFromDate(NSDate())])
+    }
+}
+
+extension CalibrationState: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .needCalibration, .needFirstInitialCalibration, .needSecondInitialCalibration:
+            return NSLocalizedString("Sensor needs calibration", comment: "The description of sensor calibration state when sensor needs calibration.")
+        case .ok:
+            return NSLocalizedString("Sensor calibration is OK", comment: "The description of sensor calibration state when sensor calibration is ok.")
+        case .stopped:
+            return NSLocalizedString("Sensor is stopped", comment: "The description of sensor calibration state when sensor sensor is stopped.")
+        case .warmup:
+            return NSLocalizedString("Sensor is warming up", comment: "The description of sensor calibration state when sensor sensor is warming up.")
+        case .unknown(let rawValue):
+            return String(format: NSLocalizedString("Sensor is in unknown state %1$d", comment: "The description of sensor calibration state when raw value is unknown. (1: missing data details)"), rawValue)
+        }
     }
 }

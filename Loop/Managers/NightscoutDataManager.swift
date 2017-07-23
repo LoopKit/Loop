@@ -37,29 +37,49 @@ final class NightscoutDataManager {
             return
         }
 
-        deviceDataManager.loopManager.getLoopState { (_, state) in
+        deviceDataManager.loopManager.getLoopState { (manager, state) in
             var loopError = state.error
-            let recommendation: Double?
+            let recommendedBolus: Double?
 
             do {
-                recommendation = try state.recommendBolus().amount
+                recommendedBolus = try state.recommendBolus().amount
             } catch let error {
-                recommendation = nil
+                recommendedBolus = nil
 
                 if loopError == nil {
                     loopError = error
                 }
             }
 
-            self.uploadLoopStatus(
-                insulinOnBoard: state.insulinOnBoard,
-                carbsOnBoard: state.carbsOnBoard,
-                predictedGlucose: state.predictedGlucose,
-                recommendedTempBasal: state.recommendedTempBasal,
-                recommendedBolus: recommendation,
-                lastTempBasal: state.lastTempBasal,
-                loopError: loopError
-            )
+            let carbsOnBoard = state.carbsOnBoard
+            let predictedGlucose = state.predictedGlucose
+            let recommendedTempBasal = state.recommendedTempBasal
+            let lastTempBasal = state.lastTempBasal
+
+            manager.doseStore.insulinOnBoard(at: Date()) { (result) in
+                let insulinOnBoard: InsulinValue?
+
+                switch result {
+                case .success(let value):
+                    insulinOnBoard = value
+                case .failure(let error):
+                    insulinOnBoard = nil
+
+                    if loopError == nil {
+                        loopError = error
+                    }
+                }
+
+                self.uploadLoopStatus(
+                    insulinOnBoard: insulinOnBoard,
+                    carbsOnBoard: carbsOnBoard,
+                    predictedGlucose: predictedGlucose,
+                    recommendedTempBasal: recommendedTempBasal,
+                    recommendedBolus: recommendedBolus,
+                    lastTempBasal: lastTempBasal,
+                    loopError: loopError
+                )
+            }
         }
     }
     
@@ -106,10 +126,9 @@ final class NightscoutDataManager {
         }
 
         let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal, tempBasal.unit == .unitsPerHour &&
-            lastTempBasalUploaded?.startDate != tempBasal.startDate {
+        if let tempBasal = lastTempBasal, lastTempBasalUploaded?.startDate != tempBasal.startDate {
             let duration = tempBasal.endDate.timeIntervalSince(tempBasal.startDate)
-            loopEnacted = LoopEnacted(rate: tempBasal.value, duration: duration, timestamp: tempBasal.startDate, received:
+            loopEnacted = LoopEnacted(rate: tempBasal.unitsPerHour, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
             lastTempBasalUploaded = tempBasal
         } else {

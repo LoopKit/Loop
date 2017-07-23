@@ -39,7 +39,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
         bolusAmountTextField.becomeFirstResponder()
 
-        AnalyticsManager.sharedManager.didDisplayBolusScreen()
+        AnalyticsManager.shared.didDisplayBolusScreen()
     }
 
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String

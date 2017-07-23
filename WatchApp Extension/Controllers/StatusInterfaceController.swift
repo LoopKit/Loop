@@ -12,7 +12,6 @@ import Foundation
 
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
-    @IBOutlet weak var graphImage: WKInterfaceImage!
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
@@ -74,7 +73,6 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         
         // TODO: Other elements
         statusLabel.setHidden(true)
-        graphImage.setHidden(true)
     }
 
     // MARK: - Menu Items
@@ -87,4 +85,5 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         presentController(withName: BolusInterfaceController.className, context: lastContext?.bolusSuggestion)
     }
 
+    
 }

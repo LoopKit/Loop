@@ -1,12 +1,11 @@
 {
-  "commitish" : "v0.8.0",
   "iOS" : [
     {
-      "hash" : "8568448b3acdbfa1da26b3a87e2b08db5b11e9b6625ccc61e159179f23ea951a",
+      "hash" : "a093bc579bbd7d505080e8bf012bc222d54f207dc5fe3e40aaf7d9bb7c57498a",
       "name" : "xDripG5"
     }
   ],
-  "xcodeVersion" : "Xcode 8.3.2\nBuild version 8E2002",
+  "commitish" : "v0.8.0",
   "watchOS" : [
 
   ],

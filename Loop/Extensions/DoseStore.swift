@@ -26,16 +26,7 @@ extension LoopDataManager {
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:
-                let unit: DoseUnit
-
-                switch bolus.type {
-                case .Normal:
-                    unit = .units
-                case .Square:
-                    unit = .unitsPerHour
-                }
-
-                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: bolus.amount, unit: unit)
+                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: bolus.amount, unit: .units)
             case is SuspendPumpEvent:
                 dose = DoseEntry(suspendDate: event.date)
             case is ResumePumpEvent:
@@ -50,10 +41,14 @@ extension LoopDataManager {
                         type: .tempBasal,
                         startDate: event.date,
                         endDate: event.date.addingTimeInterval(TimeInterval(minutes: Double(temp.duration))),
-                        value: amount.value,
-                        unit: amount.unit
+                        value: amount.unitsPerHour,
+                        unit: .unitsPerHour
                     )
                 }
+            case is BasalProfileStartPumpEvent:
+                break
+            case is RewindPumpEvent:
+                break
             case is PrimePumpEvent:
                 eventType = .prime
             default:

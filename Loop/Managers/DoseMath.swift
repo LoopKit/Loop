@@ -7,12 +7,13 @@
 //
 
 import Foundation
+import CarbKit
 import HealthKit
 import InsulinKit
 import LoopKit
 
 
-struct DoseMath {
+enum DoseMath {
     /// The allowed precision
     static let basalStrokes: Double = 40
 
@@ -115,7 +116,7 @@ struct DoseMath {
         if let lastTempBasal = lastTempBasal, lastTempBasal.unit == .unitsPerHour && lastTempBasal.endDate > date {
             if let determinedRate = rate {
                 // Ignore the dose if the current dose is the same rate and has more than 10 minutes remaining
-                if determinedRate == lastTempBasal.value && lastTempBasal.endDate.timeIntervalSince(date) > TimeInterval(minutes: 11) {
+                if determinedRate == lastTempBasal.unitsPerHour && lastTempBasal.endDate.timeIntervalSince(date) > TimeInterval(minutes: 11) {
                     rate = nil
                 }
             } else {
