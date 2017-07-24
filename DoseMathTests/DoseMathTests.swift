@@ -27,14 +27,15 @@ extension XCTestCase {
 public typealias JSONDictionary = [String: Any]
 
 
-extension DateFormatter {
-    static func ISO8601LocalTimeDateFormatter() -> Self {
-        let dateFormatter = self.init()
+extension ISO8601DateFormatter {
+    static func localTimeDateFormatter() -> Self {
+        let formatter = self.init()
 
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.formatOptions = .withInternetDateTime
+        formatter.formatOptions.subtract(.withTimeZone)
+        formatter.timeZone = .current
 
-        return dateFormatter
+        return formatter
     }
 }
 
@@ -56,7 +57,7 @@ class RecommendTempBasalTests: XCTestCase {
 
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
-        let dateFormatter = DateFormatter.ISO8601LocalTimeDateFormatter()
+        let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
 
         return fixture.map {
             return GlucoseFixtureValue(
@@ -460,7 +461,7 @@ class RecommendBolusTests: XCTestCase {
 
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
-        let dateFormatter = DateFormatter.ISO8601LocalTimeDateFormatter()
+        let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
 
         return fixture.map {
             return GlucoseFixtureValue(

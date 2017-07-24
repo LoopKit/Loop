@@ -192,7 +192,7 @@ extension StatusChartsManager {
         let dateFormatter = self.dateFormatter
         let decimalFormatter = self.doseFormatter
         let unit = glucoseUnit.unitDivided(by: .minute())
-        let unitString = unit.unitString
+        let unitString = String(format: NSLocalizedString("%1$@/min", comment: "Format string describing glucose units per minute (1: glucose unit string)"), glucoseUnit.glucoseUnitDisplayString)
 
         var insulinCounteractionEffectPoints: [ChartPoint] = []
         var allCarbEffectPoints: [ChartPoint] = []
