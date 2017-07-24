@@ -645,14 +645,6 @@ public final class StatusChartsManager {
         }
     }
 
-    /// The minimum range to display for COB values.
-    private var carbEffectDisplayRangePoints: [ChartPoint] = [0, 1].map {
-        return ChartPoint(
-            x: ChartAxisValue(scalar: 0),
-            y: ChartAxisValueInt($0)
-        )
-    }
-
     private var carbEffectChart: Chart?
 
     private var carbEffectChartCache: ChartPointsTouchHighlightLayerViewCache?
@@ -672,6 +664,14 @@ public final class StatusChartsManager {
     private func generateCarbEffectChartWithFrame(_ frame: CGRect) -> Chart? {
         guard let xAxisModel = xAxisModel, let xAxisValues = xAxisValues else {
             return nil
+        }
+
+        /// The minimum range to display for carb effect values.
+        let carbEffectDisplayRangePoints: [ChartPoint] = [0, glucoseUnit.glucoseUnitYAxisSegmentSize / 25.0].map {
+            return ChartPoint(
+                x: ChartAxisValue(scalar: 0),
+                y: ChartAxisValueDouble($0)
+            )
         }
 
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(carbEffectPoints + allCarbEffectPoints + carbEffectDisplayRangePoints,
