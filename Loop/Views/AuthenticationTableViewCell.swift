@@ -27,6 +27,7 @@ final class AuthenticationTableViewCell: UITableViewCell, NibLoadable {
         super.prepareForReuse()
 
         textField.delegate = nil
+        credentialOptionPicker = nil
     }
 
     var credentialOptionPicker: CredentialOptionPicker? {
