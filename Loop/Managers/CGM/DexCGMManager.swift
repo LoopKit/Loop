@@ -34,6 +34,10 @@ class DexCGMManager: CGMManager {
         return shareManager?.sensorState
     }
 
+    var managedDataInterval: TimeInterval? {
+        return shareManager?.managedDataInterval
+    }
+
     fileprivate var shareManager: ShareClientManager? = ShareClientManager()
 
     var device: HKDevice? {
@@ -53,11 +57,13 @@ class DexCGMManager: CGMManager {
 final class ShareClientManager: CGMManager {
     weak var delegate: CGMManagerDelegate?
 
-    var providesBLEHeartbeat = false
+    let providesBLEHeartbeat = false
 
     var sensorState: SensorDisplayable? {
         return latestBackfill
     }
+
+    let managedDataInterval: TimeInterval? = nil
 
     private var latestBackfill: ShareGlucose?
 
@@ -127,6 +133,14 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
 
     override var sensorState: SensorDisplayable? {
         return latestReading ?? super.sensorState
+    }
+
+    override var managedDataInterval: TimeInterval? {
+        if let transmitter = transmitter, transmitter.passiveModeEnabled {
+            return .hours(3)
+        }
+
+        return super.managedDataInterval
     }
 
     private var latestReading: Glucose? {
@@ -200,6 +214,11 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
 
     override var sensorState: SensorDisplayable? {
         return latestReading ?? super.sensorState
+    }
+
+
+    override var managedDataInterval: TimeInterval? {
+        return .hours(3)
     }
 
     private var latestReading: GlucoseG4? {

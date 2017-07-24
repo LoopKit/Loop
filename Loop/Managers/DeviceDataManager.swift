@@ -473,6 +473,7 @@ final class DeviceDataManager {
     private func setupCGM() {
         cgmManager = cgm?.createManager()
         cgmManager?.delegate = self
+        loopManager.glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
 
         /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
         /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and
