@@ -163,9 +163,9 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         }
                         reloadGroup.leave()
                     }
-                }
 
-                carbsOnBoard = state.carbsOnBoard
+                    carbsOnBoard = state.carbsOnBoard
+                }
 
                 if refreshContext.remove(.targets) != nil {
                     if let schedule = manager.settings.glucoseTargetRangeSchedule {
@@ -216,10 +216,10 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                     self.carbTotal = carbTotal
                 }
 
+                self.carbsOnBoard = carbsOnBoard
+
                 self.tableView.reloadSections(IndexSet(integer: Section.entries.rawValue), with: .fade)
             }
-
-            self.carbsOnBoard = carbsOnBoard
 
             if let cell = self.tableView.cellForRow(at: IndexPath(row: 0, section: Section.totals.rawValue)) as? HeaderValuesTableViewCell {
                 self.updateCell(cell)
@@ -381,12 +381,25 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
     private func updateCell(_ cell: HeaderValuesTableViewCell) {
         let unit = HKUnit.gram()
 
-        if let carbsOnBoard = carbsOnBoard {
+        if let carbsOnBoard = carbsOnBoard, carbsOnBoard.quantity.doubleValue(for: unit) > 0 {
             cell.COBDateLabel.text = String(
                 format: NSLocalizedString("at %@", comment: "Format fragment for a specific time"),
                 timeFormatter.string(from: carbsOnBoard.startDate)
             )
             cell.COBValueLabel.text = carbFormatter.string(from: NSNumber(value: carbsOnBoard.quantity.doubleValue(for: unit)))
+
+            // Warn the user if the carbsOnBoard value isn't recent
+            let textColor: UIColor
+            switch carbsOnBoard.startDate.timeIntervalSinceNow {
+            case let t where t < .minutes(-30):
+                textColor = .staleColor
+            case let t where t < .minutes(-15):
+                textColor = .agingColor
+            default:
+                textColor = .secondaryLabelColor
+            }
+
+            cell.COBDateLabel.textColor = textColor
         } else {
             cell.COBDateLabel.text = nil
             cell.COBValueLabel.text = carbFormatter.string(from: NSNumber(value: 0))
