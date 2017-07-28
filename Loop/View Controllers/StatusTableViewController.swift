@@ -44,7 +44,7 @@ final class StatusTableViewController: ChartsTableViewController {
         let notificationCenter = NotificationCenter.default
 
         notificationObservers += [
-            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { note in
+            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [unowned self] note in
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
@@ -55,7 +55,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     case .carbs?:
                         self.refreshContext.update(with: .carbs)
                     case .glucose?:
-                        self.refreshContext.update(with: .glucose)
+                        self.refreshContext.update(with: [.glucose, .carbs])
                     case .tempBasal?:
                         self.refreshContext.update(with: .insulin)
                     }
@@ -64,7 +64,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     self.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { _ in
+            notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { [unowned self] _ in
                 DispatchQueue.main.async {
                     self.hudView.loopCompletionHUD.loopInProgress = true
                 }
@@ -101,7 +101,7 @@ final class StatusTableViewController: ChartsTableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        AnalyticsManager.sharedManager.didDisplayStatusScreen()
+        AnalyticsManager.shared.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -162,8 +162,9 @@ final class StatusTableViewController: ChartsTableViewController {
         chartStartDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
         let reloadGroup = DispatchGroup()
-        var newLastLoopCompleted: Date?
-        var newLastTempBasal: DoseEntry?
+        var lastLoopCompleted: Date?
+        var lastReservoirValue: ReservoirValue?
+        var lastTempBasal: DoseEntry?
         var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
 
         reloadGroup.enter()
@@ -206,8 +207,8 @@ final class StatusTableViewController: ChartsTableViewController {
                     newRecommendedTempBasal = state.recommendedTempBasal
                 }
 
-                newLastTempBasal = state.lastTempBasal
-                newLastLoopCompleted = state.lastLoopCompleted
+                lastTempBasal = state.lastTempBasal
+                lastLoopCompleted = state.lastLoopCompleted
 
                 if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                     self.eventualGlucoseDescription = String(describing: lastPoint)
@@ -220,6 +221,14 @@ final class StatusTableViewController: ChartsTableViewController {
                         self.charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
                     } else {
                         self.charts.targetPointsCalculator = nil
+                    }
+                }
+
+                if self.refreshContext.remove(.carbs) != nil {
+                    reloadGroup.enter()
+                    manager.carbStore.getCarbsOnBoardValues(start: self.chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (values) in
+                        self.charts.setCOBValues(values)
+                        reloadGroup.leave()
                     }
                 }
 
@@ -268,28 +277,18 @@ final class StatusTableViewController: ChartsTableViewController {
 
                 reloadGroup.leave()
             }
-        }
 
-        if refreshContext.remove(.carbs) != nil {
             reloadGroup.enter()
-            deviceManager.loopManager.carbStore.getCarbsOnBoardValues(startDate: chartStartDate) { (values, error) -> Void in
-                if let error = error {
-                    self.deviceManager.logger.addError(error, fromSource: "CarbStore")
-                    self.refreshContext.update(with: .carbs)
+            deviceManager.loopManager.doseStore.getReservoirValues(since: Date(timeIntervalSinceNow: .minutes(-30))) { (result) in
+                switch result {
+                case .success(let values):
+                    lastReservoirValue = values.first
+                case .failure:
+                    self.refreshContext.update(with: .insulin)
                 }
-
-                self.charts.setCOBValues(values)
 
                 reloadGroup.leave()
             }
-        }
-
-        if let reservoir = deviceManager.loopManager.doseStore.lastReservoirValue {
-            if let capacity = deviceManager.pumpState?.pumpModel?.reservoirCapacity {
-                hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
-            }
-            
-            hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
         }
 
         if let level = deviceManager.pumpBatteryChargeRemaining {
@@ -309,21 +308,29 @@ final class StatusTableViewController: ChartsTableViewController {
                 )
             }
 
+            if let reservoir = lastReservoirValue {
+                if let capacity = self.deviceManager.pumpState?.pumpModel?.reservoirCapacity {
+                    self.hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+                }
+
+                self.hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+            }
+
             // Loop completion HUD
-            self.hudView.loopCompletionHUD.lastLoopCompleted = newLastLoopCompleted
+            self.hudView.loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
 
             // Net basal rate HUD
-            let date = newLastTempBasal?.startDate ?? Date()
+            let date = lastTempBasal?.startDate ?? Date()
             if let scheduledBasal = self.deviceManager.loopManager.basalRateSchedule?.between(start: date,
                                                                                 end: date).first
             {
                 let netBasal = NetBasal(
-                    lastTempBasal: newLastTempBasal,
+                    lastTempBasal: lastTempBasal,
                     maxBasal: self.deviceManager.loopManager.settings.maximumBasalRatePerHour,
                     scheduledBasal: scheduledBasal
                 )
 
-                self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.startDate)
+                self.hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.start)
             }
 
             // Fetch the current IOB subtitle
@@ -588,7 +595,7 @@ final class StatusTableViewController: ChartsTableViewController {
             case .iob, .dose:
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
             case .cob:
-                performSegue(withIdentifier: CarbEntryTableViewController.className, sender: indexPath)
+                performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {
@@ -618,15 +625,18 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - Actions
 
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if identifier == CarbEntryEditViewController.className {
+        switch identifier {
+        case CarbEntryEditViewController.className, CarbAbsorptionViewController.className:
             if deviceManager.loopManager.carbStore.authorizationRequired {
                 deviceManager.loopManager.carbStore.authorize { (success, error) in
                     if success {
-                        self.performSegue(withIdentifier: CarbEntryEditViewController.className, sender: sender)
+                        self.performSegue(withIdentifier: identifier, sender: sender)
                     }
                 }
                 return false
             }
+        default:
+            break
         }
 
         return true
@@ -642,6 +652,9 @@ final class StatusTableViewController: ChartsTableViewController {
         }
 
         switch targetViewController {
+        case let vc as CarbAbsorptionViewController:
+            vc.deviceManager = deviceManager
+            vc.hidesBottomBarWhenPushed = true
         case let vc as CarbEntryTableViewController:
             vc.carbStore = deviceManager.loopManager.carbStore
             vc.hidesBottomBarWhenPushed = true
@@ -652,35 +665,10 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
-            self.deviceManager.loopManager.getLoopState { (manager, state) in
-                let maximumBolus = manager.settings.maximumBolus
-
-                let activeInsulin = state.insulinOnBoard?.value
-                let activeCarbohydrates = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
-                let bolusRecommendation: BolusRecommendation?
-
-                if let recommendation = sender as? BolusRecommendation {
-                    bolusRecommendation = recommendation
-                } else {
-                    do {
-                        bolusRecommendation = try state.recommendBolus()
-                    } catch let error {
-                        bolusRecommendation = nil
-                        self.deviceManager.logger.addError(error, fromSource: "Bolus")
-                    }
-                }
-
-                DispatchQueue.main.async {
-                    if let maxBolus = maximumBolus {
-                        vc.maxBolus = maxBolus
-                    }
-
-                    vc.glucoseUnit = self.charts.glucoseUnit
-                    vc.activeInsulin = activeInsulin
-                    vc.activeCarbohydrates = activeCarbohydrates
-                    vc.bolusRecommendation = bolusRecommendation
-                }
-            }
+            vc.configureWithLoopManager(self.deviceManager.loopManager,
+                recommendation: sender as? BolusRecommendation,
+                glucoseUnit: self.charts.glucoseUnit
+            )
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
         case let vc as SettingsTableViewController:
@@ -694,22 +682,24 @@ final class StatusTableViewController: ChartsTableViewController {
     ///
     /// - parameter segue: The unwind segue
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {
-        if let carbVC = segue.source as? CarbEntryEditViewController, let updatedEntry = carbVC.updatedCarbEntry {
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let recommendation):
-                        if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
-                            self.bolusState = .recommended
-                            self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
-                        }
-                    case .failure(let error):
-                        // Ignore bolus wizard errors
-                        if error is CarbStore.CarbStoreError {
-                            self.presentAlertController(with: error)
-                        } else {
-                            self.deviceManager.logger.addError(error, fromSource: "Bolus")
-                        }
+        guard let carbVC = segue.source as? CarbEntryEditViewController, let updatedEntry = carbVC.updatedCarbEntry else {
+            return
+        }
+
+        deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let recommendation):
+                    if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
+                        self.bolusState = .recommended
+                        self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
+                    }
+                case .failure(let error):
+                    // Ignore bolus wizard errors
+                    if error is CarbStore.CarbStoreError {
+                        self.presentAlertController(with: error)
+                    } else {
+                        self.deviceManager.logger.addError(error, fromSource: "Bolus")
                     }
                 }
             }

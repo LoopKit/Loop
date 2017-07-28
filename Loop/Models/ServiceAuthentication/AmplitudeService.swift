@@ -10,7 +10,7 @@ import Foundation
 import Amplitude
 
 
-struct AmplitudeService: ServiceAuthentication {
+class AmplitudeService: ServiceAuthentication {
     var credentials: [ServiceCredential]
 
     let title: String = NSLocalizedString("Amplitude", comment: "The title of the Amplitude service")
@@ -37,7 +37,7 @@ struct AmplitudeService: ServiceAuthentication {
 
     var isAuthorized: Bool = true
 
-    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+    func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let APIKey = APIKey else {
             isAuthorized = false
             completion(false, nil)
@@ -52,9 +52,23 @@ struct AmplitudeService: ServiceAuthentication {
         completion(true, nil)
     }
 
-    mutating func reset() {
-        credentials[0].value = nil
+    func reset() {
+        credentials[0].reset()
         isAuthorized = false
         client = nil
+    }
+}
+
+
+private let AmplitudeAPIKeyService = "AmplitudeAPIKey"
+
+
+extension KeychainManager {
+    func setAmplitudeAPIKey(_ key: String?) throws {
+        try replaceGenericPassword(key, forService: AmplitudeAPIKeyService)
+    }
+
+    func getAmplitudeAPIKey() -> String? {
+        return try? getGenericPasswordForService(AmplitudeAPIKeyService)
     }
 }

@@ -25,7 +25,8 @@ struct LoopContext {
 struct NetBasalContext {
     let rate: Double
     let percentage: Double
-    let startDate: Date
+    let start: Date
+    let end: Date
 }
 
 struct SensorDisplayableContext: SensorDisplayable {
@@ -122,7 +123,8 @@ extension NetBasalContext: RawRepresentable {
         return [
             "rate": rate,
             "percentage": percentage,
-            "startDate": startDate
+            "start": start,
+            "end": end
         ]
     }
 
@@ -130,14 +132,16 @@ extension NetBasalContext: RawRepresentable {
         guard
             let rate       = rawValue["rate"] as? Double,
             let percentage = rawValue["percentage"] as? Double,
-            let startDate  = rawValue["startDate"] as? Date
+            let start      = rawValue["start"] as? Date,
+            let end        = rawValue["end"] as? Date
         else {
             return nil
         }
 
         self.rate = rate
         self.percentage = percentage
-        self.startDate = startDate
+        self.start = start
+        self.end = end
     }
 }
 

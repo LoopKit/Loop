@@ -1,5 +1,5 @@
 //
-//  ChartContentView.swift
+//  ChartContainerView.swift
 //  Loop
 //
 //  Created by Nate Racklyeft on 9/14/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class ChartContentView: UIView {
+public class ChartContainerView: UIView {
 
     override public func layoutSubviews() {
         super.layoutSubviews()

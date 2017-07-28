@@ -11,7 +11,7 @@ import NightscoutUploadKit
 
 
 // Encapsulates a Nightscout site and its authentication
-struct NightscoutService: ServiceAuthentication {
+class NightscoutService: ServiceAuthentication {
     var credentials: [ServiceCredential]
 
     let title: String = NSLocalizedString("Nightscout", comment: "The title of the Nightscout service")
@@ -40,8 +40,9 @@ struct NightscoutService: ServiceAuthentication {
     // The uploader instance, if credentials are present
     private(set) var uploader: NightscoutUploader? {
         didSet {
+            let logger = DiagnosticLogger.shared?.forCategory("NightscoutService")
             uploader?.errorHandler = { (error: Error, context: String) -> Void in
-                print("Error \(error), while \(context)")
+                logger?.error("Error \(error), while \(context)")
             }
         }
     }
@@ -60,7 +61,7 @@ struct NightscoutService: ServiceAuthentication {
 
     var isAuthorized: Bool = true
 
-    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+    func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let siteURL = siteURL, let APISecret = APISecret else {
             isAuthorized = false
             completion(false, nil)
@@ -74,9 +75,9 @@ struct NightscoutService: ServiceAuthentication {
         self.uploader = uploader
     }
 
-    mutating func reset() {
-        credentials[0].value = nil
-        credentials[1].value = nil
+    func reset() {
+        credentials[0].reset()
+        credentials[1].reset()
         isAuthorized = false
         uploader = nil
     }

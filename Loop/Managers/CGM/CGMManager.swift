@@ -43,6 +43,9 @@ protocol CGMManager: CustomDebugStringConvertible {
     /// Whether the device is capable of waking the app
     var providesBLEHeartbeat: Bool { get }
 
+    /// The length of time to keep samples in HealthKit before removal. Return nil to never remove samples.
+    var managedDataInterval: TimeInterval? { get }
+
     var sensorState: SensorDisplayable? { get }
 
     /// The representation of the device for use in HealthKit

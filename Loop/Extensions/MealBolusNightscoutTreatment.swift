@@ -14,6 +14,6 @@ import HealthKit
 extension MealBolusNightscoutTreatment {
     public convenience init(carbEntry: CarbEntry) {
         let carbGrams = carbEntry.quantity.doubleValue(for: HKUnit.gram())
-        self.init(timestamp: carbEntry.startDate, enteredBy: "loop://\(UIDevice.current.name)", id: carbEntry.externalId, carbs: lround(carbGrams), absorptionTime: carbEntry.absorptionTime)
+        self.init(timestamp: carbEntry.startDate, enteredBy: "loop://\(UIDevice.current.name)", id: carbEntry.externalID, carbs: lround(carbGrams), absorptionTime: carbEntry.absorptionTime, foodType: carbEntry.foodType)
     }
 }

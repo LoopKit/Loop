@@ -10,9 +10,11 @@ import UIKit
 
 
 extension UIColor {
-    @nonobjc static let tintColor = UIColor.HIGOrangeColor()
+    @nonobjc static let tintColor = UIColor(red: 76 / 255, green: 217 / 255, blue: 100 / 255, alpha: 1)
 
-    @nonobjc static let darkTintColor = UIColor.HIGOrangeColorDark()
+    @nonobjc static let carbsColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
+
+    @nonobjc static let darkCarbsColor = UIColor.carbsColor.withAlphaComponent(0.14)
 
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color

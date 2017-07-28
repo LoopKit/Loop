@@ -13,12 +13,14 @@ import LoopKit
 struct NetBasal {
     let rate: Double
     let percent: Double
-    let startDate: Date
+    let start: Date
+    let end: Date
     
     init(lastTempBasal: DoseEntry?, maxBasal: Double?, scheduledBasal: AbsoluteScheduleValue<Double>) {
         if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > Date(), let maxBasal = maxBasal {
-            rate = lastTempBasal.value - scheduledBasal.value
-            startDate = lastTempBasal.startDate
+            rate = lastTempBasal.unitsPerHour - scheduledBasal.value
+            start = lastTempBasal.startDate
+            end = lastTempBasal.endDate
             
             if rate < 0 {
                 percent = rate / scheduledBasal.value
@@ -30,9 +32,11 @@ struct NetBasal {
             percent = 0
             
             if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > scheduledBasal.startDate {
-                startDate = lastTempBasal.endDate
+                start = lastTempBasal.endDate
+                end = scheduledBasal.endDate
             } else {
-                startDate = scheduledBasal.startDate
+                start = scheduledBasal.startDate
+                end = scheduledBasal.endDate
             }
         }
     }

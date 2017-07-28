@@ -12,11 +12,13 @@ import MinimedKit
 
 
 final class EnliteCGMManager: CGMManager {
-    var providesBLEHeartbeat = false
+    let providesBLEHeartbeat = false
 
     weak var delegate: CGMManagerDelegate?
 
     var sensorState: SensorDisplayable?
+
+    let managedDataInterval: TimeInterval? = nil
 
     func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
         guard let device = deviceManager.rileyLinkManager.firstConnectedDevice?.ops

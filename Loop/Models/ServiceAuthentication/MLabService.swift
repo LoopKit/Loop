@@ -12,7 +12,7 @@ import Foundation
 private let mLabAPIHost = URL(string: "https://api.mongolab.com/api/1/databases")!
 
 
-struct MLabService: ServiceAuthentication {
+class MLabService: ServiceAuthentication {
     var credentials: [ServiceCredential]
 
     let title: String = NSLocalizedString("mLab", comment: "The title of the mLab service")
@@ -50,7 +50,7 @@ struct MLabService: ServiceAuthentication {
 
     var isAuthorized: Bool = false
 
-    mutating func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+    func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let APIURL = APIURLForCollection("") else {
             completion(false, nil)
             return
@@ -66,9 +66,9 @@ struct MLabService: ServiceAuthentication {
         }).resume()
     }
 
-    mutating func reset() {
-        credentials[0].value = nil
-        credentials[1].value = nil
+    func reset() {
+        credentials[0].reset()
+        credentials[1].reset()
         isAuthorized = false
     }
 

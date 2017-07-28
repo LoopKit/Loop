@@ -59,6 +59,15 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
         }
     }
 
+    var credentials: [ServiceCredential] {
+        switch state {
+        case .authorized:
+            return authentication.credentials.filter({ !$0.isSecret })
+        default:
+            return authentication.credentials
+        }
+    }
+
     init(authentication: T) {
         self.authentication = authentication
 
@@ -89,12 +98,7 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .credentials:
-            switch state {
-            case .authorized:
-                return authentication.credentials.filter({ !$0.isSecret }).count
-            default:
-                return authentication.credentials.count
-            }
+            return credentials.count
         case .button:
             return 1
         }
@@ -126,15 +130,22 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
         case .credentials:
             let cell = tableView.dequeueReusableCell(withIdentifier: AuthenticationTableViewCell.className, for: indexPath) as! AuthenticationTableViewCell
 
-            let credential = authentication.credentials[indexPath.row]
+            let credentials = self.credentials
+            let credential = credentials[indexPath.row]
 
             cell.titleLabel.text = credential.title
-            cell.textField.tag = indexPath.row
             cell.textField.keyboardType = credential.keyboardType
             cell.textField.isSecureTextEntry = credential.isSecret
-            cell.textField.returnKeyType = (indexPath.row < authentication.credentials.count - 1) ? .next : .done
+            cell.textField.returnKeyType = (indexPath.row < credentials.count - 1) ? .next : .done
             cell.textField.text = credential.value
             cell.textField.placeholder = credential.placeholder ?? NSLocalizedString("Required", comment: "The default placeholder string for a credential")
+
+            if let options = credential.options {
+                let picker = CredentialOptionPicker(options: options)
+                picker.value = credential.value
+
+                cell.credentialOptionPicker = picker
+            }
 
             cell.textField.delegate = self
 
@@ -149,7 +160,7 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
         }
     }
 
-    private func validate() {
+    fileprivate func validate() {
         state = .verifying
     }
 
@@ -173,7 +184,16 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
     // MARK: - UITextFieldDelegate
 
     func textFieldDidEndEditing(_ textField: UITextField) {
-        authentication.credentials[textField.tag].value = textField.text
+        let point = tableView.convert(textField.frame.origin, from: textField.superview)
+
+        guard case .unauthorized = state,
+            let indexPath = tableView.indexPathForRow(at: point),
+            let cell = tableView.cellForRow(at: IndexPath(row: indexPath.row, section: indexPath.section)) as? AuthenticationTableViewCell
+        else {
+            return
+        }
+
+        authentication.credentials[indexPath.row].value = cell.value
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -190,6 +210,10 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
         }
 
         return true
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        return textField.inputView == nil
     }
 }
 

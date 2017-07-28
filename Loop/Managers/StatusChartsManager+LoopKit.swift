@@ -84,17 +84,17 @@ extension StatusChartsManager {
         var allDosePoints = [ChartPoint]()
 
         for entry in doseEntries {
-            switch entry.unit {
-            case .unitsPerHour:
+            switch entry.endDate.timeIntervalSince(entry.startDate) {
+            case let time where time > 0:
                 // TODO: Display the DateInterval
                 let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                 let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
                 let zero = ChartAxisValueInt(0)
-                let value = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U/hour", formatter: doseFormatter)
+                let value = ChartAxisValueDoubleLog(actualDouble: entry.unitsPerHour, unitString: "U/hour", formatter: doseFormatter)
 
                 let valuePoints: [ChartPoint]
 
-                if entry.value != 0 {
+                if entry.unitsPerHour != 0 {
                     valuePoints = [
                         ChartPoint(x: startX, y: value),
                         ChartPoint(x: endX, y: value)
@@ -110,13 +110,15 @@ extension StatusChartsManager {
                 ]
 
                 allDosePoints += valuePoints
-            case .units:
-                let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
-                let y = ChartAxisValueDoubleLog(actualDouble: entry.value, unitString: "U", formatter: doseFormatter)
+            default:
+                if entry.type == .bolus && entry.units > 0 {
+                    let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
+                    let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
 
-                let point = ChartPoint(x: x, y: y)
-                bolusDosePoints.append(point)
-                allDosePoints.append(point)
+                    let point = ChartPoint(x: x, y: y)
+                    bolusDosePoints.append(point)
+                    allDosePoints.append(point)
+                }
             }
         }
 
@@ -142,5 +144,83 @@ extension StatusChartsManager {
                 y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: unit), unitString: unitString, formatter: integerFormatter)
             )
         }
+    }
+
+    /// Convert an array of GlucoseEffects (as glucose values) into glucose effect velocity (glucose/min) for charting
+    ///
+    /// - Parameter effects: A timeline of glucose values representing glucose change
+    func setCarbEffects(_ effects: [GlucoseEffect]) {
+        let dateFormatter = self.dateFormatter
+        let decimalFormatter = self.doseFormatter
+        let unit = glucoseUnit.unitDivided(by: .minute())
+        let unitString = unit.unitString
+
+        var lastDate = effects.first?.endDate
+        var lastValue = effects.first?.quantity.doubleValue(for: glucoseUnit)
+        let minuteInterval = 5.0
+
+        var carbEffectPoints = [ChartPoint]()
+
+        let zero = ChartAxisValueInt(0)
+
+        for effect in effects.dropFirst() {
+            let value = effect.quantity.doubleValue(for: glucoseUnit)
+            let valuePerMinute = (value - lastValue!) / minuteInterval
+            lastValue = value
+
+            let startX = ChartAxisValueDate(date: lastDate!, formatter: dateFormatter)
+            let endX = ChartAxisValueDate(date: effect.endDate, formatter: dateFormatter)
+            lastDate = effect.endDate
+
+            let valueY = ChartAxisValueDoubleUnit(valuePerMinute, unitString: unitString, formatter: decimalFormatter)
+
+            carbEffectPoints += [
+                ChartPoint(x: startX, y: zero),
+                ChartPoint(x: startX, y: valueY),
+                ChartPoint(x: endX, y: valueY),
+                ChartPoint(x: endX, y: zero)
+            ]
+        }
+
+        self.carbEffectPoints = carbEffectPoints
+    }
+
+    /// Charts glucose effect velocity
+    ///
+    /// - Parameter effects: A timeline of glucose velocity values
+    func setInsulinCounteractionEffects(_ effects: [GlucoseEffectVelocity]) {
+        let dateFormatter = self.dateFormatter
+        let decimalFormatter = self.doseFormatter
+        let unit = glucoseUnit.unitDivided(by: .minute())
+        let unitString = String(format: NSLocalizedString("%1$@/min", comment: "Format string describing glucose units per minute (1: glucose unit string)"), glucoseUnit.glucoseUnitDisplayString)
+
+        var insulinCounteractionEffectPoints: [ChartPoint] = []
+        var allCarbEffectPoints: [ChartPoint] = []
+
+        let zero = ChartAxisValueInt(0)
+
+        for effect in effects {
+            let startX = ChartAxisValueDate(date: effect.startDate, formatter: dateFormatter)
+            let endX = ChartAxisValueDate(date: effect.endDate, formatter: dateFormatter)
+            let value = ChartAxisValueDoubleUnit(effect.quantity.doubleValue(for: unit), unitString: unitString, formatter: decimalFormatter)
+
+            guard value.scalar != 0 else {
+                continue
+            }
+
+            let valuePoint = ChartPoint(x: endX, y: value)
+
+            insulinCounteractionEffectPoints += [
+                ChartPoint(x: startX, y: zero),
+                ChartPoint(x: startX, y: value),
+                valuePoint,
+                ChartPoint(x: endX, y: zero)
+            ]
+
+            allCarbEffectPoints.append(valuePoint)
+        }
+
+        self.insulinCounteractionEffectPoints = insulinCounteractionEffectPoints
+        self.allCarbEffectPoints = allCarbEffectPoints
     }
 }
