@@ -68,8 +68,8 @@ final class LoopDataManager {
         )
         
         // Novolog published curve fit: actionDuration = 360, peak = 75
-        // Child rapid-acting: actionDuration = 360, peak = 55
-        // Fiasp: actionDuration = 300, peak = 55
+        // Child rapid-acting: actionDuration = 300, peak = 60
+        // Fiasp: actionDuration = 360, peak = 55
         let insulinModel = ExponentialInsulinModel(actionDuration: TimeInterval(minutes: 360), peakActivityTime: TimeInterval(minutes: 75))
 
         doseStore = DoseStore(
