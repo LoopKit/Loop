@@ -66,9 +66,14 @@ final class LoopDataManager {
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
+        
+        // Novolog published curve fit: actionDuration = 360, peak = 75
+        // Child rapid-acting: actionDuration = 300, peak = 60
+        // Fiasp: actionDuration = 360, peak = 55
+        let insulinModel = ExponentialInsulinModel(actionDuration: TimeInterval(minutes: 360), peakActivityTime: TimeInterval(minutes: 75))
 
         doseStore = DoseStore(
-            insulinActionDuration: insulinActionDuration,
+            insulinModel: insulinModel,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -138,11 +143,11 @@ final class LoopDataManager {
     /// - Returns: True if the override was set
     @discardableResult
     func enableWorkoutMode(until endDate: Date) -> Bool {
-        guard let glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule else {
+        guard settings.glucoseTargetRangeSchedule != nil else {
             return false
         }
 
-        _ = glucoseTargetRangeSchedule.setWorkoutOverride(until: endDate)
+        _ = settings.glucoseTargetRangeSchedule!.setWorkoutOverride(until: endDate)
 
         notify(forChange: .preferences)
 
@@ -163,7 +168,8 @@ final class LoopDataManager {
         }
         set {
             let oldValue = doseStore.insulinActionDuration
-            doseStore.insulinActionDuration = newValue
+            // Disable this; it will set insulin model back to walsh
+            //doseStore.insulinActionDuration = newValue
 
             UserDefaults.standard.insulinActionDuration = newValue
 
