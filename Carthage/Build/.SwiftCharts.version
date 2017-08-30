@@ -1,7 +1,7 @@
 {
   "iOS" : [
     {
-      "hash" : "d6ddb49e6f1c8abb58516b6c4334e9458a8d4d3e3147d0b1489a034a92ac0741",
+      "hash" : "7c4f3d8885422c0005481354a76354687151e14642e93274c215557679cff01c",
       "name" : "SwiftCharts"
     }
   ],
@@ -11,7 +11,7 @@
   ],
   "tvOS" : [
     {
-      "hash" : "43eb1be1f543f40d6899617161952dac59688ac4ab472068d2edba8a35642cb0",
+      "hash" : "d7f87a1ee73907bd59d57b51e9c0421306c711bfc84ae92e5bf85f8a22822af0",
       "name" : "SwiftCharts"
     }
   ],
