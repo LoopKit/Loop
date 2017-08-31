@@ -267,8 +267,8 @@ final class DeviceDataManager {
 
         device.ops?.getHistoryEvents(since: startDate) { (result) in
             switch result {
-            case let .success(events, _):
-                self.loopManager.addPumpEvents(events) { (error) in
+            case let .success(events, model):
+                self.loopManager.addPumpEvents(events, from: model) { (error) in
                     if let error = error {
                         self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
                     }
