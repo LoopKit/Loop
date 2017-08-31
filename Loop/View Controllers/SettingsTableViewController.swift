@@ -558,7 +558,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.workoutRange = schedule.workoutRange
+                    scheduleVC.overrideRanges = schedule.overrideRanges
 
                     show(scheduleVC, sender: sender)
                 } else {
@@ -802,7 +802,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     }
                 case .glucoseTargetRange:
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                        dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, workoutRange: controller.workoutRange, timeZone: controller.timeZone)
+                        dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
                         AnalyticsManager.shared.didChangeGlucoseTargetRangeSchedule()
                     }
                 case let row:

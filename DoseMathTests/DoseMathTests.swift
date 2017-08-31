@@ -82,7 +82,7 @@ class RecommendTempBasalTests: XCTestCase {
     }
 
     var glucoseTargetRange: GlucoseRangeSchedule {
-        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
+        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], overrideRanges: [:])!
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {
@@ -486,7 +486,7 @@ class RecommendBolusTests: XCTestCase {
     }
 
     var glucoseTargetRange: GlucoseRangeSchedule {
-        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], workoutRange: nil)!
+        return GlucoseRangeSchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: 90, maxValue: 120))], overrideRanges: [:])!
     }
 
     var insulinSensitivitySchedule: InsulinSensitivitySchedule {

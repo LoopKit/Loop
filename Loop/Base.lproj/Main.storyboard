@@ -697,18 +697,16 @@
                                 <segue destination="YJ1-01-QoA" kind="presentation" identifier="CarbEntryEditViewController" id="viB-eQ-p7y"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="g6k-L0-2qh"/>
+                        <barButtonItem enabled="NO" image="Pre-Meal" id="jdk-2o-ydO"/>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="ava-EZ-v6i"/>
                         <barButtonItem image="bolus" id="2kb-DB-Vag">
                             <connections>
                                 <segue destination="m6L-HW-ENd" kind="presentation" identifier="BolusViewController" id="PC7-vP-CUY"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="g6k-L0-2qh"/>
-                        <barButtonItem enabled="NO" image="workout" id="8Qz-Cj-oVB">
-                            <connections>
-                                <action selector="toggleWorkoutMode:" destination="1zR-tC-i50" id="coy-UU-6Zu"/>
-                            </connections>
-                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="p68-fH-iuk"/>
+                        <barButtonItem enabled="NO" image="workout" id="8Qz-Cj-oVB"/>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
                         <barButtonItem image="settings" id="PHJ-4n-qiF">
                             <connections>
@@ -1020,15 +1018,16 @@
         </scene>
     </scenes>
     <resources>
+        <image name="Pre-Meal" width="29" height="29"/>
         <image name="Uploading" width="32" height="20"/>
         <image name="bolus" width="22" height="24"/>
-        <image name="carbs" width="22" height="23"/>
+        <image name="carbs" width="29" height="29"/>
         <image name="settings" width="25" height="40"/>
         <image name="workout" width="30" height="29"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="PC7-vP-CUY"/>
+        <segue reference="viB-eQ-p7y"/>
         <segue reference="xCA-IG-jXB"/>
-        <segue reference="UnO-ql-F0K"/>
-        <segue reference="Isc-NM-GBt"/>
     </inferredMetricsTieBreakers>
 </document>

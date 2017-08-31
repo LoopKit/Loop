@@ -33,7 +33,7 @@ final class LoopDataManager {
 
     let doseStore: DoseStore
 
-    let glucoseStore: GlucoseStore! = GlucoseStore()
+    let glucoseStore: GlucoseStore!
 
     unowned let delegate: LoopDataManagerDelegate
 
@@ -57,7 +57,10 @@ final class LoopDataManager {
         self.lastTempBasal = lastTempBasal
         self.settings = settings
 
+        let healthStore = HKHealthStore()
+
         carbStore = CarbStore(
+            healthStore: healthStore,
             defaultAbsorptionTimes: (
                 fast: TimeInterval(hours: 2),
                 medium: TimeInterval(hours: 3),
@@ -72,6 +75,8 @@ final class LoopDataManager {
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
+
+        glucoseStore = GlucoseStore(healthStore: healthStore)
 
         // Observe changes
         carbUpdateObserver = NotificationCenter.default.addObserver(
@@ -128,24 +133,6 @@ final class LoopDataManager {
 
             notify(forChange: .preferences)
         }
-    }
-
-    /// Enable workout glucose targets until the given date
-    ///
-    /// TODO: When schedule settings are migrated to structs, this can be simplified
-    ///
-    /// - Parameter endDate: The date the workout targets should end
-    /// - Returns: True if the override was set
-    @discardableResult
-    func enableWorkoutMode(until endDate: Date) -> Bool {
-        if settings.glucoseTargetRangeSchedule != nil {
-            _ = settings.glucoseTargetRangeSchedule!.setWorkoutOverride(until: endDate)
-        }
-
-
-        notify(forChange: .preferences)
-
-        return true
     }
 
     /// Disable any active workout glucose targets
@@ -212,23 +199,10 @@ final class LoopDataManager {
     ///
     /// - Parameter timeZone: The time zone
     func setScheduleTimeZone(_ timeZone: TimeZone) {
-        // Recreate each schedule to force a change notification
-        // TODO: When schedule settings are migrated to structs, this can be simplified
-        if let basalRateSchedule = basalRateSchedule {
-            self.basalRateSchedule = BasalRateSchedule(dailyItems: basalRateSchedule.items, timeZone: timeZone)
-        }
-
-        if let carbRatioSchedule = carbRatioSchedule {
-            self.carbRatioSchedule = CarbRatioSchedule(unit: carbRatioSchedule.unit, dailyItems: carbRatioSchedule.items, timeZone: timeZone)
-        }
-
-        if let insulinSensitivitySchedule = insulinSensitivitySchedule {
-            self.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: insulinSensitivitySchedule.unit, dailyItems: insulinSensitivitySchedule.items, timeZone: timeZone)
-        }
-
-        if let glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule {
-            settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: glucoseTargetRangeSchedule.unit, dailyItems: glucoseTargetRangeSchedule.items, workoutRange: glucoseTargetRangeSchedule.workoutRange, timeZone: timeZone)
-        }
+        self.basalRateSchedule?.timeZone = timeZone
+        self.carbRatioSchedule?.timeZone = timeZone
+        self.insulinSensitivitySchedule?.timeZone = timeZone
+        settings.glucoseTargetRangeSchedule?.timeZone = timeZone
     }
 
     // MARK: - Intake
@@ -273,6 +247,9 @@ final class LoopDataManager {
         let addCompletion: (Bool, CarbEntry?, CarbStore.CarbStoreError?) -> Void = { (success, _, error) in
             self.dataAccessQueue.async {
                 if success {
+                    // Remove the active pre-meal target override
+                    self.settings.glucoseTargetRangeSchedule?.clearOverride(matching: .preMeal)
+
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
 
