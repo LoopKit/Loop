@@ -78,10 +78,10 @@ final class StatusTableViewController: ChartsTableViewController {
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].tintColor = UIColor.COBTintColor
-        toolbarItems![2].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
-        toolbarItems![2].tintColor = UIColor.doseTintColor
-        toolbarItems![6].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![6].tintColor = UIColor.secondaryLabelColor
+        toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
+        toolbarItems![4].tintColor = UIColor.doseTintColor
+        toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
+        toolbarItems![8].tintColor = UIColor.secondaryLabelColor
     }
 
     override func didReceiveMemoryWarning() {
@@ -297,7 +297,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
         hudView.loopCompletionHUD.dosingEnabled = deviceManager.loopManager.settings.dosingEnabled
 
-        workoutMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.workoutModeEnabled
+        workoutMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.overrideEnabledForContext(.workout)
+        preMealMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.overrideEnabledForContext(.preMeal)
 
         reloadGroup.notify(queue: .main) {
             if let glucose = self.deviceManager.loopManager.glucoseStore.latestGlucose {
@@ -432,6 +433,20 @@ final class StatusTableViewController: ChartsTableViewController {
 
     // MARK: - Toolbar data
 
+    private var preMealMode: Bool? = nil {
+        didSet {
+            guard oldValue != preMealMode else {
+                return
+            }
+
+            if let preMealMode = preMealMode {
+                toolbarItems![2] = createPreMealButtonItem(selected: preMealMode)
+            } else {
+                toolbarItems![2].isEnabled = false
+            }
+        }
+    }
+
     private var workoutMode: Bool? = nil {
         didSet {
             guard oldValue != workoutMode else {
@@ -439,9 +454,9 @@ final class StatusTableViewController: ChartsTableViewController {
             }
 
             if let workoutMode = workoutMode {
-                toolbarItems![4] = createWorkoutButtonItem(selected: workoutMode)
+                toolbarItems![6] = createWorkoutButtonItem(selected: workoutMode)
             } else {
-                toolbarItems![4].isEnabled = false
+                toolbarItems![6].isEnabled = false
             }
         }
     }
@@ -722,9 +737,25 @@ final class StatusTableViewController: ChartsTableViewController {
     @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {
     }
 
+    private func createPreMealButtonItem(selected: Bool) -> UIBarButtonItem {
+        let item = UIBarButtonItem(image: UIImage.preMealImage(selected: selected), style: .plain, target: self, action: #selector(togglePreMealMode(_:)))
+        item.accessibilityLabel = NSLocalizedString("Pre-Meal Targets", comment: "The label of the pre-meal mode toggle button")
+
+        if selected {
+            item.accessibilityTraits = item.accessibilityTraits | UIAccessibilityTraitSelected
+            item.accessibilityHint = NSLocalizedString("Disables", comment: "The action hint of the workout mode toggle button when enabled")
+        } else {
+            item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
+        }
+
+        item.tintColor = UIColor.COBTintColor
+
+        return item
+    }
+
     private func createWorkoutButtonItem(selected: Bool) -> UIBarButtonItem {
         let item = UIBarButtonItem(image: UIImage.workoutImage(selected: selected), style: .plain, target: self, action: #selector(toggleWorkoutMode(_:)))
-        item.accessibilityLabel = NSLocalizedString("Workout Mode", comment: "The label of the workout mode toggle button")
+        item.accessibilityLabel = NSLocalizedString("Workout Targets", comment: "The label of the workout mode toggle button")
 
         if selected {
             item.accessibilityTraits = item.accessibilityTraits | UIAccessibilityTraitSelected
@@ -738,12 +769,20 @@ final class StatusTableViewController: ChartsTableViewController {
         return item
     }
 
+    @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
+        if preMealMode == true {
+            deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride(matching: .preMeal)
+        } else {
+            _ = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(.preMeal, until: Date(timeIntervalSinceNow: .hours(1)))
+        }
+    }
+
     @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
-        if let workoutModeEnabled = workoutMode, workoutModeEnabled {
-            deviceManager.loopManager.disableWorkoutMode()
+        if workoutMode == true {
+            deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride(matching: .workout)
         } else {
             let vc = UIAlertController(workoutDurationSelectionHandler: { (endDate) in
-                self.deviceManager.loopManager.enableWorkoutMode(until: endDate)
+                _ = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(.workout, until: endDate)
             })
 
             present(vc, animated: true, completion: nil)

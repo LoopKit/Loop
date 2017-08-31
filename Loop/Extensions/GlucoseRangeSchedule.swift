@@ -9,11 +9,16 @@ import LoopKit
 
 
 extension GlucoseRangeSchedule {
-    var workoutModeEnabled: Bool? {
-        guard let override = temporaryOverride else {
+    func overrideEnabledForContext(_ context: Override.Context) -> Bool? {
+        guard let override = override, override.context == context else {
+            guard let value = overrideRanges[context], !value.isZero else {
+                // Unavailable to set
+                return nil
+            }
+
             return false
         }
 
-        return override.endDate.timeIntervalSinceNow > 0
+        return override.isActive()
     }
 }

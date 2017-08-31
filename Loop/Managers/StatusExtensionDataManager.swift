@@ -148,12 +148,13 @@ final class StatusExtensionDataManager {
                         )
                     }
 
-                if let override = targetRanges.temporaryOverride {
+                if let override = targetRanges.override {
                     context.temporaryOverride = DatedRangeContext(
-                        startDate: override.startDate,
-                        endDate: override.endDate,
+                        startDate: override.start,
+                        endDate: override.end ?? .distantFuture,
                         minValue: override.value.minValue,
-                        maxValue: override.value.maxValue)
+                        maxValue: override.value.maxValue
+                    )
                 }
             }
 

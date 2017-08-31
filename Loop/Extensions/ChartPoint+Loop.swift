@@ -26,15 +26,15 @@ extension ChartPoint {
         return ChartPoint.pointsForDatedRanges(targetRanges, xAxisValues: xAxisValues)
     }
 
-    static func pointsForGlucoseRangeScheduleOverrideDuration(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeScheduleOverrideDuration(_ override: GlucoseRangeSchedule.Override, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         return ChartPoint.pointsForDatedRangeOverrideDuration(
-            DatedRangeContext(startDate: override.startDate, endDate: override.endDate, minValue: override.value.minValue, maxValue: override.value.maxValue),
+            DatedRangeContext(startDate: override.start, endDate: override.end ?? .distantFuture, minValue: override.value.minValue, maxValue: override.value.maxValue),
             xAxisValues: xAxisValues)
     }
 
-    static func pointsForGlucoseRangeScheduleOverride(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeScheduleOverride(_ override: GlucoseRangeSchedule.Override, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         return ChartPoint.pointsForDatedRangeOverride(
-            DatedRangeContext(startDate: override.startDate, endDate: override.endDate, minValue: override.value.minValue, maxValue: override.value.maxValue),
+            DatedRangeContext(startDate: override.start, endDate: override.end ?? .distantFuture, minValue: override.value.minValue, maxValue: override.value.maxValue),
             xAxisValues: xAxisValues)
     }
 }
