@@ -1,11 +1,11 @@
 {
   "iOS" : [
     {
-      "hash" : "af566c1904ed3a6f35421c09c21b40aa358eac8b8ac3e22f288c10000139da11",
+      "hash" : "c7bb83f472aff44ec724aa20da5a68e9975ee8a531103d219080e3fe755ac4d0",
       "name" : "ShareClient"
     }
   ],
-  "commitish" : "v0.2.1",
+  "commitish" : "v0.4.0",
   "watchOS" : [
 
   ],

@@ -138,11 +138,10 @@ final class LoopDataManager {
     /// - Returns: True if the override was set
     @discardableResult
     func enableWorkoutMode(until endDate: Date) -> Bool {
-        guard let glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule else {
-            return false
+        if settings.glucoseTargetRangeSchedule != nil {
+            _ = settings.glucoseTargetRangeSchedule!.setWorkoutOverride(until: endDate)
         }
 
-        _ = glucoseTargetRangeSchedule.setWorkoutOverride(until: endDate)
 
         notify(forChange: .preferences)
 
