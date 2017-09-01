@@ -52,6 +52,8 @@ final class PumpIDTableViewController: TextFieldTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        tableView.rowHeight = UITableViewAutomaticDimension
     }
 
     // MARK: - Table view data source

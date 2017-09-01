@@ -73,6 +73,7 @@
 		437CCAE01D285C7B0075D2C3 /* ServiceAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CCADF1D285C7B0075D2C3 /* ServiceAuthentication.swift */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
+		4381D2261F3C0FDD004ACCF9 /* RileyLinkDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4381D2251F3C0FDD004ACCF9 /* RileyLinkDevice.swift */; };
 		43846AD51D8FA67800799272 /* Base.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD41D8FA67800799272 /* Base.lproj */; };
 		43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43846ADA1D91057000799272 /* ContextUpdatable.swift */; };
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
@@ -248,7 +249,6 @@
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
 		C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
-		C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17884621D51A7A400405663 /* BatteryIndicator.swift */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
@@ -445,6 +445,7 @@
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		437D9BA11D7B5203007245E8 /* Loop.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Loop.xcconfig; sourceTree = "<group>"; };
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
+		4381D2251F3C0FDD004ACCF9 /* RileyLinkDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RileyLinkDevice.swift; sourceTree = "<group>"; };
 		43846AD41D8FA67800799272 /* Base.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Base.lproj; sourceTree = "<group>"; };
 		43846ADA1D91057000799272 /* ContextUpdatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextUpdatable.swift; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
@@ -588,7 +589,6 @@
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
 		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
-		C17884621D51A7A400405663 /* BatteryIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryIndicator.swift; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
 		C1C73F0E1DE3D0270022FC89 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -877,7 +877,6 @@
 		43E344A01B9E144300C85C07 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				C17884621D51A7A400405663 /* BatteryIndicator.swift */,
 				C17824991E1999FA00D9D25C /* CaseCountable.swift */,
 				4F6663931E905FD2009E74FC /* ChartColorPalette+Loop.swift */,
 				4346D1F51C78501000ABAFE3 /* ChartPoint+Loop.swift */,
@@ -891,6 +890,7 @@
 				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43441A9F1EDB4D390087958C /* OSLog.swift */,
+				4381D2251F3C0FDD004ACCF9 /* RileyLinkDevice.swift */,
 				43BFF0CA1E466C0900FF19A9 /* StateColorPalette.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43BFF0BB1E45C80600FF19A9 /* UIColor+Loop.swift */,
@@ -1510,6 +1510,7 @@
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
+				4381D2261F3C0FDD004ACCF9 /* RileyLinkDevice.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
 				43C418B51CE0575200405B6A /* ShareGlucose+GlucoseKit.swift in Sources */,
 				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
@@ -1549,7 +1550,6 @@
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
-				C17884631D51A7A400405663 /* BatteryIndicator.swift in Sources */,
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				4F08DE9D1E81D0E9006741EA /* StatusChartsManager+LoopKit.swift in Sources */,

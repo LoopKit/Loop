@@ -212,6 +212,40 @@ final class LoopDataManager {
         settings.glucoseTargetRangeSchedule?.timeZone = timeZone
     }
 
+    /// All the HealthKit types to be read by stores
+    var readTypes: Set<HKSampleType> {
+        return glucoseStore.readTypes.union(
+               carbStore.readTypes).union(
+               doseStore.readTypes)
+    }
+
+    /// All the HealthKit types we to be shared by stores
+    var shareTypes: Set<HKSampleType> {
+        return glucoseStore.shareTypes.union(
+               carbStore.shareTypes).union(
+               doseStore.shareTypes)
+    }
+
+    /// True if any stores require HealthKit authorization
+    var authorizationRequired: Bool {
+        return glucoseStore.authorizationRequired ||
+               carbStore.authorizationRequired ||
+               doseStore.authorizationRequired
+    }
+
+    /// True if the user has explicitly denied access to any stores' HealthKit types
+    var sharingDenied: Bool {
+        return glucoseStore.sharingDenied ||
+               carbStore.sharingDenied ||
+               doseStore.sharingDenied
+    }
+
+    func authorize(_ completion: @escaping () -> Void) {
+        carbStore.healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
+            completion()
+        }
+    }
+
     // MARK: - Intake
 
     /// Adds and stores glucose data

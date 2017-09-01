@@ -92,6 +92,8 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
+    var appearedOnce = false
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -100,6 +102,18 @@ final class StatusTableViewController: ChartsTableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        if !appearedOnce {
+            appearedOnce = true
+
+            if deviceManager.loopManager.authorizationRequired {
+                deviceManager.loopManager.authorize {
+                    DispatchQueue.main.async {
+                        self.reloadData()
+                    }
+                }
+            }
+        }
 
         AnalyticsManager.shared.didDisplayStatusScreen()
     }
@@ -150,7 +164,9 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     override func reloadData(animated: Bool = false, to size: CGSize? = nil) {
-        guard active && visible && !refreshContext.isEmpty else { return }
+        guard active && visible && !refreshContext.isEmpty && !deviceManager.loopManager.authorizationRequired else {
+            return
+        }
 
         // How far back should we show data? Use the screen size as a guide.
         let minimumSegmentWidth: CGFloat = 50
@@ -643,24 +659,6 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     // MARK: - Actions
-
-    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        switch identifier {
-        case CarbEntryEditViewController.className, CarbAbsorptionViewController.className:
-            if deviceManager.loopManager.carbStore.authorizationRequired {
-                deviceManager.loopManager.carbStore.authorize { (success, error) in
-                    if success {
-                        self.performSegue(withIdentifier: identifier, sender: sender)
-                    }
-                }
-                return false
-            }
-        default:
-            break
-        }
-
-        return true
-    }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)

@@ -36,7 +36,7 @@ final class DeviceDataManager {
 
     private var nightscoutDataManager: NightscoutDataManager!
 
-    var latestPumpStatus: RileyLinkKit.PumpStatus?
+    fileprivate var latestPumpStatus: RileyLinkKit.PumpStatus?
 
     private(set) var lastError: (date: Date, error: Error)?
 
@@ -61,7 +61,7 @@ final class DeviceDataManager {
     }
 
     // Battery monitor
-    func observeBatteryDuring(_ block: () -> Void) {
+    fileprivate func observeBatteryDuring(_ block: () -> Void) {
         let oldVal = pumpBatteryChargeRemaining
         block()
         if let newVal = pumpBatteryChargeRemaining {
@@ -79,6 +79,17 @@ final class DeviceDataManager {
 
     @objc private func receivedRileyLinkManagerNotification(_ note: Notification) {
         NotificationCenter.default.post(name: note.name, object: self, userInfo: note.userInfo)
+
+        switch note.name {
+        case Notification.Name.DeviceConnectionStateDidChange,
+             Notification.Name.DeviceNameDidChange:
+            // Update the HKDevice to include the name or connection status change
+            if let device = rileyLinkManager.firstConnectedDevice?.device {
+                loopManager.doseStore.setDevice(device)
+            }
+        default:
+            break
+        }
     }
 
     /**
@@ -136,9 +147,45 @@ final class DeviceDataManager {
         }
     }
 
+    fileprivate func updateTimerTickPreference() {
+        /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
+        /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and
+        /// G4 Receiver are reliable as hearbeats, but users who find their resources extremely constrained
+        /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
+        rileyLinkManager.timerTickEnabled = pumpDataIsStale() || !(cgmManager?.providesBLEHeartbeat == true)
+    }
+
+    /**
+     Attempts to fix an extended communication failure between a RileyLink device and the pump
+
+     - parameter device: The RileyLink device
+     */
+    private func troubleshootPumpComms(using device: RileyLinkDevice) {
+        // Ensuring timer tick is enabled will allow more tries to bring the pump data up-to-date.
+        updateTimerTickPreference()
+
+        // How long we should wait before we re-tune the RileyLink
+        let tuneTolerance = TimeInterval(minutes: 14)
+
+        if device.lastTuned == nil || device.lastTuned!.timeIntervalSinceNow <= -tuneTolerance {
+            device.tunePump { (result) in
+                switch result {
+                case .success(let scanResult):
+                    self.logger.addError("Device \(device.name ?? "") auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
+                case .failure(let error):
+                    self.logger.addError("Device \(device.name ?? "") auto-tune failed with error: \(error)", fromSource: "RileyLink")
+                    self.rileyLinkManager.deprioritizeDevice(device: device)
+                    self.setLastError(error: error)
+                }
+            }
+        } else {
+            rileyLinkManager.deprioritizeDevice(device: device)
+        }
+    }
+
     // MARK: Pump data
 
-    var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
+    fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
 
     /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
@@ -266,6 +313,9 @@ final class DeviceDataManager {
                     }
                 }
             }
+
+            // New reservoir data means we may want to adjust our timer tick requirements
+            self.updateTimerTickPreference()
         }
     }
 
@@ -303,7 +353,7 @@ final class DeviceDataManager {
 
     private func pumpDataIsStale() -> Bool {
         // How long should we wait before we poll for new pump data?
-        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
+        let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 9) : TimeInterval(minutes: 4)
 
         return loopManager.doseStore.lastReservoirValue == nil
             || loopManager.doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= -pumpStatusAgeTolerance
@@ -421,31 +471,6 @@ final class DeviceDataManager {
         }
     }
 
-    /**
-     Attempts to fix an extended communication failure between a RileyLink device and the pump
-
-     - parameter device: The RileyLink device
-     */
-    private func troubleshootPumpComms(using device: RileyLinkDevice) {
-        // How long we should wait before we re-tune the RileyLink
-        let tuneTolerance = TimeInterval(minutes: 14)
-
-        if device.lastTuned == nil || device.lastTuned!.timeIntervalSinceNow <= -tuneTolerance {
-            device.tunePump { (result) in
-                switch result {
-                case .success(let scanResult):
-                    self.logger.addError("Device \(device.name ?? "") auto-tuned to \(scanResult.bestFrequency) MHz", fromSource: "RileyLink")
-                case .failure(let error):
-                    self.logger.addError("Device \(device.name ?? "") auto-tune failed with error: \(error)", fromSource: "RileyLink")
-                    self.rileyLinkManager.deprioritizeDevice(device: device)
-                    self.setLastError(error: error)
-                }
-            }
-        } else {
-            rileyLinkManager.deprioritizeDevice(device: device)
-        }
-    }
-
     // MARK: - CGM
 
     var cgm: CGM? = UserDefaults.standard.cgm {
@@ -465,11 +490,7 @@ final class DeviceDataManager {
         cgmManager?.delegate = self
         loopManager.glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
 
-        /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
-        /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and
-        /// G4 Receiver are reliable as hearbeats, but users who find their resources extremely constrained
-        /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
-        rileyLinkManager.timerTickEnabled = !(cgmManager?.providesBLEHeartbeat == true)
+        updateTimerTickPreference()
     }
 
     var sensorInfo: SensorDisplayable? {
@@ -543,6 +564,16 @@ final class DeviceDataManager {
         case "pumpModel"?:
             if let sentrySupported = pumpState?.pumpModel?.hasMySentry, !sentrySupported {
                 rileyLinkManager.idleListeningEnabled = false
+            }
+
+            // Update the HKDevice to include the model change
+            if let device = rileyLinkManager.firstConnectedDevice?.device {
+                loopManager.doseStore.setDevice(device)
+            }
+
+            // Update the preference for basal profile start events
+            if let recordsBasalProfileStartEvents = pumpState?.pumpModel?.recordsBasalProfileStartEvents {
+                loopManager.doseStore.pumpRecordsBasalProfileStartEvents = recordsBasalProfileStartEvents
             }
 
             UserDefaults.standard.pumpModelNumber = pumpState?.pumpModel?.rawValue
@@ -630,6 +661,10 @@ final class DeviceDataManager {
 
         loopManager.carbStore.syncDelegate = remoteDataManager.nightscoutService.uploader
         loopManager.doseStore.delegate = self
+        // Proliferate PumpModel preferences to DoseStore
+        if let pumpModel = pumpState?.pumpModel {
+            loopManager.doseStore.pumpRecordsBasalProfileStartEvents = pumpModel.recordsBasalProfileStartEvents
+        }
 
         setupCGM()
     }

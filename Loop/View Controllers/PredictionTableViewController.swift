@@ -22,6 +22,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.rowHeight = UITableViewAutomaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
         charts.glucoseDisplayRange = (
