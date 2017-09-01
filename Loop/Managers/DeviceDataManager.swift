@@ -38,6 +38,15 @@ final class DeviceDataManager {
 
     var latestPumpStatus: RileyLinkKit.PumpStatus?
 
+    private(set) var lastError: (date: Date, error: Error)?
+
+    fileprivate func setLastError(error: Error) {
+        DispatchQueue.main.async { // Synchronize writes
+            self.lastError = (date: Date(), error: error)
+            // TODO: Notify observers of change
+        }
+    }
+
     // Returns a value in the range 0 - 1
     var pumpBatteryChargeRemaining: Double? {
         get {
@@ -159,8 +168,7 @@ final class DeviceDataManager {
 
         // Gather PumpStatus from MySentry packet
         let pumpStatus: NightscoutUploadKit.PumpStatus?
-        if let pumpDate = pumpDateComponents.date, let pumpID = pumpID {
-
+        if let pumpID = pumpID {
             let batteryStatus = BatteryStatus(percent: status.batteryRemainingPercent)
             let iobStatus = IOBStatus(timestamp: pumpDate, iob: status.iob)
 
@@ -189,7 +197,10 @@ final class DeviceDataManager {
                 switch result {
                 case .newData(let values):
                     self.loopManager.addGlucose(values, from: self.cgmManager?.device)
-                case .noData, .error:
+                case .noData:
+                    break
+                case .error(let error):
+                    self.setLastError(error: error)
                     break
                 }
             }
@@ -217,11 +228,16 @@ final class DeviceDataManager {
         loopManager.addReservoirValue(units, at: date) { (result) in
             switch result {
             case .failure(let error):
+                self.setLastError(error: error)
                 self.logger.addError(error, fromSource: "DoseStore")
             case .success(let (newValue, lastValue, areStoredValuesContinuous)):
                 // Run a loop as long as we have fresh, reliable pump data.
                 if self.preferredInsulinDataSource == .pumpHistory || !areStoredValuesContinuous {
                     self.fetchPumpHistory { (error) in
+                        if let error = error {
+                            self.setLastError(error: error)
+                        }
+
                         if error == nil || areStoredValuesContinuous {
                             self.loopManager.loop()
                         }
@@ -258,8 +274,9 @@ final class DeviceDataManager {
     /// - Parameters:
     ///   - completion: A closure called once upon completion
     ///   - error: An error describing why the fetch and/or store failed
-    private func fetchPumpHistory(_ completion: @escaping (_ error: Error?) -> Void) {
+    fileprivate func fetchPumpHistory(_ completion: @escaping (_ error: Error?) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice else {
+            completion(LoopError.connectionError)
             return
         }
 
@@ -284,39 +301,6 @@ final class DeviceDataManager {
         }
     }
 
-    /**
-     Read the pump's current state, including reservoir and clock
-
-     - parameter completion: A closure called after the command is complete. This closure takes a single Result argument:
-        - Success(status, date): The pump status, and the resolved date according to the pump's clock
-        - Failure(error): An error describing why the command failed
-     */
-    private func readPumpData(_ completion: @escaping (RileyLinkKit.Either<(status: RileyLinkKit.PumpStatus, date: Date), Error>) -> Void) {
-        guard let device = rileyLinkManager.firstConnectedDevice, let ops = device.ops else {
-            completion(.failure(LoopError.connectionError))
-            return
-        }
-
-        ops.readPumpStatus { (result) in
-            switch result {
-            case .success(let status):
-                var clock = status.clock
-                clock.timeZone = ops.pumpState.timeZone
-
-                guard let date = clock.date else {
-                    let errorStr = "Could not interpret pump clock: \(clock)"
-                    self.logger.addError(errorStr, fromSource: "RileyLink")
-                    completion(.failure(LoopError.invalidData(details: errorStr)))
-                    return
-                }
-                completion(.success((status: status, date: date)))
-            case .failure(let error):
-                self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
-                completion(.failure(error))
-            }
-        }
-    }
-
     private func pumpDataIsStale() -> Bool {
         // How long should we wait before we poll for new pump data?
         let pumpStatusAgeTolerance = rileyLinkManager.idleListeningEnabled ? TimeInterval(minutes: 11) : TimeInterval(minutes: 4)
@@ -330,6 +314,7 @@ final class DeviceDataManager {
      */
     fileprivate func assertCurrentPumpData() {
         guard let device = rileyLinkManager.firstConnectedDevice else {
+            self.setLastError(error: LoopError.connectionError)
             return
         }
 
@@ -339,7 +324,7 @@ final class DeviceDataManager {
             return
         }
 
-        readPumpData { (result) in
+        rileyLinkManager.readPumpData { (result) in
             let nsPumpStatus: NightscoutUploadKit.PumpStatus?
             switch result {
             case .success(let (status, date)):
@@ -352,6 +337,8 @@ final class DeviceDataManager {
 
                 nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
             case .failure(let error):
+                self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
+                self.setLastError(error: error)
                 self.troubleshootPumpComms(using: device)
                 self.nightscoutDataManager.uploadLoopStatus(loopError: error)
                 nsPumpStatus = nil
@@ -406,7 +393,7 @@ final class DeviceDataManager {
             loopManager.doseStore.lastReservoirVolumeDrop < 0 ||
             loopManager.doseStore.lastReservoirValue!.startDate.timeIntervalSinceNow <= TimeInterval(minutes: -6)
         {
-            readPumpData { (result) in
+            rileyLinkManager.readPumpData { (result) in
                 switch result {
                 case .success(let (status, date)):
                     self.loopManager.addReservoirValue(status.reservoir, at: date) { (result) in
@@ -425,6 +412,8 @@ final class DeviceDataManager {
                     default:
                         notify(error)
                     }
+
+                    self.logger.addError("Failed to fetch pump status: \(error)", fromSource: "RileyLink")
                 }
             }
         } else {
@@ -449,6 +438,7 @@ final class DeviceDataManager {
                 case .failure(let error):
                     self.logger.addError("Device \(device.name ?? "") auto-tune failed with error: \(error)", fromSource: "RileyLink")
                     self.rileyLinkManager.deprioritizeDevice(device: device)
+                    self.setLastError(error: error)
                 }
             }
         } else {
@@ -660,7 +650,10 @@ extension DeviceDataManager: CGMManagerDelegate {
             loopManager.addGlucose(values, from: manager.device) { _ in
                 self.assertCurrentPumpData()
             }
-        case .noData, .error:
+        case .noData:
+            break
+        case .error(let error):
+            self.setLastError(error: error)
             self.assertCurrentPumpData()
         }
     }
@@ -721,6 +714,12 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                     value: body.rate,
                     unit: .unitsPerHour
                 )))
+
+                // If we haven't fetched history in a while (preferredInsulinDataSource == .reservoir), 
+                // let's try to do so while the pump radio is on.
+                if self.loopManager.doseStore.lastAddedPumpEvents.timeIntervalSinceNow < .minutes(-4) {
+                    self.fetchPumpHistory { (_) in }
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -736,15 +735,13 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "## DeviceDataManager",
             "launchDate: \(launchDate)",
             "cgm: \(String(describing: cgm))",
+            "lastError: \(String(describing: lastError))",
             "latestPumpStatusFromMySentry: \(String(describing: latestPumpStatusFromMySentry))",
             "pumpState: \(String(reflecting: pumpState))",
             "preferredInsulinDataSource: \(preferredInsulinDataSource)",
             cgmManager != nil ? String(reflecting: cgmManager!) : "",
             String(reflecting: rileyLinkManager),
             String(reflecting: statusExtensionManager!),
-            "",
-            "## NSUserDefaults",
-            String(reflecting: UserDefaults.standard.dictionaryRepresentation())
         ].joined(separator: "\n")
     }
 }

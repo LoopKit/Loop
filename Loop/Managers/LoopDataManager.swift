@@ -1084,6 +1084,7 @@ extension LoopDataManager {
                 
                 entries.append("insulinOnBoard: \(String(describing: insulinOnBoard))")
                 entries.append("error: \(String(describing: loopError))")
+                entries.append("")
 
                 self.glucoseStore.generateDiagnosticReport { (report) in
                     entries.append(report)

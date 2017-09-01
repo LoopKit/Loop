@@ -11,6 +11,7 @@
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
 		4302F4E51D4EA75100F0FCAF /* DoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E41D4EA75100F0FCAF /* DoseStore.swift */; };
+		43045E581F25AC1700FD9CE1 /* RileyLinkDeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43045E571F25AC1700FD9CE1 /* RileyLinkDeviceManager.swift */; };
 		43076BF31DFDBC4B0012A723 /* it.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 43076BF21DFDBC4B0012A723 /* it.lproj */; };
 		4309786C1E73D2F500BEBC82 /* it.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 4309786B1E73D2F500BEBC82 /* it.lproj */; };
 		4309786E1E73DAD100BEBC82 /* CGM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4309786D1E73DAD100BEBC82 /* CGM.swift */; };
@@ -371,6 +372,7 @@
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E41D4EA75100F0FCAF /* DoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseStore.swift; sourceTree = "<group>"; };
+		43045E571F25AC1700FD9CE1 /* RileyLinkDeviceManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RileyLinkDeviceManager.swift; sourceTree = "<group>"; };
 		43076BF21DFDBC4B0012A723 /* it.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = it.lproj; sourceTree = "<group>"; };
 		4309786B1E73D2F500BEBC82 /* it.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = it.lproj; sourceTree = "<group>"; };
 		4309786D1E73DAD100BEBC82 /* CGM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGM.swift; sourceTree = "<group>"; };
@@ -958,6 +960,7 @@
 				C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */,
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */,
+				43045E571F25AC1700FD9CE1 /* RileyLinkDeviceManager.swift */,
 				430C1ABC1E5568A80067F1AE /* StatusChartsManager+LoopKit.swift */,
 				4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
@@ -1533,6 +1536,7 @@
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				435CB6271F37AE5600C320C7 /* WalshInsulinModel.swift in Sources */,
 				43E344A41B9E1B1C00C85C07 /* NSUserDefaults.swift in Sources */,
+				43045E581F25AC1700FD9CE1 /* RileyLinkDeviceManager.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */,

@@ -126,6 +126,8 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
+    private var lastLoopError: Error?
+
     private var refreshContext = RefreshContext.all
 
     private var bolusState: BolusState? {
@@ -163,6 +165,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
         let reloadGroup = DispatchGroup()
         var lastLoopCompleted: Date?
+        var lastLoopError: Error?
         var lastReservoirValue: ReservoirValue?
         var lastTempBasal: DoseEntry?
         var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
@@ -209,6 +212,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
                 lastTempBasal = state.lastTempBasal
                 lastLoopCompleted = state.lastLoopCompleted
+                lastLoopError = state.error
 
                 if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                     self.eventualGlucoseDescription = String(describing: lastPoint)
@@ -319,6 +323,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Loop completion HUD
             self.hudView.loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+            self.lastLoopError = lastLoopError
 
             // Net basal rate HUD
             let date = lastTempBasal?.startDate ?? Date()
@@ -814,10 +819,11 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
-        self.deviceManager.loopManager.getLoopState { (_, state) in
-            if let error = state.error {
-                self.presentAlertController(with: error)
-            }
+        // First, check whether we have a device error after the most recent completion date
+        if let deviceError = deviceManager.lastError, deviceError.date > (hudView.loopCompletionHUD.lastLoopCompleted ?? .distantPast) {
+            self.presentAlertController(with: deviceError.error)
+        } else if let lastLoopError = lastLoopError {
+            self.presentAlertController(with: lastLoopError)
         }
     }
 
