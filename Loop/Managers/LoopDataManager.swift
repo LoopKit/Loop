@@ -45,7 +45,7 @@ final class LoopDataManager {
         lastTempBasal: DoseEntry?,
         basalRateSchedule: BasalRateSchedule? = UserDefaults.standard.basalRateSchedule,
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.standard.carbRatioSchedule,
-        insulinActionDuration: TimeInterval? = UserDefaults.standard.insulinActionDuration,
+        insulinModelSettings: InsulinModelSettings? = UserDefaults.standard.insulinModelSettings,
         insulinCounteractionEffects: [GlucoseEffectVelocity]? = UserDefaults.standard.insulinCounteractionEffects,
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.standard.insulinSensitivitySchedule,
         settings: LoopSettings = UserDefaults.standard.loopSettings ?? LoopSettings()
@@ -71,7 +71,8 @@ final class LoopDataManager {
         )
 
         doseStore = DoseStore(
-            insulinActionDuration: insulinActionDuration,
+            healthStore: healthStore,
+            insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -143,22 +144,26 @@ final class LoopDataManager {
     }
 
     /// The length of time insulin has an effect on blood glucose
-    var insulinActionDuration: TimeInterval? {
+    var insulinModelSettings: InsulinModelSettings? {
         get {
-            return doseStore.insulinActionDuration
+            guard let model = doseStore.insulinModel else {
+                return nil
+            }
+
+            return InsulinModelSettings(model: model)
         }
         set {
-            let oldValue = doseStore.insulinActionDuration
-            doseStore.insulinActionDuration = newValue
+            doseStore.insulinModel = newValue?.model
+            UserDefaults.standard.insulinModelSettings = newValue
 
-            UserDefaults.standard.insulinActionDuration = newValue
+            self.dataAccessQueue.async {
+                // Invalidate cached effects based on this schedule
+                self.insulinEffect = nil
 
-            // Invalidate cached effects based on this schedule
-            insulinEffect = nil
-
-            if oldValue != newValue {
-                AnalyticsManager.shared.didChangeInsulinActionDuration()
+                self.notify(forChange: .preferences)
             }
+
+            AnalyticsManager.shared.didChangeInsulinModel()
         }
     }
 
@@ -183,12 +188,14 @@ final class LoopDataManager {
 
             UserDefaults.standard.insulinSensitivitySchedule = newValue
 
-            // Invalidate cached effects based on this schedule
-            carbEffect = nil
-            carbsOnBoard = nil
-            insulinEffect = nil
+            dataAccessQueue.async {
+                // Invalidate cached effects based on this schedule
+                self.carbEffect = nil
+                self.carbsOnBoard = nil
+                self.insulinEffect = nil
 
-            notify(forChange: .preferences)
+                self.notify(forChange: .preferences)
+            }
         }
     }
 
@@ -299,11 +306,17 @@ final class LoopDataManager {
     ///   - error: An error explaining why the events could not be saved.
     func addPumpEvents(_ events: [NewPumpEvent], completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         doseStore.addPumpEvents(events) { (error) in
-            if error != nil {
-                self.insulinEffect = nil
-            }
+            self.dataAccessQueue.async {
+                if error == nil {
+                    self.insulinEffect = nil
+                    // Expire any bolus values now represented in the insulin data
+                    if let bolusDate = self.lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                        self.lastBolus = nil
+                    }
+                }
 
-            completion(error)
+                completion(error)
+            }
         }
     }
 
@@ -322,13 +335,19 @@ final class LoopDataManager {
             if let error = error {
                 completion(.failure(error))
             } else if let newValue = newValue {
-                self.insulinEffect = nil
+                self.dataAccessQueue.async {
+                    self.insulinEffect = nil
+                    // Expire any bolus values now represented in the insulin data
+                    if areStoredValuesContinuous, let bolusDate = self.lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                        self.lastBolus = nil
+                    }
 
-                completion(.success((
-                    newValue: newValue,
-                    lastValue: previousValue,
-                    areStoredValuesContinuous: areStoredValuesContinuous
-                )))
+                    completion(.success((
+                        newValue: newValue,
+                        lastValue: previousValue,
+                        areStoredValuesContinuous: areStoredValuesContinuous
+                    )))
+                }
             } else {
                 assertionFailure()
             }
@@ -608,10 +627,6 @@ final class LoopDataManager {
     }
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
-            if let bolusDate = lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
-                lastBolus = nil
-            }
-
             predictedGlucose = nil
         }
     }
@@ -797,7 +812,7 @@ final class LoopDataManager {
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule,
-            let insulinActionDuration = insulinActionDuration
+            let insulinActionDuration = insulinModelSettings?.model.effectDuration
         else {
             throw LoopError.configurationError("Check settings")
         }
@@ -839,7 +854,7 @@ final class LoopDataManager {
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule,
-            let insulinActionDuration = insulinActionDuration
+            let insulinActionDuration = insulinModelSettings?.model.effectDuration
         else {
             throw LoopError.configurationError("Check Settings")
         }

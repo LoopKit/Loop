@@ -29,7 +29,7 @@ extension HKUnit {
         return HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter())
     }
     
-    // A glucose-centric presentation helper for the localized unit string
+    /// A glucose-centric presentation helper for the localized unit string
     var glucoseUnitDisplayString: String {
         if self == HKUnit.millimolesPerLiter() {
             return NSLocalizedString("mmol/L", comment: "The unit display string for millimoles of glucose per liter")
@@ -38,4 +38,12 @@ extension HKUnit {
         }
     }
 
+    /// An example value for the "ideal" target
+    var glucoseExampleTargetValue: Double {
+        if unitString == "mg/dL" {
+            return 100
+        } else {
+            return 5.5
+        }
+    }
 }
