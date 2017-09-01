@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import InsulinKit
 import LoopKit
 import RileyLinkKit
 import MinimedKit
@@ -112,7 +113,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
         case minimumBGGuard
-        case insulinActionDuration
+        case insulinModel
         case basalRate
         case carbRatio
         case insulinSensitivity
@@ -136,6 +137,29 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         return formatter
     }()
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        switch segue.destination {
+        case let vc as InsulinModelSettingsViewController:
+            vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
+
+            if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
+                vc.insulinSensitivitySchedule = insulinSensitivitySchedule
+            }
+
+            dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
+                DispatchQueue.main.async {
+                    if let unit = unit {
+                        vc.glucoseUnit = unit
+                    }
+
+                    vc.delegate = self
+                }
+            }
+        default:
+            break
+        }
+    }
     
     // MARK: - UITableViewDataSource
 
@@ -310,18 +334,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
-            case .insulinActionDuration:
-                configCell.textLabel?.text = NSLocalizedString("Insulin Action Duration", comment: "The title text for the insulin action duration value")
+            case .insulinModel:
+                configCell.textLabel?.text = NSLocalizedString("Insulin Model", comment: "The title text for the insulin model setting row")
 
-                if let insulinActionDuration = dataManager.loopManager.insulinActionDuration {
-                    let formatter = DateComponentsFormatter()
-                    formatter.unitsStyle = .abbreviated
-                    // Seems to have no effect.
-                    // http://stackoverflow.com/questions/32522965/what-am-i-doing-wrong-with-allowsfractionalunits-on-nsdatecomponentsformatter
-                    formatter.allowsFractionalUnits = true
-                    // formatter.allowedUnits = [.hour]
-
-                    configCell.detailTextLabel?.text = formatter.string(from: insulinActionDuration)
+                if let settings = dataManager.loopManager.insulinModelSettings {
+                    configCell.detailTextLabel?.text = settings.title
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -480,12 +497,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
-            case .insulinActionDuration, .maxBasal, .maxBolus:
+            case .maxBasal, .maxBolus:
                 let vc: TextFieldTableViewController
 
                 switch row {
-                case .insulinActionDuration:
-                    vc = .insulinActionDuration(dataManager.loopManager.insulinActionDuration)
                 case .maxBasal:
                     vc = .maxBasal(dataManager.loopManager.settings.maximumBasalRatePerHour)
                 case .maxBolus:
@@ -595,6 +610,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                         }
                     }
                 }
+            case .insulinModel:
+                performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
             }
         case .devices:
             let vc = RileyLinkDeviceTableViewController()
@@ -829,6 +846,31 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 }
 
 
+extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegate {
+    func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController) {
+        guard let indexPath = self.tableView.indexPathForSelectedRow else {
+            return
+        }
+
+        switch Section(rawValue: indexPath.section)! {
+        case .configuration:
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .insulinModel:
+                if let model = controller.insulinModel {
+                    dataManager.loopManager.insulinModelSettings = InsulinModelSettings(model: model)
+                }
+
+                tableView.reloadRows(at: [indexPath], with: .none)
+            default:
+                assertionFailure()
+            }
+        default:
+            assertionFailure()
+        }
+    }
+}
+
+
 extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate {
     func radioSelectionTableViewControllerDidChangeSelectedIndex(_ controller: RadioSelectionTableViewController) {
         if let indexPath = self.tableView.indexPathForSelectedRow {
@@ -901,12 +943,6 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                         dataManager.loopManager.settings.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.loopManager.settings.minimumBGGuard = nil
-                    }
-                case .insulinActionDuration:
-                    if let value = controller.value, let duration = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.insulinActionDuration = TimeInterval(hours: duration)
-                    } else {
-                        dataManager.loopManager.insulinActionDuration = nil
                     }
                 case .maxBasal:
                     if let value = controller.value, let rate = valueNumberFormatter.number(from: value)?.doubleValue {

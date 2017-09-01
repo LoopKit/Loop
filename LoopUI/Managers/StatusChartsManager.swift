@@ -353,8 +353,8 @@ public final class StatusChartsManager {
         var alternatePrediction: ChartLayer?
 
         if let altPoints = alternatePredictedGlucosePoints, altPoints.count > 1 {
-            // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
-            let lineModel = ChartLineModel(chartPoints: altPoints, lineColor: colors.glucoseTint, lineWidth: 2, animDuration: 0.0001, animDelay: 0, dashPattern: [6, 5])
+
+            let lineModel = ChartLineModel.predictionLine(points: altPoints, color: colors.glucoseTint, width: 2)
 
             alternatePrediction = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
         }
@@ -364,14 +364,10 @@ public final class StatusChartsManager {
         if predictedGlucosePoints.count > 1 {
             let lineColor = (alternatePrediction == nil) ? colors.glucoseTint : UIColor.secondaryLabelColor
 
-            // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
-            let lineModel = ChartLineModel(
-                chartPoints: predictedGlucosePoints,
-                lineColor: lineColor,
-                lineWidth: 1,
-                animDuration: 0.0001,
-                animDelay: 0,
-                dashPattern: [6, 5]
+            let lineModel = ChartLineModel.predictionLine(
+                points: predictedGlucosePoints,
+                color: lineColor,
+                width: 1
             )
 
             prediction = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
@@ -399,7 +395,12 @@ public final class StatusChartsManager {
             circles
         ]
 
-        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.flatMap { $0 })
+        return Chart(
+            frame: frame,
+            innerFrame: innerFrame,
+            settings: chartSettings,
+            layers: layers.flatMap { $0 }
+        )
     }
 
     public func iobChartWithFrame(_ frame: CGRect) -> Chart? {
@@ -745,6 +746,134 @@ public final class StatusChartsManager {
         return Chart(
             frame: frame,
             innerFrame: innerFrame,
+            settings: chartSettings,
+            layers: layers.flatMap { $0 }
+        )
+    }
+
+    // MARK: - Insulin Model Comparisons
+
+    /// The chart points for the selected model
+    public var selectedInsulinModelChartPoints: [ChartPoint] = [] {
+        didSet {
+            insulinModelChart = nil
+
+            if let lastDate = selectedInsulinModelChartPoints.last?.x as? ChartAxisValueDate {
+                updateEndDate(lastDate.date)
+            }
+        }
+    }
+
+    public var unselectedInsulinModelChartPoints: [[ChartPoint]] = [] {
+        didSet {
+            insulinModelChart = nil
+
+            for points in unselectedInsulinModelChartPoints {
+                if let lastDate = points.last?.x as? ChartAxisValueDate {
+                    updateEndDate(lastDate.date)
+                }
+            }
+        }
+    }
+
+    private var insulinModelChart: Chart?
+
+    public func insulinModelChartWithFrame(_ frame: CGRect) -> Chart? {
+        if let chart = insulinModelChart, chart.frame != frame {
+            self.insulinModelChart = nil
+        }
+
+        if insulinModelChart == nil {
+            insulinModelChart = generateInsulinModelChartWithFrame(frame)
+        }
+
+        return insulinModelChart
+    }
+
+    private func generateInsulinModelChartWithFrame(_ frame: CGRect) -> Chart? {
+        guard let xAxisModel = xAxisModel, let xAxisValues = xAxisValues else {
+            return nil
+        }
+
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(glucoseDisplayRangePoints,
+            minSegmentCount: 2,
+            maxSegmentCount: 5,
+            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize / 50,
+            axisValueGenerator: {
+                ChartAxisValueDouble(round($0), labelSettings: self.axisLabelSettings)
+            },
+            addPaddingSegmentIfEdge: false
+        )
+
+        let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
+
+        let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(
+            chartSettings: chartSettings,
+            chartFrame: frame,
+            xModel: xAxisModel,
+            yModel: yAxisModel
+        )
+
+        // Grid lines
+        let gridLayer = ChartGuideLinesForValuesLayer(
+            xAxis: coordsSpace.xAxisLayer.axis,
+            yAxis: coordsSpace.yAxisLayer.axis,
+            settings: guideLinesLayerSettings,
+            axisValuesX: Array(xAxisValues.dropFirst().dropLast()),
+            axisValuesY: yAxisValues
+        )
+
+        // Selected line
+        var selectedLayer: ChartLayer?
+
+        if selectedInsulinModelChartPoints.count > 1 {
+            let lineModel = ChartLineModel.predictionLine(
+                points: selectedInsulinModelChartPoints,
+                color: colors.glucoseTint,
+                width: 2
+            )
+
+            selectedLayer = ChartPointsLineLayer(
+                xAxis: coordsSpace.xAxisLayer.axis,
+                yAxis: coordsSpace.yAxisLayer.axis,
+                lineModels: [lineModel]
+            )
+        }
+
+        var unselectedLineModels = [ChartLineModel]()
+
+        for points in unselectedInsulinModelChartPoints {
+            guard points.count > 1 else { continue }
+
+            unselectedLineModels.append(ChartLineModel.predictionLine(
+                points: points,
+                color: UIColor.secondaryLabelColor,
+                width: 1
+            ))
+        }
+
+        // Unselected lines
+        var unselectedLayer: ChartLayer?
+
+        if unselectedLineModels.count > 0 {
+            unselectedLayer = ChartPointsLineLayer(
+                xAxis: coordsSpace.xAxisLayer.axis,
+                yAxis: coordsSpace.yAxisLayer.axis,
+                lineModels: unselectedLineModels
+            )
+        }
+
+        let layers: [ChartLayer?] = [
+            gridLayer,
+            coordsSpace.xAxisLayer,
+            coordsSpace.yAxisLayer,
+            unselectedLayer,
+            selectedLayer
+        ]
+
+        return Chart(
+            frame: frame,
+            innerFrame: coordsSpace.chartInnerFrame,
             settings: chartSettings,
             layers: layers.flatMap { $0 }
         )

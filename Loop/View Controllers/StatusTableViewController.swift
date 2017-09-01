@@ -154,7 +154,7 @@ final class StatusTableViewController: ChartsTableViewController {
         let minimumSegmentWidth: CGFloat = 50
         let availableWidth = (size ?? self.tableView.bounds.size).width - self.charts.fixedHorizontalMargin
         let totalHours = floor(Double(availableWidth / minimumSegmentWidth))
-        let historyHours = totalHours - (deviceManager.loopManager.insulinActionDuration ?? TimeInterval(hours: 4)).hours
+        let historyHours = totalHours - (deviceManager.loopManager.insulinModelSettings?.model.effectDuration ?? TimeInterval(hours: 4)).hours
 
         var components = DateComponents()
         components.minute = 0

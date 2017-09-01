@@ -13,7 +13,7 @@ import ShareClient
 
 final class RemoteDataManager {
 
-    var delegate: RemoteDataManagerDelegate?
+    weak var delegate: RemoteDataManagerDelegate?
 
     var nightscoutService: NightscoutService {
         didSet {
