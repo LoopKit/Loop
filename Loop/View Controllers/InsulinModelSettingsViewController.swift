@@ -44,9 +44,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             }
 
             refreshContext = true
-            if visible && active {
-                reloadData()
-            }
+            reloadData()
         }
     }
 
@@ -145,7 +143,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
 
     // MARK: - ChartsTableViewController
 
-    override func reloadData(animated: Bool = true, to size: CGSize? = nil) {
+    override func reloadData(animated: Bool = true) {
         if active && visible && refreshContext {
             refreshContext = false
             charts.startDate = Calendar.current.nextDate(after: Date(), matching: DateComponents(minute: 0), matchingPolicy: .strict, direction: .backward) ?? Date()

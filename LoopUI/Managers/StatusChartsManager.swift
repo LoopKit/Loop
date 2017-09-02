@@ -23,7 +23,10 @@ public final class StatusChartsManager {
         self.colors = colors
         self.chartSettings = settings
 
-        axisLabelSettings = ChartLabelSettings(font: UIFont.preferredFont(forTextStyle: UIFontTextStyle.caption1), fontColor: colors.axisLabel)
+        axisLabelSettings = ChartLabelSettings(
+            font: .systemFont(ofSize: 14),  // caption1, but hard-coded until axis can scale with type preference
+            fontColor: colors.axisLabel
+        )
 
         guideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: colors.grid)
     }
@@ -102,6 +105,13 @@ public final class StatusChartsManager {
         }
     }
 
+    /// The latest allowed date on the X-axis
+    public var maxEndDate = Date.distantFuture {
+        didSet {
+            endDate = min(endDate, maxEndDate)
+        }
+    }
+
     /// Updates the endDate using a new candidate date
     /// 
     /// Dates are rounded up to the next hour.
@@ -111,7 +121,15 @@ public final class StatusChartsManager {
         if date > endDate {
             var components = DateComponents()
             components.minute = 0
-            endDate = Calendar.current.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .forward) ?? date
+            endDate = min(
+                maxEndDate,
+                Calendar.current.nextDate(
+                    after: date,
+                    matching: components,
+                    matchingPolicy: .strict,
+                    direction: .forward
+                ) ?? date
+            )
         }
     }
 
