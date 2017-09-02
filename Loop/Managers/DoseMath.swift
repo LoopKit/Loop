@@ -186,7 +186,7 @@ private func insulinCorrectionUnits(fromValue: Double, toValue: Double, effected
 }
 
 
-extension Collection where Element == GlucoseValue {
+extension Collection where Iterator.Element == GlucoseValue {
 
     /// For a collection of glucose prediction, determine the least amount of insulin delivered at
     /// `date` to correct the predicted glucose to the middle of `correctionRange` at the time of prediction.
