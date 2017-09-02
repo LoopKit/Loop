@@ -102,6 +102,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 91
     }
 

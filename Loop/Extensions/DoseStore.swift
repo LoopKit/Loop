@@ -81,13 +81,17 @@ extension LoopDataManager {
                 }
             case let alarm as PumpAlarmPumpEvent:
                 eventType = .alarm
+
                 if case .noDelivery = alarm.alarmType {
-                    // TODO: Interpret a no delivery alarm as a suspend
+                    dose = DoseEntry(suspendDate: event.date)
                 }
                 break
-            case is ClearAlarmPumpEvent:
+            case let alarm as ClearAlarmPumpEvent:
                 eventType = .alarmClear
-                // TODO: Interpret a clear no delivery as a Resume
+
+                if case .noDelivery = alarm.alarmType {
+                    dose = DoseEntry(resumeDate: event.date)
+                }
                 break
             default:
                 break
