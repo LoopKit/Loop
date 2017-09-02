@@ -49,7 +49,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
                     case .none, .bolus?:
-                        self.refreshContext.update(with: .status)
+                        self.refreshContext.formUnion([.status, .insulin])
                     case .preferences?:
                         self.refreshContext.formUnion([.status, .targets])
                     case .carbs?:

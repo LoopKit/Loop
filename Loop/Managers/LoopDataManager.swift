@@ -320,15 +320,34 @@ final class LoopDataManager {
         }
     }
 
+    /// Adds a bolus requested of the pump, but not confirmed.
+    ///
+    /// - Parameters:
+    ///   - units: The bolus amount, in units
+    ///   - date: The date the bolus was requested
+    func addRequestedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
+        dataAccessQueue.async {
+            self.lastRequestedBolus = (units: units, date: date)
+            self.notify(forChange: .bolus)
+
+            completion?()
+        }
+    }
+
     /// Adds a bolus enacted by the pump, but not fully delivered.
     ///
     /// - Parameters:
     ///   - units: The bolus amount, in units
     ///   - date: The date the bolus was enacted
-    func addExpectedBolus(_ units: Double, at date: Date) {
-        dataAccessQueue.async {
-            self.lastBolus = (units: units, date: date)
-            self.notify(forChange: .bolus)
+    func addConfirmedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
+        self.doseStore.addPendingPumpEvent(.enactedBolus(units: units, at: date)) {
+            self.dataAccessQueue.async {
+                self.lastRequestedBolus = nil
+                self.insulinEffect = nil
+                self.notify(forChange: .bolus)
+
+                completion?()
+            }
         }
     }
 
@@ -344,8 +363,8 @@ final class LoopDataManager {
                 if error == nil {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if let bolusDate = self.lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
-                        self.lastBolus = nil
+                    if let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                        self.lastRequestedBolus = nil
                     }
                 }
 
@@ -372,8 +391,8 @@ final class LoopDataManager {
                 self.dataAccessQueue.async {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if areStoredValuesContinuous, let bolusDate = self.lastBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
-                        self.lastBolus = nil
+                    if areStoredValuesContinuous, let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                        self.lastRequestedBolus = nil
                     }
 
                     completion(.success((
@@ -611,7 +630,7 @@ final class LoopDataManager {
             pendingTempBasalInsulin = 0
         }
 
-        let pendingBolusAmount: Double = lastBolus?.units ?? 0
+        let pendingBolusAmount: Double = lastRequestedBolus?.units ?? 0
 
         // All outstanding potential insulin delivery
         return pendingTempBasalInsulin + pendingBolusAmount
@@ -699,7 +718,7 @@ final class LoopDataManager {
     fileprivate var carbsOnBoard: CarbValue?
 
     fileprivate var lastTempBasal: DoseEntry?
-    fileprivate var lastBolus: (units: Double, date: Date)?
+    fileprivate var lastRequestedBolus: (units: Double, date: Date)?
     fileprivate var lastLoopCompleted: Date? {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
@@ -852,7 +871,7 @@ final class LoopDataManager {
         }
 
         guard
-            lastBolus == nil,  // Don't recommend changes if a bolus was just set
+            lastRequestedBolus == nil,  // Don't recommend changes if a bolus was just set
             let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
                 lastTempBasal: lastTempBasal,
                 maxBasalRate: maxBasal,
@@ -1091,7 +1110,7 @@ extension LoopDataManager {
                 "predictedGlucose: \(state.predictedGlucose ?? [])",
                 "retrospectivePredictedGlucose: \(state.retrospectivePredictedGlucose ?? [])",
                 "recommendedTempBasal: \(String(describing: state.recommendedTempBasal))",
-                "lastBolus: \(String(describing: manager.lastBolus))",
+                "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastGlucoseChange: \(String(describing: manager.lastGlucoseChange))",
                 "retrospectiveGlucoseChange: \(String(describing: manager.retrospectiveGlucoseChange))",
                 "lastLoopCompleted: \(String(describing: state.lastLoopCompleted))",

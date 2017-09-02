@@ -427,13 +427,16 @@ final class DeviceDataManager {
         }
 
         let setBolus = {
-            ops.setNormalBolus(units: units) { (error) in
-                if let error = error {
-                    self.logger.addError(error, fromSource: "Bolus")
-                    notify(error)
-                } else {
-                    self.loopManager.addExpectedBolus(units, at: Date())
-                    notify(nil)
+            self.loopManager.addRequestedBolus(units: units, at: Date()) {
+                ops.setNormalBolus(units: units) { (error) in
+                    if let error = error {
+                        self.logger.addError(error, fromSource: "Bolus")
+                        notify(error)
+                    } else {
+                        self.loopManager.addConfirmedBolus(units: units, at: Date()) {
+                             notify(nil)
+                        }
+                    }
                 }
             }
         }
@@ -735,28 +738,33 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return
         }
 
+        let notify = { (result: Result<DoseEntry>) -> Void in
+            // If we haven't fetched history in a while (preferredInsulinDataSource == .reservoir),
+            // let's try to do so while the pump radio is on.
+            if self.loopManager.doseStore.lastAddedPumpEvents.timeIntervalSinceNow < .minutes(-4) {
+                self.fetchPumpHistory { (_) in
+                    completion(result)
+                }
+            } else {
+                completion(result)
+            }
+        }
+
         ops.setTempBasal(rate: basal.rate, duration: basal.duration) { (result) -> Void in
             switch result {
             case .success(let body):
                 let now = Date()
                 let endDate = now.addingTimeInterval(body.timeRemaining)
                 let startDate = endDate.addingTimeInterval(-basal.duration)
-
-                completion(.success(DoseEntry(
+                notify(.success(DoseEntry(
                     type: .tempBasal,
                     startDate: startDate,
                     endDate: endDate,
                     value: body.rate,
                     unit: .unitsPerHour
                 )))
-
-                // If we haven't fetched history in a while (preferredInsulinDataSource == .reservoir), 
-                // let's try to do so while the pump radio is on.
-                if self.loopManager.doseStore.lastAddedPumpEvents.timeIntervalSinceNow < .minutes(-4) {
-                    self.fetchPumpHistory { (_) in }
-                }
             case .failure(let error):
-                completion(.failure(error))
+                notify(.failure(error))
             }
         }
     }
