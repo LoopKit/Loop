@@ -87,6 +87,7 @@
 		438A95A81D8B9B24009D12E1 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438A95A71D8B9B24009D12E1 /* xDripG5.framework */; };
 		438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */; };
 		438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */; };
+		43947D731F529FAA00A07D31 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
 		4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4398973A1CD2FC2000223065 /* NSDateFormatter.swift */; };
 		439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED291E76093C00B0AED5 /* CGMManager.swift */; };
@@ -1663,6 +1664,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C17824A11E19E8C200D9D25C /* GlucoseThreshold.swift in Sources */,
+				43947D731F529FAA00A07D31 /* GlucoseRangeSchedule.swift in Sources */,
 				43E2D8DC1D20C049004DA55F /* DoseMath.swift in Sources */,
 				43E2D8DB1D20C03B004DA55F /* NSTimeInterval.swift in Sources */,
 				43E2D8D41D20BF42004DA55F /* DoseMathTests.swift in Sources */,
