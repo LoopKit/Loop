@@ -344,7 +344,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqualWithAccuracy(1.1, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(1.475, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -564,7 +564,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.225, dose.amount)
+        XCTAssertEqual(1.575, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
             XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
@@ -586,7 +586,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
         
-        XCTAssertEqual(1.125, dose.amount)
+        XCTAssertEqual(1.4, dose.amount)
         XCTAssertEqual(BolusRecommendationNotice.predictedGlucoseBelowTarget(minGlucose: glucose[1]), dose.notice!)
     }
 
@@ -604,7 +604,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
         
-        XCTAssertEqual(0.225, dose.amount)
+        XCTAssertEqual(0.575, dose.amount)
     }
 
     func testStartVeryLowEndHigh() {
@@ -668,7 +668,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(0.15, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqualWithAccuracy(0.325, dose.amount, accuracy: 1.0 / 40.0)
 
         // Less existing temp
 

@@ -185,6 +185,29 @@ private func insulinCorrectionUnits(fromValue: Double, toValue: Double, effected
     return glucoseCorrection / effectedSensitivity
 }
 
+/// Computes a target glucose value for a correction, at a given time during the insulin effect duration
+///
+/// - Parameters:
+///   - percentEffectDuration: The percent of time elapsed of the insulin effect duration
+///   - minValue: The minimum (starting) target value
+///   - maxValue: The maximum (eventual) target value
+/// - Returns: A target value somewhere between the minimum and maximum
+private func targetGlucoseValue(percentEffectDuration: Double, minValue: Double, maxValue: Double) -> Double {
+    // The inflection point in time: before it we use minValue, after it we linearly blend from minValue to maxValue
+    let useMinValueUntilPercent = 0.5
+
+    guard percentEffectDuration > useMinValueUntilPercent else {
+        return minValue
+    }
+
+    guard percentEffectDuration < 1 else {
+        return maxValue
+    }
+
+    let slope = (maxValue - minValue) / (1 - useMinValueUntilPercent)
+    return minValue + slope * (percentEffectDuration - useMinValueUntilPercent)
+}
+
 
 extension Collection where Iterator.Element == GlucoseValue {
 
@@ -215,6 +238,7 @@ extension Collection where Iterator.Element == GlucoseValue {
 
         let unit = correctionRange.unit
         let sensitivityValue = sensitivity.doubleValue(for: unit)
+        let suspendThresholdValue = suspendThreshold.doubleValue(for: unit)
 
         // For each prediction above target, determine the amount of insulin necessary to correct glucose based on the modeled effectiveness of the insulin at that time
         for prediction in self {
@@ -233,18 +257,23 @@ extension Collection where Iterator.Element == GlucoseValue {
             }
             eventualGlucose = prediction
 
-            let predictedGlucose = prediction.quantity.doubleValue(for: unit)
-            let targetGlucose = correctionRange.value(at: prediction.startDate)
+            let predictedGlucoseValue = prediction.quantity.doubleValue(for: unit)
+            let time = prediction.startDate.timeIntervalSince(date)
+
+            // Compute the target value as a function of time since the dose started
+            let targetValue = targetGlucoseValue(
+                percentEffectDuration: time / model.effectDuration,
+                minValue: suspendThresholdValue, 
+                maxValue: correctionRange.value(at: prediction.startDate).averageValue)
 
             // Compute the dose required to bring this prediction to target:
             // dose = (Glucose Δ) / (% effect × sensitivity)
-            let time = prediction.startDate.timeIntervalSince(date)
+
             let percentEffected = 1 - model.percentEffectRemaining(at: time)
             let effectedSensitivity = percentEffected * sensitivityValue
-
             guard let correctionUnits = insulinCorrectionUnits(
-                fromValue: predictedGlucose,
-                toValue: targetGlucose.averageValue,
+                fromValue: predictedGlucoseValue,
+                toValue: targetValue,
                 effectedSensitivity: effectedSensitivity
             ), correctionUnits > 0 else {
                 continue
