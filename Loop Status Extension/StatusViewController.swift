@@ -61,36 +61,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     var defaults: UserDefaults?
     final var observationContext = 1
 
-    var loopCompletionHUD: LoopCompletionHUDView! {
-        get {
-            return hudView.loopCompletionHUD
-        }
-    }
-
-    var glucoseHUD: GlucoseHUDView! {
-        get {
-            return hudView.glucoseHUD
-        }
-    }
-
-    var basalRateHUD: BasalRateHUDView! {
-        get {
-            return hudView.basalRateHUD
-        }
-    }
-
-    var reservoirVolumeHUD: ReservoirVolumeHUDView! {
-        get {
-            return hudView.reservoirVolumeHUD
-        }
-    }
-
-    var batteryHUD: BatteryLevelHUDView! {
-        get {
-            return hudView.batteryHUD
-        }
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         subtitleLabel.isHidden = true
@@ -125,11 +95,13 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     }
     
     func widgetActiveDisplayModeDidChange(_ activeDisplayMode: NCWidgetDisplayMode, withMaximumSize maxSize: CGSize) {
+        let compactHeight = hudView.systemLayoutSizeFitting(maxSize).height + subtitleLabel.systemLayoutSizeFitting(maxSize).height
+
         switch activeDisplayMode {
         case .compact:
-            preferredContentSize = maxSize
+            preferredContentSize = CGSize(width: maxSize.width, height: compactHeight)
         case .expanded:
-            preferredContentSize = CGSize(width: maxSize.width, height: 210)
+            preferredContentSize = CGSize(width: maxSize.width, height: compactHeight + 100)
         }
     }
 
@@ -168,7 +140,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return NCUpdateResult.failed
         }
         if let lastGlucose = context.glucose?.last {
-            glucoseHUD.setGlucoseQuantity(lastGlucose.value,
+            hudView.glucoseHUD.setGlucoseQuantity(lastGlucose.value,
                at: lastGlucose.startDate,
                unit: lastGlucose.unit,
                sensor: context.sensor
@@ -176,21 +148,21 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
         
         if let batteryPercentage = context.batteryPercentage {
-            batteryHUD.batteryLevel = Double(batteryPercentage)
+            hudView.batteryHUD.batteryLevel = Double(batteryPercentage)
         }
         
         if let reservoir = context.reservoir {
-            reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(reservoir.capacity))))
-            reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+            hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(reservoir.capacity))))
+            hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
         }
 
         if let netBasal = context.netBasal {
-            basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
+            hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percentage, at: netBasal.start)
         }
 
         if let loop = context.loop {
-            loopCompletionHUD.dosingEnabled = loop.dosingEnabled
-            loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
+            hudView.loopCompletionHUD.dosingEnabled = loop.dosingEnabled
+            hudView.loopCompletionHUD.lastLoopCompleted = loop.lastCompleted
         }
 
         subtitleLabel.isHidden = true

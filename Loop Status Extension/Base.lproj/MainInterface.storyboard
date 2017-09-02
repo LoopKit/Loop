@@ -24,17 +24,17 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QEK-eF-fK6">
                                 <rect key="frame" x="8" y="0.0" width="359" height="220"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="d8d-rW-z8J" customClass="HUDView" customModule="LoopUI">
+                                    <view contentMode="scaleToFill" verticalHuggingPriority="252" translatesAutoresizingMaskIntoConstraints="NO" id="VIh-8L-VsB" customClass="HUDView" customModule="LoopUI">
                                         <rect key="frame" x="0.0" y="0.0" width="359" height="70"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="70" id="CMw-Lk-A0P"/>
+                                            <constraint firstAttribute="height" constant="70" placeholder="YES" id="DpL-aY-Gr3"/>
                                         </constraints>
-                                    </stackView>
+                                    </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3n2-yC-jGi">
-                                        <rect key="frame" x="0.0" y="70" width="359" height="40"/>
+                                        <rect key="frame" x="0.0" y="70" width="359" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" layoutMarginsFollowReadableWidth="YES" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
-                                                <rect key="frame" x="8" y="0.0" width="343" height="40"/>
+                                                <rect key="frame" x="8" y="0.0" width="343" height="50"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="aVA-Mg-CvQ"/>
                                                 </constraints>
@@ -50,8 +50,8 @@
                                             <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="8" id="x9b-EB-fji"/>
                                         </constraints>
                                     </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContainerView" customModule="LoopUI">
-                                        <rect key="frame" x="0.0" y="110" width="359" height="110"/>
+                                    <view contentMode="scaleToFill" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContainerView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="120" width="359" height="100"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" priority="750" constant="100" id="rLK-f9-lLl"/>
@@ -75,7 +75,7 @@
                     <size key="freeformSize" width="375" height="220"/>
                     <connections>
                         <outlet property="glucoseChartContentView" destination="GVu-hk-PBg" id="gfZ-nx-P6V"/>
-                        <outlet property="hudView" destination="d8d-rW-z8J" id="7Cp-BW-Kpc"/>
+                        <outlet property="hudView" destination="VIh-8L-VsB" id="NsP-iq-J4a"/>
                         <outlet property="subtitleLabel" destination="9iF-xY-Bh4" id="PM8-hd-IB3"/>
                     </connections>
                 </viewController>

@@ -101,8 +101,11 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             default:
                 break
             }
-
-            task.setTaskCompleted()
+            #if swift(>=3.2)
+                task.setTaskCompletedWithSnapshot(false)
+            #else
+                task.setTaskCompleted()
+            #endif
         }
     }
 
@@ -110,7 +113,13 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     private func completePendingConnectivityTasksIfNeeded() {
         if WCSession.default().activationState == .activated && !WCSession.default().hasContentPending {
-            pendingConnectivityTasks.forEach { $0.setTaskCompleted() }
+            pendingConnectivityTasks.forEach {
+                #if swift(>=3.2)
+                    $0.setTaskCompletedWithSnapshot(false)
+                #else
+                    $0.setTaskCompleted()
+                #endif
+            }
             pendingConnectivityTasks.removeAll()
         }
     }
