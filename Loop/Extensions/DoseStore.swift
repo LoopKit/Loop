@@ -27,7 +27,10 @@ extension LoopDataManager {
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:
-                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: bolus.amount, unit: .units)
+                // For entries in-progress, use the programmed amount
+                let units = event.isMutable() ? bolus.programmed : bolus.amount
+
+                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: units, unit: .units)
             case is SuspendPumpEvent:
                 dose = DoseEntry(suspendDate: event.date)
             case is ResumePumpEvent:
