@@ -694,6 +694,8 @@ extension DeviceDataManager: CGMManagerDelegate {
             self.setLastError(error: error)
             self.assertCurrentPumpData()
         }
+
+        updateTimerTickPreference()
     }
 
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
