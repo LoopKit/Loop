@@ -124,11 +124,11 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule = nil
                 }
 
-                let minimumBGGuard: GlucoseThreshold?
+                let suspendThreshold: GlucoseThreshold?
                 if let rawValue = dictionary(forKey: "com.loopkit.Loop.MinimumBGGuard") {
-                    minimumBGGuard = GlucoseThreshold(rawValue: rawValue)
+                    suspendThreshold = GlucoseThreshold(rawValue: rawValue)
                 } else {
-                    minimumBGGuard = nil
+                    suspendThreshold = nil
                 }
 
                 var maximumBasalRatePerHour: Double? = double(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
@@ -146,7 +146,7 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
-                    minimumBGGuard: minimumBGGuard,
+                    suspendThreshold: suspendThreshold,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings

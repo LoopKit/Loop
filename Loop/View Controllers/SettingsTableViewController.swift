@@ -115,7 +115,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
-        case minimumBGGuard
+        case suspendThreshold
         case insulinModel
         case basalRate
         case carbRatio
@@ -328,12 +328,12 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
-            case .minimumBGGuard:
-                configCell.textLabel?.text = NSLocalizedString("Minimum BG Guard", comment: "The title text for the minimum bg guard setting")
+            case .suspendThreshold:
+                configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
                 
-                if let minimumBGGuard = dataManager.loopManager.settings.minimumBGGuard {
-                    let value = valueNumberFormatter.string(from: NSNumber(value: minimumBGGuard.value)) ?? "-"
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string for minimum bg guard. (1: value)(2: bg unit)"), value, minimumBGGuard.unit.glucoseUnitDisplayString)
+                if let suspendThreshold = dataManager.loopManager.settings.suspendThreshold {
+                    let value = valueNumberFormatter.string(from: NSNumber(value: suspendThreshold.value)) ?? "-"
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string for current suspend threshold. (1: value)(2: bg unit)"), value, suspendThreshold.unit.glucoseUnitDisplayString)
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -591,8 +591,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                         }
                     }
                 }
-            case .minimumBGGuard:
-                if let minBGGuard = dataManager.loopManager.settings.minimumBGGuard {
+            case .suspendThreshold:
+                if let minBGGuard = dataManager.loopManager.settings.suspendThreshold {
                     let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnit: minBGGuard.unit)
                     vc.delegate = self
                     vc.indexPath = indexPath
@@ -940,12 +940,12 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
                 }
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
-                case .minimumBGGuard:
+                case .suspendThreshold:
                     if let controller = controller as? GlucoseThresholdTableViewController,
                         let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.minimumBGGuard = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
+                        dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
-                        dataManager.loopManager.settings.minimumBGGuard = nil
+                        dataManager.loopManager.settings.suspendThreshold = nil
                     }
                 case .maxBasal:
                     if let value = controller.value, let rate = valueNumberFormatter.number(from: value)?.doubleValue {
