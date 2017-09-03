@@ -25,8 +25,6 @@ final class LoopDataManager {
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
-    typealias TempBasalRecommendation = (recommendedDate: Date, rate: Double, duration: TimeInterval)
-
     fileprivate typealias GlucoseChange = (start: GlucoseValue, end: GlucoseValue)
 
     let carbStore: CarbStore!
@@ -713,7 +711,7 @@ final class LoopDataManager {
             retrospectiveGlucoseEffect = []
         }
     }
-    fileprivate var recommendedTempBasal: TempBasalRecommendation?
+    fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
 
     fileprivate var carbsOnBoard: CarbValue?
 
@@ -882,7 +880,7 @@ final class LoopDataManager {
             return
         }
 
-        recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.unitsPerHour, duration: tempBasal.duration)
+        recommendedTempBasal = (recommendation: tempBasal, date: Date())
     }
 
     /// - Returns: A bolus recommendation from the current data
@@ -934,8 +932,8 @@ final class LoopDataManager {
             return
         }
 
-        guard abs(recommendedTempBasal.recommendedDate.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
-            completion(LoopError.recommendationExpired(date: recommendedTempBasal.recommendedDate))
+        guard abs(recommendedTempBasal.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            completion(LoopError.recommendationExpired(date: recommendedTempBasal.date))
             return
         }
 
@@ -977,7 +975,7 @@ protocol LoopState {
     var predictedGlucose: [GlucoseValue]? { get }
 
     /// The recommended temp basal based on predicted glucose
-    var recommendedTempBasal: LoopDataManager.TempBasalRecommendation? { get }
+    var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? { get }
 
     /// The retrospective prediction over a recent period of glucose samples
     var retrospectivePredictedGlucose: [GlucoseValue]? { get }
@@ -1042,7 +1040,7 @@ extension LoopDataManager {
             return loopDataManager.predictedGlucose
         }
 
-        var recommendedTempBasal: LoopDataManager.TempBasalRecommendation? {
+        var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.recommendedTempBasal
         }
@@ -1167,5 +1165,5 @@ protocol LoopDataManagerDelegate: class {
     ///   - basal: The new recommended basal
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
-    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: LoopDataManager.TempBasalRecommendation, completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
 }
