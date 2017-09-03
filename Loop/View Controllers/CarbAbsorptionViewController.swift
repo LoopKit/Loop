@@ -147,6 +147,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         switch result {
                         case .success(let status):
                             carbStatuses = status
+                            carbsOnBoard = status.clampedCarbsOnBoard
                         case .failure(let error):
                             self.deviceManager.logger.addError(error, fromSource: "CarbStore")
                             refreshContext.update(with: .carbs)
@@ -167,8 +168,6 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         }
                         reloadGroup.leave()
                     }
-
-                    carbsOnBoard = state.carbsOnBoard
                 }
 
                 if refreshContext.remove(.targets) != nil {
