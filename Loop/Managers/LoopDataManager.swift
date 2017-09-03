@@ -856,37 +856,33 @@ final class LoopDataManager {
         let predictedGlucose = try predictGlucose(using: settings.enabledEffects)
         self.predictedGlucose = predictedGlucose
 
-        guard let minimumBGGuard = settings.minimumBGGuard else {
-            throw LoopError.configurationError("Minimum BG Guard")
-        }
-
         guard let
             maxBasal = settings.maximumBasalRatePerHour,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule,
-            let insulinActionDuration = insulinModelSettings?.model.effectDuration
+            let model = insulinModelSettings?.model
         else {
             throw LoopError.configurationError("Check settings")
         }
 
         guard
             lastRequestedBolus == nil,  // Don't recommend changes if a bolus was just set
-            let tempBasal = DoseMath.recommendTempBasalFromPredictedGlucose(predictedGlucose,
-                lastTempBasal: lastTempBasal,
+            let tempBasal = predictedGlucose.recommendedTempBasal(
+                to: glucoseTargetRange,
+                suspendThreshold: settings.minimumBGGuard?.quantity,
+                sensitivity: insulinSensitivity,
+                model: model,
+                basalRates: basalRates,
                 maxBasalRate: maxBasal,
-                glucoseTargetRange: glucoseTargetRange,
-                insulinSensitivity: insulinSensitivity,
-                basalRateSchedule: basalRates,
-                minimumBGGuard: minimumBGGuard,
-                insulinActionDuration: insulinActionDuration
+                lastTempBasal: lastTempBasal
             )
         else {
             recommendedTempBasal = nil
             return
         }
 
-        recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.rate, duration: tempBasal.duration)
+        recommendedTempBasal = (recommendedDate: Date(), rate: tempBasal.unitsPerHour, duration: tempBasal.duration)
     }
 
     /// - Returns: A bolus recommendation from the current data
@@ -897,17 +893,12 @@ final class LoopDataManager {
     fileprivate func recommendBolus() throws -> BolusRecommendation {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard let minimumBGGuard = settings.minimumBGGuard else {
-            throw LoopError.configurationError("Minimum BG Guard")
-        }
-
         guard
             let predictedGlucose = predictedGlucose,
             let maxBolus = settings.maximumBolus,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
-            let basalRates = basalRateSchedule,
-            let insulinActionDuration = insulinModelSettings?.model.effectDuration
+            let model = insulinModelSettings?.model
         else {
             throw LoopError.configurationError("Check Settings")
         }
@@ -922,14 +913,13 @@ final class LoopDataManager {
 
         let pendingInsulin = try self.getPendingInsulin()
 
-        let recommendation = DoseMath.recommendBolusFromPredictedGlucose(predictedGlucose,
-            maxBolus: maxBolus,
-            glucoseTargetRange: glucoseTargetRange,
-            insulinSensitivity: insulinSensitivity,
-            basalRateSchedule: basalRates,
+        let recommendation = predictedGlucose.recommendedBolus(
+            to: glucoseTargetRange,
+            suspendThreshold: settings.minimumBGGuard?.quantity,
+            sensitivity: insulinSensitivity,
+            model: model,
             pendingInsulin: pendingInsulin,
-            minimumBGGuard: minimumBGGuard,
-            insulinActionDuration: insulinActionDuration
+            maxBolus: maxBolus
         )
 
         return recommendation
