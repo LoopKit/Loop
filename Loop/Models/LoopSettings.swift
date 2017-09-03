@@ -21,7 +21,7 @@ struct LoopSettings {
 
     var minimumBGGuard: GlucoseThreshold? = nil
 
-    var retrospectiveCorrectionEnabled = false
+    var retrospectiveCorrectionEnabled = true
 }
 
 
