@@ -729,7 +729,7 @@ extension DeviceDataManager: DoseStoreDelegate {
 
 
 extension DeviceDataManager: LoopDataManagerDelegate {
-    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: LoopDataManager.TempBasalRecommendation, completion: @escaping (_ result: Result<DoseEntry>) -> Void) {
+    func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) {
         guard let device = rileyLinkManager.firstConnectedDevice else {
             completion(.failure(LoopError.connectionError))
             return
@@ -752,12 +752,12 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             }
         }
 
-        ops.setTempBasal(rate: basal.rate, duration: basal.duration) { (result) -> Void in
+        ops.setTempBasal(rate: basal.recommendation.unitsPerHour, duration: basal.recommendation.duration) { (result) -> Void in
             switch result {
             case .success(let body):
                 let now = Date()
                 let endDate = now.addingTimeInterval(body.timeRemaining)
-                let startDate = endDate.addingTimeInterval(-basal.duration)
+                let startDate = endDate.addingTimeInterval(-basal.recommendation.duration)
                 notify(.success(DoseEntry(
                     type: .tempBasal,
                     startDate: startDate,

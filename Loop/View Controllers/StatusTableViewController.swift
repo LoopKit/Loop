@@ -147,6 +147,13 @@ final class StatusTableViewController: ChartsTableViewController {
 
     private var bolusState: BolusState? {
         didSet {
+            switch bolusState {
+            case .enacting?:
+                updateHUDandStatusRows(statusRowMode: .enactingBolus, newSize: nil, animated: true)
+            default:
+                updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+            }
+
             refreshContext.update(with: .status)
         }
     }
@@ -165,7 +172,7 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     private var shouldShowStatus: Bool {
-        return !landscapeMode && recommendedTempBasal != nil
+        return !landscapeMode && statusRowMode.hasRow
     }
 
     override func reloadData(animated: Bool = false) {
@@ -201,7 +208,8 @@ final class StatusTableViewController: ChartsTableViewController {
         var lastLoopError: Error?
         var lastReservoirValue: ReservoirValue?
         var lastTempBasal: DoseEntry?
-        var newRecommendedTempBasal: LoopDataManager.TempBasalRecommendation?
+        var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+        let bolusState = self.bolusState
 
         reloadGroup.enter()
         deviceManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
@@ -235,16 +243,17 @@ final class StatusTableViewController: ChartsTableViewController {
                     retryContext.update(with: .status)
                 }
 
-                switch self.bolusState {
-                case .recommended?, .enacting?:
-                    newRecommendedTempBasal = nil
-                case .none:
-                    newRecommendedTempBasal = state.recommendedTempBasal
-                }
-
                 lastTempBasal = state.lastTempBasal
                 lastLoopCompleted = state.lastLoopCompleted
                 lastLoopError = state.error
+
+                // Display a recommended basal change only if we haven't completed recently, or we're in open-loop mode
+                if state.lastLoopCompleted == nil ||
+                    state.lastLoopCompleted! < Date(timeIntervalSinceNow: .minutes(-6)) ||
+                    !manager.settings.dosingEnabled
+                {
+                    newRecommendedTempBasal = state.recommendedTempBasal
+                }
 
                 if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
                     self.eventualGlucoseDescription = String(describing: lastPoint)
@@ -392,39 +401,21 @@ final class StatusTableViewController: ChartsTableViewController {
             self.charts.prerender()
 
             // Show/hide the table view rows
-            let hudWasVisible = self.shouldShowHUD
-            let statusWasVisible = self.shouldShowStatus
+            let statusRowMode: StatusRowMode?
 
-            let oldRecommendedTempBasal = self.recommendedTempBasal
-            self.recommendedTempBasal = newRecommendedTempBasal
-            if let newSize = currentContext.newSize {
-                self.landscapeMode = newSize.width > newSize.height
-            }
-
-            let hudIsVisible = self.shouldShowHUD
-            let statusIsVisible = self.shouldShowStatus
-
-            switch (hudWasVisible, hudIsVisible) {
-            case (false, true):
-                self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .top : .none)
-            case (true, false):
-                self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .top : .none)
-            default:
-                break
-            }
-
-            switch (statusWasVisible, statusIsVisible) {
-            case (true, true):
-                if let old = oldRecommendedTempBasal, let new = newRecommendedTempBasal, old != new {
-                    self.tableView.reloadRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
+            switch bolusState {
+            case .recommended?, .enacting?:
+                statusRowMode = nil
+            case .none:
+                if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
+                    // TODO: Don't display this if we're in closed mode and the loop recently completed
+                    statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+                } else {
+                    statusRowMode = .hidden
                 }
-            case (false, true):
-                self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
-            case (true, false):
-                self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.status.rawValue)], with: animated ? .top : .none)
-            default:
-                break
             }
+
+            self.updateHUDandStatusRows(statusRowMode: statusRowMode, newSize: currentContext.newSize, animated: animated)
 
             for case let cell as ChartTableViewCell in self.tableView.visibleCells {
                 cell.reloadChart()
@@ -485,25 +476,94 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - Loop Status Section Data
 
     private enum StatusRow: Int {
-        case recommendedBasal = 0
+        case status = 0
 
         static let count = 1
     }
 
-    private var recommendedTempBasal: LoopDataManager.TempBasalRecommendation?
+    private enum StatusRowMode {
+        case hidden
+        case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
+        case enactingBolus
 
-    private var settingTempBasal: Bool = false {
-        didSet {
-            if let cell = tableView.cellForRow(at: IndexPath(row: StatusRow.recommendedBasal.rawValue, section: Section.status.rawValue)) {
-                if settingTempBasal {
-                    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-                    indicatorView.startAnimating()
-                    cell.accessoryView = indicatorView
-                } else {
-                    cell.accessoryView = nil
-                }
+        var hasRow: Bool {
+            switch self {
+            case .hidden:
+                return false
+            default:
+                return true
             }
         }
+    }
+
+    private var statusRowMode = StatusRowMode.hidden
+
+    private func updateHUDandStatusRows(statusRowMode: StatusRowMode?, newSize: CGSize?, animated: Bool) {
+        let hudWasVisible = self.shouldShowHUD
+        let statusWasVisible = self.shouldShowStatus
+
+        let oldStatusRowMode = self.statusRowMode
+        if let statusRowMode = statusRowMode {
+            self.statusRowMode = statusRowMode
+        }
+
+        if let newSize = newSize {
+            self.landscapeMode = newSize.width > newSize.height
+        }
+
+        let hudIsVisible = self.shouldShowHUD
+        let statusIsVisible = self.shouldShowStatus
+
+        tableView.beginUpdates()
+
+        switch (hudWasVisible, hudIsVisible) {
+        case (false, true):
+            self.tableView.insertRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .top : .none)
+        case (true, false):
+            self.tableView.deleteRows(at: [IndexPath(row: 0, section: Section.hud.rawValue)], with: animated ? .top : .none)
+        default:
+            break
+        }
+
+        let statusIndexPath = IndexPath(row: StatusRow.status.rawValue, section: Section.status.rawValue)
+
+        switch (statusWasVisible, statusIsVisible) {
+        case (true, true):
+            switch (oldStatusRowMode, self.statusRowMode) {
+            case (.recommendedTempBasal(tempBasal: let oldTempBasal, at: let oldDate, enacting: let wasEnacting),
+                  .recommendedTempBasal(tempBasal: let newTempBasal, at: let newDate, enacting: let isEnacting)):
+                // Ensure we have a change
+                guard oldTempBasal != newTempBasal || oldDate != newDate || wasEnacting != isEnacting else {
+                    break
+                }
+
+                // If the rate or date change, reload the row
+                if oldTempBasal != newTempBasal || oldDate != newDate {
+                    self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .top : .none)
+                } else if let cell = tableView.cellForRow(at: statusIndexPath) {
+                    // If only the enacting state changed, update the activity indicator
+                    if isEnacting {
+                        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                        indicatorView.startAnimating()
+                        cell.accessoryView = indicatorView
+                    } else {
+                        cell.accessoryView = nil
+                    }
+                }
+            case (.enactingBolus, .enactingBolus):
+                break
+            default:
+                self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .top : .none)
+            }
+        case (false, true):
+            self.tableView.insertRows(at: [statusIndexPath], with: animated ? .top : .none)
+        case (true, false):
+            self.tableView.deleteRows(at: [statusIndexPath], with: animated ? .top : .none)
+        default:
+            break
+        }
+
+        tableView.endUpdates()
     }
 
     // MARK: - Toolbar data
@@ -600,24 +660,35 @@ final class StatusTableViewController: ChartsTableViewController {
             cell.selectionStyle = .none
 
             switch StatusRow(rawValue: indexPath.row)! {
-            case .recommendedBasal:
-                if let recommendedTempBasal = recommendedTempBasal {
+            case .status:
+                switch statusRowMode {
+                case .hidden:
+                    cell.titleLabel.text = nil
+                    cell.subtitleLabel?.text = nil
+                    cell.accessoryView = nil
+                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
                     let timeFormatter = DateFormatter()
                     timeFormatter.dateStyle = .none
                     timeFormatter.timeStyle = .short
 
-                    cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U/hour @ %2$@", comment: "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: recommendedTempBasal.rate), number: .decimal), timeFormatter.string(from: recommendedTempBasal.recommendedDate))
+                    cell.titleLabel.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell displaying a recommended temp basal value")
+                    cell.subtitleLabel?.text = String(format: NSLocalizedString("%1$@ U/hour @ %2$@", comment: "The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time)"), NumberFormatter.localizedString(from: NSNumber(value: tempBasal.unitsPerHour), number: .decimal), timeFormatter.string(from: date))
                     cell.selectionStyle = .default
-                } else {
-                    cell.subtitleLabel?.text = "––"
-                }
 
-                if settingTempBasal {
+                    if enacting {
+                        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                        indicatorView.startAnimating()
+                        cell.accessoryView = indicatorView
+                    } else {
+                        cell.accessoryView = nil
+                    }
+                case .enactingBolus:
+                    cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")
+                    cell.subtitleLabel.text = nil
+
                     let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
-                } else {
-                    cell.accessoryView = nil
                 }
             }
 
@@ -697,14 +768,15 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         case .status:
             switch StatusRow(rawValue: indexPath.row)! {
-            case .recommendedBasal:
+            case .status:
                 tableView.deselectRow(at: indexPath, animated: true)
 
-                if recommendedTempBasal != nil && !settingTempBasal {
-                    settingTempBasal = true
+                if case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) = statusRowMode, !enacting {
+                    self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
+
                     self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
                         DispatchQueue.main.async {
-                            self.settingTempBasal = false
+                            self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
 
                             if let error = error {
                                 self.deviceManager.logger.addError(error, fromSource: "TempBasal")
@@ -793,7 +865,9 @@ final class StatusTableViewController: ChartsTableViewController {
             if let bolus = bolusViewController.bolus, bolus > 0 {
                 self.bolusState = .enacting
                 deviceManager.enactBolus(units: bolus) { (_) in
-                    self.bolusState = nil
+                    DispatchQueue.main.async {
+                        self.bolusState = nil
+                    }
                 }
             } else {
                 self.bolusState = nil
