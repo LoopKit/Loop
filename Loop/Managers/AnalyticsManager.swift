@@ -108,7 +108,7 @@ final class AnalyticsManager: IdentifiableClass {
             logEvent("Maximum bolus change")
         }
 
-        if newValue.minimumBGGuard != oldValue.minimumBGGuard {
+        if newValue.suspendThreshold != oldValue.suspendThreshold {
             logEvent("Minimum BG Guard change")
         }
     }

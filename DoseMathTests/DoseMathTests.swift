@@ -89,7 +89,7 @@ class RecommendTempBasalTests: XCTestCase {
         return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
     }
     
-    var minimumBGGuard: GlucoseThreshold {
+    var suspendThreshold: GlucoseThreshold {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter(), value: 55)
     }
 
@@ -107,7 +107,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -124,7 +124,7 @@ class RecommendTempBasalTests: XCTestCase {
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -146,7 +146,7 @@ class RecommendTempBasalTests: XCTestCase {
         dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -164,7 +164,7 @@ class RecommendTempBasalTests: XCTestCase {
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -185,7 +185,7 @@ class RecommendTempBasalTests: XCTestCase {
         dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -212,7 +212,7 @@ class RecommendTempBasalTests: XCTestCase {
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -226,7 +226,7 @@ class RecommendTempBasalTests: XCTestCase {
         dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -243,7 +243,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -261,7 +261,7 @@ class RecommendTempBasalTests: XCTestCase {
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -282,7 +282,7 @@ class RecommendTempBasalTests: XCTestCase {
         dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -300,7 +300,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -318,7 +318,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -336,7 +336,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -354,7 +354,7 @@ class RecommendTempBasalTests: XCTestCase {
         var dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: self.insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -371,7 +371,7 @@ class RecommendTempBasalTests: XCTestCase {
         dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -389,7 +389,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -407,7 +407,7 @@ class RecommendTempBasalTests: XCTestCase {
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -424,7 +424,7 @@ class RecommendTempBasalTests: XCTestCase {
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             basalRates: basalRateSchedule,
@@ -475,7 +475,7 @@ class RecommendBolusTests: XCTestCase {
         return InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 60.0)])!
     }
     
-    var minimumBGGuard: GlucoseThreshold {
+    var suspendThreshold: GlucoseThreshold {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter(), value: 55)
     }
 
@@ -493,7 +493,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -509,7 +509,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -525,7 +525,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -541,7 +541,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -557,7 +557,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -579,7 +579,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -597,7 +597,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 1,
@@ -613,7 +613,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -629,7 +629,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -645,7 +645,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -661,7 +661,7 @@ class RecommendBolusTests: XCTestCase {
         var dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -675,7 +675,7 @@ class RecommendBolusTests: XCTestCase {
         dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0.8,
@@ -691,7 +691,7 @@ class RecommendBolusTests: XCTestCase {
         var dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: self.insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -706,7 +706,7 @@ class RecommendBolusTests: XCTestCase {
         dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -722,7 +722,7 @@ class RecommendBolusTests: XCTestCase {
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
@@ -738,7 +738,7 @@ class RecommendBolusTests: XCTestCase {
 
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
-            suspendThreshold: minimumBGGuard.quantity,
+            suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,

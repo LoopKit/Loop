@@ -24,7 +24,7 @@ extension BolusRecommendationNotice {
         case .glucoseBelowSuspendThreshold(minGlucose: let minGlucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.describingGlucose(minGlucose.quantity, for: unit)!
-            return String(format: NSLocalizedString("Predicted glucose of %1$@ is below your suspend threshold setting.", comment: "Notice message when recommending bolus when BG is below minimum BG guard. (1: glucose value)"), bgStr)
+            return String(format: NSLocalizedString("Predicted glucose of %1$@ is below your suspend threshold setting.", comment: "Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value)"), bgStr)
         case .currentGlucoseBelowTarget(glucose: let glucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.describingGlucose(glucose.quantity, for: unit)!
