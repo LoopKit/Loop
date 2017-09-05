@@ -800,6 +800,13 @@ final class LoopDataManager {
             insulinEffect.filterDateRange(startDate, endDate)
         )
 
+        // Ensure we're not repeating effects
+        if let lastEffect = insulinCounteractionEffects.last {
+            guard startDate >= lastEffect.endDate else {
+                return
+            }
+        }
+
         // Compare that retrospective, insulin-driven prediction to the actual glucose change to
         // calculate the effect of all insulin counteraction
         guard let lastGlucose = prediction.last else { return }
@@ -807,7 +814,7 @@ final class LoopDataManager {
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
         let discrepancy = change.end.quantity.doubleValue(for: glucoseUnit) - lastGlucose.quantity.doubleValue(for: glucoseUnit) // mg/dL
         let averageVelocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / change.end.endDate.timeIntervalSince(change.start.endDate))
-        let effect = GlucoseEffectVelocity(startDate: change.start.startDate, endDate: change.end.startDate, quantity: averageVelocity)
+        let effect = GlucoseEffectVelocity(startDate: startDate, endDate: change.end.startDate, quantity: averageVelocity)
 
         insulinCounteractionEffects.append(effect)
         // For now, only keep the last 24 hours of values
