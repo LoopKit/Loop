@@ -327,7 +327,7 @@ public final class StatusChartsManager {
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 4,
-            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize,
+            multiple: glucoseUnit.chartableIncrement * 25,
             axisValueGenerator: {
                 ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings)
             },
@@ -686,7 +686,7 @@ public final class StatusChartsManager {
         }
 
         /// The minimum range to display for carb effect values.
-        let carbEffectDisplayRangePoints: [ChartPoint] = [0, glucoseUnit.glucoseUnitYAxisSegmentSize / 25.0].map {
+        let carbEffectDisplayRangePoints: [ChartPoint] = [0, glucoseUnit.chartableIncrement].map {
             return ChartPoint(
                 x: ChartAxisValue(scalar: 0),
                 y: ChartAxisValueDouble($0)
@@ -696,7 +696,7 @@ public final class StatusChartsManager {
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(carbEffectPoints + allCarbEffectPoints + carbEffectDisplayRangePoints,
             minSegmentCount: 2,
             maxSegmentCount: 4,
-            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize / 50,
+            multiple: glucoseUnit.chartableIncrement / 2,
             axisValueGenerator: {
                 ChartAxisValueDouble($0, labelSettings: self.axisLabelSettings)
             },
@@ -816,7 +816,7 @@ public final class StatusChartsManager {
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(glucoseDisplayRangePoints,
             minSegmentCount: 2,
             maxSegmentCount: 5,
-            multiple: glucoseUnit.glucoseUnitYAxisSegmentSize / 50,
+            multiple: glucoseUnit.chartableIncrement / 2,
             axisValueGenerator: {
                 ChartAxisValueDouble(round($0), labelSettings: self.axisLabelSettings)
             },
@@ -948,16 +948,6 @@ public final class StatusChartsManager {
             targetGlucosePoints = calculator.glucosePoints
             targetOverridePoints = calculator.overridePoints
             targetOverrideDurationPoints = calculator.overrideDurationPoints
-        }
-    }
-}
-
-private extension HKUnit {
-    var glucoseUnitYAxisSegmentSize: Double {
-        if self == HKUnit.milligramsPerDeciliter() {
-            return 25
-        } else {
-            return 1
         }
     }
 }
