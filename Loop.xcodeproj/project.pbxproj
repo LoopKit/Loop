@@ -81,8 +81,6 @@
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
-		438991681E91B570000EEF90 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438991661E91B563000EEF90 /* ChartPoint.swift */; };
-		438991691E91B571000EEF90 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438991661E91B563000EEF90 /* ChartPoint.swift */; };
 		4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */; };
 		438A95A81D8B9B24009D12E1 /* xDripG5.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 438A95A71D8B9B24009D12E1 /* xDripG5.framework */; };
 		438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */; };
@@ -163,6 +161,7 @@
 		43E93FB51E4675E800EAB8DB /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
+		43F1C31A1F5DC87700395429 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438991661E91B563000EEF90 /* ChartPoint.swift */; };
 		43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C361D3BF32400C11ED6 /* UIAlertController.swift */; };
 		43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F4EF1C1BA2A57600526CE1 /* DiagnosticLogger.swift */; };
 		43F5173D1D713DB0000FA422 /* RadioSelectionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5173C1D713DB0000FA422 /* RadioSelectionTableViewController.swift */; };
@@ -1060,6 +1059,7 @@
 			isa = PBXGroup;
 			children = (
 				4F08DE801E7BB6F1006741EA /* CGPoint.swift */,
+				438991661E91B563000EEF90 /* ChartPoint.swift */,
 				43649A621C7A347F00523D7F /* CollectionType.swift */,
 			);
 			path = Extensions;
@@ -1090,7 +1090,6 @@
 		4FF4D0FC1E1834CC00846527 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				438991661E91B563000EEF90 /* ChartPoint.swift */,
 				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
@@ -1531,7 +1530,6 @@
 				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
 				43BFF0CB1E466C0900FF19A9 /* StateColorPalette.swift in Sources */,
-				438991691E91B571000EEF90 /* ChartPoint.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				C11C87DD1E21E53500BB71D3 /* GlucoseThreshold.swift in Sources */,
 				434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */,
@@ -1697,7 +1695,6 @@
 				43BFF0C71E465A4F00FF19A9 /* UIColor+HIG.swift in Sources */,
 				43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
-				438991681E91B570000EEF90 /* ChartPoint.swift in Sources */,
 				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1723,6 +1720,7 @@
 				4FB76FC61E8C57B100B39636 /* StatusChartsManager.swift in Sources */,
 				4FB76FB41E8C3F7C00B39636 /* ChartAxisValueDoubleUnit.swift in Sources */,
 				4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */,
+				43F1C31A1F5DC87700395429 /* ChartPoint.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
 				4F20AE631E6B87B100D07A06 /* ChartContainerView.swift in Sources */,
 				4F7528A21DFE200B00C322D6 /* LevelMaskView.swift in Sources */,
