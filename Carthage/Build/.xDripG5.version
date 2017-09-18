@@ -1,11 +1,11 @@
 {
   "iOS" : [
     {
-      "hash" : "79cbe93b42fabad98bdcfb18194b45ac90a9b0fe26323c135f9c0f15e525c7df",
+      "hash" : "35cb6c6d9de549086ef2dbd86a480ec706e52d2aa3549899032d5cccfe68e599",
       "name" : "xDripG5"
     }
   ],
-  "commitish" : "v0.8.0",
+  "commitish" : "v0.8.1",
   "watchOS" : [
 
   ],
