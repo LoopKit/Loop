@@ -638,6 +638,10 @@ final class LoopDataManager {
     fileprivate func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
+        guard let model = insulinModelSettings?.model else {
+            throw LoopError.configurationError("Check settings")
+        }
+
         guard let glucose = self.glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(details: "Cannot predict glucose due to missing input data", recovery: "Check your CGM data source")
         }
@@ -661,7 +665,16 @@ final class LoopDataManager {
             effects.append(self.retrospectiveGlucoseEffect)
         }
 
-        return LoopMath.predictGlucose(glucose, momentum: momentum, effects: effects)
+        var prediction = LoopMath.predictGlucose(glucose, momentum: momentum, effects: effects)
+
+        // Dosing requires prediction entries at as long as the insulin model duration.
+        // If our prediciton is shorter than that, then extend it here.
+        let finalDate = glucose.startDate.addingTimeInterval(model.effectDuration)
+        if let last = prediction.last, last.startDate < finalDate {
+            prediction.append(PredictedGlucoseValue(startDate: finalDate, quantity: last.quantity))
+        }
+
+        return prediction
     }
 
     // MARK: - Calculation state

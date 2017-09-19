@@ -264,7 +264,8 @@ extension Collection where Iterator.Element == GlucoseValue {
             let targetValue = targetGlucoseValue(
                 percentEffectDuration: time / model.effectDuration,
                 minValue: suspendThresholdValue, 
-                maxValue: correctionRange.value(at: prediction.startDate).averageValue)
+                maxValue: correctionRange.value(at: prediction.startDate).averageValue
+            )
 
             // Compute the dose required to bring this prediction to target:
             // dose = (Glucose Δ) / (% effect × sensitivity)

@@ -62,6 +62,7 @@
 		435CB6291F37B01300C320C7 /* InsulinModelSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6281F37B01300C320C7 /* InsulinModelSettings.swift */; };
 		436961911F19D11E00447E89 /* ChartPointsContextFillLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */; };
 		436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
+		436D9BF81F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */; };
 		436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACED1D0BA636004E2427 /* InsulinDataSource.swift */; };
 		437272DF1F09E41200A3DA02 /* WCSession+Swift4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */; };
 		437272E01F09E41600A3DA02 /* WCSession+Swift4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */; };
@@ -428,6 +429,7 @@
 		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
 		4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsContextFillLayer.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
+		436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommended_temp_start_low_end_just_above_range.json; sourceTree = "<group>"; };
 		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
 		437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WCSession+Swift4.swift"; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -858,8 +860,10 @@
 		43E2D8E01D20C0CB004DA55F /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */,
 				43E2D8E11D20C0DB004DA55F /* read_selected_basal_profile.json */,
 				43E2D8E21D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json */,
+				C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */,
 				43E2D8E31D20C0DB004DA55F /* recommend_temp_basal_flat_and_high.json */,
 				43E2D8E41D20C0DB004DA55F /* recommend_temp_basal_high_and_falling.json */,
 				43E2D8E51D20C0DB004DA55F /* recommend_temp_basal_high_and_rising.json */,
@@ -869,10 +873,9 @@
 				43E2D8E91D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json */,
 				43E2D8EA1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json */,
 				43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */,
-				C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */,
 				C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */,
-				C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */,
-				C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */,
+				C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */,
+				436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -1420,6 +1423,7 @@
 				C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */,
 				43E2D8F41D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json in Resources */,
 				43E2D8EF1D20C0DB004DA55F /* recommend_temp_basal_high_and_falling.json in Resources */,
+				436D9BF81F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json in Resources */,
 				43E2D8ED1D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json in Resources */,
 				43E2D8F01D20C0DB004DA55F /* recommend_temp_basal_high_and_rising.json in Resources */,
 				C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */,

@@ -685,6 +685,22 @@ class RecommendBolusTests: XCTestCase {
         XCTAssertEqualWithAccuracy(0, dose.amount, accuracy: 1e-13)
     }
 
+    func testStartLowEndJustAboveRange() {
+        let glucose = loadGlucoseValueFixture("recommended_temp_start_low_end_just_above_range")
+
+        let dose = glucose.recommendedBolus(
+            to: glucoseTargetRange,
+            at: glucose.first!.startDate,
+            suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter(), doubleValue: 0),
+            sensitivity: insulinSensitivitySchedule,
+            model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0),
+            pendingInsulin: 0,
+            maxBolus: maxBolus
+        )
+
+        XCTAssertEqual(0.275, dose.amount)
+    }
+
     func testHighAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
 
