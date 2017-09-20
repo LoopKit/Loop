@@ -10,6 +10,7 @@ import HealthKit
 import UIKit
 import CarbKit
 import LoopKit
+import LoopUI
 
 
 final class StatusExtensionDataManager {
@@ -148,12 +149,13 @@ final class StatusExtensionDataManager {
                         )
                     }
 
-                if let override = targetRanges.temporaryOverride {
+                if let override = targetRanges.override {
                     context.temporaryOverride = DatedRangeContext(
-                        startDate: override.startDate,
-                        endDate: override.endDate,
+                        startDate: override.start,
+                        endDate: override.end ?? .distantFuture,
                         minValue: override.value.minValue,
-                        maxValue: override.value.maxValue)
+                        maxValue: override.value.maxValue
+                    )
                 }
             }
 
@@ -162,7 +164,8 @@ final class StatusExtensionDataManager {
                     isStateValid: sensorInfo.isStateValid,
                     stateDescription: sensorInfo.stateDescription,
                     trendType: sensorInfo.trendType,
-                    isLocal: sensorInfo.isLocal)
+                    isLocal: sensorInfo.isLocal
+                )
             }
 
             updateGroup.notify(queue: DispatchQueue.global(qos: .background)) {

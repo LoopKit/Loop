@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class HUDView: UIStackView, NibLoadable {
+public class HUDView: UIView, NibLoadable {
     @IBOutlet public weak var loopCompletionHUD: LoopCompletionHUDView!
     @IBOutlet public weak var glucoseHUD: GlucoseHUDView!
     @IBOutlet public weak var basalRateHUD: BasalRateHUDView!
@@ -32,7 +32,7 @@ public class HUDView: UIStackView, NibLoadable {
         setup()
     }
 
-    public required init(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
     }

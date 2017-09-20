@@ -6,14 +6,31 @@
 //
 
 import LoopKit
+import HealthKit
 
 
 extension GlucoseRangeSchedule {
-    var workoutModeEnabled: Bool? {
-        guard let override = temporaryOverride else {
+    func overrideEnabledForContext(_ context: Override.Context) -> Bool? {
+        guard let override = override, override.context == context else {
+            guard let value = overrideRanges[context], !value.isZero else {
+                // Unavailable to set
+                return nil
+            }
+
             return false
         }
 
-        return override.endDate.timeIntervalSinceNow > 0
+        return override.isActive()
+    }
+
+    func minQuantity(at date: Date) -> HKQuantity {
+        return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
+    }
+}
+
+
+extension DoubleRange {
+    var averageValue: Double {
+        return (maxValue + minValue) / 2
     }
 }

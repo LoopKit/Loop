@@ -1,7 +1,7 @@
-github "LoopKit/LoopKit" == 1.4.2
-github "LoopKit/xDripG5" ~> 0.8.0
-github "i-schuetz/SwiftCharts" ~> 0.6.0
-github "mddub/dexcom-share-client-swift" == 0.4.0
-github "mddub/G4ShareSpy" == 0.3.2
-github "ps2/rileylink_ios" == 1.2.0
+github "LoopKit/LoopKit" == 1.5.0
+github "LoopKit/xDripG5" ~> 0.8.1
+github "i-schuetz/SwiftCharts" "master"
+github "mddub/dexcom-share-client-swift" == 0.4.1
+github "mddub/G4ShareSpy" == 0.3.3
+github "ps2/rileylink_ios" == 1.2.2
 github "amplitude/Amplitude-iOS" ~> 3.8.5

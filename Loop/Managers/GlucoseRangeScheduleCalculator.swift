@@ -29,10 +29,10 @@ class GlucoseRangeScheduleCalculator: TargetPointsCalculator {
         {
             glucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, xAxisValues: xAxisValues)
 
-            if let override = schedule.temporaryOverride {
-                overridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, xAxisValues: xAxisValues)
+            if let override = schedule.override {
+                overridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues)
 
-                overrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverrideDuration(override, xAxisValues: xAxisValues)
+                overrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverrideDuration(override, unit: schedule.unit, xAxisValues: xAxisValues)
             } else {
                 overridePoints = []
                 overrideDurationPoints = []
