@@ -13,7 +13,7 @@ import LoopUI
 
 
 private extension RefreshContext {
-    static let all: RefreshContext = [.glucose, .targets]
+    static let all: Set<RefreshContext> = [.glucose, .targets]
 }
 
 
@@ -22,6 +22,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.rowHeight = UITableViewAutomaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
         charts.glucoseDisplayRange = (
@@ -37,7 +38,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
                     case .preferences?:
-                        self.refreshContext.update(with: [.status, .targets])
+                        self.refreshContext.formUnion([.status, .targets])
                     case .glucose?:
                         self.refreshContext.update(with: .glucose)
                     default:
@@ -54,12 +55,12 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         super.didReceiveMemoryWarning()
 
         if !visible {
-            refreshContext = .all
+            refreshContext = RefreshContext.all
         }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        refreshContext.update(with: .status)
+        refreshContext.update(with: .size(size))
 
         super.viewWillTransition(to: size, with: coordinator)
     }
@@ -76,16 +77,17 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
         set {
             if newValue != chartStartDate {
-                refreshContext = .all
+                refreshContext = RefreshContext.all
             }
 
             charts.startDate = newValue
         }
     }
 
-    override func reloadData(animated: Bool = false, to size: CGSize? = nil) {
+    override func reloadData(animated: Bool = false) {
         guard active && visible && !refreshContext.isEmpty else { return }
 
+        refreshContext.remove(.size(.zero))
         let calendar = Calendar.current
         var components = DateComponents()
         components.minute = 0
@@ -210,7 +212,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
-            cell.titleLabel?.textColor = UIColor.secondaryLabelColor
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
             cell.chartContentView.chartGenerator = { [weak self] (frame) in
                 return self?.charts.glucoseChartWithFrame(frame)?.view

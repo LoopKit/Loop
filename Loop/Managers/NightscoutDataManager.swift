@@ -85,7 +85,7 @@ final class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, carbsOnBoard: CarbValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: LoopDataManager.TempBasalRecommendation? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
+    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, carbsOnBoard: CarbValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
 
         guard deviceDataManager.remoteDataManager.nightscoutService.uploader != nil else {
             return
@@ -119,8 +119,8 @@ final class NightscoutDataManager {
 
         let recommended: RecommendedTempBasal?
 
-        if let recommendation = recommendedTempBasal {
-            recommended = RecommendedTempBasal(timestamp: recommendation.recommendedDate, rate: recommendation.rate, duration: recommendation.duration)
+        if let (recommendation: recommendation, date: date) = recommendedTempBasal {
+            recommended = RecommendedTempBasal(timestamp: date, rate: recommendation.unitsPerHour, duration: recommendation.duration)
         } else {
             recommended = nil
         }

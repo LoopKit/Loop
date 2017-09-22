@@ -7,4 +7,5 @@ framework module InsulinKit {
 
 module InsulinKit.Swift {
     header "InsulinKit-Swift.h"
+    requires objc
 }

@@ -61,13 +61,6 @@ struct PredictedGlucoseContext {
     }
 }
 
-struct DatedRangeContext {
-    let startDate: Date
-    let endDate: Date
-    let minValue: Double
-    let maxValue: Double
-}
-
 extension ReservoirContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
@@ -243,9 +236,9 @@ extension PredictedGlucoseContext: RawRepresentable {
 }
 
 extension DatedRangeContext: RawRepresentable {
-    typealias RawValue = [String: Any]
+    public typealias RawValue = [String: Any]
 
-    var rawValue: RawValue {
+    public var rawValue: RawValue {
         return [
             "startDate": startDate,
             "endDate": endDate,
@@ -254,7 +247,7 @@ extension DatedRangeContext: RawRepresentable {
         ]
     }
 
-    init?(rawValue: RawValue) {
+    public init?(rawValue: RawValue) {
         guard
             let startDate = rawValue["startDate"] as? Date,
             let endDate = rawValue["endDate"] as? Date,

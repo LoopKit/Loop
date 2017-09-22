@@ -156,12 +156,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     if error == nil {
                         AnalyticsManager.shared.didSetBolusFromWatch(bolus.value)
                     }
-
-                    replyHandler([:])
                 }
-            } else {
-                replyHandler([:])
             }
+
+            replyHandler([:])
         default:
             replyHandler([:])
         }
