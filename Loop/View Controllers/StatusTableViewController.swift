@@ -427,13 +427,12 @@ final class StatusTableViewController: ChartsTableViewController {
             self.tableView.endUpdates()
 
             self.reloading = false
+            let reloadNow = !self.refreshContext.isEmpty
+            self.refreshContext.formUnion(retryContext)
+
             // Trigger a reload if new context exists.
-            if !self.refreshContext.isEmpty {
-                self.refreshContext.formUnion(retryContext)
+            if reloadNow {
                 self.reloadData()
-            } else {
-                // If our only context is retry, wait for the next trigger
-                self.refreshContext.formUnion(retryContext)
             }
         }
     }
@@ -739,10 +738,17 @@ final class StatusTableViewController: ChartsTableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
-            // 20: Status bar
-            // 70: HUD
-            // 44: Toolbar
-            let availableSize = max(tableView.bounds.width, tableView.bounds.height) - 20 - 70 - 44
+            // Compute the height of the HUD, defaulting to 70
+            let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height ?? 70)
+            var availableSize = max(tableView.bounds.width, tableView.bounds.height)
+
+            if #available(iOS 11.0, *) {
+                availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + hudHeight)
+            } else {
+                // 20: Status bar
+                // 44: Toolbar
+                availableSize -= hudHeight + 20 + 44
+            }
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
