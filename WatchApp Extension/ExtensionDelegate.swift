@@ -101,11 +101,12 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             default:
                 break
             }
-            #if swift(>=3.2)
+
+            if #available(watchOSApplicationExtension 4.0, *) {
                 task.setTaskCompletedWithSnapshot(false)
-            #else
+            } else {
                 task.setTaskCompleted()
-            #endif
+            }
         }
     }
 
@@ -113,12 +114,12 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     private func completePendingConnectivityTasksIfNeeded() {
         if WCSession.default().activationState == .activated && !WCSession.default().hasContentPending {
-            pendingConnectivityTasks.forEach {
-                #if swift(>=3.2)
-                    $0.setTaskCompletedWithSnapshot(false)
-                #else
-                    $0.setTaskCompleted()
-                #endif
+            pendingConnectivityTasks.forEach { (task) in
+                if #available(watchOSApplicationExtension 4.0, *) {
+                    task.setTaskCompletedWithSnapshot(false)
+                } else {
+                    task.setTaskCompleted()
+                }
             }
             pendingConnectivityTasks.removeAll()
         }
