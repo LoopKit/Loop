@@ -64,8 +64,6 @@
 		436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
 		436D9BF81F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */; };
 		436FACEE1D0BA636004E2427 /* InsulinDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436FACED1D0BA636004E2427 /* InsulinDataSource.swift */; };
-		437272DF1F09E41200A3DA02 /* WCSession+Swift4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */; };
-		437272E01F09E41600A3DA02 /* WCSession+Swift4.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
@@ -431,7 +429,6 @@
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
 		436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommended_temp_start_low_end_just_above_range.json; sourceTree = "<group>"; };
 		436FACED1D0BA636004E2427 /* InsulinDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDataSource.swift; sourceTree = "<group>"; };
-		437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WCSession+Swift4.swift"; sourceTree = "<group>"; };
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -1101,7 +1098,6 @@
 				43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */,
 				43BFF0B11E45C18400FF19A9 /* UIColor.swift */,
 				43BFF0C31E4659E700FF19A9 /* UIColor+HIG.swift */,
-				437272DE1F09E41200A3DA02 /* WCSession+Swift4.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1573,7 +1569,6 @@
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				4F08DEA11E81D90F006741EA /* GlucoseRangeScheduleCalculator.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
-				437272DF1F09E41200A3DA02 /* WCSession+Swift4.swift in Sources */,
 				4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
@@ -1640,7 +1635,6 @@
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				4328E0291CFBE2C500E199AA /* NSUserDefaults.swift in Sources */,
 				4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */,
-				437272E01F09E41600A3DA02 /* WCSession+Swift4.swift in Sources */,
 				4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */,
 				4328E02A1CFBE2C500E199AA /* UIColor.swift in Sources */,
 				4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */,
