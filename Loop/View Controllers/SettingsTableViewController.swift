@@ -202,7 +202,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
                 switchCell.switch?.isOn = dataManager.loopManager.settings.dosingEnabled
-                switchCell.titleLabel.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
+                switchCell.textLabel?.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
                 switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
 
@@ -260,11 +260,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 switch row {
                 case .enlite:
                     switchCell.switch?.isOn = dataManager.cgm == .enlite
-                    switchCell.titleLabel.text = NSLocalizedString("Sof-Sensor / Enlite", comment: "The title text for the Medtronic sensor switch cell")
+                    switchCell.textLabel?.text = NSLocalizedString("Sof-Sensor / Enlite", comment: "The title text for the Medtronic sensor switch cell")
                     switchCell.switch?.addTarget(self, action: #selector(enliteChanged(_:)), for: .valueChanged)
                 case .g4:
                     switchCell.switch?.isOn = dataManager.cgm == .g4
-                    switchCell.titleLabel.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver switch cell")
+                    switchCell.textLabel?.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver switch cell")
                     switchCell.switch?.addTarget(self, action: #selector(g4Changed(_:)), for: .valueChanged)
                 case .g5:
                     if case .g5? = dataManager.cgm {
@@ -273,7 +273,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                         switchCell.switch?.isOn = false
                     }
 
-                    switchCell.titleLabel.text = NSLocalizedString("G5 Transmitter", comment: "The title text for the G5 Transmitter switch cell")
+                    switchCell.textLabel?.text = NSLocalizedString("G5 Transmitter", comment: "The title text for the G5 Transmitter switch cell")
                     switchCell.switch?.addTarget(self, action: #selector(g5Changed(_:)), for: .valueChanged)
                 case .dexcomShare, .g5TransmitterID:
                     assertionFailure()
