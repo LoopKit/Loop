@@ -203,11 +203,7 @@ final class StatusTableViewController: ChartsTableViewController {
         charts.maxEndDate = chartStartDate.addingTimeInterval(.hours(totalHours))
 
         let reloadGroup = DispatchGroup()
-        var dosingEnabled: Bool?
-        var lastLoopCompleted: Date?
-        var lastLoopError: Error?
         var lastReservoirValue: ReservoirValue?
-        var lastTempBasal: DoseEntry?
         var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
         let bolusState = self.bolusState
 
@@ -215,22 +211,6 @@ final class StatusTableViewController: ChartsTableViewController {
         deviceManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
             if let unit = unit {
                 self.charts.glucoseUnit = unit
-            }
-
-            if currentContext.contains(.glucose) {
-                reloadGroup.enter()
-                self.deviceManager.loopManager.glucoseStore.getGlucoseValues(start: chartStartDate) { (result) -> Void in
-                    switch result {
-                    case .failure(let error):
-                        self.deviceManager.logger.addError(error, fromSource: "GlucoseStore")
-                        retryContext.update(with: .glucose)
-                        self.charts.setGlucoseValues([])
-                    case .success(let values):
-                        self.charts.setGlucoseValues(values)
-                    }
-
-                    reloadGroup.leave()
-                }
             }
 
             // TODO: Don't always assume currentContext.contains(.status)
@@ -243,9 +223,33 @@ final class StatusTableViewController: ChartsTableViewController {
                     retryContext.update(with: .status)
                 }
 
-                lastTempBasal = state.lastTempBasal
-                lastLoopCompleted = state.lastLoopCompleted
-                lastLoopError = state.error
+                /// Update the status HUDs immediately
+                let netBasal: NetBasal?
+                let lastLoopCompleted = state.lastLoopCompleted
+                let lastLoopError = state.error
+                let dosingEnabled = manager.settings.dosingEnabled
+
+                // Net basal rate HUD
+                let date = state.lastTempBasal?.startDate ?? Date()
+                if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first {
+                    netBasal = NetBasal(
+                        lastTempBasal: state.lastTempBasal,
+                        maxBasal: manager.settings.maximumBasalRatePerHour,
+                        scheduledBasal: scheduledBasal
+                    )
+                } else {
+                    netBasal = nil
+                }
+
+                DispatchQueue.main.async {
+                    self.hudView?.loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
+                    self.hudView?.loopCompletionHUD.dosingEnabled = dosingEnabled
+                    self.lastLoopError = lastLoopError
+
+                    if let netBasal = netBasal {
+                        self.hudView?.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.start)
+                    }
+                }
 
                 // Display a recommended basal change only if we haven't completed recently, or we're in open-loop mode
                 if state.lastLoopCompleted == nil ||
@@ -277,12 +281,26 @@ final class StatusTableViewController: ChartsTableViewController {
                     }
                 }
 
-                dosingEnabled = manager.settings.dosingEnabled
-
                 reloadGroup.leave()
             }
 
             reloadGroup.leave()
+        }
+
+        if currentContext.contains(.glucose) {
+            reloadGroup.enter()
+            self.deviceManager.loopManager.glucoseStore.getGlucoseValues(start: chartStartDate) { (result) -> Void in
+                switch result {
+                case .failure(let error):
+                    self.deviceManager.logger.addError(error, fromSource: "GlucoseStore")
+                    retryContext.update(with: .glucose)
+                    self.charts.setGlucoseValues([])
+                case .success(let values):
+                    self.charts.setGlucoseValues(values)
+                }
+
+                reloadGroup.leave()
+            }
         }
 
         if currentContext.contains(.insulin) {
@@ -344,13 +362,6 @@ final class StatusTableViewController: ChartsTableViewController {
         reloadGroup.notify(queue: .main) {
             self.tableView.beginUpdates()
             if let hudView = self.hudView {
-                // Loop completion HUD
-                hudView.loopCompletionHUD.lastLoopCompleted = lastLoopCompleted
-                self.lastLoopError = lastLoopError
-                if let dosingEnabled = dosingEnabled {
-                    hudView.loopCompletionHUD.dosingEnabled = dosingEnabled
-                }
-
                 // Glucose HUD
                 if let glucose = self.deviceManager.loopManager.glucoseStore.latestGlucose {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
@@ -358,18 +369,6 @@ final class StatusTableViewController: ChartsTableViewController {
                         unit: self.charts.glucoseUnit,
                         sensor: self.deviceManager.sensorInfo
                     )
-                }
-
-                // Net basal rate HUD
-                let date = lastTempBasal?.startDate ?? Date()
-                if let scheduledBasal = self.deviceManager.loopManager.basalRateSchedule?.between(start: date, end: date).first {
-                    let netBasal = NetBasal(
-                        lastTempBasal: lastTempBasal,
-                        maxBasal: self.deviceManager.loopManager.settings.maximumBasalRatePerHour,
-                        scheduledBasal: scheduledBasal
-                    )
-
-                    hudView.basalRateHUD.setNetBasalRate(netBasal.rate, percent: netBasal.percent, at: netBasal.start)
                 }
 
                 // Reservoir HUD
@@ -427,13 +426,12 @@ final class StatusTableViewController: ChartsTableViewController {
             self.tableView.endUpdates()
 
             self.reloading = false
+            let reloadNow = !self.refreshContext.isEmpty
+            self.refreshContext.formUnion(retryContext)
+
             // Trigger a reload if new context exists.
-            if !self.refreshContext.isEmpty {
-                self.refreshContext.formUnion(retryContext)
+            if reloadNow {
                 self.reloadData()
-            } else {
-                // If our only context is retry, wait for the next trigger
-                self.refreshContext.formUnion(retryContext)
             }
         }
     }
@@ -739,10 +737,17 @@ final class StatusTableViewController: ChartsTableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
-            // 20: Status bar
-            // 70: HUD
-            // 44: Toolbar
-            let availableSize = max(tableView.bounds.width, tableView.bounds.height) - 20 - 70 - 44
+            // Compute the height of the HUD, defaulting to 70
+            let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UILayoutFittingCompressedSize).height ?? 70)
+            var availableSize = max(tableView.bounds.width, tableView.bounds.height)
+
+            if #available(iOS 11.0, *) {
+                availableSize -= (tableView.safeAreaInsets.top + tableView.safeAreaInsets.bottom + hudHeight)
+            } else {
+                // 20: Status bar
+                // 44: Toolbar
+                availableSize -= hudHeight + 20 + 44
+            }
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:

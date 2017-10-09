@@ -19,11 +19,7 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
     private lazy var labelY: UILabel = {
         let label = UILabel()
-        #if swift(>=4)
-            label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: UIFont.Weight.bold)
-        #else
-            label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: UIFontWeightBold)
-        #endif
+        label.font = UIFont.monospacedDigitSystemFont(ofSize: 15, weight: UIFont.Weight.bold)
 
         return label
     }()

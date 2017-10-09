@@ -101,7 +101,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
             let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
 
             do {
-                try WCSession.default().sendCarbEntryMessage(entry,
+                try WCSession.default.sendCarbEntryMessage(entry,
                     replyHandler: { (suggestion) in
                         WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                     },
