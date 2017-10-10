@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import InsulinKit
 import MinimedKit
 import HealthKit
 
@@ -20,8 +21,8 @@ extension UserDefaults {
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case connectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case loopSettings = "com.loopkit.Loop.loopSettings"
-        case insulinActionDuration = "com.loudnate.Naterade.InsulinActionDuration"
         case insulinCounteractionEffects = "com.loopkit.Loop.insulinCounteractionEffects"
+        case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case preferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
         case pumpID = "com.loudnate.Naterade.PumpID"
@@ -110,7 +111,7 @@ extension UserDefaults {
                 defer {
                     removeObject(forKey: "com.loudnate.Naterade.DosingEnabled")
                     removeObject(forKey: "com.loudnate.Naterade.GlucoseTargetRangeSchedule")
-                    removeObject(forKey:  "com.loudnate.Naterade.MaximumBasalRatePerHour")
+                    removeObject(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
                     removeObject(forKey: "com.loudnate.Naterade.MaximumBolus")
                     removeObject(forKey: "com.loopkit.Loop.MinimumBGGuard")
                     removeObject(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
@@ -123,11 +124,11 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule = nil
                 }
 
-                let minimumBGGuard: GlucoseThreshold?
+                let suspendThreshold: GlucoseThreshold?
                 if let rawValue = dictionary(forKey: "com.loopkit.Loop.MinimumBGGuard") {
-                    minimumBGGuard = GlucoseThreshold(rawValue: rawValue)
+                    suspendThreshold = GlucoseThreshold(rawValue: rawValue)
                 } else {
-                    minimumBGGuard = nil
+                    suspendThreshold = nil
                 }
 
                 var maximumBasalRatePerHour: Double? = double(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
@@ -145,7 +146,7 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
-                    minimumBGGuard: minimumBGGuard,
+                    suspendThreshold: suspendThreshold,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings
@@ -158,18 +159,23 @@ extension UserDefaults {
         }
     }
 
-    var insulinActionDuration: TimeInterval? {
+    var insulinModelSettings: InsulinModelSettings? {
         get {
-            let value = double(forKey: Key.insulinActionDuration.rawValue)
+            if let rawValue = dictionary(forKey: Key.insulinModelSettings.rawValue) {
+                return InsulinModelSettings(rawValue: rawValue)
+            } else {
+                // Migrate the version 0 case
+                let insulinActionDurationKey = "com.loudnate.Naterade.InsulinActionDuration"
+                defer {
+                    removeObject(forKey: insulinActionDurationKey)
+                }
 
-            return value > 0 ? value : nil
+                let value = double(forKey: insulinActionDurationKey)
+                return value > 0 ? .walsh(WalshInsulinModel(actionDuration: value)) : nil
+            }
         }
         set {
-            if let insulinActionDuration = newValue {
-                set(insulinActionDuration, forKey: Key.insulinActionDuration.rawValue)
-            } else {
-                removeObject(forKey: Key.insulinActionDuration.rawValue)
-            }
+            set(newValue?.rawValue, forKey: Key.insulinModelSettings.rawValue)
         }
     }
 

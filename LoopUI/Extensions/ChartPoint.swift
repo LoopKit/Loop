@@ -10,8 +10,23 @@ import Foundation
 import SwiftCharts
 
 
+public struct DatedRangeContext {
+    public let startDate: Date
+    public let endDate: Date
+    public let minValue: Double
+    public let maxValue: Double
+
+    public init(startDate: Date, endDate: Date, minValue: Double, maxValue: Double) {
+        self.startDate = startDate
+        self.endDate = endDate
+        self.minValue = minValue
+        self.maxValue = maxValue
+    }
+}
+
+
 extension ChartPoint {
-    static func pointsForDatedRanges(_ targetRanges: [DatedRangeContext], xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    public static func pointsForDatedRanges(_ targetRanges: [DatedRangeContext], xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let dateFormatter = DateFormatter()
 
         var maxPoints: [ChartPoint] = []
@@ -48,7 +63,7 @@ extension ChartPoint {
         return maxPoints + minPoints.reversed()
     }
 
-    static func pointsForDatedRangeOverrideDuration(_ override: DatedRangeContext, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    public static func pointsForDatedRangeOverrideDuration(_ override: DatedRangeContext, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let startDate = Date()
 
         guard override.endDate.timeIntervalSince(startDate) > 0,
@@ -71,7 +86,7 @@ extension ChartPoint {
         ]
     }
 
-    static func pointsForDatedRangeOverride(_ override: DatedRangeContext, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    public static func pointsForDatedRangeOverride(_ override: DatedRangeContext, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let startDate = Date()
 
         guard override.endDate.timeIntervalSince(startDate) > 0,

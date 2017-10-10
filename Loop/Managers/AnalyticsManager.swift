@@ -10,7 +10,7 @@ import Foundation
 import Amplitude
 
 
-final class AnalyticsManager {
+final class AnalyticsManager: IdentifiableClass {
 
     var amplitudeService: AmplitudeService {
         didSet {
@@ -24,21 +24,19 @@ final class AnalyticsManager {
         } else {
             amplitudeService = AmplitudeService(APIKey: nil)
         }
+
+        logger = DiagnosticLogger.shared?.forCategory(type(of: self).className)
     }
 
     static let shared = AnalyticsManager()
 
     // MARK: - Helpers
 
-    private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
+    private var logger: CategoryLogger?
 
     private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
-        if isSimulator {
-            NSLog("\(name) \(properties ?? [:])")
-        } else {
-            amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
-        }
-
+        logger?.debug("\(name) \(properties ?? [:])")
+        amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
     }
 
     // MARK: - UIApplicationDelegate
@@ -87,8 +85,8 @@ final class AnalyticsManager {
         logEvent("Carb ratio change")
     }
 
-    func didChangeInsulinActionDuration() {
-        logEvent("Insulin action duration change")
+    func didChangeInsulinModel() {
+        logEvent("Insulin model change")
     }
 
     func didChangeInsulinSensitivitySchedule() {
@@ -110,7 +108,7 @@ final class AnalyticsManager {
             logEvent("Maximum bolus change")
         }
 
-        if newValue.minimumBGGuard != oldValue.minimumBGGuard {
+        if newValue.suspendThreshold != oldValue.suspendThreshold {
             logEvent("Minimum BG Guard change")
         }
     }

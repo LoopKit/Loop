@@ -45,20 +45,6 @@ extension TextFieldTableViewController {
         return vc
     }
 
-    static func insulinActionDuration(_ value: TimeInterval?) -> T {
-        let vc = T()
-
-        vc.placeholder = NSLocalizedString("Enter a number of hours", comment: "The placeholder text instructing users how to enter an insulin action duration")
-        vc.keyboardType = .decimalPad
-        vc.unit = NSLocalizedString("hours", comment: "The unit string for hours")
-
-        if let insulinActionDuration = value {
-            vc.value = valueNumberFormatter.string(from: NSNumber(value: insulinActionDuration.hours))
-        }
-
-        return vc
-    }
-
     static func maxBasal(_ value: Double?) -> T {
         let vc = T()
 

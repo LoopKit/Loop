@@ -223,4 +223,16 @@ extension StatusChartsManager {
         self.insulinCounteractionEffectPoints = insulinCounteractionEffectPoints
         self.allCarbEffectPoints = allCarbEffectPoints
     }
+
+    // MARK: - Insulin Model Settings
+
+    func setSelectedInsulinModelValues(_ values: [GlucoseValue]) {
+        self.selectedInsulinModelChartPoints = glucosePointsFromValues(values)
+    }
+
+    func setUnselectedInsulinModelValues(_ values: [[GlucoseValue]]) {
+        self.unselectedInsulinModelChartPoints = values.map {
+            return glucosePointsFromValues($0)
+        }
+    }
 }

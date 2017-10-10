@@ -11,23 +11,25 @@ import LoopKit
 import HealthKit
 
 
-enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
-    case glucoseBelowMinimumGuard(minGlucose: GlucoseValue, unit: HKUnit)
-    case currentGlucoseBelowTarget(glucose: GlucoseValue, unit: HKUnit)
-    case predictedGlucoseBelowTarget(minGlucose: GlucoseValue, unit: HKUnit)
+enum BolusRecommendationNotice {
+    case glucoseBelowSuspendThreshold(minGlucose: GlucoseValue)
+    case currentGlucoseBelowTarget(glucose: GlucoseValue)
+    case predictedGlucoseBelowTarget(minGlucose: GlucoseValue)
+}
 
-    public var description: String {
 
+extension BolusRecommendationNotice {
+    public func description(using unit: HKUnit) -> String {
         switch self {
-        case .glucoseBelowMinimumGuard(let minGlucose, let unit):
+        case .glucoseBelowSuspendThreshold(minGlucose: let minGlucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.describingGlucose(minGlucose.quantity, for: unit)!
-            return String(format: NSLocalizedString("Predicted glucose of %1$@ is below your minimum BG Guard setting.", comment: "Notice message when recommending bolus when BG is below minimum BG guard. (1: glucose value)"), bgStr)
-        case .currentGlucoseBelowTarget(let glucose, let unit):
+            return String(format: NSLocalizedString("Predicted glucose of %1$@ is below your suspend threshold setting.", comment: "Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value)"), bgStr)
+        case .currentGlucoseBelowTarget(glucose: let glucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
             let bgStr = glucoseFormatter.describingGlucose(glucose.quantity, for: unit)!
-            return String(format: NSLocalizedString("Current glucose of %1$@ is below target range.", comment: "Message when offering bolus recommendation even though bg is below range. (1: glucose value)"), bgStr)
-        case .predictedGlucoseBelowTarget(let minGlucose, let unit):
+            return String(format: NSLocalizedString("Current glucose of %1$@ is below correction range.", comment: "Message when offering bolus recommendation even though bg is below range. (1: glucose value)"), bgStr)
+        case .predictedGlucoseBelowTarget(minGlucose: let minGlucose):
             let timeFormatter = DateFormatter()
             timeFormatter.dateStyle = .none
             timeFormatter.timeStyle = .short
@@ -39,23 +41,23 @@ enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
 
         }
     }
+}
 
+extension BolusRecommendationNotice: Equatable {
     static func ==(lhs: BolusRecommendationNotice, rhs: BolusRecommendationNotice) -> Bool {
         switch (lhs, rhs) {
-        case (.glucoseBelowMinimumGuard, .glucoseBelowMinimumGuard):
+        case (.glucoseBelowSuspendThreshold, .glucoseBelowSuspendThreshold):
             return true
 
         case (.currentGlucoseBelowTarget, .currentGlucoseBelowTarget):
             return true
 
-        case (let .predictedGlucoseBelowTarget(minGlucose1, unit1), let .predictedGlucoseBelowTarget(minGlucose2, unit2)):
+        case (let .predictedGlucoseBelowTarget(minGlucose1), let .predictedGlucoseBelowTarget(minGlucose2)):
             // GlucoseValue is not equatable
             return
                 minGlucose1.startDate == minGlucose2.startDate &&
                 minGlucose1.endDate == minGlucose2.endDate &&
-                minGlucose1.quantity == minGlucose2.quantity &&
-                unit1 == unit2
-
+                minGlucose1.quantity == minGlucose2.quantity
         default:
             return false
         }
@@ -66,7 +68,7 @@ enum BolusRecommendationNotice: CustomStringConvertible, Equatable {
 struct BolusRecommendation {
     let amount: Double
     let pendingInsulin: Double
-    let notice: BolusRecommendationNotice?
+    var notice: BolusRecommendationNotice?
 
     init(amount: Double, pendingInsulin: Double, notice: BolusRecommendationNotice? = nil) {
         self.amount = amount

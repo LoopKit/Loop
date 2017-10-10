@@ -7,34 +7,44 @@
 //
 
 import Foundation
+import HealthKit
 import LoopKit
 import SwiftCharts
+import LoopUI
+
 
 extension ChartPoint {
     static func pointsForGlucoseRangeSchedule(_ glucoseRangeSchedule: GlucoseRangeSchedule, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
         let targetRanges = glucoseRangeSchedule.between(
-                start: ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
-                end: ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
-            ).map {
+            start: ChartAxisValueDate.dateFromScalar(xAxisValues.first!.scalar),
+            end: ChartAxisValueDate.dateFromScalar(xAxisValues.last!.scalar)
+        ).map { (scheduleValue) -> DatedRangeContext in
+            let range = scheduleValue.value.rangeWithMinimumIncremement(glucoseRangeSchedule.unit.chartableIncrement)
+
             return DatedRangeContext(
-                startDate: $0.startDate,
-                endDate: $0.endDate,
-                minValue: $0.value.minValue,
-                maxValue: $0.value.maxValue)
+                startDate: scheduleValue.startDate,
+                endDate: scheduleValue.endDate,
+                minValue: range.minValue,
+                maxValue: range.maxValue
+            )
         }
 
         return ChartPoint.pointsForDatedRanges(targetRanges, xAxisValues: xAxisValues)
     }
 
-    static func pointsForGlucoseRangeScheduleOverrideDuration(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeScheduleOverrideDuration(_ override: GlucoseRangeSchedule.Override, unit: HKUnit, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let range = override.value.rangeWithMinimumIncremement(unit.chartableIncrement)
+
         return ChartPoint.pointsForDatedRangeOverrideDuration(
-            DatedRangeContext(startDate: override.startDate, endDate: override.endDate, minValue: override.value.minValue, maxValue: override.value.maxValue),
+            DatedRangeContext(startDate: override.start, endDate: override.end ?? .distantFuture, minValue: range.minValue, maxValue: range.maxValue),
             xAxisValues: xAxisValues)
     }
 
-    static func pointsForGlucoseRangeScheduleOverride(_ override: AbsoluteScheduleValue<DoubleRange>, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+    static func pointsForGlucoseRangeScheduleOverride(_ override: GlucoseRangeSchedule.Override, unit: HKUnit, xAxisValues: [ChartAxisValue]) -> [ChartPoint] {
+        let range = override.value.rangeWithMinimumIncremement(unit.chartableIncrement)
+
         return ChartPoint.pointsForDatedRangeOverride(
-            DatedRangeContext(startDate: override.startDate, endDate: override.endDate, minValue: override.value.minValue, maxValue: override.value.maxValue),
+            DatedRangeContext(startDate: override.start, endDate: override.end ?? .distantFuture, minValue: range.minValue, maxValue: range.maxValue),
             xAxisValues: xAxisValues)
     }
 }
@@ -52,3 +62,16 @@ extension ChartPoint: TimelineValue {
 }
 
 
+private extension DoubleRange {
+    func rangeWithMinimumIncremement(_ increment: Double) -> DoubleRange {
+        var minValue = self.minValue
+        var maxValue = self.maxValue
+
+        if (maxValue - minValue) < .ulpOfOne {
+            minValue -= increment
+            maxValue += increment
+        }
+
+        return DoubleRange(minValue: minValue, maxValue: maxValue)
+    }
+}
