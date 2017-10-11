@@ -9,16 +9,64 @@ import UIKit
 import LoopUI
 
 
-struct RefreshContext: OptionSet {
-    let rawValue: Int
-
+enum RefreshContext {
     /// Catch-all for lastLoopCompleted, recommendedTempBasal, lastTempBasal, preferences
-    static let status  = RefreshContext(rawValue: 1 << 0)
+    case status
 
-    static let glucose = RefreshContext(rawValue: 1 << 1)
-    static let insulin = RefreshContext(rawValue: 1 << 2)
-    static let carbs   = RefreshContext(rawValue: 1 << 3)
-    static let targets = RefreshContext(rawValue: 1 << 4)
+    case glucose
+    case insulin
+    case carbs
+    case targets
+
+    case size(CGSize)
+}
+
+extension RefreshContext: Hashable {
+    var hashValue: Int {
+        switch self {
+        case .status:
+            return 1
+        case .glucose:
+            return 2
+        case .insulin:
+            return 3
+        case .carbs:
+            return 4
+        case .targets:
+            return 5
+        case .size:
+            // We don't use CGSize in our determination of hash nor equality
+            return 6
+        }
+    }
+
+    static func ==(lhs: RefreshContext, rhs: RefreshContext) -> Bool {
+        return lhs.hashValue == rhs.hashValue
+    }
+}
+
+extension Set where Element == RefreshContext {
+    /// Returns the size value in the set if one exists
+    var newSize: CGSize? {
+        guard let index = index(of: .size(.zero)),
+            case .size(let size) = self[index] else
+        {
+            return nil
+        }
+
+        return size
+    }
+
+    /// Removes and returns the size value in the set if one exists
+    ///
+    /// - Returns: The size, if contained
+    mutating func removeNewSize() -> CGSize? {
+        guard case .size(let newSize)? = remove(.size(.zero)) else {
+            return nil
+        }
+
+        return newSize
+    }
 }
 
 
@@ -68,9 +116,7 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
-        if visible {
-            reloadData(animated: false, to: size)
-        }
+        reloadData(animated: false)
     }
 
     deinit {
@@ -106,8 +152,7 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     ///
     /// - Parameters:
     ///   - animated: Whether the updating should be animated if possible
-    ///   - size: The size to render into. Defaults to the table view bounds
-    func reloadData(animated: Bool = false, to size: CGSize? = nil) {
+    func reloadData(animated: Bool = false) {
 
     }
 

@@ -7,4 +7,5 @@ framework module xDripG5 {
 
 module xDripG5.Swift {
     header "xDripG5-Swift.h"
+    requires objc
 }

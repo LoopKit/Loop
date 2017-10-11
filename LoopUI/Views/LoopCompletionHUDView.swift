@@ -121,18 +121,28 @@ public final class LoopCompletionHUDView: BaseHUDView {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
             switch ago {
-            case let t where t.minutes <= 5:
+            case let t where t <= .minutes(6):
                 freshness = .fresh
-            case let t where t.minutes <= 15:
+            case let t where t <= .minutes(16):
                 freshness = .aging
-            case let t where t.hours <= 12:
+            case let t where t <= .hours(12):
                 freshness = .stale
             default:
                 freshness = .unknown
             }
 
             if let timeString = formatter.string(from: ago) {
-                caption.text = String(format: NSLocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                switch traitCollection.preferredContentSizeCategory {
+                case UIContentSizeCategory.extraSmall,
+                     UIContentSizeCategory.small,
+                     UIContentSizeCategory.medium,
+                     UIContentSizeCategory.large:
+                    // Use a longer form only for smaller text sizes
+                    caption.text = String(format: NSLocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                default:
+                    caption.text = timeString
+                }
+
                 accessibilityLabel = String(format: NSLocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
                 caption.text = "—"

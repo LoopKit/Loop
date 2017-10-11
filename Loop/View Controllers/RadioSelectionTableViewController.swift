@@ -89,7 +89,7 @@ extension RadioSelectionTableViewController {
 
         vc.selectedIndex = value.rawValue
         vc.options = (0..<2).flatMap({ BatteryChemistryType(rawValue: $0) }).map { String(describing: $0) }
-        vc.contextHelp = NSLocalizedString("Alkaline and Lithium batteries decay at differing rates.  Alkaline tend to have a linear voltage drop over time whereas lithium cell batteries tend to maintain voltage until halfway through their lifespan.  Under normal usage in a Non-MySentry compatible Minimed (x22/x15) insulin pump running Loop, Alkaline batteries last approximately 4 to 5 days.  Lithium batteries last between 1-2 weeks. This selection will use different battery voltage decay rates for each of the battery chemistry types and alert the user when a battery is approximately 8 to 10 hours from failure.", comment: "Instructions on selecting battery chemistry type")
+        vc.contextHelp = NSLocalizedString("Alkaline and Lithium batteries decay at differing rates. Alkaline tend to have a linear voltage drop over time whereas lithium cell batteries tend to maintain voltage until halfway through their lifespan. Under normal usage in a Non-MySentry compatible Minimed (x22/x15) insulin pump running Loop, Alkaline batteries last approximately 4 to 5 days. Lithium batteries last between 1-2 weeks. This selection will use different battery voltage decay rates for each of the battery chemistry types and alert the user when a battery is approximately 8 to 10 hours from failure.", comment: "Instructions on selecting battery chemistry type")
 
         return vc
     }

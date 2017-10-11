@@ -20,6 +20,37 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     private var lastContext: WatchContext?
 
+    override func didAppear() {
+        super.didAppear()
+
+        updateLoopHUD()
+    }
+
+    override func willActivate() {
+        super.willActivate()
+
+        updateLoopHUD()
+    }
+
+    private func updateLoopHUD() {
+        guard let date = lastContext?.loopLastRunDate else {
+            return
+        }
+
+        let loopImage: LoopImage
+
+        switch date.timeIntervalSinceNow {
+        case let t where t > .minutes(-6):
+            loopImage = .Fresh
+        case let t where t > .minutes(-20):
+            loopImage = .Aging
+        default:
+            loopImage = .Stale
+        }
+
+        self.loopHUDImage.setLoopImage(loopImage)
+    }
+
     func update(with context: WatchContext?) {
         lastContext = context
 
@@ -28,18 +59,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             self.loopTimer.setHidden(false)
             self.loopTimer.start()
 
-            let loopImage: LoopImage
-
-            switch date.timeIntervalSinceNow {
-            case let t where t.minutes <= 5:
-                loopImage = .Fresh
-            case let t where t.minutes <= 15:
-                loopImage = .Aging
-            default:
-                loopImage = .Stale
-            }
-
-            self.loopHUDImage.setLoopImage(loopImage)
+            updateLoopHUD()
         } else {
             loopTimer.setHidden(true)
             loopHUDImage.setLoopImage(.Unknown)
@@ -85,5 +105,4 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         presentController(withName: BolusInterfaceController.className, context: lastContext?.bolusSuggestion)
     }
 
-    
 }

@@ -27,7 +27,10 @@ extension LoopDataManager {
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:
-                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: bolus.amount, unit: .units)
+                // For entries in-progress, use the programmed amount
+                let units = event.isMutable() ? bolus.programmed : bolus.amount
+
+                dose = DoseEntry(type: .bolus, startDate: event.date, endDate: event.date.addingTimeInterval(bolus.duration), value: units, unit: .units)
             case is SuspendPumpEvent:
                 dose = DoseEntry(suspendDate: event.date)
             case is ResumePumpEvent:
@@ -55,10 +58,6 @@ extension LoopDataManager {
                     value: basal.scheduleEntry.rate,
                     unit: .unitsPerHour
                 )
-
-                if isRewound {
-                    isRewound = false
-                }
             case is RewindPumpEvent:
                 eventType = .rewind
 
@@ -67,27 +66,30 @@ extension LoopDataManager {
  
                  If the fixed prime is cancelled, it is never recorded in history. It is possible to cancel a fixed prime and perform one manually some time later, but basal delivery will have resumed during that period.
                  
-                 On an x23 model pump, the point at which basal delivery resumes is unambiguous thanks to the BasalProfileStart event.
-                 On older model pumps, we take the conservative approach and assume delivery is paused only between the Rewind and the first Prime event.
+                 We take the conservative approach and assume delivery is paused only between the Rewind and the first Prime event.
                  */
                 dose = DoseEntry(suspendDate: event.date)
                 isRewound = true
             case is PrimePumpEvent:
                 eventType = .prime
 
-                if !model.recordsBasalProfileStartEvents && isRewound {
+                if isRewound {
                     isRewound = false
                     dose = DoseEntry(resumeDate: event.date)
                 }
             case let alarm as PumpAlarmPumpEvent:
                 eventType = .alarm
+
                 if case .noDelivery = alarm.alarmType {
-                    // TODO: Interpret a no delivery alarm as a suspend
+                    dose = DoseEntry(suspendDate: event.date)
                 }
                 break
-            case is ClearAlarmPumpEvent:
+            case let alarm as ClearAlarmPumpEvent:
                 eventType = .alarmClear
-                // TODO: Interpret a clear no delivery as a Resume
+
+                if case .noDelivery = alarm.alarmType {
+                    dose = DoseEntry(resumeDate: event.date)
+                }
                 break
             default:
                 break

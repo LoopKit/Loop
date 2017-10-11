@@ -319,7 +319,7 @@
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Target Range" = "Intervallo Glicemico";
+"Correction Range" = "Intervallo Glicemico";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "La quantità massima di bolo è %@ Unità";
