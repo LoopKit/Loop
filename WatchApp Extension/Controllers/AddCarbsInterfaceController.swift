@@ -133,7 +133,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     fileprivate var accumulatedRotation: Double = 0
 }
 
-fileprivate let rotationsPerCarb: Double = 1/24
+private let rotationsPerCarb: Double = 1/24
 
 extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {

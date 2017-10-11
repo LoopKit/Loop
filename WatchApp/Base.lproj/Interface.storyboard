@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13196" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
-    <device id="watch42" orientation="portrait">
+    <device id="watch38" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -98,7 +98,7 @@
                                 <separator alignment="left" id="EVD-AC-w2R">
                                     <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </separator>
-                                <button width="1" height="0.25" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
+                                <button width="1" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
                                     <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
                                     <connections>
