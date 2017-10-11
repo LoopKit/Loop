@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13196" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="12029"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13051"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -16,7 +16,7 @@
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="uPt-Z4-ngs">
                             <items>
-                                <group width="1" alignment="left" spacing="0.0" id="WLN-cX-0wl">
+                                <group width="1" height="0.20000000000000001" alignment="left" spacing="0.0" id="WLN-cX-0wl">
                                     <items>
                                         <group width="22" height="22" alignment="left" verticalAlignment="center" radius="11" id="J90-Xm-Znp">
                                             <items>
@@ -55,30 +55,50 @@
                                 <separator alignment="left" id="psX-Zk-dTM">
                                     <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </separator>
-                                <group width="1" alignment="left" spacing="0.0" id="XMa-yL-87D">
+                                <group width="1" height="0.20000000000000001" alignment="left" spacing="0.0" id="XMa-yL-87D">
                                     <items>
-                                        <button width="0.33000000000000002" alignment="left" title="🍭" id="gAn-qe-OvX">
-                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                        <button width="0.33000000000000002" height="1" alignment="left" title="🍭" id="gAn-qe-OvX">
+                                            <fontDescription key="font" type="system" pointSize="22"/>
+                                            <variation key="device=watch38mm">
+                                                <fontDescription key="font" type="system" pointSize="20"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeFast" destination="zh0-gB-D44" id="Eoj-WC-Fod"/>
                                             </connections>
                                         </button>
-                                        <button width="0.33000000000000002" alignment="left" title="🌮" id="0fo-Z3-hTi">
+                                        <button width="0.33000000000000002" height="1" alignment="left" title="🌮" id="0fo-Z3-hTi">
                                             <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                            <fontDescription key="font" type="system" pointSize="22"/>
+                                            <variation key="device=watch38mm">
+                                                <fontDescription key="font" type="system" pointSize="20"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeMedium" destination="zh0-gB-D44" id="GXY-aa-sz8"/>
                                             </connections>
                                         </button>
-                                        <button width="0.33000000000000002" alignment="left" title="🍕" id="dPF-QZ-sh6">
-                                            <fontDescription key="font" type="system" pointSize="25"/>
+                                        <button width="0.33000000000000002" height="1" alignment="left" title="🍕" id="dPF-QZ-sh6">
+                                            <fontDescription key="font" type="system" pointSize="22"/>
+                                            <variation key="device=watch38mm">
+                                                <fontDescription key="font" type="system" pointSize="20"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeSlow" destination="zh0-gB-D44" id="qa3-FG-c9F"/>
                                             </connections>
                                         </button>
                                     </items>
                                 </group>
-                                <button width="1" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
+                                <separator alignment="left" id="arf-ic-MQs">
+                                    <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </separator>
+                                <button width="1" height="0.20000000000000001" alignment="left" title="Date &amp; Time" id="CXa-7l-fIw">
+                                    <connections>
+                                        <action selector="setDate" destination="zh0-gB-D44" id="KOR-4u-r1p"/>
+                                    </connections>
+                                </button>
+                                <separator alignment="left" id="EVD-AC-w2R">
+                                    <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </separator>
+                                <button width="1" height="0.25" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
                                     <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
                                     <connections>
@@ -97,6 +117,89 @@
                 </controller>
             </objects>
             <point key="canvasLocation" x="520" y="345"/>
+        </scene>
+        <!--CarbDateInterfaceController-->
+        <scene sceneID="UiT-nb-sOl">
+            <objects>
+                <controller identifier="CarbDateInterfaceController" id="8Kd-cx-LFN" customClass="CarbDateInterfaceController" customModule="WatchApp_Extension">
+                    <items>
+                        <group width="1" alignment="center" layout="vertical" id="Kg6-07-fyM">
+                            <items>
+                                <group width="1" alignment="center" verticalAlignment="center" id="Srv-oJ-a5F">
+                                    <items>
+                                        <button width="22" height="22" alignment="right" verticalAlignment="center" accessibilityLabel="Add" title="+" id="zuN-Ak-Y8z">
+                                            <color key="titleColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                            <connections>
+                                                <action selector="incrementDate" destination="8Kd-cx-LFN" id="JkS-Jv-FvR"/>
+                                            </connections>
+                                        </button>
+                                        <label height="37" alignment="center" verticalAlignment="center" text="12/12/12" textAlignment="center" id="RPZ-L9-gHe">
+                                            <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="light" pointSize="25"/>
+                                            <variation key="device=watch38mm">
+                                                <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                                            </variation>
+                                        </label>
+                                        <button width="22" height="22" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="U3u-Z6-ZB2">
+                                            <color key="titleColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                            <connections>
+                                                <action selector="decrementDate" destination="8Kd-cx-LFN" id="bCO-aD-9aj"/>
+                                            </connections>
+                                        </button>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="center" verticalAlignment="center" id="zSs-wU-gMe">
+                                    <items>
+                                        <button width="22" height="22" alignment="right" verticalAlignment="center" accessibilityLabel="Add" title="+" id="VXe-Ml-lkI">
+                                            <color key="titleColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                            <connections>
+                                                <action selector="incrementTime" destination="8Kd-cx-LFN" id="J3Y-uC-SFo"/>
+                                            </connections>
+                                        </button>
+                                        <button width="22" height="22" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="32U-qu-cat">
+                                            <color key="titleColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
+                                            <connections>
+                                                <action selector="decrementTime" destination="8Kd-cx-LFN" id="n8a-i8-e26"/>
+                                            </connections>
+                                        </button>
+                                        <label height="37" alignment="center" verticalAlignment="center" text="10:09 PM" textAlignment="center" id="W65-ni-ds2">
+                                            <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="light" pointSize="25"/>
+                                            <variation key="device=watch38mm">
+                                                <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                                            </variation>
+                                        </label>
+                                    </items>
+                                </group>
+                                <label alignment="center" verticalAlignment="bottom" text="DATE &amp; TIME" textAlignment="center" id="bAp-Ao-0Na">
+                                    <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption2"/>
+                                </label>
+                            </items>
+                        </group>
+                        <button width="1" alignment="left" verticalAlignment="bottom" title="Done" id="MIg-0m-XmJ">
+                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
+                            <connections>
+                                <action selector="save" destination="8Kd-cx-LFN" id="yTa-Pl-rwm"/>
+                            </connections>
+                        </button>
+                    </items>
+                    <connections>
+                        <outlet property="dateLabel" destination="RPZ-L9-gHe" id="xFM-9O-VzP"/>
+                        <outlet property="timeLabel" destination="W65-ni-ds2" id="2la-Wx-dnX"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="523" y="658"/>
         </scene>
         <!--Loop-->
         <scene sceneID="gQv-2Z-iCt">

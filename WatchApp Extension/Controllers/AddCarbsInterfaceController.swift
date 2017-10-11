@@ -12,7 +12,7 @@ import WatchConnectivity
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    fileprivate var carbValue: Int = 15 {
+    private var carbValue: Int = 15 {
         didSet {
             guard carbValue >= 0 else {
                 carbValue = 0
@@ -44,6 +44,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
             }
         }
     }
+
+    var date = Date()
 
     @IBOutlet weak var valueLabel: WKInterfaceLabel!
 
@@ -96,9 +98,13 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         absorptionTime = .slow
     }
 
+    @IBAction func setDate() {
+        presentController(withName: CarbDateInterfaceController.className, context: self)
+    }
+
     @IBAction func save() {
         if carbValue > 0 {
-            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
+            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: date)
 
             do {
                 try WCSession.default().sendCarbEntryMessage(entry,
@@ -136,5 +142,11 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
         carbValue += Int((accumulatedRotation - remainder) / rotationsPerCarb)
         accumulatedRotation = remainder
+    }
+}
+
+extension AddCarbsInterfaceController: CarbDateInterfaceControllerDelegate {
+    func didConfirmDate(_ date: Date) {
+        self.date = date
     }
 }
