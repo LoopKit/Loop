@@ -14,29 +14,25 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     private var carbValue: Int = 15 {
         didSet {
-            guard carbValue >= 0 else {
+            if carbValue < 0 {
                 carbValue = 0
-                return
-            }
-
-            guard carbValue <= 100 else {
+            } else if carbValue > 100 {
                 carbValue = 100
-                return
             }
 
-            carbValueLabel.setText(String(carbValue))
+            valueLabel.setText(String(carbValue))
         }
     }
 
     private let maximumDatePastInterval = TimeInterval(hours: 8)
-
     private let maximumDateFutureInterval = TimeInterval(hours: 4)
 
     private var date = Date() {
         didSet {
             let now = Date()
-            let minimumDate = now.addingTimeInterval(-maximumDatePastInterval)
-            let maximumDate = now.addingTimeInterval(maximumDateFutureInterval)
+            let minimumDate = now - maximumDatePastInterval
+            let maximumDate = now + maximumDateFutureInterval
+
             if date < minimumDate {
                 date = minimumDate
             } else if date > maximumDate {
@@ -54,7 +50,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         return formatter
     }()
 
-    private var absorptionTime = AbsorptionTimeType.medium {
+    private var absorptionTime: AbsorptionTimeType = .medium {
         didSet {
             absorptionButtonA.setBackgroundColor(UIColor.darkCarbsColor)
             absorptionButtonB.setBackgroundColor(UIColor.darkCarbsColor)
@@ -71,32 +67,9 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         }
     }
 
-    @IBOutlet var carbValueLabel: WKInterfaceLabel!
-
-    @IBOutlet var minusButton: WKInterfaceButton!
-
-    @IBOutlet var plusButton: WKInterfaceButton!
+    @IBOutlet var valueLabel: WKInterfaceLabel!
 
     @IBOutlet var dateLabel: WKInterfaceLabel!
-    
-    var activeValueLabel: WKInterfaceLabel! {
-        didSet {
-            activeValueLabel.setTextColor(UIColor.carbsColor)
-            let accessoryColor: UIColor
-            switch activeValueLabel {
-            case carbValueLabel:
-                accessoryColor = UIColor.carbsColor
-                dateLabel.setTextColor(UIColor.lightGray)
-            case dateLabel:
-                accessoryColor = UIColor.lightGray
-                carbValueLabel.setTextColor(UIColor.lightGray)
-            default:
-                accessoryColor = UIColor.black
-            }
-            minusButton.setTitleWithColor(title: "-", color: accessoryColor)
-            plusButton.setTitleWithColor(title: "+", color: accessoryColor)
-        }
-    }
 
     @IBOutlet weak var absorptionButtonA: WKInterfaceButton!
 
@@ -104,13 +77,30 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
+    private enum InputMode {
+        case value
+        case date
+    }
+
+    private var inputMode: InputMode = .value {
+        didSet {
+            switch inputMode {
+            case .value:
+                valueLabel.setTextColor(UIColor.carbsColor)
+                dateLabel.setTextColor(UIColor.lightGray)
+            case .date:
+                valueLabel.setTextColor(UIColor.lightGray)
+                dateLabel.setTextColor(UIColor.carbsColor)
+            }
+        }
+    }
+
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
         // Configure interface objects here.
         crownSequencer.delegate = self
 
-        activeValueLabel = carbValueLabel
         date = Date()
         absorptionTime = .medium
     }
@@ -129,18 +119,29 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     // MARK: - Actions
 
-    @IBAction func decrementCarbValue() {
-        activeValueLabel = carbValueLabel
-        carbValue -= 5
+    private let valueIncrement = 5
+    private let dateIncrement = TimeInterval(minutes: 15)
+
+    @IBAction func decrement() {
+        switch inputMode {
+        case .value:
+            carbValue -= valueIncrement
+        case .date:
+            date -= dateIncrement
+        }
     }
 
-    @IBAction func incrementCarbValue() {
-        activeValueLabel = carbValueLabel
-        carbValue += 5
+    @IBAction func increment() {
+        switch inputMode {
+        case .value:
+            carbValue += valueIncrement
+        case .date:
+            date += dateIncrement
+        }
     }
 
-    @IBAction func toggleActiveValueLabel() {
-        activeValueLabel = (activeValueLabel === carbValueLabel) ? dateLabel : carbValueLabel
+    @IBAction func toggleInputMode() {
+        inputMode = (inputMode == .value) ? .date : .value
     }
 
     @IBAction func setAbsorptionTimeFast() {
@@ -192,16 +193,13 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
-        let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
+        let delta = (accumulatedRotation - remainder) / rotationsPerIncrement
 
-        switch activeValueLabel {
-        case carbValueLabel:
-            carbValue += delta
-        case dateLabel:
-            guard let changedDate = Calendar.current.date(byAdding: .minute, value: delta, to: date) else { return }
-            date = changedDate
-        default:
-            break
+        switch inputMode {
+        case .value:
+            carbValue += Int(delta)
+        case .date:
+            date += TimeInterval(minutes: delta)
         }
 
         accumulatedRotation = remainder

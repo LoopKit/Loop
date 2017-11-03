@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13196" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13529" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13174"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13051"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13507"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -27,7 +27,7 @@
                                                             <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
                                                             <connections>
-                                                                <action selector="decrementCarbValue" destination="zh0-gB-D44" id="G9W-dC-AzW"/>
+                                                                <action selector="decrement" destination="zh0-gB-D44" id="FdO-GD-e1m"/>
                                                             </connections>
                                                         </button>
                                                     </items>
@@ -43,7 +43,7 @@
                                                             <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="0.14000000000000001" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
                                                             <connections>
-                                                                <action selector="incrementCarbValue" destination="zh0-gB-D44" id="QSq-Je-VyR"/>
+                                                                <action selector="increment" destination="zh0-gB-D44" id="6yb-Y8-oKu"/>
                                                             </connections>
                                                         </button>
                                                     </items>
@@ -61,7 +61,7 @@
                                     <gestureRecognizers>
                                         <tapGestureRecognizer id="ZKu-em-Fme">
                                             <connections>
-                                                <action selector="toggleActiveValueLabel" destination="zh0-gB-D44" id="SKT-oi-MhI"/>
+                                                <action selector="toggleInputMode" destination="zh0-gB-D44" id="iNJ-Rq-8w7"/>
                                             </connections>
                                         </tapGestureRecognizer>
                                     </gestureRecognizers>
@@ -69,29 +69,20 @@
                                 <group width="1" height="0.25" alignment="center" verticalAlignment="center" spacing="0.0" id="XMa-yL-87D">
                                     <items>
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🍭" id="gAn-qe-OvX">
-                                            <fontDescription key="font" type="system" pointSize="22"/>
-                                            <variation key="device=watch38mm">
-                                                <fontDescription key="font" type="system" pointSize="20"/>
-                                            </variation>
+                                            <fontDescription key="font" type="system" pointSize="25"/>
                                             <connections>
                                                 <action selector="setAbsorptionTimeFast" destination="zh0-gB-D44" id="Eoj-WC-Fod"/>
                                             </connections>
                                         </button>
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🌮" id="0fo-Z3-hTi">
                                             <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <fontDescription key="font" type="system" pointSize="22"/>
-                                            <variation key="device=watch38mm">
-                                                <fontDescription key="font" type="system" pointSize="20"/>
-                                            </variation>
+                                            <fontDescription key="font" type="system" pointSize="25"/>
                                             <connections>
                                                 <action selector="setAbsorptionTimeMedium" destination="zh0-gB-D44" id="GXY-aa-sz8"/>
                                             </connections>
                                         </button>
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🍕" id="dPF-QZ-sh6">
-                                            <fontDescription key="font" type="system" pointSize="22"/>
-                                            <variation key="device=watch38mm">
-                                                <fontDescription key="font" type="system" pointSize="20"/>
-                                            </variation>
+                                            <fontDescription key="font" type="system" pointSize="25"/>
                                             <connections>
                                                 <action selector="setAbsorptionTimeSlow" destination="zh0-gB-D44" id="qa3-FG-c9F"/>
                                             </connections>
@@ -118,10 +109,8 @@
                         <outlet property="absorptionButtonA" destination="gAn-qe-OvX" id="mMN-LG-P3Q"/>
                         <outlet property="absorptionButtonB" destination="0fo-Z3-hTi" id="bPH-HR-eTF"/>
                         <outlet property="absorptionButtonC" destination="dPF-QZ-sh6" id="KfE-KO-HcS"/>
-                        <outlet property="carbValueLabel" destination="CWt-7U-cnK" id="EZd-HO-fF6"/>
                         <outlet property="dateLabel" destination="Ury-of-vQg" id="tRT-Eb-SVK"/>
-                        <outlet property="minusButton" destination="Dh9-HV-fXy" id="hGJ-zC-tb9"/>
-                        <outlet property="plusButton" destination="eu3-pj-GH3" id="67u-Oa-F0B"/>
+                        <outlet property="valueLabel" destination="CWt-7U-cnK" id="hJE-ER-FQy"/>
                     </connections>
                 </controller>
             </objects>
