@@ -16,7 +16,7 @@
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="uPt-Z4-ngs">
                             <items>
-                                <group width="1" alignment="left" layout="vertical" id="hwe-wE-KAr">
+                                <group width="1" alignment="left" layout="vertical" spacing="3" id="hwe-wE-KAr">
                                     <items>
                                         <group width="1" height="0.25" alignment="left" spacing="0.0" id="WLN-cX-0wl">
                                             <items>
@@ -66,10 +66,13 @@
                                         </tapGestureRecognizer>
                                     </gestureRecognizers>
                                 </group>
-                                <group width="1" height="0.25" alignment="center" verticalAlignment="center" spacing="0.0" id="XMa-yL-87D">
+                                <group width="1" height="0.25" alignment="center" spacing="0.0" id="XMa-yL-87D">
                                     <items>
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🍭" id="gAn-qe-OvX">
                                             <fontDescription key="font" type="system" pointSize="25"/>
+                                            <variation key="device=watch42mm">
+                                                <fontDescription key="font" type="system" pointSize="30"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeFast" destination="zh0-gB-D44" id="Eoj-WC-Fod"/>
                                             </connections>
@@ -77,24 +80,24 @@
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🌮" id="0fo-Z3-hTi">
                                             <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <fontDescription key="font" type="system" pointSize="25"/>
+                                            <variation key="device=watch42mm">
+                                                <fontDescription key="font" type="system" pointSize="30"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeMedium" destination="zh0-gB-D44" id="GXY-aa-sz8"/>
                                             </connections>
                                         </button>
                                         <button width="0.33000000000000002" height="1" alignment="left" title="🍕" id="dPF-QZ-sh6">
                                             <fontDescription key="font" type="system" pointSize="25"/>
+                                            <variation key="device=watch42mm">
+                                                <fontDescription key="font" type="system" pointSize="30"/>
+                                            </variation>
                                             <connections>
                                                 <action selector="setAbsorptionTimeSlow" destination="zh0-gB-D44" id="qa3-FG-c9F"/>
                                             </connections>
                                         </button>
                                     </items>
                                 </group>
-                                <separator alignment="left" id="arf-ic-MQs">
-                                    <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </separator>
-                                <separator alignment="left" id="EVD-AC-w2R">
-                                    <color key="color" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </separator>
                                 <button width="1" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
                                     <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
