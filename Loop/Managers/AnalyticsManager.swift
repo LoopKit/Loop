@@ -10,7 +10,7 @@ import Foundation
 import Amplitude
 
 
-final class AnalyticsManager {
+final class AnalyticsManager: IdentifiableClass {
 
     var amplitudeService: AmplitudeService {
         didSet {
@@ -24,21 +24,19 @@ final class AnalyticsManager {
         } else {
             amplitudeService = AmplitudeService(APIKey: nil)
         }
+
+        logger = DiagnosticLogger.shared?.forCategory(type(of: self).className)
     }
 
-    static let sharedManager = AnalyticsManager()
+    static let shared = AnalyticsManager()
 
     // MARK: - Helpers
 
-    private var isSimulator: Bool = TARGET_OS_SIMULATOR != 0
+    private var logger: CategoryLogger?
 
     private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
-        if isSimulator {
-            NSLog("\(name) \(properties ?? [:])")
-        } else {
-            amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
-        }
-
+        logger?.debug("\(name) \(properties ?? [:])")
+        amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
     }
 
     // MARK: - UIApplicationDelegate
@@ -87,8 +85,8 @@ final class AnalyticsManager {
         logEvent("Carb ratio change")
     }
 
-    func didChangeInsulinActionDuration() {
-        logEvent("Insulin action duration change")
+    func didChangeInsulinModel() {
+        logEvent("Insulin model change")
     }
 
     func didChangeInsulinSensitivitySchedule() {
@@ -99,18 +97,26 @@ final class AnalyticsManager {
         logEvent("Glucose target range change")
     }
 
-    func didChangeMaximumBasalRate() {
-        logEvent("Maximum basal rate change")
-    }
+    func didChangeLoopSettings(from oldValue: LoopSettings, to newValue: LoopSettings) {
+        logEvent("Loop settings change")
 
-    func didChangeMaximumBolus() {
-        logEvent("Maximum bolus change")
+        if newValue.maximumBasalRatePerHour != oldValue.maximumBasalRatePerHour {
+            logEvent("Maximum basal rate change")
+        }
+
+        if newValue.maximumBolus != oldValue.maximumBolus {
+            logEvent("Maximum bolus change")
+        }
+
+        if newValue.suspendThreshold != oldValue.suspendThreshold {
+            logEvent("Minimum BG Guard change")
+        }
     }
 
     // MARK: - Loop Events
 
     func didAddCarbsFromWatch(_ carbs: Double) {
-        logEvent("Carb entry created", withProperties: ["source" : "Watch", "value": carbs], outOfSession: true)
+        logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func didRetryBolus() {
@@ -118,7 +124,7 @@ final class AnalyticsManager {
     }
 
     func didSetBolusFromWatch(_ units: Double) {
-        logEvent("Bolus set", withProperties: ["source" : "Watch", "value": units], outOfSession: true)
+        logEvent("Bolus set", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
     func loopDidSucceed() {

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G24b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Status View Controller-->
+        <scene sceneID="SeL-id-ebs">
+            <objects>
+                <viewController id="64E-I5-5c4" customClass="StatusViewController" customModule="Loop_Status_Extension" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="RlU-UG-7QV"/>
+                        <viewControllerLayoutGuide type="bottom" id="Vi1-50-EGe"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Vhu-kB-paW">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="220"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="QEK-eF-fK6">
+                                <rect key="frame" x="8" y="0.0" width="359" height="220"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" verticalHuggingPriority="252" translatesAutoresizingMaskIntoConstraints="NO" id="VIh-8L-VsB" customClass="HUDView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="0.0" width="359" height="70"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="70" placeholder="YES" id="DpL-aY-Gr3"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3n2-yC-jGi">
+                                        <rect key="frame" x="0.0" y="70" width="359" height="50"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" layoutMarginsFollowReadableWidth="YES" text="Eventually 92 mg/dL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9iF-xY-Bh4">
+                                                <rect key="frame" x="8" y="0.0" width="343" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="aVA-Mg-CvQ"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="top" secondItem="3n2-yC-jGi" secondAttribute="top" id="HSD-ba-SBR"/>
+                                            <constraint firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="LtS-Ct-5Wl"/>
+                                            <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="3n2-yC-jGi" secondAttribute="leading" constant="8" id="cIA-WI-DT4"/>
+                                            <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="8" id="x9b-EB-fji"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContainerView" customModule="LoopUI">
+                                        <rect key="frame" x="0.0" y="120" width="359" height="100"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" priority="750" constant="100" id="rLK-f9-lLl"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="Vi1-50-EGe" firstAttribute="top" secondItem="QEK-eF-fK6" secondAttribute="bottom" id="8CP-lo-FxM"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="top" secondItem="RlU-UG-7QV" secondAttribute="bottom" id="Rna-hO-xkd"/>
+                            <constraint firstItem="QEK-eF-fK6" firstAttribute="leading" secondItem="Vhu-kB-paW" secondAttribute="leading" constant="8" id="hDE-a8-dTa"/>
+                            <constraint firstAttribute="trailing" secondItem="QEK-eF-fK6" secondAttribute="trailing" constant="8" id="rIV-pZ-0Ap"/>
+                        </constraints>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <nil key="simulatedStatusBarMetrics"/>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="375" height="220"/>
+                    <connections>
+                        <outlet property="glucoseChartContentView" destination="GVu-hk-PBg" id="gfZ-nx-P6V"/>
+                        <outlet property="hudView" destination="VIh-8L-VsB" id="NsP-iq-J4a"/>
+                        <outlet property="subtitleLabel" destination="9iF-xY-Bh4" id="PM8-hd-IB3"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="d69-6q-UCR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-226.40000000000001" y="274.36281859070465"/>
+        </scene>
+    </scenes>
+</document>

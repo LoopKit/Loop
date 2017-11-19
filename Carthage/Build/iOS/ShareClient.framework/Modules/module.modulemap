@@ -7,4 +7,5 @@ framework module ShareClient {
 
 module ShareClient.Swift {
     header "ShareClient-Swift.h"
+    requires objc
 }

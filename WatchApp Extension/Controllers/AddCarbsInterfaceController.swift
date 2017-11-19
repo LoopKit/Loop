@@ -30,17 +30,17 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     private var absorptionTime = AbsorptionTimeType.medium {
         didSet {
-            absorptionButtonA.setBackgroundColor(UIColor.darkTintColor)
-            absorptionButtonB.setBackgroundColor(UIColor.darkTintColor)
-            absorptionButtonC.setBackgroundColor(UIColor.darkTintColor)
+            absorptionButtonA.setBackgroundColor(UIColor.darkCarbsColor)
+            absorptionButtonB.setBackgroundColor(UIColor.darkCarbsColor)
+            absorptionButtonC.setBackgroundColor(UIColor.darkCarbsColor)
 
             switch absorptionTime {
             case .fast:
-                absorptionButtonA.setBackgroundColor(UIColor.tintColor)
+                absorptionButtonA.setBackgroundColor(UIColor.carbsColor)
             case .medium:
-                absorptionButtonB.setBackgroundColor(UIColor.tintColor)
+                absorptionButtonB.setBackgroundColor(UIColor.carbsColor)
             case .slow:
-                absorptionButtonC.setBackgroundColor(UIColor.tintColor)
+                absorptionButtonC.setBackgroundColor(UIColor.carbsColor)
             }
         }
     }
@@ -134,7 +134,7 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
-        carbValue += Int((accumulatedRotation - remainder).divided(by: rotationsPerCarb))
+        carbValue += Int((accumulatedRotation - remainder) / rotationsPerCarb)
         accumulatedRotation = remainder
     }
 }

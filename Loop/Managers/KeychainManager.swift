@@ -55,7 +55,7 @@ struct KeychainManager {
         return query
     }
 
-    private func queryForInternetPassword(account: String? = nil, url: URL? = nil) -> Query {
+    private func queryForInternetPassword(account: String? = nil, url: URL? = nil, label: String? = nil) -> Query {
         var query = self.query(by: kSecClassInternetPassword)
 
         if let account = account {
@@ -66,6 +66,10 @@ struct KeychainManager {
             for (key, value) in components.keychainAttributes {
                 query[key] = value
             }
+        }
+
+        if let label = label {
+            query[kSecAttrLabel as String] = label as NSObject?
         }
 
         return query
@@ -135,8 +139,8 @@ struct KeychainManager {
 
     // MARK – Internet Passwords
 
-    func setInternetPassword(_ password: String, forAccount account: String, atURL url: URL) throws {
-        var query = try updatedQuery(queryForInternetPassword(account: account, url: url), withPassword: password)
+    func setInternetPassword(_ password: String, account: String, atURL url: URL, label: String? = nil) throws {
+        var query = try updatedQuery(queryForInternetPassword(account: account, url: url, label: label), withPassword: password)
 
         query[kSecAttrAccount as String] = account as NSObject?
 
@@ -144,6 +148,10 @@ struct KeychainManager {
             for (key, value) in components.keychainAttributes {
                 query[key] = value
             }
+        }
+
+        if let label = label {
+            query[kSecAttrLabel as String] = label as NSObject?
         }
 
         let statusCode = SecItemAdd(query as CFDictionary, nil)
@@ -159,7 +167,17 @@ struct KeychainManager {
         try delete(query)
 
         if let credentials = credentials {
-            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.url)
+            try setInternetPassword(credentials.password, account: credentials.username, atURL: credentials.url)
+        }
+    }
+
+    func replaceInternetCredentials(_ credentials: InternetCredentials?, forLabel label: String) throws {
+        let query = queryForInternetPassword(label: label)
+
+        try delete(query)
+
+        if let credentials = credentials {
+            try setInternetPassword(credentials.password, account: credentials.username, atURL: credentials.url, label: label)
         }
     }
 
@@ -169,12 +187,12 @@ struct KeychainManager {
         try delete(query)
 
         if let credentials = credentials {
-            try setInternetPassword(credentials.password, forAccount: credentials.username, atURL: credentials.url)
+            try setInternetPassword(credentials.password, account: credentials.username, atURL: credentials.url)
         }
     }
 
-    func getInternetCredentials(account: String? = nil, url: URL? = nil) throws -> InternetCredentials {
-        var query = queryForInternetPassword(account: account, url: url)
+    func getInternetCredentials(account: String? = nil, url: URL? = nil, label: String? = nil) throws -> InternetCredentials {
+        var query = queryForInternetPassword(account: account, url: url, label: label)
 
         query[kSecReturnData as String] = kCFBooleanTrue
         query[kSecReturnAttributes as String] = kCFBooleanTrue
@@ -256,8 +274,8 @@ private extension URLComponents {
 
         host = keychainAttributes[kSecAttrServer as String] as? String
 
-        if let port = keychainAttributes[kSecAttrPort as String] as? NSNumber, port.intValue > 0 {
-            self.port = port as Int?
+        if let port = keychainAttributes[kSecAttrPort as String] as? Int, port > 0 {
+            self.port = port
         }
 
         if let path = keychainAttributes[kSecAttrPath as String] as? String {

@@ -12,7 +12,6 @@ import Foundation
 
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
-    @IBOutlet weak var graphImage: WKInterfaceImage!
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
@@ -21,55 +20,79 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     private var lastContext: WatchContext?
 
+    override func didAppear() {
+        super.didAppear()
+
+        updateLoopHUD()
+    }
+
+    override func willActivate() {
+        super.willActivate()
+
+        updateLoopHUD()
+    }
+
+    private func updateLoopHUD() {
+        guard let date = lastContext?.loopLastRunDate else {
+            return
+        }
+
+        let loopImage: LoopImage
+
+        switch date.timeIntervalSinceNow {
+        case let t where t > .minutes(-6):
+            loopImage = .Fresh
+        case let t where t > .minutes(-20):
+            loopImage = .Aging
+        default:
+            loopImage = .Stale
+        }
+
+        self.loopHUDImage.setLoopImage(loopImage)
+    }
+
     func update(with context: WatchContext?) {
         lastContext = context
 
         if let date = context?.loopLastRunDate {
-            self.loopTimer.setDate(date as Date)
+            self.loopTimer.setDate(date)
             self.loopTimer.setHidden(false)
             self.loopTimer.start()
 
-            let loopImage: LoopImage
-
-            switch date.timeIntervalSinceNow {
-            case let t where t.minutes <= 5:
-                loopImage = .Fresh
-            case let t where t.minutes <= 15:
-                loopImage = .Aging
-            default:
-                loopImage = .Stale
-            }
-
-            self.loopHUDImage.setLoopImage(loopImage)
+            updateLoopHUD()
         } else {
             loopTimer.setHidden(true)
             loopHUDImage.setLoopImage(.Unknown)
         }
+        
+        guard let glucose = context?.glucose,
+            let unit = context?.preferredGlucoseUnit
+        else {
+            glucoseLabel.setHidden(true)
+            eventualGlucoseLabel.setHidden(true)
+            return
+        }
 
-        let numberFormatter = NumberFormatter()
+        let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
-        if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
-            let glucoseValue = glucose.doubleValue(for: unit)
+        if let glucoseValue = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))){
             let trend = context?.glucoseTrend?.symbol ?? ""
-
-            self.glucoseLabel.setText((numberFormatter.string(from: NSNumber(value: glucoseValue)) ?? "") + trend)
+            self.glucoseLabel.setText(glucoseValue + trend)
             self.glucoseLabel.setHidden(false)
         } else {
             glucoseLabel.setHidden(true)
         }
 
-        if let eventualGlucose = context?.eventualGlucose, let unit = context?.preferredGlucoseUnit {
-            let glucoseValue = eventualGlucose.doubleValue(for: unit)
-
-            self.eventualGlucoseLabel.setText(numberFormatter.string(from: NSNumber(value: glucoseValue)))
+        if let eventualGlucose = context?.eventualGlucose {
+            let glucoseValue = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+            self.eventualGlucoseLabel.setText(glucoseValue)
             self.eventualGlucoseLabel.setHidden(false)
         } else {
             eventualGlucoseLabel.setHidden(true)
         }
-
+        
         // TODO: Other elements
         statusLabel.setHidden(true)
-        graphImage.setHidden(true)
     }
 
     // MARK: - Menu Items

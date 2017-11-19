@@ -16,6 +16,8 @@ typedef NS_ENUM(NSUInteger, RileyLinkState) {
   RileyLinkStateDisconnected
 };
 
+extern NSString * _Nonnull const SubgRfspyErrorDomain;
+
 typedef NS_ENUM(NSUInteger, SubgRfspyError) {
   SubgRfspyErrorRxTimeout = 0xaa,
   SubgRfspyErrorCmdInterrupted = 0xbb,
@@ -64,9 +66,9 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 @interface RileyLinkBLEDevice : NSObject
 
 @property (nonatomic, nullable, readonly) NSString * name;
-@property (nonatomic, nullable, retain) NSNumber * RSSI;
+@property (nonatomic, nullable, strong) NSNumber * RSSI;
 @property (nonatomic, nonnull, readonly) NSString * peripheralId;
-@property (nonatomic, nonnull, readonly, retain) CBPeripheral * peripheral;
+@property (nonatomic, nonnull, strong) CBPeripheral * peripheral;
 
 @property (nonatomic, readonly) RileyLinkState state;
 
@@ -81,6 +83,8 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 @property (nonatomic, readonly, nullable) NSDate *lastIdle;
 
 @property (nonatomic) BOOL timerTickEnabled;
+
+@property (nonatomic) uint32_t idleTimeoutMS;
 
 /**
  Initializes the device with a specified peripheral
@@ -97,6 +101,6 @@ typedef NS_ENUM(NSUInteger, SubgRfspyVersionState) {
 - (void) setCustomName:(nonnull NSString*)customName;
 - (void) enableIdleListeningOnChannel:(uint8_t)channel;
 - (void) disableIdleListening;
-- (void) assertIdleListening;
+- (void) assertIdleListeningForcingRestart:(BOOL)forceRestart;
 
 @end

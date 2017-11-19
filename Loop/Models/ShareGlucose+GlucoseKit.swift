@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopUI
 import ShareClient
 
 
@@ -18,21 +19,31 @@ extension ShareGlucose: GlucoseValue {
     }
 
     public var quantity: HKQuantity {
-        return HKQuantity(unit: HKUnit.milligramsPerDeciliterUnit(), doubleValue: Double(glucose))
+        return HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: Double(glucose))
     }
 }
 
 
 extension ShareGlucose: SensorDisplayable {
-    var isStateValid: Bool {
+    public var isStateValid: Bool {
         return glucose >= 20
     }
 
-    var trendType: GlucoseTrend? {
+    public var trendType: GlucoseTrend? {
         return GlucoseTrend(rawValue: Int(trend))
     }
 
-    var isLocal: Bool {
+    public var isLocal: Bool {
         return false
+    }
+}
+
+extension SensorDisplayable {
+    public var stateDescription: String {
+        if isStateValid {
+            return NSLocalizedString("OK", comment: "Sensor state description for the valid state")
+        } else {
+            return NSLocalizedString("Needs Attention", comment: "Sensor state description for the non-valid state")
+        }
     }
 }
