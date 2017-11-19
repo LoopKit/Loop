@@ -21,7 +21,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     override init() {
         super.init()
 
-        let session = WCSession.default()
+        let session = WCSession.default
         session.delegate = self
 
         // It seems, according to [this sample code](https://developer.apple.com/library/prerelease/content/samplecode/QuickSwitch/Listings/QuickSwitch_WatchKit_Extension_ExtensionDelegate_swift.html#//apple_ref/doc/uid/TP40016647-QuickSwitch_WatchKit_Extension_ExtensionDelegate_swift-DontLinkElementID_8)
@@ -47,8 +47,8 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     func applicationDidBecomeActive() {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 
-        if WCSession.default().activationState != .activated {
-            WCSession.default().activate()
+        if WCSession.default.activationState != .activated {
+            WCSession.default.activate()
         }
     }
 
@@ -92,8 +92,8 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
                 pendingConnectivityTasks.append(task)
 
-                if WCSession.default().activationState != .activated {
-                    WCSession.default().activate()
+                if WCSession.default.activationState != .activated {
+                    WCSession.default.activate()
                 }
 
                 completePendingConnectivityTasksIfNeeded()
@@ -101,24 +101,25 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
             default:
                 break
             }
-            #if swift(>=3.2)
+
+            if #available(watchOSApplicationExtension 4.0, *) {
                 task.setTaskCompletedWithSnapshot(false)
-            #else
+            } else {
                 task.setTaskCompleted()
-            #endif
+            }
         }
     }
 
     private var pendingConnectivityTasks: [WKWatchConnectivityRefreshBackgroundTask] = []
 
     private func completePendingConnectivityTasksIfNeeded() {
-        if WCSession.default().activationState == .activated && !WCSession.default().hasContentPending {
-            pendingConnectivityTasks.forEach {
-                #if swift(>=3.2)
-                    $0.setTaskCompletedWithSnapshot(false)
-                #else
-                    $0.setTaskCompleted()
-                #endif
+        if WCSession.default.activationState == .activated && !WCSession.default.hasContentPending {
+            pendingConnectivityTasks.forEach { (task) in
+                if #available(watchOSApplicationExtension 4.0, *) {
+                    task.setTaskCompletedWithSnapshot(false)
+                } else {
+                    task.setTaskCompleted()
+                }
             }
             pendingConnectivityTasks.removeAll()
         }
