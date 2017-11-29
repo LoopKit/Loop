@@ -205,11 +205,24 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 if let eventualGlucose = predictedGlucose.last {
                     let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
 
+                    var activeInsulinString = "--"
+                    if let activeInsulin = context.activeInsulin {
+                        // If the returned value doesn't indicate an error,
+                        // assign it to the label:
+                        if activeInsulin.error == "" {
+                            activeInsulinString = String(format: "%.1f", activeInsulin.value)
+                        } else {
+                            // This will be ugly but maybe (?) informative: 
+                            activeInsulinString = activeInsulin.error
+                        }
+                    }
+
                     if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
-                                "Eventually %1$@ %2$@",
-                                comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
+                                "%1$@ U IOB;   Eventual BG %2$@ %3$@",
+                                comment: "The subtitle format describing active insulin and eventual glucose. (1: active insulin description) (2: localized glucose value description) (3: localized glucose units description)"),
+                            activeInsulinString,
                             eventualGlucoseNumberString,
                             unit.glucoseUnitDisplayString
                         )
