@@ -144,10 +144,7 @@ final class StatusExtensionDataManager {
                 // recent it is. 
                 switch result {
                 case .success(let iobValue):
-                    context.activeInsulin = ActiveInsulinContext(value: iobValue.value,
-                                                                 startDate: iobValue.startDate,
-                                                                 error: "")
-                    
+                    context.activeInsulin = iobValue.value                    
                 case .failure:
                     context.activeInsulin = nil
                 }

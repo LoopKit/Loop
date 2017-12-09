@@ -175,6 +175,16 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return dateFormatter
         }()
 
+        let insulinFormatter: NumberFormatter = {
+            let numberFormatter = NumberFormatter()
+            
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 1
+            numberFormatter.maximumFractionDigits = 1
+            
+            return numberFormatter
+        }()
+
 
         if let glucose = context.glucose,
             glucose.count > 0 {
@@ -205,15 +215,17 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 if let eventualGlucose = predictedGlucose.last {
                     let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
 
-                    var activeInsulinString = "--"
-                    if let activeInsulin = context.activeInsulin {
-                        activeInsulinString = String(format: "%.1f", activeInsulin.value)
+                    var activeInsulinString: String
+                    if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
+                        activeInsulinString = valueStr
+                    } else {
+                        activeInsulinString = "--"
                     }
 
                     if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
-                                "%1$@ U IOB;   Eventual BG %2$@ %3$@",
+                                "%1$@ U IOB;   BG eventually %2$@ %3$@",
                                 comment: "The subtitle format describing active insulin and eventual glucose. (1: active insulin description) (2: localized glucose value description) (3: localized glucose units description)"),
                             activeInsulinString,
                             eventualGlucoseNumberString,

@@ -29,12 +29,6 @@ struct NetBasalContext {
     let end: Date
 }
 
-struct ActiveInsulinContext {
-    let value: Double
-    let startDate: Date
-    let error: String
-}
-
 struct SensorDisplayableContext: SensorDisplayable {
     let isStateValid: Bool
     let stateDescription: String
@@ -141,32 +135,6 @@ extension NetBasalContext: RawRepresentable {
         self.percentage = percentage
         self.start = start
         self.end = end
-    }
-}
-
-extension ActiveInsulinContext: RawRepresentable {
-    typealias RawValue = [String: Any]
-    
-    var rawValue: RawValue {
-        return [
-            "value": value,
-            "startDate": startDate,
-            "error": error
-        ]
-    }
-
-    init?(rawValue: RawValue) {
-        guard
-            let value     = rawValue["value"] as? Double,
-            let startDate = rawValue["startDate"] as? Date,
-            let error     = rawValue["error"] as? String
-            else {
-                return nil
-            }
-        
-        self.value = value
-        self.startDate = startDate
-        self.error = error
     }
 }
 
@@ -306,7 +274,7 @@ struct StatusExtensionContext: RawRepresentable {
     var loop: LoopContext?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
-    var activeInsulin: ActiveInsulinContext?
+    var activeInsulin: Double?
     var targetRanges: [DatedRangeContext]?
     var temporaryOverride: DatedRangeContext?
     var sensor: SensorDisplayableContext?
@@ -340,9 +308,7 @@ struct StatusExtensionContext: RawRepresentable {
 
         batteryPercentage = rawValue["batteryPercentage"] as? Double
 
-        if let rawValue = rawValue["activeInsulin"] as? ActiveInsulinContext.RawValue {
-            activeInsulin = ActiveInsulinContext(rawValue: rawValue)
-        }
+        activeInsulin = rawValue["activeInsulin"] as? Double
         
         if let rawValue = rawValue["targetRanges"] as? [DatedRangeContext.RawValue] {
             targetRanges = rawValue.flatMap({return DatedRangeContext(rawValue: $0)})
@@ -368,7 +334,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["loop"] = loop?.rawValue
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
-        raw["activeInsulin"] = activeInsulin?.rawValue
+        raw["activeInsulin"] = activeInsulin
         raw["targetRanges"] = targetRanges?.map({return $0.rawValue})
         raw["temporaryOverride"] = temporaryOverride?.rawValue
         raw["sensor"] = sensor?.rawValue
