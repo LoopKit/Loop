@@ -266,7 +266,7 @@ extension DatedRangeContext: RawRepresentable {
 
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
-    private let version = 3
+    private let version = 4
 
     var glucose: [GlucoseContext]?
     var predictedGlucose: PredictedGlucoseContext?
