@@ -521,7 +521,7 @@ final class DeviceDataManager {
 
             var pumpID = newValue
 
-            if let pumpID = pumpID, pumpID.characters.count == 6 {
+            if let pumpID = pumpID, pumpID.count == 6 {
                 let pumpState = PumpState(pumpID: pumpID, pumpRegion: self.pumpState?.pumpRegion ?? .northAmerica)
 
                 if let timeZone = self.pumpState?.timeZone {
