@@ -84,8 +84,16 @@ extension StatusChartsManager {
         var allDosePoints = [ChartPoint]()
 
         for entry in doseEntries {
-            switch entry.endDate.timeIntervalSince(entry.startDate) {
-            case let time where time > 0:
+            let time = entry.endDate.timeIntervalSince(entry.startDate)
+
+            if entry.type == .bolus && entry.units > 0 && time < .minutes(5) {
+                let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
+                let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
+
+                let point = ChartPoint(x: x, y: y)
+                bolusDosePoints.append(point)
+                allDosePoints.append(point)
+            } else if time > 0 {
                 // TODO: Display the DateInterval
                 let startX = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                 let endX = ChartAxisValueDate(date: entry.endDate, formatter: dateFormatter)
@@ -110,15 +118,6 @@ extension StatusChartsManager {
                 ]
 
                 allDosePoints += valuePoints
-            default:
-                if entry.type == .bolus && entry.units > 0 {
-                    let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
-                    let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
-
-                    let point = ChartPoint(x: x, y: y)
-                    bolusDosePoints.append(point)
-                    allDosePoints.append(point)
-                }
             }
         }
 
