@@ -148,13 +148,8 @@ final class StatusExtensionDataManager {
                                                                  startDate: iobValue.startDate,
                                                                  error: "")
                     
-                case .failure(let error):
-                    // Use a large negative value to flag that we
-                    // we didn't successfully get a value back, so
-                    // label in status extension shouldn't use this. 
-                    context.activeInsulin = ActiveInsulinContext(value: -9999.9,
-                                                                 startDate: Date(),
-                                                                 error: String(describing: error))
+                case .failure:
+                    context.activeInsulin = nil
                 }
                 updateGroup.leave()
             }

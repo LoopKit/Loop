@@ -207,14 +207,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
                     var activeInsulinString = "--"
                     if let activeInsulin = context.activeInsulin {
-                        // If the returned value doesn't indicate an error,
-                        // assign it to the label:
-                        if activeInsulin.error == "" {
-                            activeInsulinString = String(format: "%.1f", activeInsulin.value)
-                        } else {
-                            // This will be ugly but maybe (?) informative: 
-                            activeInsulinString = activeInsulin.error
-                        }
+                        activeInsulinString = String(format: "%.1f", activeInsulin.value)
                     }
 
                     if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
