@@ -462,7 +462,7 @@ public final class StatusChartsManager {
             let viewFrame = CGRect(x: chart.contentView.bounds.minX, y: chartPointModel.screenLoc.y - width / 2, width: chart.contentView.bounds.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
-            v.backgroundColor = UIColor.IOBTintColor
+            v.layer.backgroundColor = UIColor.IOBTintColor.cgColor
             return v
         })
 
@@ -606,7 +606,7 @@ public final class StatusChartsManager {
             let viewFrame = CGRect(x: chart.contentView.bounds.minX, y: chartPointModel.screenLoc.y - width / 2, width: chart.contentView.bounds.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
-            v.backgroundColor = self.colors.doseTint
+            v.layer.backgroundColor = self.colors.doseTint.cgColor
             return v
         })
 
@@ -737,7 +737,7 @@ public final class StatusChartsManager {
             let viewFrame = CGRect(x: chart.contentView.bounds.minX, y: chartPointModel.screenLoc.y - width / 2, width: chart.contentView.bounds.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
-            v.backgroundColor = carbFillColor
+            v.layer.backgroundColor = carbFillColor.cgColor
             return v
         })
 
