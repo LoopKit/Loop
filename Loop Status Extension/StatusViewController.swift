@@ -215,8 +215,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 if let eventualGlucose = predictedGlucose.last {
                     let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
 
-                    var activeInsulinString: String
-                    if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
+                    let activeInsulinString: String
+                    if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
+                    {
                         activeInsulinString = valueStr
                     } else {
                         activeInsulinString = "--"
