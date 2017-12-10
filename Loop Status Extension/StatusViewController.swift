@@ -167,6 +167,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         subtitleLabel.isHidden = true
+        insulinLabel.isHidden = true
 
         let dateFormatter: DateFormatter = {
             let dateFormatter = DateFormatter()
@@ -186,7 +187,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return numberFormatter
         }()
 
-
+        if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
+        {
+            insulinLabel.text = "IOB " + valueStr + " U"
+            insulinLabel.isHidden = false
+        }
+        
         if let glucose = context.glucose,
             glucose.count > 0 {
             let unit = glucose[0].unit
@@ -216,22 +222,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 if let eventualGlucose = predictedGlucose.last {
                     let formatter = NumberFormatter.glucoseFormatter(for: eventualGlucose.unit)
 
-                    let activeInsulinString: String
-                    if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
-                    {
-                        activeInsulinString = valueStr + " U"
-                    } else {
-                        activeInsulinString = "??"
-                    }
-
-                    insulinLabel.text = "IOB " + activeInsulinString
-                    
                     if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
-                                "%1$@ U IOB;   BG eventually %2$@ %3$@",
-                                comment: "The subtitle format describing active insulin and eventual glucose. (1: active insulin description) (2: localized glucose value description) (3: localized glucose units description)"),
-                            activeInsulinString,
+                                "Eventually %1$@ %2$@",
+                                comment: "The subtitle format describing eventual glucose.  (1: localized glucose value description) (2: localized glucose units description)"),
                             eventualGlucoseNumberString,
                             unit.glucoseUnitDisplayString
                         )
