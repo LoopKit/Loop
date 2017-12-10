@@ -215,6 +215,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             if let first = glucose.first {
                 charts.startDate = first.startDate
             }
+            
+            // Showing the whole history plus full prediction in the glucose plot
+            // is a little crowded, so limit it to three hours in the future:
+            charts.maxEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             if let predictedGlucose = context.predictedGlucose?.samples {
                 charts.predictedGlucosePoints = predictedGlucose.map {
