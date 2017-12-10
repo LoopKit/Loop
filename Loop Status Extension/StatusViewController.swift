@@ -26,6 +26,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
+    @IBOutlet weak var insulinLabel: UILabel!
     @IBOutlet weak var glucoseChartContentView: LoopUI.ChartContainerView!
 
     private lazy var charts: StatusChartsManager = {
@@ -218,11 +219,13 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     let activeInsulinString: String
                     if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
                     {
-                        activeInsulinString = valueStr
+                        activeInsulinString = valueStr + " U"
                     } else {
-                        activeInsulinString = "--"
+                        activeInsulinString = "??"
                     }
 
+                    insulinLabel.text = "IOB " + activeInsulinString
+                    
                     if let eventualGlucoseNumberString = formatter.string(from: NSNumber(value: eventualGlucose.quantity.doubleValue(for: unit))) {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
