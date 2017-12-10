@@ -191,7 +191,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
         if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
         {
-            insulinLabel.text = "IOB " + valueStr + " U"
+            insulinLabel.text = String(format: NSLocalizedString(
+                    "IOB %1$@ U",
+                    comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
+                                        valueStr)
             insulinLabel.isHidden = false
         }
         
