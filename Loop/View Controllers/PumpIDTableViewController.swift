@@ -99,7 +99,7 @@ final class PumpIDTableViewController: TextFieldTableViewController {
         case .id:
             return super.tableView(tableView, titleForFooterInSection: section)
         case .region:
-            return NSLocalizedString("The pump regioncan be found printed on the back as part of the model number (REF), for example: MMT-551NAB, or MMT-515LWWS. If the model number contains \"NA\" or \"CA\", then the region is North America. If if contains \"WW\", then the region is World-Wide.", comment: "Instructions on selecting the pump region")
+            return NSLocalizedString("The pump region can be found printed on the back as part of the model number (REF), for example: MMT-551NAB, or MMT-515LWWS. If the model number contains \"NA\" or \"CA\", then the region is North America. If if contains \"WW\", then the region is World-Wide.", comment: "Instructions on selecting the pump region")
         }
     }
 
