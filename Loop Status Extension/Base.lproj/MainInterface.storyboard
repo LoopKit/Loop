@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G24b" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
-    <device id="retina4_7" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="64E-I5-5c4">
+    <device id="retina5_5" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -42,11 +42,24 @@
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" layoutMarginsFollowReadableWidth="YES" text="IOB 1.0 U" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UPi-dG-yYD">
+                                                <rect key="frame" x="8" y="0.0" width="343" height="50"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="Va8-zN-Zxc"/>
+                                                </constraints>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                         </subviews>
                                         <constraints>
+                                            <constraint firstItem="UPi-dG-yYD" firstAttribute="leading" secondItem="9iF-xY-Bh4" secondAttribute="leading" id="7Jj-0n-7D1"/>
+                                            <constraint firstItem="UPi-dG-yYD" firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="GsE-4E-FbA"/>
                                             <constraint firstItem="9iF-xY-Bh4" firstAttribute="top" secondItem="3n2-yC-jGi" secondAttribute="top" id="HSD-ba-SBR"/>
                                             <constraint firstAttribute="bottom" secondItem="9iF-xY-Bh4" secondAttribute="bottom" id="LtS-Ct-5Wl"/>
+                                            <constraint firstItem="UPi-dG-yYD" firstAttribute="height" secondItem="9iF-xY-Bh4" secondAttribute="height" id="Qa0-KT-ozH"/>
                                             <constraint firstItem="9iF-xY-Bh4" firstAttribute="leading" secondItem="3n2-yC-jGi" secondAttribute="leading" constant="8" id="cIA-WI-DT4"/>
+                                            <constraint firstAttribute="trailing" secondItem="UPi-dG-yYD" secondAttribute="trailing" constant="8" id="uU7-uQ-0lP"/>
                                             <constraint firstAttribute="trailing" secondItem="9iF-xY-Bh4" secondAttribute="trailing" constant="8" id="x9b-EB-fji"/>
                                         </constraints>
                                     </view>
@@ -76,6 +89,7 @@
                     <connections>
                         <outlet property="glucoseChartContentView" destination="GVu-hk-PBg" id="gfZ-nx-P6V"/>
                         <outlet property="hudView" destination="VIh-8L-VsB" id="NsP-iq-J4a"/>
+                        <outlet property="insulinLabel" destination="UPi-dG-yYD" id="mhC-fv-uD4"/>
                         <outlet property="subtitleLabel" destination="9iF-xY-Bh4" id="PM8-hd-IB3"/>
                     </connections>
                 </viewController>

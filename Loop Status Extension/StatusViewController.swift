@@ -26,6 +26,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
+    @IBOutlet weak var insulinLabel: UILabel!
     @IBOutlet weak var glucoseChartContentView: LoopUI.ChartContainerView!
 
     private lazy var charts: StatusChartsManager = {
@@ -65,6 +66,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         super.viewDidLoad()
         subtitleLabel.isHidden = true
         subtitleLabel.textColor = .subtitleLabelColor
+        insulinLabel.isHidden = true
+        insulinLabel.textColor = .subtitleLabelColor
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
@@ -166,6 +169,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         subtitleLabel.isHidden = true
+        insulinLabel.isHidden = true
 
         let dateFormatter: DateFormatter = {
             let dateFormatter = DateFormatter()
@@ -175,7 +179,25 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             return dateFormatter
         }()
 
+        let insulinFormatter: NumberFormatter = {
+            let numberFormatter = NumberFormatter()
+            
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 1
+            numberFormatter.maximumFractionDigits = 1
+            
+            return numberFormatter
+        }()
 
+        if let activeInsulin = context.activeInsulin, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin))
+        {
+            insulinLabel.text = String(format: NSLocalizedString(
+                    "IOB %1$@ U",
+                    comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
+                                        valueStr)
+            insulinLabel.isHidden = false
+        }
+        
         if let glucose = context.glucose,
             glucose.count > 0 {
             let unit = glucose[0].unit
@@ -193,6 +215,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             if let first = glucose.first {
                 charts.startDate = first.startDate
             }
+            
+            // Showing the whole history plus full prediction in the glucose plot
+            // is a little crowded, so limit it to three hours in the future:
+            charts.maxEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
 
             if let predictedGlucose = context.predictedGlucose?.samples {
                 charts.predictedGlucosePoints = predictedGlucose.map {
@@ -209,7 +235,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                         subtitleLabel.text = String(
                             format: NSLocalizedString(
                                 "Eventually %1$@ %2$@",
-                                comment: "The subtitle format describing eventual glucose. (1: localized glucose value description) (2: localized glucose units description)"),
+                                comment: "The subtitle format describing eventual glucose.  (1: localized glucose value description) (2: localized glucose units description)"),
                             eventualGlucoseNumberString,
                             unit.glucoseUnitDisplayString
                         )

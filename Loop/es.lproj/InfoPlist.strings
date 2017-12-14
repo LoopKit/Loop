@@ -1,0 +1,15 @@
+/* (No Comment) */
+"CFBundleDisplayName" = "Loop";
+
+/* (No Comment) */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* (No Comment) */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth se utiliza para las comunicaciones con la microinfusora y los dispositivos de monitoreo continuo de glucosa.";
+
+/* (No Comment) */
+"NSHealthShareUsageDescription" = "Datos de alimentos de la base de datos de Salud se utiliza para determinar los efectos en el nivel de glucosa. Datos de glucosa de la bsase de datos de Salud se utilizan para graficar y determinar cálculos de momentum.";
+
+/* (No Comment) */
+"NSHealthUpdateUsageDescription" = "Datos de alimentos ingresados en la aplicación y en el reloj son almacenados en la base de datos de Salud. Los datos de glucosa extraídos del monitor continuo de glucosa se almacenan de manera segura en Kit de Salud.";
+
