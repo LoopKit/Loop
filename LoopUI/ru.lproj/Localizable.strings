@@ -1,0 +1,63 @@
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ в %2$@ ";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ ед/час в %2$@";
+
+/* Accessibility format string for (1: localized volume)(2: time) */
+"%1$@ units remaining at %2$@" = "%1$@ ед остающихся в %2$@";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ ед";
+
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "%@ назад";
+
+/* Format string for reservoir volume. (1: The localized volume) */
+"%@U" = "%@ед";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "Алгоритм замкнутого цикла";
+
+/* Glucose trend down */
+"Falling" = "Падение";
+
+/* Glucose trend down-down */
+"Falling fast" = "Быстрое падение";
+
+/* Glucose trend down-down-down */
+"Falling very fast" = "Очень быстрое падение";
+
+/* Glucose trend flat */
+"Flat" = "Стабильно";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "Алгоритм цикла запущен %@ назад";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "Требует внимания";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "Алгоритм открытого цикла";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Glucose trend up */
+"Rising" = "Повышение";
+
+/* Glucose trend up-up */
+"Rising fast" = "Быстрое повышение";
+
+/* Glucose trend up-up-up */
+"Rising very fast" = "Очень быстрое повышение";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "Неизвестно";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "Ожидает первичного запуска";
+
+/* The unit display string for millimoles of glucose per liter */
+"mmol/L" = "ммоль/л";
+
