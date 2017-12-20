@@ -593,6 +593,22 @@
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteSensorDisplayable.swift; sourceTree = "<group>"; };
+		7D68AAA91FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		7D68AAAA1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Main.strings; sourceTree = "<group>"; };
+		7D68AAAB1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/MainInterface.strings; sourceTree = "<group>"; };
+		7D68AAAC1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Interface.strings; sourceTree = "<group>"; };
+		7D68AAAD1FE2E8D400522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D68AAAE1FE2E8D400522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAAF1FE2E8D500522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAB01FE2E8D500522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/ckcomplication.strings; sourceTree = "<group>"; };
+		7D68AAB11FE2E8D500522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAB21FE2E8D500522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAB31FE2E8D500522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D68AAB41FE2E8D600522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAB51FE2E8D600522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D68AAB61FE2E8D600522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D68AAB71FE2E8D600522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D68AAB81FE2E8D700522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7D7076361FE06EDE004AC8EA /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7D70763B1FE06EDF004AC8EA /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7D7076401FE06EDF004AC8EA /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/ckcomplication.strings; sourceTree = "<group>"; };
@@ -1825,6 +1841,7 @@
 			children = (
 				43776F961B8022E90074EA36 /* Base */,
 				7DD382771F8DBFC60071272B /* es */,
+				7D68AAAA1FE2DB0A00522C49 /* ru */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -1834,6 +1851,7 @@
 			children = (
 				43776F9B1B8022E90074EA36 /* Base */,
 				7DD382761F8DBFC60071272B /* es */,
+				7D68AAA91FE2DB0A00522C49 /* ru */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -1843,6 +1861,7 @@
 			children = (
 				43A943751B926B7B0051FA24 /* Base */,
 				7DD382791F8DBFC60071272B /* es */,
+				7D68AAAC1FE2DB0A00522C49 /* ru */,
 			);
 			name = Interface.storyboard;
 			sourceTree = "<group>";
@@ -1852,6 +1871,7 @@
 			children = (
 				4F70C1E31DE8DCA7006380B7 /* Base */,
 				7DD382781F8DBFC60071272B /* es */,
+				7D68AAAB1FE2DB0A00522C49 /* ru */,
 			);
 			name = MainInterface.storyboard;
 			sourceTree = "<group>";
@@ -1860,6 +1880,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076361FE06EDE004AC8EA /* es */,
+				7D68AAAD1FE2E8D400522C49 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1868,6 +1889,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D70763B1FE06EDF004AC8EA /* es */,
+				7D68AAAF1FE2E8D500522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1876,6 +1898,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076401FE06EDF004AC8EA /* es */,
+				7D68AAB01FE2E8D500522C49 /* ru */,
 			);
 			name = ckcomplication.strings;
 			sourceTree = "<group>";
@@ -1884,6 +1907,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076461FE06EE0004AC8EA /* es */,
+				7D68AAB21FE2E8D500522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1892,6 +1916,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D70764B1FE06EE1004AC8EA /* es */,
+				7D68AAB31FE2E8D500522C49 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1900,6 +1925,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076501FE06EE1004AC8EA /* es */,
+				7D68AAB41FE2E8D600522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1908,6 +1934,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076551FE06EE2004AC8EA /* es */,
+				7D68AAB51FE2E8D600522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1916,6 +1943,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D70765A1FE06EE2004AC8EA /* es */,
+				7D68AAB61FE2E8D600522C49 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1924,6 +1952,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D70765F1FE06EE3004AC8EA /* es */,
+				7D68AAB71FE2E8D600522C49 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1932,6 +1961,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076641FE06EE4004AC8EA /* es */,
+				7D68AAB81FE2E8D700522C49 /* ru */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1940,6 +1970,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D7076691FE0702F004AC8EA /* es */,
+				7D68AAAE1FE2E8D400522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1949,6 +1980,7 @@
 			children = (
 				C1C73F0E1DE3D0270022FC89 /* it */,
 				7D7076421FE06EE0004AC8EA /* es */,
+				7D68AAB11FE2E8D500522C49 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1986,7 +2018,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -2051,7 +2083,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -2291,11 +2323,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 41;
+				DYLIB_CURRENT_VERSION = 42;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -2318,11 +2350,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 41;
+				DYLIB_CURRENT_VERSION = 42;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";

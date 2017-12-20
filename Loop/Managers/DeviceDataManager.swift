@@ -691,6 +691,7 @@ extension DeviceDataManager: CGMManagerDelegate {
                 self.assertCurrentPumpData()
             }
         case .noData:
+            self.assertCurrentPumpData()
             break
         case .error(let error):
             self.setLastError(error: error)
