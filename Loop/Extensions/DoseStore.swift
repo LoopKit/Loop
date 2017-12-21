@@ -58,10 +58,6 @@ extension LoopDataManager {
                     value: basal.scheduleEntry.rate,
                     unit: .unitsPerHour
                 )
-
-                if isRewound {
-                    isRewound = false
-                }
             case is RewindPumpEvent:
                 eventType = .rewind
 
@@ -70,15 +66,14 @@ extension LoopDataManager {
  
                  If the fixed prime is cancelled, it is never recorded in history. It is possible to cancel a fixed prime and perform one manually some time later, but basal delivery will have resumed during that period.
                  
-                 On an x23 model pump, the point at which basal delivery resumes is unambiguous thanks to the BasalProfileStart event.
-                 On older model pumps, we take the conservative approach and assume delivery is paused only between the Rewind and the first Prime event.
+                 We take the conservative approach and assume delivery is paused only between the Rewind and the first Prime event.
                  */
                 dose = DoseEntry(suspendDate: event.date)
                 isRewound = true
             case is PrimePumpEvent:
                 eventType = .prime
 
-                if !model.recordsBasalProfileStartEvents && isRewound {
+                if isRewound {
                     isRewound = false
                     dose = DoseEntry(resumeDate: event.date)
                 }

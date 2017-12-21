@@ -11,12 +11,19 @@ import UIKit
 
 final class SwitchTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel?
 
     @IBOutlet weak var subtitleLabel: UILabel?
 
-    @IBOutlet weak var `switch`: UISwitch?
+    var `switch`: UISwitch?
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        `switch` = UISwitch(frame: .zero)
+        accessoryView = `switch`
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
 
