@@ -80,7 +80,7 @@ extension UserDefaults {
                     return .enlite
                 }
 
-                if let transmitterID = string(forKey: "com.loudnate.Naterade.TransmitterID"), transmitterID.characters.count == 6 {
+                if let transmitterID = string(forKey: "com.loudnate.Naterade.TransmitterID"), transmitterID.count == 6 {
                     self.cgm = .g5(transmitterID: transmitterID)
                     return .g5(transmitterID: transmitterID)
                 }

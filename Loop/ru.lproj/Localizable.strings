@@ -1,0 +1,451 @@
+/* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
+" (pending: %@)" = "(В ожидании: %@)";
+
+/* Format string for current suspend threshold. (1: value)(2: bg unit) */
+"%1$@ %2$@" = "%1$@ %2$@";
+
+/* Format string for carb ratio average. (1: value)(2: carb unit)
+   Format string for insulin sensitivity average (1: value)(2: glucose unit) */
+"%1$@ %2$@/U" = "%1$@ %2$@/ед";
+
+/* Formats (1: carb start time) and (2: carb absorption duration) */
+"%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* Low reservoir alert format string. (1: Number of units remaining) */
+"%1$@ U left" = "%1$@ Осталось ед";
+
+/* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
+"%1$@ U left: %2$@" = "%1$@ Осталось ед: %2$@ ";
+
+/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
+"%1$@ U/hour @ %2$@" = "%1$@ ед/час @ %2$@";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/минут";
+
+/* Formats (1: carb value) and (2: food type) */
+"%1$@: %2$@" = "%1$@: %2$@";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ всего ед";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ усвоено";
+
+/* Description of the prediction input effect for glucose momentum */
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15-мин коэффициент регрессии гликемии (b1), продолжен с угасанием 30 мин";
+
+/* Description of the prediction input effect for retrospective correction */
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 мин сравнение предсказанной гликемии с действительной, продолжено с угасанием 60 мин";
+
+/* Subtitle of Fiasp preset */
+"A model based on the published absorption of Fiasp insulin." = "модель, основанная на опубликованных данных усвоения FIASP инсулина ";
+
+/* Subtitle of Rapid-Acting – Adult preset */
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "модель, основанная на опубликованных данных усвоения Humalog, Novolog и Apidra у взрослых ";
+
+/* The title of the amplitude API key credential
+   The title of the mLab API Key credential */
+"API Key" = "API Key";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API Secret";
+
+/* Action to copy the recommended Bolus value to the actual Bolus Field */
+"AcceptRecommendedBolus" = "Принятьрекомендуемыйболюс";
+
+/* The title of the Carbs On-Board graph */
+"Active Carbohydrates" = "Действующие углеводы";
+
+/* The string format describing active carbohydrates. (1: localized glucose value description) */
+"Active Carbohydrates: %@" = "Действующие углеводы: %@";
+
+/* The title of the Insulin On-Board graph */
+"Active Insulin" = "Действующий инсулин";
+
+/* The string format describing active insulin. (1: localized insulin value description) */
+"Active Insulin: %@" = "Действующий инсулин: %@";
+
+/* The title of the button to add the credentials for a service */
+"Add Account" = "Добавить пользователя";
+
+/* The label of the carb entry button */
+"Add Meal" = "Добавить продукт";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "Настройки алгоритма";
+
+/* Instructions on selecting battery chemistry type */
+"Alkaline and Lithium batteries decay at differing rates. Alkaline tend to have a linear voltage drop over time whereas lithium cell batteries tend to maintain voltage until halfway through their lifespan. Under normal usage in a Non-MySentry compatible Minimed (x22/x15) insulin pump running Loop, Alkaline batteries last approximately 4 to 5 days. Lithium batteries last between 1-2 weeks. This selection will use different battery voltage decay rates for each of the battery chemistry types and alert the user when a battery is approximately 8 to 10 hours from failure." = "Щелочные и литиевые батарейки садятся с различной скоростью. У щелочных падение линейное, в то время как литиевые сохраняют  напряжение в течение половины срока службы. При нормальном пользовании в помпе Minimed без Mysentry (x22/x15) с применением алгоритма ИПЖ щелочные батарейки служат примерно от 4 до 5 дней. Литиевые служат от 1 до 2 недель. Эта настройка будет использовать разную скорость падения напряжения батареек в зависимости от их химического типа и предупреждать пользователя за 8-10 часов до отказа ";
+
+/* The title of the Amplitude service */
+"Amplitude" = "Amplitude";
+
+/* Subtitle of Rapid-Acting – Children preset */
+"An adjustment to the adult model based on empirical effects in children." = "Поправка к модели для взрослых основанная на эмпирических данных для детей";
+
+/* The message displayed during a device authentication prompt for bolus specification */
+"Authenticate to Bolus %@ Units" = "Подтверждение болюса %@ ед";
+
+/* The title of the basal rate profile screen
+   The title text for the basal rate schedule */
+"Basal Rates" = "Скорости базала";
+
+/* The label of the bolus entry button
+   The notification title for a bolus failure */
+"Bolus" = "Болюс";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "Отмена";
+
+/* The title of the carb ratios schedule screen
+   The title text for the carb ratio schedule */
+"Carb Ratios" = "Соотношения углеводов";
+
+/* Title of the prediction input effect for carbohydrates */
+"Carbohydrates" = "Углеводы";
+
+/* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Усвоенные углеводы (г) : соотношение углеводов (гр/ед)х чувствительность к инсулину";
+
+/* The notification alert describing a low pump battery */
+"Change the pump battery immediately" = "Замените батарею помпы немедленно";
+
+/* The notification alert describing an empty pump reservoir */
+"Change the pump reservoir now" = "Замените резервуар помпы сейчас";
+
+/* The title text for the looping enabled switch cell */
+"Closed Loop" = "Замкнутый цикл";
+
+/* The title of the configuration section in settings */
+"Configuration" = "Конфигурация";
+
+/* The error message displayed for configuration errors. (1: configuration error details) */
+"Configuration Error: %1$@" = "Ошибка конфигурации: %1$@";
+
+/* The title of the continuous glucose monitor section in settings */
+"Continuous Glucose Monitor" = "Непрерывный мониторинг гликемии";
+
+/* The title of the glucose target range schedule screen
+   The title text for the glucose target range schedule */
+"Correction Range" = "Диапазон коррекции";
+
+/* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
+"Current glucose of %1$@ is below correction range." = "Гликемия %1$@ ниже диапазона коррекции";
+
+/* The title of the Loggly customer token credential */
+"Customer Token" = "Жетон пользователя";
+
+/* The title of the mLab database name credential */
+"Database" = "База данных";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Удалить аккаунт";
+
+/* The title of the Dexcom Share service */
+"Dexcom Share" = "Декском Шеар";
+
+/* The action hint of the workout mode toggle button when enabled */
+"Disables" = "Деактивирует";
+
+/* Title of the switch which toggles retrospective correction effects */
+"Enable Retrospective Correction" = "Активирует ретроспективную коррекцию";
+
+/* The detail text describing an enabled setting */
+"Enabled" = "Активировано";
+
+/* The action hint of the workout mode toggle button when disabled */
+"Enables" = "Активирует";
+
+/* The placeholder text instructing users how to enter a maximum bolus */
+"Enter a number of units" = "Введите кол-во единиц";
+
+/* The placeholder text instructing users how to enter a maximum basal rate */
+"Enter a rate in units per hour" = "Введите скорость в единицах в час";
+
+/* The placeholder text instructing users to enter a suspend treshold */
+"Enter suspend threshold" = "Введите рубеж приостановки";
+
+/* The placeholder text instructing users how to enter a pump ID */
+"Enter the 6-digit pump ID" = "Введите инд номер помпы (6 цифр)";
+
+/* The placeholder text instructing users how to enter a pump ID */
+"Enter the 6-digit transmitter ID" = "Введите инд. номер трансмиттера (6 цифр)";
+
+/* Describing the pump history insulin data source */
+"Event History" = "История событий";
+
+/* The subtitle format describing eventual glucose. (1: localized glucose value description) */
+"Eventually %@" = "В конечном итоге %@";
+
+/* The title of the alert describing a maximum bolus validation error */
+"Exceeds Maximum Bolus" = "Превышает макс болюс";
+
+/* Title of insulin model preset */
+"Fiasp" = "Fiasp";
+
+/* The format string used to describe a finite workout targets duration */
+"For %1$@" = "В течение %1$@";
+
+/* The title text for the G4 Share Receiver switch cell */
+"G4 Share Receiver" = "Ресивер G4 Шеар";
+
+/* The title text for the G5 Transmitter switch cell */
+"G5 Transmitter" = "Трансмиттер G5";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "Гликемия";
+
+/* Title of the prediction input effect for glucose momentum */
+"Glucose Momentum" = "Динамика гликемии";
+
+/* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
+"Glucose data is %1$@ old" = "Данным гликемии %1$@";
+
+/* The title of a target alert action specifying an indefinitely long workout targets duration */
+"Indefinitely" = "На неопределенное время";
+
+/* Title of the prediction input effect for insulin */
+"Insulin" = "Инсулин";
+
+/* Description of the prediction input effect for insulin */
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Инсулин усвоен х чувствительность к инсулину";
+
+/* The title of the insulin delivery graph */
+"Insulin Delivery" = "Подача инсулина";
+
+/* The title text for the insulin model setting row */
+"Insulin Model" = "Модель инсулина";
+
+/* The title of the insulin sensitivities schedule screen
+   The title text for the insulin sensitivity schedule */
+"Insulin Sensitivities" = "Факторы чувствительности инсулина";
+
+/* Instructions on selecting an insulin data source */
+"Insulin delivery can be determined from the pump by either interpreting the event history or comparing the reservoir volume over time. Reading event history allows for a more accurate status graph and uploading up-to-date treatment data to Nightscout, at the cost of faster pump battery drain and the possibility of a higher radio error rate compared to reading only reservoir volume. If the selected source cannot be used for any reason, the system will attempt to fall back to the other option." = "Подача инсулина может определяться с помпы путем интерпретации истории событий или сравнением изменения объемов резервуара за прошедшее время. Чтение истории событий позволяет вычертить более точный график состояния и загрузить в Nightscout актуальные данные лечения/назначений (за счет более быстрого истощения батареи помпы и более высокого процента ошибок радиосвязи) по сравнению со считыванием данных только об объеме резервуара.";
+
+/* The error message when invalid data was encountered. (1: details of invalid data) */
+"Invalid data: %1$@" = "Неверные данные: %1$@";
+
+/* The title text for the issue report cell */
+"Issue Report" = "Сообщить об ошибе";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
+"Last comparison: %1$@ → %2$@ vs %3$@" = "Недавнее сравнение %1$@ → %2$@ и %3$@";
+
+/* Glucose HUD accessibility hint */
+"Launches CGM app" = "Запускает приложение  непрерывного мониторинга CGM";
+
+/* The loading message for the diagnostic report screen */
+"Loading..." = "Загрузка...";
+
+/* The title of the loggly service */
+"Loggly" = "Loggly";
+
+/* The notification title for a loop failure */
+"Loop Failure" = "Ошибка в работе цикла/контура";
+
+/* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
+"Loop has not completed successfully in %@" = "Ну удалось успешно  замкнуть цикл/контур в %@";
+
+/* The description of a low G5 transmitter battery with a leading space */
+"Low Battery" = "Низкий заряд батареи";
+
+/* The title text for the maximum basal rate value */
+"Maximum Basal Rate" = "Максимальная скорость подачи базала";
+
+/* The title text for the maximum bolus value */
+"Maximum Bolus" = "Максимальный болюс";
+
+/* The error message for missing data. (1: missing data details) */
+"Missing data: %1$@" = "Пропущены данные: %1$@";
+
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Требует внимания";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* The error message displayed for device connection errors. */
+"No connected devices, or failure during device connection" = "Устройства не сопряжены или ошибка во время сопряжения";
+
+/* Sensor state description for the valid state */
+"OK" = "OK";
+
+/* Outside US share server option title */
+"Outside US" = "за пределами США";
+
+/* The title of the Dexcom share password credential */
+"Password" = "Пароль";
+
+/* The label of the pre-meal mode toggle button */
+"Pre-Meal Targets" = "Целевые значения до приема пищи";
+
+/* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
+"Predicted glucose at %1$@ is %2$@." = "Предсказываемая гликемия в %1$@ -- %2$@";
+
+/* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Предсказываемая гликемия %1$@ ниже ваших настроек порога приостановки помпы";
+
+/* The title text for the preferred insulin data source config */
+"Preferred Data Source" = "Предпочтительный источник данных";
+
+/* The title of the pump section in settings */
+"Pump" = "Помпа";
+
+/* The notification title for a low pump battery */
+"Pump Battery Low" = "Низкий заряд батареи помпы";
+
+/* The title text for the battery type value */
+"Pump Battery Type" = "Тип батареи помпы";
+
+/* The title text for the pump ID config value */
+"Pump ID" = "Инд номер помпы";
+
+/* The notification title for an empty pump reservoir */
+"Pump Reservoir Empty" = "Резервуар помпы пуст";
+
+/* The notification title for a low pump reservoir */
+"Pump Reservoir Low" = "Низкий уровень резервуара помпы";
+
+/* The error message when pump data is too old to be used. (1: pump data age in minutes) */
+"Pump data is %1$@ old" = "Данные помпы от %1$@ ";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Adults" = "Боыстродействующий - взрослые";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Children" = "Быстродействующий - дети";
+
+/* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
+"Recommendation expired: %1$@ old" = "Рекомнендация истекла : от %1$@";
+
+/* The title of the cell displaying a recommended temp basal value */
+"Recommended Basal" = "Рекомендуемый базал";
+
+/* Accessibility hint describing recommended bolus units */
+"Recommended Bolus: %@ Units" = "Рекомендуемый болюс: %@ ед";
+
+/* The default placeholder string for a credential */
+"Required" = "обязательный";
+
+/* Describing the reservoir insulin data source */
+"Reservoir" = "Резервуар";
+
+/* Title of the prediction input effect for retrospective correction */
+"Retrospective Correction" = "Ретроспективная коррекция";
+
+/* The title of the notification action to retry a bolus command */
+"Retry" = "Повторить попытку";
+
+/* The description of sensor calibration state when sensor calibration is ok. */
+"Sensor calibration is OK" = "Калибровка сенсора ОК";
+
+/* The description of sensor calibration state when raw value is unknown. (1: missing data details) */
+"Sensor is in unknown state %1$d" = "Состояние сенсора неизвестно %1$d";
+
+/* The description of sensor calibration state when sensor sensor is stopped. */
+"Sensor is stopped" = "Сенсор остановлен";
+
+/* The description of sensor calibration state when sensor sensor is warming up. */
+"Sensor is warming up" = "Сенсор прогревается";
+
+/* The description of sensor calibration state when sensor needs calibration. */
+"Sensor needs calibration" = "Сенсор требует калибровки";
+
+/* The title of the Dexcom share server URL credential */
+"Server" = "Сервер";
+
+/* The title of the services section in settings */
+"Services" = "Службы";
+
+/* The label of the settings button */
+"Settings" = "Настройки";
+
+/* Loop Completion HUD accessibility hint */
+"Shows last loop error" = "Показывает крайнюю ошибку помпы";
+
+/* The title of the nightscout site URL credential */
+"Site URL" = "URL сайта";
+
+/* The title text for the Medtronic sensor switch cell */
+"Sof-Sensor / Enlite" = "Sof-Sensor/Enlite";
+
+/* The title of the cell indicating a bolus is being sent */
+"Starting Bolus" = "Начинаю болюс";
+
+/* The title text in settings */
+"Suspend Threshold" = "Порог приостановки";
+
+/* The empty-state text for a configuration value */
+"Tap to set" = "Щелкнуть чтобы задать";
+
+/* Subtitle description of Walsh insulin model setting */
+"The legacy model used by Loop, allowing customization of action duration." = "Модель, используемая для цикла/контура, позволяет настройку длительности действия";
+
+/* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
+"The maximum bolus amount is %@ Units" = "максимальный болюс %@ ед";
+
+/* Instructions on where to find the pump ID on a Minimed pump */
+"The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "инд номер помпы находится на ее задней стенке или снизу экрана состояния STATUS/ESC. Это исключительно цифровая часть серийного номера (обозначаемого SN или S/N) ";
+
+/* Instructions on where to find the transmitter ID */
+"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the G5 receiver and mobile app." = "Инд. номер трансмиттера находится на задней стенке устройства , сбоку упаковочной коробки, в настроечном меню ресивера G5 и мобильного приложения";
+
+/* The description of the switch which toggles retrospective correction effects */
+"This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Это более радикально понизит или увеличит подачу базала в тех случаях когда динамика гликемии не соответствует моделям основанным на углеводах и инсулине";
+
+/* The title text for the Dexcom G5 transmitter ID config value */
+"Transmitter ID" = "Инд № трансмиттера";
+
+/* The unit string for units per hour */
+"U/hour" = "Ед/час";
+
+/* U.S. share server option title */
+"US" = "США";
+
+/* The unit string for units */
+"Units" = "Ед";
+
+/* The title of the alert controller used to select a duration for workout targets */
+"Use Workout Glucose Targets" = "Применить цели гликемии как для физической нагрузки";
+
+/* The title of the Dexcom share username credential */
+"Username" = "Имя пользователя";
+
+/* Label indicating validation is occurring */
+"Verifying" = "Верифицируется";
+
+/* Title of insulin model setting */
+"Walsh" = "Walsh";
+
+/* Explanation of suspend threshold */
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Если текущая или предсказываемая гликемия ниже порога приостановки помпы, алгоритм цикла ипж не рекомендует болюс и всегда рекомендует временный базал 0 ед/час";
+
+/* The label of the workout mode toggle button */
+"Workout Targets" = "Целевые значения при физической нагрузке";
+
+/* Format fragment for a specific time */
+"at %@" = "В %@";
+
+/* The placeholder text for the nightscout site URL credential */
+"https://mysite.azurewebsites.net" = "https://мойсайт. azurewebsites.net";
+
+/* The title of the mLab service */
+"mLab" = "mLab";
+
+/* The unit display string for millimoles of glucose per liter */
+"mmol/L" = "ммоль/л";
+
+/* Format fragment for a start time */
+"since %@" = "от %@";
+

@@ -1,0 +1,63 @@
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ en %2$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ unidades por hora en %2$@";
+
+/* Accessibility format string for (1: localized volume)(2: time) */
+"%1$@ units remaining at %2$@" = "%1$@ unidades restantes a %2$@";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ U";
+
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "hace %@";
+
+/* Format string for reservoir volume. (1: The localized volume) */
+"%@U" = "%@U";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "Asa cerrada";
+
+/* Glucose trend down */
+"Falling" = "Bajando";
+
+/* Glucose trend down-down */
+"Falling fast" = "Bajando rápido";
+
+/* Glucose trend down-down-down */
+"Falling very fast" = "Bajando muy rápido";
+
+/* Glucose trend flat */
+"Flat" = "Estable";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "Loop corrió hace %@";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "Necesita atención";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "Asa abierta";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Glucose trend up */
+"Rising" = "Subiendo";
+
+/* Glucose trend up-up */
+"Rising fast" = "Subiendo rápido";
+
+/* Glucose trend up-up-up */
+"Rising very fast" = "Subiendo muy rápido";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "Desconocido";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "Esperando el primer uso";
+
+/* The unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+

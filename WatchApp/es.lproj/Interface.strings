@@ -1,0 +1,66 @@
+/* Class = "WKInterfaceButton"; title = "🌮"; ObjectID = "0fo-Z3-hTi"; */
+"0fo-Z3-hTi.title" = "🌮";
+
+/* Class = "WKInterfaceLabel"; text = "GRAMS"; ObjectID = "18G-mT-92P"; */
+"18G-mT-92P.text" = "GRAMOS";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.accessibilityLabel" = "Agregar";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.title" = "+";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.accessibilityLabel" = "Substraer";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.title" = "−";
+
+/* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "E5r-2c-UZm"; */
+"E5r-2c-UZm.text" = "15";
+
+/* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
+"Qsq-p5-1J0.title" = "Bolo";
+
+/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
+"XkS-y5-khE.text" = "<body>";
+
+/* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
+"b6f-3I-jki.title" = "Agregar Carbs";
+
+/* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
+"dPF-QZ-sh6.title" = "🍕";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.accessibilityLabel" = "Agregar";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.title" = "+";
+
+/* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
+"gAn-qe-OvX.title" = "🍭";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.accessibilityLabel" = "Sustraer";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.title" = "−";
+
+/* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
+"hln-CI-MRP.text" = "Carbs";
+
+/* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
+"jj3-Gq-HBy.text" = "Bolo Falló";
+
+/* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
+"mpK-zY-UvA.text" = "0.000";
+
+/* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
+"rNf-Mh-tID.title" = "Loop";
+
+/* Class = "WKInterfaceLabel"; text = "UNITS"; ObjectID = "rV7-d9-n6u"; */
+"rV7-d9-n6u.text" = "UNIDADES";
+
+/* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
+"smL-Rc-IZh.text" = "Bolo";
+
