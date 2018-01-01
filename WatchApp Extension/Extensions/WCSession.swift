@@ -55,4 +55,27 @@ extension WCSession {
             errorHandler: errorHandler
         )
     }
+
+    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo, replyHandler: @escaping (_ overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context) -> Void, errorHandler: @escaping (Error) -> Void) throws {
+        guard activationState == .activated else {
+            throw MessageError.activationError
+        }
+
+        guard isReachable else {
+            transferUserInfo(userInfo.rawValue)
+            return
+        }
+
+        sendMessage(userInfo.rawValue,
+            replyHandler: { reply in
+                guard let overrideContext = GlucoseRangeScheduleOverrideUserInfo.Context(rawValue: reply["context"] as? String ?? "") else {
+                    errorHandler(MessageError.decodingError)
+                    return
+                }
+
+                replyHandler(overrideContext)
+            },
+            errorHandler: errorHandler
+        )
+    }
 }

@@ -21,6 +21,7 @@ final class WatchContext: NSObject, RawRepresentable {
     var glucoseTrendRawValue: Int?
     var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
+    var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
 
     var loopLastRunDate: Date?
     var lastNetTempBasalDose: Double?
@@ -65,6 +66,8 @@ final class WatchContext: NSObject, RawRepresentable {
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
+        glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(rawValue: rawValue["grsoc"] as? [String: Any] ?? [:])
+
 
         IOB = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
@@ -97,6 +100,7 @@ final class WatchContext: NSObject, RawRepresentable {
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
+        raw["grsoc"] = glucoseRangeScheduleOverride?.rawValue
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
         raw["mb"] = maxBolus

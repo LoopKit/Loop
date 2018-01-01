@@ -109,6 +109,15 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.recommendedBolusDose = try? state.recommendBolus().amount
                 context.maxBolus = manager.settings.maximumBolus
 
+                if let override = manager.settings.glucoseTargetRangeSchedule?.override,
+                    let overrideContext = GlucoseRangeScheduleOverrideUserInfo.Context(rawValue: override.context.rawValue) {
+                    context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
+                        context: overrideContext,
+                        startDate: override.start,
+                        endDate: override.end
+                    )
+                }
+
                 if let trend = self.deviceDataManager.sensorInfo?.trendType {
                     context.glucoseTrendRawValue = trend.rawValue
                 }
@@ -160,6 +169,15 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             }
 
             replyHandler([:])
+        case GlucoseRangeScheduleOverrideUserInfo.name?:
+            if let override = GlucoseRangeScheduleOverrideUserInfo(rawValue: message), let context = GlucoseRangeSchedule.Override.Context(rawValue: override.context.rawValue) {
+                let _ = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(context, from: override.startDate, until: override.endDate ?? .distantFuture)
+                let overrideContext = GlucoseRangeScheduleOverrideUserInfo.Context(rawValue: deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.override?.context.rawValue ?? "")
+                replyHandler(["context": overrideContext?.rawValue ?? GlucoseRangeScheduleOverrideUserInfo.Context.none.rawValue])
+            } else {
+            deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
+                replyHandler(["context": GlucoseRangeScheduleOverrideUserInfo.Context.none.rawValue])
+            }
         default:
             replyHandler([:])
         }
