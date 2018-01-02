@@ -136,20 +136,22 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             eventualGlucoseLabel.setHidden(true)
         }
 
-        if case .preMeal? = context?.glucoseRangeScheduleOverride?.context {
-            preMealModeEnabled = true
-        } else {
-            preMealModeEnabled = false
-        }
+        update(overrideContext: context?.glucoseRangeScheduleOverride?.context)
 
-        if case .workout? = context?.glucoseRangeScheduleOverride?.context {
-            workoutModeEnabled = true
-        } else {
-            workoutModeEnabled = false
-        }
-        
         // TODO: Other elements
         statusLabel.setHidden(true)
+    }
+
+    private func update(overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?) {
+        switch overrideContext {
+        case .preMeal?:
+            self.preMealModeEnabled = true
+        case .workout?:
+            self.workoutModeEnabled = true
+        case .none?, nil:
+            self.preMealModeEnabled = false
+            self.workoutModeEnabled = false
+        }
     }
 
     // MARK: - Menu Items
@@ -177,17 +179,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo) {
         do {
             try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
-                replyHandler: { overrideContext in
-                    switch overrideContext {
-                    case .preMeal:
-                        self.preMealModeEnabled = true
-                    case .workout:
-                        self.workoutModeEnabled = true
-                    case .none:
-                        self.preMealModeEnabled = false
-                        self.workoutModeEnabled = false
-                    }
-                },
+                replyHandler: update(overrideContext:),
                 errorHandler: { error in
                     ExtensionDelegate.shared().present(error)
                 }
@@ -202,25 +194,19 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     }
 
     @IBAction func swipeToPreviousButtonPage(_ sender: Any) {
-        guard let previousPage = ButtonPage(rawValue: buttonPage.rawValue - 1) else {
-            return
-        }
-
-        transition(from: buttonPage, to: previousPage)
-        buttonPage = previousPage
+        transitionToPage(withOffset: -1)
     }
 
     @IBAction func swipeToNextButtonPage(_ sender: Any) {
-        guard let nextPage = ButtonPage(rawValue: buttonPage.rawValue + 1) else {
+        transitionToPage(withOffset: +1)
+    }
+
+    private func transitionToPage(withOffset offset: Int) {
+        guard let toPage = ButtonPage(rawValue: buttonPage.rawValue + offset) else {
             return
         }
 
-        transition(from: buttonPage, to: nextPage)
-        buttonPage = nextPage
-    }
-
-    private func transition(from fromPage: ButtonPage, to toPage: ButtonPage) {
-        let (fromGroup, fromDot) = buttonGroupAndPageDot(forPage: fromPage)
+        let (fromGroup, fromDot) = buttonGroupAndPageDot(forPage: buttonPage)
         let (toGroup, toDot) = buttonGroupAndPageDot(forPage: toPage)
 
         animate(withDuration: 0.3) {
@@ -232,6 +218,8 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
         fromDot.setAlpha(0.4)
         toDot.setAlpha(1)
+
+        buttonPage = toPage
     }
 
     private func buttonGroupAndPageDot(forPage page: ButtonPage) -> (buttonGroup: WKInterfaceGroup, pageDot: WKInterfaceGroup) {
