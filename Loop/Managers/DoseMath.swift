@@ -196,6 +196,15 @@ private func targetGlucoseValue(percentEffectDuration: Double, minValue: Double,
     // The inflection point in time: before it we use minValue, after it we linearly blend from minValue to maxValue
     let useMinValueUntilPercent = 0.5
 
+    // Allow dosing below minValue during initial interval here set to 10% of effect duration
+    let useInitialValueUntilPercent = 0.1
+    // Set initial threshold to 10 pts below minValue, which normally equals suspend threshold
+    let initialValue = minValue - 10.0
+    
+    guard percentEffectDuration > useInitialValueUntilPercent else {
+        return initialValue
+    }
+    
     guard percentEffectDuration > useMinValueUntilPercent else {
         return minValue
     }
@@ -246,10 +255,14 @@ extension Collection where Iterator.Element == GlucoseValue {
                 continue
             }
 
-            // If any predicted value is below the suspend threshold, return immediately
-            guard prediction.quantity >= suspendThreshold else {
+            // (modified: If any predicted value is below the suspend threshold, return immediately)
+            // Allow dosing at a threshold below suspend threshold, here set to 10 mg/dL below
+            let predicted_bg = prediction.quantity
+            let initialThreshold = suspendThresholdValue - 10.0
+            guard predicted_bg >= initialThreshold else {
                 return .suspend(min: prediction)
             }
+            
 
             // Update range statistics
             if minGlucose == nil || prediction.quantity < minGlucose!.quantity {
