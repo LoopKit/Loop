@@ -258,7 +258,7 @@ extension Collection where Iterator.Element == GlucoseValue {
 
             // (current Loop: If any predicted value is below the suspend threshold, return immediately)
             // modified to allow dosing above initialThreshold, here set to 10 mg/dL below suspendThreshold
-            let predicted_bg = prediction.quantity
+            let predicted_bg = prediction.quantity.doubleValue(for: unit)
             let initialThreshold = suspendThresholdValue - 10.0
             guard predicted_bg >= initialThreshold else {
                 return .suspend(min: prediction)
@@ -389,10 +389,10 @@ extension Collection where Iterator.Element == GlucoseValue {
         )
 
         let scheduledBasalRate = basalRates.value(at: date)
-        var maxBasalRate = maxBasalRate
+        let maxBasalRate = maxBasalRate
 
         // TODO: Allow `highBasalThreshold` to be a configurable setting
-        // Allow high temping below minTarget
+        // Allow high temping below minTarget but above suspend threshold
         // if case .aboveRange(min: let min, correcting: _, minTarget: let highBasalThreshold, units: _)? = correction,
         //    min.quantity < highBasalThreshold
         // {
