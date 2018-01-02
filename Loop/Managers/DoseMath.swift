@@ -196,9 +196,10 @@ private func targetGlucoseValue(percentEffectDuration: Double, minValue: Double,
     // The inflection point in time: before it we use minValue, after it we linearly blend from minValue to maxValue
     let useMinValueUntilPercent = 0.5
 
-    // Allow dosing below minValue during initial interval here set to 10% of effect duration
+    // Allow dosing below minValue during initial interval set below to 10% of
+    // effect duration, so nominally 0.1*6*60 min = 36 min
     let useInitialValueUntilPercent = 0.1
-    // Set initial threshold to 10 pts below minValue, which normally equals suspend threshold
+    // Set initial threshold to 10 mg/dL pts below minValue (which normally equals suspend threshold)
     let initialValue = minValue - 10.0
     
     guard percentEffectDuration > useInitialValueUntilPercent else {
@@ -255,8 +256,8 @@ extension Collection where Iterator.Element == GlucoseValue {
                 continue
             }
 
-            // (modified: If any predicted value is below the suspend threshold, return immediately)
-            // Allow dosing at a threshold below suspend threshold, here set to 10 mg/dL below
+            // (current Loop: If any predicted value is below the suspend threshold, return immediately)
+            // modified to allow dosing above initialThreshold, here set to 10 mg/dL below suspendThreshold
             let predicted_bg = prediction.quantity
             let initialThreshold = suspendThresholdValue - 10.0
             guard predicted_bg >= initialThreshold else {
@@ -274,6 +275,7 @@ extension Collection where Iterator.Element == GlucoseValue {
             let time = prediction.startDate.timeIntervalSince(date)
 
             // Compute the target value as a function of time since the dose started
+            // Target initially dropped to InitialThreshold, see changes in targetGlucoseValue
             let targetValue = targetGlucoseValue(
                 percentEffectDuration: time / model.effectDuration,
                 minValue: suspendThresholdValue, 
@@ -390,11 +392,12 @@ extension Collection where Iterator.Element == GlucoseValue {
         var maxBasalRate = maxBasalRate
 
         // TODO: Allow `highBasalThreshold` to be a configurable setting
-        if case .aboveRange(min: let min, correcting: _, minTarget: let highBasalThreshold, units: _)? = correction,
-            min.quantity < highBasalThreshold
-        {
-            maxBasalRate = scheduledBasalRate
-        }
+        // Allow high temping below minTarget
+        // if case .aboveRange(min: let min, correcting: _, minTarget: let highBasalThreshold, units: _)? = correction,
+        //    min.quantity < highBasalThreshold
+        // {
+        //    maxBasalRate = scheduledBasalRate
+        //}
 
         let temp = correction?.asTempBasal(
             scheduledBasalRate: scheduledBasalRate,
