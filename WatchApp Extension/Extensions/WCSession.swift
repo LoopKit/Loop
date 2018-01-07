@@ -56,24 +56,24 @@ extension WCSession {
         )
     }
 
-    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo, replyHandler: @escaping (_ overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context) -> Void, errorHandler: @escaping (Error) -> Void) throws {
+    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo?, replyHandler: @escaping (_ updatedContext: GlucoseRangeScheduleOverrideUserInfo.Context?) -> Void, errorHandler: @escaping (Error) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activationError
         }
 
         guard isReachable else {
-            transferUserInfo(userInfo.rawValue)
-            return
+            throw MessageError.reachabilityError
         }
 
-        sendMessage(userInfo.rawValue,
+        sendMessage(userInfo?.rawValue ?? GlucoseRangeScheduleOverrideUserInfo.clearOverride,
             replyHandler: { reply in
-                guard let overrideContext = GlucoseRangeScheduleOverrideUserInfo.Context(rawValue: reply["context"] as? String ?? "") else {
-                    errorHandler(MessageError.decodingError)
-                    return
+                if let overrideUserInfoContextRawValue = reply["context"] as? GlucoseRangeScheduleOverrideUserInfo.Context.RawValue,
+                    let overrideUserInfoContext = GlucoseRangeScheduleOverrideUserInfo.Context(rawValue: overrideUserInfoContextRawValue)
+                {
+                    replyHandler(overrideUserInfoContext)
+                } else {
+                    replyHandler(nil)
                 }
-
-                replyHandler(overrideContext)
             },
             errorHandler: errorHandler
         )

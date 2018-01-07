@@ -10,15 +10,18 @@ import Foundation
 
 
 struct GlucoseRangeScheduleOverrideUserInfo {
-    enum Context: String {
+    enum Context: Int {
         case workout
         case preMeal
-        case none // no override enabled
     }
 
     let context: Context
     let startDate: Date
     let endDate: Date?
+
+    var effectiveEndDate: Date {
+        return endDate ?? .distantFuture
+    }
 }
 
 extension GlucoseRangeScheduleOverrideUserInfo: RawRepresentable {
@@ -29,7 +32,8 @@ extension GlucoseRangeScheduleOverrideUserInfo: RawRepresentable {
 
     init?(rawValue: RawValue) {
         guard rawValue["v"] as? Int == type(of: self).version && rawValue["name"] as? String == GlucoseRangeScheduleOverrideUserInfo.name,
-            let context = Context(rawValue: rawValue["context"] as? String ?? ""),
+            let contextRawValue = rawValue["context"] as? Int,
+            let context = Context(rawValue: contextRawValue),
             let startDate = rawValue["startDate"] as? Date else
         {
             return nil
@@ -54,4 +58,10 @@ extension GlucoseRangeScheduleOverrideUserInfo: RawRepresentable {
 
         return raw
     }
+
+    /// The "raw value" of an override message intended to clear any active override
+    static let clearOverride: RawValue = [
+        "v": version,
+        "name": name
+    ]
 }

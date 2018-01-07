@@ -18,52 +18,72 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var statusLabel: WKInterfaceLabel!
 
-    @IBOutlet var carbAndBolusButtonGroup: WKInterfaceGroup!
-    @IBOutlet var glucoseRangeOverrideButtonGroup: WKInterfaceGroup!
+    @IBOutlet var preMealButton: WKInterfaceButton!
+    @IBOutlet var preMealButtonImage: WKInterfaceImage!
+    @IBOutlet var preMealButtonBackground: WKInterfaceGroup!
 
-    @IBOutlet var preMealBackgroundGroup: WKInterfaceGroup!
-    @IBOutlet var preMealLabel: WKInterfaceLabel!
-    
-    @IBOutlet var workoutBackgroundGroup: WKInterfaceGroup!
-    @IBOutlet var workoutLabel: WKInterfaceLabel!
+    @IBOutlet var workoutButton: WKInterfaceButton!
+    @IBOutlet var workoutButtonImage: WKInterfaceImage!
+    @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
 
-    @IBOutlet var buttonPageZeroDot: WKInterfaceGroup!
-    @IBOutlet var buttonPageOneDot: WKInterfaceGroup!
+    private struct ButtonGroup {
+        private let button: WKInterfaceButton
+        private let image: WKInterfaceImage
+        private let background: WKInterfaceGroup
+        private let onBackgroundColor: UIColor
+        private let offBackgroundColor: UIColor
+
+        enum State {
+            case on
+            case off
+            case disabled
+        }
+
+        var state: State = .off {
+            didSet {
+                let imageTintColor: UIColor
+                let backgroundColor: UIColor
+                switch state {
+                case .on:
+                    imageTintColor = offBackgroundColor
+                    backgroundColor = onBackgroundColor
+                case .off:
+                    imageTintColor = onBackgroundColor
+                    backgroundColor = offBackgroundColor
+                case .disabled:
+                    imageTintColor = .disabledButtonColor
+                    backgroundColor = .darkDisabledButtonColor
+                }
+
+                button.setEnabled(state != .disabled)
+                image.setTintColor(imageTintColor)
+                background.setBackgroundColor(backgroundColor)
+            }
+        }
+
+        init(button: WKInterfaceButton, image: WKInterfaceImage, background: WKInterfaceGroup, onBackgroundColor: UIColor, offBackgroundColor: UIColor) {
+            self.button = button
+            self.image = image
+            self.background = background
+            self.onBackgroundColor = onBackgroundColor
+            self.offBackgroundColor = offBackgroundColor
+        }
+
+        mutating func turnOff() {
+            switch state {
+            case .on:
+                state = .off
+            case .off, .disabled:
+                break
+            }
+        }
+    }
+
+    private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
+
+    private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
     private var lastContext: WatchContext?
-
-    private enum ButtonPage: Int {
-        case carbAndBolus
-        case glucoseRangeOverride
-    }
-
-    private var buttonPage: ButtonPage = .carbAndBolus
-
-    private var preMealModeEnabled = false {
-        didSet {
-            if preMealModeEnabled {
-                workoutModeEnabled = false
-                preMealLabel.setTextColor(.carbsColor)
-                preMealBackgroundGroup.setBackgroundColor(UIColor.carbsColor.withAlphaComponent(0.3))
-            } else {
-                preMealLabel.setTextColor(.white)
-                preMealBackgroundGroup.setBackgroundColor(.darkCarbsColor)
-            }
-        }
-    }
-
-    private var workoutModeEnabled = false {
-        didSet {
-            if workoutModeEnabled {
-                preMealModeEnabled = false
-                workoutLabel.setTextColor(.workoutColor)
-                workoutBackgroundGroup.setBackgroundColor(UIColor.workoutColor.withAlphaComponent(0.3))
-            } else {
-                workoutLabel.setTextColor(.white)
-                workoutBackgroundGroup.setBackgroundColor(.darkWorkoutColor)
-            }
-        }
-    }
 
     override func didAppear() {
         super.didAppear()
@@ -110,47 +130,65 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             loopHUDImage.setLoopImage(.Unknown)
         }
         
-        guard let glucose = context?.glucose,
-            let unit = context?.preferredGlucoseUnit
-        else {
-            glucoseLabel.setHidden(true)
-            eventualGlucoseLabel.setHidden(true)
-            return
-        }
+        if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
+            let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
-        let formatter = NumberFormatter.glucoseFormatter(for: unit)
+            if let glucoseValue = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))) {
+                let trend = context?.glucoseTrend?.symbol ?? ""
+                self.glucoseLabel.setText(glucoseValue + trend)
+                self.glucoseLabel.setHidden(false)
+            } else {
+                glucoseLabel.setHidden(true)
+            }
 
-        if let glucoseValue = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))){
-            let trend = context?.glucoseTrend?.symbol ?? ""
-            self.glucoseLabel.setText(glucoseValue + trend)
-            self.glucoseLabel.setHidden(false)
+            if let eventualGlucose = context?.eventualGlucose {
+                let glucoseValue = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+                self.eventualGlucoseLabel.setText(glucoseValue)
+                self.eventualGlucoseLabel.setHidden(false)
+            } else {
+                eventualGlucoseLabel.setHidden(true)
+            }
         } else {
             glucoseLabel.setHidden(true)
-        }
-
-        if let eventualGlucose = context?.eventualGlucose {
-            let glucoseValue = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
-            self.eventualGlucoseLabel.setText(glucoseValue)
-            self.eventualGlucoseLabel.setHidden(false)
-        } else {
             eventualGlucoseLabel.setHidden(true)
         }
 
-        update(overrideContext: context?.glucoseRangeScheduleOverride?.context)
+        if let glucoseRangeScheduleOverride = context?.glucoseRangeScheduleOverride, (glucoseRangeScheduleOverride.startDate...glucoseRangeScheduleOverride.effectiveEndDate).contains(Date())
+        {
+            updateForOverrideContext(glucoseRangeScheduleOverride.context)
+        } else {
+            updateForOverrideContext(nil)
+        }
+
+        if let configuredOverrideContexts = context?.configuredOverrideContexts {
+            if !configuredOverrideContexts.contains(.preMeal) {
+                preMealButtonGroup.state = .disabled
+            } else if preMealButtonGroup.state == .disabled {
+                preMealButtonGroup.state = .off
+            }
+
+            if !configuredOverrideContexts.contains(.workout) {
+                workoutButtonGroup.state = .disabled
+            } else if workoutButtonGroup.state == .disabled {
+                workoutButtonGroup.state = .off
+            }
+        }
 
         // TODO: Other elements
         statusLabel.setHidden(true)
     }
 
-    private func update(overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?) {
-        switch overrideContext {
+    private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {
+        switch context {
         case .preMeal?:
-            self.preMealModeEnabled = true
+            preMealButtonGroup.state = .on
+            workoutButtonGroup.turnOff()
         case .workout?:
-            self.workoutModeEnabled = true
-        case .none?, nil:
-            self.preMealModeEnabled = false
-            self.workoutModeEnabled = false
+            preMealButtonGroup.turnOff()
+            workoutButtonGroup.state = .on
+        case nil:
+            preMealButtonGroup.turnOff()
+            workoutButtonGroup.turnOff()
         }
     }
 
@@ -165,21 +203,35 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     }
 
     @IBAction func togglePreMealMode() {
-        let context: GlucoseRangeScheduleOverrideUserInfo.Context = !preMealModeEnabled ? .preMeal : .none
-        let userInfo = GlucoseRangeScheduleOverrideUserInfo(context: context, startDate: Date(), endDate: Date(timeIntervalSinceNow: .hours(1)))
+        let userInfo: GlucoseRangeScheduleOverrideUserInfo?
+        if preMealButtonGroup.state == .on {
+            userInfo = nil
+            updateForOverrideContext(nil)
+        } else {
+            userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .preMeal, startDate: Date(), endDate: Date(timeIntervalSinceNow: .hours(1)))
+            updateForOverrideContext(.preMeal)
+        }
+
         sendGlucoseRangeOverride(userInfo: userInfo)
     }
 
     @IBAction func toggleWorkoutMode() {
-        let context: GlucoseRangeScheduleOverrideUserInfo.Context = !workoutModeEnabled ? .workout : .none
-        let userInfo = GlucoseRangeScheduleOverrideUserInfo(context: context, startDate: Date(), endDate: nil)
+        let userInfo: GlucoseRangeScheduleOverrideUserInfo?
+        if workoutButtonGroup.state == .on {
+            userInfo = nil
+            updateForOverrideContext(nil)
+        } else {
+            userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .workout, startDate: Date(), endDate: nil)
+            updateForOverrideContext(.workout)
+        }
+
         sendGlucoseRangeOverride(userInfo: userInfo)
     }
 
-    private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo) {
+    private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo?) {
         do {
             try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
-                replyHandler: update(overrideContext:),
+                replyHandler: updateForOverrideContext,
                 errorHandler: { error in
                     ExtensionDelegate.shared().present(error)
                 }
@@ -190,44 +242,6 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
                          preferredStyle: .alert,
                          actions: [WKAlertAction.dismissAction()]
             )
-        }
-    }
-
-    @IBAction func swipeToPreviousButtonPage(_ sender: Any) {
-        transitionToPage(withOffset: -1)
-    }
-
-    @IBAction func swipeToNextButtonPage(_ sender: Any) {
-        transitionToPage(withOffset: +1)
-    }
-
-    private func transitionToPage(withOffset offset: Int) {
-        guard let toPage = ButtonPage(rawValue: buttonPage.rawValue + offset) else {
-            return
-        }
-
-        let (fromGroup, fromDot) = buttonGroupAndPageDot(forPage: buttonPage)
-        let (toGroup, toDot) = buttonGroupAndPageDot(forPage: toPage)
-
-        animate(withDuration: 0.3) {
-            fromGroup.setWidth(0)
-            fromGroup.setAlpha(0)
-            toGroup.setRelativeWidth(1, withAdjustment: 0)
-            toGroup.setAlpha(1)
-        }
-
-        fromDot.setAlpha(0.4)
-        toDot.setAlpha(1)
-
-        buttonPage = toPage
-    }
-
-    private func buttonGroupAndPageDot(forPage page: ButtonPage) -> (buttonGroup: WKInterfaceGroup, pageDot: WKInterfaceGroup) {
-        switch page {
-        case .carbAndBolus:
-            return (carbAndBolusButtonGroup, buttonPageZeroDot)
-        case .glucoseRangeOverride:
-            return (glucoseRangeOverrideButtonGroup, buttonPageOneDot)
         }
     }
 }
