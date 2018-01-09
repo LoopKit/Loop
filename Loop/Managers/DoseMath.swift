@@ -228,7 +228,8 @@ private func targetGlucoseValue(percentEffectDuration: Double,
     //super bolus dosing only if initialValue less than minValue, i.e. only for bolus dosing, not for temps
     var BGzeroTempEffect = 0.0
     if initialValue < minValue {
-        BGzeroTempEffect = zeroTempEffect(percentEffectDuration)
+        let BGzeroTemp = zeroTempEffect(percentEffectDuration: percentEffectDuration)
+        BGzeroTempEffect = BGzeroTemp
     }
     
     // The inflection point in time: before it we use minValue, after it we linearly blend from minValue to maxValue
