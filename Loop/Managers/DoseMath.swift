@@ -222,12 +222,15 @@ private func zeroTempEffect(percentEffectDuration: Double) -> Double {
 /// - Returns: A target value somewhere between the minimum and maximum
 private func targetGlucoseValue(percentEffectDuration: Double,
                                 initialValue: Double,
-                                minValue: Double, maxValue: Double) -> Double {
+                                minValue: Double, maxValue: Double,
+                                glucoseValue: Double) -> Double {
     
     //dm61 BG effect of zero temping shofts bg target down, which results in super bolus
     //super bolus dosing only if initialValue less than minValue, i.e. only for bolus dosing, not for temps
+    //and only if current or any predicted bg is above a high threshold (set to 240 mg/dL below)
     var BGzeroTempEffect = 0.0
-    if initialValue < minValue {
+
+    if initialValue < minValue && glucoseValue > 240.0 {
         let BGzeroTemp = zeroTempEffect(percentEffectDuration: percentEffectDuration)
         BGzeroTempEffect = BGzeroTemp
     }
@@ -317,7 +320,8 @@ extension Collection where Iterator.Element == GlucoseValue {
                 percentEffectDuration: time / model.effectDuration,
                 initialValue: initialThresholdValue,
                 minValue: suspendThresholdValue,
-                maxValue: correctionRange.value(at: prediction.startDate).averageValue
+                maxValue: correctionRange.value(at: prediction.startDate).averageValue,
+                glucoseValue: predictedGlucoseValue
             )
 
             // Compute the dose required to bring this prediction to target:
