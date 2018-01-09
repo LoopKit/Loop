@@ -185,6 +185,34 @@ private func insulinCorrectionUnits(fromValue: Double, toValue: Double, effected
     return glucoseCorrection / effectedSensitivity
 }
 
+
+/// dm61 function required for dynamic super bolus calculation
+/// Computes effect of zero temping on predicted bg at percentEffectDuration
+///
+/// - Parameters:
+///   - percentEffectDuration: The percent of time elapsed of the insulin effect duration
+///
+/// - Returns: effect on bg
+private func zeroTempEffect(percentEffectDuration: Double) -> Double {
+    // WARNING: code not tested for Loop operating in mmol/L
+    // values in the lines 199-203 may be customized
+    let Aggressiveness = 0.5 // choose between 0 (no super bolus) to 1 (max super bolus)
+    let BasalRate = 0.5 // set to minimum daily basal rate in [U/h]
+    let InsulinSensitivity = 60.0 // set to minimum daily ISF in [(mg/dL)/U]
+    let td = 360.0 // set to td = DIA = 360 min nominally for exponential curves
+    let tp = 75.0 // set to peak insulin action, Novolog = 75 min, FIASP = 55 min for exp curves
+    
+    let τ = tp * (1 - tp / td) / (1 - 2 * tp / td)
+    let a = τ / td
+    let Scale = 6.0 * Aggressiveness * BasalRate * InsulinSensitivity / ( 1 - 2 * a + (1 + 2 * a) * exp(-1/a) )
+    let p = percentEffectDuration
+    let component1 = (-6 * pow(a,2) + 2 * a * (1 - 2 * p) + p * (1 - p)) * exp(-p/a)
+    let component2 = 2 * a * (3 * a - 1) + (1 - 2 * a) * p
+
+    return Scale * ( component1 + component2 )
+}
+
+
 /// Computes a target glucose value for a correction, at a given time during the insulin effect duration
 ///
 /// - Parameters:
@@ -196,6 +224,13 @@ private func targetGlucoseValue(percentEffectDuration: Double,
                                 initialValue: Double,
                                 minValue: Double, maxValue: Double) -> Double {
     
+    //dm61 BG effect of zero temping shofts bg target down, which results in super bolus
+    //super bolus dosing only if initialValue less than minValue, i.e. only for bolus dosing, not for temps
+    var BGzeroTempEffect = 0.0
+    if initialValue < minValue {
+        BGzeroTempEffect = zeroTempEffect(percentEffectDuration)
+    }
+    
     // The inflection point in time: before it we use minValue, after it we linearly blend from minValue to maxValue
     let useMinValueUntilPercent = 0.5
 
@@ -204,19 +239,19 @@ private func targetGlucoseValue(percentEffectDuration: Double,
     let useInitialValueUntilPercent = 0.15
     
     guard percentEffectDuration > useInitialValueUntilPercent else {
-        return initialValue
+        return initialValue - BGzeroTempEffect
     }
     
     guard percentEffectDuration > useMinValueUntilPercent else {
-        return minValue
+        return minValue - BGzeroTempEffect
     }
 
     guard percentEffectDuration < 1 else {
-        return maxValue
+        return maxValue - BGzeroTempEffect
     }
 
     let slope = (maxValue - minValue) / (1 - useMinValueUntilPercent)
-    return minValue + slope * (percentEffectDuration - useMinValueUntilPercent)
+    return minValue + slope * (percentEffectDuration - useMinValueUntilPercent) - BGzeroTempEffect
 }
 
 
