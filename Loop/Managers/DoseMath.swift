@@ -225,12 +225,12 @@ private func targetGlucoseValue(percentEffectDuration: Double,
                                 minValue: Double, maxValue: Double,
                                 glucoseValue: Double) -> Double {
     
-    //dm61 BG effect of zero temping shofts bg target down, which results in super bolus
+    //bg effect of zero temping shifts bg target down, which results in a calculated super bolus
     //super bolus dosing only if initialValue less than minValue, i.e. only for bolus dosing, not for temps
-    //and only if current or any predicted bg is above a high threshold (set to 240 mg/dL below)
+    //and only if current bg is above a high threshold (set to 180 mg/dL below)
+    //WARNING: not tested for Loop operating in mmol/dL
     var BGzeroTempEffect = 0.0
-
-    if initialValue < minValue && glucoseValue > 240.0 {
+    if initialValue < minValue && glucoseValue > 180.0 {
         let BGzeroTemp = zeroTempEffect(percentEffectDuration: percentEffectDuration)
         BGzeroTempEffect = BGzeroTemp
     }
@@ -291,6 +291,9 @@ extension Collection where Iterator.Element == GlucoseValue {
         let sensitivityValue = sensitivity.doubleValue(for: unit)
         let initialThresholdValue = initialThreshold.doubleValue(for: unit)
         let suspendThresholdValue = suspendThreshold.doubleValue(for: unit)
+        
+        // Current BG value
+        let currentGlucose = self.first?.quantity.doubleValue(for: unit)
 
         // For each prediction above target, determine the amount of insulin necessary to correct glucose based on the modeled effectiveness of the insulin at that time
         for prediction in self {
@@ -321,7 +324,7 @@ extension Collection where Iterator.Element == GlucoseValue {
                 initialValue: initialThresholdValue,
                 minValue: suspendThresholdValue,
                 maxValue: correctionRange.value(at: prediction.startDate).averageValue,
-                glucoseValue: predictedGlucoseValue
+                glucoseValue: currentGlucose!
             )
 
             // Compute the dose required to bring this prediction to target:
