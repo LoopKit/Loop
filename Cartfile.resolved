@@ -1,4 +1,4 @@
-github "LoopKit/LoopKit" "v1.5.3"
+github "LoopKit/LoopKit" "v1.5.4"
 github "LoopKit/xDripG5" "v0.8.1"
 github "amplitude/Amplitude-iOS" "v3.14.1"
 github "i-schuetz/SwiftCharts" "6b55a26a7b0b95e49202ddc1db5404702fce114f"
