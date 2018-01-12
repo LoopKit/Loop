@@ -1,4 +1,4 @@
-github "LoopKit/LoopKit" == 1.5.3
+github "LoopKit/LoopKit" == 1.5.4
 github "LoopKit/xDripG5" ~> 0.8.1
 github "i-schuetz/SwiftCharts" == 0.6.1
 github "mddub/dexcom-share-client-swift" == 0.4.1
