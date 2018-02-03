@@ -83,6 +83,8 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
+    private var lastOverrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
+
     private var lastContext: WatchContext?
 
     override func didAppear() {
@@ -206,10 +208,8 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         let userInfo: GlucoseRangeScheduleOverrideUserInfo?
         if preMealButtonGroup.state == .on {
             userInfo = nil
-            updateForOverrideContext(nil)
         } else {
             userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .preMeal, startDate: Date(), endDate: Date(timeIntervalSinceNow: .hours(1)))
-            updateForOverrideContext(.preMeal)
         }
 
         sendGlucoseRangeOverride(userInfo: userInfo)
@@ -219,24 +219,25 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         let userInfo: GlucoseRangeScheduleOverrideUserInfo?
         if workoutButtonGroup.state == .on {
             userInfo = nil
-            updateForOverrideContext(nil)
         } else {
             userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .workout, startDate: Date(), endDate: nil)
-            updateForOverrideContext(.workout)
         }
 
         sendGlucoseRangeOverride(userInfo: userInfo)
     }
 
     private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo?) {
+        updateForOverrideContext(userInfo?.context)
+        lastOverrideContext = userInfo?.context
         do {
             try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
-                replyHandler: updateForOverrideContext,
                 errorHandler: { error in
+                    self.updateForOverrideContext(self.lastOverrideContext)
                     ExtensionDelegate.shared().present(error)
                 }
             )
         } catch {
+            updateForOverrideContext(lastOverrideContext)
             presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
                          message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
                          preferredStyle: .alert,

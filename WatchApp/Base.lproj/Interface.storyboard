@@ -166,7 +166,7 @@
                                         <button alignment="center" id="5iF-jW-tC8">
                                             <group key="contentGroup" width="54" height="54" alignment="left" radius="27" id="C7f-Mo-eUU">
                                                 <items>
-                                                    <imageView alignment="center" verticalAlignment="center" image="fork" contentMode="center" id="4aO-ao-Sp9">
+                                                    <imageView alignment="center" verticalAlignment="center" image="carbs" contentMode="center" id="4aO-ao-Sp9">
                                                         <color key="tintColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </imageView>
                                                 </items>
@@ -212,7 +212,7 @@
                                         <button alignment="center" id="jY0-1m-ful">
                                             <group key="contentGroup" width="54" height="54" alignment="left" radius="27" id="mBB-jG-wHy">
                                                 <items>
-                                                    <imageView alignment="center" verticalAlignment="center" image="fork" contentMode="center" id="Asx-tm-mEg">
+                                                    <imageView alignment="center" verticalAlignment="center" image="pre-meal" contentMode="center" id="Asx-tm-mEg">
                                                         <color key="tintColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     </imageView>
                                                 </items>
@@ -233,7 +233,7 @@
                                         <button alignment="center" id="dYe-c2-Sfm">
                                             <group key="contentGroup" width="54" height="54" alignment="left" radius="27" id="HCn-yQ-9kV">
                                                 <items>
-                                                    <imageView alignment="center" verticalAlignment="center" image="bolus" contentMode="center" id="8OJ-hd-8Va">
+                                                    <imageView alignment="center" verticalAlignment="center" image="workout" contentMode="center" id="8OJ-hd-8Va">
                                                         <color key="tintColor" red="0.3089656234" green="0.67790412899999997" blue="0.97261637450000005" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                     </imageView>
                                                 </items>

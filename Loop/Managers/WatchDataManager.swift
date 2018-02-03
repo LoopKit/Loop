@@ -107,7 +107,6 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 do {
                     try session.updateApplicationContext(context.rawValue)
                 } catch let error {
-                    print(error.localizedDescription)
                     deviceDataManager.logger.addError(error, fromSource: "WCSession")
                 }
             }
@@ -209,11 +208,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     lastActiveOverrideContext = previousActiveOverrideContext
                 }
 
-                if let updatedOverrideContext = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.override?.context {
-                    replyHandler(["context": updatedOverrideContext.correspondingUserInfoContext.rawValue])
-                } else {
-                    replyHandler([:])
-                }
+                replyHandler([:])
             } else {
                 lastActiveOverrideContext = nil
                 deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
