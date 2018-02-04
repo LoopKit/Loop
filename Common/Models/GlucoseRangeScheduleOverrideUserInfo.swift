@@ -13,6 +13,10 @@ struct GlucoseRangeScheduleOverrideUserInfo {
     enum Context: Int {
         case workout
         case preMeal
+
+        static var allContexts: [Context] {
+            return [.workout, .preMeal]
+        }
     }
 
     let context: Context

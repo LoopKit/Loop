@@ -26,7 +26,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     @IBOutlet var workoutButtonImage: WKInterfaceImage!
     @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
 
-    private struct ButtonGroup {
+    private class ButtonGroup {
         private let button: WKInterfaceButton
         private let image: WKInterfaceImage
         private let background: WKInterfaceGroup
@@ -69,7 +69,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             self.offBackgroundColor = offBackgroundColor
         }
 
-        mutating func turnOff() {
+        func turnOff() {
             switch state {
             case .on:
                 state = .off
@@ -155,24 +155,24 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             eventualGlucoseLabel.setHidden(true)
         }
 
+        let overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
         if let glucoseRangeScheduleOverride = context?.glucoseRangeScheduleOverride, (glucoseRangeScheduleOverride.startDate...glucoseRangeScheduleOverride.effectiveEndDate).contains(Date())
         {
-            updateForOverrideContext(glucoseRangeScheduleOverride.context)
+            overrideContext = glucoseRangeScheduleOverride.context
         } else {
-            updateForOverrideContext(nil)
+            overrideContext = nil
         }
+        updateForOverrideContext(overrideContext)
+        lastOverrideContext = overrideContext
 
         if let configuredOverrideContexts = context?.configuredOverrideContexts {
-            if !configuredOverrideContexts.contains(.preMeal) {
-                preMealButtonGroup.state = .disabled
-            } else if preMealButtonGroup.state == .disabled {
-                preMealButtonGroup.state = .off
-            }
-
-            if !configuredOverrideContexts.contains(.workout) {
-                workoutButtonGroup.state = .disabled
-            } else if workoutButtonGroup.state == .disabled {
-                workoutButtonGroup.state = .off
+            for overrideContext in GlucoseRangeScheduleOverrideUserInfo.Context.allContexts {
+                let contextButtonGroup = buttonGroup(for: overrideContext)
+                if !configuredOverrideContexts.contains(overrideContext) {
+                    contextButtonGroup.state = .disabled
+                } else if contextButtonGroup.state == .disabled {
+                    contextButtonGroup.state = .off
+                }
             }
         }
 
@@ -194,6 +194,15 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         }
     }
 
+    private func buttonGroup(for overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context) -> ButtonGroup {
+        switch overrideContext {
+        case .preMeal:
+            return preMealButtonGroup
+        case .workout:
+            return workoutButtonGroup
+        }
+    }
+
     // MARK: - Menu Items
 
     @IBAction func addCarbs() {
@@ -212,6 +221,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .preMeal, startDate: Date(), endDate: Date(timeIntervalSinceNow: .hours(1)))
         }
 
+        updateForOverrideContext(userInfo?.context)
         sendGlucoseRangeOverride(userInfo: userInfo)
     }
 
@@ -223,21 +233,36 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .workout, startDate: Date(), endDate: nil)
         }
 
+        updateForOverrideContext(userInfo?.context)
         sendGlucoseRangeOverride(userInfo: userInfo)
     }
 
+    private var pendingMessageResponses = 0
+
     private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo?) {
-        updateForOverrideContext(userInfo?.context)
-        lastOverrideContext = userInfo?.context
+        pendingMessageResponses += 1
         do {
             try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
+                replyHandler: { _ in
+                    self.pendingMessageResponses -= 1
+                    if self.pendingMessageResponses == 0 {
+                        self.updateForOverrideContext(userInfo?.context)
+                    }
+                    self.lastOverrideContext = userInfo?.context
+                },
                 errorHandler: { error in
-                    self.updateForOverrideContext(self.lastOverrideContext)
+                    self.pendingMessageResponses -= 1
+                    if self.pendingMessageResponses == 0 {
+                        self.updateForOverrideContext(self.lastOverrideContext)
+                    }
                     ExtensionDelegate.shared().present(error)
                 }
             )
         } catch {
-            updateForOverrideContext(lastOverrideContext)
+            pendingMessageResponses -= 1
+            if pendingMessageResponses == 0 {
+                updateForOverrideContext(lastOverrideContext)
+            }
             presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
                          message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
                          preferredStyle: .alert,

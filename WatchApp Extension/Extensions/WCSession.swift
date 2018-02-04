@@ -55,7 +55,7 @@ extension WCSession {
         )
     }
 
-    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo?, errorHandler: @escaping (Error) -> Void) throws {
+    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo?, replyHandler: @escaping ([String: Any]) -> Void, errorHandler: @escaping (Error) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activationError
         }
@@ -65,7 +65,7 @@ extension WCSession {
         }
 
         sendMessage(userInfo?.rawValue ?? GlucoseRangeScheduleOverrideUserInfo.clearOverride,
-            replyHandler: { reply in },
+            replyHandler: replyHandler,
             errorHandler: errorHandler
         )
     }
