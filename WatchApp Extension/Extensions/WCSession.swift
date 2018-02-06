@@ -28,7 +28,7 @@ extension WCSession {
         }
 
         sendMessage(carbEntry.rawValue,
-            replyHandler: { (reply) in
+            replyHandler: { reply in
                 guard let suggestion = BolusSuggestionUserInfo(rawValue: reply as BolusSuggestionUserInfo.RawValue) else {
                     errorHandler(MessageError.decodingError)
                     return
@@ -50,8 +50,22 @@ extension WCSession {
         }
 
         sendMessage(userInfo.rawValue,
-            replyHandler: { (reply) in
-            },
+            replyHandler: { reply in },
+            errorHandler: errorHandler
+        )
+    }
+
+    func sendGlucoseRangeScheduleOverrideMessage(_ userInfo: GlucoseRangeScheduleOverrideUserInfo?, replyHandler: @escaping ([String: Any]) -> Void, errorHandler: @escaping (Error) -> Void) throws {
+        guard activationState == .activated else {
+            throw MessageError.activationError
+        }
+
+        guard isReachable else {
+            throw MessageError.reachabilityError
+        }
+
+        sendMessage(userInfo?.rawValue ?? GlucoseRangeScheduleOverrideUserInfo.clearOverride,
+            replyHandler: replyHandler,
             errorHandler: errorHandler
         )
     }

@@ -2,17 +2,13 @@
   "images" : [
     {
       "idiom" : "watch",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "watch",
-      "filename" : "fork_38.png",
+      "filename" : "Pre-Meal 38mm.png",
       "screen-width" : "<=145",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "fork_42.png",
+      "filename" : "Pre-Meal 42mm.png",
       "screen-width" : ">145",
       "scale" : "2x"
     }
