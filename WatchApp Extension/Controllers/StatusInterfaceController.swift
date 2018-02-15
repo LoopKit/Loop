@@ -244,18 +244,22 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         do {
             try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
                 replyHandler: { _ in
-                    self.pendingMessageResponses -= 1
-                    if self.pendingMessageResponses == 0 {
-                        self.updateForOverrideContext(userInfo?.context)
+                    DispatchQueue.main.async {
+                        self.pendingMessageResponses -= 1
+                        if self.pendingMessageResponses == 0 {
+                            self.updateForOverrideContext(userInfo?.context)
+                        }
+                        self.lastOverrideContext = userInfo?.context
                     }
-                    self.lastOverrideContext = userInfo?.context
                 },
                 errorHandler: { error in
-                    self.pendingMessageResponses -= 1
-                    if self.pendingMessageResponses == 0 {
-                        self.updateForOverrideContext(self.lastOverrideContext)
+                    DispatchQueue.main.async {
+                        self.pendingMessageResponses -= 1
+                        if self.pendingMessageResponses == 0 {
+                            self.updateForOverrideContext(self.lastOverrideContext)
+                        }
+                        ExtensionDelegate.shared().present(error)
                     }
-                    ExtensionDelegate.shared().present(error)
                 }
             )
         } catch {
@@ -263,10 +267,11 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             if pendingMessageResponses == 0 {
                 updateForOverrideContext(lastOverrideContext)
             }
-            presentAlert(withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
-                         message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
-                         preferredStyle: .alert,
-                         actions: [WKAlertAction.dismissAction()]
+            presentAlert(
+                withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
+                message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
+                preferredStyle: .alert,
+                actions: [WKAlertAction.dismissAction()]
             )
         }
     }
