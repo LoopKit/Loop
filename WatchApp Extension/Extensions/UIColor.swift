@@ -14,7 +14,17 @@ extension UIColor {
 
     @nonobjc static let carbsColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
 
-    @nonobjc static let darkCarbsColor = UIColor.carbsColor.withAlphaComponent(0.14)
+    // Equivalent to carbsColor with alpha 0.14 on a black background
+    @nonobjc static let darkCarbsColor = UIColor(red: 0.07, green: 0.12, blue: 0.04, alpha: 1)
+
+    @nonobjc static let workoutColor = UIColor(red: 79 / 255, green: 173 / 255, blue: 248 / 255, alpha: 1)
+
+    // Equivalent to workoutColor with alpha 0.14 on a black background
+    @nonobjc static let darkWorkoutColor = UIColor(red: 0.02, green: 0.10, blue: 0.14, alpha: 1)
+
+    @nonobjc static let disabledButtonColor = UIColor.gray
+
+    @nonobjc static let darkDisabledButtonColor = UIColor.disabledButtonColor.withAlphaComponent(0.14)
 
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color

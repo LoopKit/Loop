@@ -163,10 +163,14 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
             do {
                 try WCSession.default.sendCarbEntryMessage(entry,
                     replyHandler: { (suggestion) in
-                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                        DispatchQueue.main.async {
+                            WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                        }
                     },
                     errorHandler: { (error) in
-                        ExtensionDelegate.shared().present(error)
+                        DispatchQueue.main.async {
+                            ExtensionDelegate.shared().present(error)
+                        }
                     }
                 )
             } catch {
