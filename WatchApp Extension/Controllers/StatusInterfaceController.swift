@@ -191,7 +191,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             preMealButtonGroup.turnOff()
             workoutButtonGroup.state = .on
         case .remoteTempTarget?:
-            print("inremotetempcase")    
+            ()    
         case nil:
             preMealButtonGroup.turnOff()
             workoutButtonGroup.turnOff()
