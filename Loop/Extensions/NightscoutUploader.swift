@@ -10,6 +10,7 @@ import CoreData
 import InsulinKit
 import MinimedKit
 import NightscoutUploadKit
+import LoopKit
 
 
 extension NightscoutUploader: CarbStoreSyncDelegate {
