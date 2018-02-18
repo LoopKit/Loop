@@ -280,6 +280,8 @@ extension UserDefaults {
 
 }
 
+/// Code adopted from @trixing for automatic uploading of NS profile using Loop settings
+
 extension UserDefaults {
     
     var lastUploadedNightscoutProfile: String {
