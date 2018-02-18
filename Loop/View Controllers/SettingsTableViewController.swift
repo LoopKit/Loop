@@ -69,6 +69,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         super.viewDidDisappear(animated)
 
         dataManager.rileyLinkManager.setDeviceScanningEnabled(false)
+        // TODO: Do not upload every time we exit settings.  Perhaps have a check for change?
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.standard.uploadProfile(uploader: uploader)
+        }
     }
 
     deinit {

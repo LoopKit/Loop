@@ -11,6 +11,7 @@ import LoopKit
 import InsulinKit
 import MinimedKit
 import HealthKit
+import NightscoutUploadKit
 
 extension UserDefaults {
 
@@ -29,6 +30,7 @@ extension UserDefaults {
         case pumpModelNumber = "com.loudnate.Naterade.PumpModelNumber"
         case pumpRegion = "com.loopkit.Loop.PumpRegion"
         case pumpTimeZone = "com.loudnate.Naterade.PumpTimeZone"
+        case lastUploadedNightscoutProfile = "com.loopkit.Loop.lastUploadedNightscoutProfile"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -277,3 +279,60 @@ extension UserDefaults {
     }
 
 }
+
+extension UserDefaults {
+    
+    var lastUploadedNightscoutProfile: String {
+        get {
+            return string(forKey: Key.lastUploadedNightscoutProfile.rawValue) ?? "{}"
+        }
+        set {
+            set(newValue, forKey: Key.lastUploadedNightscoutProfile.rawValue)
+        }
+    }
+    
+    func uploadProfile(uploader: NightscoutUploader, retry: Int = 0) {
+        // TODO: Check last upload date, and only upload on demand.
+        guard let glucoseTargetRangeSchedule = loopSettings?.glucoseTargetRangeSchedule,
+            let insulinSensitivitySchedule = insulinSensitivitySchedule,
+            let carbRatioSchedule = carbRatioSchedule,
+            let basalRateSchedule = basalRateSchedule
+            
+            else {
+                return
+        }
+        if retry > 5 {
+            return
+        }
+        let profile = NightscoutProfile(
+            timestamp: Date(),
+            name: "Loop",
+            rangeSchedule: glucoseTargetRangeSchedule,
+            sensitivity: insulinSensitivitySchedule,
+            carbs: carbRatioSchedule,
+            basal : basalRateSchedule,
+            timezone : TimeZone.current,
+            dia : (insulinModelSettings?.model.effectDuration ?? 0) / 3600,
+            settings : loopSettings?.rawValue ?? [:]
+        )
+        if profile.json != lastUploadedNightscoutProfile {
+            uploader.uploadProfile(profile) { (result) in
+                switch result {
+                case .failure(let error):
+                    print("uploadProfile failed, try \(retry)", error as Any)
+                    // Try again with linear backoff
+                    let retries = retry + 1
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(300 * retries) ) {
+                        self.uploadProfile(uploader: uploader, retry: retries)
+                    }
+                case .success(_):
+                    if let json = profile.json {
+                        self.lastUploadedNightscoutProfile = json
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
