@@ -2,17 +2,13 @@
   "images" : [
     {
       "idiom" : "watch",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "watch",
-      "filename" : "bolus_38mm.png",
+      "filename" : "Bolus icon 38mm.png",
       "screen-width" : "<=145",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "bolus_42mm.png",
+      "filename" : "Bolus Icon 42mm.png",
       "screen-width" : ">145",
       "scale" : "2x"
     }
