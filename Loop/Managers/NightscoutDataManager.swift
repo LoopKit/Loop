@@ -180,6 +180,10 @@ final class NightscoutDataManager {
         //that is the only pill that has the option to modify the text
         let loopStatus = LoopStatus(name: loopParams, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
+        //if you wish to have the Loop pill clean, without the added BGtargets and EventualBG showing, remove the slashes on code line below, and add slashes to code line above
+        
+        //let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+        
         uploadDeviceStatus(nil, loopStatus: loopStatus, includeUploaderStatus: false)
 
     }
