@@ -67,8 +67,6 @@
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
-		437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */; };
-		437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
 		437CCADA1D284ADF0075D2C3 /* AuthenticationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CCAD91D284ADF0075D2C3 /* AuthenticationTableViewCell.swift */; };
 		437CCADC1D284B830075D2C3 /* ButtonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CCADB1D284B830075D2C3 /* ButtonTableViewCell.swift */; };
 		437CCADE1D2858FD0075D2C3 /* AuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CCADD1D2858FD0075D2C3 /* AuthenticationViewController.swift */; };
@@ -196,6 +194,7 @@
 		4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D601DF8D9A900A04910 /* NetBasal.swift */; };
 		4F526D621DF9D95200A04910 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6663931E905FD2009E74FC /* ChartColorPalette+Loop.swift */; };
+		4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
 		4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */; };
 		4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F70C1E21DE8DCA7006380B7 /* MainInterface.storyboard */; };
 		4F70C1E81DE8DCA7006380B7 /* Loop Status Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F70C1DC1DE8DCA7006380B7 /* Loop Status Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -657,21 +656,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
-				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
-				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
+				43C6407C1DA051850093E25D /* InsulinKit.framework in Frameworks */,
+				438A95A81D8B9B24009D12E1 /* xDripG5.framework in Frameworks */,
 				43C246A81D89990F0031F8D1 /* Crypto.framework in Frameworks */,
+				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
+				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
+				43F78D4C1C914197002152D1 /* CarbKit.framework in Frameworks */,
 				4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */,
 				43F78D4D1C914197002152D1 /* GlucoseKit.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
-				43C6407C1DA051850093E25D /* InsulinKit.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
 				43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */,
-				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
-				437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */,
 				43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */,
 				43B371881CE597D10013C5A6 /* ShareClient.framework in Frameworks */,
 				4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */,
-				438A95A81D8B9B24009D12E1 /* xDripG5.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -702,7 +700,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
-				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
+				4F70C1DE1DE8DCA7006380B7 /* NotificationCenter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1568,24 +1566,10 @@
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/xDripG5.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CarbKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/GlucoseKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/InsulinKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkBLEKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Amplitude.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/NightscoutUploadKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/G4ShareSpy.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Rebuild using cache if we're developing in a workspace\nif [ -d $PROJECT_DIR/Loop.xcworkspace ]; then\n    /usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" --cache-builds \"$SRCROOT\"\nfi\n\n/usr/local/bin/carthage copy-frameworks";
+			shellScript = "# /usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" \"$SRCROOT\"\n# Only run this script if we're not using a workspace or installing\nif [ ! -d $PROJECT_DIR/Loop.xcworkspace ] || [ \"$ACTION\" = \"install\" ]; then\n    /usr/local/bin/carthage copy-frameworks\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
