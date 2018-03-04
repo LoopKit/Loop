@@ -11,6 +11,6 @@ import LoopUI
 
 extension ChartColorPalette {
     static var `default`: ChartColorPalette {
-        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, glucoseTint: .glucoseTintColor, doseTint: .doseTintColor)
+        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, lastDate: .lastDateColor, glucoseTint: .glucoseTintColor, doseTint: .doseTintColor)
     }
 }

@@ -22,5 +22,7 @@ extension UIColor {
 
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
     
+    @nonobjc static let lastDateColor = UIColor.HIGPurpleColor().withAlphaComponent(0.4)
+        
     @nonobjc static let pumpStatusNormal = secondaryLabelColor
 }

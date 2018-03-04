@@ -35,6 +35,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLine: .axisLineColor,
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
+                lastDate: .lastDateColor,
                 glucoseTint: .glucoseTintColor,
                 doseTint: .doseTintColor
             ),

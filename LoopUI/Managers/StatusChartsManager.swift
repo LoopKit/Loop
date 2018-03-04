@@ -313,6 +313,23 @@ public final class StatusChartsManager {
         return glucoseChart
     }
 
+    // Returns a layer with a vertical line to mark the transition between known and predicted values.
+    private func generateLastDateLineLayer(xAxis: ChartAxis, yAxis: ChartAxis) -> ChartLayer? {
+        guard let lastDate = glucosePoints.last?.x as? ChartAxisValueDate else {
+            return nil
+        }
+        let lineColor = colors.lastDate
+    
+        let lineModel = ChartLineModel.predictionLine(
+            points: [ChartPoint(x: lastDate, y: ChartAxisValueDouble(yAxis.first)),
+            ChartPoint(x: lastDate, y: ChartAxisValueDouble(yAxis.last))],
+            color: lineColor,
+            width: 1
+        )
+    
+        return  ChartPointsLineLayer(xAxis: xAxis, yAxis: yAxis, lineModels: [lineModel])
+    }
+    
     private func generateGlucoseChartWithFrame(_ frame: CGRect) -> Chart? {
         guard let xAxisModel = xAxisModel, let xAxisValues = xAxisValues else {
             return nil
@@ -365,6 +382,8 @@ public final class StatusChartsManager {
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
+        
+        let lastDateLineLayer = generateLastDateLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
 
         let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: glucosePoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: colors.glucoseTint, optimized: true)
 
@@ -404,6 +423,7 @@ public final class StatusChartsManager {
 
         let layers: [ChartLayer?] = [
             gridLayer,
+            lastDateLineLayer,
             targetsLayer,
             xAxisLayer,
             yAxisLayer,
@@ -455,6 +475,8 @@ public final class StatusChartsManager {
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
 
+        let lastDateLineLayer = generateLastDateLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
+        
         // 0-line
         let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
         let zeroGuidelineLayer = ChartPointsViewsLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: [dummyZeroChartPoint], viewGenerator: {(chartPointModel, layer, chart) -> UIView? in
@@ -479,6 +501,7 @@ public final class StatusChartsManager {
 
         let layers: [ChartLayer?] = [
             gridLayer,
+            lastDateLineLayer,
             xAxisLayer,
             yAxisLayer,
             zeroGuidelineLayer,
@@ -523,6 +546,8 @@ public final class StatusChartsManager {
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
+        
+        let lastDateLineLayer = generateLastDateLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
 
         if gestureRecognizer != nil {
             cobChartCache = ChartPointsTouchHighlightLayerViewCache(
@@ -537,6 +562,7 @@ public final class StatusChartsManager {
 
         let layers: [ChartLayer?] = [
             gridLayer,
+            lastDateLineLayer,
             xAxisLayer,
             yAxisLayer,
             cobChartCache?.highlightLayer,
@@ -598,6 +624,8 @@ public final class StatusChartsManager {
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
+        
+        let lastDateLineLayer = generateLastDateLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis)
 
         // 0-line
         let dummyZeroChartPoint = ChartPoint(x: ChartAxisValueDouble(0), y: ChartAxisValueDouble(0))
@@ -623,6 +651,7 @@ public final class StatusChartsManager {
 
         let layers: [ChartLayer?] = [
             gridLayer,
+            lastDateLineLayer,
             xAxisLayer,
             yAxisLayer,
             zeroGuidelineLayer,
