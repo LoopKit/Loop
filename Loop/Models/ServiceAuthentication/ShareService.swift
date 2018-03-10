@@ -52,14 +52,14 @@ class ShareService: ServiceAuthentication {
          https://github.com/dabear/NightscoutShareServer
          */
 
-        /*
-        let customServer = "https://REPLACEME"
-        let customServerTitle = "Custom"
+        
+        let customServer = "http://127.0.0.1:1979"
+        let customServerTitle = "Spike"
 
         credentials[2].options?.append(
                 (title: NSLocalizedString(customServerTitle, comment: "Custom share server option title"),
                 value: customServer))
-        */
+        
 
         if let username = username, let password = password, let url = url {
             isAuthorized = true
