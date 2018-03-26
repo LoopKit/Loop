@@ -905,9 +905,12 @@ final class LoopDataManager {
         dynamicEffectDuration = TimeInterval(minutes: effectMinutes)
         
         // retrospective correction including integral action
-        let discrepancy = overallRC * 60.0 / effectMinutes // scale due to extended effect duration
+        let scaledDiscrepancy = overallRC * 60.0 / effectMinutes // scaled to account for extended effect duration
         
-        let velocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / change.end.endDate.timeIntervalSince(change.0.endDate))
+        // Velocity calculation had change.end.endDate.timeIntervalSince(change.0.endDate) in the denominator,
+        // which could lead to too high RC gain when retrospection interval is shorter than 30min
+        // Changed to safe fixed default retrospection interval of 30*60 = 1800 seconds
+        let velocity = HKQuantity(unit: velocityUnit, doubleValue: scaledDiscrepancy / 1800.0)
         let type = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!
         let glucose = HKQuantitySample(type: type, quantity: change.end.quantity, start: change.end.startDate, end: change.end.endDate)
         self.retrospectiveGlucoseEffect = LoopMath.decayEffect(from: glucose, atRate: velocity, for: dynamicEffectDuration)
@@ -923,6 +926,7 @@ final class LoopDataManager {
             change.start.quantity.doubleValue(for: glucoseUnit)// mg/dL
         
         // monitoring of retrospective correction in debugger or Console ("message: myLoop")
+        NSLog("myLoop ******************************************")
         NSLog("myLoop ---retrospective correction ([mg/dL] bg unit)---")
         NSLog("myLoop Current BG: %f", currentBG)
         NSLog("myLoop 30-min retrospective delta BG: %f", currentDeltaBG)
