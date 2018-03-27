@@ -850,7 +850,10 @@ final class LoopDataManager {
 
         self.retrospectivePredictedGlucose = retrospectivePrediction
 
-        guard let lastGlucose = retrospectivePrediction.last else { return }
+        guard let lastGlucose = retrospectivePrediction.last else {
+            RC.resetRetrospectiveCorrection()
+            NSLog("myLoop --- glucose data missing, reset retrospective correction")
+            return }
         let glucoseUnit = HKUnit.milligramsPerDeciliter()
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
 
