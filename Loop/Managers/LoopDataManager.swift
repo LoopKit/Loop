@@ -934,6 +934,7 @@ final class LoopDataManager {
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
+            bolusThreshold: settings.bolusThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
             pendingInsulin: pendingInsulin,

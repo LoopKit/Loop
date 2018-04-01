@@ -111,6 +111,11 @@ final class AnalyticsManager: IdentifiableClass {
         if newValue.suspendThreshold != oldValue.suspendThreshold {
             logEvent("Minimum BG Guard change")
         }
+        
+        if newValue.bolusThreshold != oldValue.bolusThreshold {
+            logEvent("Bolus BG Guard change")
+        }
+        
     }
 
     // MARK: - Loop Events

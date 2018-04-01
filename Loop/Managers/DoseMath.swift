@@ -434,6 +434,7 @@ extension Collection where Iterator.Element == GlucoseValue {
         to correctionRange: GlucoseRangeSchedule,
         at date: Date = Date(),
         suspendThreshold: HKQuantity?,
+        bolusThreshold: HKQuantity?,
         sensitivity: InsulinSensitivitySchedule,
         model: InsulinModel,
         pendingInsulin: Double,
@@ -444,7 +445,7 @@ extension Collection where Iterator.Element == GlucoseValue {
             to: correctionRange,
             at: date,
             // for boluses, initial threshold is below suspend threshold
-            initialThreshold: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 60),
+            initialThreshold: bolusThreshold ?? correctionRange.minQuantity(at: date),
             suspendThreshold: suspendThreshold ?? correctionRange.minQuantity(at: date),
             sensitivity: sensitivity.quantity(at: date),
             model: model

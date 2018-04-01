@@ -236,6 +236,8 @@
 		4FF4D1001E18374700846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		540DED971E14C75F002B2491 /* EnliteSensorDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */; };
+		6AB322972070BD40001EE2C0 /* BolusThreshold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AB322962070BD40001EE2C0 /* BolusThreshold.swift */; };
+		6AB322992070BE8B001EE2C0 /* BolusThresholdViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AB322982070BE8B001EE2C0 /* BolusThresholdViewController.swift */; };
 		7D7076351FE06EDE004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076371FE06EDE004AC8EA /* Localizable.strings */; };
 		7D70763A1FE06EDF004AC8EA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70763C1FE06EDF004AC8EA /* InfoPlist.strings */; };
 		7D70763F1FE06EDF004AC8EA /* ckcomplication.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076411FE06EDF004AC8EA /* ckcomplication.strings */; };
@@ -593,6 +595,8 @@
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteSensorDisplayable.swift; sourceTree = "<group>"; };
+		6AB322962070BD40001EE2C0 /* BolusThreshold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusThreshold.swift; sourceTree = "<group>"; };
+		6AB322982070BE8B001EE2C0 /* BolusThresholdViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusThresholdViewController.swift; sourceTree = "<group>"; };
 		7D68AAA91FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		7D68AAAA1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Main.strings; sourceTree = "<group>"; };
 		7D68AAAB1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/MainInterface.strings; sourceTree = "<group>"; };
@@ -762,6 +766,7 @@
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				4D5B7A4A1D457CCA00796CA9 /* GlucoseG4.swift */,
 				C178249D1E19B62300D9D25C /* GlucoseThreshold.swift */,
+				6AB322962070BD40001EE2C0 /* BolusThreshold.swift */,
 				436FACED1D0BA636004E2427 /* InsulinDataSource.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
 				43D848B11E7DF42500DADCBC /* LoopSettings.swift */,
@@ -966,6 +971,7 @@
 				43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */,
 				433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */,
 				C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */,
+				6AB322982070BE8B001EE2C0 /* BolusThresholdViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
 				435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */,
 				437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */,
@@ -1621,6 +1627,7 @@
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				4F08DE9D1E81D0E9006741EA /* StatusChartsManager+LoopKit.swift in Sources */,
+				6AB322992070BE8B001EE2C0 /* BolusThresholdViewController.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
@@ -1639,6 +1646,7 @@
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				43D381621EBD9759007F8C8F /* HeaderValuesTableViewCell.swift in Sources */,
 				43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */,
+				6AB322972070BD40001EE2C0 /* BolusThreshold.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				437CCAE01D285C7B0075D2C3 /* ServiceAuthentication.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,

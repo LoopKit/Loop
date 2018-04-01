@@ -114,6 +114,7 @@ extension UserDefaults {
                     removeObject(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
                     removeObject(forKey: "com.loudnate.Naterade.MaximumBolus")
                     removeObject(forKey: "com.loopkit.Loop.MinimumBGGuard")
+                    removeObject(forKey: "com.loopkit.Loop.MinimumBolusGuard")
                     removeObject(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 }
 
@@ -130,7 +131,14 @@ extension UserDefaults {
                 } else {
                     suspendThreshold = nil
                 }
-
+                
+                let bolusThreshold: BolusThreshold?
+                if let rawValue = dictionary(forKey: "com.loopkit.Loop.MinimumBolusGuard") {
+                    bolusThreshold = BolusThreshold(rawValue: rawValue)
+                } else {
+                    bolusThreshold = nil
+                }
+                
                 var maximumBasalRatePerHour: Double? = double(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
                 if maximumBasalRatePerHour! <= 0 {
                     maximumBasalRatePerHour = nil
@@ -147,6 +155,7 @@ extension UserDefaults {
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
+                    bolusThreshold: bolusThreshold,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings
