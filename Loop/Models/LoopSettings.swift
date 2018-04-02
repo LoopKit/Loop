@@ -84,7 +84,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
-        raw["BolusBGGuard"] = bolusThreshold?.rawValue
+        raw["minimumBolusGuard"] = bolusThreshold?.rawValue
 
         return raw
     }
