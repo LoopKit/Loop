@@ -76,7 +76,7 @@ final class WatchContext: NSObject, RawRepresentable {
         }
 
         if let configuredOverrideContextsRawValues = rawValue["coc"] as? [GlucoseRangeScheduleOverrideUserInfo.Context.RawValue] {
-            configuredOverrideContexts = configuredOverrideContextsRawValues.flatMap(GlucoseRangeScheduleOverrideUserInfo.Context.init(rawValue:))
+            configuredOverrideContexts = configuredOverrideContextsRawValues.compactMap(GlucoseRangeScheduleOverrideUserInfo.Context.init(rawValue:))
         }
 
         IOB = rawValue["iob"] as? Double
