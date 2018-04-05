@@ -69,6 +69,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         super.viewDidDisappear(animated)
 
         dataManager.rileyLinkManager.setDeviceScanningEnabled(false)
+    
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.standard.uploadProfile(uploader: uploader)
+        }
     }
 
     deinit {
