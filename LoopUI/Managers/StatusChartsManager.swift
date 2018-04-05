@@ -417,7 +417,7 @@ public final class StatusChartsManager {
             frame: frame,
             innerFrame: innerFrame,
             settings: chartSettings,
-            layers: layers.flatMap { $0 }
+            layers: layers.compactMap { $0 }
         )
     }
 
@@ -487,7 +487,7 @@ public final class StatusChartsManager {
             iobLine,
         ]
 
-        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.flatMap { $0 })
+        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
     }
 
     public func cobChartWithFrame(_ frame: CGRect) -> Chart? {
@@ -544,7 +544,7 @@ public final class StatusChartsManager {
             cobLine
         ]
 
-        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.flatMap { $0 })
+        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
     }
 
     public func doseChartWithFrame(_ frame: CGRect) -> Chart? {
@@ -632,7 +632,7 @@ public final class StatusChartsManager {
             bolusLayer
         ]
         
-        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.flatMap { $0 })
+        return Chart(frame: frame, innerFrame: innerFrame, settings: chartSettings, layers: layers.compactMap { $0 })
     }
 
     // MARK: - Carb Effect
@@ -765,7 +765,7 @@ public final class StatusChartsManager {
             frame: frame,
             innerFrame: innerFrame,
             settings: chartSettings,
-            layers: layers.flatMap { $0 }
+            layers: layers.compactMap { $0 }
         )
     }
 
@@ -893,7 +893,7 @@ public final class StatusChartsManager {
             frame: frame,
             innerFrame: coordsSpace.chartInnerFrame,
             settings: chartSettings,
-            layers: layers.flatMap { $0 }
+            layers: layers.compactMap { $0 }
         )
     }
 

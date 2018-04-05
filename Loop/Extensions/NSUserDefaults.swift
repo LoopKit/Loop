@@ -184,7 +184,7 @@ extension UserDefaults {
             guard let rawValue = array(forKey: Key.insulinCounteractionEffects.rawValue) as? [GlucoseEffectVelocity.RawValue] else {
                 return nil
             }
-            return rawValue.flatMap {
+            return rawValue.compactMap {
                 GlucoseEffectVelocity(rawValue: $0)
             }
         }
