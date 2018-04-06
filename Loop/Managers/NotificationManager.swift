@@ -19,6 +19,7 @@ struct NotificationManager {
         case pumpBatteryLow
         case pumpReservoirEmpty
         case pumpReservoirLow
+        case remoteTemp
     }
 
     enum Action: String {
@@ -170,6 +171,32 @@ struct NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
 
+    static func remoteTempSetNotification(duration: Int, lowTarget: Double, highTarget:Double) {
+         let notification = UNMutableNotificationContent()
+        if duration < 1 as Int {
+            notification.title = NSLocalizedString("Remote Temporary Target Canceled ", comment: "The notification title for a remote temp being canceled")
+        }
+        else
+        {
+            let lowTargetString = NumberFormatter.localizedString(from: NSNumber(value: lowTarget), number: .decimal)
+            let highTargetString = NumberFormatter.localizedString(from: NSNumber(value: highTarget), number: .decimal)
+            
+        notification.title = NSLocalizedString("Remote Temporary Target Set ", comment: "The notification title for Remote Target Being Set")
+           
+            notification.body = String(format: NSLocalizedString(" LowTarget: %1$@ HighTarget: %2$@ Duration: %3$@", comment: "Low Target high Target"), lowTargetString, highTargetString, String(duration))
+        }
+        notification.sound = UNNotificationSound.default()
+         notification.categoryIdentifier = Category.remoteTemp.rawValue
+        let request = UNNotificationRequest(
+            identifier: Category.remoteTemp.rawValue,
+            content: notification,
+            trigger: nil
+        )
+        
+        UNUserNotificationCenter.current().add(request)
+        
+    }
+    
     static func sendPumpReservoirLowNotificationForAmount(_ units: Double, andTimeRemaining remaining: TimeInterval?) {
         let notification = UNMutableNotificationContent()
 
