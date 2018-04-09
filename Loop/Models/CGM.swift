@@ -18,7 +18,7 @@ enum CGM {
         case .g4:
             return URL(string: "dexcomshare://")
         case .g5:
-            return URL(string: "spikeapp://")
+            return URL(string: "dexcomcgm://")
         case .enlite:
             return nil
         }
