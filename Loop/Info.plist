@@ -37,7 +37,7 @@
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>spikeapp</string>
+		<string>dexcomcgm</string>
 		<string>dexcomshare</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
