@@ -40,7 +40,7 @@ final class EnliteCGMManager: CGMManager {
 
                 _ = deviceManager.remoteDataManager.nightscoutService.uploader?.processGlucoseEvents(events, source: device.device.deviceURI)
 
-                if let latestSensorEvent = events.flatMap({ $0.glucoseEvent as?  RelativeTimestampedGlucoseEvent }).last {
+                if let latestSensorEvent = events.compactMap({ $0.glucoseEvent as?  RelativeTimestampedGlucoseEvent }).last {
                     self.sensorState = EnliteSensorDisplayable(latestSensorEvent)
                 }
 

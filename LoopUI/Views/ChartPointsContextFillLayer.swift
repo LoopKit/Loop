@@ -59,7 +59,7 @@ final class ChartPointsFillsLayer: ChartCoordsSpaceLayer {
     let fills: [ChartPointsFill]
 
     init?(xAxis: ChartAxis, yAxis: ChartAxis, fills: [ChartPointsFill?]) {
-        self.fills = fills.flatMap({ $0 })
+        self.fills = fills.compactMap({ $0 })
 
         guard fills.count > 0 else {
             return nil
