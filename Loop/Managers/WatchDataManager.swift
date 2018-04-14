@@ -11,7 +11,6 @@ import UIKit
 import WatchConnectivity
 import CarbKit
 import LoopKit
-import CGMBLEKit
 
 
 final class WatchDataManager: NSObject, WCSessionDelegate {
