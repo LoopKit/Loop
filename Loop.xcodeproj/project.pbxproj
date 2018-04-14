@@ -90,7 +90,6 @@
 		438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */; };
 		43947D731F529FAA00A07D31 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
-		4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4398973A1CD2FC2000223065 /* NSDateFormatter.swift */; };
 		439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED291E76093C00B0AED5 /* CGMManager.swift */; };
 		439BED2C1E760A7A00B0AED5 /* DexCGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED2B1E760A7A00B0AED5 /* DexCGMManager.swift */; };
 		439BED2E1E760BC600B0AED5 /* EnliteCGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED2D1E760BC600B0AED5 /* EnliteCGMManager.swift */; };
@@ -479,7 +478,6 @@
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
 		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AnalyticsManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		4398973A1CD2FC2000223065 /* NSDateFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSDateFormatter.swift; sourceTree = "<group>"; };
 		439BED291E76093C00B0AED5 /* CGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMManager.swift; sourceTree = "<group>"; };
 		439BED2B1E760A7A00B0AED5 /* DexCGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DexCGMManager.swift; sourceTree = "<group>"; };
 		439BED2D1E760BC600B0AED5 /* EnliteCGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteCGMManager.swift; sourceTree = "<group>"; };
@@ -952,7 +950,6 @@
 				C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */,
-				4398973A1CD2FC2000223065 /* NSDateFormatter.swift */,
 				43E344A31B9E1B1C00C85C07 /* NSUserDefaults.swift */,
 				43441A9F1EDB4D390087958C /* OSLog.swift */,
 				4381D2251F3C0FDD004ACCF9 /* RileyLinkDevice.swift */,
@@ -1576,6 +1573,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/G4ShareSpy.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKitUI.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
@@ -1593,10 +1591,11 @@
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/NightscoutUploadKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/G4ShareSpy.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKitUI.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Rebuild using cache if we're developing in a workspace\nif [ -d $PROJECT_DIR/Loop.xcworkspace ]; then\n    /usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" --cache-builds --project-directory \"$SRCROOT\"\nfi\n\n/usr/local/bin/carthage copy-frameworks";
+			shellScript = "# Rebuild using cache if we're developing in a workspace\nif [ -d $PROJECT_DIR/Loop2.xcworkspace ]; then\n    /usr/local/bin/carthage build --platform \"$PLATFORM_NAME\" --cache-builds --project-directory \"$SRCROOT\"\nfi\n\n/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1690,7 +1689,6 @@
 				43CEE6E61E56AFD400CB9116 /* NightscoutUploader.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */,
-				4398973B1CD2FC2000223065 /* NSDateFormatter.swift in Sources */,
 				540DED971E14C75F002B2491 /* EnliteSensorDisplayable.swift in Sources */,
 				436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */,
 				435CB6231F37967800C320C7 /* InsulinModelSettingsViewController.swift in Sources */,
