@@ -994,15 +994,6 @@ protocol LoopState {
     /// - Returns: An timeline of predicted glucose values
     /// - Throws: LoopError.missingDataError if prediction cannot be computed
     func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue]
-
-    /// Calculates a recommended bolus based on predicted glucose
-    ///
-    /// - Returns: A bolus recommendation
-    /// - Throws: An error describing why a bolus couldnʼt be computed
-    ///     - LoopError.configurationError
-    ///     - LoopError.glucoseTooOld
-    ///     - LoopError.missingDataError
-    func recommendBolus() throws -> BolusRecommendation
 }
 
 
@@ -1063,13 +1054,6 @@ extension LoopDataManager {
 
         func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
             return try loopDataManager.predictGlucose(using: inputs)
-        }
-
-        func recommendBolus() throws -> BolusRecommendation {
-            if let bolus = loopDataManager.recommendedBolus {
-                return bolus.recommendation
-            }
-            throw LoopError.missingDataError(details: "Recommended Bolus data not available.", recovery: "Check you loop state.")
         }
     }
 
