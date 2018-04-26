@@ -586,7 +586,6 @@ final class LoopDataManager {
                         self.insulinOnBoard = InsulinValue(startDate: now, value: 0.0)
                     }
                 case .failure(let error):
-                    NSLog("getInsulinOnBoardValues - error: \(error)")
                     self.logger.error(error)
                     self.insulinOnBoard = nil
                 }
@@ -916,7 +915,7 @@ final class LoopDataManager {
         guard let
             insulinOnBoard = insulinOnBoard
         else {
-                throw LoopError.missingDataError(details: "Insulin on Board not available (updatePredictedGlucoseAndRecommendedBasal)", recovery: "Pump data up to date?")
+            throw LoopError.missingDataError(details: "Insulin on Board not available (updatePredictedGlucoseAndRecommendedBasal)", recovery: "Pump data up to date?")
         }
 
         guard
