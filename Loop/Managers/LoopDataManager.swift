@@ -573,6 +573,26 @@ final class LoopDataManager {
                 updateGroup.leave()
             }
         }
+        
+        if insulinOnBoard == nil {
+            updateGroup.enter()
+            let now = Date()
+            doseStore.getInsulinOnBoardValues(start: retrospectiveStart, end: now) { (result) in
+                switch result {
+                case .success(let value):
+                    if let recentValue = value.closestPriorToDate(now) {
+                        self.insulinOnBoard = recentValue
+                    } else {
+                        self.insulinOnBoard = InsulinValue(startDate: now, value: 0.0)
+                    }
+                case .failure(let error):
+                    NSLog("getInsulinOnBoardValues - error: \(error)")
+                    self.logger.error(error)
+                    self.insulinOnBoard = nil
+                }
+                updateGroup.leave()
+            }
+        }
 
         _ = updateGroup.wait(timeout: .distantFuture)
 
@@ -692,8 +712,16 @@ final class LoopDataManager {
     private var insulinEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
+            insulinOnBoard = nil
         }
     }
+    
+    fileprivate var insulinOnBoard: InsulinValue? {
+        didSet {
+            predictedGlucose = nil
+        }
+    }
+    
     private var glucoseMomentumEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
@@ -876,6 +904,7 @@ final class LoopDataManager {
 
         guard let
             maxBasal = settings.maximumBasalRatePerHour,
+            let maximumInsulinOnBoard = settings.maximumInsulinOnBoard,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule,
@@ -883,6 +912,15 @@ final class LoopDataManager {
         else {
             throw LoopError.configurationError("Check settings")
         }
+        
+        guard let insulinOnBoard = insulinOnBoard
+            else {
+                throw LoopError.missingDataError(details: "Insulin on Board not available (updatePredictedGlucoseAndRecommendedBasal)", recovery: "Pump data up to date?")
+        }
+        
+//        guard cgmCalibrated else {
+//            throw LoopError.missingDataError(details: "CGM", recovery: "CGM Recently calibrated")
+//        }
 
         guard
             lastRequestedBolus == nil,  // Don't recommend changes if a bolus was just set
@@ -893,6 +931,8 @@ final class LoopDataManager {
                 model: model,
                 basalRates: basalRates,
                 maxBasalRate: maxBasal,
+                insulinOnBoard: insulinOnBoard.value,
+                maxInsulinOnBoard: maximumInsulinOnBoard,
                 lastTempBasal: lastTempBasal
             )
         else {
@@ -914,13 +954,19 @@ final class LoopDataManager {
         guard
             let predictedGlucose = predictedGlucose,
             let maxBolus = settings.maximumBolus,
+            let maximumInsulinOnBoard = settings.maximumInsulinOnBoard,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let model = insulinModelSettings?.model
         else {
             throw LoopError.configurationError("Check Settings")
         }
-
+        
+        guard let insulinOnBoard = insulinOnBoard
+            else {
+                throw LoopError.missingDataError(details: "Insulin on Board not available (recommendBolus)", recovery: "Pump data up to date?")
+        }
+        
         guard let glucoseDate = predictedGlucose.first?.startDate else {
             throw LoopError.missingDataError(details: "No glucose data found", recovery: "Check your CGM source")
         }
@@ -937,7 +983,9 @@ final class LoopDataManager {
             sensitivity: insulinSensitivity,
             model: model,
             pendingInsulin: pendingInsulin,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            insulinOnBoard: insulinOnBoard.value,
+            maxInsulinOnBoard: maximumInsulinOnBoard
         )
 
         return recommendation
@@ -979,6 +1027,8 @@ protocol LoopState {
     /// The last-calculated carbs on board
     var carbsOnBoard: CarbValue? { get }
 
+    var insulinOnBoard: InsulinValue? { get }
+    
     /// An error in the current state of the loop, or one that happened during the last attempt to loop.
     var error: Error? { get }
 
@@ -1033,6 +1083,11 @@ extension LoopDataManager {
         var carbsOnBoard: CarbValue? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.carbsOnBoard
+        }
+        
+        var insulinOnBoard: InsulinValue? {
+            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            return loopDataManager.insulinOnBoard
         }
 
         var error: Error? {
@@ -1115,6 +1170,7 @@ extension LoopDataManager {
                 "## LoopDataManager",
                 "settings: \(String(reflecting: manager.settings))",
                 "insulinCounteractionEffects: \(String(reflecting: manager.insulinCounteractionEffects))",
+                "insulinOnBoard: \(String(describing: state.insulinOnBoard))",
                 "predictedGlucose: \(state.predictedGlucose ?? [])",
                 "retrospectivePredictedGlucose: \(state.retrospectivePredictedGlucose ?? [])",
                 "recommendedTempBasal: \(String(describing: state.recommendedTempBasal))",
@@ -1125,45 +1181,24 @@ extension LoopDataManager {
                 "lastTempBasal: \(String(describing: state.lastTempBasal))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))"
             ]
-            var loopError = state.error
-            
-            // TODO: this should be moved to doseStore.generateDiagnosticReport
-            self.doseStore.insulinOnBoard(at: Date()) { (result) in
 
-                let insulinOnBoard: InsulinValue?
-                
-                switch result {
-                case .success(let value):
-                    insulinOnBoard = value
-                case .failure(let error):
-                    insulinOnBoard = nil
-                    
-                    if loopError == nil {
-                        loopError = error
-                    }
-                }
-                
-                entries.append("insulinOnBoard: \(String(describing: insulinOnBoard))")
-                entries.append("error: \(String(describing: loopError))")
+            self.glucoseStore.generateDiagnosticReport { (report) in
+                entries.append(report)
                 entries.append("")
 
-                self.glucoseStore.generateDiagnosticReport { (report) in
+                self.carbStore.generateDiagnosticReport { (report) in
                     entries.append(report)
                     entries.append("")
 
-                    self.carbStore.generateDiagnosticReport { (report) in
+                    self.doseStore.generateDiagnosticReport { (report) in
                         entries.append(report)
                         entries.append("")
 
-                        self.doseStore.generateDiagnosticReport { (report) in
-                            entries.append(report)
-                            entries.append("")
-
-                            completion(entries.joined(separator: "\n"))
-                        }
+                        completion(entries.joined(separator: "\n"))
                     }
                 }
             }
+            
         }
     }
 }

@@ -71,5 +71,19 @@ extension TextFieldTableViewController {
         }
 
         return vc
-    }    
+    }
+    
+    static func maxInsulinOnBoard(_ value: Double?) -> T {
+        let vc = T()
+        
+        vc.placeholder = NSLocalizedString("Enter a number of units", comment: "The placeholder text instructing users how to enter a maximum iob")
+        vc.keyboardType = .decimalPad
+        vc.unit = NSLocalizedString("Units", comment: "The unit string for units")
+        
+        if let maxIOB = value {
+            vc.value = valueNumberFormatter.string(from: NSNumber(value: maxIOB))
+        }
+        
+        return vc
+    }
 }
