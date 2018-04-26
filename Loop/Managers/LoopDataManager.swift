@@ -913,14 +913,11 @@ final class LoopDataManager {
             throw LoopError.configurationError("Check settings")
         }
         
-        guard let insulinOnBoard = insulinOnBoard
-            else {
+        guard let
+            insulinOnBoard = insulinOnBoard
+        else {
                 throw LoopError.missingDataError(details: "Insulin on Board not available (updatePredictedGlucoseAndRecommendedBasal)", recovery: "Pump data up to date?")
         }
-        
-//        guard cgmCalibrated else {
-//            throw LoopError.missingDataError(details: "CGM", recovery: "CGM Recently calibrated")
-//        }
 
         guard
             lastRequestedBolus == nil,  // Don't recommend changes if a bolus was just set

@@ -397,7 +397,8 @@ class RecommendTempBasalTests: XCTestCase {
             maxInsulinOnBoard: 2,
             lastTempBasal: nil
         )
-
+        // If the IOB is exceeded the rate is limited to the default
+        // basal rate.
         XCTAssertNil(dose)
     }
 

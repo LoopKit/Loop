@@ -375,7 +375,6 @@ extension Collection where Iterator.Element == GlucoseValue {
         insulinOnBoard: Double,
         maxInsulinOnBoard: Double,
         lastTempBasal: DoseEntry?,
-        lowerOnly: Bool = false,  // only lower the basal, never raise
         duration: TimeInterval = .minutes(30),
         minimumProgrammableIncrementPerUnit: Double = 40,
         continuationInterval: TimeInterval = .minutes(11)
@@ -438,7 +437,8 @@ extension Collection where Iterator.Element == GlucoseValue {
         pendingInsulin: Double,
         maxBolus: Double,
         insulinOnBoard: Double,
-        maxInsulinOnBoard: Double
+        maxInsulinOnBoard: Double,
+        minimumProgrammableIncrementPerUnit: Double = 40
     ) -> BolusRecommendation {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
@@ -455,7 +455,7 @@ extension Collection where Iterator.Element == GlucoseValue {
             maxBolus: maxBolus,
             insulinOnBoard: insulinOnBoard,
             maxInsulinOnBoard: maxInsulinOnBoard,
-            minimumProgrammableIncrementPerUnit: 40
+            minimumProgrammableIncrementPerUnit: minimumProgrammableIncrementPerUnit
         )
 
         // Handle the "current BG below target" notice here
