@@ -10,8 +10,10 @@ import UIKit
 import HealthKit
 import InsulinKit
 import LoopKit
-import RileyLinkKit
 import MinimedKit
+import RileyLinkBLEKit
+import RileyLinkKit
+import RileyLinkKitUI
 
 private let ConfigCellIdentifier = "ConfigTableViewCell"
 
@@ -29,32 +31,25 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
 
-        tableView.register(RileyLinkDeviceTableViewCell.nib(), forCellReuseIdentifier: RileyLinkDeviceTableViewCell.className)
+        tableView.register(RileyLinkDeviceTableViewCell.self, forCellReuseIdentifier: RileyLinkDeviceTableViewCell.className)
 
-        dataManagerObserver = NotificationCenter.default.addObserver(forName: nil, object: dataManager, queue: nil) { [weak self = self] (note) -> Void in
-            DispatchQueue.main.async {
-                if let deviceManager = self?.dataManager.rileyLinkManager {
-                    switch note.name {
-                    case Notification.Name.DeviceManagerDidDiscoverDevice:
-                        self?.tableView.insertRows(at: [IndexPath(row: deviceManager.devices.count - 1, section: Section.devices.rawValue)], with: .automatic)
-                    case Notification.Name.DeviceConnectionStateDidChange,
-                         Notification.Name.DeviceRSSIDidChange,
-                         Notification.Name.DeviceNameDidChange:
-                      if let device = note.userInfo?[RileyLinkDeviceManager.RileyLinkDeviceKey] as? RileyLinkDevice, let index = deviceManager.devices.index(where: { $0 === device }) {
-                            self?.tableView.reloadRows(at: [IndexPath(row: index, section: Section.devices.rawValue)], with: .none)
-                        }
-                    default:
-                        break
-                    }
-                }
-            }
+        // Register for manager notifications
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadDevices), name: .ManagerDevicesDidChange, object: dataManager.rileyLinkManager)
+
+        // Register for device notifications
+        for name in [.DeviceConnectionStateDidChange, .DeviceRSSIDidChange, .DeviceNameDidChange] as [Notification.Name] {
+            NotificationCenter.default.addObserver(self, selector: #selector(deviceDidUpdate(_:)), name: name, object: nil)
         }
+
+        reloadDevices()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        dataManager.rileyLinkManager.setDeviceScanningEnabled(true)
+        dataManager.rileyLinkManager.setScanningEnabled(true)
+        rssiFetchTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(updateRSSI), userInfo: nil, repeats: true)
+        updateRSSI()
 
         if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
             dataManager.loopManager.glucoseStore.authorize { (success, error) -> Void in
@@ -65,25 +60,14 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
 
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
 
-        dataManager.rileyLinkManager.setDeviceScanningEnabled(false)
-    }
-
-    deinit {
-        dataManagerObserver = nil
+        dataManager.rileyLinkManager.setScanningEnabled(false)
+        rssiFetchTimer = nil
     }
 
     var dataManager: DeviceDataManager!
-
-    private var dataManagerObserver: Any? {
-        willSet {
-            if let observer = dataManagerObserver {
-                NotificationCenter.default.removeObserver(observer)
-            }
-        }
-    }
 
     fileprivate enum Section: Int, CaseCountable {
         case loop = 0
@@ -188,7 +172,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .configuration:
             return ConfigurationRow.count
         case .devices:
-            return dataManager.rileyLinkManager.devices.count
+            return devices.count
         case .services:
             return ServiceRow.count
         }
@@ -227,7 +211,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             switch PumpRow(rawValue: indexPath.row)! {
             case .pumpID:
                 configCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
-                configCell.detailTextLabel?.text = dataManager.pumpID ?? TapToSetString
+                configCell.detailTextLabel?.text = dataManager.pumpSettings?.pumpID ?? TapToSetString
             case .batteryChemistry:
                 configCell.textLabel?.text = NSLocalizedString("Pump Battery Type", comment: "The title text for the battery type value")
                 configCell.detailTextLabel?.text = String(describing: dataManager.batteryChemistry)
@@ -366,14 +350,14 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             return configCell
         case .devices:
             let deviceCell = tableView.dequeueReusableCell(withIdentifier: RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
-            let device = dataManager.rileyLinkManager.devices[indexPath.row]
+            let device = devices[indexPath.row]
 
             deviceCell.configureCellWithName(device.name,
-                signal: device.RSSI,
-                peripheralState: device.peripheral.state
+                signal: valueNumberFormatter.decibleString(from: deviceRSSI[device.peripheralIdentifier]),
+                peripheralState: device.peripheralState
             )
 
-            deviceCell.connectSwitch.addTarget(self, action: #selector(deviceConnectionChanged(_:)), for: .valueChanged)
+            deviceCell.connectSwitch?.addTarget(self, action: #selector(deviceConnectionChanged(_:)), for: .valueChanged)
 
             return deviceCell
         case .services:
@@ -449,10 +433,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let row = PumpRow(rawValue: indexPath.row)!
             switch row {
             case .pumpID:
-                let vc: TextFieldTableViewController
+                let vc: LoopKit.TextFieldTableViewController
                 switch row {
                 case .pumpID:
-                    vc = PumpIDTableViewController(pumpID: dataManager.pumpID, region: dataManager.pumpState?.pumpRegion)
+                    vc = PumpIDTableViewController(pumpID: dataManager.pumpSettings?.pumpID, region: dataManager.pumpSettings?.pumpRegion)
                 default:
                     fatalError()
                 }
@@ -481,7 +465,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 show(vc, sender: sender)
             case .g5TransmitterID:
-                let vc: TextFieldTableViewController
+                let vc: LoopKit.TextFieldTableViewController
                 var value: String?
 
                 if case .g5(let transmitterID)? = dataManager.cgm {
@@ -501,7 +485,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
             case .maxBasal, .maxBolus:
-                let vc: TextFieldTableViewController
+                let vc: LoopKit.TextFieldTableViewController
 
                 switch row {
                 case .maxBasal:
@@ -617,10 +601,21 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
             }
         case .devices:
-            let vc = RileyLinkDeviceTableViewController()
-            vc.device = dataManager.rileyLinkManager.devices[indexPath.row]
+            let device = devices[indexPath.row]
 
-            show(vc, sender: sender)
+            dataManager.getStateForDevice(device) { (deviceState, pumpState, pumpSettings, pumpOps) in
+                DispatchQueue.main.async {
+                    let vc = RileyLinkDeviceTableViewController(
+                        device: device,
+                        deviceState: deviceState,
+                        pumpSettings: pumpSettings,
+                        pumpState: pumpState,
+                        pumpOps: pumpOps
+                    )
+
+                    self.show(vc, sender: sender)
+                }
+            }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
             case .preferredInsulinDataSource:
@@ -698,12 +693,70 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
 
+    @objc private func reloadDevices() {
+        self.dataManager.rileyLinkManager.getDevices { (devices) in
+            DispatchQueue.main.async {
+                self.devices = devices
+            }
+        }
+    }
+
+    @objc private func deviceDidUpdate(_ note: Notification) {
+        DispatchQueue.main.async {
+            if let device = note.object as? RileyLinkDevice, let index = self.devices.index(where: { $0 === device }) {
+                if let rssi = note.userInfo?[RileyLinkDevice.notificationRSSIKey] as? Int {
+                    self.deviceRSSI[device.peripheralIdentifier] = rssi
+                }
+
+                if let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: Section.devices.rawValue)) as? RileyLinkDeviceTableViewCell {
+                    cell.configureCellWithName(device.name,
+                        signal: self.valueNumberFormatter.decibleString(from: self.deviceRSSI[device.peripheralIdentifier]),
+                        peripheralState: device.peripheralState
+                    )
+                }
+            }
+        }
+    }
+
+    private var devices: [RileyLinkDevice] = [] {
+        didSet {
+            // Assume only appends are possible when count changes for algorithmic simplicity
+            guard oldValue.count < devices.count else {
+                tableView.reloadSections(IndexSet(integer: Section.devices.rawValue), with: .fade)
+                return
+            }
+
+            tableView.beginUpdates()
+
+            let insertedPaths = (oldValue.count..<devices.count).map { (index) -> IndexPath in
+                return IndexPath(row: index, section: Section.devices.rawValue)
+            }
+            tableView.insertRows(at: insertedPaths, with: .automatic)
+
+            tableView.endUpdates()
+        }
+    }
+
+    private var deviceRSSI: [UUID: Int] = [:]
+
+    var rssiFetchTimer: Timer? {
+        willSet {
+            rssiFetchTimer?.invalidate()
+        }
+    }
+
+    @objc func updateRSSI() {
+        for device in devices {
+            device.readRSSI()
+        }
+    }
+
     @objc private func deviceConnectionChanged(_ connectSwitch: UISwitch) {
         let switchOrigin = connectSwitch.convert(CGPoint.zero, to: tableView)
 
         if let indexPath = tableView.indexPathForRow(at: switchOrigin), indexPath.section == Section.devices.rawValue
         {
-            let device = dataManager.rileyLinkManager.devices[indexPath.row]
+            let device = devices[indexPath.row]
 
             if connectSwitch.isOn {
                 dataManager.connectToRileyLink(device)
@@ -908,19 +961,19 @@ extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate
     }
 }
 
-extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
-    func textFieldTableViewControllerDidEndEditing(_ controller: TextFieldTableViewController) {
+extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDelegate {
+    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKit.TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
             switch Section(rawValue: indexPath.section)! {
             case .pump:
                 switch PumpRow(rawValue: indexPath.row)! {
                 case .pumpID:
-                    dataManager.pumpID = controller.value
+                    dataManager.setPumpID(controller.value)
 
                     if  let controller = controller as? PumpIDTableViewController,
                         let region = controller.region
                     {
-                        dataManager.pumpState?.pumpRegion = region
+                        dataManager.setPumpRegion(region)
                     }
                 default:
                     assertionFailure()
@@ -970,7 +1023,7 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
         tableView.reloadData()
     }
 
-    func textFieldTableViewControllerDidReturn(_ controller: TextFieldTableViewController) {
+    func textFieldTableViewControllerDidReturn(_ controller: LoopKit.TextFieldTableViewController) {
         _ = navigationController?.popViewController(animated: true)
     }
 }
@@ -979,7 +1032,7 @@ extension SettingsTableViewController: TextFieldTableViewControllerDelegate {
 extension SettingsTableViewController: PumpIDTableViewControllerDelegate {
     func pumpIDTableViewControllerDidChangePumpRegion(_ controller: PumpIDTableViewController) {
         if let region = controller.region {
-            dataManager.pumpState?.pumpRegion = region
+            dataManager.setPumpRegion(region)
         }
     }
 }
