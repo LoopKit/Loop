@@ -517,6 +517,8 @@ final class DeviceDataManager {
     /// Send a bolus command and handle the result
     ///
     /// - parameter units:      The number of units to deliver
+    /// - parameter startDate:  The start of the bolus.
+    /// - parameter quiet:      Do not produce a notification of failure to the user.
     /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
     ///     - error: An error describing why the command failed
     func enactBolus(units: Double, at startDate: Date = Date(), quiet : Bool = false, completion: @escaping (_ error: Error?) -> Void) {
@@ -561,6 +563,9 @@ final class DeviceDataManager {
             }
 
             if shouldReadReservoir {
+                // TODO it might be safer to return here and not give a Bolus
+                //      forcing the recalculation of recommendedBolus.  The new
+                //      data might have invalidated the old recommendation.
                 do {
                     let reservoir = try session.getRemainingInsulin()
 
