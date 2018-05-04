@@ -241,9 +241,19 @@ final class DeviceDataManager {
     // MARK: Pump data
 
     /// TODO: Isolate to queue
-    fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
+    fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody? {
+        didSet {
+            if let manager = cgmManager as? EnliteCGMManager {
+                manager.sensorState = latestPumpStatusFromMySentry
+            }
+        }
+    }
 
-    /** Check if pump date is current and otherwise update it. **/
+    /**
+     Check if pump date is current and otherwise update it.
+     
+     - parameter date: The last pump date
+    */
     private func assertPumpDate(_ date: Date) -> Bool {
         let dateDiff = abs(date.timeIntervalSinceNow)
         if dateDiff > TimeInterval(minutes: 1) {
