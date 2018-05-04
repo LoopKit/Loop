@@ -510,8 +510,6 @@ final class DeviceDataManager {
         }
     }
 
-    private var bolusInProgress = false
-
     /// TODO: Isolate to queue
     /// Send a bolus command and handle the result
     ///
@@ -526,7 +524,6 @@ final class DeviceDataManager {
                     NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
                 }
             }
-            self.bolusInProgress = false
             completion(error)
         }
         
@@ -539,14 +536,7 @@ final class DeviceDataManager {
             notify(LoopError.configurationError("Pump ID"))
             return
         }
-        
-        guard !bolusInProgress else {
-            notify(LoopError.invalidData(details: "Bolus already in progress"))
-            bolusInProgress = true // notify alwasy set this to false, so reset to true...
-            return
-        }
-        bolusInProgress = true
-        
+
         // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
         var shouldReadReservoir = isReservoirDataOlderThan(timeIntervalSinceNow: .minutes(-10))
         if loopManager.doseStore.lastReservoirVolumeDrop < 0 {
@@ -852,9 +842,9 @@ extension DeviceDataManager: DoseStoreDelegate {
 
 extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
-    _ manager: LoopDataManager,
-    didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
-    completion: @escaping (_ result: Result<DoseEntry>) -> Void
+        _ manager: LoopDataManager,
+        didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
+        completion: @escaping (_ result: Result<DoseEntry>) -> Void
     ) {
         guard let pumpOps = pumpOps else {
             completion(.failure(LoopError.configurationError("Pump ID")))
@@ -892,7 +882,6 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                     value: response.rate,
                     unit: .unitsPerHour
                 )))
-
             } catch let error {
                 notify(.failure(error))
             }
@@ -916,28 +905,6 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             }
             
         }
-    }
-    
-    func loopDataManager(_ manager: LoopDataManager, uploadTreatments treatments: [NightscoutTreatment], completion: @escaping (Result<[String]>) -> Void) {
-        
-        guard let uploader = remoteDataManager.nightscoutService.uploader else {
-            completion(.failure(LoopError.configurationError("Nightscout not configured")))
-            return
-        }
-        
-        uploader.upload(treatments) { (result) in
-            switch result {
-            case .success(let objects):
-                completion(.success(objects))
-            case .failure(let error):
-                let logger = DiagnosticLogger.shared!.forCategory("NightscoutUploader")
-                logger.error(error)
-                NSLog("UPLOADING delegate failed \(error)")
-                completion(.failure(error))
-
-            }
-        }
-    
     }
 }
 
