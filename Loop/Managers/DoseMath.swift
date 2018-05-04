@@ -360,6 +360,7 @@ extension Collection where Iterator.Element == GlucoseValue {
     ///   - insulinOnBoard: The current insulin on board
     ///   - maxInsulinOnBoard: The maximum insulin allowed
     ///   - lastTempBasal: The previously set temp basal
+    ///   - lowerOnly: Only return lower basal rates, never higher
     ///   - duration: The duration of the temporary basal
     ///   - minimumProgrammableIncrementPerUnit: The smallest fraction of a unit supported in basal delivery
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
