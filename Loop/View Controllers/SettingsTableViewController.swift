@@ -80,6 +80,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
+        case bolus
         case preferredInsulinDataSource
         case diagnostic
     }
@@ -191,6 +192,15 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
 
+                return switchCell
+            case .bolus:
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+                
+                switchCell.switch?.isOn = dataManager.loopManager.settings.bolusEnabled
+                switchCell.textLabel?.text = NSLocalizedString("Automated Bolus", comment: "The title text for the automated bolus enabled switch cell")
+                
+                switchCell.switch?.addTarget(self, action: #selector(bolusEnabledChanged(_:)), for: .valueChanged)
+                
                 return switchCell
             case .preferredInsulinDataSource:
                 let cell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
@@ -640,7 +650,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 vc.title = sender?.textLabel?.text
 
                 show(vc, sender: sender)
-            case .dosing:
+            case .dosing, .bolus:
                 break
             }
         case .services:
@@ -702,6 +712,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
+    }
+    
+    @objc private func bolusEnabledChanged(_ sender: UISwitch) {
+        dataManager.loopManager.settings.bolusEnabled = sender.isOn
     }
 
     @objc private func reloadDevices() {

@@ -86,6 +86,7 @@ final class LoopDataManager {
             self.dataAccessQueue.async {
                 self.carbEffect = nil
                 self.carbsOnBoard = nil
+                self.lastCarbChange = Date()
                 self.notify(forChange: .carbs)
             }
         }
@@ -325,7 +326,11 @@ final class LoopDataManager {
     ///   - date: The date the bolus was requested
     func addRequestedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
         dataAccessQueue.async {
-            self.lastRequestedBolus = (units: units, date: date)
+            NSLog("addRequestedBolus: \(units) \(date)")
+            self.recommendedBolus = nil
+            self.lastPendingBolus = nil
+            self.lastFailedBolus = nil
+            self.lastRequestedBolus = (units: units, date: date, reservoir: self.doseStore.lastReservoirValue)
             self.notify(forChange: .bolus)
 
             completion?()
@@ -338,14 +343,37 @@ final class LoopDataManager {
     ///   - units: The bolus amount, in units
     ///   - date: The date the bolus was enacted
     func addConfirmedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
-        self.doseStore.addPendingPumpEvent(.enactedBolus(units: units, at: date)) {
+        let event = NewPumpEvent.enactedBolus(units: units, at: date)
+        NSLog("addConfirmedBolus: \(units) \(date)")
+        self.doseStore.addPendingPumpEvent(event) {
             self.dataAccessQueue.async {
+                let requestDate = self.lastRequestedBolus?.date ?? date
+                self.lastPendingBolus = (units: units, date: requestDate, reservoir: self.doseStore.lastReservoirValue, event: event)
                 self.lastRequestedBolus = nil
+                self.lastFailedBolus = nil
+                self.lastAutomaticBolus = date  // keep this as a date, irrespective of automatic or not
+                self.recommendedBolus = nil
                 self.insulinEffect = nil
-                self.notify(forChange: .bolus)
 
+                self.notify(forChange: .bolus)
+                do {
+                    try self.update()
+                } catch let error {
+                    NSLog("addConfirmedBolus: Update after confirmed bolus failed \(error)")
+                }
                 completion?()
             }
+        }
+    }
+
+    func addFailedBolus(units: Double, at date: Date, error: Error, completion: (() -> Void)?) {
+        dataAccessQueue.async {
+            NSLog("addFailedBolus: \(units) \(date) \(error)")
+            self.lastFailedBolus = (units: units, date: date, error: error)
+            self.lastPendingBolus = nil
+            self.recommendedBolus = nil
+            self.notify(forChange: .bolus)
+            completion?()
         }
     }
 
@@ -433,11 +461,23 @@ final class LoopDataManager {
                         if let error = error {
                             self.logger.error(error)
                         } else {
-                            self.lastLoopCompleted = Date()
+                            if self.settings.bolusEnabled {
+                                // Have to do a bolus first.
+                                self.setAutomatedBolus { (error) -> Void in
+                                    if let error = error {
+                                        self.logger.error(error)
+                                    } else {
+                                        self.lastLoopCompleted = Date()
+                                    }
+                                }
+                            } else {
+                                // No automatic Bolus, we are done.
+                                self.lastLoopCompleted = Date()
+                            }
                         }
                         self.notify(forChange: .tempBasal)
                     }
-
+                    
                     // Delay the notification until we know the result of the temp basal
                     return
                 } else {
@@ -759,7 +799,11 @@ final class LoopDataManager {
     fileprivate var carbsOnBoard: CarbValue?
 
     fileprivate var lastTempBasal: DoseEntry?
-    fileprivate var lastRequestedBolus: (units: Double, date: Date)?
+    
+    fileprivate var lastRequestedBolus: (units: Double, date: Date, reservoir: ReservoirValue?)?
+    fileprivate var lastPendingBolus: (units: Double, date: Date, reservoir: ReservoirValue?, event: NewPumpEvent)?
+    fileprivate var lastFailedBolus: (units: Double, date: Date, error: Error)?
+    
     fileprivate var lastLoopCompleted: Date? {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
@@ -994,6 +1038,78 @@ final class LoopDataManager {
             }
         }
     }
+    
+    /// *This method should only be called from the `dataAccessQueue`*
+    private var lastAutomaticBolus : Date? = nil
+    private var lastCarbChange : Date? = nil
+    
+    private func roundInsulinUnits(_ units: Double) -> Double {
+        return round(units * settings.insulinIncrementPerUnit)/settings.insulinIncrementPerUnit
+    }
+    
+    private func setAutomatedBolus(_ completion: @escaping (_ error: Error?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
+        guard let recommendedBolus = self.recommendedBolus else {
+            completion(nil)
+            NSLog("setAutomatedBolus - recommendation not available")
+            return
+        }
+
+        let safeAmount = roundInsulinUnits(recommendedBolus.recommendation.amount * settings.automatedBolusRatio)
+        if safeAmount < settings.automatedBolusThreshold {
+            completion(nil)
+            NSLog("setAutomatedBolus - recommendation below threshold")
+            return
+        }
+
+        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            completion(LoopError.recommendationExpired(date: recommendedBolus.date))
+            NSLog("setAutomatedBolus - recommendation too old")
+            return
+        }
+
+        if let lastAutomaticBolus = self.lastAutomaticBolus, abs(lastAutomaticBolus.timeIntervalSinceNow) < settings.automaticBolusInterval {
+            NSLog("setAutomatedBolus - last automatic bolus too close")
+            completion(nil)
+            return
+        }
+
+        if let carbChange = lastCarbChange {
+            guard abs(carbChange.timeIntervalSinceNow) > TimeInterval(minutes: 2) else {
+                NSLog("setAutomatedBolus - last carbchange too close")
+                completion(nil)
+                return
+            }
+        }
+
+        // TODO lastPendingBolus is never cleared, thus we need to check for the date here.
+        if lastRequestedBolus != nil {
+            NSLog("setAutomatedBolus - lastRequestedBolus or lastPendingBolus still in progress \(String(describing: lastRequestedBolus)) \(String(describing: lastPendingBolus))")
+            completion(nil)
+            return
+        }
+
+        // Copy bolus with "safe" ratio
+        let automatedBolus = (recommendation: BolusRecommendation(amount: safeAmount , pendingInsulin:  recommendedBolus.recommendation.pendingInsulin, notice: recommendedBolus.recommendation.notice ), date: recommendedBolus.date)
+        self.recommendedBolus = nil
+        lastAutomaticBolus = Date()
+
+        delegate.loopDataManager(self, didRecommendBolus: automatedBolus) { (result) in
+            self.dataAccessQueue.async {
+                switch result {
+                case .success(let bolus):
+                    NSLog("setAutomatedBolus - success: \(bolus)")
+                    self.recommendedBolus = nil
+                    completion(nil)
+                case .failure(let error):
+                    completion(error)
+                }
+            }
+        }
+    }
+
+    
 }
 
 
@@ -1191,4 +1307,13 @@ protocol LoopDataManagerDelegate: class {
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
     func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+    
+    /// Informs the delegate that an immediate bolus is recommended
+    ///
+    /// - Parameters:
+    ///   - manager: The manager
+    ///   - bolus: The recommended bolus
+    ///   - completion: A closure called once on completion
+    ///   - result: The enacted bolus
+    func loopDataManager(_ manager: LoopDataManager, didRecommendBolus bolus: (recommendation: BolusRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
 }

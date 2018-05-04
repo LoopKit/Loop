@@ -407,12 +407,10 @@ final class DeviceDataManager {
                 return
             }
 
+
             ops.runSession(withName: "Fetch Pump History", using: device) { (session) in
                 do {
-                    // TODO: This should isn't safe to access synchronously
-                    let startDate = self.loopManager.doseStore.pumpEventQueryAfterDate
-
-                    let (events, model) = try session.getHistoryEvents(since: startDate)
+                    let (events, model) = try session.getHistoryEvents(since: self.loopManager.doseStore.pumpEventQueryAfterDate)
                     self.loopManager.addPumpEvents(events, from: model) { (error) in
                         if let error = error {
                             self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
@@ -512,21 +510,26 @@ final class DeviceDataManager {
         }
     }
 
+    private var bolusInProgress = false
+
     /// TODO: Isolate to queue
     /// Send a bolus command and handle the result
     ///
     /// - parameter units:      The number of units to deliver
     /// - parameter completion: A clsure called after the command is complete. This closure takes a single argument:
     ///     - error: An error describing why the command failed
-    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
+    func enactBolus(units: Double, at startDate: Date = Date(), quiet : Bool = false, completion: @escaping (_ error: Error?) -> Void) {
+
         let notify = { (error: Error?) -> Void in
             if let error = error {
-                NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                if !quiet {
+                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                }
             }
-
+            self.bolusInProgress = false
             completion(error)
         }
-
+        
         guard units > 0 else {
             notify(nil)
             return
@@ -536,9 +539,27 @@ final class DeviceDataManager {
             notify(LoopError.configurationError("Pump ID"))
             return
         }
-
+        
+        guard !bolusInProgress else {
+            notify(LoopError.invalidData(details: "Bolus already in progress"))
+            bolusInProgress = true // notify alwasy set this to false, so reset to true...
+            return
+        }
+        bolusInProgress = true
+        
         // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
-        let shouldReadReservoir = isReservoirDataOlderThan(timeIntervalSinceNow: .minutes(-6))
+        var shouldReadReservoir = isReservoirDataOlderThan(timeIntervalSinceNow: .minutes(-10))
+        if loopManager.doseStore.lastReservoirVolumeDrop < 0 {
+            notify(LoopError.invalidData(details: "Last Reservoir drop negative."))
+            shouldReadReservoir = true
+        } else if let reservoir = loopManager.doseStore.lastReservoirValue, reservoir.startDate.timeIntervalSinceNow <=
+            -loopManager.recencyInterval {
+            notify(LoopError.pumpDataTooOld(date: reservoir.startDate))
+            shouldReadReservoir = true
+        } else if loopManager.doseStore.lastReservoirValue == nil {
+            notify(LoopError.missingDataError(details: "Reservoir Value missing", recovery: "Keep phone close."))
+            shouldReadReservoir = true
+        }
 
         ops.runSession(withName: "Bolus", using: rileyLinkManager.firstConnectedDevice) { (session) in
             guard let session = session else {
@@ -831,9 +852,9 @@ extension DeviceDataManager: DoseStoreDelegate {
 
 extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(
-        _ manager: LoopDataManager,
-        didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
-        completion: @escaping (_ result: Result<DoseEntry>) -> Void
+    _ manager: LoopDataManager,
+    didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
+    completion: @escaping (_ result: Result<DoseEntry>) -> Void
     ) {
         guard let pumpOps = pumpOps else {
             completion(.failure(LoopError.configurationError("Pump ID")))
@@ -871,10 +892,52 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                     value: response.rate,
                     unit: .unitsPerHour
                 )))
+
             } catch let error {
                 notify(.failure(error))
             }
         }
+    }
+    
+    func loopDataManager(_ manager: LoopDataManager, didRecommendBolus bolus: (recommendation: BolusRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) {
+        
+        enactBolus(units: bolus.recommendation.amount, quiet: true) { (error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                let now = Date()
+                completion(.success(DoseEntry(
+                    type: .bolus,
+                    startDate: now,
+                    endDate: now,
+                    value: bolus.recommendation.amount,
+                    unit: .units
+                )))
+            }
+            
+        }
+    }
+    
+    func loopDataManager(_ manager: LoopDataManager, uploadTreatments treatments: [NightscoutTreatment], completion: @escaping (Result<[String]>) -> Void) {
+        
+        guard let uploader = remoteDataManager.nightscoutService.uploader else {
+            completion(.failure(LoopError.configurationError("Nightscout not configured")))
+            return
+        }
+        
+        uploader.upload(treatments) { (result) in
+            switch result {
+            case .success(let objects):
+                completion(.success(objects))
+            case .failure(let error):
+                let logger = DiagnosticLogger.shared!.forCategory("NightscoutUploader")
+                logger.error(error)
+                NSLog("UPLOADING delegate failed \(error)")
+                completion(.failure(error))
+
+            }
+        }
+    
     }
 }
 
