@@ -304,11 +304,11 @@ final class DeviceDataManager {
         guard status != latestPumpStatusFromMySentry, let pumpDate = pumpDateComponents.date else {
             return
         }
-        
+
         if !assertPumpDate(pumpDate) {
             return
         }
-        
+
         observeBatteryDuring {
             latestPumpStatusFromMySentry = status
         }
