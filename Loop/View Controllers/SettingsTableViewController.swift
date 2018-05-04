@@ -106,6 +106,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case insulinSensitivity
         case maxBasal
         case maxBolus
+        case maxInsulinOnBoard
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -345,6 +346,14 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+            case .maxInsulinOnBoard:
+                configCell.textLabel?.text = NSLocalizedString("Maximum IOB", comment: "The title text for the maximum insulin on board value")
+                
+                if let maxInsulinOnBoard = dataManager.loopManager.settings.maximumInsulinOnBoard {
+                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxInsulinOnBoard))!) U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
             }
 
             return configCell
@@ -484,7 +493,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
-            case .maxBasal, .maxBolus:
+            case .maxBasal, .maxBolus, .maxInsulinOnBoard:
                 let vc: LoopKit.TextFieldTableViewController
 
                 switch row {
@@ -492,6 +501,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     vc = .maxBasal(dataManager.loopManager.settings.maximumBasalRatePerHour)
                 case .maxBolus:
                     vc = .maxBolus(dataManager.loopManager.settings.maximumBolus)
+                case .maxInsulinOnBoard:
+                    vc = .maxInsulinOnBoard(dataManager.loopManager.settings.maximumInsulinOnBoard)
                 default:
                     fatalError()
                 }
@@ -1011,6 +1022,12 @@ extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDeleg
                         dataManager.loopManager.settings.maximumBolus = units
                     } else {
                         dataManager.loopManager.settings.maximumBolus = nil
+                    }
+                case .maxInsulinOnBoard:
+                    if let value = controller.value, let units = valueNumberFormatter.number(from: value)?.doubleValue {
+                        dataManager.loopManager.settings.maximumInsulinOnBoard = units
+                    } else {
+                        dataManager.loopManager.settings.maximumInsulinOnBoard = nil
                     }
                 default:
                     assertionFailure()
