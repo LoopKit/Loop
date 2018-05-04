@@ -243,9 +243,7 @@ final class DeviceDataManager {
     /// TODO: Isolate to queue
     fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
 
-    /** Check if pump date is current and otherwise update it.
-     * TODO this should get a device name probably.
-     **/
+    /** Check if pump date is current and otherwise update it. **/
     private func assertPumpDate(_ date: Date) -> Bool {
         let dateDiff = abs(date.timeIntervalSinceNow)
         if dateDiff > TimeInterval(minutes: 1) {
@@ -256,18 +254,15 @@ final class DeviceDataManager {
                 guard let device = devices.firstConnected else {
                     return
                 }
-                // TODO use a session
                 pumpOps.runSession(withName: "Sync Pump Time", using: device) { (session) in
                     do {
                         try session.setTime { () -> DateComponents in
                             let calendar = Calendar(identifier: .gregorian)
                             return calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
                         }
-                        self.loopManager.addInternalNote("syncPumpTime success (difference \(dateDiff)).")
-
+                        NSLog("syncPumpTime success (difference \(dateDiff)).")
                     } catch let error {
-                
-                        self.loopManager.addInternalNote("syncPumpTime error \(String(describing: error)).")
+                        NSLog("syncPumpTime error \(String(describing: error)).")
                     }
                 }
             }
