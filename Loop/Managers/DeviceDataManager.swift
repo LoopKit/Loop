@@ -241,12 +241,39 @@ final class DeviceDataManager {
     // MARK: Pump data
 
     /// TODO: Isolate to queue
-    fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody? {
-        didSet {
-            if let manager = cgmManager as? EnliteCGMManager {
-                manager.sensorState = latestPumpStatusFromMySentry
+    fileprivate var latestPumpStatusFromMySentry: MySentryPumpStatusMessageBody?
+
+    /** Check if pump date is current and otherwise update it.
+     * TODO this should get a device name probably.
+     **/
+    private func assertPumpDate(_ date: Date) -> Bool {
+        let dateDiff = abs(date.timeIntervalSinceNow)
+        if dateDiff > TimeInterval(minutes: 1) {
+            guard let pumpOps = pumpOps else {
+                return false
             }
+            rileyLinkManager.getDevices { (devices) in
+                guard let device = devices.firstConnected else {
+                    return
+                }
+                // TODO use a session
+                pumpOps.runSession(withName: "Sync Pump Time", using: device) { (session) in
+                    do {
+                        try session.setTime { () -> DateComponents in
+                            let calendar = Calendar(identifier: .gregorian)
+                            return calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
+                        }
+                        self.loopManager.addInternalNote("syncPumpTime success (difference \(dateDiff)).")
+
+                    } catch let error {
+                
+                        self.loopManager.addInternalNote("syncPumpTime error \(String(describing: error)).")
+                    }
+                }
+            }
+            return false
         }
+        return true
     }
 
     /**
@@ -272,7 +299,11 @@ final class DeviceDataManager {
         guard status != latestPumpStatusFromMySentry, let pumpDate = pumpDateComponents.date else {
             return
         }
-
+        
+        if !assertPumpDate(pumpDate) {
+            return
+        }
+        
         observeBatteryDuring {
             latestPumpStatusFromMySentry = status
         }
@@ -549,6 +580,12 @@ final class DeviceDataManager {
             if shouldReadReservoir {
                 do {
                     let reservoir = try session.getRemainingInsulin()
+                    if !self.assertPumpDate(reservoir.clock.date!) {
+                        self.logger.addError("Pump clock is deviating too much, need to fix first.", fromSource: "enactBolus")
+                        let error = PumpOpsError.rfCommsFailure("Pump clock is deviating too much.")
+                        notify(SetBolusError.certain(error))
+                        return
+                    }
 
                     self.loopManager.addReservoirValue(reservoir.units, at: reservoir.clock.date!) { (result) in
                         switch result {
