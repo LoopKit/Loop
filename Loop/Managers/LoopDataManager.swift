@@ -328,8 +328,6 @@ final class LoopDataManager {
         dataAccessQueue.async {
             NSLog("addRequestedBolus: \(units) \(date)")
             self.recommendedBolus = nil
-            self.lastPendingBolus = nil
-            self.lastFailedBolus = nil
             self.lastRequestedBolus = (units: units, date: date, reservoir: self.doseStore.lastReservoirValue)
             self.notify(forChange: .bolus)
 
@@ -347,10 +345,7 @@ final class LoopDataManager {
         NSLog("addConfirmedBolus: \(units) \(date)")
         self.doseStore.addPendingPumpEvent(event) {
             self.dataAccessQueue.async {
-                let requestDate = self.lastRequestedBolus?.date ?? date
-                self.lastPendingBolus = (units: units, date: requestDate, reservoir: self.doseStore.lastReservoirValue, event: event)
                 self.lastRequestedBolus = nil
-                self.lastFailedBolus = nil
                 self.lastAutomaticBolus = date  // keep this as a date, irrespective of automatic or not
                 self.recommendedBolus = nil
                 self.insulinEffect = nil
@@ -363,17 +358,6 @@ final class LoopDataManager {
                 }
                 completion?()
             }
-        }
-    }
-
-    func addFailedBolus(units: Double, at date: Date, error: Error, completion: (() -> Void)?) {
-        dataAccessQueue.async {
-            NSLog("addFailedBolus: \(units) \(date) \(error)")
-            self.lastFailedBolus = (units: units, date: date, error: error)
-            self.lastPendingBolus = nil
-            self.recommendedBolus = nil
-            self.notify(forChange: .bolus)
-            completion?()
         }
     }
 
@@ -795,15 +779,13 @@ final class LoopDataManager {
     fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
 
     fileprivate var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
-    
+
     fileprivate var carbsOnBoard: CarbValue?
 
     fileprivate var lastTempBasal: DoseEntry?
-    
+
     fileprivate var lastRequestedBolus: (units: Double, date: Date, reservoir: ReservoirValue?)?
-    fileprivate var lastPendingBolus: (units: Double, date: Date, reservoir: ReservoirValue?, event: NewPumpEvent)?
-    fileprivate var lastFailedBolus: (units: Double, date: Date, error: Error)?
-    
+
     fileprivate var lastLoopCompleted: Date? {
         didSet {
             NotificationManager.scheduleLoopNotRunningNotifications()
@@ -973,6 +955,7 @@ final class LoopDataManager {
             // Don't recommend changes if a bolus was just requested.
             // Sending additional pump commands is not going to be
             // successful in any case.
+            NSLog("updatePredictedGlucoseAndRecommendedBasalAndBolus - previous Bolus still in progress")
             recommendedBolus = nil
             recommendedTempBasal = nil
             return
@@ -987,16 +970,16 @@ final class LoopDataManager {
                 maxBasalRate: maxBasal,
                 insulinOnBoard: insulinOnBoard.value,
                 maxInsulinOnBoard: maximumInsulinOnBoard,
-                lastTempBasal: lastTempBasal
+                lastTempBasal: lastTempBasal,
+                lowerOnly: settings.bolusEnabled
             )
         
         if let temp = tempBasal {
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
             recommendedTempBasal = nil
-            return
         }
-        
+
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
@@ -1038,15 +1021,14 @@ final class LoopDataManager {
             }
         }
     }
-    
-    /// *This method should only be called from the `dataAccessQueue`*
+
+    // Keep track of last automatic bolus to space them out
     private var lastAutomaticBolus : Date? = nil
+
+    // Keeps track of last carb change to prevent bolus immediately afterwards.
     private var lastCarbChange : Date? = nil
-    
-    private func roundInsulinUnits(_ units: Double) -> Double {
-        return round(units * settings.insulinIncrementPerUnit)/settings.insulinIncrementPerUnit
-    }
-    
+
+    /// *This method should only be called from the `dataAccessQueue`*
     private func setAutomatedBolus(_ completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
@@ -1056,7 +1038,7 @@ final class LoopDataManager {
             return
         }
 
-        let safeAmount = roundInsulinUnits(recommendedBolus.recommendation.amount * settings.automatedBolusRatio)
+        let safeAmount = round(recommendedBolus.recommendation.amount * settings.automatedBolusRatio * 10) / 10
         if safeAmount < settings.automatedBolusThreshold {
             completion(nil)
             NSLog("setAutomatedBolus - recommendation below threshold")
@@ -1083,9 +1065,9 @@ final class LoopDataManager {
             }
         }
 
-        // TODO lastPendingBolus is never cleared, thus we need to check for the date here.
+        // TODO lastRequestedBolus might not ever get cleared, thus we need to check for the date here.
         if lastRequestedBolus != nil {
-            NSLog("setAutomatedBolus - lastRequestedBolus or lastPendingBolus still in progress \(String(describing: lastRequestedBolus)) \(String(describing: lastPendingBolus))")
+            NSLog("setAutomatedBolus - lastRequestedBolus still in progress \(String(describing: lastRequestedBolus))")
             completion(nil)
             return
         }

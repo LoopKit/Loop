@@ -375,6 +375,7 @@ extension Collection where Iterator.Element == GlucoseValue {
         insulinOnBoard: Double,
         maxInsulinOnBoard: Double,
         lastTempBasal: DoseEntry?,
+        lowerOnly: Bool = false,
         duration: TimeInterval = .minutes(30),
         minimumProgrammableIncrementPerUnit: Double = 40,
         continuationInterval: TimeInterval = .minutes(11)
@@ -394,6 +395,10 @@ extension Collection where Iterator.Element == GlucoseValue {
         if case .aboveRange(min: let min, correcting: _, minTarget: let highBasalThreshold, units: _)? = correction,
             min.quantity < highBasalThreshold
         {
+            maxBasalRate = scheduledBasalRate
+        }
+
+        if lowerOnly {
             maxBasalRate = scheduledBasalRate
         }
 

@@ -410,7 +410,10 @@ final class DeviceDataManager {
 
             ops.runSession(withName: "Fetch Pump History", using: device) { (session) in
                 do {
-                    let (events, model) = try session.getHistoryEvents(since: self.loopManager.doseStore.pumpEventQueryAfterDate)
+                    // TODO: This should isn't safe to access synchronously
+                    let startDate = self.loopManager.doseStore.pumpEventQueryAfterDate
+
+                    let (events, model) = try session.getHistoryEvents(since: startDate)
                     self.loopManager.addPumpEvents(events, from: model) { (error) in
                         if let error = error {
                             self.logger.addError("Failed to store history: \(error)", fromSource: "DoseStore")
