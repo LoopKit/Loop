@@ -32,7 +32,6 @@ struct LoopSettings {
     let automatedBolusThreshold: Double = 0.2
     let automatedBolusRatio: Double = 0.7
     let automaticBolusInterval: TimeInterval = TimeInterval(minutes: 7)
-    let minimumRecommendedBolus: Double = 0.2
 }
 
 
