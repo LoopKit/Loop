@@ -23,6 +23,23 @@ extension GlucoseRangeSchedule {
         return override.isActive()
     }
 
+    var activeOverrideContext: GlucoseRangeSchedule.Override.Context? {
+        guard let override = override, override.isActive() else {
+            return nil
+        }
+
+        return override.context
+    }
+
+    var configuredOverrideContexts: [GlucoseRangeSchedule.Override.Context] {
+        var contexts: [GlucoseRangeSchedule.Override.Context] = []
+        for (context, range) in overrideRanges where !range.isZero {
+            contexts.append(context)
+        }
+
+        return contexts
+    }
+
     func minQuantity(at date: Date) -> HKQuantity {
         return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
     }

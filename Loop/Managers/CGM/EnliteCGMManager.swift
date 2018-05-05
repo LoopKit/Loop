@@ -9,6 +9,7 @@
 import HealthKit
 import LoopUI
 import MinimedKit
+import RileyLinkKit
 
 
 final class EnliteCGMManager: CGMManager {
@@ -21,42 +22,47 @@ final class EnliteCGMManager: CGMManager {
     let managedDataInterval: TimeInterval? = nil
 
     func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
-        guard let device = deviceManager.rileyLinkManager.firstConnectedDevice?.ops
-            else {
+        deviceManager.rileyLinkManager.getDevices { (devices) in
+            guard let device = devices.firstConnected else {
+                completion(.error(LoopError.connectionError))
+                return
+            }
+
+            guard let ops = deviceManager.pumpOps else {
+                completion(.error(LoopError.configurationError("Pump ID")))
+                return
+            }
+
+            let latestGlucoseDate = self.delegate?.startDateToFilterNewData(for: self) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
+
+            guard latestGlucoseDate.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) else {
                 completion(.noData)
                 return
-        }
+            }
 
-        let latestGlucoseDate = self.delegate?.startDateToFilterNewData(for: self) ?? Date(timeIntervalSinceNow: TimeInterval(hours: -24))
+            ops.runSession(withName: "Fetch Enlite History", using: device) { (session) in
+                do {
+                    let events = try session.getGlucoseHistoryEvents(since: latestGlucoseDate.addingTimeInterval(.minutes(1)))
+                    _ = deviceManager.remoteDataManager.nightscoutService.uploader?.processGlucoseEvents(events, source: device.deviceURI)
 
-        guard latestGlucoseDate.timeIntervalSinceNow <= TimeInterval(minutes: -4.5) else {
-            completion(.noData)
-            return
-        }
+                    if let latestSensorEvent = events.compactMap({ $0.glucoseEvent as? RelativeTimestampedGlucoseEvent }).last {
+                        self.sensorState = EnliteSensorDisplayable(latestSensorEvent)
+                    }
 
-        device.getGlucoseHistoryEvents(since: latestGlucoseDate.addingTimeInterval(TimeInterval(minutes: 1))) { (result) in
-            switch result {
-            case .success(let events):
+                    let unit = HKUnit.milligramsPerDeciliter()
+                    let glucoseValues = events
+                        // TODO: Is the { $0.date > latestGlucoseDate } filter duplicative?
+                        .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > latestGlucoseDate })
+                        .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
+                            let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
+                            let quantity = HKQuantity(unit: unit, doubleValue: Double(glucoseEvent.sgv))
+                            return (quantity: quantity, date: e.date, isDisplayOnly: false)
+                        })
 
-                _ = deviceManager.remoteDataManager.nightscoutService.uploader?.processGlucoseEvents(events, source: device.device.deviceURI)
-
-                if let latestSensorEvent = events.flatMap({ $0.glucoseEvent as?  RelativeTimestampedGlucoseEvent }).last {
-                    self.sensorState = EnliteSensorDisplayable(latestSensorEvent)
+                    completion(.newData(glucoseValues))
+                } catch let error {
+                    completion(.error(error))
                 }
-
-                let unit = HKUnit.milligramsPerDeciliter()
-                let glucoseValues = events
-                    // TODO: Is the { $0.date > latestGlucoseDate } filter duplicative?
-                    .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > latestGlucoseDate })
-                    .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
-                        let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
-                        let quantity = HKQuantity(unit: unit, doubleValue: Double(glucoseEvent.sgv))
-                        return (quantity: quantity, date: e.date, isDisplayOnly: false)
-                    })
-
-                completion(.newData(glucoseValues))
-            case .failure(let error):
-                completion(.error(error))
             }
         }
     }

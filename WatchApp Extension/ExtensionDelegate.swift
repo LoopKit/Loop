@@ -164,7 +164,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
 extension ExtensionDelegate: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        if activationState == .activated && lastContext == nil {
+        if activationState == .activated {
             updateContext(session.receivedApplicationContext)
         }
     }

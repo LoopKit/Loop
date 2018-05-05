@@ -24,7 +24,7 @@ final class StatusExtensionDataManager {
     }
 
     fileprivate var defaults: UserDefaults? {
-        return UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+        return UserDefaults.appGroup
     }
 
     var context: StatusExtensionContext? {
