@@ -51,6 +51,7 @@ extension TextFieldTableViewController {
         vc.placeholder = NSLocalizedString("Enter a rate in units per hour", comment: "The placeholder text instructing users how to enter a maximum basal rate")
         vc.keyboardType = .decimalPad
         vc.unit = NSLocalizedString("U/hour", comment: "The unit string for units per hour")
+        vc.contextHelp = NSLocalizedString("Please check that the maximum basal rate entered here does not exceed the corresponding maximum basal rate setting in the pump.", comment: "Instructions to help get max basal rate setting correct.")
 
         if let maxBasal = value {
             vc.value = valueNumberFormatter.string(from: NSNumber(value: maxBasal))
