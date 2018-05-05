@@ -10,8 +10,6 @@ import Foundation
 import HealthKit
 import InsulinKit
 import LoopKit
-import xDripG5
-
 
 extension WatchContext {
     convenience init(glucose: GlucoseValue?, eventualGlucose: GlucoseValue?, glucoseUnit: HKUnit?) {

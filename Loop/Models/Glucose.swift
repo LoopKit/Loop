@@ -8,12 +8,12 @@
 
 import Foundation
 import LoopUI
-import xDripG5
+import CGMBLEKit
 
 
 extension Glucose: SensorDisplayable {
     public var isStateValid: Bool {
-        return state == .ok && status == .ok
+        return state == .known(.ok) && status == .ok
     }
 
     public var stateDescription: String {

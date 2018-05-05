@@ -11,12 +11,6 @@ import Foundation
 
 extension Data {
     var hexadecimalString: String {
-        let string = NSMutableString(capacity: count * 2)
-
-        for byte in self {
-            string.appendFormat("%02x", byte)
-        }
-
-        return string as String
+        return map { String(format: "%02hhx", $0) }.joined()
     }
 }
