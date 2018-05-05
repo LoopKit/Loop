@@ -101,6 +101,10 @@ final class AnalyticsManager: IdentifiableClass {
         logEvent("Insulin sensitivity change")
     }
 
+    func didChangeGlucoseTargetRangeSchedule() {
+        logEvent("Glucose target range change")
+    }
+
     func didChangeLoopSettings(from oldValue: LoopSettings, to newValue: LoopSettings) {
         logEvent("Loop settings change", outOfSession: true)
 
