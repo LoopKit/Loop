@@ -250,6 +250,38 @@ final class DeviceDataManager {
     }
 
     /**
+     Check if pump date is current and otherwise update it.
+     
+     - parameter date: The last pump date
+    */
+    private func assertPumpDate(_ date: Date) -> Bool {
+        let dateDiff = abs(date.timeIntervalSinceNow)
+        if dateDiff > TimeInterval(minutes: 1) {
+            guard let pumpOps = pumpOps else {
+                return false
+            }
+            rileyLinkManager.getDevices { (devices) in
+                guard let device = devices.firstConnected else {
+                    return
+                }
+                pumpOps.runSession(withName: "Sync Pump Time", using: device) { (session) in
+                    do {
+                        try session.setTime { () -> DateComponents in
+                            let calendar = Calendar(identifier: .gregorian)
+                            return calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
+                        }
+                        NSLog("syncPumpTime success (difference \(dateDiff)).")
+                    } catch let error {
+                        NSLog("syncPumpTime error \(String(describing: error)).")
+                    }
+                }
+            }
+            return false
+        }
+        return true
+    }
+
+    /**
      Handles receiving a MySentry status message, which are only posted by MM x23 pumps.
 
      This message has two important pieces of info about the pump: reservoir volume and battery.
@@ -270,6 +302,10 @@ final class DeviceDataManager {
 
         // The pump sends the same message 3x, so ignore it if we've already seen it.
         guard status != latestPumpStatusFromMySentry, let pumpDate = pumpDateComponents.date else {
+            return
+        }
+
+        if !assertPumpDate(pumpDate) {
             return
         }
 
@@ -549,6 +585,12 @@ final class DeviceDataManager {
             if shouldReadReservoir {
                 do {
                     let reservoir = try session.getRemainingInsulin()
+                    if !self.assertPumpDate(reservoir.clock.date!) {
+                        self.logger.addError("Pump clock is deviating too much, need to fix first.", fromSource: "enactBolus")
+                        let error = PumpOpsError.rfCommsFailure("Pump clock is deviating too much.")
+                        notify(SetBolusError.certain(error))
+                        return
+                    }
 
                     self.loopManager.addReservoirValue(reservoir.units, at: reservoir.clock.date!) { (result) in
                         switch result {
