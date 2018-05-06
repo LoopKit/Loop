@@ -156,11 +156,11 @@ extension TempBasalRecommendation {
                 return nil
             } else if matchesRate(scheduledBasalRate) {
                 // If our new temp matches the scheduled rate, cancel the current temp
-                return .cancel
+                return self //set temp to current Loop default instead of canceling
             }
         } else if matchesRate(scheduledBasalRate) {
             // If we recommend the in-progress scheduled basal rate, do nothing
-            return nil
+            return self //set temp to current Loop default instead of canceling
         }
 
         return self
