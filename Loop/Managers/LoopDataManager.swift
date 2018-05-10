@@ -24,6 +24,7 @@ final class LoopDataManager {
     }
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
+    static let LastLoopCompletedKey = "com.loopkit.Loop.LoopDataManager.LastLoopCompleted"
 
     fileprivate typealias GlucoseChange = (start: GlucoseValue, end: GlucoseValue)
 
@@ -132,13 +133,6 @@ final class LoopDataManager {
 
             notify(forChange: .preferences)
         }
-    }
-
-    /// Disable any active workout glucose targets
-    func disableWorkoutMode() {
-        settings.glucoseTargetRangeSchedule?.clearOverride()
-
-        notify(forChange: .preferences)
     }
 
     /// The length of time insulin has an effect on blood glucose
@@ -596,9 +590,17 @@ final class LoopDataManager {
     }
 
     private func notify(forChange context: LoopUpdateContext) {
+        var userInfo: [String: Any] = [
+            type(of: self).LoopUpdateContextKey: context.rawValue
+        ]
+
+        if let lastLoopCompleted = lastLoopCompleted {
+            userInfo[type(of: self).LastLoopCompletedKey] = lastLoopCompleted
+        }
+
         NotificationCenter.default.post(name: .LoopDataUpdated,
             object: self,
-            userInfo: [type(of: self).LoopUpdateContextKey: context.rawValue]
+            userInfo: userInfo
         )
     }
 
