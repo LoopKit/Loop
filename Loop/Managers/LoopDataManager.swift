@@ -39,6 +39,8 @@ final class LoopDataManager {
     private let logger: CategoryLogger
     
     var glucoseUpdated: Bool // flag used to decide if integral RC should be updated or not
+    
+    var overallRetrospectiveCorrection: HKQuantity // value used to display overall RC effect to the user
 
     init(
         delegate: LoopDataManagerDelegate,
@@ -58,6 +60,7 @@ final class LoopDataManager {
         self.lastTempBasal = lastTempBasal
         self.settings = settings
         self.glucoseUpdated = false
+        self.overallRetrospectiveCorrection = HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 0)
 
         let healthStore = HKHealthStore()
 
@@ -916,6 +919,8 @@ final class LoopDataManager {
         
         let effectMinutes = RC.updateEffectDuration()
         dynamicEffectDuration = TimeInterval(minutes: effectMinutes)
+        
+        overallRetrospectiveCorrection = HKQuantity(unit: glucoseUnit, doubleValue: overallRC)
         
         // retrospective correction including integral action
         let scaledDiscrepancy = overallRC * 60.0 / effectMinutes // scaled to account for extended effect duration
