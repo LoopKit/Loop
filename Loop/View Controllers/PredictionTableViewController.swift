@@ -274,11 +274,13 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         {
             let formatter = NumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
             let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: NSNumber(value: $0.quantity.doubleValue(for: charts.glucoseUnit))) ?? "?" }
+            let showRetrospectiveCorrectionEffect = formatter.string(from: NSNumber(value: self.deviceManager.loopManager.overallRetrospectiveCorrection.doubleValue(for: charts.glucoseUnit))) ?? "?"
+            let integralRCIndicator = self.deviceManager.loopManager.integralRectrospectiveCorrectionIndicator
 
             let retro = String(
-                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)"),
-                values[0], values[1], values[2]
-            )
+                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@, RC: %4$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)(4: Overall retrospective correction effect)"),
+                values[0], values[1], values[2], showRetrospectiveCorrectionEffect
+            ) + integralRCIndicator
 
             subtitleText = String(format: "%@\n%@", subtitleText, retro)
         }
