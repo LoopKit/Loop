@@ -278,7 +278,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             let integralRCIndicator = self.deviceManager.loopManager.integralRectrospectiveCorrectionIndicator
 
             let retro = String(
-                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@, Correction: %4$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)(4: Overall retrospective correction effect)"),
+                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@, RC: %4$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)(4: Overall retrospective correction effect)"),
                 values[0], values[1], values[2], showRetrospectiveCorrectionEffect
             ) + integralRCIndicator
 
