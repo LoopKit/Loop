@@ -41,12 +41,12 @@ final class LoopDataManager {
         delegate: LoopDataManagerDelegate,
         lastLoopCompleted: Date?,
         lastTempBasal: DoseEntry?,
-        basalRateSchedule: BasalRateSchedule? = UserDefaults.standard.basalRateSchedule,
-        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.standard.carbRatioSchedule,
-        insulinModelSettings: InsulinModelSettings? = UserDefaults.standard.insulinModelSettings,
-        insulinCounteractionEffects: [GlucoseEffectVelocity]? = UserDefaults.standard.insulinCounteractionEffects,
-        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.standard.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.standard.loopSettings ?? LoopSettings()
+        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup.basalRateSchedule,
+        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup.carbRatioSchedule,
+        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup.insulinModelSettings,
+        insulinCounteractionEffects: [GlucoseEffectVelocity]? = UserDefaults.appGroup.insulinCounteractionEffects,
+        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup.insulinSensitivitySchedule,
+        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
     ) {
         self.delegate = delegate
         self.logger = DiagnosticLogger.shared!.forCategory("LoopDataManager")
@@ -98,7 +98,7 @@ final class LoopDataManager {
     /// These are not thread-safe.
     var settings: LoopSettings {
         didSet {
-            UserDefaults.standard.loopSettings = settings
+            UserDefaults.appGroup.loopSettings = settings
             notify(forChange: .preferences)
             AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
@@ -111,7 +111,7 @@ final class LoopDataManager {
         }
         set {
             doseStore.basalProfile = newValue
-            UserDefaults.standard.basalRateSchedule = newValue
+            UserDefaults.appGroup.basalRateSchedule = newValue
             notify(forChange: .preferences)
         }
     }
@@ -124,7 +124,7 @@ final class LoopDataManager {
         }
         set {
             carbStore.carbRatioSchedule = newValue
-            UserDefaults.standard.carbRatioSchedule = newValue
+            UserDefaults.appGroup.carbRatioSchedule = newValue
 
             // Invalidate cached effects based on this schedule
             carbEffect = nil
@@ -152,7 +152,7 @@ final class LoopDataManager {
         }
         set {
             doseStore.insulinModel = newValue?.model
-            UserDefaults.standard.insulinModelSettings = newValue
+            UserDefaults.appGroup.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
                 // Invalidate cached effects based on this schedule
@@ -168,7 +168,7 @@ final class LoopDataManager {
     /// A timeline of average velocity of glucose change counteracting predicted insulin effects
     fileprivate var insulinCounteractionEffects: [GlucoseEffectVelocity] {
         didSet {
-            UserDefaults.standard.insulinCounteractionEffects = insulinCounteractionEffects
+            UserDefaults.appGroup.insulinCounteractionEffects = insulinCounteractionEffects
             carbEffect = nil
             carbsOnBoard = nil
         }
@@ -184,7 +184,7 @@ final class LoopDataManager {
             carbStore.insulinSensitivitySchedule = newValue
             doseStore.insulinSensitivitySchedule = newValue
 
-            UserDefaults.standard.insulinSensitivitySchedule = newValue
+            UserDefaults.appGroup.insulinSensitivitySchedule = newValue
 
             dataAccessQueue.async {
                 // Invalidate cached effects based on this schedule
@@ -1012,7 +1012,7 @@ protocol LoopState {
     /// Calculates a recommended bolus based on predicted glucose
     ///
     /// - Returns: A bolus recommendation
-    /// - Throws: An error describing why a bolus couldn't be computed
+    /// - Throws: An error describing why a bolus couldnʼt be computed
     ///     - LoopError.configurationError
     ///     - LoopError.glucoseTooOld
     ///     - LoopError.missingDataError

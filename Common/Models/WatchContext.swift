@@ -22,6 +22,9 @@ final class WatchContext: NSObject, RawRepresentable {
     var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
+    var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
+    var configuredOverrideContexts: [GlucoseRangeScheduleOverrideUserInfo.Context] = []
+
     var loopLastRunDate: Date?
     var lastNetTempBasalDose: Double?
     var lastNetTempBasalDate: Date?
@@ -66,6 +69,16 @@ final class WatchContext: NSObject, RawRepresentable {
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
 
+        if let overrideUserInfoRawValue = rawValue["grsoc"] as? GlucoseRangeScheduleOverrideUserInfo.RawValue,
+            let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: overrideUserInfoRawValue)
+        {
+            glucoseRangeScheduleOverride = overrideUserInfo
+        }
+
+        if let configuredOverrideContextsRawValues = rawValue["coc"] as? [GlucoseRangeScheduleOverrideUserInfo.Context.RawValue] {
+            configuredOverrideContexts = configuredOverrideContextsRawValues.compactMap(GlucoseRangeScheduleOverrideUserInfo.Context.init(rawValue:))
+        }
+
         IOB = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
         reservoirPercentage = rawValue["rp"] as? Double
@@ -97,6 +110,8 @@ final class WatchContext: NSObject, RawRepresentable {
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
+        raw["grsoc"] = glucoseRangeScheduleOverride?.rawValue
+        raw["coc"] = configuredOverrideContexts.map { $0.rawValue }
         raw["iob"] = IOB
         raw["ld"] = loopLastRunDate
         raw["mb"] = maxBolus

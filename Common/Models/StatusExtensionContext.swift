@@ -257,10 +257,7 @@ extension DatedRangeContext: RawRepresentable {
             return nil
         }
 
-        self.startDate = startDate
-        self.endDate = endDate
-        self.minValue = minValue
-        self.maxValue = maxValue
+        self.init(startDate: startDate, endDate: endDate, minValue: minValue, maxValue: maxValue)
     }
 }
 
@@ -287,7 +284,7 @@ struct StatusExtensionContext: RawRepresentable {
         }
 
         if let rawValue = rawValue["glucose"] as? [GlucoseContext.RawValue] {
-            glucose = rawValue.flatMap({return GlucoseContext(rawValue: $0)})
+            glucose = rawValue.compactMap({return GlucoseContext(rawValue: $0)})
         }
 
         if let rawValue = rawValue["predictedGlucose"] as? PredictedGlucoseContext.RawValue {
@@ -311,7 +308,7 @@ struct StatusExtensionContext: RawRepresentable {
         activeInsulin = rawValue["activeInsulin"] as? Double
         
         if let rawValue = rawValue["targetRanges"] as? [DatedRangeContext.RawValue] {
-            targetRanges = rawValue.flatMap({return DatedRangeContext(rawValue: $0)})
+            targetRanges = rawValue.compactMap({return DatedRangeContext(rawValue: $0)})
         }
 
         if let rawValue = rawValue["temporaryOverride"] as? DatedRangeContext.RawValue {
