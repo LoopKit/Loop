@@ -43,15 +43,7 @@ final class NightscoutDataManager {
             var loopError = state.error
             let recommendedBolus: Double?
 
-            do {
-                recommendedBolus = try state.recommendBolus().amount
-            } catch let error {
-                recommendedBolus = nil
-
-                if loopError == nil {
-                    loopError = error
-                }
-            }
+            recommendedBolus = state.recommendedBolus?.recommendation.amount
 
             let carbsOnBoard = state.carbsOnBoard
             let predictedGlucose = state.predictedGlucose
