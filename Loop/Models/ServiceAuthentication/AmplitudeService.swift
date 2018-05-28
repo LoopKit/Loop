@@ -46,6 +46,7 @@ class AmplitudeService: ServiceAuthentication {
 
         isAuthorized = true
         let client = Amplitude()
+        client.disableIdfaTracking()
         client.disableLocationListening()
         client.initializeApiKey(APIKey)
         self.client = client
