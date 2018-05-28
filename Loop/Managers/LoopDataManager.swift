@@ -890,8 +890,6 @@ final class LoopDataManager {
             throw LoopError.configurationError("Check settings")
         }
         
-        let pendingInsulin = try self.getPendingInsulin()
-
         guard lastRequestedBolus == nil
         else {
             // Don't recommend changes if a bolus was just requested.
@@ -903,20 +901,22 @@ final class LoopDataManager {
         }
         
         let tempBasal = predictedGlucose.recommendedTempBasal(
-                to: glucoseTargetRange,
-                suspendThreshold: settings.suspendThreshold?.quantity,
-                sensitivity: insulinSensitivity,
-                model: model,
-                basalRates: basalRates,
-                maxBasalRate: maxBasal,
-                lastTempBasal: lastTempBasal
-            )
+            to: glucoseTargetRange,
+            suspendThreshold: settings.suspendThreshold?.quantity,
+            sensitivity: insulinSensitivity,
+            model: model,
+            basalRates: basalRates,
+            maxBasalRate: maxBasal,
+            lastTempBasal: lastTempBasal
+        )
         
         if let temp = tempBasal {
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
             recommendedTempBasal = nil
         }
+
+        let pendingInsulin = try self.getPendingInsulin()
         
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
