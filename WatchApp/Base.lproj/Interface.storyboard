@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13771" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14109" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13756"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14031"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -149,16 +149,14 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="center" verticalAlignment="bottom" textAlignment="center" id="PI8-dB-Ykw">
+                                        <label alignment="center" verticalAlignment="bottom" textAlignment="left" numberOfLines="0" id="PI8-dB-Ykw">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
                                 </group>
                             </items>
                         </group>
-                        <group width="1" height="0.080000000000000002" alignment="left" id="rSt-1g-97T">
-                            <variation key="device=watch42mm" height="0.10000000000000001"/>
-                        </group>
+                        <group width="1" height="7" alignment="left" id="rSt-1g-97T"/>
                         <group width="1" height="0.59999999999999998" alignment="center" verticalAlignment="bottom" id="VU2-MR-CSd">
                             <items>
                                 <group width="0.5" alignment="left" layout="vertical" id="wJu-fl-xhv">
@@ -267,7 +265,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="235" y="345"/>
+            <point key="canvasLocation" x="235" y="347.5"/>
         </scene>
         <!--BolusInterfaceController-->
         <scene sceneID="vCl-Xb-hzF">
