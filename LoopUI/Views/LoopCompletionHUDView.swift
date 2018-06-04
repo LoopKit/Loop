@@ -95,7 +95,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         )
         updateTimer = timer
 
-        RunLoop.main.add(timer, forMode: RunLoopMode.defaultRunLoopMode)
+        RunLoop.main.add(timer, forMode: .defaultRunLoopMode)
     }
 
     private var updateTimer: Timer? {

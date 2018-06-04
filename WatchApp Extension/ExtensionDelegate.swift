@@ -8,6 +8,7 @@
 
 import WatchConnectivity
 import WatchKit
+import HealthKit
 import os
 import UserNotifications
 
@@ -152,10 +153,23 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    private lazy var healthStore = HKHealthStore()
+
     fileprivate func updateContext(_ data: [String: Any]) {
         if let context = WatchContext(rawValue: data as WatchContext.RawValue) {
-            DispatchQueue.main.async {
-                self.lastContext = context
+            if context.preferredGlucoseUnit == nil {
+                let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
+                healthStore.preferredUnits(for: [type]) { (units, error) in
+                    context.preferredGlucoseUnit = units[type]
+
+                    DispatchQueue.main.async {
+                        self.lastContext = context
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.lastContext = context
+                }
             }
         }
     }
@@ -164,7 +178,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
 extension ExtensionDelegate: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        if activationState == .activated && lastContext == nil {
+        if activationState == .activated {
             updateContext(session.receivedApplicationContext)
         }
     }

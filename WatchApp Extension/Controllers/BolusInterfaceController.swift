@@ -137,7 +137,9 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
             do {
                 try WCSession.default.sendBolusMessage(bolus) { (error) in
-                    ExtensionDelegate.shared().present(error)
+                    DispatchQueue.main.async {
+                        ExtensionDelegate.shared().present(error)
+                    }
                 }
             } catch {
                 presentAlert(
