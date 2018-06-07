@@ -183,7 +183,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
         return HKDevice(
             name: "CGMBLEKit",
             manufacturer: "Dexcom",
-            model: "G5 Mobile",
+            model: "G5/G6 Mobile",
             hardwareVersion: nil,
             firmwareVersion: nil,
             softwareVersion: String(CGMBLEKitVersionNumber),

@@ -197,7 +197,7 @@
 "G4 Share Receiver" = "Ресивер G4 Шеар";
 
 /* The title text for the G5 Transmitter switch cell */
-"G5 Transmitter" = "Трансмиттер G5";
+"G5/G6 Transmitter" = "Трансмиттер G5/G6";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Гликемия";
@@ -254,7 +254,7 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Ну удалось успешно  замкнуть цикл/контур в %@";
 
-/* The description of a low G5 transmitter battery with a leading space */
+/* The description of a low transmitter battery with a leading space */
 "Low Battery" = "Низкий заряд батареи";
 
 /* The title text for the maximum basal rate value */
@@ -399,7 +399,7 @@
 "The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "инд номер помпы находится на ее задней стенке или снизу экрана состояния STATUS/ESC. Это исключительно цифровая часть серийного номера (обозначаемого SN или S/N) ";
 
 /* Instructions on where to find the transmitter ID */
-"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the G5 receiver and mobile app." = "Инд. номер трансмиттера находится на задней стенке устройства , сбоку упаковочной коробки, в настроечном меню ресивера G5 и мобильного приложения";
+"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "Инд. номер трансмиттера находится на задней стенке устройства , сбоку упаковочной коробки, в настроечном меню ресивера и мобильного приложения";
 
 /* The description of the switch which toggles retrospective correction effects */
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Это более радикально понизит или увеличит подачу базала в тех случаях когда динамика гликемии не соответствует моделям основанным на углеводах и инсулине";
