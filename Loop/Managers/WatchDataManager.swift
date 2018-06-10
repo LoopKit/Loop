@@ -128,6 +128,29 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
                 context.maxBolus = manager.settings.maximumBolus
 
+                let updateGroup = DispatchGroup()
+
+                updateGroup.enter()
+                manager.doseStore.insulinOnBoard(at: Date()) {(result) in
+                    // This function completes asynchronously, so below
+                    // is a completion that returns a value after eventual
+                    // function completion.
+                    switch result {
+                    case .success(let iobValue):
+                        context.IOB = iobValue.value
+                    case .failure:
+                        context.IOB = nil
+                    }
+                    updateGroup.leave()
+                }
+  
+                if let cobValue = state.carbsOnBoard {
+                    context.COB = cobValue.quantity.doubleValue(for: HKUnit.gram())
+                } else {
+                // we expect state.carbsOnBoard to be nil if value is zero:
+                    context.COB = 0.0
+                }
+                
                 if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
                     if let override = glucoseTargetRangeSchedule.override {
                         context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
@@ -146,7 +169,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     context.glucoseTrendRawValue = trend.rawValue
                 }
 
-                completion(context)
+                updateGroup.notify(queue: DispatchQueue.global(qos: .background)) {
+                    completion(context)
+                }
+
             }
         }
     }
