@@ -113,8 +113,9 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         }
         charts.startDate = chartStartDate
 
-        let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate)
+
+        let visiblePeriod = Calendar.current.date(byAdding: .hour, value: -24, to: Date()) ?? Calendar.current.startOfDay(for: Date())
+        let listStart = min(visiblePeriod, chartStartDate)
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -179,7 +180,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
             if shouldUpdateCarbs {
                 reloadGroup.enter()
-                self.deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
+                self.deviceManager.loopManager.carbStore.getTotalCarbs(since: visiblePeriod) { (result) in
                     switch result {
                     case .success(let total):
                         carbTotal = total
