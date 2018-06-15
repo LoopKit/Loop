@@ -181,7 +181,7 @@
 "G4 Share Receiver" = "G4 Ricevitore Share";
 
 /* The title text for the Dexcom G5 transmitter ID config value */
-"G5 Transmitter ID" = "G5 ID Trasmettitore";
+"G5/G6 Transmitter ID" = "G5/G6 ID Trasmettitore";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glicemie";
@@ -328,7 +328,7 @@
 "The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "L'ID della pompa si trova stampato sul retro, o vicino al fondo della schermata STATO/Esc. È la parte strettamente numerica del numero di serie (indicato come SN o S/N).";
 
 /* Instructions on where to find the transmitter ID */
-"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the G5 receiver and mobile app." = "L'ID trasmettitore può essere trovato stampato sul retro del dispositivo, sul lato della scatola, e all'interno del menu impostazione del ricevitore G5 all'interno dell'applicazione mobile.";
+"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "L'ID trasmettitore può essere trovato stampato sul retro del dispositivo, sul lato della scatola, e all'interno del menu impostazione del ricevitore all'interno dell'applicazione mobile.";
 
 /* The description of the switch which toggles retrospective correction effects */
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Questo sarà più aggressivo all'aumentare o al diminuire della basale quando il movimento di glucosio non corrisponde al modello di carboidrati e al modello insulino-basale";
