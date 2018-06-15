@@ -19,7 +19,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.5.4</string>
+	<string>1.5.6</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -37,6 +37,7 @@
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>dexcomg6</string>
 		<string>dexcomcgm</string>
 		<string>dexcomshare</string>
 	</array>
@@ -51,7 +52,7 @@ Glucose data from the Health database is used for graphing and momentum calculat
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database.
 Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Face ID is used to authenticate insulin boluses.</string>
+	<string>Face ID is used to authenticate insulin bolus.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

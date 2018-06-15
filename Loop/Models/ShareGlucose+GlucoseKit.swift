@@ -26,7 +26,7 @@ extension ShareGlucose: GlucoseValue {
 
 extension ShareGlucose: SensorDisplayable {
     public var isStateValid: Bool {
-        return glucose >= 20
+        return glucose >= 39
     }
 
     public var trendType: GlucoseTrend? {
