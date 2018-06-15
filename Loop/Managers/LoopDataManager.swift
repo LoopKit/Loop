@@ -24,6 +24,7 @@ final class LoopDataManager {
     }
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
+    static let LastLoopCompletedKey = "com.loopkit.Loop.LoopDataManager.LastLoopCompleted"
 
     fileprivate typealias GlucoseChange = (start: GlucoseValue, end: GlucoseValue)
 
@@ -133,13 +134,6 @@ final class LoopDataManager {
 
             notify(forChange: .preferences)
         }
-    }
-
-    /// Disable any active workout glucose targets
-    func disableWorkoutMode() {
-        settings.glucoseTargetRangeSchedule?.clearOverride()
-
-        notify(forChange: .preferences)
     }
 
     /// The length of time insulin has an effect on blood glucose
@@ -639,9 +633,17 @@ final class LoopDataManager {
     }
 
     private func notify(forChange context: LoopUpdateContext) {
+        var userInfo: [String: Any] = [
+            type(of: self).LoopUpdateContextKey: context.rawValue
+        ]
+
+        if let lastLoopCompleted = lastLoopCompleted {
+            userInfo[type(of: self).LastLoopCompletedKey] = lastLoopCompleted
+        }
+
         NotificationCenter.default.post(name: .LoopDataUpdated,
             object: self,
-            userInfo: [type(of: self).LoopUpdateContextKey: context.rawValue]
+            userInfo: userInfo
         )
     }
 
@@ -947,7 +949,7 @@ final class LoopDataManager {
         guard let
             insulinOnBoard = insulinOnBoard
         else {
-            throw LoopError.missingDataError(details: "Insulin on Board not available (updatePredictedGlucoseAndRecommendedBasal)", recovery: "Pump data up to date?")
+            throw LoopError.missingDataError(details: "Insulin on Board not available", recovery: "Check pump")
         }
 
         guard lastRequestedBolus == nil
@@ -955,25 +957,24 @@ final class LoopDataManager {
             // Don't recommend changes if a bolus was just requested.
             // Sending additional pump commands is not going to be
             // successful in any case.
-            NSLog("updatePredictedGlucoseAndRecommendedBasalAndBolus - previous Bolus still in progress")
             recommendedBolus = nil
             recommendedTempBasal = nil
             return
         }
-        
+
         let tempBasal = predictedGlucose.recommendedTempBasal(
-                to: glucoseTargetRange,
-                suspendThreshold: settings.suspendThreshold?.quantity,
-                sensitivity: insulinSensitivity,
-                model: model,
-                basalRates: basalRates,
-                maxBasalRate: maxBasal,
-                insulinOnBoard: insulinOnBoard.value,
-                maxInsulinOnBoard: maximumInsulinOnBoard,
-                lastTempBasal: lastTempBasal,
-                lowerOnly: settings.bolusEnabled
-            )
-        
+            to: glucoseTargetRange,
+            suspendThreshold: settings.suspendThreshold?.quantity,
+            sensitivity: insulinSensitivity,
+            model: model,
+            basalRates: basalRates,
+            maxBasalRate: maxBasal,
+            insulinOnBoard: insulinOnBoard.value,
+            maxInsulinOnBoard: maximumInsulinOnBoard,
+            lastTempBasal: lastTempBasal,
+            lowerOnly: settings.bolusEnabled
+        )
+
         if let temp = tempBasal {
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
