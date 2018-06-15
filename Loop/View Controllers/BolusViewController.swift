@@ -116,6 +116,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
 
     var maxBolus: Double = 25
+    var maxInsulinOnBoard: Double = 0
 
     private(set) var bolus: Double?
 
@@ -184,6 +185,15 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         guard bolus <= maxBolus else {
             presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
             return
+        }
+
+        if maxInsulinOnBoard > 0 {
+            guard bolus + (activeInsulin ?? 0) <= maxInsulinOnBoard else {
+                NSLog("BolusViewController - maxIOB")
+                presentAlertController(withTitle: NSLocalizedString("Would exceed Maximum Insulin on Board", comment: "The title of the alert describing a maximum insulin on board validation error"), message: String(format: NSLocalizedString("The insulin on board amount is %@ Units", comment: "Body of the alert describing a maximum iob validation error. (1: The localized max iob value)"),
+                    bolusUnitsFormatter.string(from: NSNumber(value: maxInsulinOnBoard)) ?? ""))
+                return
+            }
         }
 
         let context = LAContext()
