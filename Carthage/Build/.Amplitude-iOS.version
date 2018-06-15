@@ -8,11 +8,11 @@
   "tvOS" : [
 
   ],
-  "commitish" : "v3.14.1",
+  "commitish" : "2137d5fd44bf630ed33e1e72d7af6d8f8612f270",
   "iOS" : [
     {
       "name" : "Amplitude",
-      "hash" : "6d22c00833bfcaa5d34ba1331c1144a93e8999bad97ade70be089aba729a9fbe"
+      "hash" : "5f7cea951cf973d78073e75b87cd222891b181a3879b081a42f057d983b7c389"
     }
   ]
 }

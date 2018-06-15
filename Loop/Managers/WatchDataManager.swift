@@ -125,7 +125,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.reservoir = reservoir?.unitVolume
 
                 context.loopLastRunDate = state.lastLoopCompleted
-                context.recommendedBolusDose = try? state.recommendBolus().amount
+                context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
                 context.maxBolus = manager.settings.maximumBolus
 
                 if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
