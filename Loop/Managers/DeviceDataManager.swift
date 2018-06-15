@@ -154,6 +154,10 @@ final class DeviceDataManager {
             self.lastTimerTick = Date()
 
             self.cgmManager?.fetchNewDataIfNeeded(with: self) { (result) in
+                if case .newData = result {
+                    AnalyticsManager.shared.didFetchNewCGMData()
+                }
+
                 // TODO: Isolate to queue?
                 self.cgmManager(self.cgmManager!, didUpdateWith: result)
             }
@@ -188,7 +192,7 @@ final class DeviceDataManager {
     func updateTimerTickPreference() {
         queue.async {
             /// Controls the management of the RileyLink timer tick, which is a reliably-changing BLE
-            /// characteristic which can cause the app to wake. For most users, the G5 Transmitter and
+            /// characteristic which can cause the app to wake. For most users, the G5/G6 Transmitter and
             /// G4 Receiver are reliable as hearbeats, but users who find their resources extremely constrained
             /// due to greedy apps or older devices may choose to always enable the timer by always setting `true`
             self.rileyLinkManager.timerTickEnabled = self.isPumpDataStale() || !(self.cgmManager?.providesBLEHeartbeat == true)
@@ -485,6 +489,16 @@ final class DeviceDataManager {
                     guard let date = status.clock.date else {
                         assertionFailure("Could not interpret a valid date from \(status.clock) in the system calendar")
                         return
+                    }
+
+                    // Check if the clock should be reset
+                    if abs(date.timeIntervalSinceNow) > .seconds(20) {
+                        self.logger.addError("Pump clock is more than 20 seconds off. Resetting.", fromSource: "RileyLink")
+                        AnalyticsManager.shared.pumpTimeDidDrift(date.timeIntervalSinceNow)
+                        try session.setTime { () -> DateComponents in
+                            let calendar = Calendar(identifier: .gregorian)
+                            return calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
+                        }
                     }
 
                     self.observeBatteryDuring {
@@ -840,18 +854,6 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             return
         }
 
-        let notify = { (result: Result<DoseEntry>) -> Void in
-            // If we haven't fetched history in a while (preferredInsulinDataSource == .reservoir),
-            // let's try to do so while the pump radio is on.
-            if self.loopManager.doseStore.lastAddedPumpEvents.timeIntervalSinceNow < .minutes(-4) {
-                self.fetchPumpHistory { (_) in
-                    completion(result)
-                }
-            } else {
-                completion(result)
-            }
-        }
-
         pumpOps.runSession(withName: "Set Temp Basal", using: rileyLinkManager.firstConnectedDevice) { (session) in
             guard let session = session else {
                 completion(.failure(LoopError.connectionError))
@@ -864,15 +866,43 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                 let now = Date()
                 let endDate = now.addingTimeInterval(response.timeRemaining)
                 let startDate = endDate.addingTimeInterval(-basal.recommendation.duration)
-                notify(.success(DoseEntry(
+                completion(.success(DoseEntry(
                     type: .tempBasal,
                     startDate: startDate,
                     endDate: endDate,
                     value: response.rate,
                     unit: .unitsPerHour
                 )))
+
+                // Continue below
             } catch let error {
-                notify(.failure(error))
+                completion(.failure(error))
+                return
+            }
+
+            do {
+                // If we haven't fetched history in a while, our preferredInsulinDataSource is probably .reservoir, so
+                // let's take advantage of the pump radio being on.
+                if self.loopManager.doseStore.lastAddedPumpEvents.timeIntervalSinceNow < .minutes(-4) {
+                    let clock = try session.getTime()
+                    // Check if the clock should be reset
+                    if let date = clock.date, abs(date.timeIntervalSinceNow) > .seconds(20) {
+                        self.logger.addError("Pump clock is more than 20 seconds off. Resetting.", fromSource: "RileyLink")
+                        AnalyticsManager.shared.pumpTimeDidDrift(date.timeIntervalSinceNow)
+                        try session.setTime { () -> DateComponents in
+                            let calendar = Calendar(identifier: .gregorian)
+                            return calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: Date())
+                        }
+                    }
+
+                    self.fetchPumpHistory { (error) in
+                        if let error = error {
+                            self.logger.addError("Post-basal history fetch failed: \(error)", fromSource: "RileyLink")
+                        }
+                    }
+                }
+            } catch let error {
+                self.logger.addError("Post-basal time sync failed: \(error)", fromSource: "RileyLink")
             }
         }
     }
