@@ -187,11 +187,16 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
             return
         }
 
+        let iob = activeInsulin ?? 0
         if maxInsulinOnBoard > 0 {
-            guard bolus + (activeInsulin ?? 0) <= maxInsulinOnBoard else {
+            guard bolus + iob <= maxInsulinOnBoard else {
                 NSLog("BolusViewController - maxIOB")
-                presentAlertController(withTitle: NSLocalizedString("Would exceed Maximum Insulin on Board", comment: "The title of the alert describing a maximum insulin on board validation error"), message: String(format: NSLocalizedString("The insulin on board amount is %@ Units", comment: "Body of the alert describing a maximum iob validation error. (1: The localized max iob value)"),
-                    bolusUnitsFormatter.string(from: NSNumber(value: maxInsulinOnBoard)) ?? ""))
+                presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Insulin on Board", comment: "The title of the alert describing a maximum insulin on board validation error"), message: String(format: NSLocalizedString("The insulin on board amount is %@ Units. Together with the entered value of %@ Units it exceeds the configured maximum of %@ Units.", comment: "Body of the alert describing a maximum iob validation error. (1: The bolus value, 2: The IOB value, 3: The maximum IOB permitted)"),
+                    bolusUnitsFormatter.string(from: NSNumber(value: iob)) ?? "",
+                    bolusUnitsFormatter.string(from: NSNumber(value: bolus)) ?? "",
+                    bolusUnitsFormatter.string(from: NSNumber(value: maxInsulinOnBoard)) ?? ""
+                ))
+
                 return
             }
         }
