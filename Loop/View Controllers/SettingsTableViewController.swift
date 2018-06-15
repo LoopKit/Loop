@@ -231,7 +231,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .g5TransmitterID:
                 let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
 
-                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the Dexcom G5 transmitter ID config value")
+                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the Dexcom G5/G6 transmitter ID config value")
 
                 if case .g5(let transmitterID)? = dataManager.cgm {
                     configCell.detailTextLabel?.text = transmitterID ?? TapToSetString
@@ -257,7 +257,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                         switchCell.switch?.isOn = false
                     }
 
-                    switchCell.textLabel?.text = NSLocalizedString("G5 Transmitter", comment: "The title text for the G5 Transmitter switch cell")
+                    switchCell.textLabel?.text = NSLocalizedString("G5/G6 Transmitter", comment: "The title text for the G5/G6 Transmitter switch cell")
                     switchCell.switch?.addTarget(self, action: #selector(g5Changed(_:)), for: .valueChanged)
                 case .dexcomShare, .g5TransmitterID:
                     assertionFailure()
