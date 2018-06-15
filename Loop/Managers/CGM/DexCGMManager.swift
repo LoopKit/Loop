@@ -116,10 +116,7 @@ final class ShareClientManager: CGMManager {
 
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
-    func transmitter(_ transmitter: Transmitter, didReadBackfill glucose: [Glucose]) {
-        // Not implemented yet
-    }
-    
+
     private let transmitter: Transmitter?
     let logger = DiagnosticLogger.shared!.forCategory("G5CGMManager")
 
@@ -232,6 +229,12 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
         self.delegate?.cgmManager(self, didUpdateWith: .newData([
             (quantity: quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly)
             ]))
+    }
+
+    func transmitter(_ transmitter: Transmitter, didReadBackfill glucose: [Glucose]) {
+        for g in glucose.sorted(by: { $0.readDate < $1.readDate }) {
+            self.transmitter(transmitter, didRead: g)
+        }
     }
 
     func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
