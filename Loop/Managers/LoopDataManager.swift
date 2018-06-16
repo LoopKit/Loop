@@ -854,10 +854,14 @@ final class LoopDataManager {
             throw LoopError.missingDataError(details: "Glucose", recovery: "Check your CGM data source")
         }
 
-        guard let pumpStatusDate = doseStore.lastReservoirValue?.startDate else {
-            self.predictedGlucose = nil
-            throw LoopError.missingDataError(details: "Reservoir", recovery: "Check that your pump is in range")
-        }
+        #if IOS_SIMULATOR
+            let pumpStatusDate = doseStore.lastReservoirValue?.startDate ?? Date()
+        #else
+            guard let pumpStatusDate = doseStore.lastReservoirValue?.startDate else {
+                self.predictedGlucose = nil
+                throw LoopError.missingDataError(details: "Reservoir", recovery: "Check that your pump is in range")
+            }
+        #endif
 
         let startDate = Date()
 
