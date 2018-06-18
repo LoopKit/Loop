@@ -1052,6 +1052,7 @@ final class LoopDataManager {
             NSLog("myLoop 30-min retrospective delta BG: %4.2f", currentDeltaBG)
             NSLog("myLoop Retrospective insulin effect: %4.2f", currentInsulinEffect)
             NSLog("myLoop Retrospectve carb effect: %4.2f", currentCarbEffect)
+            NSLog("myLoop Scaled carb effect: %4.2f", scaledCarbEffect)
             NSLog("myLoop Carb effect limit: %4.2f", carbEffectLimit)
             NSLog("myLoop Current discrepancy: %4.2f", currentDiscrepancy)
             NSLog("myLoop Retrospection time interval: %4.2f", retrospectionTimeInterval)

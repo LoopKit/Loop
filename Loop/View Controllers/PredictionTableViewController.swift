@@ -318,9 +318,13 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                 
             } else {
                 // Retrospective Correction disabled or not included in glucose prediction for other reasons
-                let inactiveRetrospectiveCorrection = String(
-                    format: NSLocalizedString("Retrospective correction currently not active", comment: "Format string describing inactive state of retrospective correction."))
-                subtitleText = String(format: "%@\n%@", subtitleText, inactiveRetrospectiveCorrection)
+                if deviceManager.loopManager.settings.retrospectiveCorrectionEnabled {
+                    let inactiveRetrospectiveCorrection = String(format: NSLocalizedString("Temporarily inactive due to recent calibration or missing data", comment: "Format string describing inactive retrospective correction."))
+                    subtitleText = String(format: "%@", inactiveRetrospectiveCorrection)
+                } else {
+                    let disabledRetrospectiveCorrection = String(format: NSLocalizedString("⚠️ Retrospective correction is disabled", comment: "Format string describing disabled retrospective correction."))
+                    subtitleText = String(format: "%@\n%@", subtitleText, disabledRetrospectiveCorrection)
+                }
             }
         }
 
