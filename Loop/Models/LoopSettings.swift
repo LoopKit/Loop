@@ -23,6 +23,8 @@ struct LoopSettings {
     var suspendThreshold: GlucoseThreshold? = nil
 
     var retrospectiveCorrectionEnabled = true
+
+    var integralRetrospectiveCorrectionEnabled = true
 }
 
 
@@ -74,13 +76,18 @@ extension LoopSettings: RawRepresentable {
         if let retrospectiveCorrectionEnabled = rawValue["retrospectiveCorrectionEnabled"] as? Bool {
             self.retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
         }
+        
+        if let integralRetrospectiveCorrectionEnabled = rawValue["integralRetrospectiveCorrectionEnabled"] as? Bool {
+            self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrectionEnabled
+        }
     }
 
     var rawValue: RawValue {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,
-            "retrospectiveCorrectionEnabled": retrospectiveCorrectionEnabled
+            "retrospectiveCorrectionEnabled": retrospectiveCorrectionEnabled,
+            "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
