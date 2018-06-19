@@ -170,7 +170,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         if shouldUpdateCarbs {
             reloadGroup.enter()
-            self.deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
+            self.deviceManager.loopManager.carbStore.getTotalCarbs(since: visiblePeriod) { (result) in
                 switch result {
                 case .success(let total):
                     carbTotal = total
