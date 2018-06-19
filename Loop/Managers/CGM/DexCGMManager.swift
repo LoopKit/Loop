@@ -7,6 +7,7 @@
 
 import G4ShareSpy
 import HealthKit
+import LoopKit
 import LoopUI
 import ShareClient
 import CGMBLEKit
@@ -94,7 +95,7 @@ final class ShareClientManager: CGMManager {
             // Ignore glucose values that are up to a minute newer than our previous value, to account for possible time shifting in Share data
             let startDate = self.delegate?.startDateToFilterNewData(for: self)?.addingTimeInterval(TimeInterval(minutes: 1))
             let newGlucose = glucose.filterDateRange(startDate, nil).filter({ $0.isStateValid }).map {
-                return (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: false)
+                return NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: false, syncIdentifier: "\($0.startDate.timeIntervalSince1970)", device: self.device)
             }
 
             self.latestBackfill = glucose.first
@@ -116,10 +117,6 @@ final class ShareClientManager: CGMManager {
 
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
-    func transmitter(_ transmitter: Transmitter, didReadBackfill glucose: [Glucose]) {
-        // Not implemented yet
-    }
-    
     private let transmitter: Transmitter?
     let logger = DiagnosticLogger.shared!.forCategory("G5CGMManager")
 
@@ -230,8 +227,36 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
         }
 
         self.delegate?.cgmManager(self, didUpdateWith: .newData([
-            (quantity: quantity, date: glucose.readDate, isDisplayOnly: glucose.isDisplayOnly)
-            ]))
+            NewGlucoseSample(
+                date: glucose.readDate,
+                quantity: quantity,
+                isDisplayOnly: glucose.isDisplayOnly,
+                syncIdentifier: glucose.syncIdentifier,
+                device: device
+            )
+        ]))
+    }
+
+    func transmitter(_ transmitter: Transmitter, didReadBackfill glucose: [Glucose]) {
+        let samples = glucose.compactMap { (glucose) -> NewGlucoseSample? in
+            guard glucose != latestReading, glucose.state.hasReliableGlucose, let quantity = glucose.glucose else {
+                return nil
+            }
+
+            return NewGlucoseSample(
+                date: glucose.readDate,
+                quantity: quantity,
+                isDisplayOnly: glucose.isDisplayOnly,
+                syncIdentifier: glucose.syncIdentifier,
+                device: device
+            )
+        }
+
+        guard samples.count > 0 else {
+            return
+        }
+
+        self.delegate?.cgmManager(self, didUpdateWith: .newData(samples))
     }
 
     func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
@@ -322,7 +347,7 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
         let validGlucose = glucoseHistory.filter({
             $0.isStateValid
         }).filterDateRange(includeAfter, nil).map({
-            (quantity: $0.quantity, date: $0.startDate, isDisplayOnly: $0.isDisplayOnly)
+            NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: $0.isDisplayOnly, syncIdentifier: String(describing: $0.sequence), device: self.device)
         })
 
         self.delegate?.cgmManager(self, didUpdateWith: .newData(validGlucose))

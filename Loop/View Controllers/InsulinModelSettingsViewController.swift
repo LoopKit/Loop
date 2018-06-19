@@ -7,7 +7,6 @@
 
 import UIKit
 import HealthKit
-import InsulinKit
 import LoopKit
 
 
@@ -49,7 +48,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
     }
 
     /// The sensitivity (in glucose units) to use for demonstrating the model
-    var insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter(), dailyItems: [RepeatingScheduleValue<Double>(startTime: 0, value: 40)])!
+    var insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue<Double>(startTime: 0, value: 40)])!
 
     fileprivate let walshModelIndex = 0
 
@@ -162,7 +161,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
 
             for (index, model) in allModels.enumerated() {
                 let effects = [bolus].glucoseEffects(insulinModel: model, insulinSensitivity: insulinSensitivitySchedule)
-                let values = LoopMath.predictGlucose(startingGlucoseSample, effects: effects)
+                let values = LoopMath.predictGlucose(startingAt: startingGlucoseSample, effects: effects)
 
                 if selectedModelIndex == index {
                     charts.setSelectedInsulinModelValues(values)

@@ -8,8 +8,6 @@
 
 import UIKit
 import UserNotifications
-import CarbKit
-import InsulinKit
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate {

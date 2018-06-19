@@ -250,7 +250,7 @@
         <!--InsulinKit-->
         <scene sceneID="n8N-hY-V0o">
             <objects>
-                <viewControllerPlaceholder storyboardName="InsulinKit" bundleIdentifier="com.loopkit.InsulinKit" id="a8v-ef-RZZ" sceneMemberID="viewController">
+                <viewControllerPlaceholder storyboardName="InsulinKit" bundleIdentifier="com.loopkit.LoopKitUI" id="a8v-ef-RZZ" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="BWb-ny-Yc4"/>
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MjI-5q-y5n" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -955,7 +955,7 @@
         <!--CarbEntryEditViewController-->
         <scene sceneID="efd-D7-aOf">
             <objects>
-                <viewControllerPlaceholder storyboardName="CarbKit" bundleIdentifier="com.loopkit.CarbKit" referencedIdentifier="CarbEntryEditViewController" id="Td9-bv-106" sceneMemberID="viewController">
+                <viewControllerPlaceholder storyboardName="CarbKit" bundleIdentifier="com.loopkit.LoopKitUI" referencedIdentifier="CarbEntryEditViewController" id="Td9-bv-106" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="7IM-y8-KQo"/>
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hft-ry-meg" userLabel="First Responder" sceneMemberID="firstResponder"/>
