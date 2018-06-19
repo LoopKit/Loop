@@ -39,15 +39,20 @@ public final class LoopCompletionHUDView: BaseHUDView {
 
     public var lastLoopCompleted: Date? {
         didSet {
-            updateTimer = nil
-            loopInProgress = false
-            assertTimer()
+            if lastLoopCompleted != oldValue {
+                loopInProgress = false
+            }
         }
     }
 
     public var loopInProgress = false {
         didSet {
             loopStateView.animated = loopInProgress
+
+            if !loopInProgress {
+                updateTimer = nil
+                assertTimer()
+            }
         }
     }
 
