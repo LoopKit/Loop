@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13771" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14113" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13756"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14033"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -149,15 +149,24 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="center" verticalAlignment="bottom" textAlignment="center" id="PI8-dB-Ykw">
+                                        <label width="1" alignment="center" verticalAlignment="bottom" textAlignment="center" minimumScaleFactor="0.5" id="cZW-uY-zIa">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
                                 </group>
                             </items>
                         </group>
-                        <group width="1" height="0.080000000000000002" alignment="left" id="rSt-1g-97T">
-                            <variation key="device=watch42mm" height="0.10000000000000001"/>
+                        <group width="1" alignment="left" id="GqJ-yv-NKQ">
+                            <items>
+                                <imageView alignment="left" contentMode="scaleAspectFill" id="2ky-ah-gaV"/>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" id="rSt-1g-97T">
+                            <items>
+                                <label alignment="center" verticalAlignment="bottom" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
+                            </items>
                         </group>
                         <group width="1" height="0.59999999999999998" alignment="center" verticalAlignment="bottom" id="VU2-MR-CSd">
                             <items>
@@ -253,7 +262,9 @@
                         </group>
                     </items>
                     <connections>
+                        <outlet property="basalLabel" destination="cZW-uY-zIa" id="tsU-ob-kZa"/>
                         <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
+                        <outlet property="glucoseChart" destination="2ky-ah-gaV" id="hrM-HQ-HAg"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
                         <outlet property="loopTimer" destination="sG9-yO-4Xy" id="tfl-hp-Eu5"/>
@@ -267,7 +278,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="235" y="345"/>
+            <point key="canvasLocation" x="235" y="347.5"/>
         </scene>
         <!--BolusInterfaceController-->
         <scene sceneID="vCl-Xb-hzF">

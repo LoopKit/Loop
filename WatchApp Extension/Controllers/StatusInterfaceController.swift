@@ -8,15 +8,17 @@
 
 import WatchKit
 import WatchConnectivity
-
+import HealthKit
 
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
+    @IBOutlet weak var glucoseChart: WKInterfaceImage!
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var statusLabel: WKInterfaceLabel!
+    @IBOutlet weak var basalLabel: WKInterfaceLabel!
 
     @IBOutlet var preMealButton: WKInterfaceButton!
     @IBOutlet var preMealButtonImage: WKInterfaceImage!
@@ -86,6 +88,8 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     private var lastOverrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
 
     private var lastContext: WatchContext?
+
+    private var charts = StatusChartsManager()
 
     override func didAppear() {
         super.didAppear()
@@ -177,7 +181,72 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         }
 
         // TODO: Other elements
+        let insulinFormatter: NumberFormatter = {
+            let numberFormatter = NumberFormatter()
+            
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 1
+            numberFormatter.maximumFractionDigits = 1
+            
+            return numberFormatter
+        }()
+        
         statusLabel.setHidden(true)
+        var statusLabelText = ""
+        
+        if let activeInsulin = context?.IOB, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
+            statusLabelText = String(format: NSLocalizedString(
+                "IOB %1$@ U",
+                comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
+                                       valueStr)
+        }
+        
+        if let carbsOnBoard = context?.COB {
+            let carbFormatter = NumberFormatter()
+            carbFormatter.numberStyle = .decimal
+            carbFormatter.maximumFractionDigits = 0
+            let valueStr = carbFormatter.string(from:NSNumber(value:carbsOnBoard))
+            
+            if statusLabelText != "" { // Not empty - add space; TODO layout properly
+                statusLabelText += "  "
+            }
+            statusLabelText += String(format: NSLocalizedString(
+                "COB %1$@ g",
+                comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"),
+                                      valueStr!)
+        }
+        
+        basalLabel.setHidden(true)
+        if let tempBasal = context?.lastNetTempBasalDose {
+            let basalFormatter = NumberFormatter()
+            basalFormatter.numberStyle = .decimal
+            basalFormatter.minimumFractionDigits = 1
+            basalFormatter.maximumFractionDigits = 3
+            basalFormatter.positivePrefix = basalFormatter.plusSign
+            let valueStr = basalFormatter.string(from:NSNumber(value:tempBasal))
+            
+            let basalLabelText = String(format: NSLocalizedString(
+                "%1$@ U/hr",
+                comment: "The subtitle format describing the current temp basal rate. (1: localized basal rate description)"),
+                                      valueStr!)
+            basalLabel.setText(basalLabelText)
+            basalLabel.setHidden(false)
+        }
+    
+        statusLabel.setText(statusLabelText)
+        statusLabel.setHidden(false)
+
+        charts.historicalGlucose = context?.historicalGlucose
+        charts.predictedGlucose = context?.predictedGlucose
+        charts.targetRanges = context?.targetRanges
+        charts.temporaryOverride = context?.temporaryOverride
+        charts.unit = context?.preferredGlucoseUnit
+
+        glucoseChart.setHidden(true)
+        if let chart = charts.glucoseChart() {
+            glucoseChart.setImage(chart)
+            glucoseChart.setHidden(false)
+        }
     }
 
     private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {

@@ -9,10 +9,142 @@
 import Foundation
 import HealthKit
 
+public struct WatchDatedRangeContext {
+    public let startDate: Date
+    public let endDate: Date
+    public let minValue: Double
+    public let maxValue: Double
+
+    public init(startDate: Date, endDate: Date, minValue: Double, maxValue: Double) {
+        self.startDate = startDate
+        self.endDate = endDate
+        self.minValue = minValue
+        self.maxValue = maxValue
+    }
+}
+
+struct WatchGlucoseContext {
+    let value: Double
+    let unit: HKUnit
+    let startDate: Date
+
+    var quantity: HKQuantity {
+        return HKQuantity(unit: unit, doubleValue: value)
+    }
+}
+
+struct WatchHistoricalGlucoseContext {
+    let dates: [Date]
+    let values: [Double]
+    let unit: HKUnit
+
+    var samples: [WatchGlucoseContext] {
+        return zip(dates, values).map {
+            WatchGlucoseContext(value: $0.1, unit: unit, startDate: $0.0)
+        }
+    }
+}
+
+struct WatchPredictedGlucoseContext {
+    let values: [Double]
+    let unit: HKUnit
+    let startDate: Date
+    let interval: TimeInterval
+
+    var samples: [WatchGlucoseContext] {
+        return values.enumerated().map { (i, v) in
+            WatchGlucoseContext(value: v, unit: unit, startDate: startDate.addingTimeInterval(Double(i) * interval))
+        }
+    }
+}
+
+extension WatchGlucoseContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "v": value,
+            "u": unit.unitString,
+            "sd": startDate
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let value = rawValue["v"] as? Double,
+            let unitString = rawValue["u"] as? String,
+            let startDate = rawValue["sd"] as? Date
+            else {
+                return nil
+        }
+
+        self.value = value
+        self.unit = HKUnit(from: unitString)
+        self.startDate = startDate
+    }
+}
+
+extension WatchHistoricalGlucoseContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "d": dates,
+            "v": values,
+            "u": unit.unitString,
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let dates = rawValue["d"] as? [Date],
+            let values = rawValue["v"] as? [Double],
+            let unitString = rawValue["u"] as? String
+            else {
+                return nil
+        }
+
+        self.dates = dates
+        self.values = values
+        self.unit = HKUnit(from: unitString)
+    }
+}
+
+
+extension WatchPredictedGlucoseContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "v": values,
+            "u": unit.unitString,
+            "sd": startDate,
+            "i": interval
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let values = rawValue["v"] as? [Double],
+            let unitString = rawValue["u"] as? String,
+            let startDate = rawValue["sd"] as? Date,
+            let interval = rawValue["i"] as? TimeInterval
+            else {
+                return nil
+        }
+
+        self.values = values
+        self.unit = HKUnit(from: unitString)
+        self.startDate = startDate
+        self.interval = interval
+    }
+}
+
+
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 3
+    private let version = 4
 
     var preferredGlucoseUnit: HKUnit?
     var maxBolus: Double?
@@ -22,6 +154,8 @@ final class WatchContext: NSObject, RawRepresentable {
     var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
+    var targetRanges: [WatchDatedRangeContext]?
+    var temporaryOverride: WatchDatedRangeContext?
     var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
     var configuredOverrideContexts: [GlucoseRangeScheduleOverrideUserInfo.Context] = []
 
@@ -41,6 +175,8 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoir: Double?
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
+    var historicalGlucose: WatchHistoricalGlucoseContext?
+    var predictedGlucose: WatchPredictedGlucoseContext?
 
     override init() {
         super.init()
@@ -54,16 +190,15 @@ final class WatchContext: NSObject, RawRepresentable {
         }
 
         if let unitString = rawValue["gu"] as? String {
-            let unit = HKUnit(from: unitString)
-            preferredGlucoseUnit = unit
+            preferredGlucoseUnit = HKUnit(from: unitString)
         }
-
+        let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
         if let glucoseValue = rawValue["gv"] as? Double {
-            glucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
+            glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         if let glucoseValue = rawValue["egv"] as? Double {
-            eventualGlucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
+            eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
@@ -90,6 +225,14 @@ final class WatchContext: NSObject, RawRepresentable {
         recommendedBolusDose = rawValue["rbo"] as? Double
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
+
+        if let rawValue = rawValue["hg"] as? WatchHistoricalGlucoseContext.RawValue {
+            historicalGlucose = WatchHistoricalGlucoseContext(rawValue: rawValue)
+        }
+
+        if let rawValue = rawValue["pg"] as? WatchPredictedGlucoseContext.RawValue {
+            predictedGlucose = WatchPredictedGlucoseContext(rawValue: rawValue)
+        }
     }
 
     var rawValue: RawValue {
@@ -117,6 +260,9 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
+
+        raw["hg"] = historicalGlucose?.rawValue
+        raw["pg"] = predictedGlucose?.rawValue
 
         return raw
     }
