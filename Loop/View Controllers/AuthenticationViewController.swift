@@ -30,7 +30,7 @@ final class AuthenticationViewController<T: ServiceAuthentication>: UITableViewC
                 }) 
 
                 tableView.reloadSections(IndexSet(integersIn: 0...1), with: .automatic)
-                authentication.verify { [unowned self] (success, error) in
+                authentication.verify { (success, error) in
                     DispatchQueue.main.async {
                         UIView.animate(withDuration: 0.25, animations: {
                             self.navigationItem.titleView = nil

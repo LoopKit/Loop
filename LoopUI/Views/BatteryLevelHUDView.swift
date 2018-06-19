@@ -20,7 +20,7 @@ public final class BatteryLevelHUDView: LevelHUDView {
 
     public var batteryLevel: Double? {
         didSet {
-            if let value = batteryLevel, let level = numberFormatter.string(from: NSNumber(value: value)) {
+            if let value = batteryLevel, let level = numberFormatter.string(from: value) {
                 caption.text = level
                 accessibilityValue = level
             } else {
