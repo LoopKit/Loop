@@ -60,7 +60,7 @@ final class DeviceDataManager {
             if let status = latestPumpStatusFromMySentry {
                 return Double(status.batteryRemainingPercent) / 100
             } else if let status = latestPumpStatus {
-                return batteryChemistry.chargeRemaining(at: status.batteryVolts)
+                return batteryChemistry.chargeRemaining(voltage: status.batteryVolts)
             } else {
                 return statusExtensionManager.context?.batteryPercentage
             }
@@ -512,7 +512,7 @@ final class DeviceDataManager {
                     }
 
                     self.updateReservoirVolume(status.reservoir, at: date, withTimeLeft: nil)
-                    let battery = NightscoutUploadKit.BatteryStatus(voltage: status.batteryVolts.value, status: BatteryIndicator(batteryStatus: status.batteryStatus))
+                    let battery = NightscoutUploadKit.BatteryStatus(voltage: status.batteryVolts, status: BatteryIndicator(batteryStatus: status.batteryStatus))
 
                     nsPumpStatus = NightscoutUploadKit.PumpStatus(clock: date, pumpID: status.pumpID, iob: nil, battery: battery, suspended: status.suspended, bolusing: status.bolusing, reservoir: status.reservoir)
                 } catch let error {
