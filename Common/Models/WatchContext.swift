@@ -59,11 +59,11 @@ final class WatchContext: NSObject, RawRepresentable {
         }
 
         if let glucoseValue = rawValue["gv"] as? Double {
-            glucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter(), doubleValue: glucoseValue)
+            glucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
         }
 
         if let glucoseValue = rawValue["egv"] as? Double {
-            eventualGlucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter(), doubleValue: glucoseValue)
+            eventualGlucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
         }
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
@@ -102,7 +102,7 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["bp"] = batteryPercentage
         raw["cob"] = COB
 
-        let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter()
+        let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
         raw["egv"] = eventualGlucose?.doubleValue(for: unit)
         raw["gu"] = preferredGlucoseUnit?.unitString
         raw["gv"] = glucose?.doubleValue(for: unit)

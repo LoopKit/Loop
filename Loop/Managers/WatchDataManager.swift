@@ -9,7 +9,6 @@
 import HealthKit
 import UIKit
 import WatchConnectivity
-import CarbKit
 import LoopKit
 
 
@@ -81,7 +80,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
     private var lastComplicationContext: WatchContext?
 
     private let minTrendDrift: Double = 20
-    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter()
+    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
 
     private func sendWatchContext(_ context: WatchContext) {
         if let session = watchSession, session.isPaired && session.isWatchAppInstalled {
@@ -118,36 +117,34 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         let glucose = loopManager.glucoseStore.latestGlucose
         let reservoir = loopManager.doseStore.lastReservoirValue
 
-        loopManager.glucoseStore.preferredUnit { (unit, error) in
-            loopManager.getLoopState { (manager, state) in
-                let eventualGlucose = state.predictedGlucose?.last
-                let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
-                context.reservoir = reservoir?.unitVolume
+        loopManager.getLoopState { (manager, state) in
+            let eventualGlucose = state.predictedGlucose?.last
+            let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: manager.glucoseStore.preferredUnit)
+            context.reservoir = reservoir?.unitVolume
 
-                context.loopLastRunDate = state.lastLoopCompleted
-                context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
-                context.maxBolus = manager.settings.maximumBolus
+            context.loopLastRunDate = manager.lastLoopCompleted
+            context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
+            context.maxBolus = manager.settings.maximumBolus
 
-                if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
-                    if let override = glucoseTargetRangeSchedule.override {
-                        context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
-                            context: override.context.correspondingUserInfoContext,
-                            startDate: override.start,
-                            endDate: override.end
-                        )
-                    }
-
-                    let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
-                    let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
-                    context.configuredOverrideContexts = configuredUserInfoOverrideContexts
+            if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
+                if let override = glucoseTargetRangeSchedule.override {
+                    context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
+                        context: override.context.correspondingUserInfoContext,
+                        startDate: override.start,
+                        endDate: override.end
+                    )
                 }
 
-                if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                    context.glucoseTrendRawValue = trend.rawValue
-                }
-
-                completion(context)
+                let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+                let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
+                context.configuredOverrideContexts = configuredUserInfoOverrideContexts
             }
+
+            if let trend = self.deviceDataManager.sensorInfo?.trendType {
+                context.glucoseTrendRawValue = trend.rawValue
+            }
+
+            completion(context)
         }
     }
 
