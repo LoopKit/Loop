@@ -23,12 +23,8 @@ struct LoopSettings {
     var suspendThreshold: GlucoseThreshold? = nil
 
     var retrospectiveCorrectionEnabled = true
-<<<<<<< HEAD:Loop/Models/LoopSettings.swift
 
     var integralRetrospectiveCorrectionEnabled = true
-}
-=======
->>>>>>> LoopKit/dev:Common/Models/LoopSettings.swift
 
     let retrospectiveCorrectionInterval = TimeInterval(minutes: 30)
 

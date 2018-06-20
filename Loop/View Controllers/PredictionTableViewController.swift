@@ -267,8 +267,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         cell.enabled = input != .retrospection || deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
 
         var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit) ?? ""
-
-<<<<<<< HEAD
         if input == .retrospection {
             if deviceManager.loopManager.settings.retrospectiveCorrectionEnabled,
                 let startGlucose = retrospectivePredictedGlucose?.first,
@@ -276,7 +274,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                 let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
             {
                 let formatter = NumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
-                let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: NSNumber(value: $0.quantity.doubleValue(for: charts.glucoseUnit))) ?? "?" }
+                let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: $0.quantity.doubleValue(for: charts.glucoseUnit)) ?? "?" }
                 let endGlucoseValue = endGlucose.quantity.doubleValue(for: charts.glucoseUnit)
                 let currentGlucoseValue = currentGlucose.quantity.doubleValue(for: charts.glucoseUnit)
                 let currentDiscrepancyValue = currentGlucoseValue - endGlucoseValue
@@ -311,22 +309,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                     subtitleText = String(format: "%@\n%@", subtitleText, disabledRetrospectiveCorrection)
                 }
             }
-=======
-        if input == .retrospection,
-            let startGlucose = retrospectivePredictedGlucose?.first,
-            let endGlucose = retrospectivePredictedGlucose?.last,
-            let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
-        {
-            let formatter = NumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
-            let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: $0.quantity.doubleValue(for: charts.glucoseUnit)) ?? "?" }
-
-            let retro = String(
-                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)"),
-                values[0], values[1], values[2]
-            )
-
-            subtitleText = String(format: "%@\n%@", subtitleText, retro)
->>>>>>> LoopKit/dev
         }
 
         cell.subtitleLabel?.text = subtitleText
