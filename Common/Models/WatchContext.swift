@@ -9,7 +9,7 @@
 import Foundation
 import HealthKit
 
-public struct WatchDatedRangeContext {
+struct WatchDatedRangeContext {
     public let startDate: Date
     public let endDate: Date
     public let minValue: Double
@@ -55,6 +55,35 @@ struct WatchPredictedGlucoseContext {
         return values.enumerated().map { (i, v) in
             WatchGlucoseContext(value: v, unit: unit, startDate: startDate.addingTimeInterval(Double(i) * interval))
         }
+    }
+}
+
+extension WatchDatedRangeContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    var rawValue: RawValue {
+        return [
+            "sd": startDate,
+            "ed": endDate,
+            "mi": minValue,
+            "ma": maxValue
+        ]
+    }
+
+    init?(rawValue: RawValue) {
+        guard
+            let startDate = rawValue["sd"] as? Date,
+            let endDate = rawValue["ed"] as? Date,
+            let minValue = rawValue["mi"] as? Double,
+            let maxValue = rawValue["ma"] as? Double
+            else {
+                return nil
+        }
+
+        self.startDate = startDate
+        self.endDate = endDate
+        self.minValue = minValue
+        self.maxValue = maxValue
     }
 }
 
@@ -233,6 +262,14 @@ final class WatchContext: NSObject, RawRepresentable {
         if let rawValue = rawValue["pg"] as? WatchPredictedGlucoseContext.RawValue {
             predictedGlucose = WatchPredictedGlucoseContext(rawValue: rawValue)
         }
+
+        if let rawValue = rawValue["tr"] as? [WatchDatedRangeContext.RawValue] {
+            targetRanges = rawValue.compactMap({return WatchDatedRangeContext(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["to"] as? WatchDatedRangeContext.RawValue {
+            temporaryOverride = WatchDatedRangeContext(rawValue: rawValue)
+        }
     }
 
     var rawValue: RawValue {
@@ -263,6 +300,9 @@ final class WatchContext: NSObject, RawRepresentable {
 
         raw["hg"] = historicalGlucose?.rawValue
         raw["pg"] = predictedGlucose?.rawValue
+
+        raw["tr"] = targetRanges?.map { $0.rawValue }
+        raw["to"] = temporaryOverride?.rawValue
 
         return raw
     }
