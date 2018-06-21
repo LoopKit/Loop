@@ -255,22 +255,11 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
             replyHandler([:])
         case GlucoseRangeScheduleOverrideUserInfo.name?:
+            // Successfull changes will trigger a preferences change which will update the watch with the new overrides
             if let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: message) {
-                let overrideContext = overrideUserInfo.context.correspondingOverrideContext
-
-                // update the recorded last active override context prior to enabling the actual override
-                // to prevent the Watch context being unnecessarily sent in response to the override being enabled
-                let previousActiveOverrideContext = lastActiveOverrideContext
-                lastActiveOverrideContext = overrideContext
-                let overrideSuccess = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
-
-                if overrideSuccess == false {
-                    lastActiveOverrideContext = previousActiveOverrideContext
-                }
-
+                _ = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideUserInfo.context.correspondingOverrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
                 replyHandler([:])
             } else {
-                lastActiveOverrideContext = nil
                 deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
                 replyHandler([:])
             }
