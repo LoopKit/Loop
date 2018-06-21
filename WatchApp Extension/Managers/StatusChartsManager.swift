@@ -20,38 +20,13 @@ class StatusChartsManager {
 
     func glucoseChart() -> UIImage? {
         guard let historicalGlucose = historicalGlucose?.samples,
-            let unit = unit,
             historicalGlucose.count > 0 else {
             return nil
         }
 
-        // Set scale values for graph
-        // Make the max be the larger of the current BG values,
-        // or 175 mg/dl, and force it to be a multiple of 25 mg/dl.
-        // If units are mmol/L, go from 3 to 10 for the default scale,
-        // and round scale to the nearest whole number (so increments
-        // in max scale of the equivalent of 18 mg/dl).
-        let glucoseVals = historicalGlucose.map { $0.value }
-
-        // OK to force unwrap this since we know inside this if
-        // block that we have at least one value.
-        let dataBGMax = glucoseVals.max()!
-
-        // Depending on units we set the graph limits differently:
-        var graphMaxBG: CGFloat
-        var bgMin: CGFloat
-        var graphMaxBGIncrement: Int
-        if unit == HKUnit.millimolesPerLiter {
-            graphMaxBG = 10
-            bgMin = 3
-            graphMaxBGIncrement = 1
-        } else {
-            graphMaxBG = 175
-            bgMin = 50
-            graphMaxBGIncrement = 25
-        }
-        let roundedBGMax = CGFloat(graphMaxBGIncrement * (1 + (Int(dataBGMax) / graphMaxBGIncrement)))
-        let bgMax = roundedBGMax > graphMaxBG ? roundedBGMax : graphMaxBG
+        let sampleValues = (historicalGlucose + (predictedGlucose?.samples ?? [])).map { $0.value }
+        let bgMax = CGFloat(sampleValues.max()!) * 1.25
+        let bgMin = CGFloat(sampleValues.min()!) * 0.75
 
         let glucoseChartSize = CGSize(width: 270, height: 152)
         let xMax = glucoseChartSize.width
@@ -121,7 +96,6 @@ class StatusChartsManager {
             // to check and only show if they are active:
             if let override = temporaryOverride, override.endDate > Date() {
                 overrideColor.setFill()
-
 
                 // Top left corner is start date and max value:
                 // Might be off the graph so keep it in:
@@ -216,7 +190,7 @@ class StatusChartsManager {
                 y = yScale * (bgMax - bgFloat)
                 predictedPoints.append(CGPoint(x: x, y: y))
             }
-            // Seems like line is cleaner without the first point:
+            // The first prediction is the current BG. Dropping it makes for a cleaner graph.
             predictedPoints.removeFirst(1)
             // Add points to the path, then draw it:
             imContext.addLines(between: predictedPoints)
@@ -232,8 +206,9 @@ class StatusChartsManager {
         // Add a label for min BG on y axis
         bgMinLabel.draw(with: CGRect(x: 6, y: yMax-28, width: 40, height: 40), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
 
-        let timeLabel = "+\(dateMax.timeIntervalSinceNow.hours)h"
+        let timeLabel = "+\(Int(dateMax.timeIntervalSinceNow.hours))h"
         timeLabel.draw(with: CGRect(x: xMax - 50, y: 4, width: 40, height: 40), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+
         // Draw the box
         UIColor.darkGray.setStroke()
         imContext.stroke(CGRect(origin: CGPoint(x: 0, y: 0), size: glucoseChartSize))
