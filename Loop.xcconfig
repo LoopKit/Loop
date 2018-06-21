@@ -6,12 +6,6 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-<<<<<<< HEAD
 // Change this on first setup to your own unique organization identifier in
 // reverse-domain name syntax.
 MAIN_APP_BUNDLE_IDENTIFIER = com.dragan2
-=======
-// This is automatically disambiguated by development team, but you may choose to change this to
-// support running multiple apps simultaneously.
-MAIN_APP_BUNDLE_IDENTIFIER = com.${DEVELOPMENT_TEAM}.loopkit
->>>>>>> integral-retrospective-correction
