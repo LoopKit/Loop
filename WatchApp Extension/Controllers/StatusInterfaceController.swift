@@ -135,7 +135,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
             let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
-            if let glucoseValue = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))) {
+            if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
                 let trend = context?.glucoseTrend?.symbol ?? ""
                 self.glucoseLabel.setText(glucoseValue + trend)
                 self.glucoseLabel.setHidden(false)
@@ -144,7 +144,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             }
 
             if let eventualGlucose = context?.eventualGlucose {
-                let glucoseValue = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+                let glucoseValue = formatter.string(from: eventualGlucose.doubleValue(for: unit))
                 self.eventualGlucoseLabel.setText(glucoseValue)
                 self.eventualGlucoseLabel.setHidden(false)
             } else {
