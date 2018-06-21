@@ -243,7 +243,7 @@
 		4FB76FCE1E8C835D00B39636 /* ChartColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
-		4FE3474D20D48B6800A86D03 /* DatedRangedContextCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DEA21E81E12D006741EA /* DatedRangedContextCalculator.swift */; };
+		4FDDD23720DC51DF00D04B16 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* HealthKitManager.swift */; };
 		4FE3475E20D5D77900A86D03 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE3475D20D5D77900A86D03 /* StatusChartsManager.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		4FF4D0F91E17268800846527 /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */; };
@@ -608,6 +608,7 @@
 		4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartColorPalette.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
+		4FDDD23620DC51DF00D04B16 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		4FE3475D20D5D77900A86D03 /* StatusChartsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		540DED961E14C75F002B2491 /* EnliteSensorDisplayable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnliteSensorDisplayable.swift; sourceTree = "<group>"; };
@@ -1142,6 +1143,7 @@
 			isa = PBXGroup;
 			children = (
 				4FE3475D20D5D77900A86D03 /* StatusChartsManager.swift */,
+				4FDDD23620DC51DF00D04B16 /* HealthKitManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1757,6 +1759,7 @@
 				4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */,
 				4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */,
 				4328E02A1CFBE2C500E199AA /* UIColor.swift in Sources */,
+				4FDDD23720DC51DF00D04B16 /* HealthKitManager.swift in Sources */,
 				4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */,
 				4328E02B1CFBE2C500E199AA /* WKAlertAction.swift in Sources */,
 				894B91CE1FF9F45900DA65F5 /* GlucoseRangeScheduleOverrideUserInfo.swift in Sources */,

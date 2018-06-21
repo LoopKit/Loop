@@ -182,17 +182,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.lastNetTempBasalDose =  lastTempBasal.unitsPerHour - scheduledBasal.value
             }
 
-            updateGroup.enter()
             if let unit = manager.glucoseStore.preferredUnit {
-                manager.glucoseStore.getCachedGlucoseSamples(start: startDate) { (values) in
-                    context.historicalGlucose = WatchHistoricalGlucoseContext(
-                        dates: values.map { $0.startDate },
-                        values: values.map { $0.quantity.doubleValue(for: unit) },
-                        unit: unit
-                    )
-                    updateGroup.leave()
-                }
-
                 // Drop the first element in predictedGlucose because it is the currentGlucose
                 // and will have a different interval to the next element
                 if let predictedGlucose = state.predictedGlucose?.dropFirst(), predictedGlucose.count > 1 {

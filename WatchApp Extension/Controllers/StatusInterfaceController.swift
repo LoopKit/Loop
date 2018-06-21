@@ -232,17 +232,25 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             basalLabel.setHidden(false)
         }
 
-        charts.historicalGlucose = context?.historicalGlucose
-        charts.predictedGlucose = context?.predictedGlucose
-        charts.targetRanges = context?.targetRanges
-        charts.temporaryOverride = context?.temporaryOverride
-        charts.unit = context?.preferredGlucoseUnit
+        let updateGroup = DispatchGroup()
+        updateGroup.enter()
+        let healthKitManager = HealthKitManager()
+        healthKitManager.getCachedGlucoseSamples() { (samples) in
+            self.charts.historicalGlucose = samples
+            self.charts.predictedGlucose = context?.predictedGlucose
+            self.charts.targetRanges = context?.targetRanges
+            self.charts.temporaryOverride = context?.temporaryOverride
+            self.charts.unit = context?.preferredGlucoseUnit
 
-        glucoseChart.setHidden(true)
-        if let chart = charts.glucoseChart() {
-            glucoseChart.setImage(chart)
-            glucoseChart.setHidden(false)
+            self.glucoseChart.setHidden(true)
+            if let chart = self.charts.glucoseChart() {
+                self.glucoseChart.setImage(chart)
+                self.glucoseChart.setHidden(false)
+            }
+            updateGroup.leave()
         }
+
+        _ = updateGroup.wait(timeout: .distantFuture)
     }
 
     private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {

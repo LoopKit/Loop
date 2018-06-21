@@ -204,7 +204,6 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoir: Double?
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
-    var historicalGlucose: WatchHistoricalGlucoseContext?
     var predictedGlucose: WatchPredictedGlucoseContext?
 
     override init() {
@@ -255,10 +254,6 @@ final class WatchContext: NSObject, RawRepresentable {
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
 
-        if let rawValue = rawValue["hg"] as? WatchHistoricalGlucoseContext.RawValue {
-            historicalGlucose = WatchHistoricalGlucoseContext(rawValue: rawValue)
-        }
-
         if let rawValue = rawValue["pg"] as? WatchPredictedGlucoseContext.RawValue {
             predictedGlucose = WatchPredictedGlucoseContext(rawValue: rawValue)
         }
@@ -298,7 +293,6 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
 
-        raw["hg"] = historicalGlucose?.rawValue
         raw["pg"] = predictedGlucose?.rawValue
 
         raw["tr"] = targetRanges?.map { $0.rawValue }

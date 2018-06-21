@@ -15,16 +15,21 @@ class StatusChartsManager {
     var unit: HKUnit?
     var targetRanges: [WatchDatedRangeContext]?
     var temporaryOverride: WatchDatedRangeContext?
-    var historicalGlucose: WatchHistoricalGlucoseContext?
+    var historicalGlucose: [HKQuantitySample]?
     var predictedGlucose: WatchPredictedGlucoseContext?
 
     func glucoseChart() -> UIImage? {
-        guard let historicalGlucose = historicalGlucose?.samples,
-            historicalGlucose.count > 0 else {
+        guard let unit = unit, let historicalGlucose = historicalGlucose, historicalGlucose.count > 0 else {
             return nil
         }
 
-        let sampleValues = (historicalGlucose + (predictedGlucose?.samples ?? [])).map { $0.value }
+        // Choose the min/max values from across all of our data sources
+        var sampleValues = historicalGlucose.map { $0.quantity.doubleValue(for: unit) }
+        sampleValues += predictedGlucose?.samples.map { $0.value } ?? []
+        sampleValues += targetRanges?.map { [$0.maxValue, $0.minValue] }.flatMap { $0 } ?? []
+        if let temporaryOverride = temporaryOverride {
+            sampleValues += [temporaryOverride.maxValue, temporaryOverride.minValue]
+        }
         let bgMax = CGFloat(sampleValues.max()!) * 1.25
         let bgMin = CGFloat(sampleValues.min()!) * 0.75
 
@@ -158,7 +163,7 @@ class StatusChartsManager {
 
         // Draw the glucose points:
         historicalGlucose.forEach { sample in
-            let bgFloat = CGFloat(sample.value)
+            let bgFloat = CGFloat(sample.quantity.doubleValue(for: unit))
             x = xScale * (CGFloat(sample.startDate.timeIntervalSince1970) - timeMin)
             y = yScale * (bgMax - bgFloat)
             if bgFloat > bgMax {
