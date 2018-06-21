@@ -149,7 +149,7 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="right" verticalAlignment="bottom" text="## U/hr" textAlignment="right" minimumScaleFactor="0.5" id="cZW-uY-zIa">
+                                        <label width="1" alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="cZW-uY-zIa">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
@@ -163,10 +163,10 @@
                         </group>
                         <group width="1" alignment="left" id="rSt-1g-97T">
                             <items>
-                                <label alignment="left" verticalAlignment="bottom" text="IOB # U" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
+                                <label alignment="left" verticalAlignment="bottom" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
                                     <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                 </label>
-                                <label alignment="right" verticalAlignment="bottom" text="COB # U" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
+                                <label alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
                                     <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                 </label>
                             </items>
