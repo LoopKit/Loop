@@ -26,26 +26,26 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
         charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 60),
-            max: HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: 200)
+            min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60),
+            max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
         )
 
         let notificationCenter = NotificationCenter.default
 
         notificationObservers += [
-            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [unowned self] note in
+            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [weak self] note in
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
                     case .preferences?:
-                        self.refreshContext.formUnion([.status, .targets])
+                        self?.refreshContext.formUnion([.status, .targets])
                     case .glucose?:
-                        self.refreshContext.update(with: .glucose)
+                        self?.refreshContext.update(with: .glucose)
                     default:
                         break
                     }
 
-                    self.reloadData(animated: true)
+                    self?.reloadData(animated: true)
                 }
             }
         ]
@@ -95,65 +95,49 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         chartStartDate = calendar.nextDate(after: date, matching: components, matchingPolicy: .strict, direction: .backward) ?? date
 
         let reloadGroup = DispatchGroup()
+        var glucoseValues: [StoredGlucoseSample]?
 
-        reloadGroup.enter()
-        deviceManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
-            if let unit = unit {
-                self.charts.glucoseUnit = unit
-            }
-
-            if self.refreshContext.remove(.glucose) != nil {
-                reloadGroup.enter()
-                self.deviceManager.loopManager.glucoseStore.getGlucoseValues(start: self.chartStartDate) { (result) -> Void in
-                    switch result {
-                    case .failure(let error):
-                        self.deviceManager.logger.addError(error, fromSource: "GlucoseStore")
-                        self.refreshContext.update(with: .glucose)
-                        self.charts.setGlucoseValues([])
-                    case .success(let values):
-                        self.charts.setGlucoseValues(values)
-                    }
-
-                    reloadGroup.leave()
-                }
-            }
-
-            // For now, do this every time
-            _ = self.refreshContext.remove(.status)
+        if self.refreshContext.remove(.glucose) != nil {
             reloadGroup.enter()
-            self.deviceManager.loopManager.getLoopState { (manager, state) in
-                self.retrospectivePredictedGlucose = state.retrospectivePredictedGlucose
-                self.charts.setPredictedGlucoseValues(state.predictedGlucose ?? [])
-
-                do {
-                    let glucose = try state.predictGlucose(using: self.selectedInputs)
-                    self.charts.setAlternatePredictedGlucoseValues(glucose)
-                } catch {
-                    self.refreshContext.update(with: .status)
-                    self.charts.setAlternatePredictedGlucoseValues([])
-                }
-
-                if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
-                    self.eventualGlucoseDescription = String(describing: lastPoint)
-                } else {
-                    self.eventualGlucoseDescription = nil
-                }
-
-                if self.refreshContext.remove(.targets) != nil {
-                    if let schedule = manager.settings.glucoseTargetRangeSchedule {
-                        self.charts.targetPointsCalculator = GlucoseRangeScheduleCalculator(schedule)
-                    } else {
-                        self.charts.targetPointsCalculator = nil
-                    }
-                }
-
+            self.deviceManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: self.chartStartDate) { (values) -> Void in
+                glucoseValues = values
                 reloadGroup.leave()
+            }
+        }
+
+        // For now, do this every time
+        _ = self.refreshContext.remove(.status)
+        reloadGroup.enter()
+        self.deviceManager.loopManager.getLoopState { (manager, state) in
+            self.retrospectivePredictedGlucose = state.retrospectivePredictedGlucose
+            self.charts.setPredictedGlucoseValues(state.predictedGlucose ?? [])
+
+            do {
+                let glucose = try state.predictGlucose(using: self.selectedInputs)
+                self.charts.setAlternatePredictedGlucoseValues(glucose)
+            } catch {
+                self.refreshContext.update(with: .status)
+                self.charts.setAlternatePredictedGlucoseValues([])
+            }
+
+            if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
+                self.eventualGlucoseDescription = String(describing: lastPoint)
+            } else {
+                self.eventualGlucoseDescription = nil
+            }
+
+            if self.refreshContext.remove(.targets) != nil {
+                self.charts.targetGlucoseSchedule = manager.settings.glucoseTargetRangeSchedule
             }
 
             reloadGroup.leave()
         }
 
         reloadGroup.notify(queue: .main) {
+            if let glucoseValues = glucoseValues {
+                self.charts.setGlucoseValues(glucoseValues)
+            }
+
             self.charts.prerender()
 
             self.tableView.beginUpdates()
@@ -283,7 +267,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         cell.enabled = input != .retrospection || deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
 
         var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit) ?? ""
-
         if input == .retrospection {
             if deviceManager.loopManager.settings.retrospectiveCorrectionEnabled,
                 let startGlucose = retrospectivePredictedGlucose?.first,
@@ -291,7 +274,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                 let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
             {
                 let formatter = NumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
-                let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: NSNumber(value: $0.quantity.doubleValue(for: charts.glucoseUnit))) ?? "?" }
+                let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: $0.quantity.doubleValue(for: charts.glucoseUnit)) ?? "?" }
                 let endGlucoseValue = endGlucose.quantity.doubleValue(for: charts.glucoseUnit)
                 let currentGlucoseValue = currentGlucose.quantity.doubleValue(for: charts.glucoseUnit)
                 let currentDiscrepancyValue = currentGlucoseValue - endGlucoseValue

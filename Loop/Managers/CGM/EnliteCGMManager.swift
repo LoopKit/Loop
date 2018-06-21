@@ -7,6 +7,7 @@
 //
 
 import HealthKit
+import LoopKit
 import LoopUI
 import MinimedKit
 import RileyLinkKit
@@ -49,15 +50,15 @@ final class EnliteCGMManager: CGMManager {
                         self.sensorState = EnliteSensorDisplayable(latestSensorEvent)
                     }
 
-                    let unit = HKUnit.milligramsPerDeciliter()
-                    let glucoseValues = events
+                    let unit = HKUnit.milligramsPerDeciliter
+                    let glucoseValues: [NewGlucoseSample] = events
                         // TODO: Is the { $0.date > latestGlucoseDate } filter duplicative?
                         .filter({ $0.glucoseEvent is SensorValueGlucoseEvent && $0.date > latestGlucoseDate })
-                        .map({ (e:TimestampedGlucoseEvent) -> (quantity: HKQuantity, date: Date, isDisplayOnly: Bool) in
-                            let glucoseEvent = e.glucoseEvent as! SensorValueGlucoseEvent
+                        .map {
+                            let glucoseEvent = $0.glucoseEvent as! SensorValueGlucoseEvent
                             let quantity = HKQuantity(unit: unit, doubleValue: Double(glucoseEvent.sgv))
-                            return (quantity: quantity, date: e.date, isDisplayOnly: false)
-                        })
+                            return NewGlucoseSample(date: $0.date, quantity: quantity, isDisplayOnly: false, syncIdentifier: glucoseEvent.glucoseSyncIdentifier ?? UUID().uuidString, device: self.device)
+                        }
 
                     completion(.newData(glucoseValues))
                 } catch let error {

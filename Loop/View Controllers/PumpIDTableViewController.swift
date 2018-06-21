@@ -8,7 +8,8 @@
 
 import UIKit
 import MinimedKit
-import LoopKit
+import LoopKitUI
+
 
 protocol PumpIDTableViewControllerDelegate: TextFieldTableViewControllerDelegate {
     func pumpIDTableViewControllerDidChangePumpRegion(_ controller: PumpIDTableViewController)
