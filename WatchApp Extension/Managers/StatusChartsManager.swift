@@ -30,7 +30,7 @@ class StatusChartsManager {
         if let temporaryOverride = temporaryOverride {
             sampleValues += [temporaryOverride.maxValue, temporaryOverride.minValue]
         }
-        let bgMax = CGFloat(sampleValues.max()!) * 1.25
+        let bgMax = CGFloat(sampleValues.max()!) * 1.1
         let bgMin = CGFloat(sampleValues.min()!) * 0.75
 
         let glucoseChartSize = CGSize(width: 270, height: 152)

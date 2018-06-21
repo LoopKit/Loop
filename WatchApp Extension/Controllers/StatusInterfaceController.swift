@@ -8,7 +8,6 @@
 
 import WatchKit
 import WatchConnectivity
-import HealthKit
 
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
