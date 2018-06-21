@@ -17,7 +17,8 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var statusLabel: WKInterfaceLabel!
+    @IBOutlet weak var iobLabel: WKInterfaceLabel!
+    @IBOutlet weak var cobLabel: WKInterfaceLabel!
     @IBOutlet weak var basalLabel: WKInterfaceLabel!
 
     @IBOutlet var preMealButton: WKInterfaceButton!
@@ -191,29 +192,27 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             return numberFormatter
         }()
         
-        statusLabel.setHidden(true)
-        var statusLabelText = ""
-        
+        iobLabel.setHidden(true)
         if let activeInsulin = context?.IOB, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
-            statusLabelText = String(format: NSLocalizedString(
+            iobLabel.setText(String(format: NSLocalizedString(
                 "IOB %1$@ U",
                 comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
-                                       valueStr)
+                                       valueStr))
+            iobLabel.setHidden(false)
         }
         
+        cobLabel.setHidden(true)
         if let carbsOnBoard = context?.COB {
             let carbFormatter = NumberFormatter()
             carbFormatter.numberStyle = .decimal
             carbFormatter.maximumFractionDigits = 0
             let valueStr = carbFormatter.string(from:NSNumber(value:carbsOnBoard))
             
-            if statusLabelText != "" { // Not empty - add space; TODO layout properly
-                statusLabelText += "  "
-            }
-            statusLabelText += String(format: NSLocalizedString(
+            cobLabel.setText(String(format: NSLocalizedString(
                 "COB %1$@ g",
                 comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"),
-                                      valueStr!)
+                                      valueStr!))
+            cobLabel.setHidden(false)
         }
         
         basalLabel.setHidden(true)
@@ -232,9 +231,6 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             basalLabel.setText(basalLabelText)
             basalLabel.setHidden(false)
         }
-    
-        statusLabel.setText(statusLabelText)
-        statusLabel.setHidden(false)
 
         charts.historicalGlucose = context?.historicalGlucose
         charts.predictedGlucose = context?.predictedGlucose
