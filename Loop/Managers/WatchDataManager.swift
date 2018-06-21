@@ -120,6 +120,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
+
+            let startDate = Date().addingTimeInterval(TimeInterval(minutes: -120))
+            let endDate = Date().addingTimeInterval(TimeInterval(minutes: 120))
+
             let context = WatchContext(glucose: glucose, eventualGlucose: state.predictedGlucose?.last, glucoseUnit: manager.glucoseStore.preferredUnit)
             context.reservoir = reservoir?.unitVolume
             context.loopLastRunDate = manager.lastLoopCompleted
@@ -149,9 +153,6 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
                 context.configuredOverrideContexts = configuredUserInfoOverrideContexts
 
-                // Pass an hour of past BGs and an hour of future predictions
-                let startDate = Date().addingTimeInterval(TimeInterval(minutes: -60))
-                let endDate = Date().addingTimeInterval(TimeInterval(minutes: 60))
                 context.targetRanges = targetRanges.between(start: startDate, end: endDate).map {
                     return WatchDatedRangeContext(
                         startDate: $0.startDate,
@@ -183,7 +184,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
             updateGroup.enter()
             if let unit = manager.glucoseStore.preferredUnit {
-                manager.glucoseStore.getCachedGlucoseSamples(start: Date().addingTimeInterval(TimeInterval(minutes: -60))) { (values) in
+                manager.glucoseStore.getCachedGlucoseSamples(start: startDate) { (values) in
                     context.historicalGlucose = WatchHistoricalGlucoseContext(
                         dates: values.map { $0.startDate },
                         values: values.map { $0.quantity.doubleValue(for: unit) },

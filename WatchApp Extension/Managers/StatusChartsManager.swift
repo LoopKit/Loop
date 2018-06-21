@@ -57,8 +57,9 @@ class StatusChartsManager {
         let xMax = glucoseChartSize.width
         let yMax = glucoseChartSize.height
         let timeNow = CGFloat(Date().timeIntervalSince1970)
-        let dateMax = Date().addingTimeInterval(TimeInterval(minutes: 60))
-        let dateMin = Date().addingTimeInterval(TimeInterval(minutes: -60))
+
+        let dateMax = predictedGlucose?.samples.last?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: 60))
+        let dateMin = historicalGlucose.first?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: -60))
         let timeMax = CGFloat(dateMax.timeIntervalSince1970)
         let timeMin = CGFloat(dateMin.timeIntervalSince1970)
         let yScale = yMax/(bgMax - bgMin)
@@ -230,7 +231,8 @@ class StatusChartsManager {
         bgMaxLabel.draw(with: CGRect(x: 6, y: 4, width: 40, height: 40), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
         // Add a label for min BG on y axis
         bgMinLabel.draw(with: CGRect(x: 6, y: yMax-28, width: 40, height: 40), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
-        let timeLabel = "+1h"
+
+        let timeLabel = "+\(dateMax.timeIntervalSinceNow.hours)h"
         timeLabel.draw(with: CGRect(x: xMax - 50, y: 4, width: 40, height: 40), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
         // Draw the box
         UIColor.darkGray.setStroke()
