@@ -8,9 +8,7 @@
 
 import Foundation
 import NightscoutUploadKit
-import CarbKit
 import HealthKit
-import InsulinKit
 import LoopKit
 import RileyLinkKit
 import RileyLinkBLEKit

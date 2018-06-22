@@ -6,6 +6,7 @@
 //
 
 import HealthKit
+import LoopKit
 import LoopUI
 
 
@@ -16,7 +17,7 @@ import LoopUI
 /// - error: An error occurred while receiving or store data
 enum CGMResult {
     case noData
-    case newData([(quantity: HKQuantity, date: Date, isDisplayOnly: Bool)])
+    case newData([NewGlucoseSample])
     case error(Error)
 }
 
