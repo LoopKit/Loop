@@ -100,7 +100,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    var appearedOnce = false
+    private var appearedOnce = false
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -181,6 +181,10 @@ final class StatusTableViewController: ChartsTableViewController {
 
     private var shouldShowStatus: Bool {
         return !landscapeMode && statusRowMode.hasRow
+    }
+
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
     }
 
     private func updateChartDateRange() {
