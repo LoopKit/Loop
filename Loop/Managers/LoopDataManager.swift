@@ -165,6 +165,7 @@ final class LoopDataManager {
     fileprivate var predictedGlucose: [GlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
+            recommendedBolus = nil
         }
     }
     fileprivate var retrospectivePredictedGlucose: [GlucoseValue]? {
