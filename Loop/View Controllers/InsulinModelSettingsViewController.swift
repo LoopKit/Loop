@@ -47,6 +47,10 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
         }
     }
 
+    override func glucoseUnitDidChange() {
+        refreshContext = true
+    }
+
     /// The sensitivity (in glucose units) to use for demonstrating the model
     var insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue<Double>(startTime: 0, value: 40)])!
 

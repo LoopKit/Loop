@@ -84,6 +84,10 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
     }
 
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
+    }
+
     override func reloadData(animated: Bool = false) {
         guard active && visible && !refreshContext.isEmpty else { return }
 
