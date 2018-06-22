@@ -6,7 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import InsulinKit
+import LoopKit
 import MinimedKit
 
 
@@ -24,7 +24,7 @@ extension LoopDataManager {
 
         for event in pumpEvents {
             var dose: DoseEntry?
-            var eventType: InsulinKit.PumpEventType?
+            var eventType: LoopKit.PumpEventType?
 
             switch event.pumpEvent {
             case let bolus as BolusNormalPumpEvent:

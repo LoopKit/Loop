@@ -7,17 +7,18 @@
 //
 
 import Foundation
-import LoopKit
+import LoopKitUI
 
 
 extension CommandResponseViewController {
     static func generateDiagnosticReport(dataManager: DeviceDataManager) -> CommandResponseViewController {
+        let date = Date()
         let vc = CommandResponseViewController(command: { (completionHandler) in
             dataManager.loopManager.generateDiagnosticReport { (report) in
                 DispatchQueue.main.async {
                     completionHandler([
                         "Use the Share button above save this diagnostic report to aid investigating your problem. Issues can be filed at https://github.com/LoopKit/Loop/issues.",
-                        "Generated: \(Date())",
+                        "Generated: \(date)",
                         "",
                         String(reflecting: dataManager),
                         "",
@@ -29,6 +30,7 @@ extension CommandResponseViewController {
 
             return NSLocalizedString("Loading...", comment: "The loading message for the diagnostic report screen")
         })
+        vc.fileName = "Loop Report \(ISO8601DateFormatter.string(from: date, timeZone: .current, formatOptions: [.withSpaceBetweenDateAndTime, .withInternetDateTime])).md"
 
         return vc
     }

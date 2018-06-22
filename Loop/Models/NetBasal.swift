@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import InsulinKit
 import LoopKit
+
 
 struct NetBasal {
     let rate: Double

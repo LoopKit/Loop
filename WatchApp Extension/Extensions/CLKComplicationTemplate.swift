@@ -22,7 +22,7 @@ extension CLKComplicationTemplate {
 
         let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
-        guard let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
+        guard let glucoseString = formatter.string(from: glucose.doubleValue(for: unit)),
             let date = context.glucoseDate else
         {
             return nil
@@ -70,7 +70,7 @@ extension CLKComplicationTemplate {
         case .utilitarianLarge:
             var eventualGlucoseText = ""
             if  let eventualGlucose = context.eventualGlucose,
-                let eventualGlucoseString = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+                let eventualGlucoseString = formatter.string(from: eventualGlucose.doubleValue(for: unit))
             {
                 eventualGlucoseText = eventualGlucoseString
             }
