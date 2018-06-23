@@ -35,6 +35,7 @@ final class LoopDataManager {
     private let logger: CategoryLogger
     
     fileprivate var glucoseUpdated: Bool // flag used to decide if integral RC should be updated or not
+    fileprivate var lastRetrospectiveCorrectionGlucose: GlucoseValue?
     fileprivate var initializeIntegralRetrospectiveCorrection: Bool // flag used to decide if integral RC should be initialized upon Loop relaunch or for other reasons
     var overallRetrospectiveCorrection: HKQuantity? // value used to display overall RC effect to the user
 
@@ -61,6 +62,7 @@ final class LoopDataManager {
         self.lastTempBasal = lastTempBasal
         self.settings = settings
         self.glucoseUpdated = false
+        self.lastRetrospectiveCorrectionGlucose = nil
         self.initializeIntegralRetrospectiveCorrection = true
         self.overallRetrospectiveCorrection = nil
 
@@ -701,9 +703,12 @@ extension LoopDataManager {
             updateGroup.enter()
             glucoseStore.getRecentMomentumEffect { (effects) -> Void in
                 self.glucoseMomentumEffect = effects
+                NSLog("myLoop: +++ Momentum updated +++")
                 updateGroup.leave()
             }
         }
+        
+        _ = updateGroup.wait(timeout: .distantFuture)
 
         if insulinEffect == nil {
             updateGroup.enter()
@@ -770,12 +775,16 @@ extension LoopDataManager {
         _ = updateGroup.wait(timeout: .distantFuture)
 
         if retrospectivePredictedGlucose == nil {
+            updateGroup.enter()
             do {
                 try updateRetrospectiveGlucoseEffect()
             } catch let error {
                 logger.error(error)
             }
+            updateGroup.leave()
         }
+
+        _ = updateGroup.wait(timeout: .distantFuture) // retrospective correction should be completed before we move on
 
         if predictedGlucose == nil {
             do {
@@ -906,6 +915,7 @@ extension LoopDataManager {
                                            glucoseUpdated: Bool) -> Double {
             if (RetrospectiveCorrection.previousDiscrepancy * discrepancy < 0 ||
                 (discrepancy > 0 && carbEffect > carbEffectLimit)){
+                NSLog("myLoop: xxx IRC reset xxx")
                 // reset integral action when discrepancy reverses polarity or
                 // if discrepancy is positive and carb effect is greater than carbEffectLimit
                 RetrospectiveCorrection.effectDuration = 60.0
@@ -913,6 +923,7 @@ extension LoopDataManager {
                 RetrospectiveCorrection.integralDiscrepancy = integralGain * discrepancy
             } else {
                 if glucoseUpdated {
+                    NSLog("myLoop: +++ IRC update +++")
                     // update integral action via low-pass filter y[n] = forget * y[n-1] + gain * u[n]
                     RetrospectiveCorrection.integralDiscrepancy =
                         integralForget * RetrospectiveCorrection.integralDiscrepancy +
@@ -923,6 +934,8 @@ extension LoopDataManager {
                     // extend duration of retrospective correction effect by 10 min, up to a maxium of 180 min
                     RetrospectiveCorrection.effectDuration =
                     min(RetrospectiveCorrection.effectDuration + 10, 180)
+                } else {
+                    NSLog("myLoop: ooo IRC pass ooo")
                 }
             }
             let overallDiscrepancy = proportionalGain * discrepancy + RetrospectiveCorrection.integralDiscrepancy
@@ -996,6 +1009,13 @@ extension LoopDataManager {
             return // too few glucose values, erroneous insulin and carb effects, skip retrospective correction
         }
         
+        // check if retrospective glucose correction has already been updated for this glucose change
+        if( self.lastRetrospectiveCorrectionGlucose?.endDate == change.end.endDate ) {
+            glucoseUpdated = false
+        } else {
+            self.lastRetrospectiveCorrectionGlucose = change.end
+        }
+        
         let glucoseUnit = HKUnit.milligramsPerDeciliter
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
 
@@ -1041,6 +1061,19 @@ extension LoopDataManager {
             return // could not get carb effect, reset integral RC and skip retrospective correction
         }
         
+        // retrospective insulin effect (just for monitoring RC operation)
+        let retrospectiveInsulinEffect = LoopMath.predictGlucose(startingAt: change.start, effects:
+            insulinEffect.filterDateRange(startDate, endDate))
+        guard let lastInsulinOnlyGlucose = retrospectiveInsulinEffect.last else {
+            self.glucoseUpdated = false
+            return
+        }
+        let currentInsulinEffect = -change.start.quantity.doubleValue(for: glucoseUnit) + lastInsulinOnlyGlucose.quantity.doubleValue(for: glucoseUnit)
+        
+        // retrospective average delta BG (just for monitoring RC operation)
+        let currentDeltaBG = change.end.quantity.doubleValue(for: glucoseUnit) -
+            change.start.quantity.doubleValue(for: glucoseUnit)// mg/dL
+        
         // setup an upper safety limit for carb action
         // integral RC resets to standard RC if discrepancy > 0 and carb action is greater than carbEffectLimit in mg/dL over 30 minutes
         let currentCarbEffect = -change.start.quantity.doubleValue(for: glucoseUnit) + lastCarbOnlyGlucose.quantity.doubleValue(for: glucoseUnit)
@@ -1080,19 +1113,6 @@ extension LoopDataManager {
         
         self.retrospectiveGlucoseEffect = glucose.decayEffect(atRate: velocity, for: dynamicEffectDuration)
         
-        // retrospective insulin effect (just for monitoring RC operation)
-        let retrospectiveInsulinEffect = LoopMath.predictGlucose(startingAt: change.start, effects:
-            insulinEffect.filterDateRange(startDate, endDate))
-        guard let lastInsulinOnlyGlucose = retrospectiveInsulinEffect.last else {
-            self.glucoseUpdated = false
-            return
-        }
-        let currentInsulinEffect = -change.start.quantity.doubleValue(for: glucoseUnit) + lastInsulinOnlyGlucose.quantity.doubleValue(for: glucoseUnit)
-
-        // retrospective average delta BG (just for monitoring RC operation)
-        let currentDeltaBG = change.end.quantity.doubleValue(for: glucoseUnit) -
-            change.start.quantity.doubleValue(for: glucoseUnit)// mg/dL
-        
         if self.glucoseUpdated {
             // monitoring of retrospective correction in debugger or Console ("message: myLoop")
             NSLog("myLoop ******************************************")
@@ -1110,7 +1130,7 @@ extension LoopDataManager {
             NSLog("myLoop Correction effect duration [min]: %4.2f", effectMinutes)
         }
         
-        glucoseUpdated = false // ensure we are only updating integral RC once per BG update
+        self.glucoseUpdated = false // ensure we are only updating integral RC once per BG update
     }
 
     /// Runs the glucose prediction on the latest effect data.
