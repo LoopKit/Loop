@@ -712,7 +712,7 @@ class RecommendBolusTests: XCTestCase {
         XCTAssertEqual(1.3, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
-            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
+            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter), 60)
         } else {
             XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
         }
@@ -736,7 +736,7 @@ class RecommendBolusTests: XCTestCase {
         XCTAssertEqual(0.3, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
-            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
+            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter), 60)
         } else {
             XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
         }
@@ -760,7 +760,7 @@ class RecommendBolusTests: XCTestCase {
         XCTAssertEqual(0, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
-            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
+            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter), 60)
         } else {
             XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
         }
