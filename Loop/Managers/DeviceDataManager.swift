@@ -562,13 +562,15 @@ final class DeviceDataManager {
             return
         }
 
+        guard let recencyInterval = loopManager?.settings.recencyInterval else {
+            notify(LoopError.configurationError("LoopManager"))
+            return
+        }
+
         // If we don't have recent pump data, or the pump was recently rewound, read new pump data before bolusing.
         var shouldReadReservoir = isReservoirDataOlderThan(timeIntervalSinceNow: .minutes(-10))
-        if loopManager.doseStore.lastReservoirVolumeDrop < 0 {
-            notify(LoopError.invalidData(details: "Last Reservoir drop negative."))
-            shouldReadReservoir = true
-        } else if let reservoir = loopManager.doseStore.lastReservoirValue, reservoir.startDate.timeIntervalSinceNow <=
-            -loopManager.recencyInterval {
+        if let reservoir = loopManager.doseStore.lastReservoirValue, reservoir.startDate.timeIntervalSinceNow <=
+            -recencyInterval {
             notify(LoopError.pumpDataTooOld(date: reservoir.startDate))
             shouldReadReservoir = true
         } else if loopManager.doseStore.lastReservoirValue == nil {
