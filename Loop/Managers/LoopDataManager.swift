@@ -1235,6 +1235,21 @@ extension LoopDataManager {
             var entries = [
                 "## LoopDataManager",
                 "settings: \(String(reflecting: manager.settings))",
+
+                "insulinCounteractionEffects: [",
+                "* GlucoseEffectVelocity(start, end, mg/dL/min)",
+                manager.insulinCounteractionEffects.reduce(into: "", { (entries, entry) in
+                    entries.append("* \(entry.startDate), \(entry.endDate), \(entry.quantity.doubleValue(for: GlucoseEffectVelocity.unit))\n")
+                }),
+                "]",
+
+                "predictedGlucose: [",
+                "* PredictedGlucoseValue(start, mg/dL)",
+                (state.predictedGlucose ?? []).reduce(into: "", { (entries, entry) in
+                    entries.append("* \(entry.startDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
+                }),
+                "]",
+
                 "retrospectivePredictedGlucose: \(state.retrospectivePredictedGlucose ?? [])",
                 "glucoseMomentumEffect: \(manager.glucoseMomentumEffect ?? [])",
                 "retrospectiveGlucoseEffect: \(manager.retrospectiveGlucoseEffect)",
