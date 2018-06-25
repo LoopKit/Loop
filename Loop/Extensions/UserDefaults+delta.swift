@@ -161,7 +161,7 @@ extension UserDefaults {
         settings["workoutTargets"] = targets
         let profile = NightscoutProfile(
             timestamp: Date(),
-            name: "Loop2",
+            name: "Loop",
             rangeSchedule: glucoseTargetRangeSchedule,
             sensitivity: insulinSensitivitySchedule,
             carbs: carbRatioSchedule,

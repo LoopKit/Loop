@@ -22,7 +22,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		1F4C149920DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4C149820DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift */; };
 		1FCA446720E18004001554A1 /* UserDefaults+delta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCA446620E18004001554A1 /* UserDefaults+delta.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
@@ -445,7 +444,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1F4C149820DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NightscoutUploader+Profile.swift"; sourceTree = "<group>"; };
 		1FCA446620E18004001554A1 /* UserDefaults+delta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+delta.swift"; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
@@ -1027,7 +1025,6 @@
 				C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */,
-				1F4C149820DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift */,
 				4381D2251F3C0FDD004ACCF9 /* RileyLinkDevice.swift */,
 				43E5292A205F718500ACEB3B /* SensorValueGlucoseEvent.swift */,
 				43BFF0CA1E466C0900FF19A9 /* StateColorPalette.swift */,
@@ -1751,7 +1748,6 @@
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
-				1F4C149920DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift in Sources */,
 				4381D2261F3C0FDD004ACCF9 /* RileyLinkDevice.swift in Sources */,
 				430B298A2041F54A00BA9F93 /* NSUserDefaults.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
