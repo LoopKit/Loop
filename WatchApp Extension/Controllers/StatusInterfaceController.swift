@@ -11,14 +11,16 @@ import WatchConnectivity
 import CGMBLEKit
 import LoopKit
 
-
 final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
+    @IBOutlet weak var glucoseChart: WKInterfaceImage!
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var statusLabel: WKInterfaceLabel!
+    @IBOutlet weak var iobLabel: WKInterfaceLabel!
+    @IBOutlet weak var cobLabel: WKInterfaceLabel!
+    @IBOutlet weak var basalLabel: WKInterfaceLabel!
 
     @IBOutlet var preMealButton: WKInterfaceButton!
     @IBOutlet var preMealButtonImage: WKInterfaceImage!
@@ -36,12 +38,41 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     private var lastContext: WatchContext?
 
+    private var charts = StatusChartsManager()
+
+    weak var healthManager: HealthManager?
+
+    private var glucoseSamplesObserver: NSKeyValueObservation?
+
+    override init() {
+        super.init()
+
+        healthManager = ExtensionDelegate.shared().healthManager
+
+        NotificationCenter.default.addObserver(self, selector: #selector(self.glucoseUpdated), name: .GlucoseUpdated, object: nil)
+    }
+
+    @objc func glucoseUpdated() {
+        DispatchQueue.main.async {
+            self.updateGlucoseChart()
+        }
+    }
+
     override func didAppear() {
         super.didAppear()
     }
 
     override func willActivate() {
         super.willActivate()
+
+        if let healthManager = healthManager {
+            if healthManager.glucoseStore.isStale {
+                let userInfo = GlucoseBackfillRequestUserInfo(startDate: healthManager.glucoseStore.latestDate)
+                WCSession.default.sendGlucoseBackfillRequestMessage(userInfo) { (context) in
+                    healthManager.glucoseStore.backfill(samples: context.samples)
+                }
+            }
+        }
 
         updateLoopHUD()
     }
@@ -125,7 +156,71 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         }
 
         // TODO: Other elements
-        statusLabel.setHidden(true)
+        let insulinFormatter: NumberFormatter = {
+            let numberFormatter = NumberFormatter()
+            
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 1
+            numberFormatter.maximumFractionDigits = 1
+            
+            return numberFormatter
+        }()
+        
+        iobLabel.setHidden(true)
+        if let activeInsulin = context?.IOB, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
+            iobLabel.setText(String(format: NSLocalizedString(
+                "IOB %1$@ U",
+                comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
+                                       valueStr))
+            iobLabel.setHidden(false)
+        }
+        
+        cobLabel.setHidden(true)
+        if let carbsOnBoard = context?.COB {
+            let carbFormatter = NumberFormatter()
+            carbFormatter.numberStyle = .decimal
+            carbFormatter.maximumFractionDigits = 0
+            let valueStr = carbFormatter.string(from:NSNumber(value:carbsOnBoard))
+            
+            cobLabel.setText(String(format: NSLocalizedString(
+                "COB %1$@ g",
+                comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"),
+                                      valueStr!))
+            cobLabel.setHidden(false)
+        }
+        
+        basalLabel.setHidden(true)
+        if let tempBasal = context?.lastNetTempBasalDose {
+            let basalFormatter = NumberFormatter()
+            basalFormatter.numberStyle = .decimal
+            basalFormatter.minimumFractionDigits = 1
+            basalFormatter.maximumFractionDigits = 3
+            basalFormatter.positivePrefix = basalFormatter.plusSign
+            let valueStr = basalFormatter.string(from:NSNumber(value:tempBasal))
+            
+            let basalLabelText = String(format: NSLocalizedString(
+                "%1$@ U/hr",
+                comment: "The subtitle format describing the current temp basal rate. (1: localized basal rate description)"),
+                                      valueStr!)
+            basalLabel.setText(basalLabelText)
+            basalLabel.setHidden(false)
+        }
+
+        updateGlucoseChart()
+    }
+
+    func updateGlucoseChart() {
+        charts.historicalGlucose = healthManager?.glucoseStore.samples
+        charts.predictedGlucose = lastContext?.predictedGlucose?.samples
+        charts.targetRanges = lastContext?.targetRanges
+        charts.temporaryOverride = lastContext?.temporaryOverride
+        charts.unit = lastContext?.preferredGlucoseUnit
+
+        self.glucoseChart.setHidden(true)
+        if let chart = self.charts.glucoseChart() {
+            self.glucoseChart.setImage(chart)
+            self.glucoseChart.setHidden(false)
+        }
     }
 
     private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {
