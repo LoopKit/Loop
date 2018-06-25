@@ -42,6 +42,8 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
 
+    var cgm: CGM?
+
     override init() {
         super.init()
     }
@@ -90,6 +92,10 @@ final class WatchContext: NSObject, RawRepresentable {
         recommendedBolusDose = rawValue["rbo"] as? Double
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
+
+        if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
+            cgm = CGM(rawValue: cgmRawValue)
+        }
     }
 
     var rawValue: RawValue {
@@ -100,6 +106,9 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["ba"] = lastNetTempBasalDose
         raw["bad"] = lastNetTempBasalDate
         raw["bp"] = batteryPercentage
+
+        raw["cgm"] = cgm?.rawValue
+
         raw["cob"] = COB
 
         let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter

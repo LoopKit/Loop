@@ -60,3 +60,16 @@ protocol CGMManager: CustomDebugStringConvertible {
     func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) -> Void
 }
 
+
+extension CGM {
+    func createManager() -> CGMManager? {
+        switch self {
+        case .enlite:
+            return nil
+        case .g4:
+            return G4CGMManager()
+        case .g5(let transmitterID):
+            return G5CGMManager(transmitterID: transmitterID)
+        }
+    }
+}
