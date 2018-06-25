@@ -66,8 +66,12 @@ class StatusChartsManager {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
 
-        let attrs = [NSAttributedStringKey.font: UIFont(name: "HelveticaNeue", size: 20)!, NSAttributedStringKey.paragraphStyle: paragraphStyle,
-                     NSAttributedStringKey.foregroundColor: UIColor.white]
+        let attrs = [
+            NSAttributedStringKey.font: UIFont(name: "HelveticaNeue", size: 20)!,
+            NSAttributedStringKey.paragraphStyle: paragraphStyle,
+            NSAttributedStringKey.foregroundColor: UIColor.white,
+            NSAttributedStringKey.backgroundColor: UIColor.black,
+        ]
 
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .none
