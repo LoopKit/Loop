@@ -69,4 +69,21 @@ extension WCSession {
             errorHandler: errorHandler
         )
     }
+
+    func sendGlucoseBackfillRequestMessage(_ userInfo: GlucoseBackfillRequestUserInfo, successHandler: @escaping (WatchHistoricalGlucoseContext) -> Void) {
+        // Backfill is optional so we ignore any errors
+        guard activationState == .activated, isReachable else {
+            return
+        }
+
+        sendMessage(userInfo.rawValue,
+            replyHandler: { reply in
+                print("Backfill reply: \(reply)")
+                if let context = WatchHistoricalGlucoseContext(rawValue: reply as WatchHistoricalGlucoseContext.RawValue) {
+                    successHandler(context)
+                }
+            },
+            errorHandler: { reply in }
+        )
+    }
 }

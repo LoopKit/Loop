@@ -245,12 +245,25 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
             replyHandler([:])
         case GlucoseRangeScheduleOverrideUserInfo.name?:
-            // Successfull changes will trigger a preferences change which will update the watch with the new overrides
+            // Successful changes will trigger a preferences change which will update the watch with the new overrides
             if let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: message) {
                 _ = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideUserInfo.context.correspondingOverrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
-                replyHandler([:])
             } else {
                 deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
+            }
+            replyHandler([:])
+        case GlucoseBackfillRequestUserInfo.name?:
+            if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message),
+                let manager = deviceDataManager.loopManager,
+                let unit = manager.glucoseStore.preferredUnit {
+                manager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate) { (values) in
+                    let context = WatchHistoricalGlucoseContext(
+                        dates: values.map { $0.startDate },
+                        values: values.map { $0.quantity.doubleValue(for: unit) },
+                        unit: unit)
+                    replyHandler(context.rawValue)
+                }
+            } else {
                 replyHandler([:])
             }
         default:

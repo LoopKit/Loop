@@ -14,6 +14,7 @@ import UserNotifications
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
+    private(set) lazy var healthManager = HealthManager()
 
     static func shared() -> ExtensionDelegate {
         return WKExtension.shared().extensionDelegate

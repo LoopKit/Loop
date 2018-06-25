@@ -91,6 +91,24 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     private var charts = StatusChartsManager()
 
+    weak var healthManager: HealthManager?
+
+    private var glucoseSamplesObserver: NSKeyValueObservation?
+
+    override init() {
+        super.init()
+
+        healthManager = ExtensionDelegate.shared().healthManager
+
+        NotificationCenter.default.addObserver(self, selector: #selector(self.glucoseUpdated), name: .GlucoseUpdated, object: nil)
+    }
+
+    @objc func glucoseUpdated() {
+        DispatchQueue.main.async {
+            self.updateGlucoseChart()
+        }
+    }
+
     override func didAppear() {
         super.didAppear()
 
@@ -99,6 +117,15 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
 
     override func willActivate() {
         super.willActivate()
+
+        if let healthManager = healthManager {
+            if healthManager.glucoseStore.isStale {
+                let userInfo = GlucoseBackfillRequestUserInfo(startDate: healthManager.glucoseStore.latestDate)
+                WCSession.default.sendGlucoseBackfillRequestMessage(userInfo) { (context) in
+                    healthManager.glucoseStore.backfill(samples: context.samples)
+                }
+            }
+        }
 
         updateLoopHUD()
     }
@@ -231,25 +258,21 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
             basalLabel.setHidden(false)
         }
 
-        let updateGroup = DispatchGroup()
-        updateGroup.enter()
-        let healthKitManager = HealthKitManager()
-        healthKitManager.getCachedGlucoseSamples() { (samples) in
-            self.charts.historicalGlucose = samples
-            self.charts.predictedGlucose = context?.predictedGlucose
-            self.charts.targetRanges = context?.targetRanges
-            self.charts.temporaryOverride = context?.temporaryOverride
-            self.charts.unit = context?.preferredGlucoseUnit
+        updateGlucoseChart()
+    }
 
-            self.glucoseChart.setHidden(true)
-            if let chart = self.charts.glucoseChart() {
-                self.glucoseChart.setImage(chart)
-                self.glucoseChart.setHidden(false)
-            }
-            updateGroup.leave()
+    func updateGlucoseChart() {
+        charts.historicalGlucose = healthManager?.glucoseStore.samples
+        charts.predictedGlucose = lastContext?.predictedGlucose?.samples
+        charts.targetRanges = lastContext?.targetRanges
+        charts.temporaryOverride = lastContext?.temporaryOverride
+        charts.unit = lastContext?.preferredGlucoseUnit
+
+        self.glucoseChart.setHidden(true)
+        if let chart = self.charts.glucoseChart() {
+            self.glucoseChart.setImage(chart)
+            self.glucoseChart.setHidden(false)
         }
-
-        _ = updateGroup.wait(timeout: .distantFuture)
     }
 
     private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {

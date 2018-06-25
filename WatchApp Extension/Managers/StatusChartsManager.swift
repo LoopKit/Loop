@@ -16,7 +16,7 @@ class StatusChartsManager {
     var targetRanges: [WatchDatedRangeContext]?
     var temporaryOverride: WatchDatedRangeContext?
     var historicalGlucose: [HKQuantitySample]?
-    var predictedGlucose: WatchPredictedGlucoseContext?
+    var predictedGlucose: [WatchGlucoseContext]?
 
     func glucoseChart() -> UIImage? {
         guard let unit = unit, let historicalGlucose = historicalGlucose, historicalGlucose.count > 0 else {
@@ -25,7 +25,7 @@ class StatusChartsManager {
 
         // Choose the min/max values from across all of our data sources
         var sampleValues = historicalGlucose.map { $0.quantity.doubleValue(for: unit) }
-        sampleValues += predictedGlucose?.samples.map { $0.value } ?? []
+        sampleValues += predictedGlucose?.map { $0.value } ?? []
         sampleValues += targetRanges?.map { [$0.maxValue, $0.minValue] }.flatMap { $0 } ?? []
         if let temporaryOverride = temporaryOverride {
             sampleValues += [temporaryOverride.maxValue, temporaryOverride.minValue]
@@ -38,7 +38,7 @@ class StatusChartsManager {
         let yMax = glucoseChartSize.height
         let timeNow = CGFloat(Date().timeIntervalSince1970)
 
-        let dateMax = predictedGlucose?.samples.last?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: 60))
+        let dateMax = predictedGlucose?.last?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: 60))
         let dateMin = historicalGlucose.first?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: -60))
         let timeMax = CGFloat(dateMax.timeIntervalSince1970)
         let timeMin = CGFloat(dateMin.timeIntervalSince1970)
@@ -188,15 +188,14 @@ class StatusChartsManager {
         imContext.beginPath()
         var predictedPoints: [CGPoint] = []
 
-        if let predictedGlucose = predictedGlucose?.samples, predictedGlucose.count > 2 {
+        if let predictedGlucose = predictedGlucose, predictedGlucose.count > 2 {
             predictedGlucose.forEach { (sample) in
                 let bgFloat = CGFloat(sample.value)
                 x = xScale * (CGFloat(sample.startDate.timeIntervalSince1970) - timeMin)
                 y = yScale * (bgMax - bgFloat)
                 predictedPoints.append(CGPoint(x: x, y: y))
             }
-            // The first prediction is the current BG. Dropping it makes for a cleaner graph.
-            predictedPoints.removeFirst(1)
+
             // Add points to the path, then draw it:
             imContext.addLines(between: predictedPoints)
             imContext.strokePath()
