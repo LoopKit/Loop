@@ -9,16 +9,27 @@
 import Foundation
 import HealthKit
 
+extension Date {
+    static var EarliestGlucoseCutoff: Date {
+        return Date().addingTimeInterval(TimeInterval(hours: -3))
+    }
+
+    static var StaleGlucoseCutoff: Date {
+        return Date().addingTimeInterval(-TimeInterval(minutes: 4.5))
+    }
+}
+
 class GlucoseStore: NSObject {
+
     let healthStore = HKHealthStore()
     @objc var samples: [HKQuantitySample] = []
 
     var latestDate: Date {
-        return samples.last?.startDate ?? healthStore.earliestPermittedSampleDate()
+        return samples.last?.startDate ?? .EarliestGlucoseCutoff
     }
 
     var isStale: Bool {
-        return latestDate.timeIntervalSinceNow < -TimeInterval(minutes: 4.5)
+        return latestDate < .StaleGlucoseCutoff
     }
 
     override init() {
@@ -27,7 +38,7 @@ class GlucoseStore: NSObject {
         let glucoseType = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
         let query = HKObserverQuery(sampleType: glucoseType, predicate: nil) { (query, completionHandler, error) in
             if error == nil {
-                let startDate = max(Date().addingTimeInterval(TimeInterval(hours: -2)), self.latestDate)
+                let startDate: Date = max(self.latestDate, .EarliestGlucoseCutoff)
                 let predicate = HKQuery.predicateForSamples(withStart: startDate, end: Date())
                 let query = HKSampleQuery(sampleType: glucoseType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: []) {
                     (_, samples, error) -> Void in
@@ -49,11 +60,10 @@ class GlucoseStore: NSObject {
     }
 
     private func add(samples new: [HKQuantitySample]) {
-        let cutoff = Date().addingTimeInterval(TimeInterval(hours: -2))
         samples = (samples + new).sorted {
-            $0.startDate < $1.startDate
+                $0.startDate < $1.startDate
             }.filter {
-                $0.startDate >= cutoff
+                $0.startDate >= .EarliestGlucoseCutoff
         }
         NotificationCenter.default.post(name: .GlucoseUpdated, object: nil)
     }
