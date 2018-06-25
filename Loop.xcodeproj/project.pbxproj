@@ -23,6 +23,7 @@
 
 /* Begin PBXBuildFile section */
 		1F4C149920DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4C149820DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift */; };
+		1F4C149B20DCA9BF0075D1E0 /* UserDefaults+beta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4C149A20DCA9BF0075D1E0 /* UserDefaults+beta.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -445,6 +446,7 @@
 
 /* Begin PBXFileReference section */
 		1F4C149820DCA2EC0075D1E0 /* NightscoutUploader+Profile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NightscoutUploader+Profile.swift"; sourceTree = "<group>"; };
+		1F4C149A20DCA9BF0075D1E0 /* UserDefaults+beta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+beta.swift"; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E41D4EA75100F0FCAF /* DoseStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseStore.swift; sourceTree = "<group>"; };
@@ -1034,6 +1036,7 @@
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
+				1F4C149A20DCA9BF0075D1E0 /* UserDefaults+beta.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1759,6 +1762,7 @@
 				43E5292B205F718500ACEB3B /* SensorValueGlucoseEvent.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
+				1F4C149B20DCA9BF0075D1E0 /* UserDefaults+beta.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				437CCADA1D284ADF0075D2C3 /* AuthenticationTableViewCell.swift in Sources */,
 				439BED2E1E760BC600B0AED5 /* EnliteCGMManager.swift in Sources */,
