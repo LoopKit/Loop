@@ -127,15 +127,13 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
+            vc.deviceManager = dataManager
             vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
 
             if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                 vc.insulinSensitivitySchedule = insulinSensitivitySchedule
             }
 
-            if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
-                vc.glucoseUnit = unit
-            }
             vc.delegate = self
         default:
             break

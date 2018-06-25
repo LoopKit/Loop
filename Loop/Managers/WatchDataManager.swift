@@ -132,9 +132,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             context.COB = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
             context.glucoseTrendRawValue = self.deviceDataManager.sensorInfo?.trendType?.rawValue
 
-            if let targetRanges = manager.settings.glucoseTargetRangeSchedule {
-                // TODO(Bharat): these are so similar - are they both necessary?
-                if let override = targetRanges.override {
+            context.cgm = self.deviceDataManager.cgm
+
+            if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
+                if let override = glucoseTargetRangeSchedule.override {
                     context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
                         context: override.context.correspondingUserInfoContext,
                         startDate: override.start,
@@ -153,7 +154,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
                 context.configuredOverrideContexts = configuredUserInfoOverrideContexts
 
-                context.targetRanges = targetRanges.between(start: startDate, end: endDate).map {
+                context.targetRanges = glucoseTargetRangeSchedule.between(start: startDate, end: endDate).map {
                     return WatchDatedRangeContext(
                         startDate: $0.startDate,
                         endDate: $0.endDate,

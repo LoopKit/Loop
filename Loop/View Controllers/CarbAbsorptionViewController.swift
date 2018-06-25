@@ -90,6 +90,10 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
     // MARK: - Data loading
 
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
+    }
+
     override func reloadData(animated: Bool = false) {
         guard active && !reloading && !self.refreshContext.isEmpty else { return }
         var currentContext = self.refreshContext

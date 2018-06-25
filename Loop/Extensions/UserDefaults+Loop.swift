@@ -8,7 +8,6 @@
 import Foundation
 import LoopKit
 import MinimedKit
-import RileyLinkKit
 
 
 extension UserDefaults {
@@ -39,45 +38,7 @@ extension UserDefaults {
 extension UserDefaults {
     private enum Key: String {
         case batteryChemistry = "com.loopkit.Loop.BatteryChemistry"
-        case cgmSettings = "com.loopkit.Loop.cgmSettings"
         case preferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
-    }
-
-
-    var cgm: CGM? {
-        get {
-            if let rawValue = dictionary(forKey: Key.cgmSettings.rawValue) {
-                return CGM(rawValue: rawValue)
-            } else {
-                // Migrate the "version 0" case. Further format changes should be handled in the CGM initializer
-                defer {
-                    removeObject(forKey: "com.loopkit.Loop.G5TransmitterEnabled")
-                    removeObject(forKey: "com.loudnate.Loop.G4ReceiverEnabled")
-                    removeObject(forKey: "com.loopkit.Loop.FetchEnliteDataEnabled")
-                    removeObject(forKey: "com.loudnate.Naterade.TransmitterID")
-                }
-
-                if bool(forKey: "com.loudnate.Loop.G4ReceiverEnabled") {
-                    self.cgm = .g4
-                    return .g4
-                }
-
-                if bool(forKey: "com.loopkit.Loop.FetchEnliteDataEnabled") {
-                    self.cgm = .enlite
-                    return .enlite
-                }
-
-                if let transmitterID = string(forKey: "com.loudnate.Naterade.TransmitterID"), transmitterID.count == 6 {
-                    self.cgm = .g5(transmitterID: transmitterID)
-                    return .g5(transmitterID: transmitterID)
-                }
-
-                return nil
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.cgmSettings.rawValue)
-        }
     }
 
     var preferredInsulinDataSource: InsulinDataSource? {
