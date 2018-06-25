@@ -1,5 +1,5 @@
 github "LoopKit/LoopKit" == 2.0
-github "LoopKit/CGMBLEKit" == 2.1
+github "LoopKit/CGMBLEKit" "dev"
 github "i-schuetz/SwiftCharts" == 0.6.1
 github "mddub/dexcom-share-client-swift" == 0.4.1
 github "mddub/G4ShareSpy" == 0.3.3

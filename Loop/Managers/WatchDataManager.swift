@@ -126,6 +126,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.maxBolus = manager.settings.maximumBolus
 
+            context.cgm = self.deviceDataManager.cgm
+
             if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
                 if let override = glucoseTargetRangeSchedule.override {
                     context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
