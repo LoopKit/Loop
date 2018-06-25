@@ -144,6 +144,11 @@ final class LoopDataManager {
             predictedGlucose = nil
         }
     }
+    private var insulinOnBoard: InsulinValue? {
+        didSet {
+            predictedGlucose = nil
+        }
+    }
     private var glucoseMomentumEffect: [GlucoseEffect]? {
         didSet {
             predictedGlucose = nil
@@ -692,6 +697,25 @@ extension LoopDataManager {
                 updateGroup.leave()
             }
         }
+        
+        if insulinOnBoard == nil {
+            updateGroup.enter()
+            let now = Date()
+            doseStore.getInsulinOnBoardValues(start: retrospectiveStart, end: now) { (result) in
+                switch result {
+                case .success(let value):
+                    if let recentValue = value.closestPriorToDate(now) {
+                        self.insulinOnBoard = recentValue
+                    } else {
+                        self.insulinOnBoard = InsulinValue(startDate: now, value: 0.0)
+                    }
+                case .failure(let error):
+                    self.logger.error(error)
+                    self.insulinOnBoard = nil
+                }
+                updateGroup.leave()
+            }
+        }
 
         _ = updateGroup.wait(timeout: .distantFuture)
 
@@ -893,6 +917,7 @@ extension LoopDataManager {
 
         guard let
             maxBasal = settings.maximumBasalRatePerHour,
+            let maximumInsulinOnBoard = settings.maximumInsulinOnBoard,
             let glucoseTargetRange = settings.glucoseTargetRangeSchedule,
             let insulinSensitivity = insulinSensitivitySchedule,
             let basalRates = basalRateSchedule,
@@ -902,6 +927,12 @@ extension LoopDataManager {
             throw LoopError.configurationError("Check settings")
         }
         
+        guard let
+            insulinOnBoard = insulinOnBoard
+        else {
+            throw LoopError.missingDataError(details: "Insulin on Board not available", recovery: "Check pump")
+        }
+
         guard lastRequestedBolus == nil
         else {
             // Don't recommend changes if a bolus was just requested.
@@ -911,7 +942,7 @@ extension LoopDataManager {
             recommendedTempBasal = nil
             return
         }
-        
+
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
@@ -919,9 +950,11 @@ extension LoopDataManager {
             model: model,
             basalRates: basalRates,
             maxBasalRate: maxBasal,
+            insulinOnBoard: insulinOnBoard.value,
+            maxInsulinOnBoard: maximumInsulinOnBoard,
             lastTempBasal: lastTempBasal
         )
-        
+
         if let temp = tempBasal {
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
@@ -936,7 +969,9 @@ extension LoopDataManager {
             sensitivity: insulinSensitivity,
             model: model,
             pendingInsulin: pendingInsulin,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            insulinOnBoard: insulinOnBoard.value,
+            maxInsulinOnBoard: maximumInsulinOnBoard
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
     }
@@ -977,6 +1012,8 @@ protocol LoopState {
     /// The last-calculated carbs on board
     var carbsOnBoard: CarbValue? { get }
 
+    var insulinOnBoard: InsulinValue? { get }
+    
     /// An error in the current state of the loop, or one that happened during the last attempt to loop.
     var error: Error? { get }
 
@@ -1021,6 +1058,11 @@ extension LoopDataManager {
         var carbsOnBoard: CarbValue? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.carbsOnBoard
+        }
+        
+        var insulinOnBoard: InsulinValue? {
+            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            return loopDataManager.insulinOnBoard
         }
 
         var error: Error? {
@@ -1116,6 +1158,7 @@ extension LoopDataManager {
                 "retrospectivePredictedGlucose: \(state.retrospectivePredictedGlucose ?? [])",
                 "glucoseMomentumEffect: \(manager.glucoseMomentumEffect ?? [])",
                 "retrospectiveGlucoseEffect: \(manager.retrospectiveGlucoseEffect)",
+                "insulinOnBoard: \(String(describing: state.insulinOnBoard))",
                 "recommendedTempBasal: \(String(describing: state.recommendedTempBasal))",
                 "recommendedBolus: \(String(describing: state.recommendedBolus))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
@@ -1145,6 +1188,7 @@ extension LoopDataManager {
                     }
                 }
             }
+            
         }
     }
 }

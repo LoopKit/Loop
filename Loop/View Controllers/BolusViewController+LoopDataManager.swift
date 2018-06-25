@@ -13,6 +13,7 @@ extension BolusViewController {
     func configureWithLoopManager(_ manager: LoopDataManager, recommendation: BolusRecommendation?, glucoseUnit: HKUnit) {
         manager.getLoopState { (manager, state) in
             let maximumBolus = manager.settings.maximumBolus
+            let maximumInsulinOnBoard = manager.settings.maximumInsulinOnBoard
 
             let activeCarbohydrates = state.carbsOnBoard?.quantity.doubleValue(for: .gram())
             let bolusRecommendation: BolusRecommendation?
@@ -36,6 +37,10 @@ extension BolusViewController {
                 DispatchQueue.main.async {
                     if let maxBolus = maximumBolus {
                         self.maxBolus = maxBolus
+                    }
+
+                    if let maxInsulinOnBoard = maximumInsulinOnBoard {
+                        self.maxInsulinOnBoard = maxInsulinOnBoard
                     }
 
                     self.glucoseUnit = glucoseUnit
