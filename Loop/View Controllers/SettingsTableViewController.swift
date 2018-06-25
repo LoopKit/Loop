@@ -65,6 +65,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         dataManager.rileyLinkManager.setScanningEnabled(false)
         rssiFetchTimer = nil
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup.uploadProfile(uploader: uploader)
+        }
     }
 
     var dataManager: DeviceDataManager!
