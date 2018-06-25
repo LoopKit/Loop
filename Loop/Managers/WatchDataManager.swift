@@ -121,8 +121,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
 
-            let startDate = Date().addingTimeInterval(TimeInterval(minutes: -120))
-            let endDate = Date().addingTimeInterval(TimeInterval(minutes: 120))
+            let startDate = Date().addingTimeInterval(TimeInterval(minutes: -180))
+            let endDate = Date().addingTimeInterval(TimeInterval(minutes: 180))
 
             let context = WatchContext(glucose: glucose, eventualGlucose: state.predictedGlucose?.last, glucoseUnit: manager.glucoseStore.preferredUnit)
             context.reservoir = reservoir?.unitVolume

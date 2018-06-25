@@ -38,14 +38,14 @@ class StatusChartsManager {
         let yMax = glucoseChartSize.height
         let timeNow = CGFloat(Date().timeIntervalSince1970)
 
-        let dateMax = predictedGlucose?.last?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: 60))
-        let dateMin = historicalGlucose.first?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: -60))
+        let dateMax = predictedGlucose?.last?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: 180))
+        let dateMin = historicalGlucose.first?.startDate ?? Date().addingTimeInterval(TimeInterval(minutes: -180))
         let timeMax = CGFloat(dateMax.timeIntervalSince1970)
         let timeMin = CGFloat(dateMin.timeIntervalSince1970)
         let yScale = yMax/(bgMax - bgMin)
         let xScale = xMax/(timeMax - timeMin)
         let xNow: CGFloat = xScale * (timeNow - timeMin)
-        let pointSize: CGFloat = 8
+        let pointSize: CGFloat = 4
         // When we draw points, they are drawn in a rectangle specified
         // by its corner coords, so often need to shift by half a point:
         let halfPoint = pointSize / 2
