@@ -1,4 +1,4 @@
-github "kdisimone/LoopKit" "delta"
+github "kdisimone/LoopKit" "delta-remote"
 github "LoopKit/CGMBLEKit" "dev"
 github "i-schuetz/SwiftCharts" == 0.6.1
 github "mddub/dexcom-share-client-swift" == 0.4.1

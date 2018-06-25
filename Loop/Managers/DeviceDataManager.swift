@@ -819,7 +819,7 @@ final class DeviceDataManager {
                 // set the remote temp if it's valid and not already set.  Handle the nil issue as well
                 let endlastTemp = cdates.max()! + TimeInterval(.minutes(Double(last.duration)))
                 if Date() < endlastTemp  {
-                    let NStargetUnit = HKUnit.milligramsPerDeciliter()
+                    let NStargetUnit = HKUnit.milligramsPerDeciliter
                     let userUnit = self.loopManager.settings.glucoseTargetRangeSchedule?.unit
                     //convert NS temp targets to an HKQuanity with units and set limits (low of 70 mg/dL, high of 300 mg/dL)
                     //ns temps are always given in mg/dL
