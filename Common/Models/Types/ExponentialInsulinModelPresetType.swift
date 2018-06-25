@@ -8,7 +8,7 @@
 import LoopKit
 
 
-enum ExponentialInsulinModelPreset: String {
+enum ExponentialInsulinModelPresetType: String {
     case humalogNovologAdult
     case humalogNovologChild
     case fiasp
@@ -16,7 +16,7 @@ enum ExponentialInsulinModelPreset: String {
 
 
 // MARK: - Model generation
-extension ExponentialInsulinModelPreset {
+extension ExponentialInsulinModelPresetType {
     var actionDuration: TimeInterval {
         switch self {
         case .humalogNovologAdult:
@@ -46,7 +46,7 @@ extension ExponentialInsulinModelPreset {
 
 
 // MARK: - Localization
-extension ExponentialInsulinModelPreset {
+extension ExponentialInsulinModelPresetType {
     var title: String {
         switch self {
         case .humalogNovologAdult:
@@ -71,7 +71,7 @@ extension ExponentialInsulinModelPreset {
 }
 
 
-extension ExponentialInsulinModelPreset: InsulinModel {
+extension ExponentialInsulinModelPresetType: InsulinModel {
     var effectDuration: TimeInterval {
         return model.effectDuration
     }
@@ -82,7 +82,7 @@ extension ExponentialInsulinModelPreset: InsulinModel {
 }
 
 
-extension ExponentialInsulinModelPreset: CustomDebugStringConvertible {
+extension ExponentialInsulinModelPresetType: CustomDebugStringConvertible {
     var debugDescription: String {
         return "\(self.rawValue)(\(String(reflecting: model))"
     }

@@ -61,7 +61,7 @@ protocol CGMManager: CustomDebugStringConvertible {
 }
 
 
-extension CGM {
+extension CGMType {
     func createManager() -> CGMManager? {
         switch self {
         case .enlite:

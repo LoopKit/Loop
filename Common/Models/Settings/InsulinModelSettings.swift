@@ -9,7 +9,7 @@ import LoopKit
 
 
 enum InsulinModelSettings {
-    case exponentialPreset(ExponentialInsulinModelPreset)
+    case exponentialPreset(ExponentialInsulinModelPresetType)
     case walsh(WalshInsulinModel)
 
     var model: InsulinModel {
@@ -23,7 +23,7 @@ enum InsulinModelSettings {
 
     init?(model: InsulinModel) {
         switch model {
-        case let model as ExponentialInsulinModelPreset:
+        case let model as ExponentialInsulinModelPresetType:
             self = .exponentialPreset(model)
         case let model as WalshInsulinModel:
             self = .walsh(model)
@@ -62,8 +62,8 @@ extension InsulinModelSettings: RawRepresentable {
 
         switch type {
         case .exponentialPreset:
-            guard let modelRaw = rawValue["model"] as? ExponentialInsulinModelPreset.RawValue,
-                let model = ExponentialInsulinModelPreset(rawValue: modelRaw)
+            guard let modelRaw = rawValue["model"] as? ExponentialInsulinModelPresetType.RawValue,
+                let model = ExponentialInsulinModelPresetType(rawValue: modelRaw)
             else {
                 return nil
             }

@@ -30,7 +30,7 @@ extension Glucose: SensorDisplayable {
         return String(format: "%1$@ %2$@", String(describing: state), status)
     }
 
-    public var trendType: GlucoseTrend? {
+    public var trendType: GlucoseTrendType? {
         guard trend < Int(Int8.max) else {
             return nil
         }

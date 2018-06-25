@@ -8,59 +8,18 @@
 
 import Foundation
 
-enum AbsorptionTimeType {
-    case fast
-    case medium
-    case slow
-}
-
 
 struct CarbEntryUserInfo {
     let value: Double
     let absorptionTimeType: AbsorptionTimeType
     let startDate: Date
-
-    init(value: Double, absorptionTimeType: AbsorptionTimeType, startDate: Date) {
-        self.value = value
-        self.absorptionTimeType = absorptionTimeType
-        self.startDate = startDate
-    }
-}
-
-
-extension AbsorptionTimeType: RawRepresentable {
-    typealias RawValue = Int
-
-    init?(rawValue: RawValue) {
-        switch rawValue {
-        case 0:
-            self = .fast
-        case 1:
-            self = .medium
-        case 2:
-            self = .slow
-        default:
-            return nil
-        }
-    }
-
-    var rawValue: RawValue {
-        switch self {
-        case .fast:
-            return 0
-        case .medium:
-            return 1
-        case .slow:
-            return 2
-        }
-    }
 }
 
 
 extension CarbEntryUserInfo: RawRepresentable {
     typealias RawValue = [String: Any]
 
-    static let version = 1
+    private static let version = 1
     static let name = "CarbEntryUserInfo"
 
     init?(rawValue: RawValue) {

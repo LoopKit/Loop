@@ -58,9 +58,9 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
 
     private var allModels: [InsulinModel] = [
         WalshInsulinModel(actionDuration: .hours(6)),
-        ExponentialInsulinModelPreset.humalogNovologAdult,
-        ExponentialInsulinModelPreset.humalogNovologChild,
-        ExponentialInsulinModelPreset.fiasp
+        ExponentialInsulinModelPresetType.humalogNovologAdult,
+        ExponentialInsulinModelPresetType.humalogNovologChild,
+        ExponentialInsulinModelPresetType.fiasp
     ]
 
     private var selectedModelIndex: Int? {
@@ -69,9 +69,9 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             return nil
         case is WalshInsulinModel:
             return walshModelIndex
-        case let selectedModel as ExponentialInsulinModelPreset:
+        case let selectedModel as ExponentialInsulinModelPresetType:
             for index in 1..<allModels.count {
-                if selectedModel == (allModels[index] as! ExponentialInsulinModelPreset) {
+                if selectedModel == (allModels[index] as! ExponentialInsulinModelPresetType) {
                     return index
                 }
             }
@@ -121,7 +121,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             if lhs != rhs {
                 delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
             }
-        case let (lhs, rhs) as (ExponentialInsulinModelPreset, ExponentialInsulinModelPreset):
+        case let (lhs, rhs) as (ExponentialInsulinModelPresetType, ExponentialInsulinModelPresetType):
             if lhs != rhs {
                 delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
             }
@@ -229,7 +229,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
 
                 cell.titleLabel.text = model.title
                 cell.subtitleLabel.text = model.subtitle
-            case let model as ExponentialInsulinModelPreset:
+            case let model as ExponentialInsulinModelPresetType:
                 configureCell(cell, duration: nil)
 
                 cell.titleLabel.text = model.title

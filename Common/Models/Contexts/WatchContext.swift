@@ -9,11 +9,7 @@
 import Foundation
 import HealthKit
 
-final class WatchContext: NSObject, RawRepresentable {
-    typealias RawValue = [String: Any]
-
-    private let version = 3
-
+struct WatchContext {
     var preferredGlucoseUnit: HKUnit?
     var maxBolus: Double?
 
@@ -42,16 +38,16 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
 
-    var cgm: CGM?
+    var cgm: CGMType?
+}
 
-    override init() {
-        super.init()
-    }
+extension WatchContext: RawRepresentable {
+    typealias RawValue = [String: Any]
 
-    required init?(rawValue: RawValue) {
-        super.init()
+    static let version = 3
 
-        guard rawValue["v"] as? Int == version else {
+    init?(rawValue: RawValue) {
+        guard rawValue["v"] as? Int == type(of: self).version else {
             return nil
         }
 
@@ -93,14 +89,14 @@ final class WatchContext: NSObject, RawRepresentable {
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
 
-        if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
-            cgm = CGM(rawValue: cgmRawValue)
+        if let cgmRawValue = rawValue["cgm"] as? CGMType.RawValue {
+            cgm = CGMType(rawValue: cgmRawValue)
         }
     }
 
     var rawValue: RawValue {
         var raw: [String: Any] = [
-            "v": version
+            "v": type(of: self).version
         ]
 
         raw["ba"] = lastNetTempBasalDose

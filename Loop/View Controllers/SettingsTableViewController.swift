@@ -963,7 +963,7 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
                 case .suspendThreshold:
                     if let controller = controller as? GlucoseThresholdTableViewController,
                         let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
+                        dataManager.loopManager.settings.suspendThreshold = GlucoseThresholdSetting(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.loopManager.settings.suspendThreshold = nil
                     }

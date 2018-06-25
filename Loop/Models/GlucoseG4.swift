@@ -37,8 +37,8 @@ extension GlucoseG4: SensorDisplayable {
         }
     }
 
-    public var trendType: GlucoseTrend? {
-        return GlucoseTrend(rawValue: Int(trend))
+    public var trendType: GlucoseTrendType? {
+        return GlucoseTrendType(rawValue: Int(trend))
     }
 
     public var isLocal: Bool {

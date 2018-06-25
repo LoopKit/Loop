@@ -9,7 +9,7 @@
 import Foundation
 
 
-public enum GlucoseTrend: Int {
+public enum GlucoseTrendType: Int {
     case upUpUp       = 1
     case upUp         = 2
     case up           = 3

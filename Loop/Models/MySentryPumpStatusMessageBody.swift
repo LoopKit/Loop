@@ -21,7 +21,7 @@ extension MySentryPumpStatusMessageBody: SensorDisplayable {
         }
     }
 
-    public var trendType: LoopUI.GlucoseTrend? {
+    public var trendType: LoopUI.GlucoseTrendType? {
         guard case .active = glucose else {
             return nil
         }

@@ -32,10 +32,11 @@ struct GlucoseRangeScheduleOverrideUserInfo {
     }
 }
 
+
 extension GlucoseRangeScheduleOverrideUserInfo: RawRepresentable {
     typealias RawValue = [String: Any]
 
-    static let version = 1
+    private static let version = 1
     static let name = "GlucoseRangeScheduleOverrideUserInfo"
 
     init?(rawValue: RawValue) {

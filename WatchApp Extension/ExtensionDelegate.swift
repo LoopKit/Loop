@@ -130,7 +130,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     private lazy var healthStore = HKHealthStore()
 
     fileprivate func updateContext(_ data: [String: Any]) {
-        if let context = WatchContext(rawValue: data as WatchContext.RawValue) {
+        if var context = WatchContext(rawValue: data as WatchContext.RawValue) {
             if context.preferredGlucoseUnit == nil {
                 let type = HKQuantityType.quantityType(forIdentifier: .bloodGlucose)!
                 healthStore.preferredUnits(for: [type]) { (units, error) in

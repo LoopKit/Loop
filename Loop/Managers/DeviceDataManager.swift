@@ -617,7 +617,7 @@ final class DeviceDataManager {
 
     // MARK: - CGM
 
-    var cgm: CGM? = UserDefaults.appGroup.cgm {
+    var cgm: CGMType? = UserDefaults.appGroup.cgm {
         didSet {
             if cgm != oldValue {
                 setupCGM()

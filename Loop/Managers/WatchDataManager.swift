@@ -119,9 +119,12 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
         loopManager.getLoopState { (manager, state) in
             let eventualGlucose = state.predictedGlucose?.last
-            let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: manager.glucoseStore.preferredUnit)
+            var context = WatchContext()
+            context.glucose = glucose?.quantity
+            context.glucoseDate = glucose?.startDate
+            context.eventualGlucose = eventualGlucose?.quantity
+            context.preferredGlucoseUnit = manager.glucoseStore.preferredUnit
             context.reservoir = reservoir?.unitVolume
-
             context.loopLastRunDate = manager.lastLoopCompleted
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.maxBolus = manager.settings.maximumBolus

@@ -9,10 +9,10 @@
 import Foundation
 
 extension WatchContext {
-    var glucoseTrend: GlucoseTrend? {
+    var glucoseTrend: GlucoseTrendType? {
         get {
             if let glucoseTrendRawValue = glucoseTrendRawValue {
-                return GlucoseTrend(rawValue: glucoseTrendRawValue)
+                return GlucoseTrendType(rawValue: glucoseTrendRawValue)
             } else {
                 return nil
             }

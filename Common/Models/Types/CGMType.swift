@@ -1,5 +1,5 @@
 //
-//  CGM.swift
+//  CGMType.swift
 //  Loop
 //
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum CGM {
+enum CGMType {
     case g5(transmitterID: String?)
     case g4
     case enlite
@@ -33,20 +33,20 @@ enum CGM {
 }
 
 
-extension CGM: RawRepresentable {
+extension CGMType: RawRepresentable {
     typealias RawValue = [String: Any]
     private static let version = 1
 
     init?(rawValue: RawValue) {
         guard
             let version = rawValue["version"] as? Int,
-            version == CGM.version,
+            version == CGMType.version,
             let type = rawValue["type"] as? String
         else {
             return nil
         }
 
-        switch CGMType(rawValue: type) {
+        switch InternalType(rawValue: type) {
         case .g5?:
             self = .g5(transmitterID: rawValue["transmitterID"] as? String)
         case .g4?:
@@ -58,13 +58,13 @@ extension CGM: RawRepresentable {
         }
     }
 
-    private enum CGMType: String {
+    private enum InternalType: String {
         case g5
         case g4
         case enlite
     }
 
-    private var type: CGMType {
+    private var type: InternalType {
         switch self {
         case .g5: return .g5
         case .g4: return .g4
@@ -74,7 +74,7 @@ extension CGM: RawRepresentable {
 
     var rawValue: [String: Any] {
         var raw: RawValue = [
-            "version": CGM.version,
+            "version": CGMType.version,
             "type": type.rawValue
         ]
 
@@ -87,8 +87,8 @@ extension CGM: RawRepresentable {
 }
 
 
-extension CGM: Equatable {
-    static func ==(lhs: CGM, rhs: CGM) -> Bool {
+extension CGMType: Equatable {
+    static func ==(lhs: CGMType, rhs: CGMType) -> Bool {
         switch (lhs, rhs) {
         case (.g4, .g4), (.enlite, .enlite):
             return true
@@ -99,3 +99,4 @@ extension CGM: Equatable {
         }
     }
 }
+

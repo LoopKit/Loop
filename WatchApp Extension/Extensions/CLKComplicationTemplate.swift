@@ -21,7 +21,7 @@ extension CLKComplicationTemplate {
         return templateForFamily(family, glucose: glucose, unit: unit, date: context.glucoseDate, trend: context.glucoseTrend, eventualGlucose: context.eventualGlucose)
     }
 
-    static func templateForFamily(_ family: CLKComplicationFamily, glucose: HKQuantity, unit: HKUnit, date: Date?, trend: GlucoseTrend?, eventualGlucose: HKQuantity?) -> CLKComplicationTemplate? {
+    static func templateForFamily(_ family: CLKComplicationFamily, glucose: HKQuantity, unit: HKUnit, date: Date?, trend: GlucoseTrendType?, eventualGlucose: HKQuantity?) -> CLKComplicationTemplate? {
 
         let formatter = NumberFormatter.glucoseFormatter(for: unit)
 

@@ -103,9 +103,9 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule = nil
                 }
 
-                let suspendThreshold: GlucoseThreshold?
+                let suspendThreshold: GlucoseThresholdSetting?
                 if let rawValue = dictionary(forKey: "com.loopkit.Loop.MinimumBGGuard") {
-                    suspendThreshold = GlucoseThreshold(rawValue: rawValue)
+                    suspendThreshold = GlucoseThresholdSetting(rawValue: rawValue)
                 } else {
                     suspendThreshold = nil
                 }

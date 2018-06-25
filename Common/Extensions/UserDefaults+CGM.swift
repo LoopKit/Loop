@@ -13,10 +13,10 @@ extension UserDefaults {
         case cgmSettings = "com.loopkit.Loop.cgmSettings"
     }
 
-    var cgm: CGM? {
+    var cgm: CGMType? {
         get {
             if let rawValue = dictionary(forKey: Key.cgmSettings.rawValue) {
-                return CGM(rawValue: rawValue)
+                return CGMType(rawValue: rawValue)
             } else {
                 return nil
             }

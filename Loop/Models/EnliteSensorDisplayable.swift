@@ -13,7 +13,7 @@ import MinimedKit
 
 struct EnliteSensorDisplayable: SensorDisplayable {
     public let isStateValid: Bool
-    public let trendType: LoopUI.GlucoseTrend?
+    public let trendType: LoopUI.GlucoseTrendType?
     public let isLocal: Bool
 
     public init?(_ event: RelativeTimestampedGlucoseEvent) {
@@ -28,7 +28,7 @@ extension RelativeTimestampedGlucoseEvent {
         return self is SensorValueGlucoseEvent
     }
 
-    var trendType: LoopUI.GlucoseTrend? {
+    var trendType: LoopUI.GlucoseTrendType? {
         return nil
     }
 
