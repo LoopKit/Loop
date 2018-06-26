@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import LoopKit
 
 
 enum CGM {
     case g5(transmitterID: String?)
     case g4
-    case enlite
+    case usePump
 
     var appURL: URL? {
         switch self {
@@ -26,7 +27,7 @@ enum CGM {
                 }
             }
             return nil
-        case .enlite:
+        case .usePump:
             return nil
         }
     }
@@ -51,8 +52,8 @@ extension CGM: RawRepresentable {
             self = .g5(transmitterID: rawValue["transmitterID"] as? String)
         case .g4?:
             self = .g4
-        case .enlite?:
-            self = .enlite
+        case .usePump?:
+            self = .usePump
         case .none:
             return nil
         }
@@ -61,14 +62,14 @@ extension CGM: RawRepresentable {
     private enum CGMType: String {
         case g5
         case g4
-        case enlite
+        case usePump = "enlite"
     }
 
     private var type: CGMType {
         switch self {
         case .g5: return .g5
         case .g4: return .g4
-        case .enlite: return .enlite
+        case .usePump: return .usePump
         }
     }
 
@@ -90,7 +91,7 @@ extension CGM: RawRepresentable {
 extension CGM: Equatable {
     static func ==(lhs: CGM, rhs: CGM) -> Bool {
         switch (lhs, rhs) {
-        case (.g4, .g4), (.enlite, .enlite):
+        case (.g4, .g4), (.usePump, .usePump):
             return true
         case (.g5(let a), .g5(let b)):
             return a == b

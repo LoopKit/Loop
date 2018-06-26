@@ -5,14 +5,12 @@
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
 
-import CoreData
 import LoopKit
-import MinimedKit
 import NightscoutUploadKit
 
 
 extension NightscoutUploader: CarbStoreSyncDelegate {
-    static let logger = DiagnosticLogger.shared!.forCategory("NightscoutUploader")
+    static let logger = DiagnosticLogger.shared.forCategory("NightscoutUploader")
 
     public func carbStore(_ carbStore: CarbStore, hasEntriesNeedingUpload entries: [StoredCarbEntry], completion: @escaping ([StoredCarbEntry]) -> Void) {
         var created = [StoredCarbEntry]()
@@ -72,21 +70,20 @@ extension NightscoutUploader: CarbStoreSyncDelegate {
 
 
 extension NightscoutUploader {
-    func upload(_ events: [PersistedPumpEvent], from pumpModel: PumpModel, completion: @escaping (NightscoutUploadKit.Either<[URL], Error>) -> Void) {
+    func upload(_ events: [PersistedPumpEvent], fromSource source: String, completion: @escaping (NightscoutUploadKit.Either<[URL], Error>) -> Void) {
         var objectIDURLs = [URL]()
-        var timestampedPumpEvents = [TimestampedHistoryEvent]()
+        var treatments = [NightscoutTreatment]()
 
         for event in events {
-            objectIDURLs.append(event.objectIDURL)
-
-            if let raw = event.raw, raw.count > 0, let type = MinimedKit.PumpEventType(rawValue: raw[0])?.eventType, let pumpEvent = type.init(availableData: raw, pumpModel: pumpModel) {
-                timestampedPumpEvents.append(TimestampedHistoryEvent(pumpEvent: pumpEvent, date: event.date))
+            guard let treatment = event.treatment(enteredBy: source) else {
+                continue
             }
+
+            objectIDURLs.append(event.objectIDURL)
+            treatments.append(treatment)
         }
 
-        let nsEvents = NightscoutPumpEvents.translate(timestampedPumpEvents, eventSource: "loop://\(UIDevice.current.name)", includeCarbs: false)
-
-        self.upload(nsEvents) { (result) in
+        self.upload(treatments) { (result) in
             switch result {
             case .success( _):
                 completion(.success(objectIDURLs))

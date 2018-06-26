@@ -7,7 +7,6 @@
 
 import Foundation
 import LoopKit
-import MinimedKit
 
 
 extension UserDefaults {
@@ -20,15 +19,17 @@ extension UserDefaults {
             shared.basalRateSchedule = standard.basalRateSchedule
             shared.carbRatioSchedule = standard.carbRatioSchedule
             shared.cgm               = standard.cgm
-            shared.connectedPeripheralIDs = standard.connectedPeripheralIDs
             shared.loopSettings      = standard.loopSettings
             shared.insulinModelSettings = standard.insulinModelSettings
             shared.insulinSensitivitySchedule = standard.insulinSensitivitySchedule
-            shared.preferredInsulinDataSource = standard.preferredInsulinDataSource
-            shared.batteryChemistry  = standard.batteryChemistry
         }
 
         shared?.removeObject(forKey: "com.loopkit.Loop.insulinCounteractionEffects")
+        shared?.removeObject(forKey: "com.loopkit.Loop.BatteryChemistry")
+        shared?.removeObject(forKey: "com.loudnate.Loop.PreferredInsulinDataSource")
+        shared?.removeObject(forKey: "com.loopkit.Loop.PumpState")
+        shared?.removeObject(forKey: "com.loopkit.Loop.PumpSettings")
+        shared?.removeObject(forKey: "com.loudnate.Naterade.ConnectedPeripheralIDs")
 
         return shared ?? standard
     }()
@@ -37,33 +38,19 @@ extension UserDefaults {
 
 extension UserDefaults {
     private enum Key: String {
-        case batteryChemistry = "com.loopkit.Loop.BatteryChemistry"
-        case preferredInsulinDataSource = "com.loudnate.Loop.PreferredInsulinDataSource"
+        case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
     }
 
-    var preferredInsulinDataSource: InsulinDataSource? {
+    var pumpManager: PumpManager? {
         get {
-            return InsulinDataSource(rawValue: integer(forKey: Key.preferredInsulinDataSource.rawValue))
-        }
-        set {
-            if let preferredInsulinDataSource = newValue {
-                set(preferredInsulinDataSource.rawValue, forKey: Key.preferredInsulinDataSource.rawValue)
-            } else {
-                removeObject(forKey: Key.preferredInsulinDataSource.rawValue)
+            guard let rawValue = dictionary(forKey: Key.pumpManagerState.rawValue) else {
+                return nil
             }
-        }
-    }
 
-    var batteryChemistry: BatteryChemistryType? {
-        get {
-            return BatteryChemistryType(rawValue: integer(forKey: Key.batteryChemistry.rawValue))
+            return PumpManagerFromRawValue(rawValue)
         }
         set {
-            if let batteryChemistry = newValue {
-                set(batteryChemistry.rawValue, forKey: Key.batteryChemistry.rawValue)
-            } else {
-                removeObject(forKey: Key.batteryChemistry.rawValue)
-            }
+            set(newValue?.rawValue, forKey: Key.pumpManagerState.rawValue)
         }
     }
 }

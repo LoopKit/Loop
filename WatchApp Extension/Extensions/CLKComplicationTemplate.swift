@@ -8,6 +8,7 @@
 
 import ClockKit
 import HealthKit
+import LoopKit
 import Foundation
 
 

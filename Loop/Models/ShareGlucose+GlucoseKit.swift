@@ -9,7 +9,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopUI
 import ShareClient
 
 
