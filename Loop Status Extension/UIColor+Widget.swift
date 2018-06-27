@@ -21,6 +21,8 @@ extension UIColor {
     @nonobjc static let glucoseTintColor = UIColor(red: 0 / 255, green: 122 / 255, blue: 244 / 255, alpha: 1)
 
     @nonobjc static let gridColor = subtitleLabelColor
+    
+    @nonobjc static let lastDateColor = UIColor.HIGPurpleColor().withAlphaComponent(0.4)
 
     @nonobjc static let pumpStatusNormal = UIColor(red: 100 / 255, green: 101 / 255, blue: 105 / 255, alpha: 1)
 
