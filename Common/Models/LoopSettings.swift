@@ -23,6 +23,11 @@ struct LoopSettings {
     var suspendThreshold: GlucoseThreshold? = nil
 
     var retrospectiveCorrectionEnabled = true
+    
+    var basalProfileStandard: BasalRateSchedule?
+    var basalProfileA: BasalRateSchedule?
+    var basalProfileB: BasalRateSchedule?
+    var activeBasalProfile: BasalProfile?
 
     var integralRetrospectiveCorrectionEnabled = true
 
@@ -58,6 +63,22 @@ extension LoopSettings: RawRepresentable {
         if let rawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
             self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: rawValue)
         }
+        
+        if let rawValue = rawValue["basalProfileB"] as? BasalRateSchedule.RawValue {
+            self.basalProfileB = BasalRateSchedule(rawValue: rawValue)
+        }
+        
+        if let rawValue = rawValue["basalProfileA"] as? BasalRateSchedule.RawValue {
+            self.basalProfileA = BasalRateSchedule(rawValue: rawValue)
+        }
+        
+        if let rawValue = rawValue["basalProfileStandard"] as? BasalRateSchedule.RawValue {
+            self.basalProfileStandard = BasalRateSchedule(rawValue: rawValue)
+        }
+        
+        if let rawValue = rawValue["activeBasalProfile"] as? BasalProfile.RawValue {
+            self.activeBasalProfile = BasalProfile(rawValue: rawValue)
+        }
 
         self.maximumBasalRatePerHour = rawValue["maximumBasalRatePerHour"] as? Double
 
@@ -88,6 +109,10 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
+        raw["basalProfileB"] = basalProfileB?.rawValue
+        raw["basalProfileA"] = basalProfileA?.rawValue
+        raw["basalProfileStandard"] = basalProfileStandard?.rawValue
+        raw["activeBasalProfile"] = activeBasalProfile?.rawValue
 
         return raw
     }

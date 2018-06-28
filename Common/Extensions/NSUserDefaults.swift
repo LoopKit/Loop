@@ -16,7 +16,11 @@ import RileyLinkKit
 extension UserDefaults {
 
     private enum Key: String {
+        case activeBasalProfile = "com.loudnate.Naterade.activeBasalProfile"
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
+        case basalRateScheduleA = "com.loudnate.Naterade.BasalRateScheduleA"
+        case basalRateScheduleB = "com.loudnate.Naterade.BasalRateScheduleB"
+        case basalRateScheduleStandard = "com.loudnate.Naterade.BasalRateScheduleStandard"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
         case connectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
@@ -36,6 +40,60 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.basalRateSchedule.rawValue)
+        }
+    }
+    
+    var basalRateScheduleA: BasalRateSchedule? {
+        get {
+            if let rawValue = dictionary(forKey: Key.basalRateScheduleA.rawValue) {
+                return BasalRateSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.basalRateScheduleA.rawValue)
+        }
+    }
+    
+    var basalRateScheduleB: BasalRateSchedule? {
+        get {
+            if let rawValue = dictionary(forKey: Key.basalRateScheduleB.rawValue) {
+                return BasalRateSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.basalRateScheduleB.rawValue)
+        }
+    }
+    
+    var basalRateScheduleStandard: BasalRateSchedule? {
+        get {
+            if let rawValue = dictionary(forKey: Key.basalRateScheduleStandard.rawValue) {
+                return BasalRateSchedule(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.basalRateScheduleStandard.rawValue)
+        }
+    }
+    
+    var activeBasalProfile: BasalProfile? {
+        get {
+            let rawValue = Key.activeBasalProfile.rawValue
+            return BasalProfile(rawValue: integer(forKey: rawValue))
+            
+        }
+        set {
+            if let activeBasalProfile = newValue {
+                set(activeBasalProfile.rawValue, forKey: Key.activeBasalProfile.rawValue)
+            } else {
+                removeObject(forKey: Key.activeBasalProfile.rawValue)
+            }
         }
     }
 
@@ -89,11 +147,15 @@ extension UserDefaults {
                 // Migrate the version 0 case
                 defer {
                     removeObject(forKey: "com.loudnate.Naterade.DosingEnabled")
+                    removeObject(forKey: "com.loudnate.Naterade.activeBasalProfile")
                     removeObject(forKey: "com.loudnate.Naterade.GlucoseTargetRangeSchedule")
                     removeObject(forKey: "com.loudnate.Naterade.MaximumBasalRatePerHour")
                     removeObject(forKey: "com.loudnate.Naterade.MaximumBolus")
                     removeObject(forKey: "com.loopkit.Loop.MinimumBGGuard")
                     removeObject(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
+                    removeObject(forKey: "com.loudnate.Naterade.BasalRateScheduleA")
+                    removeObject(forKey: "com.loudnate.Naterade.BasalRateScheduleB")
+                    removeObject(forKey: "com.loudnate.Naterade.BasalRateScheduleStandard")
                 }
 
                 let glucoseTargetRangeSchedule: GlucoseRangeSchedule?
@@ -127,7 +189,11 @@ extension UserDefaults {
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled"),
-                    integralRetrospectiveCorrectionEnabled: bool(forKey: "com.loopkit.Loop.IntegralRetrospectiveCorrectionEnabled")
+                    integralRetrospectiveCorrectionEnabled: bool(forKey: "com.loopkit.Loop.IntegralRetrospectiveCorrectionEnabled"),
+                    basalProfileStandard: basalRateScheduleStandard,
+                    basalProfileA: basalRateScheduleA,
+                    basalProfileB: basalRateScheduleB,
+                    activeBasalProfile: activeBasalProfile
                 )
                 self.loopSettings = settings
 

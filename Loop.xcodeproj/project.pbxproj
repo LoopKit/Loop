@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1F11183220E5A83B00E0F87D /* BasalProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F11183120E5A83B00E0F87D /* BasalProfile.swift */; };
+		1F11183320E5A84100E0F87D /* BasalProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F11183120E5A83B00E0F87D /* BasalProfile.swift */; };
 		1FCA446720E18004001554A1 /* UserDefaults+delta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCA446620E18004001554A1 /* UserDefaults+delta.swift */; };
 		1FCA446B20E184CC001554A1 /* NightscoutUploader+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FCA446A20E184CB001554A1 /* NightscoutUploader+Profile.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -445,6 +447,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1F11183120E5A83B00E0F87D /* BasalProfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalProfile.swift; sourceTree = "<group>"; };
 		1FCA446620E18004001554A1 /* UserDefaults+delta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+delta.swift"; sourceTree = "<group>"; };
 		1FCA446A20E184CB001554A1 /* NightscoutUploader+Profile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NightscoutUploader+Profile.swift"; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
@@ -1234,6 +1237,7 @@
 			children = (
 				43673E2E1F37BDA10058AC7C /* Insulin */,
 				435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */,
+				1F11183120E5A83B00E0F87D /* BasalProfile.swift */,
 				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4309786D1E73DAD100BEBC82 /* CGM.swift */,
@@ -1827,6 +1831,7 @@
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */,
+				1F11183220E5A83B00E0F87D /* BasalProfile.swift in Sources */,
 				4344628F20A7ADD500C4BE6F /* UserDefaults+CGM.swift in Sources */,
 				894B91CD1FF9F45900DA65F5 /* GlucoseRangeScheduleOverrideUserInfo.swift in Sources */,
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
@@ -1951,6 +1956,7 @@
 				43BFF0C71E465A4F00FF19A9 /* UIColor+HIG.swift in Sources */,
 				43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
+				1F11183320E5A84100E0F87D /* BasalProfile.swift in Sources */,
 				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 				430B298B2041F55700BA9F93 /* NSUserDefaults.swift in Sources */,
 			);
