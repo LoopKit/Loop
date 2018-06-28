@@ -189,7 +189,11 @@ extension UserDefaults {
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled"),
-                    basalProfileStandard: basalRateScheduleStandard, basalProfileA: basalRateScheduleA, basalProfileB: basalRateScheduleB, activeBasalProfile: activeBasalProfile, integralRetrospectiveCorrectionEnabled: bool(forKey: "com.loopkit.Loop.IntegralRetrospectiveCorrectionEnabled")
+                    basalProfileStandard: basalRateScheduleStandard,
+                    basalProfileA: basalRateScheduleA,
+                    basalProfileB: basalRateScheduleB,
+                    activeBasalProfile: activeBasalProfile,
+                    integralRetrospectiveCorrectionEnabled: bool(forKey: "com.loopkit.Loop.IntegralRetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings
 
