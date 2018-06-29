@@ -111,7 +111,6 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case basalRateStandard
         case basalRateA
         case basalRateB
-        case basalRate
         case carbRatio
         case insulinSensitivity
         case maxBasal
