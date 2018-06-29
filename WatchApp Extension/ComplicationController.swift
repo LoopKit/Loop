@@ -19,7 +19,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineStartDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
+        if let date = ExtensionDelegate.shared().activeContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -27,7 +27,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     }
     
     func getTimelineEndDate(for complication: CLKComplication, withHandler handler: @escaping (Date?) -> Void) {
-        if let date = ExtensionDelegate.shared().lastContext?.glucoseDate {
+        if let date = ExtensionDelegate.shared().activeContext?.glucoseDate {
             handler(date)
         } else {
             handler(nil)
@@ -45,7 +45,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
         let entry: CLKComplicationTimelineEntry?
 
-        if  let context = ExtensionDelegate.shared().lastContext,
+        if  let context = ExtensionDelegate.shared().activeContext,
             let glucoseDate = context.glucoseDate,
             glucoseDate.timeIntervalSinceNow.minutes >= -15,
             let template = CLKComplicationTemplate.templateForFamily(complication.family, from: context)
@@ -68,7 +68,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         // Call the handler with the timeline entries after to the given date
         let entries: [CLKComplicationTimelineEntry]?
 
-        if  let context = ExtensionDelegate.shared().lastContext,
+        if  let context = ExtensionDelegate.shared().activeContext,
             let glucoseDate = context.glucoseDate,
             glucoseDate.timeIntervalSince(date) > 0,
             let template = CLKComplicationTemplate.templateForFamily(complication.family, from: context)
