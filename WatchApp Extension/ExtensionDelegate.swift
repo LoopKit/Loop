@@ -16,6 +16,7 @@ import UserNotifications
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
+    private(set) lazy var loopManager = LoopDataManager()
 
     private let log = OSLog(category: "ExtensionDelegate")
 
@@ -57,7 +58,13 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    func applicationWillResignActive() {
+        UserDefaults.standard.startOnChartPage = (WKExtension.shared().visibleInterfaceController as? ChartHUDController) != nil
+    }
+
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
+        loopManager.glucoseStore.maybeRequestGlucoseBackfill()
+
         for task in backgroundTasks {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
@@ -121,9 +128,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     // Main queue only
-    private(set) var lastContext: WatchContext? {
+    private(set) var activeContext: WatchContext? {
         didSet {
-            WKExtension.shared().rootUpdatableInterfaceController?.update(with: lastContext)
+            loopManager.activeContext = activeContext
 
             if WKExtension.shared().applicationState != .active {
                 WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: Date(), userInfo: nil) { (error) in
@@ -161,15 +168,15 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                     context.preferredGlucoseUnit = units[type]
 
                     DispatchQueue.main.async {
-                        if self.lastContext == nil || context.shouldReplace(self.lastContext!) {
-                            self.lastContext = context
+                        if self.activeContext == nil || context.shouldReplace(self.activeContext!) {
+                            self.activeContext = context
                         }
                     }
                 }
             } else {
                 DispatchQueue.main.async {
-                    if self.lastContext == nil || context.shouldReplace(self.lastContext!) {
-                        self.lastContext = context
+                    if self.activeContext == nil || context.shouldReplace(self.activeContext!) {
+                        self.activeContext = context
                     }
                 }
             }
@@ -221,9 +228,5 @@ extension ExtensionDelegate {
 fileprivate extension WKExtension {
     var extensionDelegate: ExtensionDelegate! {
         return delegate as? ExtensionDelegate
-    }
-
-    var rootUpdatableInterfaceController: ContextUpdatable? {
-        return rootInterfaceController as? ContextUpdatable
     }
 }
