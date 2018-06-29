@@ -1,5 +1,5 @@
 //
-//  HealthKitManager.swift
+//  LoopDataManager.swift
 //  WatchApp Extension
 //
 //  Created by Bharat Mediratta on 6/21/18.
