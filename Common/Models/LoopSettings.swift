@@ -6,7 +6,6 @@
 //
 
 import LoopKit
-import RileyLinkBLEKit
 
 
 struct LoopSettings {

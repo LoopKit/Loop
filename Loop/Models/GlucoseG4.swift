@@ -10,7 +10,6 @@ import Foundation
 import G4ShareSpy
 import HealthKit
 import LoopKit
-import LoopUI
 
 
 extension GlucoseG4: GlucoseValue {

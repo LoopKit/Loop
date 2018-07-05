@@ -103,19 +103,13 @@ extension InsulinCorrection {
 }
 
 
-struct TempBasalRecommendation {
+struct TempBasalRecommendation: Equatable {
     let unitsPerHour: Double
     let duration: TimeInterval
 
     /// A special command which cancels any existing temp basals
     static var cancel: TempBasalRecommendation {
         return self.init(unitsPerHour: 0, duration: 0)
-    }
-}
-
-extension TempBasalRecommendation: Equatable {
-    static func ==(lhs: TempBasalRecommendation, rhs: TempBasalRecommendation) -> Bool {
-        return lhs.unitsPerHour == rhs.unitsPerHour && lhs.duration == rhs.duration
     }
 }
 
