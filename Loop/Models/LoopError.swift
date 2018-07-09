@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import RileyLinkKit
+import LoopKit
 
 
 enum LoopError: Error {

@@ -13,14 +13,14 @@ import LoopKit
 
 final class WatchDataManager: NSObject, WCSessionDelegate {
 
-    unowned let deviceDataManager: DeviceDataManager
+    unowned let deviceManager: DeviceDataManager
 
-    init(deviceDataManager: DeviceDataManager) {
-        self.deviceDataManager = deviceDataManager
+    init(deviceManager: DeviceDataManager) {
+        self.deviceManager = deviceManager
 
         super.init()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: deviceManager.loopManager)
 
         watchSession?.delegate = self
         watchSession?.activate()
@@ -52,8 +52,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         case .tempBasal:
             break
         case .preferences:
-            let activeOverrideContext = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.activeOverrideContext
-            let configuredOverrideContexts = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+            let activeOverrideContext = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.activeOverrideContext
+            let configuredOverrideContexts = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
             defer {
                 lastActiveOverrideContext = activeOverrideContext
                 lastConfiguredOverrideContexts = configuredOverrideContexts
@@ -106,14 +106,14 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 do {
                     try session.updateApplicationContext(context.rawValue)
                 } catch let error {
-                    deviceDataManager.logger.addError(error, fromSource: "WCSession")
+                    deviceManager.logger.addError(error, fromSource: "WCSession")
                 }
             }
         }
     }
 
     private func createWatchContext(_ completion: @escaping (_ context: WatchContext?) -> Void) {
-        let loopManager = deviceDataManager.loopManager!
+        let loopManager = deviceManager.loopManager!
 
         let glucose = loopManager.glucoseStore.latestGlucose
         let reservoir = loopManager.doseStore.lastReservoirValue
@@ -130,9 +130,9 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.maxBolus = manager.settings.maximumBolus
             context.COB = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
-            context.glucoseTrendRawValue = self.deviceDataManager.sensorInfo?.trendType?.rawValue
+            context.glucoseTrendRawValue = self.deviceManager.sensorInfo?.trendType?.rawValue
 
-            context.cgm = self.deviceDataManager.cgm
+            context.cgm = self.deviceManager.cgm
 
             if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
                 if let override = glucoseTargetRangeSchedule.override {
@@ -150,7 +150,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     )
                 }
 
-                let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+                let configuredOverrideContexts = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
                 let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
                 context.configuredOverrideContexts = configuredUserInfoOverrideContexts
 
@@ -188,6 +188,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.predictedGlucose = WatchPredictedGlucose(values: Array(predictedGlucose))
             }
 
+            if let trend = self.deviceManager.sensorInfo?.trendType {
+                context.glucoseTrendRawValue = trend.rawValue
+            }
+
             _ = updateGroup.wait(timeout: .distantFuture)
             completion(context)
         }
@@ -196,19 +200,19 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
     private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ units: Double?) -> Void)? = nil) {
         if let carbEntry = CarbEntryUserInfo(rawValue: message) {
             let newEntry = NewCarbEntry(
-                quantity: HKQuantity(unit: deviceDataManager.loopManager.carbStore.preferredUnit, doubleValue: carbEntry.value),
+                quantity: HKQuantity(unit: deviceManager.loopManager.carbStore.preferredUnit, doubleValue: carbEntry.value),
                 startDate: carbEntry.startDate,
                 foodType: nil,
-                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(deviceDataManager.loopManager.carbStore.defaultAbsorptionTimes)
+                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(deviceManager.loopManager.carbStore.defaultAbsorptionTimes)
             )
 
-            deviceDataManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (result) in
+            deviceManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (result) in
                 switch result {
                 case .success(let recommendation):
                     AnalyticsManager.shared.didAddCarbsFromWatch(carbEntry.value)
                     completionHandler?(recommendation?.amount)
                 case .failure(let error):
-                    self.deviceDataManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
+                    self.deviceManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
                     completionHandler?(nil)
                 }
             }
@@ -223,11 +227,11 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
             addCarbEntryFromWatchMessage(message) { (units) in
-                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0, maxBolus: self.deviceDataManager.loopManager.settings.maximumBolus).rawValue)
+                replyHandler(BolusSuggestionUserInfo(recommendedBolus: units ?? 0, maxBolus: self.deviceManager.loopManager.settings.maximumBolus).rawValue)
             }
         case SetBolusUserInfo.name?:
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
-                self.deviceDataManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
+                self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                     if error == nil {
                         AnalyticsManager.shared.didSetBolusFromWatch(bolus.value)
                     }
@@ -238,14 +242,14 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         case GlucoseRangeScheduleOverrideUserInfo.name?:
             // Successful changes will trigger a preferences change which will update the watch with the new overrides
             if let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: message) {
-                _ = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideUserInfo.context.correspondingOverrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
+                _ = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideUserInfo.context.correspondingOverrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
             } else {
-                deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
+                deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
             }
             replyHandler([:])
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message),
-                let manager = deviceDataManager.loopManager {
+                let manager = deviceManager.loopManager {
                 manager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate) { (values) in
                     replyHandler(WatchHistoricalGlucose(with: values).rawValue)
                 }
@@ -265,7 +269,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         switch activationState {
         case .activated:
             if let error = error {
-                deviceDataManager.logger.addError(error, fromSource: "WCSession")
+                deviceManager.logger.addError(error, fromSource: "WCSession")
             }
         case .inactive, .notActivated:
             break
@@ -274,7 +278,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
         if let error = error {
-            deviceDataManager.logger.addError(error, fromSource: "WCSession")
+            deviceManager.logger.addError(error, fromSource: "WCSession")
         }
     }
 

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 
 extension WatchContext {
     var glucoseTrend: GlucoseTrend? {

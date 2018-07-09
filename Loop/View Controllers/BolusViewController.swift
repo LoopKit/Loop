@@ -68,7 +68,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
-            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
+            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)
             updateNotice()
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin

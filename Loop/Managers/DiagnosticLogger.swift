@@ -12,14 +12,6 @@ import os.log
 
 final class DiagnosticLogger {
     private let isSimulator: Bool = TARGET_OS_SIMULATOR != 0
-    let subsystem: String
-    let version: String
-
-    private var mLabService: MLabService {
-        didSet {
-            try! KeychainManager().setMLabDatabaseName(mLabService.databaseName, APIKey: mLabService.APIKey)
-        }
-    }
 
     var logglyService: LogglyService {
         didSet {
@@ -29,15 +21,13 @@ final class DiagnosticLogger {
 
     let remoteLogLevel: OSLogType
 
-    static var shared: DiagnosticLogger?
+    static let shared: DiagnosticLogger = DiagnosticLogger()
 
-    init(subsystem: String, version: String) {
-        self.subsystem = subsystem
-        self.version = version
+    init() {
         remoteLogLevel = isSimulator ? .fault : .info
 
         // Delete the mLab credentials as they're no longer supported
-        mLabService = MLabService(databaseName: nil, APIKey: nil)
+        try! KeychainManager().setMLabDatabaseName(nil, APIKey: nil)
 
         let customerToken = KeychainManager().getLogglyCustomerToken()
         logglyService = LogglyService(customerToken: customerToken)

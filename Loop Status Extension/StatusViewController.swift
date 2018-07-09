@@ -205,10 +205,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 self.hudView.batteryHUD.batteryLevel = Double(batteryPercentage)
             }
 
-            if let reservoir = lastReservoirValue,
-                let capacity = defaults.pumpState?.pumpModel?.reservoirCapacity
-            {
-                self.hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+            if let reservoir = lastReservoirValue, let capacity = context.reservoirCapacity {
+                self.hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / capacity)))
                 self.hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
             }
 

@@ -9,14 +9,13 @@
 import HealthKit
 import UIKit
 import LoopKit
-import LoopUI
 
 
 final class StatusExtensionDataManager {
-    unowned let dataManager: DeviceDataManager
+    unowned let deviceManager: DeviceDataManager
 
     init(deviceDataManager: DeviceDataManager) {
-        self.dataManager = deviceDataManager
+        self.deviceManager = deviceDataManager
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
@@ -30,7 +29,7 @@ final class StatusExtensionDataManager {
     }
 
     @objc private func update(_ notification: Notification) {
-        guard let unit = (dataManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+        guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
             return
         }
 
@@ -42,8 +41,8 @@ final class StatusExtensionDataManager {
     }
 
     private func createContext(glucoseUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
-        dataManager.loopManager.getLoopState { (manager, state) in
-            let dataManager = self.dataManager
+        deviceManager.loopManager.getLoopState { (manager, state) in
+            let dataManager = self.deviceManager
             var context = StatusExtensionContext()
         
             #if IOS_SIMULATOR
@@ -100,9 +99,8 @@ final class StatusExtensionDataManager {
                 context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, start: netBasal.start, end: netBasal.end)
             }
 
-            if let batteryPercentage = dataManager.pumpBatteryChargeRemaining {
-                context.batteryPercentage = batteryPercentage
-            }
+            context.batteryPercentage = dataManager.pumpManager?.pumpBatteryChargeRemaining
+            context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
             if let sensorInfo = dataManager.sensorInfo {
                 context.sensor = SensorDisplayableContext(

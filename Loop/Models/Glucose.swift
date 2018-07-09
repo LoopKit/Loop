@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LoopUI
+import LoopKit
 import CGMBLEKit
 
 
