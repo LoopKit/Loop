@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import LoopKit
 
 
 public final class GlucoseHUDView: BaseHUDView {

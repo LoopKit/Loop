@@ -80,6 +80,10 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
+            self.charts.glucoseUnit = unit
+        }
+
         let notificationCenter = NotificationCenter.default
         notificationObservers += [
             notificationCenter.addObserver(forName: .UIApplicationWillResignActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
@@ -138,17 +142,26 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
         }
     }
 
-    @objc func unitPreferencesDidChange(_ note: Notification) {
+    @objc private func unitPreferencesDidChange(_ note: Notification) {
         DispatchQueue.main.async {
             if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
+                let didChange = unit != self.charts.glucoseUnit
                 self.charts.glucoseUnit = unit
+
+                if didChange {
+                    self.glucoseUnitDidChange()
+                }
             }
             self.log.debug("[reloadData] for HealthKit unit preference change")
             self.reloadData()
         }
     }
 
-    var charts = StatusChartsManager(colors: .default, settings: .default)
+    func glucoseUnitDidChange() {
+        // To override.
+    }
+
+    let charts = StatusChartsManager(colors: .default, settings: .default)
 
     // References to registered notification center observers
     var notificationObservers: [Any] = []

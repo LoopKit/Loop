@@ -1,6 +1,0 @@
-framework module Crypto {
-  umbrella header "Crypto.h"
-
-  export *
-  module * { export * }
-}

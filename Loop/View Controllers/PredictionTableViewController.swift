@@ -9,7 +9,7 @@
 import UIKit
 import HealthKit
 import LoopKit
-import LoopUI
+import LoopKitUI
 
 
 private extension RefreshContext {
@@ -82,6 +82,10 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
             charts.startDate = newValue
         }
+    }
+
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
     }
 
     override func reloadData(animated: Bool = false) {

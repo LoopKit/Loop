@@ -9,8 +9,6 @@
 import Foundation
 import LoopKit
 import HealthKit
-import MinimedKit
-import RileyLinkKit
 
 
 extension UserDefaults {
@@ -18,12 +16,9 @@ extension UserDefaults {
     private enum Key: String {
         case basalRateSchedule = "com.loudnate.Naterade.BasalRateSchedule"
         case carbRatioSchedule = "com.loudnate.Naterade.CarbRatioSchedule"
-        case connectedPeripheralIDs = "com.loudnate.Naterade.ConnectedPeripheralIDs"
         case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
-        case pumpSettings = "com.loopkit.Loop.PumpSettings"
-        case pumpState = "com.loopkit.Loop.PumpState"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -49,15 +44,6 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.carbRatioSchedule.rawValue)
-        }
-    }
-
-    var connectedPeripheralIDs: [String] {
-        get {
-            return array(forKey: Key.connectedPeripheralIDs.rawValue) as? [String] ?? []
-        }
-        set {
-            set(newValue, forKey: Key.connectedPeripheralIDs.rawValue)
         }
     }
 
@@ -148,72 +134,6 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.insulinSensitivitySchedule.rawValue)
-        }
-    }
-
-    var pumpSettings: PumpSettings? {
-        get {
-            if let raw = dictionary(forKey: Key.pumpSettings.rawValue) {
-                return PumpSettings(rawValue: raw)
-            } else {
-                // Migrate the version 0 case
-                let standard = UserDefaults.standard
-                defer {
-                    standard.removeObject(forKey: "com.loudnate.Naterade.PumpID")
-                    standard.removeObject(forKey: "com.loopkit.Loop.PumpRegion")
-                }
-
-                guard let pumpID = standard.string(forKey: "com.loudnate.Naterade.PumpID") else {
-                    return nil
-                }
-
-                let settings = PumpSettings(
-                    pumpID: pumpID,
-                    // Defaults to 0 / northAmerica
-                    pumpRegion: PumpRegion(rawValue: standard.integer(forKey: "com.loopkit.Loop.PumpRegion"))
-                )
-
-                self.pumpSettings = settings
-
-                return settings
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.pumpSettings.rawValue)
-        }
-    }
-
-    var pumpState: PumpState? {
-        get {
-            if let raw = dictionary(forKey: Key.pumpState.rawValue) {
-                return PumpState(rawValue: raw)
-            } else {
-                // Migrate the version 0 case
-                let standard = UserDefaults.standard
-                defer {
-                    standard.removeObject(forKey: "com.loudnate.Naterade.PumpModelNumber")
-                    standard.removeObject(forKey: "com.loudnate.Naterade.PumpTimeZone")
-                }
-
-                var state = PumpState()
-
-                if let pumpModelNumber = standard.string(forKey: "com.loudnate.Naterade.PumpModelNumber") {
-                    state.pumpModel = PumpModel(rawValue: pumpModelNumber)
-                }
-
-                if let offset = standard.object(forKey: "com.loudnate.Naterade.PumpTimeZone") as? NSNumber,
-                    let timeZone = TimeZone(secondsFromGMT: offset.intValue)
-                {
-                    state.timeZone = timeZone
-                }
-
-                self.pumpState = state
-
-                return state
-            }
-        }
-        set {
-            set(newValue?.rawValue, forKey: Key.pumpState.rawValue)
         }
     }
 }

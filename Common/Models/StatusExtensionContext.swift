@@ -10,7 +10,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopUI
 
 
 struct NetBasalContext {
@@ -154,12 +153,13 @@ extension PredictedGlucoseContext: RawRepresentable {
 
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
-    private let version = 4
+    private let version = 5
 
     var predictedGlucose: PredictedGlucoseContext?
     var lastLoopCompleted: Date?
     var netBasal: NetBasalContext?
     var batteryPercentage: Double?
+    var reservoirCapacity: Double?
     var sensor: SensorDisplayableContext?
     
     init() { }
@@ -179,6 +179,7 @@ struct StatusExtensionContext: RawRepresentable {
 
         lastLoopCompleted = rawValue["lastLoopCompleted"] as? Date
         batteryPercentage = rawValue["batteryPercentage"] as? Double
+        reservoirCapacity = rawValue["reservoirCapacity"] as? Double
 
         if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
             sensor = SensorDisplayableContext(rawValue: rawValue)
@@ -194,6 +195,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["lastLoopCompleted"] = lastLoopCompleted
         raw["netBasal"] = netBasal?.rawValue
         raw["batteryPercentage"] = batteryPercentage
+        raw["reservoirCapacity"] = reservoirCapacity
         raw["sensor"] = sensor?.rawValue
         return raw
     }

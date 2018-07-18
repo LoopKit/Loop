@@ -10,7 +10,6 @@ import HealthKit
 
 import LoopKit
 import LoopKitUI
-import LoopUI
 
 
 private extension RefreshContext {
@@ -89,6 +88,10 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
     private var carbTotal: CarbValue?
 
     // MARK: - Data loading
+
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
+    }
 
     override func reloadData(animated: Bool = false) {
         guard active && !reloading && !self.refreshContext.isEmpty else { return }

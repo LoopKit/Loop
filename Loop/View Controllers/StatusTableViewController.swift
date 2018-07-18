@@ -100,7 +100,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    var appearedOnce = false
+    private var appearedOnce = false
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -181,6 +181,10 @@ final class StatusTableViewController: ChartsTableViewController {
 
     private var shouldShowStatus: Bool {
         return !landscapeMode && statusRowMode.hasRow
+    }
+
+    override func glucoseUnitDidChange() {
+        refreshContext = RefreshContext.all
     }
 
     private func updateChartDateRange() {
@@ -416,15 +420,15 @@ final class StatusTableViewController: ChartsTableViewController {
 
                 // Reservoir HUD
                 if let reservoir = lastReservoirValue {
-                    if let capacity = self.deviceManager.pumpState?.pumpModel?.reservoirCapacity {
-                        hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / Double(capacity))))
+                    if let capacity = self.deviceManager.pumpManager?.pumpReservoirCapacity {
+                        hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, reservoir.unitVolume / capacity))
                     }
 
                     hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
                 }
 
                 // Battery HUD
-                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpBatteryChargeRemaining
+                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpManager?.pumpBatteryChargeRemaining ?? UserDefaults.appGroup.statusExtensionContext?.batteryPercentage
             }
 
             // Show/hide the table view rows
