@@ -10,15 +10,15 @@ import WatchKit
 import WatchConnectivity
 import CGMBLEKit
 import LoopKit
+import SpriteKit
 
-
-final class ChartHUDController: HUDInterfaceController {
+final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet weak var basalLabel: WKInterfaceLabel!
     @IBOutlet weak var iobLabel: WKInterfaceLabel!
     @IBOutlet weak var cobLabel: WKInterfaceLabel!
-    @IBOutlet weak var glucoseChart: WKInterfaceImage!
+    @IBOutlet weak var glucoseScene: WKInterfaceSKScene!
 
-    private var charts = StatusChartsManager()
+    private let scene = GlucoseChartScene()
 
     override init() {
         super.init()
@@ -29,6 +29,8 @@ final class ChartHUDController: HUDInterfaceController {
                 self.updateGlucoseChart()
             }
         }
+
+        glucoseScene.presentScene(scene)
     }
 
     override func awake(withContext context: Any?) {
@@ -37,6 +39,8 @@ final class ChartHUDController: HUDInterfaceController {
 
             // For some reason, .didAppear() does not get called when we do this. It gets called *twice* the next
             // time this view appears. Force it by hand now, until we figure out the root cause.
+            //
+            // TODO: possibly because I'm not calling super.awake()? investigate that.
             DispatchQueue.main.async {
                 self.didAppear()
             }
@@ -48,6 +52,9 @@ final class ChartHUDController: HUDInterfaceController {
     }
 
     override func willActivate() {
+        crownSequencer.delegate = self
+        crownSequencer.focus()
+
         super.willActivate()
 
         loopManager?.glucoseStore.maybeRequestGlucoseBackfill()
@@ -118,23 +125,28 @@ final class ChartHUDController: HUDInterfaceController {
             return
         }
 
-        charts.predictedGlucose = activeContext.predictedGlucose?.values
-        charts.targetRanges = activeContext.targetRanges
-        charts.temporaryOverride = activeContext.temporaryOverride
-        charts.unit = activeContext.preferredGlucoseUnit
+        scene.predictedGlucose = activeContext.predictedGlucose?.values
+        scene.targetRanges = activeContext.targetRanges
+        scene.temporaryOverride = activeContext.temporaryOverride
+        scene.unit = activeContext.preferredGlucoseUnit
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         loopManager?.glucoseStore.getCachedGlucoseSamples(start: .EarliestGlucoseCutoff) { (samples) in
-            self.charts.historicalGlucose = samples
+            self.scene.historicalGlucose = samples
             updateGroup.leave()
         }
         _ = updateGroup.wait(timeout: .distantFuture)
+    }
 
-        self.glucoseChart.setHidden(true)
-        if let chart = self.charts.glucoseChart() {
-            self.glucoseChart.setImage(chart)
-            self.glucoseChart.setHidden(false)
+    // MARK: WKCrownDelegate
+    var crownAccumulator = 0.0
+
+    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
+        crownAccumulator += rotationalDelta
+        if abs(crownAccumulator) >= 1.0 {
+            scene.visibleHours += 2 * Int(crownAccumulator)
+            crownAccumulator = 0
         }
     }
 }
