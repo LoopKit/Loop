@@ -67,7 +67,7 @@ class GlucoseChartScene: SKScene {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         var sceneSize: CGSize
         if WKInterfaceDevice.current().screenBounds.width > 136 {
-            sceneSize = CGSize(width: 154, height: 110)
+            sceneSize = CGSize(width: 154, height: 86)
         } else {
             sceneSize = CGSize(width: 134, height: 110)
         }

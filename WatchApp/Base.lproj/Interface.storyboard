@@ -382,7 +382,7 @@
                             <items>
                                 <spriteKitScene width="2" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
                                     <variation key="device=watch38mm" height="110" width="134"/>
-                                    <variation key="device=watch42mm" height="110" width="154"/>
+                                    <variation key="device=watch42mm" height="86" width="154"/>
                                 </spriteKitScene>
                             </items>
                         </group>
