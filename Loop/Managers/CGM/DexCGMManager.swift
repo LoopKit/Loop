@@ -8,7 +8,6 @@
 import G4ShareSpy
 import HealthKit
 import LoopKit
-import LoopUI
 import ShareClient
 import CGMBLEKit
 
@@ -18,19 +17,21 @@ class DexCGMManager: CGMManager {
         return false
     }
 
-    weak var delegate: CGMManagerDelegate? {
+    let shouldSyncToRemoteService = false
+
+    weak var cgmManagerDelegate: CGMManagerDelegate? {
         didSet {
-            shareManager?.delegate = delegate
+            shareManager?.cgmManagerDelegate = cgmManagerDelegate
         }
     }
 
-    func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
+    func fetchNewDataIfNeeded(_ completion: @escaping (CGMResult) -> Void) {
         guard let shareManager = shareManager else {
             completion(.noData)
             return
         }
 
-        shareManager.fetchNewDataIfNeeded(with: deviceManager, completion)
+        shareManager.fetchNewDataIfNeeded(completion)
     }
 
     var sensorState: SensorDisplayable? {
@@ -58,9 +59,11 @@ class DexCGMManager: CGMManager {
 
 
 final class ShareClientManager: CGMManager {
-    weak var delegate: CGMManagerDelegate?
+    weak var cgmManagerDelegate: CGMManagerDelegate?
 
     let providesBLEHeartbeat = false
+
+    let shouldSyncToRemoteService = false
 
     var sensorState: SensorDisplayable? {
         return latestBackfill
@@ -70,8 +73,8 @@ final class ShareClientManager: CGMManager {
 
     fileprivate var latestBackfill: ShareGlucose?
 
-    func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
-        guard let shareClient = deviceManager.remoteDataManager.shareService.client else {
+    func fetchNewDataIfNeeded(_ completion: @escaping (CGMResult) -> Void) {
+        guard let shareClient = RemoteDataManager().shareService.client else {
             completion(.noData)
             return
         }
@@ -93,7 +96,7 @@ final class ShareClientManager: CGMManager {
             }
 
             // Ignore glucose values that are up to a minute newer than our previous value, to account for possible time shifting in Share data
-            let startDate = self.delegate?.startDateToFilterNewData(for: self)?.addingTimeInterval(TimeInterval(minutes: 1))
+            let startDate = self.cgmManagerDelegate?.startDateToFilterNewData(for: self)?.addingTimeInterval(TimeInterval(minutes: 1))
             let newGlucose = glucose.filterDateRange(startDate, nil).filter({ $0.isStateValid }).map {
                 return NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: false, syncIdentifier: "\($0.startDate.timeIntervalSince1970)", device: self.device)
             }
@@ -118,7 +121,7 @@ final class ShareClientManager: CGMManager {
 
 final class G5CGMManager: DexCGMManager, TransmitterDelegate {
     private let transmitter: Transmitter?
-    let logger = DiagnosticLogger.shared!.forCategory("G5CGMManager")
+    let logger = DiagnosticLogger.shared.forCategory("G5CGMManager")
 
     init(transmitterID: String?) {
         if let transmitterID = transmitterID {
@@ -166,14 +169,14 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
         return true
     }
 
-    override func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
+    override func fetchNewDataIfNeeded(_ completion: @escaping (CGMResult) -> Void) {
         // If our last glucose was less than 4.5 minutes ago, don't fetch.
         guard !dataIsFresh else {
             completion(.noData)
             return
         }
 
-        super.fetchNewDataIfNeeded(with: deviceManager, completion)
+        super.fetchNewDataIfNeeded(completion)
     }
 
     override var device: HKDevice? {
@@ -204,12 +207,12 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
 
     func transmitter(_ transmitter: Transmitter, didError error: Error) {
         logger.error(error)
-        delegate?.cgmManager(self, didUpdateWith: .error(error))
+        cgmManagerDelegate?.cgmManager(self, didUpdateWith: .error(error))
     }
 
     func transmitter(_ transmitter: Transmitter, didRead glucose: Glucose) {
         guard glucose != latestReading else {
-            delegate?.cgmManager(self, didUpdateWith: .noData)
+            cgmManagerDelegate?.cgmManager(self, didUpdateWith: .noData)
             return
         }
 
@@ -217,16 +220,16 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
 
         guard glucose.state.hasReliableGlucose else {
             logger.error(String(describing: glucose.state))
-            delegate?.cgmManager(self, didUpdateWith: .error(CalibrationError.unreliableState(glucose.state)))
+            cgmManagerDelegate?.cgmManager(self, didUpdateWith: .error(CalibrationError.unreliableState(glucose.state)))
             return
         }
         
         guard let quantity = glucose.glucose else {
-            delegate?.cgmManager(self, didUpdateWith: .noData)
+            cgmManagerDelegate?.cgmManager(self, didUpdateWith: .noData)
             return
         }
 
-        self.delegate?.cgmManager(self, didUpdateWith: .newData([
+        cgmManagerDelegate?.cgmManager(self, didUpdateWith: .newData([
             NewGlucoseSample(
                 date: glucose.readDate,
                 quantity: quantity,
@@ -256,7 +259,7 @@ final class G5CGMManager: DexCGMManager, TransmitterDelegate {
             return
         }
 
-        self.delegate?.cgmManager(self, didUpdateWith: .newData(samples))
+        cgmManagerDelegate?.cgmManager(self, didUpdateWith: .newData(samples))
     }
 
     func transmitter(_ transmitter: Transmitter, didReadUnknownData data: Data) {
@@ -298,14 +301,14 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
         return true
     }
 
-    override func fetchNewDataIfNeeded(with deviceManager: DeviceDataManager, _ completion: @escaping (CGMResult) -> Void) {
+    override func fetchNewDataIfNeeded(_ completion: @escaping (CGMResult) -> Void) {
         // If our last glucose was less than 4.5 minutes ago, don't fetch.
         guard !dataIsFresh else {
             completion(.noData)
             return
         }
 
-        super.fetchNewDataIfNeeded(with: deviceManager, completion)
+        super.fetchNewDataIfNeeded(completion)
     }
 
     override var device: HKDevice? {
@@ -342,7 +345,7 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
         latestReading = latest
 
         // In the event that some of the glucose history was already backfilled from Share, don't overwrite it.
-        let includeAfter = delegate?.startDateToFilterNewData(for: self)?.addingTimeInterval(TimeInterval(minutes: 1))
+        let includeAfter = cgmManagerDelegate?.startDateToFilterNewData(for: self)?.addingTimeInterval(TimeInterval(minutes: 1))
 
         let validGlucose = glucoseHistory.filter({
             $0.isStateValid
@@ -350,11 +353,11 @@ final class G4CGMManager: DexCGMManager, ReceiverDelegate {
             NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: $0.isDisplayOnly, syncIdentifier: String(describing: $0.sequence), device: self.device)
         })
 
-        self.delegate?.cgmManager(self, didUpdateWith: .newData(validGlucose))
+        self.cgmManagerDelegate?.cgmManager(self, didUpdateWith: .newData(validGlucose))
     }
 
     func receiver(_ receiver: Receiver, didError error: Error) {
-        delegate?.cgmManager(self, didUpdateWith: .error(error))
+        cgmManagerDelegate?.cgmManager(self, didUpdateWith: .error(error))
     }
 
     func receiver(_ receiver: Receiver, didLogBluetoothEvent event: String) {

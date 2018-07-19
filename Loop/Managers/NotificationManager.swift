@@ -8,8 +8,7 @@
 
 import UIKit
 import UserNotifications
-
-import RileyLinkKit
+import LoopKit
 
 
 struct NotificationManager {
@@ -65,7 +64,7 @@ struct NotificationManager {
         notification.title = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
 
         switch error {
-        case let error as RileyLinkKit.SetBolusError:
+        case let error as SetBolusError:
             notification.subtitle = error.errorDescriptionWithUnits(units)
             notification.body = String(format: "%@ %@", error.failureReason!, error.recoverySuggestion!)
         case let error as LocalizedError:

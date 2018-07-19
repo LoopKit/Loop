@@ -148,9 +148,6 @@
 "Enter a rate in units per hour" = "Inserire un tasso di unità per ora";
 
 /* The placeholder text instructing users how to enter a pump ID */
-"Enter the 6-digit pump ID" = "Inserire 6-numeri ID pompa";
-
-/* The placeholder text instructing users how to enter a pump ID */
 "Enter the 6-digit transmitter ID" = "Inserire 6-numeri ID trasmettitore";
 
 /* Describing the pump history insulin data source */
@@ -323,9 +320,6 @@
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "La quantità massima di bolo è %@ Unità";
-
-/* Instructions on where to find the pump ID on a Minimed pump */
-"The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "L'ID della pompa si trova stampato sul retro, o vicino al fondo della schermata STATO/Esc. È la parte strettamente numerica del numero di serie (indicato come SN o S/N).";
 
 /* Instructions on where to find the transmitter ID */
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "L'ID trasmettitore può essere trovato stampato sul retro del dispositivo, sul lato della scatola, e all'interno del menu impostazione del ricevitore all'interno dell'applicazione mobile.";

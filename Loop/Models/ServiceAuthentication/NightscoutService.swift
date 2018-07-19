@@ -40,9 +40,9 @@ class NightscoutService: ServiceAuthentication {
     // The uploader instance, if credentials are present
     private(set) var uploader: NightscoutUploader? {
         didSet {
-            let logger = DiagnosticLogger.shared?.forCategory("NightscoutService")
+            let logger = DiagnosticLogger.shared.forCategory("NightscoutService")
             uploader?.errorHandler = { (error: Error, context: String) -> Void in
-                logger?.error("Error \(error), while \(context)")
+                logger.error("Error \(error), while \(context)")
             }
         }
     }

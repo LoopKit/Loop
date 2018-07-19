@@ -11,16 +11,18 @@ import LoopKitUI
 
 
 extension CommandResponseViewController {
-    static func generateDiagnosticReport(dataManager: DeviceDataManager) -> CommandResponseViewController {
+    typealias T = CommandResponseViewController
+
+    static func generateDiagnosticReport(deviceManager: DeviceDataManager) -> T {
         let date = Date()
-        let vc = CommandResponseViewController(command: { (completionHandler) in
-            dataManager.loopManager.generateDiagnosticReport { (report) in
+        let vc = T(command: { (completionHandler) in
+            deviceManager.loopManager.generateDiagnosticReport { (report) in
                 DispatchQueue.main.async {
                     completionHandler([
                         "Use the Share button above save this diagnostic report to aid investigating your problem. Issues can be filed at https://github.com/LoopKit/Loop/issues.",
                         "Generated: \(date)",
                         "",
-                        String(reflecting: dataManager),
+                        String(reflecting: deviceManager),
                         "",
                         report,
                         "",
