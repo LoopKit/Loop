@@ -81,22 +81,22 @@ extension HKUnit {
 class GlucoseChartScene: SKScene {
     var data: ChartData = ChartData() {
         didSet {
-            nextUpdate = Date()
+            isPaused = false
         }
     }
 
     var visibleHours: Int = 1 {
         didSet {
-            if (1...3).contains(visibleHours) {
+            if (1...4).contains(visibleHours) {
                 WKInterfaceDevice.current().play(.success)
-                nextUpdate = Date()
+                isPaused = false
             } else {
-                visibleHours = max(0, min(3, visibleHours))
+                visibleHours = max(0, min(4, visibleHours))
             }
         }
     }
 
-    private var nextUpdate = Date()
+    private var timer: Timer?
     private var dataLayer: SKNode!
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
@@ -142,6 +142,11 @@ class GlucoseChartScene: SKScene {
 
         dataLayer = SKNode()
         addChild(dataLayer)
+
+        // Force an update once a minute
+        Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
+            self.isPaused = false
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -149,7 +154,7 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        guard let unit = data.unit, Date() >= nextUpdate else {
+        guard let unit = data.unit else {
             return
         }
 
@@ -196,6 +201,6 @@ class GlucoseChartScene: SKScene {
             dataLayer.addChild(SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3])))
         }
 
-        nextUpdate = Date() + TimeInterval(minutes: 1)
+        isPaused = true
     }
 }
