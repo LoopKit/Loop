@@ -63,7 +63,7 @@ struct Scaler {
 extension HKUnit {
     var highWatermark: Double {
         if unitString == "mg/dL" {
-            return 250.0
+            return 400.0
         } else {
             return 14.0
         }
