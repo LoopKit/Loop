@@ -18,17 +18,11 @@ extension UIColor {
     static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
     static let gridColor = UIColor(white: 193 / 255, alpha: 1)
     static let nowColor = UIColor(white: 193 / 255, alpha: 0.5)
-}
-
-extension SampleValue {
-    var hashValue: Double {
-        return 17 * quantity.doubleValue(for: HKUnit.milligramsPerDeciliter) +
-            23 * startDate.timeIntervalSince1970
-    }
+    static let rangeColor = UIColor(red: 158/255, green: 215/255, blue: 245/255, alpha: 1)
 }
 
 extension SKLabelNode {
-    static func basic() -> SKLabelNode {
+    static func basic(at position: CGPoint) -> SKLabelNode {
         let basic = SKLabelNode(text: "--")
         basic.fontSize = 12
         basic.fontName = "HelveticaNeue"
@@ -36,32 +30,77 @@ extension SKLabelNode {
         basic.alpha = 0.8
         basic.verticalAlignmentMode = .top
         basic.horizontalAlignmentMode = .left
+        basic.position = position
         return basic
     }
 }
 
-class GlucoseChartScene: SKScene {
+struct ChartData {
     var unit: HKUnit?
-    var targetRanges: [WatchDatedRange]?
     var temporaryOverride: WatchDatedRange?
     var historicalGlucose: [SampleValue]?
     var predictedGlucose: [SampleValue]?
-    var visibleHours: Int = 2 {
+    var targetRanges: [WatchDatedRange]?
+}
+
+struct Scaler {
+    let start: Date
+    let bgMin: Double
+    let xScale: CGFloat
+    let yScale: CGFloat
+
+    func point(_ x: Date, _ y: Double) -> CGPoint {
+        return CGPoint(x: CGFloat(x.timeIntervalSince(start)) * xScale, y: CGFloat(y - bgMin) * yScale)
+    }
+
+    func rect(for range: WatchDatedRange) -> CGRect {
+        let a = point(range.startDate, range.minValue)
+        let b = point(range.endDate, range.maxValue)
+        return CGRect(origin: a, size: CGSize(width: b.x - a.x, height: b.y - a.y))
+    }
+}
+
+extension HKUnit {
+    var highWatermark: Double {
+        if unitString == "mg/dL" {
+            return 250.0
+        } else {
+            return 14.0
+        }
+    }
+
+    var lowWatermark: Double {
+        if unitString == "mg/dL" {
+            return 50.0
+        } else {
+            return 2.8
+        }
+    }
+}
+
+class GlucoseChartScene: SKScene {
+    var data: ChartData = ChartData() {
         didSet {
-            if visibleHours > 6 {
-                visibleHours = 6
-            } else if visibleHours < 2 {
-                visibleHours = 2
-            } else {
+            nextUpdate = Date()
+        }
+    }
+
+    var visibleHours: Int = 1 {
+        didSet {
+            if (1...3).contains(visibleHours) {
                 WKInterfaceDevice.current().play(.success)
                 nextUpdate = Date()
+            } else {
+                visibleHours = max(0, min(3, visibleHours))
             }
         }
     }
 
     private var nextUpdate = Date()
+    private var dataLayer: SKNode!
     private var hoursLabel: SKLabelNode!
-    private var sampleNodes: [Double: SKShapeNode] = [:]
+    private var maxBGLabel: SKLabelNode!
+    private var minBGLabel: SKLabelNode!
 
     override init() {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
@@ -73,6 +112,7 @@ class GlucoseChartScene: SKScene {
         }
         super.init(size: sceneSize)
 
+        anchorPoint = CGPoint(x: 0, y: 0)
         scaleMode = .aspectFit
         backgroundColor = .clear
 
@@ -88,9 +128,20 @@ class GlucoseChartScene: SKScene {
         now.strokeColor = .nowColor
         addChild(now)
 
-        hoursLabel = SKLabelNode.basic()
-        hoursLabel.position = CGPoint(x: 5, y: size.height - 5)
+        hoursLabel = SKLabelNode.basic(at: CGPoint(x: 5, y: size.height - 5))
         addChild(hoursLabel)
+
+        maxBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - 5, y: size.height - 5))
+        maxBGLabel.horizontalAlignmentMode = .right
+        addChild(maxBGLabel)
+
+        minBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - 5, y: 5))
+        minBGLabel.horizontalAlignmentMode = .right
+        minBGLabel.verticalAlignmentMode = .bottom
+        addChild(minBGLabel)
+
+        dataLayer = SKNode()
+        addChild(dataLayer)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -98,38 +149,51 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        guard let unit = unit, Date() >= nextUpdate else {
+        guard let unit = data.unit, Date() >= nextUpdate else {
             return
         }
 
         let window = TimeInterval(hours: Double(visibleHours))
-        let start = Date() - (window / 2)
-        let xScale = size.width / CGFloat(window)
-        let yScale = size.height / CGFloat(200 - 50)
+        let scaler = Scaler(start: Date() - window,
+                            bgMin: unit.lowWatermark,
+                            xScale: size.width / CGFloat(window * 2),
+                            yScale: size.height / CGFloat(unit.highWatermark - unit.lowWatermark))
 
+
+        let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
+        minBGLabel.text = numberFormatter.string(from: unit.lowWatermark)
+        maxBGLabel.text = numberFormatter.string(from: unit.highWatermark)
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        var expiredNodes = sampleNodes
-        historicalGlucose?.filter { $0.startDate > start }.forEach {
-            let hashValue = $0.hashValue
-            if sampleNodes[hashValue] == nil {
-                let node = SKShapeNode(circleOfRadius: 1)
-                node.fillColor = .glucoseTintColor
-                node.strokeColor = .clear
-                node.position = position
-                sampleNodes[$0.hashValue] = node
-                addChild(node)
-            }
-
-            sampleNodes[hashValue]!.position =
-                CGPoint(x: CGFloat($0.startDate.timeIntervalSince(start)) * xScale,
-                        y: CGFloat($0.quantity.doubleValue(for: unit) - 50) * yScale)
-            expiredNodes.removeValue(forKey: hashValue)
+        dataLayer.removeAllChildren()
+        if let range = data.temporaryOverride {
+            let node = SKShapeNode(rect: scaler.rect(for: range))
+            node.fillColor = UIColor.rangeColor.withAlphaComponent(0.4)
+            node.strokeColor = .clear
+            dataLayer.addChild(node)
         }
 
-        expiredNodes.forEach {
-            sampleNodes.removeValue(forKey: $0.key)
-            $0.value.removeFromParent()
+        data.targetRanges?.enumerated().forEach { (i, range) in
+            let node = SKShapeNode(rect: scaler.rect(for: range))
+            node.fillColor = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.15 : 0.4)
+            node.strokeColor = .clear
+            dataLayer.addChild(node)
+        }
+
+        data.historicalGlucose?.filter { $0.startDate > scaler.start }.forEach {
+            let node = SKShapeNode(circleOfRadius: 1)
+            node.fillColor = .glucoseTintColor
+            node.strokeColor = .glucoseTintColor
+            node.position = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
+            dataLayer.addChild(node)
+        }
+
+        if let predictedGlucose = data.predictedGlucose, predictedGlucose.count > 2 {
+            let predictedPath = CGMutablePath()
+            predictedPath.addLines(between: predictedGlucose.map {
+                scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
+            })
+            dataLayer.addChild(SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3])))
         }
 
         nextUpdate = Date() + TimeInterval(minutes: 1)

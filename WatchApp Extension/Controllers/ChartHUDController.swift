@@ -125,15 +125,15 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             return
         }
 
-        scene.predictedGlucose = activeContext.predictedGlucose?.values
-        scene.targetRanges = activeContext.targetRanges
-        scene.temporaryOverride = activeContext.temporaryOverride
-        scene.unit = activeContext.preferredGlucoseUnit
+        scene.data.predictedGlucose = activeContext.predictedGlucose?.values
+        scene.data.targetRanges = activeContext.targetRanges
+        scene.data.temporaryOverride = activeContext.temporaryOverride
+        scene.data.unit = activeContext.preferredGlucoseUnit
 
         let updateGroup = DispatchGroup()
         updateGroup.enter()
         loopManager?.glucoseStore.getCachedGlucoseSamples(start: .EarliestGlucoseCutoff) { (samples) in
-            self.scene.historicalGlucose = samples
+            self.scene.data.historicalGlucose = samples
             updateGroup.leave()
         }
         _ = updateGroup.wait(timeout: .distantFuture)
@@ -145,7 +145,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         crownAccumulator += rotationalDelta
         if abs(crownAccumulator) >= 0.5 {
-            scene.visibleHours += 2 * Int(sign(crownAccumulator))
+            scene.visibleHours += Int(sign(crownAccumulator))
             crownAccumulator = 0
         }
     }
