@@ -61,11 +61,11 @@ struct Scaler {
 }
 
 extension HKUnit {
-    var highWatermark: Double {
+    var highWatermarkRange: [Double] {
         if unitString == "mg/dL" {
-            return 400.0
+            return [150.0, 200.0, 250.0, 300.0, 350.0, 400.0]
         } else {
-            return 14.0
+            return [8.3,   11.1,  13.9,  16.6,  19.4,  22.2]
         }
     }
 
@@ -81,22 +81,24 @@ extension HKUnit {
 class GlucoseChartScene: SKScene {
     var data: ChartData = ChartData() {
         didSet {
-            isPaused = false
+            needsUpdate = true
         }
     }
 
-    var visibleHours: Int = 1 {
+    var visibleBg: Int = 1 {
         didSet {
-            if (1...4).contains(visibleHours) {
+            if let range = data.unit?.highWatermarkRange, (0..<range.count).contains(visibleBg) {
                 WKInterfaceDevice.current().play(.success)
-                isPaused = false
+                needsUpdate = true
             } else {
-                visibleHours = max(0, min(4, visibleHours))
+                visibleBg = oldValue
             }
         }
     }
 
+    private var visibleHours: Int = 3
     private var timer: Timer?
+    private var needsUpdate: Bool = true
     private var dataLayer: SKNode!
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
@@ -145,7 +147,7 @@ class GlucoseChartScene: SKScene {
 
         // Force an update once a minute
         Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
-            self.isPaused = false
+            self.needsUpdate = true
         }
     }
 
@@ -154,7 +156,7 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        guard let unit = data.unit else {
+        guard let unit = data.unit, needsUpdate == true else {
             return
         }
 
@@ -162,12 +164,12 @@ class GlucoseChartScene: SKScene {
         let scaler = Scaler(start: Date() - window,
                             bgMin: unit.lowWatermark,
                             xScale: size.width / CGFloat(window * 2),
-                            yScale: size.height / CGFloat(unit.highWatermark - unit.lowWatermark))
+                            yScale: size.height / CGFloat(unit.highWatermarkRange[visibleBg] - unit.lowWatermark))
 
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         minBGLabel.text = numberFormatter.string(from: unit.lowWatermark)
-        maxBGLabel.text = numberFormatter.string(from: unit.highWatermark)
+        maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
         dataLayer.removeAllChildren()
@@ -201,6 +203,6 @@ class GlucoseChartScene: SKScene {
             dataLayer.addChild(SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3])))
         }
 
-        isPaused = true
+        needsUpdate = false
     }
 }

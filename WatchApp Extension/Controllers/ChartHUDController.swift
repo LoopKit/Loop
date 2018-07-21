@@ -145,7 +145,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         crownAccumulator += rotationalDelta
         if abs(crownAccumulator) >= 0.5 {
-            scene.visibleHours += Int(sign(crownAccumulator))
+            scene.visibleBg += Int(sign(crownAccumulator))
             crownAccumulator = 0
         }
     }
