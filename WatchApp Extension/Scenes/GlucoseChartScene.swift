@@ -35,6 +35,15 @@ extension SKLabelNode {
     }
 }
 
+extension SKShapeNode {
+    static func basic(color: UIColor, rect: CGRect) -> SKShapeNode {
+        let node = SKShapeNode(rect: rect)
+        node.fillColor = color
+        node.strokeColor = .clear
+        return node
+    }
+}
+
 struct ChartData {
     var unit: HKUnit?
     var temporaryOverride: WatchDatedRange?
@@ -173,25 +182,18 @@ class GlucoseChartScene: SKScene {
         hoursLabel.text = "\(Int(visibleHours))h"
 
         dataLayer.removeAllChildren()
-        if let range = data.temporaryOverride {
-            var rect = scaler.rect(for: range)
-            let node1 = SKShapeNode(rect: rect)
-            node1.fillColor = UIColor.rangeColor.withAlphaComponent(0.2)
-            node1.strokeColor = .clear
-            dataLayer.addChild(node1)
-
-            rect.size.width = size.width
-            let node2 = SKShapeNode(rect: rect)
-            node2.fillColor = UIColor.rangeColor.withAlphaComponent(0.2)
-            node2.strokeColor = .clear
-            dataLayer.addChild(node2)
+        data.targetRanges?.enumerated().forEach { (i, range) in
+            let color = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.2 : 0.4)
+            dataLayer.addChild(SKShapeNode.basic(color: color, rect: scaler.rect(for: range)))
         }
 
-        data.targetRanges?.enumerated().forEach { (i, range) in
-            let node = SKShapeNode(rect: scaler.rect(for: range))
-            node.fillColor = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.2 : 0.4)
-            node.strokeColor = .clear
-            dataLayer.addChild(node)
+        if let range = data.temporaryOverride {
+            let color = UIColor.rangeColor.withAlphaComponent(0.2)
+            var rect = scaler.rect(for: range)
+            dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
+
+            rect.size.width = size.width
+            dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
         }
 
         data.historicalGlucose?.filter { $0.startDate > scaler.start }.forEach {
