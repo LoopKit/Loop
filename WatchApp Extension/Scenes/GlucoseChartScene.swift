@@ -156,7 +156,7 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        guard let unit = data.unit, needsUpdate == true else {
+        guard let unit = data.unit, needsUpdate else {
             return
         }
 
@@ -174,15 +174,22 @@ class GlucoseChartScene: SKScene {
 
         dataLayer.removeAllChildren()
         if let range = data.temporaryOverride {
-            let node = SKShapeNode(rect: scaler.rect(for: range))
-            node.fillColor = UIColor.rangeColor.withAlphaComponent(0.4)
-            node.strokeColor = .clear
-            dataLayer.addChild(node)
+            var rect = scaler.rect(for: range)
+            let node1 = SKShapeNode(rect: rect)
+            node1.fillColor = UIColor.rangeColor.withAlphaComponent(0.2)
+            node1.strokeColor = .clear
+            dataLayer.addChild(node1)
+
+            rect.size.width = size.width
+            let node2 = SKShapeNode(rect: rect)
+            node2.fillColor = UIColor.rangeColor.withAlphaComponent(0.2)
+            node2.strokeColor = .clear
+            dataLayer.addChild(node2)
         }
 
         data.targetRanges?.enumerated().forEach { (i, range) in
             let node = SKShapeNode(rect: scaler.rect(for: range))
-            node.fillColor = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.15 : 0.4)
+            node.fillColor = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.2 : 0.4)
             node.strokeColor = .clear
             dataLayer.addChild(node)
         }
