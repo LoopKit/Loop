@@ -157,7 +157,6 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        print("Update \(currentTime)")
         DispatchQueue.main.async {
             self.isPaused = true
         }
