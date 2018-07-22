@@ -90,7 +90,10 @@ class GlucoseChartScene: SKScene {
         didSet {
             if let range = unit?.highWatermarkRange, (0..<range.count).contains(visibleBg) {
                 WKInterfaceDevice.current().play(.success)
-                updateNodes()
+                updateData()
+
+                maxBGLabel.setScale(2.0)
+                maxBGLabel.run(SKAction.scale(to: 1.0, duration: 1.0), withKey: "highlight")
             } else {
                 visibleBg = oldValue
             }
@@ -148,7 +151,7 @@ class GlucoseChartScene: SKScene {
 
         // Force an update once a minute
         Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
-            self.updateNodes()
+            self.updateData()
         }
     }
 
@@ -157,12 +160,14 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        DispatchQueue.main.async {
-            self.isPaused = true
+        if maxBGLabel.action(forKey: "highlight") == nil {
+            DispatchQueue.main.async {
+                self.isPaused = true
+            }
         }
     }
 
-    func updateNodes() {
+    func updateData() {
         guard let unit = unit else {
             return
         }

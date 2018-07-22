@@ -138,7 +138,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         }
         _ = updateGroup.wait(timeout: .distantFuture)
 
-        scene.updateNodes()
+        scene.updateData()
     }
 
     // MARK: WKCrownDelegate
