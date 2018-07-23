@@ -7,31 +7,35 @@
 //
 
 import ClockKit
+import HealthKit
+import LoopKit
 import Foundation
 
 
 extension CLKComplicationTemplate {
 
     static func templateForFamily(_ family: CLKComplicationFamily, from context: WatchContext) -> CLKComplicationTemplate? {
-
-        guard let glucose = context.glucose,
-            let unit = context.preferredGlucoseUnit
-        else {
+        guard let glucose = context.glucose, let unit = context.preferredGlucoseUnit else {
             return nil
         }
 
+        return templateForFamily(family, glucose: glucose, unit: unit, date: context.glucoseDate, trend: context.glucoseTrend, eventualGlucose: context.eventualGlucose)
+    }
+
+    static func templateForFamily(_ family: CLKComplicationFamily, glucose: HKQuantity, unit: HKUnit, date: Date?, trend: GlucoseTrend?, eventualGlucose: HKQuantity?) -> CLKComplicationTemplate? {
+
         let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
-        guard let glucoseString = formatter.string(from: NSNumber(value: glucose.doubleValue(for: unit))),
-            let date = context.glucoseDate else
+        guard let glucoseString = formatter.string(from: glucose.doubleValue(for: unit)),
+            let date = date else
         {
             return nil
         }
 
-        let glucoseAndTrend = "\(glucoseString)\(context.glucoseTrend?.symbol ?? " ")"
+        let glucoseAndTrend = "\(glucoseString)\(trend?.symbol ?? " ")"
         var accessibilityStrings = [glucoseString]
 
-        if let trend = context.glucoseTrend {
+        if let trend = trend {
             accessibilityStrings.append(trend.localizedDescription)
         }
 
@@ -69,8 +73,8 @@ extension CLKComplicationTemplate {
             return template
         case .utilitarianLarge:
             var eventualGlucoseText = ""
-            if  let eventualGlucose = context.eventualGlucose,
-                let eventualGlucoseString = formatter.string(from: NSNumber(value: eventualGlucose.doubleValue(for: unit)))
+            if  let eventualGlucose = eventualGlucose,
+                let eventualGlucoseString = formatter.string(from: eventualGlucose.doubleValue(for: unit))
             {
                 eventualGlucoseText = eventualGlucoseString
             }

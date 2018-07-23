@@ -35,7 +35,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         spellOutFormatter.numberStyle = .spellOut
 
         let amount = bolusRecommendation?.amount ?? 0
-        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: NSNumber(value: amount)) ?? "0")
+        bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: amount) ?? "0")
 
         bolusAmountTextField.becomeFirstResponder()
 
@@ -45,7 +45,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String
     {
         let iobStr: String
-        if let iob = activeInsulin, let valueStr = insulinFormatter.string(from: NSNumber(value: iob))
+        if let iob = activeInsulin, let valueStr = insulinFormatter.string(from: iob)
         {
             iobStr = valueStr + " U"
         } else {
@@ -54,7 +54,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
         var rval = String(format: NSLocalizedString("Active Insulin: %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr)
 
-        if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: NSNumber(value: pending))
+        if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: pending)
         {
             rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
         }
@@ -63,12 +63,12 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     // MARK: - State
 
-    var glucoseUnit: HKUnit = HKUnit.milligramsPerDeciliter()
+    var glucoseUnit: HKUnit = .milligramsPerDeciliter
 
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
-            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
+            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)
             updateNotice()
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin
@@ -86,7 +86,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         didSet {
 
             let cobStr: String
-            if let cob = activeCarbohydrates, let str = integerFormatter.string(from: NSNumber(value: cob)) {
+            if let cob = activeCarbohydrates, let str = integerFormatter.string(from: cob) {
                 cobStr = str + " g"
             } else {
                 cobStr = "-"
@@ -125,7 +125,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
     @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
-            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: NSNumber(value: amount))
+            recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)
         }
     }
 
@@ -177,12 +177,12 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         bolusAmountTextField.resignFirstResponder()
 
         guard let text = bolusAmountTextField?.text, let bolus = bolusUnitsFormatter.number(from: text)?.doubleValue,
-            let amountString = bolusUnitsFormatter.string(from: NSNumber(value: bolus)) else {
+            let amountString = bolusUnitsFormatter.string(from: bolus) else {
             return
         }
 
         guard bolus <= maxBolus else {
-            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: NSNumber(value: maxBolus)) ?? ""))
+            presentAlertController(withTitle: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"), message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: maxBolus) ?? ""))
             return
         }
 

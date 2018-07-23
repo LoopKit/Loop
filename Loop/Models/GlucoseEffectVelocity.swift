@@ -12,7 +12,7 @@ import LoopKit
 extension GlucoseEffectVelocity: RawRepresentable {
     public typealias RawValue = [String: Any]
 
-    static let unit = HKUnit.milligramsPerDeciliter().unitDivided(by: .minute())
+    static let unit = HKUnit.milligramsPerDeciliter.unitDivided(by: .minute())
 
     public init?(rawValue: RawValue) {
         guard let startDate = rawValue["startDate"] as? Date,

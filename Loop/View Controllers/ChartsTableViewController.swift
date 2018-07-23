@@ -7,6 +7,8 @@
 
 import UIKit
 import LoopUI
+import HealthKit
+import os.log
 
 
 enum RefreshContext {
@@ -73,16 +75,22 @@ extension Set where Element == RefreshContext {
 /// Abstract class providing boilerplate setup for chart-based table view controllers
 class ChartsTableViewController: UITableViewController, UIGestureRecognizerDelegate {
 
+    private let log = OSLog(category: "ChartsTableViewController")
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
+            self.charts.glucoseUnit = unit
+        }
+
         let notificationCenter = NotificationCenter.default
         notificationObservers += [
-            notificationCenter.addObserver(forName: .UIApplicationWillResignActive, object: UIApplication.shared, queue: .main) { [unowned self] _ in
-                self.active = false
+            notificationCenter.addObserver(forName: .UIApplicationWillResignActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
+                self?.active = false
             },
-            notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive, object: UIApplication.shared, queue: .main) { [unowned self] _ in
-                self.active = true
+            notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
+                self?.active = true
             }
         ]
 
@@ -116,6 +124,7 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
 
+        log.debug("[reloadData] for view transition to size: %@", String(describing: size))
         reloadData(animated: false)
     }
 
@@ -127,21 +136,49 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     // MARK: - State
 
-    weak var deviceManager: DeviceDataManager!
+    weak var deviceManager: DeviceDataManager! {
+        didSet {
+            NotificationCenter.default.addObserver(self, selector: #selector(unitPreferencesDidChange(_:)), name: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore)
+        }
+    }
 
-    var charts = StatusChartsManager(colors: .default, settings: .default)
+    @objc private func unitPreferencesDidChange(_ note: Notification) {
+        DispatchQueue.main.async {
+            if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
+                let didChange = unit != self.charts.glucoseUnit
+                self.charts.glucoseUnit = unit
+
+                if didChange {
+                    self.glucoseUnitDidChange()
+                }
+            }
+            self.log.debug("[reloadData] for HealthKit unit preference change")
+            self.reloadData()
+        }
+    }
+
+    func glucoseUnitDidChange() {
+        // To override.
+    }
+
+    let charts = StatusChartsManager(colors: .default, settings: .default)
 
     // References to registered notification center observers
     var notificationObservers: [Any] = []
 
-    var active = true {
-        didSet {
+    var active: Bool {
+        get {
+            return UIApplication.shared.applicationState == .active
+        }
+        set {
+            log.debug("[reloadData] for app change to active: %d", active)
             reloadData()
         }
     }
 
     var visible = false {
         didSet {
+            log.debug("[reloadData] for view change to visible: %d", visible)
             reloadData()
         }
     }

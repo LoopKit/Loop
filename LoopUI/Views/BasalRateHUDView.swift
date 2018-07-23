@@ -37,7 +37,7 @@ public final class BasalRateHUDView: BaseHUDView {
         let time = timeFormatter.string(from: date)
         caption?.text = time
 
-        if let rateString = decimalFormatter.string(from: NSNumber(value: rate)) {
+        if let rateString = decimalFormatter.string(from: rate) {
             basalRateLabel?.text = String(format: basalRateFormatString, rateString)
             accessibilityValue = String(format: NSLocalizedString("%1$@ units per hour at %2$@", comment: "Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time)"), rateString, time)
         } else {

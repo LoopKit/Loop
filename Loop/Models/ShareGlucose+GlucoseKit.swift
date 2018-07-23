@@ -9,7 +9,6 @@
 import Foundation
 import HealthKit
 import LoopKit
-import LoopUI
 import ShareClient
 
 
@@ -19,7 +18,7 @@ extension ShareGlucose: GlucoseValue {
     }
 
     public var quantity: HKQuantity {
-        return HKQuantity(unit: HKUnit.milligramsPerDeciliter(), doubleValue: Double(glucose))
+        return HKQuantity(unit: .milligramsPerDeciliter, doubleValue: Double(glucose))
     }
 }
 

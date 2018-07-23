@@ -173,9 +173,6 @@
 "Enter suspend threshold" = "Введите рубеж приостановки";
 
 /* The placeholder text instructing users how to enter a pump ID */
-"Enter the 6-digit pump ID" = "Введите инд номер помпы (6 цифр)";
-
-/* The placeholder text instructing users how to enter a pump ID */
 "Enter the 6-digit transmitter ID" = "Введите инд. номер трансмиттера (6 цифр)";
 
 /* Describing the pump history insulin data source */
@@ -394,9 +391,6 @@
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "максимальный болюс %@ ед";
-
-/* Instructions on where to find the pump ID on a Minimed pump */
-"The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "инд номер помпы находится на ее задней стенке или снизу экрана состояния STATUS/ESC. Это исключительно цифровая часть серийного номера (обозначаемого SN или S/N) ";
 
 /* Instructions on where to find the transmitter ID */
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "Инд. номер трансмиттера находится на задней стенке устройства , сбоку упаковочной коробки, в настроечном меню ресивера и мобильного приложения";
