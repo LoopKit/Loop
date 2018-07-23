@@ -108,6 +108,8 @@ class GlucoseChartScene: SKScene {
     private var minBGLabel: SKLabelNode!
 
     override init() {
+        dispatchPrecondition(condition: .onQueue(.main))
+
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         var sceneSize: CGSize
         if WKInterfaceDevice.current().screenBounds.width > 136 {
