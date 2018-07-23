@@ -125,13 +125,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             return
         }
 
-        scene.data.predictedGlucose = activeContext.predictedGlucose?.values
-        scene.data.targetRanges = activeContext.targetRanges
-        scene.data.temporaryOverride = activeContext.temporaryOverride
-        scene.data.unit = activeContext.preferredGlucoseUnit
+        scene.predictedGlucose = activeContext.predictedGlucose?.values
+        scene.targetRanges = activeContext.targetRanges
+        scene.temporaryOverride = activeContext.temporaryOverride
+        scene.unit = activeContext.preferredGlucoseUnit
 
         loopManager?.glucoseStore.getCachedGlucoseSamples(start: .EarliestGlucoseCutoff) { (samples) in
-            self.scene.data.historicalGlucose = samples
+            self.scene.historicalGlucose = samples
+            self.scene.updateNodes()
         }
     }
 

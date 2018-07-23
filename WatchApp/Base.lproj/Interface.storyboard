@@ -378,7 +378,7 @@
                                 </label>
                             </items>
                         </group>
-                        <group width="1" alignment="left" layout="overlap" id="GqJ-yv-NKQ">
+                        <group width="1" alignment="left" layout="overlap" radius="0.0" id="GqJ-yv-NKQ">
                             <items>
                                 <spriteKitScene width="2" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
                                     <variation key="device=watch38mm" height="110" width="134"/>

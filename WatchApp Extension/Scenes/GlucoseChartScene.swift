@@ -79,24 +79,16 @@ extension HKUnit {
     }
 }
 
-struct ChartData {
+class GlucoseChartScene: SKScene {
     var unit: HKUnit?
     var temporaryOverride: WatchDatedRange?
     var historicalGlucose: [SampleValue]?
     var predictedGlucose: [SampleValue]?
     var targetRanges: [WatchDatedRange]?
-}
-
-class GlucoseChartScene: SKScene {
-    var data = ChartData() {
-        didSet {
-            updateNodes()
-        }
-    }
 
     var visibleBg: Int = 1 {
         didSet {
-            if let range = data.unit?.highWatermarkRange, (0..<range.count).contains(visibleBg) {
+            if let range = unit?.highWatermarkRange, (0..<range.count).contains(visibleBg) {
                 WKInterfaceDevice.current().play(.success)
 
                 maxBGLabel.setScale(2.0)
@@ -175,7 +167,7 @@ class GlucoseChartScene: SKScene {
     }
 
     func updateNodes() {
-        guard let unit = data.unit else {
+        guard let unit = unit else {
             return
         }
 
@@ -192,12 +184,12 @@ class GlucoseChartScene: SKScene {
         hoursLabel.text = "\(Int(visibleHours))h"
 
         dataLayer.removeAllChildren()
-        data.targetRanges?.enumerated().forEach { (i, range) in
-            let color = UIColor.rangeColor.withAlphaComponent(data.temporaryOverride != nil ? 0.2 : 0.4)
+        targetRanges?.enumerated().forEach { (i, range) in
+            let color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
             dataLayer.addChild(SKShapeNode.basic(color: color, rect: scaler.rect(for: range)))
         }
 
-        if let range = data.temporaryOverride {
+        if let range = temporaryOverride {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
             var rect = scaler.rect(for: range)
             dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
@@ -206,7 +198,7 @@ class GlucoseChartScene: SKScene {
             dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
         }
 
-        data.historicalGlucose?.filter { $0.startDate > scaler.start }.forEach {
+        historicalGlucose?.filter { $0.startDate > scaler.start }.forEach {
             let node = SKShapeNode(circleOfRadius: 1)
             node.fillColor = .glucoseTintColor
             node.strokeColor = .glucoseTintColor
@@ -214,7 +206,7 @@ class GlucoseChartScene: SKScene {
             dataLayer.addChild(node)
         }
 
-        if let predictedGlucose = data.predictedGlucose, predictedGlucose.count > 2 {
+        if let predictedGlucose = predictedGlucose, predictedGlucose.count > 2 {
             let predictedPath = CGMutablePath()
             predictedPath.addLines(between: predictedGlucose.map {
                 scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
