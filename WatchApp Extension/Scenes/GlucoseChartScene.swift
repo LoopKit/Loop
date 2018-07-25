@@ -45,13 +45,13 @@ extension SKShapeNode {
 }
 
 struct Scaler {
-    let start: Date
-    let bgMin: Double
+    let startDate: Date
+    let glucoseMin: Double
     let xScale: CGFloat
     let yScale: CGFloat
 
     func point(_ x: Date, _ y: Double) -> CGPoint {
-        return CGPoint(x: CGFloat(x.timeIntervalSince(start)) * xScale, y: CGFloat(y - bgMin) * yScale)
+        return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
     func rect(for range: WatchDatedRange) -> CGRect {
@@ -75,6 +75,22 @@ extension HKUnit {
             return 50.0
         } else {
             return 2.8
+        }
+    }
+}
+
+extension WKInterfaceDevice {
+    enum WatchSize {
+        case Watch38mm
+        case Watch42mm
+    }
+
+    func watchSize() -> WatchSize {
+        switch screenBounds.width {
+        case 136:
+            return .Watch38mm
+        default:
+            return .Watch42mm
         }
     }
 }
@@ -108,16 +124,15 @@ class GlucoseChartScene: SKScene {
     private var minBGLabel: SKLabelNode!
 
     override init() {
-        dispatchPrecondition(condition: .onQueue(.main))
-
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
-        var sceneSize: CGSize
-        if WKInterfaceDevice.current().screenBounds.width > 136 {
-            sceneSize = CGSize(width: 154, height: 86)
-        } else {
-            sceneSize = CGSize(width: 134, height: 110)
-        }
-        super.init(size: sceneSize)
+        super.init(size: {
+            switch WKInterfaceDevice.current().watchSize() {
+            case .Watch38mm:
+                return CGSize(width: 134, height: 110)
+            case .Watch42mm:
+                return CGSize(width: 154, height: 86)
+            }
+        }())
 
         anchorPoint = CGPoint(x: 0, y: 0)
         scaleMode = .aspectFit
@@ -169,13 +184,15 @@ class GlucoseChartScene: SKScene {
     }
 
     func updateNodes() {
+        dispatchPrecondition(condition: .onQueue(.main))
+
         guard let unit = unit else {
             return
         }
 
         let window = TimeInterval(hours: Double(visibleHours))
-        let scaler = Scaler(start: Date() - window,
-                            bgMin: unit.lowWatermark,
+        let scaler = Scaler(startDate: Date() - window,
+                            glucoseMin: unit.lowWatermark,
                             xScale: size.width / CGFloat(window * 2),
                             yScale: size.height / CGFloat(unit.highWatermarkRange[visibleBg] - unit.lowWatermark))
 
@@ -200,7 +217,7 @@ class GlucoseChartScene: SKScene {
             dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
         }
 
-        historicalGlucose?.filter { $0.startDate > scaler.start }.forEach {
+        historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
             let node = SKShapeNode(circleOfRadius: 1)
             node.fillColor = .glucoseTintColor
             node.strokeColor = .glucoseTintColor
