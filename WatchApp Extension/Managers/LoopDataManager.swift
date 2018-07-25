@@ -22,7 +22,7 @@ class LoopDataManager {
         glucoseStore = GlucoseStore(
             healthStore: HKHealthStore(),
             cacheStore: PersistenceController.controllerInAppGroupDirectory(),
-            cacheLength: .hours(24))
+            cacheLength: .hours(4))
     }
 }
 
