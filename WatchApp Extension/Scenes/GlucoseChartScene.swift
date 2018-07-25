@@ -35,11 +35,10 @@ extension SKLabelNode {
     }
 }
 
-extension SKShapeNode {
-    static func basic(color: UIColor, rect: CGRect) -> SKShapeNode {
-        let node = SKShapeNode(rect: rect)
-        node.fillColor = color
-        node.strokeColor = .clear
+extension SKSpriteNode {
+    static func basic(color: UIColor, rect: CGRect) -> SKSpriteNode {
+        let node = SKSpriteNode(color: color, size: rect.size)
+        node.position = rect.origin
         return node
     }
 }
@@ -54,10 +53,11 @@ struct Scaler {
         return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
-    func rect(for range: WatchDatedRange) -> CGRect {
+    func centerRect(for range: WatchDatedRange) -> CGRect {
         let a = point(range.startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
-        return CGRect(origin: a, size: CGSize(width: b.x - a.x, height: b.y - a.y))
+        let size = CGSize(width: b.x - a.x, height: b.y - a.y)
+        return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
     }
 }
 
@@ -205,22 +205,20 @@ class GlucoseChartScene: SKScene {
         dataLayer.removeAllChildren()
         targetRanges?.enumerated().forEach { (i, range) in
             let color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
-            dataLayer.addChild(SKShapeNode.basic(color: color, rect: scaler.rect(for: range)))
+            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: scaler.centerRect(for: range)))
         }
 
         if let range = temporaryOverride {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
-            var rect = scaler.rect(for: range)
-            dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
+            var rect = scaler.centerRect(for: range)
+            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: rect))
 
             rect.size.width = size.width
-            dataLayer.addChild(SKShapeNode.basic(color: color, rect: rect))
+            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: rect))
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
-            let node = SKShapeNode(circleOfRadius: 1)
-            node.fillColor = .glucoseTintColor
-            node.strokeColor = .glucoseTintColor
+            let node = SKSpriteNode(color: .glucoseTintColor, size: CGSize(width: 2, height: 2))
             node.position = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             dataLayer.addChild(node)
         }
