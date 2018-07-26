@@ -108,7 +108,7 @@ class GlucoseChartScene: SKScene {
                 WKInterfaceDevice.current().play(.success)
 
                 maxBGLabel.setScale(2.0)
-                maxBGLabel.run(SKAction.scale(to: 1.0, duration: 1.0), withKey: "highlight")
+                maxBGLabel.run(SKAction.scale(to: 1.0, duration: 1.0))
                 updateNodes()
             } else {
                 visibleBg = oldValue
@@ -175,14 +175,6 @@ class GlucoseChartScene: SKScene {
         super.init(coder: aDecoder)
     }
 
-    override func update(_ currentTime: TimeInterval) {
-        if maxBGLabel.action(forKey: "highlight") == nil {
-            DispatchQueue.main.async {
-                self.isPaused = true
-            }
-        }
-    }
-
     func updateNodes() {
         dispatchPrecondition(condition: .onQueue(.main))
 
@@ -230,7 +222,5 @@ class GlucoseChartScene: SKScene {
             })
             dataLayer.addChild(SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3])))
         }
-
-        isPaused = false
     }
 }
