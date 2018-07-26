@@ -58,6 +58,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         super.willActivate()
 
         loopManager?.glucoseStore.maybeRequestGlucoseBackfill()
+        glucoseScene.isPaused = false
     }
 
     override func update() {
