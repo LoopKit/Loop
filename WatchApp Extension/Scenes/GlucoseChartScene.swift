@@ -128,7 +128,7 @@ class GlucoseChartScene: SKScene {
         super.init(size: {
             switch WKInterfaceDevice.current().watchSize() {
             case .Watch38mm:
-                return CGSize(width: 134, height: 110)
+                return CGSize(width: 134, height: 61)
             case .Watch42mm:
                 return CGSize(width: 154, height: 86)
             }

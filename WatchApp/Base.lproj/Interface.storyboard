@@ -351,39 +351,39 @@
                                     <items>
                                         <group width="1" height="26" alignment="left" id="pYI-3J-lxs">
                                             <items>
-                                                <label height="1" alignment="left" hidden="YES" textAlignment="center" id="Dt1-kz-jMZ">
+                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="Dt1-kz-jMZ">
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
-                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="yl8-ZP-c3l">
+                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="yl8-ZP-c3l">
                                                     <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
+                                        <label width="1" alignment="right" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
                                 </group>
                             </items>
                         </group>
-                        <group width="1" alignment="left" id="rSt-1g-97T">
-                            <items>
-                                <label alignment="left" verticalAlignment="bottom" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
-                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                </label>
-                                <label alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
-                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                </label>
-                            </items>
-                        </group>
                         <group width="1" alignment="left" layout="overlap" radius="0.0" id="GqJ-yv-NKQ">
                             <items>
                                 <spriteKitScene width="2" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
-                                    <variation key="device=watch38mm" height="110" width="134"/>
+                                    <variation key="device=watch38mm" height="61" width="134"/>
                                     <variation key="device=watch42mm" height="86" width="154"/>
                                 </spriteKitScene>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" id="rSt-1g-97T">
+                            <items>
+                                <label alignment="left" verticalAlignment="bottom" text="---" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
+                                <label alignment="right" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
                             </items>
                         </group>
                     </items>
