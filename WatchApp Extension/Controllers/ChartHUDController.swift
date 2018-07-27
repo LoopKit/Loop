@@ -1,5 +1,5 @@
 //
-//  ChartInterfaceController.swift
+//  ChartHUDController.swift
 //  Loop
 //
 //  Created by Bharat Mediratta on 6/26/18.
@@ -70,14 +70,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
         let insulinFormatter: NumberFormatter = {
             let numberFormatter = NumberFormatter()
-            
+
             numberFormatter.numberStyle = .decimal
             numberFormatter.minimumFractionDigits = 1
             numberFormatter.maximumFractionDigits = 1
-            
+
             return numberFormatter
         }()
-        
+
         iobLabel.setHidden(true)
         if let activeInsulin = activeContext.IOB, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
             iobLabel.setText(String(format: NSLocalizedString(
@@ -86,21 +86,21 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
                                        valueStr))
             iobLabel.setHidden(false)
         }
-        
+
         cobLabel.setHidden(true)
         if let carbsOnBoard = activeContext.COB {
             let carbFormatter = NumberFormatter()
             carbFormatter.numberStyle = .decimal
             carbFormatter.maximumFractionDigits = 0
             let valueStr = carbFormatter.string(from:NSNumber(value:carbsOnBoard))
-            
+
             cobLabel.setText(String(format: NSLocalizedString(
                 "COB %1$@ g",
                 comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"),
                                       valueStr!))
             cobLabel.setHidden(false)
         }
-        
+
         basalLabel.setHidden(true)
         if let tempBasal = activeContext.lastNetTempBasalDose {
             let basalFormatter = NumberFormatter()
@@ -109,7 +109,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             basalFormatter.maximumFractionDigits = 3
             basalFormatter.positivePrefix = basalFormatter.plusSign
             let valueStr = basalFormatter.string(from:NSNumber(value:tempBasal))
-            
+
             let basalLabelText = String(format: NSLocalizedString(
                 "%1$@ U/hr",
                 comment: "The subtitle format describing the current temp basal rate. (1: localized basal rate description)"),

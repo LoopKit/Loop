@@ -1,5 +1,5 @@
 //
-//  StatusInterfaceController.swift
+//  ActionHUDController.swift
 //  Loop
 //
 //  Created by Nathan Racklyeft on 5/29/16.

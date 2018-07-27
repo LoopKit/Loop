@@ -1,5 +1,5 @@
 //
-//  GlucoseScene.swift
+//  GlucoseChartScene.swift
 //  WatchApp Extension
 //
 //  Created by Bharat Mediratta on 7/16/18.
