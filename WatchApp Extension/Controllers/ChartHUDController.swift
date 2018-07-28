@@ -134,7 +134,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         loopManager?.glucoseStore.getCachedGlucoseSamples(start: .EarliestGlucoseCutoff) { (samples) in
             DispatchQueue.main.async {
                 self.scene.historicalGlucose = samples
-                self.scene.updateNodes()
+                self.scene.updateNodes(animatePath: false)
             }
         }
     }

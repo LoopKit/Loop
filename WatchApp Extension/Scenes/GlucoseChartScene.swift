@@ -124,7 +124,7 @@ class GlucoseChartScene: SKScene {
 
                 maxBGLabel.setScale(2.0)
                 maxBGLabel.run(SKAction.scale(to: 1.0, duration: 1.0), withKey: "highlight")
-                updateNodes()
+                updateNodes(animatePath: true)
             } else {
                 visibleBg = oldValue
             }
@@ -181,7 +181,7 @@ class GlucoseChartScene: SKScene {
 
         // Force an update once a minute
         Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
-            self.updateNodes()
+            self.updateNodes(animatePath: false)
         }
     }
 
@@ -213,7 +213,7 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    func updateNodes() {
+    func updateNodes(animatePath: Bool) {
         dispatchPrecondition(condition: .onQueue(.main))
 
         guard let unit = unit else {
@@ -262,11 +262,14 @@ class GlucoseChartScene: SKScene {
 
             predictedPathNode = SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3]))
             addChild(predictedPathNode!)
-            predictedPathNode!.alpha = 0
-            predictedPathNode!.run(SKAction.sequence([
-                SKAction.wait(forDuration: 0.25),
-                SKAction.fadeIn(withDuration: 0.75)
-                ]), withKey: "move")
+
+            if animatePath {
+                predictedPathNode!.alpha = 0
+                predictedPathNode!.run(SKAction.sequence([
+                    SKAction.wait(forDuration: 0.25),
+                    SKAction.fadeIn(withDuration: 0.75)
+                    ]), withKey: "move")
+            }
         }
         expire.forEach { key, value in
             nodes.removeValue(forKey: key)
