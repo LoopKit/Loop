@@ -8,17 +8,14 @@
 
 import HealthKit
 import UIKit
-import CarbKit
 import LoopKit
-import InsulinKit
-import LoopUI
 
 
 final class StatusExtensionDataManager {
-    unowned let dataManager: DeviceDataManager
+    unowned let deviceManager: DeviceDataManager
 
     init(deviceDataManager: DeviceDataManager) {
-        self.dataManager = deviceDataManager
+        self.deviceManager = deviceDataManager
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
@@ -32,20 +29,20 @@ final class StatusExtensionDataManager {
     }
 
     @objc private func update(_ notification: Notification) {
-        self.dataManager.loopManager.glucoseStore.preferredUnit() { (unit, error) in
-            if error == nil, let unit = unit {
-                self.createContext(glucoseUnit: unit) { (context) in
-                    if let context = context {
-                        self.defaults?.statusExtensionContext = context
-                    }
-                }
+        guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+            return
+        }
+
+        createContext(glucoseUnit: unit) { (context) in
+            if let context = context {
+                self.defaults?.statusExtensionContext = context
             }
         }
     }
 
     private func createContext(glucoseUnit: HKUnit, _ completionHandler: @escaping (_ context: StatusExtensionContext?) -> Void) {
-        dataManager.loopManager.getLoopState { (manager, state) in
-            let dataManager = self.dataManager
+        deviceManager.loopManager.getLoopState { (manager, state) in
+            let dataManager = self.deviceManager
             var context = StatusExtensionContext()
         
             #if IOS_SIMULATOR
@@ -53,7 +50,6 @@ final class StatusExtensionDataManager {
                 // a fully configured app. Inject some baseline debug data to let us test the
                 // experience. This data will be overwritten by actual data below, if available.
                 context.batteryPercentage = 0.25
-                context.reservoir = ReservoirContext(startDate: Date(), unitVolume: 160, capacity: 300)
                 context.netBasal = NetBasalContext(
                     rate: 2.1,
                     percentage: 0.6,
@@ -63,7 +59,7 @@ final class StatusExtensionDataManager {
                 )
                 context.predictedGlucose = PredictedGlucoseContext(
                     values: (1...36).map { 89.123 + Double($0 * 5) }, // 3 hours of linear data
-                    unit: HKUnit.milligramsPerDeciliter(),
+                    unit: HKUnit.milligramsPerDeciliter,
                     startDate: Date(),
                     interval: TimeInterval(minutes: 5))
 
@@ -74,33 +70,10 @@ final class StatusExtensionDataManager {
                     completionHandler(nil)
                     return
                 }
-                let lastLoopCompleted = state.lastLoopCompleted
+                let lastLoopCompleted = manager.lastLoopCompleted
             #endif
 
-            context.loop = LoopContext(
-                dosingEnabled: manager.settings.dosingEnabled,
-                lastCompleted: lastLoopCompleted
-            )
-
-            let updateGroup = DispatchGroup()
-
-            // We can only access the last 30 minutes of data if the device is locked.
-            // Cap it there so that we have a consistent view in the widget.
-            let chartStartDate = Date().addingTimeInterval(TimeInterval(minutes: -30))
-            let chartEndDate = Date().addingTimeInterval(TimeInterval(hours: 3))
-
-            updateGroup.enter()
-            manager.glucoseStore.getCachedGlucoseValues(start: chartStartDate, end: Date()) {
-                (values) in
-                context.glucose = values.map({
-                    return GlucoseContext(
-                        value: $0.quantity.doubleValue(for: glucoseUnit),
-                        unit: glucoseUnit,
-                        startDate: $0.startDate
-                    )
-                })
-                updateGroup.leave()
-            }
+            context.lastLoopCompleted = lastLoopCompleted
 
             // Drop the first element in predictedGlucose because it is the currentGlucose
             // and will have a different interval to the next element
@@ -125,56 +98,9 @@ final class StatusExtensionDataManager {
 
                 context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, start: netBasal.start, end: netBasal.end)
             }
-            
-            if let reservoir = manager.doseStore.lastReservoirValue,
-               let capacity = dataManager.pumpState?.pumpModel?.reservoirCapacity {
-                context.reservoir = ReservoirContext(
-                    startDate: reservoir.startDate,
-                    unitVolume: reservoir.unitVolume,
-                    capacity: capacity
-                )
-            }
-            
-            updateGroup.enter()
-            manager.doseStore.insulinOnBoard(at: Date()) {(result) in
-                // This function completes asynchronously, so below
-                // is a completion that returns a value after eventual
-                // function completion.  Currently the time of update
-                // isn't used in the code, but could e.g. check how
-                // recent it is. 
-                switch result {
-                case .success(let iobValue):
-                    context.activeInsulin = iobValue.value                    
-                case .failure:
-                    context.activeInsulin = nil
-                }
-                updateGroup.leave()
-            }
 
-            if let batteryPercentage = dataManager.pumpBatteryChargeRemaining {
-                context.batteryPercentage = batteryPercentage
-            }
-        
-            if let targetRanges = manager.settings.glucoseTargetRangeSchedule {
-                context.targetRanges = targetRanges.between(start: chartStartDate, end: chartEndDate)
-                    .map {
-                        return DatedRangeContext(
-                            startDate: $0.startDate,
-                            endDate: $0.endDate,
-                            minValue: $0.value.minValue,
-                            maxValue: $0.value.maxValue
-                        )
-                    }
-
-                if let override = targetRanges.override {
-                    context.temporaryOverride = DatedRangeContext(
-                        startDate: override.start,
-                        endDate: override.end ?? .distantFuture,
-                        minValue: override.value.minValue,
-                        maxValue: override.value.maxValue
-                    )
-                }
-            }
+            context.batteryPercentage = dataManager.pumpManager?.pumpBatteryChargeRemaining
+            context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
             if let sensorInfo = dataManager.sensorInfo {
                 context.sensor = SensorDisplayableContext(
@@ -185,9 +111,7 @@ final class StatusExtensionDataManager {
                 )
             }
 
-            updateGroup.notify(queue: DispatchQueue.global(qos: .background)) {
-                completionHandler(context)
-            }
+            completionHandler(context)
         }
     }
 }

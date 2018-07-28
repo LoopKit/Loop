@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import LoopKit
 
 
 public final class GlucoseHUDView: BaseHUDView {
@@ -94,12 +95,12 @@ public final class GlucoseHUDView: BaseHUDView {
         caption?.text = time
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        if let valueString = numberFormatter.string(from: NSNumber(value: glucoseQuantity)) {
+        if let valueString = numberFormatter.string(from: glucoseQuantity) {
             glucoseLabel.text = valueString
             accessibilityStrings.append(String(format: NSLocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
-        var unitStrings = [unit.glucoseUnitDisplayString]
+        var unitStrings = [unit.localizedShortUnitString]
 
         if let trend = sensor?.trendType {
             unitStrings.append(trend.symbol)

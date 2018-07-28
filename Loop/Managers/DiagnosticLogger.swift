@@ -12,14 +12,6 @@ import os.log
 
 final class DiagnosticLogger {
     private let isSimulator: Bool = TARGET_OS_SIMULATOR != 0
-    let subsystem: String
-    let version: String
-
-    var mLabService: MLabService {
-        didSet {
-            try! KeychainManager().setMLabDatabaseName(mLabService.databaseName, APIKey: mLabService.APIKey)
-        }
-    }
 
     var logglyService: LogglyService {
         didSet {
@@ -29,18 +21,13 @@ final class DiagnosticLogger {
 
     let remoteLogLevel: OSLogType
 
-    static var shared: DiagnosticLogger?
+    static let shared: DiagnosticLogger = DiagnosticLogger()
 
-    init(subsystem: String, version: String) {
-        self.subsystem = subsystem
-        self.version = version
+    init() {
         remoteLogLevel = isSimulator ? .fault : .info
 
-        if let (databaseName, APIKey) = KeychainManager().getMLabCredentials() {
-            mLabService = MLabService(databaseName: databaseName, APIKey: APIKey)
-        } else {
-            mLabService = MLabService(databaseName: nil, APIKey: nil)
-        }
+        // Delete the mLab credentials as they're no longer supported
+        try! KeychainManager().setMLabDatabaseName(nil, APIKey: nil)
 
         let customerToken = KeychainManager().getLogglyCustomerToken()
         logglyService = LogglyService(customerToken: customerToken)
@@ -80,7 +67,7 @@ final class CategoryLogger {
         self.logger = logger
         self.category = category
 
-        systemLog = OSLog(subsystem: logger.subsystem, category: category)
+        systemLog = OSLog(category: category)
     }
 
     private func remoteLog(_ type: OSLogType, message: String) {
@@ -97,11 +84,6 @@ final class CategoryLogger {
         }
 
         logger.logglyService.client?.send(message, tags: [type.tagName, category])
-
-        // Legacy mLab logging. To be removed.
-        if let messageData = try? JSONSerialization.data(withJSONObject: message, options: []) {
-            logger.mLabService.uploadTaskWithData(messageData, inCollection: category)?.resume()
-        }
     }
 
     func debug(_ message: [String: Any]) {

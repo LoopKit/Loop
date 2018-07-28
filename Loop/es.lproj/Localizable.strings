@@ -160,9 +160,6 @@
 "Enter suspend threshold" = "Ingrese nivel de suspensión";
 
 /* The placeholder text instructing users how to enter a pump ID */
-"Enter the 6-digit pump ID" = "Ingrese ID de 6 dígitios de la microinfusora";
-
-/* The placeholder text instructing users how to enter a pump ID */
 "Enter the 6-digit transmitter ID" = "Ingrese ID de 6 dígitios de transmisor";
 
 /* Describing the pump history insulin data source */
@@ -381,12 +378,6 @@
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Bolo máximo es %@ Unidades";
-
-/* Instructions on where to find the pump ID on a Minimed pump */
-"The pump ID can be found printed on the back, or near the bottom of the STATUS/Esc screen. It is the strictly numerical portion of the serial number (shown as SN or S/N)." = "El ID de microinfusora puede encontrarse en la parte trasera o cerca de la parte inferior de la pantalla STATUS/Esc. Es la parte estrictamente numérica del número de serie mostrado como SN o S/N";
-
-/* Instructions on selecting the pump region */
-"The pump region can be found printed on the back as part of the model number (REF), for example: MMT-551NAB, or MMT-515LWWS. If the model number contains \"NA\" or \"CA\", then the region is North America. If if contains \"WW\", then the region is World-Wide." = "La región de la microinfusora puede enconstrarse impresa en la parte trasera como parte del código de modelo ( REF ), por ejemplo MMT-551NAB o MMT-515LWWS. Si el código de modelo contiene \"NA\" o \"CA\", la región es Norte América. Si contiene \"WW\" la región es Mundial.";
 
 /* Instructions on where to find the transmitter ID */
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "El ID de transmisor puede encontrarse impreso en la parte trasera del dispositivo, a un lado de la caja en la que estaba empacado y dentro del menú de ajustes del receptor y la app móvil";
