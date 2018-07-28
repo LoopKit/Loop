@@ -11,6 +11,8 @@ import SpriteKit
 import HealthKit
 import LoopKit
 import WatchKit
+import UIKit
+
 
 // Stashing the extensions here for ease of development, but they should likely
 // move into their own files as appropriate
@@ -32,14 +34,6 @@ extension SKLabelNode {
         basic.horizontalAlignmentMode = .left
         basic.position = position
         return basic
-    }
-}
-
-extension SKSpriteNode {
-    static func basic(color: UIColor, rect: CGRect) -> SKSpriteNode {
-        let node = SKSpriteNode(color: color, size: rect.size)
-        node.position = rect.origin
-        return node
     }
 }
 
@@ -95,6 +89,27 @@ extension WKInterfaceDevice {
     }
 }
 
+extension WatchDatedRange {
+    var hashValue: UInt64 {
+        var hashValue: Double
+        hashValue = 2 * minValue
+        hashValue += 3 * maxValue
+        hashValue += 5 * startDate.timeIntervalSince1970
+        hashValue += 7 * endDate.timeIntervalSince1970
+        return UInt64(hashValue)
+    }
+}
+
+extension SampleValue {
+    var hashValue: UInt64 {
+        var hashValue: Double
+        hashValue = 2 * startDate.timeIntervalSince1970
+        hashValue += 3 * quantity.doubleValue(for: HKUnit.milligramsPerDeciliter)
+        return UInt64(hashValue)
+    }
+}
+
+
 class GlucoseChartScene: SKScene {
     var unit: HKUnit?
     var temporaryOverride: WatchDatedRange?
@@ -118,10 +133,12 @@ class GlucoseChartScene: SKScene {
 
     private var visibleHours: Int = 3
     private var timer: Timer?
-    private var dataLayer: SKNode!
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
+    private var nodes: [UInt64 : SKNode] = [:]
+    private var expire: [UInt64 : SKNode] = [:]
+    private var predictedPathNode: SKShapeNode?
 
     override init() {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
@@ -162,9 +179,6 @@ class GlucoseChartScene: SKScene {
         minBGLabel.verticalAlignmentMode = .bottom
         addChild(minBGLabel)
 
-        dataLayer = SKNode()
-        addChild(dataLayer)
-
         // Force an update once a minute
         Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
             self.updateNodes()
@@ -176,10 +190,26 @@ class GlucoseChartScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        if maxBGLabel.action(forKey: "highlight") == nil {
+        if maxBGLabel.action(forKey: "highlight") == nil && predictedPathNode?.action(forKey: "move") == nil {
             DispatchQueue.main.async {
                 self.isPaused = true
             }
+        }
+    }
+
+    func animate(nodeFor hashValue: UInt64, to color: UIColor, and rect: CGRect) {
+        if let node = nodes[hashValue] as? SKSpriteNode {
+            node.color = color
+            node.run(SKAction.group([
+                SKAction.move(to: rect.origin, duration: 0.25),
+                SKAction.resize(toWidth: rect.size.width, duration: 0.25),
+                SKAction.resize(toHeight: rect.size.height, duration: 0.25)]))
+            expire.removeValue(forKey: hashValue)
+        } else {
+            let node = SKSpriteNode(color: color, size: rect.size)
+            node.position = rect.origin
+            nodes[hashValue] = node
+            addChild(node)
         }
     }
 
@@ -202,33 +232,45 @@ class GlucoseChartScene: SKScene {
         maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        dataLayer.removeAllChildren()
-        targetRanges?.enumerated().forEach { (i, range) in
-            let color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
-            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: scaler.centerRect(for: range)))
+        expire = nodes
+        targetRanges?.forEach { range in
+            animate(nodeFor: range.hashValue,
+                    to: UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4),
+                    and: scaler.centerRect(for: range))
         }
 
         if let range = temporaryOverride {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
-            var rect = scaler.centerRect(for: range)
-            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: rect))
+            animate(nodeFor: range.hashValue, to: color, and: scaler.centerRect(for: range))
 
-            rect.size.width = size.width
-            dataLayer.addChild(SKSpriteNode.basic(color: color, rect: rect))
+            let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
+            animate(nodeFor: extendedRange.hashValue, to: color, and: scaler.centerRect(for: extendedRange))
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
-            let node = SKSpriteNode(color: .glucoseTintColor, size: CGSize(width: 2, height: 2))
-            node.position = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
-            dataLayer.addChild(node)
+            let origin = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
+            let size = CGSize(width: 2, height: 2)
+            animate(nodeFor: $0.hashValue, to: .glucoseTintColor, and: CGRect(origin: origin, size: size))
         }
 
+        predictedPathNode?.removeFromParent()
         if let predictedGlucose = predictedGlucose, predictedGlucose.count > 2 {
             let predictedPath = CGMutablePath()
             predictedPath.addLines(between: predictedGlucose.map {
                 scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             })
-            dataLayer.addChild(SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3])))
+
+            predictedPathNode = SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3]))
+            addChild(predictedPathNode!)
+            predictedPathNode!.alpha = 0
+            predictedPathNode!.run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.25),
+                SKAction.fadeIn(withDuration: 0.75)
+                ]), withKey: "move")
+        }
+        expire.forEach { key, value in
+            nodes.removeValue(forKey: key)
+            value.removeFromParent()
         }
 
         isPaused = false
