@@ -47,7 +47,7 @@ struct Scaler {
         return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
-    func centerRect(for range: WatchDatedRange) -> CGRect {
+    func rect(for range: WatchDatedRange) -> CGRect {
         let a = point(range.startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
         let size = CGSize(width: b.x - a.x, height: b.y - a.y)
@@ -124,7 +124,7 @@ class GlucoseChartScene: SKScene {
 
                 maxBGLabel.setScale(2.0)
                 maxBGLabel.run(SKAction.scale(to: 1.0, duration: 1.0), withKey: "highlight")
-                updateNodes(animatePath: true)
+                updateNodes(animated: true)
             } else {
                 visibleBg = oldValue
             }
@@ -137,7 +137,6 @@ class GlucoseChartScene: SKScene {
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
     private var nodes: [UInt64 : SKNode] = [:]
-    private var expire: [UInt64 : SKNode] = [:]
     private var predictedPathNode: SKShapeNode?
 
     override init() {
@@ -181,7 +180,7 @@ class GlucoseChartScene: SKScene {
 
         // Force an update once a minute
         Timer.scheduledTimer(withTimeInterval: TimeInterval(minutes: 1), repeats: true) { _ in
-            self.updateNodes(animatePath: false)
+            self.updateNodes(animated: false)
         }
     }
 
@@ -197,23 +196,28 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    func animate(nodeFor hashValue: UInt64, to color: UIColor, and rect: CGRect) {
-        if let node = nodes[hashValue] as? SKSpriteNode {
-            node.color = color
+    func updateSprite(for hashValue: UInt64, to color: UIColor, at rect: CGRect, animated: Bool) {
+        if nodes[hashValue] as? SKSpriteNode == nil {
+            nodes[hashValue] = SKSpriteNode(color: color, size: rect.size)
+            nodes[hashValue]!.position = rect.origin
+            addChild(nodes[hashValue]!)
+        }
+
+        let node = nodes[hashValue] as! SKSpriteNode
+        node.color = color
+
+        if animated {
             node.run(SKAction.group([
                 SKAction.move(to: rect.origin, duration: 0.25),
                 SKAction.resize(toWidth: rect.size.width, duration: 0.25),
                 SKAction.resize(toHeight: rect.size.height, duration: 0.25)]))
-            expire.removeValue(forKey: hashValue)
         } else {
-            let node = SKSpriteNode(color: color, size: rect.size)
+            node.size = rect.size
             node.position = rect.origin
-            nodes[hashValue] = node
-            addChild(node)
         }
     }
 
-    func updateNodes(animatePath: Bool) {
+    func updateNodes(animated: Bool) {
         dispatchPrecondition(condition: .onQueue(.main))
 
         guard let unit = unit else {
@@ -232,25 +236,26 @@ class GlucoseChartScene: SKScene {
         maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        expire = nodes
+        let expire = nodes
         targetRanges?.forEach { range in
-            animate(nodeFor: range.hashValue,
-                    to: UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4),
-                    and: scaler.centerRect(for: range))
+            updateSprite(for: range.hashValue,
+                         to: UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4),
+                         at: scaler.rect(for: range),
+                         animated: animated)
         }
 
         if let range = temporaryOverride {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
-            animate(nodeFor: range.hashValue, to: color, and: scaler.centerRect(for: range))
+            updateSprite(for: range.hashValue, to: color, at: scaler.rect(for: range), animated: animated)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
-            animate(nodeFor: extendedRange.hashValue, to: color, and: scaler.centerRect(for: extendedRange))
+            updateSprite(for: extendedRange.hashValue, to: color, at: scaler.rect(for: extendedRange), animated: animated)
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
             let origin = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             let size = CGSize(width: 2, height: 2)
-            animate(nodeFor: $0.hashValue, to: .glucoseTintColor, and: CGRect(origin: origin, size: size))
+            updateSprite(for: $0.hashValue, to: .glucoseTintColor, at: CGRect(origin: origin, size: size), animated: animated)
         }
 
         predictedPathNode?.removeFromParent()
@@ -263,7 +268,7 @@ class GlucoseChartScene: SKScene {
             predictedPathNode = SKShapeNode(path: predictedPath.copy(dashingWithPhase: 11, lengths: [5, 3]))
             addChild(predictedPathNode!)
 
-            if animatePath {
+            if animated {
                 predictedPathNode!.alpha = 0
                 predictedPathNode!.run(SKAction.sequence([
                     SKAction.wait(forDuration: 0.25),
@@ -271,9 +276,9 @@ class GlucoseChartScene: SKScene {
                     ]), withKey: "move")
             }
         }
-        expire.forEach { key, value in
-            nodes.removeValue(forKey: key)
-            value.removeFromParent()
+        expire.filter { hash, _ in nodes[hash] == nil }.forEach { hash, node in
+            node.removeFromParent()
+            nodes.removeValue(forKey: hash)
         }
 
         isPaused = false
