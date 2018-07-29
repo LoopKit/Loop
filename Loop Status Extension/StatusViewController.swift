@@ -36,6 +36,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLine: .axisLineColor,
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
+                threshold: .thresholdLineColor,
                 glucoseTint: .glucoseTintColor,
                 doseTint: .doseTintColor
             ),
@@ -295,6 +296,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             self.charts.targetGlucoseSchedule = defaults.loopSettings?.glucoseTargetRangeSchedule
+            self.charts.suspendThresholdValue = nil // do not add SuspendThreshold line to the widget
 
             self.charts.prerender()
             self.glucoseChartContentView.reloadChart()

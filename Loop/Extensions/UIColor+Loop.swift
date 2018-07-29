@@ -23,4 +23,6 @@ extension UIColor {
     @nonobjc static let gridColor = UIColor(white: 193 / 255, alpha: 1)
     
     @nonobjc static let pumpStatusNormal = secondaryLabelColor
+    
+    @nonobjc static let thresholdLineColor = UIColor.HIGRedColor()
 }

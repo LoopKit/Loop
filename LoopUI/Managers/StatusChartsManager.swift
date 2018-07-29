@@ -216,6 +216,9 @@ public final class StatusChartsManager {
             glucoseChart = nil
         }
     }
+    
+    /// Suspend Threshold value
+    public var suspendThresholdValue: Double? = nil
 
     /// The chart points for IOB
     public var iobPoints: [ChartPoint] = [] {
@@ -368,6 +371,20 @@ public final class StatusChartsManager {
                 )
             ]
         )
+        
+        // SuspendThreshold line
+        var suspendThresholdLayer: ChartPointsLineLayer? = nil
+        if suspendThresholdValue != nil {
+            if suspendThresholdValue! >= yAxisLayer.axis.first {
+                let lineModel = ChartLineModel(
+                    chartPoints: [ChartPoint(x: ChartAxisValueDouble(xAxisLayer.axis.first),
+                                             y: ChartAxisValueDouble(suspendThresholdValue!)),
+                                  ChartPoint(x: ChartAxisValueDouble(xAxisLayer.axis.last),
+                                             y: ChartAxisValueDouble(suspendThresholdValue!))],
+                    lineColor: colors.threshold.withAlphaComponent(0.4), lineWidth: 1, animDuration: 0, animDelay: 0)
+                suspendThresholdLayer = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
+            }
+        }
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
@@ -411,6 +428,7 @@ public final class StatusChartsManager {
         let layers: [ChartLayer?] = [
             gridLayer,
             targetsLayer,
+            suspendThresholdLayer,
             xAxisLayer,
             yAxisLayer,
             glucoseChartCache?.highlightLayer,

@@ -13,13 +13,15 @@ public struct ChartColorPalette {
     public let axisLine: UIColor
     public let axisLabel: UIColor
     public let grid: UIColor
+    public let threshold: UIColor
     public let glucoseTint: UIColor
     public let doseTint: UIColor
 
-    public init(axisLine: UIColor, axisLabel: UIColor, grid: UIColor, glucoseTint: UIColor, doseTint: UIColor) {
+    public init(axisLine: UIColor, axisLabel: UIColor, grid: UIColor, threshold: UIColor, glucoseTint: UIColor, doseTint: UIColor) {
         self.axisLine = axisLine
         self.axisLabel = axisLabel
         self.grid = grid
+        self.threshold = threshold
         self.glucoseTint = glucoseTint
         self.doseTint = doseTint
     }

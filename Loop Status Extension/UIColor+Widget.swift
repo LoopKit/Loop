@@ -25,4 +25,6 @@ extension UIColor {
     @nonobjc static let pumpStatusNormal = UIColor(red: 100 / 255, green: 101 / 255, blue: 105 / 255, alpha: 1)
 
     @nonobjc static let subtitleLabelColor = UIColor(white: 0, alpha: 0.4)
+    
+    @nonobjc static let thresholdLineColor = UIColor.HIGRedColor()
 }
