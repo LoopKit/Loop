@@ -244,7 +244,7 @@ class GlucoseChartScene: SKScene {
                          animated: animated)
         }
 
-        if let range = temporaryOverride {
+        if let range = temporaryOverride, range.endDate > Date() {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
             updateSprite(for: range.hashValue, to: color, at: scaler.rect(for: range), animated: animated)
 
