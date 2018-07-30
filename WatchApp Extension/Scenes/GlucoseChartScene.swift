@@ -236,26 +236,30 @@ class GlucoseChartScene: SKScene {
         maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        let expire = nodes
+        var expire = nodes
         targetRanges?.forEach { range in
             updateSprite(for: range.hashValue,
                          to: UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4),
                          at: scaler.rect(for: range),
                          animated: animated)
+            expire.removeValue(forKey: range.hashValue)
         }
 
         if let range = temporaryOverride {
             let color = UIColor.rangeColor.withAlphaComponent(0.2)
             updateSprite(for: range.hashValue, to: color, at: scaler.rect(for: range), animated: animated)
+            expire.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
             updateSprite(for: extendedRange.hashValue, to: color, at: scaler.rect(for: extendedRange), animated: animated)
+            expire.removeValue(forKey: extendedRange.hashValue)
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
             let origin = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             let size = CGSize(width: 2, height: 2)
             updateSprite(for: $0.hashValue, to: .glucoseTintColor, at: CGRect(origin: origin, size: size), animated: animated)
+            expire.removeValue(forKey: $0.hashValue)
         }
 
         predictedPathNode?.removeFromParent()
@@ -276,7 +280,7 @@ class GlucoseChartScene: SKScene {
                     ]), withKey: "move")
             }
         }
-        expire.filter { hash, _ in nodes[hash] == nil }.forEach { hash, node in
+        expire.forEach { hash, node in
             node.removeFromParent()
             nodes.removeValue(forKey: hash)
         }
