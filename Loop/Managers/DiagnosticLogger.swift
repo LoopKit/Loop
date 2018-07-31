@@ -8,6 +8,7 @@
 
 import Foundation
 import os.log
+import LoopKit
 
 
 final class DiagnosticLogger {
@@ -104,6 +105,11 @@ final class CategoryLogger {
     func info(_ message: String) {
         systemLog.info("%{public}@", message)
         remoteLog(.info, message: message)
+    }
+
+    func `default`(_ message: String) {
+        systemLog.info("%{public}@", message)
+        remoteLog(.default, message: message)
     }
 
     func error(_ message: [String: Any]) {
