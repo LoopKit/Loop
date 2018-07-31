@@ -37,6 +37,20 @@ extension SKLabelNode {
     }
 }
 
+extension SKSpriteNode {
+    func move(to rect: CGRect, animated: Bool) {
+        if parent == nil || animated == false {
+            size = rect.size
+            position = rect.origin
+        } else {
+            run(SKAction.group([
+                SKAction.move(to: rect.origin, duration: 0.25),
+                SKAction.resize(toWidth: rect.size.width, duration: 0.25),
+                SKAction.resize(toHeight: rect.size.height, duration: 0.25)]))
+        }
+    }
+}
+
 struct Scaler {
     let startDate: Date
     let glucoseMin: Double
@@ -136,7 +150,7 @@ class GlucoseChartScene: SKScene {
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
-    private var nodes: [UInt64 : SKNode] = [:]
+    private var nodes: [UInt64 : SKSpriteNode] = [:]
     private var predictedPathNode: SKShapeNode?
 
     override init() {
@@ -196,25 +210,12 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    func updateSprite(for hashValue: UInt64, to color: UIColor, at rect: CGRect, animated: Bool) {
-        if nodes[hashValue] as? SKSpriteNode == nil {
-            nodes[hashValue] = SKSpriteNode(color: color, size: rect.size)
-            nodes[hashValue]!.position = rect.origin
+    func getSprite(forHash hashValue: UInt64) -> SKSpriteNode {
+        if nodes[hashValue] == nil {
+            nodes[hashValue] = SKSpriteNode(color: .clear, size: CGSize(width: 0, height: 0))
             addChild(nodes[hashValue]!)
         }
-
-        let node = nodes[hashValue] as! SKSpriteNode
-        node.color = color
-
-        if animated {
-            node.run(SKAction.group([
-                SKAction.move(to: rect.origin, duration: 0.25),
-                SKAction.resize(toWidth: rect.size.width, duration: 0.25),
-                SKAction.resize(toHeight: rect.size.height, duration: 0.25)]))
-        } else {
-            node.size = rect.size
-            node.position = rect.origin
-        }
+        return nodes[hashValue]!
     }
 
     func updateNodes(animated: Bool) {
@@ -236,30 +237,39 @@ class GlucoseChartScene: SKScene {
         maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        var expire = nodes
+        // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
+        var inactiveNodes = nodes
+
         targetRanges?.forEach { range in
-            updateSprite(for: range.hashValue,
-                         to: UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4),
-                         at: scaler.rect(for: range),
-                         animated: animated)
-            expire.removeValue(forKey: range.hashValue)
+            let sprite = getSprite(forHash: range.hashValue)
+            sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
+            sprite.move(to: scaler.rect(for: range), animated: animated)
+            inactiveNodes.removeValue(forKey: range.hashValue)
         }
 
-        if let range = temporaryOverride, range.endDate > Date() {
-            let color = UIColor.rangeColor.withAlphaComponent(0.2)
-            updateSprite(for: range.hashValue, to: color, at: scaler.rect(for: range), animated: animated)
-            expire.removeValue(forKey: range.hashValue)
+        // Make temporary overrides visually match what we do in the Loop app. This means that we have
+        // one darker box which represents the duration of the override, but we have a second lighter box which
+        // extends to the end of the visible window.
+        if let range = temporaryOverride {
+            let sprite1 = getSprite(forHash: range.hashValue)
+            sprite1.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite1.move(to: scaler.rect(for: range), animated: animated)
+            inactiveNodes.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
-            updateSprite(for: extendedRange.hashValue, to: color, at: scaler.rect(for: extendedRange), animated: animated)
-            expire.removeValue(forKey: extendedRange.hashValue)
+            let sprite2 = getSprite(forHash: extendedRange.hashValue)
+            sprite2.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite2.move(to: scaler.rect(for: extendedRange), animated: animated)
+            inactiveNodes.removeValue(forKey: extendedRange.hashValue)
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
             let origin = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             let size = CGSize(width: 2, height: 2)
-            updateSprite(for: $0.hashValue, to: .glucoseTintColor, at: CGRect(origin: origin, size: size), animated: animated)
-            expire.removeValue(forKey: $0.hashValue)
+            let sprite = getSprite(forHash: $0.hashValue)
+            sprite.color = .glucoseTintColor
+            sprite.move(to: CGRect(origin: origin, size: size), animated: animated)
+            inactiveNodes.removeValue(forKey: $0.hashValue)
         }
 
         predictedPathNode?.removeFromParent()
@@ -273,6 +283,7 @@ class GlucoseChartScene: SKScene {
             addChild(predictedPathNode!)
 
             if animated {
+                // SKShapeNode paths cannot be easily animated. Make it vanish, then fade in at the new location.
                 predictedPathNode!.alpha = 0
                 predictedPathNode!.run(SKAction.sequence([
                     SKAction.wait(forDuration: 0.25),
@@ -280,7 +291,9 @@ class GlucoseChartScene: SKScene {
                     ]), withKey: "move")
             }
         }
-        expire.forEach { hash, node in
+
+        // Any inactive nodes can be safely removed
+        inactiveNodes.forEach { hash, node in
             node.removeFromParent()
             nodes.removeValue(forKey: hash)
         }
