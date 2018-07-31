@@ -237,12 +237,14 @@ class GlucoseChartScene: SKScene {
         maxBGLabel.text = numberFormatter.string(from: unit.highWatermarkRange[visibleBg])
         hoursLabel.text = "\(Int(visibleHours))h"
 
-        var expire = nodes
+        // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
+        var inactiveNodes = nodes
+
         targetRanges?.forEach { range in
             let sprite = getSprite(forHash: range.hashValue)
             sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
             sprite.move(to: scaler.rect(for: range), animated: animated)
-            expire.removeValue(forKey: range.hashValue)
+            inactiveNodes.removeValue(forKey: range.hashValue)
         }
 
         if let range = temporaryOverride {
@@ -250,13 +252,13 @@ class GlucoseChartScene: SKScene {
             let sprite1 = getSprite(forHash: range.hashValue)
             sprite1.color = color
             sprite1.move(to: scaler.rect(for: range), animated: animated)
-            expire.removeValue(forKey: range.hashValue)
+            inactiveNodes.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
             let sprite2 = getSprite(forHash: extendedRange.hashValue)
             sprite2.color = color
             sprite2.move(to: scaler.rect(for: extendedRange), animated: animated)
-            expire.removeValue(forKey: extendedRange.hashValue)
+            inactiveNodes.removeValue(forKey: extendedRange.hashValue)
         }
 
         historicalGlucose?.filter { $0.startDate > scaler.startDate }.forEach {
@@ -265,7 +267,7 @@ class GlucoseChartScene: SKScene {
             let sprite = getSprite(forHash: $0.hashValue)
             sprite.color = .glucoseTintColor
             sprite.move(to: CGRect(origin: origin, size: size), animated: animated)
-            expire.removeValue(forKey: $0.hashValue)
+            inactiveNodes.removeValue(forKey: $0.hashValue)
         }
 
         predictedPathNode?.removeFromParent()
@@ -287,12 +289,8 @@ class GlucoseChartScene: SKScene {
             }
         }
 
-        // Any new nodes we created in this pass need to be added to the scene. And any nodes
-        // that are no longer necessary can be removed from the scene and deleted.
-        nodes.values.filter { $0.parent == nil }.forEach {
-            addChild($0)
-        }
-        expire.forEach { hash, node in
+        // Any inactive nodes can be safely removed
+        inactiveNodes.forEach { hash, node in
             node.removeFromParent()
             nodes.removeValue(forKey: hash)
         }
