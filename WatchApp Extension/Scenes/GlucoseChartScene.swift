@@ -145,7 +145,7 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    private var visibleHours: Int = 3
+    var visibleHours: Int = 3
     private var timer: Timer?
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!

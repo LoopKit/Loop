@@ -387,6 +387,25 @@
                             </items>
                         </group>
                     </items>
+                    <menu key="menu" id="Da1-jh-2yL">
+                        <items>
+                            <menuItem title="1 hour" icon="add" id="vL1-NA-WZ1">
+                                <connections>
+                                    <action selector="setChartWindow1Hour" destination="v5b-sO-bb8" id="yp1-H2-0e5"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="2 hours" icon="more" id="dPh-7b-Tfv">
+                                <connections>
+                                    <action selector="setChartWindow2Hours" destination="v5b-sO-bb8" id="IQe-Uh-AOb"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="3 hours" icon="play" id="fR1-7h-SNe">
+                                <connections>
+                                    <action selector="setChartWindow3Hours" destination="v5b-sO-bb8" id="HhZ-89-5Yp"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
                     <connections>
                         <outlet property="basalLabel" destination="U5L-zt-Ck7" id="mM0-Vf-6uk"/>
                         <outlet property="cobLabel" destination="gC1-LZ-QMz" id="zeH-DE-pAh"/>
