@@ -64,7 +64,7 @@ struct Scaler {
     func rect(for range: WatchDatedRange) -> CGRect {
         let a = point(range.startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
-        let size = CGSize(width: b.x - a.x, height: b.y - a.y)
+        let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, 2))
         return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
     }
 }
