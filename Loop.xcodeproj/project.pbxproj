@@ -22,6 +22,12 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		01C75A422111384100444723 /* 1-hour-graph-38mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A3F2111384100444723 /* 1-hour-graph-38mm.png */; };
+		01C75A432111384100444723 /* 2-hour-graph-38mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A402111384100444723 /* 2-hour-graph-38mm.png */; };
+		01C75A442111384100444723 /* 3-hour-graph-38mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A412111384100444723 /* 3-hour-graph-38mm.png */; };
+		01C75A4E2111631200444723 /* 1-hour-graph-42mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A4B2111631100444723 /* 1-hour-graph-42mm.png */; };
+		01C75A4F2111631200444723 /* 3-hour-graph-42mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A4C2111631100444723 /* 3-hour-graph-42mm.png */; };
+		01C75A502111631200444723 /* 2-hour-graph-42mm.png in Resources */ = {isa = PBXBuildFile; fileRef = 01C75A4D2111631200444723 /* 2-hour-graph-42mm.png */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -442,6 +448,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01C75A3F2111384100444723 /* 1-hour-graph-38mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1-hour-graph-38mm.png"; sourceTree = "<group>"; };
+		01C75A402111384100444723 /* 2-hour-graph-38mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "2-hour-graph-38mm.png"; sourceTree = "<group>"; };
+		01C75A412111384100444723 /* 3-hour-graph-38mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "3-hour-graph-38mm.png"; sourceTree = "<group>"; };
+		01C75A4B2111631100444723 /* 1-hour-graph-42mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1-hour-graph-42mm.png"; sourceTree = "<group>"; };
+		01C75A4C2111631100444723 /* 3-hour-graph-42mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "3-hour-graph-42mm.png"; sourceTree = "<group>"; };
+		01C75A4D2111631200444723 /* 2-hour-graph-42mm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "2-hour-graph-42mm.png"; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		43076BF21DFDBC4B0012A723 /* it.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = it.lproj; sourceTree = "<group>"; };
@@ -790,6 +802,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		01C75A3E2111384100444723 /* Graph menu icons */ = {
+			isa = PBXGroup;
+			children = (
+				01C75A3F2111384100444723 /* 1-hour-graph-38mm.png */,
+				01C75A4B2111631100444723 /* 1-hour-graph-42mm.png */,
+				01C75A4D2111631200444723 /* 2-hour-graph-42mm.png */,
+				01C75A4C2111631100444723 /* 3-hour-graph-42mm.png */,
+				01C75A402111384100444723 /* 2-hour-graph-38mm.png */,
+				01C75A412111384100444723 /* 3-hour-graph-38mm.png */,
+			);
+			name = "Graph menu icons";
+			path = "Assets.xcassets/Graph menu icons";
+			sourceTree = "<group>";
+		};
 		4328E0121CFBE1B700E199AA /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1565,6 +1591,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */,
+				01C75A4E2111631200444723 /* 1-hour-graph-42mm.png in Resources */,
+				01C75A4F2111631200444723 /* 3-hour-graph-42mm.png in Resources */,
+				01C75A422111384100444723 /* 1-hour-graph-38mm.png in Resources */,
+				01C75A432111384100444723 /* 2-hour-graph-38mm.png in Resources */,
+				01C75A502111631200444723 /* 2-hour-graph-42mm.png in Resources */,
+				01C75A442111384100444723 /* 3-hour-graph-38mm.png in Resources */,
 				894F71E21FFEC4D8007D365C /* Assets.xcassets in Resources */,
 				43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */,
 			);

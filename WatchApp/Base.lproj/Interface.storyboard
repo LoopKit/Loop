@@ -389,17 +389,23 @@
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
                         <items>
-                            <menuItem title="1 hour" icon="add" id="vL1-NA-WZ1">
+                            <menuItem title="1 hour" image="1-hour-graph-38mm" id="vL1-NA-WZ1">
+                                <variation key="device=watch38mm" image="1-hour-graph-38mm"/>
+                                <variation key="device=watch42mm" image="1-hour-graph-42mm"/>
                                 <connections>
                                     <action selector="setChartWindow1Hour" destination="v5b-sO-bb8" id="yp1-H2-0e5"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="2 hours" icon="more" id="dPh-7b-Tfv">
+                            <menuItem title="2 hours" image="2-hour-graph-38mm" id="dPh-7b-Tfv">
+                                <variation key="device=watch38mm" image="2-hour-graph-38mm"/>
+                                <variation key="device=watch42mm" image="2-hour-graph-42mm"/>
                                 <connections>
                                     <action selector="setChartWindow2Hours" destination="v5b-sO-bb8" id="IQe-Uh-AOb"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="3 hours" icon="play" id="fR1-7h-SNe">
+                            <menuItem title="3 hours" image="3-hour-graph-38mm" id="fR1-7h-SNe">
+                                <variation key="device=watch38mm" image="3-hour-graph-38mm"/>
+                                <variation key="device=watch42mm" image="3-hour-graph-42mm"/>
                                 <connections>
                                     <action selector="setChartWindow3Hours" destination="v5b-sO-bb8" id="HhZ-89-5Yp"/>
                                 </connections>
