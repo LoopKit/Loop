@@ -242,7 +242,7 @@ class GlucoseChartScene: SKScene {
 
         targetRanges?.forEach { range in
             let sprite = getSprite(forHash: range.hashValue)
-            sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
+            sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.4 : 0.6)
             sprite.move(to: scaler.rect(for: range), animated: animated)
             inactiveNodes.removeValue(forKey: range.hashValue)
         }
@@ -252,13 +252,13 @@ class GlucoseChartScene: SKScene {
         // extends to the end of the visible window.
         if let range = temporaryOverride {
             let sprite1 = getSprite(forHash: range.hashValue)
-            sprite1.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite1.color = UIColor.rangeColor.withAlphaComponent(0.6)
             sprite1.move(to: scaler.rect(for: range), animated: animated)
             inactiveNodes.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
             let sprite2 = getSprite(forHash: extendedRange.hashValue)
-            sprite2.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite2.color = UIColor.rangeColor.withAlphaComponent(0.4)
             sprite2.move(to: scaler.rect(for: extendedRange), animated: animated)
             inactiveNodes.removeValue(forKey: extendedRange.hashValue)
         }
