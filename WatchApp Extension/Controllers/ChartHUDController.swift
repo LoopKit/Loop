@@ -17,7 +17,15 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet weak var iobLabel: WKInterfaceLabel!
     @IBOutlet weak var cobLabel: WKInterfaceLabel!
     @IBOutlet weak var glucoseScene: WKInterfaceSKScene!
-
+    @IBAction func setChartWindow1Hour() {
+        scene.visibleHours = 1
+    }
+    @IBAction func setChartWindow2Hours() {
+        scene.visibleHours = 2
+    }
+    @IBAction func setChartWindow3Hours() {
+        scene.visibleHours = 3
+    }
     private let scene = GlucoseChartScene()
 
     override init() {

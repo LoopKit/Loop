@@ -145,7 +145,7 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    private var visibleHours: Int = 3
+    var visibleHours: Int = 3
     private var timer: Timer?
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
@@ -158,7 +158,7 @@ class GlucoseChartScene: SKScene {
         super.init(size: {
             switch WKInterfaceDevice.current().watchSize() {
             case .Watch38mm:
-                return CGSize(width: 134, height: 61)
+                return CGSize(width: 134, height: 68)
             case .Watch42mm:
                 return CGSize(width: 154, height: 86)
             }
