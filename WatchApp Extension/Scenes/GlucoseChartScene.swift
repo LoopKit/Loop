@@ -74,7 +74,7 @@ extension HKUnit {
         if unitString == "mg/dL" {
             return [150.0, 200.0, 250.0, 300.0, 350.0, 400.0]
         } else {
-            return [8.3,   11.1,  13.9,  16.6,  19.4,  22.2]
+            return [8.0, 11.0, 14.0, 17.0, 20.0, 23.0]
         }
     }
 
@@ -82,7 +82,7 @@ extension HKUnit {
         if unitString == "mg/dL" {
             return 50.0
         } else {
-            return 2.8
+            return 3.0
         }
     }
 }
