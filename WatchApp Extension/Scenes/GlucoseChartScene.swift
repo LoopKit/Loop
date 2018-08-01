@@ -61,8 +61,9 @@ struct Scaler {
         return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
-    func rect(for range: WatchDatedRange) -> CGRect {
-        let a = point(range.startDate, range.minValue)
+    func rect(for range: WatchDatedRange, future: Bool = false) -> CGRect {
+        let startDate = future ? Date() : range.startDate
+        let a = point(startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
         let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, 2))
         return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
@@ -250,16 +251,16 @@ class GlucoseChartScene: SKScene {
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
         // extends to the end of the visible window.
-        if let range = temporaryOverride {
+        if let range = temporaryOverride, range.endDate > Date() {
             let sprite1 = getSprite(forHash: range.hashValue)
             sprite1.color = UIColor.rangeColor.withAlphaComponent(0.6)
-            sprite1.move(to: scaler.rect(for: range), animated: animated)
+            sprite1.move(to: scaler.rect(for: range, future: true), animated: animated)
             inactiveNodes.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
             let sprite2 = getSprite(forHash: extendedRange.hashValue)
             sprite2.color = UIColor.rangeColor.withAlphaComponent(0.4)
-            sprite2.move(to: scaler.rect(for: extendedRange), animated: animated)
+            sprite2.move(to: scaler.rect(for: extendedRange, future: true), animated: animated)
             inactiveNodes.removeValue(forKey: extendedRange.hashValue)
         }
 
