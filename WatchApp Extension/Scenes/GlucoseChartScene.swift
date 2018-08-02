@@ -61,10 +61,10 @@ struct Scaler {
         return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
+    // By default enforce a minimum height so that the range is visible
     func rect(for range: WatchDatedRange, minHeight: CGFloat = 2) -> CGRect {
         let a = point(range.startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
-        // Enforce a minimum height so that narrow target ranges still show up:
         let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, minHeight))
         return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
     }
