@@ -61,10 +61,11 @@ struct Scaler {
         return CGPoint(x: CGFloat(x.timeIntervalSince(startDate)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
     }
 
-    func rect(for range: WatchDatedRange) -> CGRect {
+    // By default enforce a minimum height so that the range is visible
+    func rect(for range: WatchDatedRange, minHeight: CGFloat = 2) -> CGRect {
         let a = point(range.startDate, range.minValue)
         let b = point(range.endDate, range.maxValue)
-        let size = CGSize(width: b.x - a.x, height: b.y - a.y)
+        let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, minHeight))
         return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
     }
 }
@@ -74,7 +75,7 @@ extension HKUnit {
         if unitString == "mg/dL" {
             return [150.0, 200.0, 250.0, 300.0, 350.0, 400.0]
         } else {
-            return [8.3,   11.1,  13.9,  16.6,  19.4,  22.2]
+            return [8.0, 11.0, 14.0, 17.0, 20.0, 23.0]
         }
     }
 
@@ -82,7 +83,7 @@ extension HKUnit {
         if unitString == "mg/dL" {
             return 50.0
         } else {
-            return 2.8
+            return 3.0
         }
     }
 }
@@ -242,7 +243,7 @@ class GlucoseChartScene: SKScene {
 
         targetRanges?.forEach { range in
             let sprite = getSprite(forHash: range.hashValue)
-            sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.2 : 0.4)
+            sprite.color = UIColor.rangeColor.withAlphaComponent(temporaryOverride != nil ? 0.4 : 0.6)
             sprite.move(to: scaler.rect(for: range), animated: animated)
             inactiveNodes.removeValue(forKey: range.hashValue)
         }
@@ -250,15 +251,15 @@ class GlucoseChartScene: SKScene {
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
         // extends to the end of the visible window.
-        if let range = temporaryOverride {
+        if let range = temporaryOverride, range.endDate > Date() {
             let sprite1 = getSprite(forHash: range.hashValue)
-            sprite1.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite1.color = UIColor.rangeColor.withAlphaComponent(0.6)
             sprite1.move(to: scaler.rect(for: range), animated: animated)
             inactiveNodes.removeValue(forKey: range.hashValue)
 
             let extendedRange = WatchDatedRange(startDate: range.startDate, endDate: Date() + window, minValue: range.minValue, maxValue: range.maxValue)
             let sprite2 = getSprite(forHash: extendedRange.hashValue)
-            sprite2.color = UIColor.rangeColor.withAlphaComponent(0.2)
+            sprite2.color = UIColor.rangeColor.withAlphaComponent(0.4)
             sprite2.move(to: scaler.rect(for: extendedRange), animated: animated)
             inactiveNodes.removeValue(forKey: extendedRange.hashValue)
         }
