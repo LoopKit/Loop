@@ -250,7 +250,7 @@ class GlucoseChartScene: SKScene {
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
         // extends to the end of the visible window.
-        if let range = temporaryOverride {
+        if let range = temporaryOverride, range.endDate > Date() {
             let sprite1 = getSprite(forHash: range.hashValue)
             sprite1.color = UIColor.rangeColor.withAlphaComponent(0.6)
             sprite1.move(to: scaler.rect(for: range), animated: animated)
