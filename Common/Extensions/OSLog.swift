@@ -21,6 +21,10 @@ extension OSLog {
         log(message, type: .info, args)
     }
 
+    func `default`(_ message: StaticString, _ args: CVarArg...) {
+        log(message, type: .default, args)
+    }
+
     func error(_ message: StaticString, _ args: CVarArg...) {
         log(message, type: .error, args)
     }
@@ -35,6 +39,10 @@ extension OSLog {
             os_log(message, log: self, type: type, args[0], args[1])
         case 3:
             os_log(message, log: self, type: type, args[0], args[1], args[2])
+        case 4:
+            os_log(message, log: self, type: type, args[0], args[1], args[2], args[3])
+        case 5:
+            os_log(message, log: self, type: type, args[0], args[1], args[2], args[3], args[4])
         default:
             os_log(message, log: self, type: type, args)
         }

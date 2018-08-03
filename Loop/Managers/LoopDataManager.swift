@@ -189,6 +189,7 @@ final class LoopDataManager {
         set {
             lockedLastLoopCompleted.value = newValue
 
+            NotificationManager.clearLoopNotRunningNotifications()
             NotificationManager.scheduleLoopNotRunningNotifications()
             AnalyticsManager.shared.loopDidSucceed()
         }
