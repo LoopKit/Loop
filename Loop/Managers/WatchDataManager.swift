@@ -142,15 +142,14 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                         endDate: override.end
                     )
 
-                    context.temporaryOverride = WatchDatedRange(
-                        startDate: override.start,
-                        endDate: override.end ?? .distantFuture,
-                        minValue: override.value.minValue,
-                        maxValue: override.value.maxValue
-                    )
-
-                    if (context.temporaryOverride?.endDate)! < Date() {
-                        context.temporaryOverride = nil
+                    let endDate = override.end ?? .distantFuture
+                    if endDate > Date() {
+                        context.temporaryOverride = WatchDatedRange(
+                            startDate: override.start,
+                            endDate: endDate,
+                            minValue: override.value.minValue,
+                            maxValue: override.value.maxValue
+                        )
                     }
                 }
 
