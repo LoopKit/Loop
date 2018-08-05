@@ -148,6 +148,10 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                         minValue: override.value.minValue,
                         maxValue: override.value.maxValue
                     )
+
+                    if (context.temporaryOverride?.endDate)! < Date() {
+                        context.temporaryOverride = nil
+                    }
                 }
 
                 let configuredOverrideContexts = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
