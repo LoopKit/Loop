@@ -1,18 +1,18 @@
 {
-  "iOS" : [
-    {
-      "hash" : "d87c4461d79024396b8132e517c41d32b0fb4d64f1bfb199aa3a93265246de74",
-      "name" : "ShareClient"
-    }
+  "Mac" : [
+
   ],
-  "commitish" : "v0.4.1",
   "watchOS" : [
 
   ],
   "tvOS" : [
 
   ],
-  "Mac" : [
-
+  "commitish" : "v0.4.1",
+  "iOS" : [
+    {
+      "name" : "ShareClient",
+      "hash" : "1c64d1e57e896d8de9a262e02b58547e8a0b966090a4886c9dcbf34554dbdd7b"
+    }
   ]
 }

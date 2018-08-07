@@ -12,23 +12,45 @@ import WatchConnectivity
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
-    fileprivate var carbValue: Int = 15 {
+    private var carbValue: Int = 15 {
         didSet {
-            guard carbValue >= 0 else {
+            if carbValue < 0 {
                 carbValue = 0
-                return
-            }
-
-            guard carbValue <= 100 else {
+            } else if carbValue > 100 {
                 carbValue = 100
-                return
             }
 
             valueLabel.setText(String(carbValue))
         }
     }
 
-    private var absorptionTime = AbsorptionTimeType.medium {
+    private let maximumDatePastInterval = TimeInterval(hours: 8)
+    private let maximumDateFutureInterval = TimeInterval(hours: 4)
+
+    private var date = Date() {
+        didSet {
+            let now = Date()
+            let minimumDate = now - maximumDatePastInterval
+            let maximumDate = now + maximumDateFutureInterval
+
+            if date < minimumDate {
+                date = minimumDate
+            } else if date > maximumDate {
+                date = maximumDate
+            }
+
+            dateLabel.setText(dateFormatter.string(from: date))
+        }
+    }
+
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    private var absorptionTime: AbsorptionTimeType = .medium {
         didSet {
             absorptionButtonA.setBackgroundColor(UIColor.darkCarbsColor)
             absorptionButtonB.setBackgroundColor(UIColor.darkCarbsColor)
@@ -45,7 +67,9 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         }
     }
 
-    @IBOutlet weak var valueLabel: WKInterfaceLabel!
+    @IBOutlet var valueLabel: WKInterfaceLabel!
+
+    @IBOutlet var dateLabel: WKInterfaceLabel!
 
     @IBOutlet weak var absorptionButtonA: WKInterfaceButton!
 
@@ -53,12 +77,31 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
+    private enum InputMode {
+        case value
+        case date
+    }
+
+    private var inputMode: InputMode = .value {
+        didSet {
+            switch inputMode {
+            case .value:
+                valueLabel.setTextColor(UIColor.carbsColor)
+                dateLabel.setTextColor(UIColor.lightGray)
+            case .date:
+                valueLabel.setTextColor(UIColor.lightGray)
+                dateLabel.setTextColor(UIColor.carbsColor)
+            }
+        }
+    }
+
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
         // Configure interface objects here.
         crownSequencer.delegate = self
 
+        date = Date()
         absorptionTime = .medium
     }
 
@@ -76,12 +119,29 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     // MARK: - Actions
 
+    private let valueIncrement = 5
+    private let dateIncrement = TimeInterval(minutes: 15)
+
     @IBAction func decrement() {
-        carbValue -= 5
+        switch inputMode {
+        case .value:
+            carbValue -= valueIncrement
+        case .date:
+            date -= dateIncrement
+        }
     }
 
     @IBAction func increment() {
-        carbValue += 5
+        switch inputMode {
+        case .value:
+            carbValue += valueIncrement
+        case .date:
+            date += dateIncrement
+        }
+    }
+
+    @IBAction func toggleInputMode() {
+        inputMode = (inputMode == .value) ? .date : .value
     }
 
     @IBAction func setAbsorptionTimeFast() {
@@ -98,15 +158,19 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBAction func save() {
         if carbValue > 0 {
-            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: Date())
+            let entry = CarbEntryUserInfo(value: Double(carbValue), absorptionTimeType: absorptionTime, startDate: date)
 
             do {
-                try WCSession.default().sendCarbEntryMessage(entry,
+                try WCSession.default.sendCarbEntryMessage(entry,
                     replyHandler: { (suggestion) in
-                        WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                        DispatchQueue.main.async {
+                            WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                        }
                     },
                     errorHandler: { (error) in
-                        ExtensionDelegate.shared().present(error)
+                        DispatchQueue.main.async {
+                            ExtensionDelegate.shared().present(error)
+                        }
                     }
                 )
             } catch {
@@ -124,17 +188,24 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     // MARK: - Crown Sequencer
 
-    fileprivate var accumulatedRotation: Double = 0
+    private var accumulatedRotation: Double = 0
 }
 
-fileprivate let rotationsPerCarb: Double = 1/24
+private let rotationsPerIncrement: Double = 1/24
 
 extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
+        let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
+        let delta = (accumulatedRotation - remainder) / rotationsPerIncrement
 
-        let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerCarb)
-        carbValue += Int((accumulatedRotation - remainder) / rotationsPerCarb)
+        switch inputMode {
+        case .value:
+            carbValue += Int(delta)
+        case .date:
+            date += TimeInterval(minutes: delta)
+        }
+
         accumulatedRotation = remainder
     }
 }

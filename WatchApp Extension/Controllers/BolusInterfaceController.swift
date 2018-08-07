@@ -136,8 +136,10 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             let bolus = SetBolusUserInfo(value: bolusValue, startDate: Date())
 
             do {
-                try WCSession.default().sendBolusMessage(bolus) { (error) in
-                    ExtensionDelegate.shared().present(error)
+                try WCSession.default.sendBolusMessage(bolus) { (error) in
+                    DispatchQueue.main.async {
+                        ExtensionDelegate.shared().present(error)
+                    }
                 }
             } catch {
                 presentAlert(

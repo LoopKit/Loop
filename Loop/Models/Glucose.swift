@@ -8,12 +8,12 @@
 
 import Foundation
 import LoopUI
-import xDripG5
+import CGMBLEKit
 
 
 extension Glucose: SensorDisplayable {
     public var isStateValid: Bool {
-        return state == .ok && status == .ok
+        return state == .known(.ok) && status == .ok
     }
 
     public var stateDescription: String {
@@ -22,7 +22,7 @@ extension Glucose: SensorDisplayable {
         case .ok:
             status = ""
         case .lowBattery:
-            status = NSLocalizedString("Low Battery", comment: "The description of a low G5 transmitter battery with a leading space")
+            status = NSLocalizedString("Low Battery", comment: "The description of a low G5/G6 transmitter battery with a leading space")
         case .unknown(let value):
             status = String(format: "%02x", value)
         }

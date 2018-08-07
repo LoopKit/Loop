@@ -36,6 +36,14 @@ extension NumberFormatter {
         )
     }
 
+    func decibleString(from decibles: Int?) -> String? {
+        if let decibles = decibles {
+            return string(from: Double(decibles), unit: "dB")
+        } else {
+            return nil
+        }
+    }
+
     func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
         return string(from: value, unit: unit.glucoseUnitDisplayString)
     }

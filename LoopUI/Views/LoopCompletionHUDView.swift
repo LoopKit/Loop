@@ -95,7 +95,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         )
         updateTimer = timer
 
-        RunLoop.main.add(timer, forMode: RunLoopMode.defaultRunLoopMode)
+        RunLoop.main.add(timer, forMode: .defaultRunLoopMode)
     }
 
     private var updateTimer: Timer? {
@@ -121,11 +121,11 @@ public final class LoopCompletionHUDView: BaseHUDView {
             let ago = abs(min(0, date.timeIntervalSinceNow))
 
             switch ago {
-            case let t where t.minutes <= 5:
+            case let t where t <= .minutes(6):
                 freshness = .fresh
-            case let t where t.minutes <= 15:
+            case let t where t <= .minutes(16):
                 freshness = .aging
-            case let t where t.hours <= 12:
+            case let t where t <= .hours(12):
                 freshness = .stale
             default:
                 freshness = .unknown

@@ -17,8 +17,15 @@ enum CGM {
         switch self {
         case .g4:
             return URL(string: "dexcomshare://")
-        case .g5:
-            return URL(string: "dexcomcgm://")
+        case .g5(let transmitterID):
+            if let transmitterID = transmitterID {
+                if transmitterID.hasPrefix("4") {
+                    return URL(string: "dexcomcgm://")
+                } else {
+                    return URL(string: "dexcomg6://")
+                }
+            }
+            return nil
         case .enlite:
             return nil
         }

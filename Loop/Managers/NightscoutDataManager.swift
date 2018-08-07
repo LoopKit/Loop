@@ -13,6 +13,8 @@ import HealthKit
 import InsulinKit
 import LoopKit
 import RileyLinkKit
+import RileyLinkBLEKit
+
 
 final class NightscoutDataManager {
 
@@ -41,15 +43,7 @@ final class NightscoutDataManager {
             var loopError = state.error
             let recommendedBolus: Double?
 
-            do {
-                recommendedBolus = try state.recommendBolus().amount
-            } catch let error {
-                recommendedBolus = nil
-
-                if loopError == nil {
-                    loopError = error
-                }
-            }
+            recommendedBolus = state.recommendedBolus?.recommendation.amount
 
             let carbsOnBoard = state.carbsOnBoard
             let predictedGlucose = state.predictedGlucose
@@ -157,7 +151,7 @@ final class NightscoutDataManager {
         return UploaderStatus(name: uploaderDevice.name, timestamp: Date(), battery: battery)
     }
 
-    func uploadDeviceStatus(_ pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, rileylinkDevice: RileyLinkKit.RileyLinkDevice? = nil, includeUploaderStatus: Bool = true) {
+    func uploadDeviceStatus(_ pumpStatus: NightscoutUploadKit.PumpStatus? = nil, loopStatus: LoopStatus? = nil, rileylinkDevice: RileyLinkDevice.Status? = nil, deviceState: DeviceState? = nil, includeUploaderStatus: Bool = true) {
 
         guard let uploader = deviceDataManager.remoteDataManager.nightscoutService.uploader else {
             return
@@ -177,7 +171,15 @@ final class NightscoutDataManager {
         var radioAdapter: NightscoutUploadKit.RadioAdapter? = nil
 
         if let device = rileylinkDevice {
-            radioAdapter = NightscoutUploadKit.RadioAdapter(hardware: "RileyLink", frequency: device.radioFrequency, name: device.name ?? "Unknown", lastTuned: device.lastTuned, firmwareVersion: device.firmwareVersion ?? "Unknown", RSSI: device.RSSI, pumpRSSI: device.pumpRSSI)
+            radioAdapter = NightscoutUploadKit.RadioAdapter(
+                hardware: "RileyLink",
+                frequency: deviceState?.lastValidFrequency?.value,
+                name: device.name ?? "Unknown",
+                lastTuned: deviceState?.lastTuned,
+                firmwareVersion: device.firmwareDescription,
+                RSSI: nil, // TODO: device.RSSI,
+                pumpRSSI: nil // TODO: device.pumpRSSI
+            )
         }
 
         // Build DeviceStatus

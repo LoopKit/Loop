@@ -11,7 +11,6 @@ import UIKit
 import WatchConnectivity
 import CarbKit
 import LoopKit
-import xDripG5
 
 
 final class WatchDataManager: NSObject, WCSessionDelegate {
@@ -31,19 +30,39 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     private var watchSession: WCSession? = {
         if WCSession.isSupported() {
-            return WCSession.default()
+            return WCSession.default
         } else {
             return nil
         }
     }()
 
+    private var lastActiveOverrideContext: GlucoseRangeSchedule.Override.Context?
+    private var lastConfiguredOverrideContexts: [GlucoseRangeSchedule.Override.Context] = []
+
     @objc private func updateWatch(_ notification: Notification) {
         guard
-            let rawContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
-            let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
-            case .tempBasal = context,
+            let rawUpdateContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
+            let updateContext = LoopDataManager.LoopUpdateContext(rawValue: rawUpdateContext),
             let session = watchSession
         else {
+            return
+        }
+
+        switch updateContext {
+        case .tempBasal:
+            break
+        case .preferences:
+            let activeOverrideContext = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.activeOverrideContext
+            let configuredOverrideContexts = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+            defer {
+                lastActiveOverrideContext = activeOverrideContext
+                lastConfiguredOverrideContexts = configuredOverrideContexts
+            }
+
+            guard activeOverrideContext != lastActiveOverrideContext || configuredOverrideContexts != lastConfiguredOverrideContexts else {
+                return
+            }
+        default:
             return
         }
 
@@ -106,8 +125,22 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.reservoir = reservoir?.unitVolume
 
                 context.loopLastRunDate = state.lastLoopCompleted
-                context.recommendedBolusDose = try? state.recommendBolus().amount
+                context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
                 context.maxBolus = manager.settings.maximumBolus
+
+                if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
+                    if let override = glucoseTargetRangeSchedule.override {
+                        context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
+                            context: override.context.correspondingUserInfoContext,
+                            startDate: override.start,
+                            endDate: override.end
+                        )
+                    }
+
+                    let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+                    let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
+                    context.configuredOverrideContexts = configuredUserInfoOverrideContexts
+                }
 
                 if let trend = self.deviceDataManager.sensorInfo?.trendType {
                     context.glucoseTrendRawValue = trend.rawValue
@@ -144,7 +177,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     // MARK: WCSessionDelegate
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String: Any]) -> Void) {
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         switch message["name"] as? String {
         case CarbEntryUserInfo.name?:
             addCarbEntryFromWatchMessage(message) { (units) in
@@ -160,12 +193,32 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             }
 
             replyHandler([:])
+        case GlucoseRangeScheduleOverrideUserInfo.name?:
+            if let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: message) {
+                let overrideContext = overrideUserInfo.context.correspondingOverrideContext
+
+                // update the recorded last active override context prior to enabling the actual override
+                // to prevent the Watch context being unnecessarily sent in response to the override being enabled
+                let previousActiveOverrideContext = lastActiveOverrideContext
+                lastActiveOverrideContext = overrideContext
+                let overrideSuccess = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
+
+                if overrideSuccess == false {
+                    lastActiveOverrideContext = previousActiveOverrideContext
+                }
+
+                replyHandler([:])
+            } else {
+                lastActiveOverrideContext = nil
+                deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
+                replyHandler([:])
+            }
         default:
             replyHandler([:])
         }
     }
 
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any]) {
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
         addCarbEntryFromWatchMessage(userInfo)
     }
 
@@ -191,9 +244,30 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
-        watchSession = WCSession.default()
+        watchSession = WCSession.default
         watchSession?.delegate = self
         watchSession?.activate()
     }
+}
 
+fileprivate extension GlucoseRangeSchedule.Override.Context {
+    var correspondingUserInfoContext: GlucoseRangeScheduleOverrideUserInfo.Context {
+        switch self {
+        case .preMeal:
+            return .preMeal
+        case .workout:
+            return .workout
+        }
+    }
+}
+
+fileprivate extension GlucoseRangeScheduleOverrideUserInfo.Context {
+    var correspondingOverrideContext: GlucoseRangeSchedule.Override.Context {
+        switch self {
+        case .preMeal:
+            return .preMeal
+        case .workout:
+            return .workout
+        }
+    }
 }

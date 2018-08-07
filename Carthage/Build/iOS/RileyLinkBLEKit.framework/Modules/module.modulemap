@@ -4,3 +4,8 @@ framework module RileyLinkBLEKit {
   export *
   module * { export * }
 }
+
+module RileyLinkBLEKit.Swift {
+    header "RileyLinkBLEKit-Swift.h"
+    requires objc
+}

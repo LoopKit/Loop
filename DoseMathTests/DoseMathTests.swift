@@ -326,7 +326,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqualWithAccuracy(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -344,7 +344,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqualWithAccuracy(1.475, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.475, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -379,7 +379,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqualWithAccuracy(2.975, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(2.975, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -573,6 +573,52 @@ class RecommendBolusTests: XCTestCase {
         }
     }
 
+    func testStartBelowSuspendThresholdEndHigh() {
+        // 60 - 200 mg/dL
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
+
+        let dose = glucose.recommendedBolus(
+            to: glucoseTargetRange,
+            at: glucose.first!.startDate,
+            suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter(), doubleValue: 70),
+            sensitivity: insulinSensitivitySchedule,
+            model: insulinModel,
+            pendingInsulin: 0,
+            maxBolus: maxBolus
+        )
+
+        XCTAssertEqual(0, dose.amount)
+
+        if case BolusRecommendationNotice.glucoseBelowSuspendThreshold(let glucose) = dose.notice! {
+            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
+        } else {
+            XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
+        }
+    }
+
+    func testStartLowNoSuspendThresholdEndHigh() {
+        // 60 - 200 mg/dL
+        let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
+
+        let dose = glucose.recommendedBolus(
+            to: glucoseTargetRange,
+            at: glucose.first!.startDate,
+            suspendThreshold: nil,  // Expected to default to 90
+            sensitivity: insulinSensitivitySchedule,
+            model: insulinModel,
+            pendingInsulin: 0,
+            maxBolus: maxBolus
+        )
+
+        XCTAssertEqual(0, dose.amount)
+
+        if case BolusRecommendationNotice.glucoseBelowSuspendThreshold(let glucose) = dose.notice! {
+            XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter()), 60)
+        } else {
+            XCTFail("Expected currentGlucoseBelowTarget, but got \(dose.notice!)")
+        }
+    }
+
     func testDroppingBelowRangeThenRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_dropping_then_rising")
 
@@ -636,7 +682,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(1.575, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.575, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndFalling() {
@@ -652,7 +698,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(0.325, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.325, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testInRangeAndRising() {
@@ -668,7 +714,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(0.325, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.325, dose.amount, accuracy: 1.0 / 40.0)
 
         // Less existing temp
 
@@ -682,7 +728,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(0, dose.amount, accuracy: 1e-13)
+        XCTAssertEqual(0, dose.amount, accuracy: .ulpOfOne)
     }
 
     func testStartLowEndJustAboveRange() {
@@ -729,7 +775,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqualWithAccuracy(1.25, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.25, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testRiseAfterDIA() {
