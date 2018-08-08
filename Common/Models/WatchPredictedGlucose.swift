@@ -29,7 +29,7 @@ extension WatchPredictedGlucose: RawRepresentable {
     var rawValue: RawValue {
 
         return [
-            "v": values.map { UInt16($0.quantity.doubleValue(for: .milligramsPerDeciliter)) },
+            "v": values.map { Int16($0.quantity.doubleValue(for: .milligramsPerDeciliter)) },
             "d": values[0].startDate,
             "i": values[1].startDate.timeIntervalSince(values[0].startDate)
         ]
@@ -37,7 +37,7 @@ extension WatchPredictedGlucose: RawRepresentable {
 
     init?(rawValue: RawValue) {
         guard
-            let values = rawValue["v"] as? [UInt16],
+            let values = rawValue["v"] as? [Int16],
             let firstDate = rawValue["d"] as? Date,
             let interval = rawValue["i"] as? TimeInterval
             else {
