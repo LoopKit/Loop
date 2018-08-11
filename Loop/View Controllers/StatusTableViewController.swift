@@ -391,7 +391,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Insulin Delivery
             if let doseEntries = doseEntries {
-                self.charts.setDoseEntries(doseEntries)
+                self.charts.setDoseEntries(doseEntries,  self.deviceManager.loopManager.settings.maximumBasalRatePerHour)
             }
             if let totalDelivery = totalDelivery {
                 self.totalDelivery = totalDelivery

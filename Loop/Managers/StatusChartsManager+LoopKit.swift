@@ -72,7 +72,7 @@ extension StatusChartsManager {
         }
     }
 
-    func setDoseEntries(_ doseEntries: [DoseEntry]) {
+    func setDoseEntries(_ doseEntries: [DoseEntry], _ maxBasalRateUnitsPerHour: Double?) {
         let dateFormatter = self.dateFormatter
         let doseFormatter = self.doseFormatter
 
@@ -83,7 +83,8 @@ extension StatusChartsManager {
         for entry in doseEntries {
             let time = entry.endDate.timeIntervalSince(entry.startDate)
 
-            if entry.type == .bolus && entry.netBasalUnits > 0 && time < .minutes(5) {
+            // Delivery rate above max basal indicates a bolus not yet present in event history: 
+            if (entry.type == .bolus && entry.netBasalUnits > 0 && time < .minutes(5)) || (entry.netBasalUnitsPerHour > maxBasalRateUnitsPerHour ?? Double.infinity) {
                 let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                 let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
 
