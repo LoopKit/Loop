@@ -19,8 +19,9 @@ import UIKit
 extension UIColor {
     static let glucoseTintColor = UIColor(red: 0 / 255, green: 176 / 255, blue: 255 / 255, alpha: 1)
     static let gridColor = UIColor(white: 193 / 255, alpha: 1)
-    static let nowColor = UIColor(white: 193 / 255, alpha: 0.5)
+    static let nowColor = UIColor(white: 0.2, alpha: 1)
     static let rangeColor = UIColor(red: 158/255, green: 215/255, blue: 245/255, alpha: 1)
+    static let backgroundColor = UIColor(white: 0.1, alpha: 1)
 }
 
 extension SKLabelNode {
@@ -90,16 +91,16 @@ extension HKUnit {
 
 extension WKInterfaceDevice {
     enum WatchSize {
-        case Watch38mm
-        case Watch42mm
+        case watch38mm
+        case watch42mm
     }
 
     func watchSize() -> WatchSize {
         switch screenBounds.width {
         case 136:
-            return .Watch38mm
+            return .watch38mm
         default:
-            return .Watch42mm
+            return .watch42mm
         }
     }
 }
@@ -158,23 +159,16 @@ class GlucoseChartScene: SKScene {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         super.init(size: {
             switch WKInterfaceDevice.current().watchSize() {
-            case .Watch38mm:
+            case .watch38mm:
                 return CGSize(width: 134, height: 68)
-            case .Watch42mm:
+            case .watch42mm:
                 return CGSize(width: 154, height: 86)
             }
         }())
 
         anchorPoint = CGPoint(x: 0, y: 0)
         scaleMode = .aspectFit
-        backgroundColor = .clear
-
-        let frame = SKShapeNode(rectOf: size, cornerRadius: 0)
-        frame.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        frame.lineWidth = 2
-        frame.fillColor = .clear
-        frame.strokeColor = .gridColor
-        addChild(frame)
+        backgroundColor = .backgroundColor
 
         let dashedPath = CGPath(rect: CGRect(origin: CGPoint(x: size.width / 2, y: 0), size: CGSize(width: 0, height: size.height)), transform: nil).copy(dashingWithPhase: 0, lengths: [4.0, 3.0])
         let now = SKShapeNode(path: dashedPath)
