@@ -1,5 +1,5 @@
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Bolus Mislukt";
+"Bolus Failed" = "Bolus mislukt";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -29,7 +29,7 @@
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Versturen Mislukt";
+"Send Failed" = "Versturen mislukt";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

@@ -136,10 +136,10 @@
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Rango de Correción";
+"Correction Range" = "Rango Correctivo";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango de correción.";
+"Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango correctivo.";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token de Usuario";

@@ -32,7 +32,7 @@
 "bIL-Ub-qYp.text" = "Etiket";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Glucose Verandering";
+"bq4-98-cQU.text" = "Glucose verandering";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "BR0-dr-Fj2"; */
 "BR0-dr-Fj2.accessibilityLabel" = "Eenheden";
@@ -101,7 +101,7 @@
 "OFA-qT-ZAg.text" = "Etiket";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Voorspelde Glucose";
+"PA3-sP-cWY.title" = "Voorspelde glucose";
 
 /* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
 "pi6-Dh-72V.title" = "Insuline model";
