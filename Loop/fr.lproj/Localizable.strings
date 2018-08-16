@@ -1,5 +1,5 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = "(En suspen: %@)";
+" (pending: %@)" = "(En suspens: %@)";
 
 /* Formats absorbed carb value */
 "%@ absorbed" = "%@ absorbé";
