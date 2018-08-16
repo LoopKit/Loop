@@ -2,7 +2,7 @@
 " (pending: %@)" = "(pendiente: %@)";
 
 /* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbidos";
+"%@ absorbed" = "%@ absorbido";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
 "%@ U Total" = "%@ U Totales";
@@ -45,10 +45,10 @@
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Comparación de glucosa actual contra la predicha en 30 minutos, continuada con decadencia sobre 60 minutos.";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Un modelo basado en la publicación de la absorción de insulina Fiasp.";
+"A model based on the published absorption of Fiasp insulin." = "Un modelo basado en la absorción de la insulina Fiasp.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un modelo basado en la publicación de la absorción de insulina Humalog, Novolog y Apidra en adultos.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un modelo basado en la absorción de las insulinas Humalog, Novolog y Apidra en adultos.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AceptarBoloRecomendado";
@@ -93,7 +93,7 @@
 "at %@" = "a %@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
-"Authenticate to Bolus %@ Units" = "Autentificar para Bolo %@ Unidades";
+"Authenticate to Bolus %@ Units" = "Autenticar para Bolo %@ Unidades";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
@@ -117,10 +117,10 @@
 "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carbohidratos absorbidos (gr) ÷ Relación de Carbohidratos (gr/U) x Sensibilidad a Insulina (%1$@/U)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Cambie la batería de la microinfusora inmediatamente";
+"Change the pump battery immediately" = "Cambie la batería de la microinfusora de inmediato";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Cambie el reservorio de la microinfusora ahora";
+"Change the pump reservoir now" = "Cambie el reservorio de la microinfusora ya";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Asa cerrada";
@@ -136,10 +136,10 @@
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Rango Correctivo";
+"Correction Range" = "Rango de Correción";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = " Glucosa actual de %1$@ está por debajo del rango correctivo.";
+"Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango de correción.";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token de Usuario";
@@ -157,13 +157,13 @@
 "Dexcom Share" = "Dexcom Share";
 
 /* The action hint of the workout mode toggle button when enabled */
-"Disables" = "Inhabilita";
+"Disables" = "Desactivar";
 
 /* Title of the switch which toggles retrospective correction effects */
 "Enable Retrospective Correction" = "Habilitar corrección retrospectiva";
 
 /* The action hint of the workout mode toggle button when disabled */
-"Enables" = "Habilita";
+"Enables" = "Permitir";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Ingrese nivel de suspensión";
@@ -196,7 +196,7 @@
 "Glucose" = "Glucosa";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Los datos de glucosa son %1$@ viejos";
+"Glucose data is %1$@ old" = "Los datos de glucosa son %1$@ antiguos";
 
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "Los datos de glucosa no están disponibles";
@@ -245,7 +245,7 @@
 "Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Falla de Loop";
+"Loop Failure" = "Falla del Loop";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop no ha terminado correctamente en %@";
@@ -338,13 +338,13 @@
 "Sensor is in unknown state %1$d" = "Estado desconocido de sensor %1$d";
 
 /* The description of sensor calibration state when sensor sensor is stopped. */
-"Sensor is stopped" = "Sensor se detuvo";
+"Sensor is stopped" = "Sensor se ha detenido";
 
 /* The description of sensor calibration state when sensor sensor is warming up. */
 "Sensor is warming up" = "Preparación de sensor";
 
 /* The description of sensor calibration state when sensor needs calibration. */
-"Sensor needs calibration" = "Sensor requiere calibración";
+"Sensor needs calibration" = "Sensor se necesita de calibración";
 
 /* The title of the Dexcom share server URL credential */
 "Server" = "Servidor";
@@ -374,7 +374,7 @@
 "Suspend Threshold" = "Nivel de Suspensión";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "El model utilizado por ediciones iniciales de Loop, permite ajustar duración de acción.";
+"The legacy model used by Loop, allowing customization of action duration." = "El model utilizado por versiones iniciales del Loop, permite ajustar duración de acción de la insulina.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Bolo máximo es %@ Unidades";
@@ -383,7 +383,7 @@
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "El ID de transmisor puede encontrarse impreso en la parte trasera del dispositivo, a un lado de la caja en la que estaba empacado y dentro del menú de ajustes del receptor y la app móvil";
 
 /* The description of the switch which toggles retrospective correction effects */
-"This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Esto incrementará o decrementará mas agresivamente la entrega de basales cuando el movimiento de glucosa no concuerde con el modelo de insulina y carbohidratos.";
+"This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Esto aumentará o disminuirá de manera más agresiva la dosificación de la insulina basal cuando la dirección del nivel de la glucosa no concuerde con el modelo de la insulina y carbohidratos.";
 
 /* The title text for the Dexcom G5/G6 transmitter ID config value */
 "Transmitter ID" = "ID de Transmisor";
