@@ -1,0 +1,18 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth wird verwendet, um mit Insulinpumpen und kontinuierlichen Blutzuckermessgeräten zu kommunizieren";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID wird benutzt um Insulin-Bolus zu authentifizieren.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Mahlzeitdaten aus der HealthKit datenbank werden verwendet, um Glukose effekte zu bestimmen. Glukosedaten aus der HealthKit Datenbank werden für die Graphik- und Impulsberechnung verwendet.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Die in der App und auf der Uhr eingegebenen Kohlenhydratmehldaten werden in der Health-Datenbank gespeichert. Glukosedaten, die vom CGM abgerufen werden, werden sicher in HealthKit gespeichert.";
+

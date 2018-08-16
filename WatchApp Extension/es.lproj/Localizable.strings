@@ -1,24 +1,25 @@
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolo Falló";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
 /* The action button title to dismiss an error message */
 "Dismiss" = "Ignorar";
 
-/* Glucose trend down */
-"Falling" = "Bajando";
-
-/* Glucose trend down-down */
-"Falling fast" = "Bajando rápido";
-
-/* Glucose trend down-down-down */
-"Falling very fast" = "Bajando muy rápido";
-
-/* Glucose trend flat */
-"Flat" = "Estable";
+/* The short unit display string for grams */
+"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
-   The recovery message displayed after a carb entry send attempt fails */
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Asegúrate que tu iPhone se encuentre cerca e inténtalo de nuevo";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
@@ -26,18 +27,10 @@
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Rec: %@ U";
 
-/* Glucose trend up */
-"Rising" = "Subiendo";
-
-/* Glucose trend up-up */
-"Rising fast" = "Subiendo rápido";
-
-/* Glucose trend up-up-up */
-"Rising very fast" = "Subiendo muy rápido";
-
-/* The title of the alert controller displayed after a carb entry send attempt fails */
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Envío Falló";
 
-/* The unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+/* The short unit display string for international units of insulin */
+"U" = "U";
 
