@@ -95,6 +95,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Autenticar para Bolo %@ Unidades";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Perfil Basal";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Perfil basal";
@@ -105,6 +108,15 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Cancelar";
+
+/* Message shown when forecast cannot be made due to missing glucose data */
+"Cannot predict glucose due to missing input data" = "No se puede predecir la glucosa debido a la falta de datos de entrada";
+
+/* Error shown when carb effects or insulin effects are missing */
+"Cannot retrospect glucose due to missing input data" = "No se puede retrospectivar la glucosa debido a la falta de datos de entrada";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Efectos de carbohidratos";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -121,6 +133,15 @@
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Cambie el reservorio de la microinfusora ya";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "Verificar configuración";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "Verifique que su microinfusora esté dentro del rango";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "Verifique su fuente de datos CGM";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Asa cerrada";
@@ -192,7 +213,8 @@
 /* The title text for the G5/G6 Transmitter switch cell */
 "G5/G6 Transmitter" = "Transmisor G5/G6";
 
-/* The title of the glucose and prediction graph */
+/* Details for missing data error when glucose data is missing
+   The title of the glucose and prediction graph */
 "Glucose" = "Glucosa";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -200,6 +222,9 @@
 
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "Los datos de glucosa no están disponibles";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "Datos de glucosa no disponibles";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Momento de Glucosa";
@@ -219,7 +244,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Administración de Insulina";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "Efectos de la insulina";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "Modelo de Insulina";
 
 /* The title of the insulin sensitivities schedule screen
@@ -298,6 +327,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Los datos de la microinfusora son %1$@ viejos";
 
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "Administratión de Microinfusora";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Reservorio de Microinfusora Vacío";
 
@@ -324,6 +356,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "Requerido";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Reservorio";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Corrección Retrospectiva";
