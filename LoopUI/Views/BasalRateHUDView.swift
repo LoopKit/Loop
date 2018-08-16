@@ -18,7 +18,7 @@ public final class BasalRateHUDView: BaseHUDView {
             basalRateLabel?.text = String(format: basalRateFormatString, "–")
             updateTintColor()
 
-            accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
+            accessibilityValue = LocalizedString("Unknown", comment: "Accessibility value for an unknown value")
         }
     }
 
@@ -31,7 +31,7 @@ public final class BasalRateHUDView: BaseHUDView {
         basalRateLabel?.textColor = tintColor
     }
 
-    private lazy var basalRateFormatString = NSLocalizedString("%@ U", comment: "The format string describing the basal rate.")
+    private lazy var basalRateFormatString = LocalizedString("%@ U", comment: "The format string describing the basal rate.")
 
     public func setNetBasalRate(_ rate: Double, percent: Double, at date: Date) {
         let time = timeFormatter.string(from: date)
@@ -39,7 +39,7 @@ public final class BasalRateHUDView: BaseHUDView {
 
         if let rateString = decimalFormatter.string(from: rate) {
             basalRateLabel?.text = String(format: basalRateFormatString, rateString)
-            accessibilityValue = String(format: NSLocalizedString("%1$@ units per hour at %2$@", comment: "Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time)"), rateString, time)
+            accessibilityValue = String(format: LocalizedString("%1$@ units per hour at %2$@", comment: "Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time)"), rateString, time)
         } else {
             basalRateLabel?.text = nil
             accessibilityValue = nil

@@ -143,25 +143,25 @@ public final class LoopCompletionHUDView: BaseHUDView {
                      UIContentSizeCategory.medium,
                      UIContentSizeCategory.large:
                     // Use a longer form only for smaller text sizes
-                    caption.text = String(format: NSLocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                    caption.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
                 default:
                     caption.text = timeString
                 }
 
-                accessibilityLabel = String(format: NSLocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
+                accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
                 caption.text = "—"
                 accessibilityLabel = nil
             }
         } else {
             caption.text = "—"
-            accessibilityLabel = NSLocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
+            accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
         }
 
         if dosingEnabled {
-            accessibilityHint = NSLocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
+            accessibilityHint = LocalizedString("Closed loop", comment: "Accessibility hint describing completion HUD for a closed loop")
         } else {
-            accessibilityHint = NSLocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
+            accessibilityHint = LocalizedString("Open loop", comment: "Accessbility hint describing completion HUD for an open loop")
         }
     }
 
