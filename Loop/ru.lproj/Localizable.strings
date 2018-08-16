@@ -95,6 +95,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Подтверждение болюса %@ ед";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Скорости базала";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Скорости базала";
@@ -105,6 +108,15 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Отмена";
+
+/* Message shown when forecast cannot be made due to missing glucose data */
+"Cannot predict glucose due to missing input data" = "Невозможно предсказать гликемию из-за недостатка введенных данных";
+
+/* Error shown when carb effects or insulin effects are missing */
+"Cannot retrospect glucose due to missing input data" = "Невозможно показать ретро гликемию из-за недостатка введенных данных";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Влияние углеводов";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -121,6 +133,15 @@
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Замените резервуар помпы сейчас";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "Проверьте настройки";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "Убедитесь, что помпа в зоне коммуникации";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "Проверьте источник мониторинга СК";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Замкнутый цикл";
@@ -192,7 +213,8 @@
 /* The title text for the G5/G6 Transmitter switch cell */
 "G5/G6 Transmitter" = "Трансмиттер G5/G6";
 
-/* The title of the glucose and prediction graph */
+/* Details for missing data error when glucose data is missing
+   The title of the glucose and prediction graph */
 "Glucose" = "Гликемия";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -200,6 +222,9 @@
 
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "Данные глюкозы недоступны";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "Данные гликемии недоступны";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Динамика гликемии";
@@ -219,7 +244,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Подача инсулина";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "Влияние инсулина";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "Модель инсулина";
 
 /* The title of the insulin sensitivities schedule screen
@@ -262,6 +291,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "ммоль/л";
 
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "Влияние динамики СК";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Требует внимания";
 
@@ -298,6 +330,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Данные помпы от %1$@ ";
 
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "Управление помпой";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Резервуар помпы пуст";
 
@@ -324,6 +359,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "обязательный";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Резервуар";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Ретроспективная коррекция";

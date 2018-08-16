@@ -95,6 +95,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "解锁以输注大剂量 %@ 单位";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "基础率表";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "基础率";
@@ -105,6 +108,15 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "取消";
+
+/* Message shown when forecast cannot be made due to missing glucose data */
+"Cannot predict glucose due to missing input data" = "由于缺少输入数据无法预测血糖";
+
+/* Error shown when carb effects or insulin effects are missing */
+"Cannot retrospect glucose due to missing input data" = "由于缺少输入数据无法回溯血糖";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "碳水效果";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -121,6 +133,15 @@
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "立即更换储药器";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "检查设置";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "请检查你的泵是否在范围内";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "请检查你的动态血糖数据来源";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "开启闭环";
@@ -192,7 +213,8 @@
 /* The title text for the G5/G6 Transmitter switch cell */
 "G5/G6 Transmitter" = "G5/G6发射器";
 
-/* The title of the glucose and prediction graph */
+/* Details for missing data error when glucose data is missing
+   The title of the glucose and prediction graph */
 "Glucose" = "葡萄糖";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -200,6 +222,9 @@
 
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "葡萄糖数据不可用";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "血糖数据不可用";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "葡萄糖增量预测算法";
@@ -219,7 +244,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "已输注胰岛素";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "胰岛素效果";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "胰岛素模型";
 
 /* The title of the insulin sensitivities schedule screen
@@ -262,6 +291,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "毫摩尔/升";
 
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "葡萄糖动量效应";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "请注意";
 
@@ -298,6 +330,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "胰岛素泵数据%1$@分钟未更新";
 
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "泵管理";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "储药器药量已用完";
 
@@ -324,6 +359,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "需要";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "储药器";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "回顾性修正";

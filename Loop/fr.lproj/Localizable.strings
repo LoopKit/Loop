@@ -95,6 +95,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Authentifier pour effectuer un Bolus %@ Unités";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Horaire de taux basal";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Taux de basale";
@@ -105,6 +108,15 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Annuler";
+
+/* Message shown when forecast cannot be made due to missing glucose data */
+"Cannot predict glucose due to missing input data" = "Impossible de prédire la glycémie en raison de données manquantes";
+
+/* Error shown when carb effects or insulin effects are missing */
+"Cannot retrospect glucose due to missing input data" = "Impossible de rétrospecter la glycémie en raison de données manquantes";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Effets des glucides";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -121,6 +133,15 @@
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Changer maintenant le réservoir de la pompe";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "Vérifier les paramètres";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "Vérifier que votre pompe est à portée";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "Vérifier votre source de données de SGC";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Loop Fermé";
@@ -192,7 +213,8 @@
 /* The title text for the G5/G6 Transmitter switch cell */
 "G5/G6 Transmitter" = "Transmetteur G5/G6";
 
-/* The title of the glucose and prediction graph */
+/* Details for missing data error when glucose data is missing
+   The title of the glucose and prediction graph */
 "Glucose" = "Glycémie";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
@@ -200,6 +222,9 @@
 
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "Les données de glucose ne sont pas disponibles";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "Les données de glucose ne sont pas disponibles";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Momentum de glucose";
@@ -219,7 +244,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Administration de l'insuline";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "Effets de l'insuline";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "Modèle d'insuline";
 
 /* The title of the insulin sensitivities schedule screen
@@ -262,6 +291,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
 
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "Effets de momentum";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Attention Requise";
 
@@ -298,6 +330,9 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Données de pompe sont vielles de %1$@";
 
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "Gestionnaire de pompe";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Réservoir de la pompe vide";
 
@@ -324,6 +359,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "Nécessaire";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Réservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Correction Rétrospective";
