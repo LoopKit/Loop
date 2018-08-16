@@ -3,11 +3,5 @@
 "CFBundleDisplayName" = "Loop";
 
 /* Bundle name */
-=======
-/* (No Comment) */
-"CFBundleDisplayName" = "Loop";
-
-/* (No Comment) */
->>>>>>> please
 "CFBundleName" = "$(PRODUCT_NAME)";
 
