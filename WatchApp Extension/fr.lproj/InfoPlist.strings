@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 /* Bundle display name */
 "CFBundleDisplayName" = "WatchApp Extension";
 
 /* Bundle name */
+=======
+/* (No Comment) */
+"CFBundleDisplayName" = "WatchApp Extension";
+
+/* (No Comment) */
+>>>>>>> please
 "CFBundleName" = "$(PRODUCT_NAME)";
 

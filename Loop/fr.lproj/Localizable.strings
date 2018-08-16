@@ -214,7 +214,7 @@
 "G5/G6 Transmitter" = "Transmetteur G5/G6";
 
 /* Details for missing data error when glucose data is missing
-   The title of the glucose and prediction graph */
+ The title of the glucose and prediction graph */
 "Glucose" = "Glycémie";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */

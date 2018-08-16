@@ -612,9 +612,13 @@ extension LoopDataManager {
         _ = updateGroup.wait(timeout: .distantFuture)
 
         guard let lastGlucoseDate = latestGlucoseDate else {
+<<<<<<< HEAD
             throw LoopError.missingDataError(
                 details: NSLocalizedString("Glucose data not available", comment: "Description of error when glucose data is missing"),
                 recovery: NSLocalizedString("Check your CGM data source", comment: "Recovery suggestion when glucose data is missing"))
+=======
+            throw LoopError.missingDataError(.glucose)
+>>>>>>> please
         }
 
         let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-settings.retrospectiveCorrectionInterval)
@@ -740,7 +744,11 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let basalRates = basalRateSchedule else {
+<<<<<<< HEAD
             throw LoopError.configurationError(NSLocalizedString("Basal Rate Schedule", comment: "Details for configuration error when basal rate schedule is missing"))
+=======
+            throw LoopError.configurationError(.basalRateSchedule)
+>>>>>>> please
         }
 
         let pendingTempBasalInsulin: Double
@@ -767,6 +775,7 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let model = insulinModelSettings?.model else {
+<<<<<<< HEAD
             throw LoopError.configurationError(NSLocalizedString("Insulin Model", comment: "Details for configuration error when insulin model is missing"))
         }
 
@@ -774,6 +783,13 @@ extension LoopDataManager {
             throw LoopError.missingDataError(
                 details: NSLocalizedString("Cannot predict glucose due to missing input data", comment: "Message shown when forecast cannot be made due to missing glucose data"),
                 recovery: NSLocalizedString("Check your CGM data source", comment: "Recovery suggestion when glucose data is missing"))
+=======
+            throw LoopError.configurationError(.insulinModel)
+        }
+
+        guard let glucose = self.glucoseStore.latestGlucose else {
+            throw LoopError.missingDataError(.glucose)
+>>>>>>> please
         }
 
         var momentum: [GlucoseEffect] = []
@@ -814,13 +830,19 @@ extension LoopDataManager {
      */
     private func updateRetrospectiveGlucoseEffect(effectDuration: TimeInterval = TimeInterval(minutes: 60)) throws {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
-
-        guard
-            let carbEffect = self.carbEffect,
-            let insulinEffect = self.insulinEffect
-        else {
+        
+        guard let carbEffect = self.carbEffect else {
             self.retrospectivePredictedGlucose = nil
+            throw LoopError.missingDataError(.carbEffect)
+        }
+
+        guard let insulinEffect = self.insulinEffect else {
+            self.retrospectivePredictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(details: NSLocalizedString("Cannot retrospect glucose due to missing input data", comment: "Error shown when carb effects or insulin effects are missing"), recovery: nil)
+=======
+            throw LoopError.missingDataError(.insulinEffect)
+>>>>>>> please
         }
 
         guard let change = retrospectiveGlucoseChange else {
@@ -843,7 +865,10 @@ extension LoopDataManager {
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
 
         let discrepancy = change.end.quantity.doubleValue(for: glucoseUnit) - lastGlucose.quantity.doubleValue(for: glucoseUnit) // mg/dL
-        let velocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / change.end.endDate.timeIntervalSince(change.start.endDate))
+
+        // Determine the interval of discrepancy, requiring a minimum of the configured interval to avoid magnifying effects from short intervals
+        let discrepancyTime = max(change.end.endDate.timeIntervalSince(change.start.endDate), settings.retrospectiveCorrectionInterval)
+        let velocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / discrepancyTime)
         let type = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!
         let glucose = HKQuantitySample(type: type, quantity: change.end.quantity, start: change.end.startDate, end: change.end.endDate)
 
@@ -862,16 +887,24 @@ extension LoopDataManager {
 
         guard let glucose = glucoseStore.latestGlucose else {
             self.predictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(
                 details: NSLocalizedString("Glucose", comment: "Details for missing data error when glucose data is missing"),
                 recovery: NSLocalizedString("Check your CGM data source", comment: "Recovery suggestion when glucose data is missing"))
+=======
+            throw LoopError.missingDataError(.glucose)
+>>>>>>> please
         }
 
         guard let pumpStatusDate = doseStore.lastReservoirValue?.startDate else {
             self.predictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(
                 details: NSLocalizedString("Reservoir", comment: "Details for missing data error when reservoir data is missing"),
                 recovery: NSLocalizedString("Check that your pump is in range", comment: "Recovery suggestion when reservoir data is missing"))
+=======
+            throw LoopError.missingDataError(.reservoir)
+>>>>>>> please
         }
 
         let startDate = Date()
@@ -888,17 +921,29 @@ extension LoopDataManager {
 
         guard glucoseMomentumEffect != nil else {
             self.predictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(details: NSLocalizedString("Momentum effects", comment: "Details for missing data error when momentum effects are missing"), recovery: nil)
+=======
+            throw LoopError.missingDataError(.momentumEffect)
+>>>>>>> please
         }
 
         guard carbEffect != nil else {
             self.predictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(details: NSLocalizedString("Carb effects", comment: "Details for missing data error when carb effects are missing"), recovery: nil)
+=======
+            throw LoopError.missingDataError(.carbEffect)
+>>>>>>> please
         }
 
         guard insulinEffect != nil else {
             self.predictedGlucose = nil
+<<<<<<< HEAD
             throw LoopError.missingDataError(details: NSLocalizedString("Insulin effects", comment: "Details for missing data error when insulin effects are missing"), recovery: nil)
+=======
+            throw LoopError.missingDataError(.insulinEffect)
+>>>>>>> please
         }
 
         let predictedGlucose = try predictGlucose(using: settings.enabledEffects)
@@ -912,7 +957,11 @@ extension LoopDataManager {
             let maxBolus = settings.maximumBolus,
             let model = insulinModelSettings?.model
         else {
+<<<<<<< HEAD
             throw LoopError.configurationError(NSLocalizedString("Check settings", comment: "Details for configuration error when one or more loop settings are missing"))
+=======
+            throw LoopError.configurationError(.generalSettings)
+>>>>>>> please
         }
         
         guard lastRequestedBolus == nil

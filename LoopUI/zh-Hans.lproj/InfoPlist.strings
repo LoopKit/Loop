@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 /* Bundle display name */
 "CFBundleDisplayName" = "LoopUI";
 
 /* Bundle name */
+=======
+/* (No Comment) */
+"CFBundleDisplayName" = "LoopUI";
+
+/* (No Comment) */
+>>>>>>> please
 "CFBundleName" = "$(PRODUCT_NAME)";
 

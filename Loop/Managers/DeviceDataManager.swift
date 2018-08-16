@@ -311,7 +311,11 @@ extension DeviceDataManager: DoseStoreDelegate {
 extension DeviceDataManager {
     func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
         guard let pumpManager = pumpManager else {
+<<<<<<< HEAD
             completion(LoopError.configurationError(NSLocalizedString("Pump Manager", comment: "Details for configuration error when pump manager is missing")))
+=======
+            completion(LoopError.configurationError(.pumpManager))
+>>>>>>> please
             return
         }
 
@@ -338,7 +342,11 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         completion: @escaping (_ result: Result<DoseEntry>) -> Void
     ) {
         guard let pumpManager = pumpManager else {
+<<<<<<< HEAD
             completion(.failure(LoopError.configurationError(NSLocalizedString("Pump Manager", comment: "Details for configuration error when pump manager is missing"))))
+=======
+            completion(.failure(LoopError.configurationError(.pumpManager)))
+>>>>>>> please
             return
         }
 
