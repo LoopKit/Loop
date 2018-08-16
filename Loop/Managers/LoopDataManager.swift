@@ -841,7 +841,10 @@ extension LoopDataManager {
         let velocityUnit = glucoseUnit.unitDivided(by: HKUnit.second())
 
         let discrepancy = change.end.quantity.doubleValue(for: glucoseUnit) - lastGlucose.quantity.doubleValue(for: glucoseUnit) // mg/dL
-        let velocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / change.end.endDate.timeIntervalSince(change.start.endDate))
+
+        // Determine the interval of discrepancy, requiring a minimum of the configured interval to avoid magnifying effects from short intervals
+        let discrepancyTime = max(change.end.endDate.timeIntervalSince(change.start.endDate), settings.retrospectiveCorrectionInterval)
+        let velocity = HKQuantity(unit: velocityUnit, doubleValue: discrepancy / discrepancyTime)
         let type = HKQuantityType.quantityType(forIdentifier: HKQuantityTypeIdentifier.bloodGlucose)!
         let glucose = HKQuantitySample(type: type, quantity: change.end.quantity, start: change.end.startDate, end: change.end.endDate)
 
