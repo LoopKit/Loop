@@ -11,8 +11,8 @@
 "NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation.";
+"NSHealthShareUsageDescription" = "Matdata fra Health-databasen brukes til å bestemme blodsukkereffekt. Blodsukkerdata hentes fra HealthKit for opptegning og analyse.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.";
+"NSHealthUpdateUsageDescription" = "Angitte karbohydrater i matdataene som tastes inn i appen blir lagret i Health-databasen.";
 
