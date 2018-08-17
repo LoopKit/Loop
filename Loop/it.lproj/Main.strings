@@ -11,7 +11,7 @@
 "5TX-kX-nBo.text" = "ID Microinfusore";
 
 /* Class = "UITextField"; accessibilityLabel = "Bolus Amount"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.accessibilityLabel" = "Importa Boli";
+"7LT-50-ZzK.accessibilityLabel" = "Quantità di bolo";
 
 /* Class = "UITextField"; placeholder = "0.0"; ObjectID = "7LT-50-ZzK"; */
 "7LT-50-ZzK.placeholder" = "0.0";

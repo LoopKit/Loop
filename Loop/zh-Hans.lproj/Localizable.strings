@@ -109,12 +109,6 @@
 /* The title of the cancel action in an action sheet */
 "Cancel" = "取消";
 
-/* Message shown when forecast cannot be made due to missing glucose data */
-"Cannot predict glucose due to missing input data" = "由于缺少输入数据无法预测血糖";
-
-/* Error shown when carb effects or insulin effects are missing */
-"Cannot retrospect glucose due to missing input data" = "由于缺少输入数据无法回溯血糖";
-
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "碳水效果";
 
@@ -213,8 +207,7 @@
 /* The title text for the G5/G6 Transmitter switch cell */
 "G5/G6 Transmitter" = "G5/G6发射器";
 
-/* Details for missing data error when glucose data is missing
-   The title of the glucose and prediction graph */
+/* The title of the glucose and prediction graph */
 "Glucose" = "葡萄糖";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */

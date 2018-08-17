@@ -8,7 +8,7 @@
 "%@U" = "%@单位";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ at %2$@";
+"%1$@ at %2$@" = "%2$@ 分钟时为 %1$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ 每小时的单位 %2$@";

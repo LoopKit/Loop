@@ -95,6 +95,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Autenticati per eseguire il bolo di %@ Unità";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Impostazione valori della basale";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Impostazione Basale";
@@ -105,6 +108,9 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Cancella";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Effetto dei carboidrati";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -121,6 +127,15 @@
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Cambiare il serbatoio del microinfusore";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "Controlla le impostazioni";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "Controlla che il tuo microinfusore sia nei paraggi";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "Controlla la sorgente CGM";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Loop Chiuso";
@@ -201,6 +216,9 @@
 /* Error description for unreliable state */
 "Glucose data is unavailable" = "I dati sulla glicemia non sono disponibili";
 
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "I dati sulla glicemia non sono disponibili";
+
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Effetto Glicemico";
 
@@ -219,7 +237,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Insulina Somministrata";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "Effetto dell’insulina";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "Modello di azione dell'Insulina";
 
 /* The title of the insulin sensitivities schedule screen
@@ -262,6 +284,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
 
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "Effetto glicemico attuale";
+
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Fai Attenzione";
 
@@ -297,6 +322,9 @@
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "I dati forniti dal microinfusore sono di %1$@ fa";
+
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "Gestione Microinfusore";
 
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Serbatoio microinfusore Vuoto";
