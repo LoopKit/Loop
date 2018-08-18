@@ -17,7 +17,7 @@
 "%1$@ units remaining at %2$@" = "%1$@ eenheden resterend op %2$@";
 
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Closed loop";
+"Closed loop" = "Gesloten loop";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
