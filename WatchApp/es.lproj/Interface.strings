@@ -50,7 +50,7 @@
 "mpK-zY-UvA.text" = "0.000";
 
 /* Class = "WKInterfaceLabel"; text = "Workout"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Workout";
+"nC0-X3-oFJ.text" = "Ejercicio";
 
 /* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
 "Qsq-p5-1J0.title" = "Bolo";

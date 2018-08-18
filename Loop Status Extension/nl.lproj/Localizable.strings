@@ -20,7 +20,7 @@
 "Fiasp" = "Fiasp";
 
 /* The short unit display string for grams */
-"g" = "g";
+"g" = "gr";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ E";

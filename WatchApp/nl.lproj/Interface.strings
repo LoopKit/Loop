@@ -29,7 +29,7 @@
 "eu3-pj-GH3.title" = "+";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
-"f5G-bS-9pd.text" = "Pre-maaltijd";
+"f5G-bS-9pd.text" = "Voor de maaltijd";
 
 /* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
 "gAn-qe-OvX.title" = "🍭";

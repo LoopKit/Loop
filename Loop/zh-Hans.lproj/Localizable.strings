@@ -1,17 +1,7 @@
+/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
+
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = "(待执行: %@)";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ 已吸收";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ 单位 总量";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
-
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
    Format string for insulin sensitivity average (1: value)(2: glucose unit) */
@@ -29,26 +19,29 @@
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ 单位/小时 @ %2$@";
 
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/分钟";
 
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
 
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/分钟";
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ 已吸收";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ 单位 总量";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15分钟葡萄糖回归系数（b1），持续30分钟衰减";
 
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30分钟葡萄糖预测与实际比较，持续60分钟以上衰减";
-
-/* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "基于公布的Fiasp胰岛素吸收的模型";
-
-/* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "基于已公布的Humalog，Novolog和Apidra胰岛素在成人中吸收的模型。";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "按照推荐的大剂量输注";
@@ -79,9 +72,6 @@
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "在成人胰岛素模型基础上专为儿童修改的胰岛素代谢模型";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -159,9 +149,6 @@
 /* The title of the Loggly customer token credential */
 "Customer Token" = "用户Token";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "删除账户";
 
@@ -192,14 +179,8 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "超过大剂量最大输注限制";
 
-/* Title of insulin model preset */
-"Fiasp" = "Fiasp";
-
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "对于 %1$@";
-
-/* The short unit display string for grams */
-"g" = "克";
 
 /* The title text for the G4 Share Receiver switch cell */
 "G4 Share Receiver" = "带有蓝牙功能G4接收器";
@@ -275,14 +256,8 @@
 /* The description of a low G5/G6 transmitter battery with a leading space */
 "Low Battery" = "电量低";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "毫克/分升";
-
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "数据缺失: %1$@";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "毫摩尔/升";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "葡萄糖动量效应";
@@ -331,15 +306,6 @@
 
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "药量低";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "速效胰岛素 - 成人模型";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Children" = "速效胰岛素 - 儿童模型";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "%1$@分钟前推荐剂量已过期";
@@ -404,9 +370,6 @@
 /* The title text in settings */
 "Suspend Threshold" = "暂停阈值";
 
-/* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Loop使用的默认模型参数，您可以自行修改胰岛素代谢时间。";
-
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "大剂量输注最大限制为%@单位";
 
@@ -419,9 +382,6 @@
 /* The title text for the Dexcom G5/G6 transmitter ID config value */
 "Transmitter ID" = "发射器编号";
 
-/* The short unit display string for international units of insulin */
-"U" = "单位";
-
 /* U.S. share server option title */
 "US" = "美国";
 
@@ -433,9 +393,6 @@
 
 /* Label indicating validation is occurring */
 "Verifying" = "验证";
-
-/* Title of insulin model setting */
-"Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "当前或预测的葡萄糖低于暂停阈值时，Loop不推荐推注，并且总是建议每小时0单位的临时基础速率。";

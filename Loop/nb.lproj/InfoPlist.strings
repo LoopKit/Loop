@@ -5,10 +5,10 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth brukes til å kommunisere med insulinpumpe og kontinuerlige glukosemonitorer.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus.";
+"NSFaceIDUsageDescription" = "Face ID brukes til å autentisere insulin bolus.";
 
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Matdata fra Health-databasen brukes til å bestemme blodsukkereffekt. Blodsukkerdata hentes fra HealthKit for opptegning og analyse.";

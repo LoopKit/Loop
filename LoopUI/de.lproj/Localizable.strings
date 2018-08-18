@@ -5,7 +5,7 @@
 "%@ U" = "%@ E";
 
 /* Format string for reservoir volume. (1: The localized volume) */
-"%@U" = "%@U";
+"%@U" = "%@E";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ in %2$@";

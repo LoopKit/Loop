@@ -68,7 +68,7 @@
 "hHZ-uY-aKw.text" = "Actieve koolhydraten: 40gr";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Effect Koolhydraten";
+"hZZ-2S-lrd.title" = "Effect koolhydraten";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
 "IxU-As-glo.text" = "Geobserveerde veranderingen in glucose. Kan gebruikt worden om de verhouding insuline/koolhydraten in te schatten, minus de veranderingen die reeds door insuline toediening hebben plaatsgevonden.";
@@ -113,7 +113,7 @@
 "Rse-x8-amW.text" = "uiteindelijk 92 mg/dL";
 
 /* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g KaB";
+"SQx-au-ZcM.text" = "gr KaB";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glucose";

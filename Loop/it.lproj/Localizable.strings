@@ -1,17 +1,7 @@
+/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
+
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (prevista l'erogazione di: %@)";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ assorbiti";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Totali";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
-
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
    Format string for insulin sensitivity average (1: value)(2: glucose unit) */
@@ -29,26 +19,29 @@
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ U/ora @ %2$@";
 
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/min";
 
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
 
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ assorbiti";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U Totali";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "Coefficiente di regressione del glucosio a 15 min (b₁), interpolato con il decadimento a 30 min.";
 
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Confronto della previsione della glicemia a 30 min vs reale, interpolato con il decadimento sino a 60 min.";
-
-/* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Modello basato sull'assorbimento dell'insulina Fiasp.";
-
-/* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Modello basato sull'assorbimento dell'insulina Humalog, Novorapid e Apidra negli adulti.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AccettaBoloConsigliato";
@@ -79,9 +72,6 @@
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Adattamento del modello per adulti basato su effetti empirici nei bambini.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "Chiave API";
@@ -159,9 +149,6 @@
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token dell'utente";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Cancella Account";
 
@@ -192,14 +179,8 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Valore superiore al Bolo Massimo";
 
-/* Title of insulin model preset */
-"Fiasp" = "Fiasp";
-
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Per %1$@";
-
-/* The short unit display string for grams */
-"g" = "g";
 
 /* The title text for the G4 Share Receiver switch cell */
 "G4 Share Receiver" = "G4 Ricevitore Share";
@@ -275,14 +256,8 @@
 /* The description of a low G5/G6 transmitter battery with a leading space */
 "Low Battery" = "Batteria Bassa";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
-
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Dati mancanti: %1$@";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Effetto glicemico attuale";
@@ -332,15 +307,6 @@
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "Serbatoio microinfusore Basso";
 
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Insulina ultrarapida – Adulti";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Children" = "Insulina ultrarapida – Bambini";
-
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "La dose raccomandata e' scaduta da %1$@";
 
@@ -352,6 +318,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "Necessario";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Serbatoio"; 
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Correzione Retrospettiva";
@@ -401,9 +370,6 @@
 /* The title text in settings */
 "Suspend Threshold" = "Blocco Erogazione";
 
-/* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Il modello base usato da Loop, permette la personalizzazione della durata della glicemia.";
-
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Il massimo bolo eseguibile e' pari a %@ Unità";
 
@@ -416,9 +382,6 @@
 /* The title text for the Dexcom G5/G6 transmitter ID config value */
 "Transmitter ID" = "ID Trasmettitore";
 
-/* The short unit display string for international units of insulin */
-"U" = "U";
-
 /* U.S. share server option title */
 "US" = "USA";
 
@@ -430,9 +393,6 @@
 
 /* Label indicating validation is occurring */
 "Verifying" = "Sto verificando";
-
-/* Title of insulin model setting */
-"Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Quando l'attuale valore glicemico o un valore previsto nel futuro e' al di sotto del valore minimo previsto per la sospensione dell'erogazione, Loop non consigliera' un bolo e blocchera' l'erogazione delle basali.";

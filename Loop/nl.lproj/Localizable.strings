@@ -1,17 +1,7 @@
+/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
+
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (Wachten: %@)";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ opgenomen";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ E totaal";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
-
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
    Format string for insulin sensitivity average (1: value)(2: glucose unit) */
@@ -29,26 +19,29 @@
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ E/uur @ %2$@";
 
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/min";
 
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
 
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ opgenomen";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ E totaal";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minuten glucose regressie coëficient (b1), continue zonder afbouw over 30 min";
 
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30  min vergelijking van glucose voorspelling versus actueel, gevolgd door afbouw over 60 min";
-
-/* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Een model gebaseerd op de gepubliceerde opname van Fiasp insuline.";
-
-/* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Een model gebaseerd op de gepubliceerde opname van Humalog, Novorapid, en Apidra insuline bij volwassenen.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AccepteerVoorgesteldeBolus";
@@ -80,9 +73,6 @@
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Een aanpasing op het model voor volwassen wanneer deze door kinderen wordt gebruikt.";
-
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
 
@@ -95,6 +85,9 @@
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Authenticeer om te bolussen %@ E";
 
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "Basaal schema";
+
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
 "Basal Rates" = "Basaal waardes";
@@ -105,6 +98,9 @@
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Annuleer";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "Koolhydraten impact";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -122,6 +118,15 @@
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Vervang direct het pomp reservoir";
 
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "Controleer je instellingen";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "Controleer of je pomp binnen bereik is";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "Controleer je CGM gegevensbron";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Gesloten loop";
 
@@ -129,7 +134,7 @@
 "Configuration" = "Configuratie";
 
 /* The error message displayed for configuration errors. (1: configuration error details) */
-"Configuration Error: %1$@" = "Configuratie Fout: %1$@";
+"Configuration Error: %1$@" = "Configuratie fout: %1$@";
 
 /* The title of the continuous glucose monitor section in settings */
 "Continuous Glucose Monitor" = "Continue Glucose Monitor";
@@ -144,11 +149,8 @@
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Gebruiker token";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The title of the button to remove the credentials for a service */
-"Delete Account" = "Verwijder Account";
+"Delete Account" = "Verwijder account";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Toediening limieten";
@@ -177,29 +179,26 @@
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Overschrijdt maximale bolus";
 
-/* Title of insulin model preset */
-"Fiasp" = "Fiasp";
-
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Voor %1$@";
 
-/* The short unit display string for grams */
-"g" = "gr";
-
 /* The title text for the G4 Share Receiver switch cell */
-"G4 Share Receiver" = "G4 Share Ontvanger";
+"G4 Share Receiver" = "G4 Share ontvanger";
 
 /* The title text for the G5/G6 Transmitter switch cell */
-"G5/G6 Transmitter" = "G5/G6 Zender";
+"G5/G6 Transmitter" = "G5/G6 zender";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glucose";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Glucose data is %1$@ oud";
+"Glucose data is %1$@ old" = "Glucose gegevens is %1$@ oud";
 
 /* Error description for unreliable state */
-"Glucose data is unavailable" = "Los datos de glucosa no están disponibles";
+"Glucose data is unavailable" = "Glucose gegevens niet beschikbaar";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "Glucose gegevens niet beschikbaar";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glucose momentum";
@@ -219,7 +218,11 @@
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Insuline toediening";
 
-/* The title text for the insulin model setting row */
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "Insuline impact";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
 "Insulin Model" = "Insuline model";
 
 /* The title of the insulin sensitivities schedule screen
@@ -253,14 +256,11 @@
 /* The description of a low G5/G6 transmitter battery with a leading space */
 "Low Battery" = "Lage batterij";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
-
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Missende gegevens: %1$@";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "Momentum impact";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Aandacht vereist";
@@ -281,7 +281,7 @@
 "Password" = "Paswoord";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Pre-Maaltijd Doelen";
+"Pre-Meal Targets" = "Voor de maaltijd doelen";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Verwachte glucose op %1$@ is %2$@.";
@@ -298,20 +298,14 @@
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Pomp gegevens is %1$@ oud";
 
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "Pompbeheer";
+
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Pomp reservoir leeg";
 
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "Pomp reservoir bijna leeg";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Snelwerkende - volwassenen";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Children" = "Snelwerkende - kinderen";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "Aanbeveling verlopen: %1$@ oud";
@@ -324,6 +318,9 @@
 
 /* The default placeholder string for a credential */
 "Required" = "Vereist";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "Reservoir";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Retroperspectieve correctie";
@@ -368,13 +365,10 @@
 "Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Start Bolus";
+"Starting Bolus" = "Start bolus";
 
 /* The title text in settings */
 "Suspend Threshold" = "Onderbrekingsdrempel";
-
-/* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Het oude model dat door Loop wordt gebruikt, waardoor de actieduur kan worden aangepast.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "De maximale bolushoeveelheid is %@ Eenheden";
@@ -388,9 +382,6 @@
 /* The title text for the Dexcom G5/G6 transmitter ID config value */
 "Transmitter ID" = "Zender ID";
 
-/* The short unit display string for international units of insulin */
-"U" = "E";
-
 /* U.S. share server option title */
 "US" = "US";
 
@@ -402,9 +393,6 @@
 
 /* Label indicating validation is occurring */
 "Verifying" = "Verifiëren";
-
-/* Title of insulin model setting */
-"Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wanneer de huidige of voorspelde glucose onder de drempel voor onderbreken ligt, zal Loop geen bolus aanbevelen en zal altijd een tijdelijke basaal van 0 eenheden per uur aanbevelen.";
