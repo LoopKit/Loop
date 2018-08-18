@@ -98,7 +98,7 @@
 "Authenticate to Bolus %@ Units" = "Autentiser for å gi bolus %@ E";
 
 /* Details for configuration error when basal rate schedule is missing */
-"Basal Rate Schedule" = "Basaldoser";
+"Basal Rate Schedule" = "Basalrate program";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
@@ -112,7 +112,7 @@
 "Cancel" = "Avbryt";
 
 /* Details for missing data error when carb effects are missing */
-"Carb effects" = "Karbohydrat effekter";
+"Carb effects" = "Karbohydrateffekt";
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
@@ -131,13 +131,13 @@
 "Change the pump reservoir now" = "Bytt reservoar på pumpe nå";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Sjekk innstillingene";
+"Check settings" = "Sjekk innstillinger";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Kontroller at pumpen din er innenfor rekkevidde";
+"Check that your pump is in range" = "Sjekk at pumpen er innen rekkevidde";
 
 /* Recovery suggestion when glucose data is missing */
-"Check your CGM data source" = "Sjekk din CGM datakilde";
+"Check your CGM data source" = "Sjekk blodsukkerkilde";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Lukket Loop";
@@ -240,7 +240,7 @@
 "Insulin Delivery" = "Insulinlevering";
 
 /* Details for missing data error when insulin effects are missing */
-"Insulin effects" = "Insulin effekter";
+"Insulin effects" = "Insulineffekt";
 
 /* Details for configuration error when insulin model is missing
    The title text for the insulin model setting row */
@@ -287,7 +287,7 @@
 "mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
-"Momentum effects" = "Momentum effekter";
+"Momentum effects" = "Momentumeffekt";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Trenger tilsyn";
@@ -326,7 +326,7 @@
 "Pump data is %1$@ old" = "Pumpedata er %1$@ gammelt";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pumpe Manager";
+"Pump Manager" = "Pumpeinnstilling";
 
 /* The notification title for an empty pump reservoir */
 "Pump Reservoir Empty" = "Pumpereservoar Tomt";
