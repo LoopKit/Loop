@@ -35,7 +35,7 @@
 "%@ absorbed" = "%@ absorbert";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ E Totalt";
+"%@ U Total" = "%@ E totalt";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
@@ -56,25 +56,25 @@
 "AcceptRecommendedBolus" = "AksepterAnbefaltBolus";
 
 /* The title of the Carbs On-Board graph */
-"Active Carbohydrates" = "Aktive Karbohydrater";
+"Active Carbohydrates" = "Aktive karbohydrater";
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
-"Active Carbohydrates: %@" = "Aktive Karbohydrater: %@";
+"Active Carbohydrates: %@" = "Aktive karbohydrater: %@";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Aktivt Insulin";
+"Active Insulin" = "Aktivt insulin";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
-"Active Insulin: %@" = "Aktivt Insulin: %@";
+"Active Insulin: %@" = "Aktivt insulin: %@";
 
 /* The title of the button to add the credentials for a service */
-"Add Account" = "Legg Til Konto";
+"Add Account" = "Legg til konto";
 
 /* The label of the carb entry button */
-"Add Meal" = "Legg Til Måltid";
+"Add Meal" = "Legg til måltid";
 
 /* Title text for button to set up a new pump */
-"Add Pump" = "Legg til Pumpe";
+"Add Pump" = "Legg til pumpe";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algoritmeinnstillinger";
@@ -165,7 +165,7 @@
 "dB" = "dB";
 
 /* The title of the button to remove the credentials for a service */
-"Delete Account" = "Slett Konto";
+"Delete Account" = "Slett konto";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Leveringsgrense";
@@ -177,7 +177,7 @@
 "Disables" = "Deaktiver";
 
 /* Title of the switch which toggles retrospective correction effects */
-"Enable Retrospective Correction" = "Aktiver Retrospektiv Korrigering";
+"Enable Retrospective Correction" = "Aktiver retrospektiv korrigering";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Aktiverer";
@@ -192,7 +192,7 @@
 "Eventually %@" = "Omsider %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Overskrider Maks Bolus";
+"Exceeds Maximum Bolus" = "Overskrider maks bolus";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -207,7 +207,7 @@
 "G4 Share Receiver" = "G4 Share Receiver";
 
 /* The title text for the G5/G6 Transmitter switch cell */
-"G5/G6 Transmitter" = "G5/G6 Sender";
+"G5/G6 Transmitter" = "G5/G6 sender";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glukose";
@@ -234,7 +234,7 @@
 "Insulin" = "Insulin";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin Absorbert (E) × Insulinfølsomhet (%1$@/E)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin absorbert (E) × Insulinfølsomhet (%1$@/E)";
 
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Insulinlevering";
@@ -269,19 +269,19 @@
 "Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Loop Feilet";
+"Loop Failure" = "Loop feilet";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har ikke kjørt vellykket på %@";
 
 /* The description of a low G5/G6 transmitter battery with a leading space */
-"Low Battery" = "Lite Batteri";
+"Low Battery" = "Lite batteri";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 
 /* The error message for missing data. (1: missing data details) */
-"Missing data: %1$@" = "Mangler Data: %1$@";
+"Missing data: %1$@" = "Mangler data: %1$@";
 
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
@@ -299,7 +299,7 @@
 "No connected devices, or failure during device connection" = "Ingen tilkoblede enheter, eller feil under tilkobling til enhet";
 
 /* Sensor state description for the valid state */
-"OK" = "OK";
+"OK" = "Ok";
 
 /* Outside US share server option title */
 "Outside US" = "Utenfor USA";
@@ -320,7 +320,7 @@
 "Pump" = "Pumpe";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Pumpebatteri Lavt";
+"Pump Battery Low" = "Pumpebatteri lavt";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
 "Pump data is %1$@ old" = "Pumpedata er %1$@ gammelt";
@@ -329,10 +329,10 @@
 "Pump Manager" = "Pumpeinnstilling";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pumpereservoar Tomt";
+"Pump Reservoir Empty" = "Pumpereservoar tomt";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Pumpereservoar Lavt";
+"Pump Reservoir Low" = "Pumpereservoar lavt";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Hurtigvirkende – voksen";
@@ -344,10 +344,10 @@
 "Recommendation expired: %1$@ old" = "Anbefaling utløpt: %1$@ gammelt";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Anbefalt Basal";
+"Recommended Basal" = "Anbefalt basal";
 
 /* Accessibility hint describing recommended bolus units */
-"Recommended Bolus: %@ Units" = "Anbefalt Bolus: %@ Enheter";
+"Recommended Bolus: %@ Units" = "Anbefalt bolus: %@ enheter";
 
 /* The default placeholder string for a credential */
 "Required" = "Påkrevd";
@@ -356,7 +356,7 @@
 "Reservoir" = "Reservoar";
 
 /* Title of the prediction input effect for retrospective correction */
-"Retrospective Correction" = "Retrospektiv Korreksjon";
+"Retrospective Correction" = "Retrospektiv korreksjon";
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Prøv igjen";
@@ -398,7 +398,7 @@
 "Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Starter Bolus";
+"Starting Bolus" = "Starter bolus";
 
 /* The title text in settings */
 "Suspend Threshold" = "Grense for stopp av insulintilførsel";
@@ -425,7 +425,7 @@
 "US" = "USA";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Bruk Treningsmodus for Glukosemålområde";
+"Use Workout Glucose Targets" = "Bruk treningsmodus for glukosemålområde";
 
 /* The title of the Dexcom share username credential */
 "Username" = "Brukernavn";

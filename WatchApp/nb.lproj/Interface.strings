@@ -2,7 +2,7 @@
 "0fo-Z3-hTi.title" = "🌮";
 
 /* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
-"b6f-3I-jki.title" = "Legg til Karbohydrater";
+"b6f-3I-jki.title" = "Legg til karbohydrater";
 
 /* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "CWt-7U-cnK"; */
 "CWt-7U-cnK.text" = "15";
@@ -29,7 +29,7 @@
 "eu3-pj-GH3.title" = "+";
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
-"f5G-bS-9pd.text" = "Pre-Måltid";
+"f5G-bS-9pd.text" = "Pre-måltid";
 
 /* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
 "gAn-qe-OvX.title" = "🍭";
@@ -44,7 +44,7 @@
 "hln-CI-MRP.text" = "Karbohydrater";
 
 /* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
-"jj3-Gq-HBy.text" = "Bolus Feilet";
+"jj3-Gq-HBy.text" = "Bolus feilet";
 
 /* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
 "mpK-zY-UvA.text" = "0.000";

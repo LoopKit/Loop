@@ -44,7 +44,7 @@
 "cpo-Po-gFM.text" = "Etikett";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
-"d3X-AN-tA5.text" = "g Totalt";
+"d3X-AN-tA5.text" = "g totalt";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
 "D4C-I2-dhA.text" = "Fremtidig blodsukker forutsies ved å kombinere effektene av flere parametre. Bruk dette verktøyet til å bytte ulike parametre for å se hvordan de påvirker den endelige prediksjonen.";
@@ -65,10 +65,10 @@
 "EAn-Ja-S1d.text" = "Observert";
 
 /* Class = "UILabel"; text = "Active Carbohydrates: 40g"; ObjectID = "hHZ-uY-aKw"; */
-"hHZ-uY-aKw.text" = "Aktive Karbohydrater: 40g";
+"hHZ-uY-aKw.text" = "Aktive karbohydrater: 40g";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Effekt av Karbohydrater";
+"hZZ-2S-lrd.title" = "Effekt av karbohydrater";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
 "IxU-As-glo.text" = "Observerte endringer i blodsukker, minus endringer fra levert insulin, kan brukes for å estimere absorpsjon av karbohydrater.";
@@ -77,10 +77,10 @@
 "J7x-W5-gwo.text" = "Detaljer";
 
 /* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Forventet Blodsukker Under Område";
+"k0g-P7-OVN.text" = "⚠ Forventet blodsukker under område";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Anbefalt Basal";
+"k3F-Na-7mn.text" = "Anbefalt basal";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Etikett";
@@ -101,7 +101,7 @@
 "OFA-qT-ZAg.text" = "Etikett";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Forventet Blodsukker";
+"PA3-sP-cWY.title" = "Forventet blodsukker";
 
 /* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
 "pi6-Dh-72V.title" = "Insulinmodell";
@@ -122,7 +122,7 @@
 "ufi-Kj-33k.text" = "Etikett";
 
 /* Class = "UILabel"; text = "Active Insulin: 1.5U"; ObjectID = "viU-7a-kbI"; */
-"viU-7a-kbI.text" = "Aktivt Insulin: 1,5E";
+"viU-7a-kbI.text" = "Aktivt insulin: 1,5E";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Karbohydrater";
