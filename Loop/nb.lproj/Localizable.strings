@@ -177,13 +177,13 @@
 "Disables" = "Deaktiver";
 
 /* Title of the switch which toggles retrospective correction effects */
-"Enable Retrospective Correction" = "Aktiver retrospektiv korrigering";
+"Enable Retrospective Correction" = "Aktiver retrospektiv korreksjon";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Aktiverer";
 
 /* The placeholder text instructing users to enter a suspend treshold */
-"Enter suspend threshold" = "Legg til grense for stopp av insulintilførsel";
+"Enter suspend threshold" = "Legg til grense for insulinstopp";
 
 /* The placeholder text instructing users how to enter a transmitter ID */
 "Enter the 6-digit transmitter ID" = "Angi 6-sifret sender (CGM) ID";
@@ -314,7 +314,7 @@
 "Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker om %1$@ er %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstilling for stopp av insulintilførsel";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstilling for insulinstopp";
 
 /* The title of the pump section in settings */
 "Pump" = "Pumpe";
@@ -392,7 +392,7 @@
 "since %@" = "siden %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Nettstedslenke (URL)";
+"Site URL" = "Nettsted (URL)";
 
 /* The title text for the Medtronic sensor switch cell */
 "Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";
@@ -401,10 +401,10 @@
 "Starting Bolus" = "Starter bolus";
 
 /* The title text in settings */
-"Suspend Threshold" = "Grense for stopp av insulintilførsel";
+"Suspend Threshold" = "Grense for insulinstopp";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Den gamle modellen brukt av Loop, tillater endring av varighet for tiltak.";
+"The legacy model used by Loop, allowing customization of action duration." = "Den gamle modellen brukt av Loop, tillater endring av varighet for handling.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Maks bolus er satt til %@ enheter";
@@ -437,7 +437,7 @@
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nåværende eller forventet blodsukker er under grensen for stopp av insulintilførsel, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basalrate på 0 enheter per time.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nåværende eller forventet blodsukker er under grensen for insulinstopp, vil ikke Loop anbefale en bolus, og vil alltid anbefale en midlertidig basalrate på 0 enheter per time.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Treningsmål";
