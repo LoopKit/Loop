@@ -1,0 +1,17 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth jest używany do komunikacji z pompą i urządzeniami ciągłego monitoringu glukozy.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID jest używane do autoryzacji podaży bolusa.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Dane o posiłkach z bazy aplikacji Zdrowie będą używane do określenia ich wpływu na poziom cukru. Informacje o poziomie cukru z bazy danych aplikacji Zdrowie są używane do narysowania wykresu oraz obliczenia przewidywanego poziomu cukru.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Posiłek węglowodanowy wprowadzony w aplikacji i na zegarku oraz dane o poziomie cukru pobrane z ciągłego monitoringu glukozy są bezpiecznie przechowywane w aplikacji Zdrowie.";
