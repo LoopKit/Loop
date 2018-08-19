@@ -353,7 +353,7 @@
 "Required" = "Wymagane";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservoir";
+"Reservoir" = "Zbiornik";
 
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Korekcja retrospektywna";
