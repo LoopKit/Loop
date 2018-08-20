@@ -1,6 +1,18 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = " Текущая гликемия %1$@ ниже диапазона коррекции";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "г";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "мг/дл";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "ммоль/л";
+
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
 "Predicted glucose at %1$@ is %2$@." = "Предсказываемая гликемия в %1$@ - %2$@.";
 
@@ -10,6 +22,6 @@
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
-/* The unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+/* The short unit display string for international units of insulin */
+"U" = "ед";
 
