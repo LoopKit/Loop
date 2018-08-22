@@ -36,7 +36,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
                 formatter.minimumFractionDigits = 1
             }
 
-            valueLabel.setText(formatter.string(from: NSNumber(value: bolusValue)) ?? "--")
+            valueLabel.setText(formatter.string(from: bolusValue) ?? "--")
         }
     }
 
@@ -94,9 +94,9 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             }
 
             let recommendedPickerValue = pickerValueFromBolusValue(recommendedBolus)
-            pickerValue = Int(Double(recommendedPickerValue) * 0.75)
+            pickerValue = Int(Double(recommendedPickerValue) * 1)
 
-            if let valueString = formatter.string(from: NSNumber(value: recommendedBolus)) {
+            if let valueString = formatter.string(from: recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
         }

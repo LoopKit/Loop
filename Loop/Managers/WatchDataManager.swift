@@ -9,9 +9,7 @@
 import HealthKit
 import UIKit
 import WatchConnectivity
-import CarbKit
 import LoopKit
-
 
 final class WatchDataManager: NSObject, WCSessionDelegate {
 
@@ -49,6 +47,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         }
 
         switch updateContext {
+        case .glucose:
+            break
         case .tempBasal:
             break
         case .preferences:
@@ -81,7 +81,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
     private var lastComplicationContext: WatchContext?
 
     private let minTrendDrift: Double = 20
-    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter()
+    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
 
     private func sendWatchContext(_ context: WatchContext) {
         if let session = watchSession, session.isPaired && session.isWatchAppInstalled {
@@ -118,36 +118,88 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         let glucose = loopManager.glucoseStore.latestGlucose
         let reservoir = loopManager.doseStore.lastReservoirValue
 
-        loopManager.glucoseStore.preferredUnit { (unit, error) in
-            loopManager.getLoopState { (manager, state) in
-                let eventualGlucose = state.predictedGlucose?.last
-                let context = WatchContext(glucose: glucose, eventualGlucose: eventualGlucose, glucoseUnit: unit)
-                context.reservoir = reservoir?.unitVolume
+        loopManager.getLoopState { (manager, state) in
+            let updateGroup = DispatchGroup()
 
-                context.loopLastRunDate = state.lastLoopCompleted
-                context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
-                context.maxBolus = manager.settings.maximumBolus
+            let startDate = Date().addingTimeInterval(TimeInterval(minutes: -180))
+            let endDate = Date().addingTimeInterval(TimeInterval(minutes: 180))
 
-                if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
-                    if let override = glucoseTargetRangeSchedule.override {
-                        context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
-                            context: override.context.correspondingUserInfoContext,
-                            startDate: override.start,
-                            endDate: override.end
-                        )
-                    }
+            let context = WatchContext(glucose: glucose, eventualGlucose: state.predictedGlucose?.last, glucoseUnit: manager.glucoseStore.preferredUnit)
+            context.reservoir = reservoir?.unitVolume
+            context.loopLastRunDate = manager.lastLoopCompleted
+            context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
+            context.maxBolus = manager.settings.maximumBolus
+            context.COB = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
+            context.glucoseTrendRawValue = self.deviceDataManager.sensorInfo?.trendType?.rawValue
 
-                    let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
-                    let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
-                    context.configuredOverrideContexts = configuredUserInfoOverrideContexts
+            context.cgm = self.deviceDataManager.cgm
+
+            if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
+                if let override = glucoseTargetRangeSchedule.override {
+                    context.glucoseRangeScheduleOverride = GlucoseRangeScheduleOverrideUserInfo(
+                        context: override.context.correspondingUserInfoContext,
+                        startDate: override.start,
+                        endDate: override.end
+                    )
+
+                    context.temporaryOverride = WatchDatedRangeContext(
+                        startDate: override.start,
+                        endDate: override.end ?? .distantFuture,
+                        minValue: override.value.minValue,
+                        maxValue: override.value.maxValue
+                    )
                 }
 
-                if let trend = self.deviceDataManager.sensorInfo?.trendType {
-                    context.glucoseTrendRawValue = trend.rawValue
-                }
+                let configuredOverrideContexts = self.deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.configuredOverrideContexts ?? []
+                let configuredUserInfoOverrideContexts = configuredOverrideContexts.map { $0.correspondingUserInfoContext }
+                context.configuredOverrideContexts = configuredUserInfoOverrideContexts
 
-                completion(context)
+                context.targetRanges = glucoseTargetRangeSchedule.between(start: startDate, end: endDate).map {
+                    return WatchDatedRangeContext(
+                        startDate: $0.startDate,
+                        endDate: $0.endDate,
+                        minValue: $0.value.minValue,
+                        maxValue: $0.value.maxValue
+                    )
+                }
             }
+
+            updateGroup.enter()
+            manager.doseStore.insulinOnBoard(at: Date()) { (result) in
+                switch result {
+                case .success(let iobValue):
+                    context.IOB = iobValue.value
+                case .failure:
+                    context.IOB = nil
+                }
+                updateGroup.leave()
+            }
+
+            // Only set this value in the Watch context if there is a temp basal running that hasn't ended yet
+            let date = state.lastTempBasal?.startDate ?? Date()
+            if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first,
+                let lastTempBasal = state.lastTempBasal,
+                lastTempBasal.endDate > Date() {
+                context.lastNetTempBasalDose =  lastTempBasal.unitsPerHour - scheduledBasal.value
+            }
+
+            if let unit = manager.glucoseStore.preferredUnit {
+                // Drop the first element in predictedGlucose because it is the currentGlucose
+                // and will have a different interval to the next element
+                if let predictedGlucose = state.predictedGlucose?.dropFirst(), predictedGlucose.count > 1 {
+                    let first = predictedGlucose[predictedGlucose.startIndex]
+                    let second = predictedGlucose[predictedGlucose.startIndex.advanced(by: 1)]
+                    context.predictedGlucose = WatchPredictedGlucoseContext(
+                        values: predictedGlucose.map { $0.quantity.doubleValue(for: unit) },
+                        unit: unit,
+                        startDate: first.startDate,
+                        interval: second.startDate.timeIntervalSince(first.startDate)
+                    )
+                }
+            }
+
+            _ = updateGroup.wait(timeout: .distantFuture)
+            completion(context)
         }
     }
 
@@ -194,23 +246,25 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
             replyHandler([:])
         case GlucoseRangeScheduleOverrideUserInfo.name?:
+            // Successful changes will trigger a preferences change which will update the watch with the new overrides
             if let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: message) {
-                let overrideContext = overrideUserInfo.context.correspondingOverrideContext
-
-                // update the recorded last active override context prior to enabling the actual override
-                // to prevent the Watch context being unnecessarily sent in response to the override being enabled
-                let previousActiveOverrideContext = lastActiveOverrideContext
-                lastActiveOverrideContext = overrideContext
-                let overrideSuccess = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
-
-                if overrideSuccess == false {
-                    lastActiveOverrideContext = previousActiveOverrideContext
-                }
-
-                replyHandler([:])
+                _ = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(overrideUserInfo.context.correspondingOverrideContext, from: overrideUserInfo.startDate, until: overrideUserInfo.effectiveEndDate)
             } else {
-                lastActiveOverrideContext = nil
                 deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride()
+            }
+            replyHandler([:])
+        case GlucoseBackfillRequestUserInfo.name?:
+            if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message),
+                let manager = deviceDataManager.loopManager,
+                let unit = manager.glucoseStore.preferredUnit {
+                manager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate) { (values) in
+                    let context = WatchHistoricalGlucoseContext(
+                        dates: values.map { $0.startDate },
+                        values: values.map { $0.quantity.doubleValue(for: unit) },
+                        unit: unit)
+                    replyHandler(context.rawValue)
+                }
+            } else {
                 replyHandler([:])
             }
         default:
@@ -257,6 +311,8 @@ fileprivate extension GlucoseRangeSchedule.Override.Context {
             return .preMeal
         case .workout:
             return .workout
+        case .remoteTempTarget:
+            return .remoteTempTarget
         }
     }
 }
@@ -268,6 +324,8 @@ fileprivate extension GlucoseRangeScheduleOverrideUserInfo.Context {
             return .preMeal
         case .workout:
             return .workout
+        case .remoteTempTarget:
+            return .remoteTempTarget
         }
     }
 }

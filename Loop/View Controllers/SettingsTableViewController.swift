@@ -8,12 +8,13 @@
 
 import UIKit
 import HealthKit
-import InsulinKit
 import LoopKit
+import LoopKitUI
 import MinimedKit
 import RileyLinkBLEKit
 import RileyLinkKit
 import RileyLinkKitUI
+import NightscoutUploadKit
 
 private let ConfigCellIdentifier = "ConfigTableViewCell"
 
@@ -52,7 +53,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         updateRSSI()
 
         if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
-            dataManager.loopManager.glucoseStore.authorize { (success, error) -> Void in
+            dataManager.loopManager.glucoseStore.authorize { (result) -> Void in
                 // Do nothing for now
             }
         }
@@ -65,6 +66,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
         dataManager.rileyLinkManager.setScanningEnabled(false)
         rssiFetchTimer = nil
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup.uploadProfile(uploader: uploader)
+        }
     }
 
     var dataManager: DeviceDataManager!
@@ -101,7 +106,11 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         case glucoseTargetRange = 0
         case suspendThreshold
         case insulinModel
-        case basalRate
+        case activeBasalProfile
+        //        case basalRate
+        case basalRateStandard
+        case basalRateA
+        case basalRateB
         case carbRatio
         case insulinSensitivity
         case maxBasal
@@ -110,7 +119,6 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
     fileprivate enum ServiceRow: Int, CaseCountable {
         case nightscout = 0
-        case mLab
         case loggly
         case amplitude
     }
@@ -128,21 +136,14 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
+            vc.deviceManager = dataManager
             vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
 
             if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                 vc.insulinSensitivitySchedule = insulinSensitivitySchedule
             }
 
-            dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
-                DispatchQueue.main.async {
-                    if let unit = unit {
-                        vc.glucoseUnit = unit
-                    }
-
-                    vc.delegate = self
-                }
-            }
+            vc.delegate = self
         default:
             break
         }
@@ -269,20 +270,48 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .basalRate:
-                configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
-
-                if let basalRateSchedule = dataManager.loopManager.basalRateSchedule {
+                // case .basalRate:
+                //    configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
+                //
+                //    if let basalRateSchedule = dataManager.loopManager.basalRateSchedule {
+                //        configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
+                //    } else {
+                //        configCell.detailTextLabel?.text = TapToSetString
+                //    }
+                
+            case .basalRateA:
+                configCell.textLabel?.text = NSLocalizedString("Basal Pattern A", comment: "The title text for the basal rate schedule")
+                
+                if let basalRateSchedule = dataManager.loopManager.settings.basalProfileA {
                     configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+                
+            case .basalRateB:
+                configCell.textLabel?.text = NSLocalizedString("Basal Pattern B", comment: "The title text for the basal rate schedule")
+                
+                if let basalRateSchedule = dataManager.loopManager.settings.basalProfileB {
+                    configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+                
+            case .basalRateStandard:
+                configCell.textLabel?.text = NSLocalizedString("Basal Standard", comment: "The title text for the basal rate schedule")
+                
+                if let basalRateSchedule = dataManager.loopManager.settings.basalProfileStandard {
+                    configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+                
             case .carbRatio:
                 configCell.textLabel?.text = NSLocalizedString("Carb Ratios", comment: "The title text for the carb ratio schedule")
 
                 if let carbRatioSchedule = dataManager.loopManager.carbRatioSchedule {
                     let unit = carbRatioSchedule.unit
-                    let value = valueNumberFormatter.string(from: NSNumber(value: carbRatioSchedule.averageQuantity().doubleValue(for: unit))) ?? "—"
+                    let value = valueNumberFormatter.string(from: carbRatioSchedule.averageQuantity().doubleValue(for: unit)) ?? "—"
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for carb ratio average. (1: value)(2: carb unit)"), value, unit)
                 } else {
@@ -293,9 +322,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
-                    let value = valueNumberFormatter.string(from: NSNumber(value: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit))) ?? "—"
+                    let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? "—"
 
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.glucoseUnitDisplayString)
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.localizedShortUnitString
+                    )
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -305,10 +335,10 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 if let glucoseTargetRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
                     let unit = glucoseTargetRangeSchedule.unit
                     let value = glucoseTargetRangeSchedule.value(at: Date())
-                    let minTarget = valueNumberFormatter.string(from: NSNumber(value: value.minValue)) ?? "—"
-                    let maxTarget = valueNumberFormatter.string(from: NSNumber(value: value.maxValue)) ?? "—"
+                    let minTarget = valueNumberFormatter.string(from: value.minValue) ?? "—"
+                    let maxTarget = valueNumberFormatter.string(from: value.maxValue) ?? "—"
 
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.glucoseUnitDisplayString)
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.localizedShortUnitString)
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -316,8 +346,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
                 
                 if let suspendThreshold = dataManager.loopManager.settings.suspendThreshold {
-                    let value = valueNumberFormatter.string(from: NSNumber(value: suspendThreshold.value)) ?? "-"
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string for current suspend threshold. (1: value)(2: bg unit)"), value, suspendThreshold.unit.glucoseUnitDisplayString)
+                    let value = valueNumberFormatter.string(from: suspendThreshold.value, unit: suspendThreshold.unit) ?? TapToSetString
+                    configCell.detailTextLabel?.text = value
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
@@ -329,6 +359,20 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 } else {
                     configCell.detailTextLabel?.text = TapToSetString
                 }
+                
+            case .activeBasalProfile:
+                configCell.textLabel?.text = NSLocalizedString("Active Basal Pattern", comment: "The title text for the active basal pattern row")
+                
+                let settings = dataManager.loopManager.settings.activeBasalProfile
+                
+                //if they are nil that means nothig has been set yet
+                if settings != nil && dataManager.loopManager.basalRateSchedule != nil {
+                    let unitslabel : String = "\(dataManager.loopManager.basalRateSchedule!.total()) U"
+                    configCell.detailTextLabel?.text = (settings?.description)! + "   " + unitslabel
+                } else {
+                    configCell.detailTextLabel?.text = TapToSetString
+                }
+                
             case .maxBasal:
                 configCell.textLabel?.text = NSLocalizedString("Maximum Basal Rate", comment: "The title text for the maximum basal rate value")
 
@@ -369,11 +413,6 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? TapToSetString
-            case .mLab:
-                let mLabService = dataManager.logger.mLabService
-
-                configCell.textLabel?.text = mLabService.title
-                configCell.detailTextLabel?.text = mLabService.databaseName ?? TapToSetString
             case .loggly:
                 let logglyService = dataManager.logger.logglyService
 
@@ -433,7 +472,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let row = PumpRow(rawValue: indexPath.row)!
             switch row {
             case .pumpID:
-                let vc: LoopKit.TextFieldTableViewController
+                let vc: LoopKitUI.TextFieldTableViewController
                 switch row {
                 case .pumpID:
                     vc = PumpIDTableViewController(pumpID: dataManager.pumpSettings?.pumpID, region: dataManager.pumpSettings?.pumpRegion)
@@ -465,7 +504,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                 show(vc, sender: sender)
             case .g5TransmitterID:
-                let vc: LoopKit.TextFieldTableViewController
+                let vc: LoopKitUI.TextFieldTableViewController
                 var value: String?
 
                 if case .g5(let transmitterID)? = dataManager.cgm {
@@ -485,7 +524,7 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
             case .maxBasal, .maxBolus:
-                let vc: LoopKit.TextFieldTableViewController
+                let vc: LoopKitUI.TextFieldTableViewController
 
                 switch row {
                 case .maxBasal:
@@ -501,17 +540,62 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 vc.delegate = self
 
                 show(vc, sender: indexPath)
-            case .basalRate:
+                
+                //case .basalRate:
+                //    let scheduleVC = SingleValueScheduleTableViewController()
+                //
+                //    if let profile = dataManager.loopManager.basalRateSchedule {
+                //        scheduleVC.timeZone = profile.timeZone
+                //        scheduleVC.scheduleItems = profile.items
+                //    }
+                //    scheduleVC.delegate = self
+                //    scheduleVC.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
+                //    show(scheduleVC, sender: sender)
+                
+            case .activeBasalProfile:
+                //check to see if a basal profile that was active got deleted by the user - if so,
+                let vc = RadioSelectionTableViewController.activeBasalProfileSource(dataManager.loopManager.settings.activeBasalProfile!)
+                vc.title = sender?.textLabel?.text
+                vc.delegate = self
+                
+                show(vc, sender: sender)
+                
+            case .basalRateStandard:
                 let scheduleVC = SingleValueScheduleTableViewController()
-
-                if let profile = dataManager.loopManager.basalRateSchedule {
+                
+                if let profile = dataManager.loopManager.settings.basalProfileStandard{
                     scheduleVC.timeZone = profile.timeZone
                     scheduleVC.scheduleItems = profile.items
                 }
                 scheduleVC.delegate = self
-                scheduleVC.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
-
+                scheduleVC.title = NSLocalizedString("Basal Rates Standard", comment: "The title of the basal rate profile screen")
+                
                 show(scheduleVC, sender: sender)
+                
+            case .basalRateA:
+                let scheduleVC = SingleValueScheduleTableViewController()
+                
+                if let profile = dataManager.loopManager.settings.basalProfileA{
+                    scheduleVC.timeZone = profile.timeZone
+                    scheduleVC.scheduleItems = profile.items
+                }
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Basal Rates A", comment: "The title of the basal rate profile screen")
+                
+                show(scheduleVC, sender: sender)
+                
+            case .basalRateB:
+                let scheduleVC = SingleValueScheduleTableViewController()
+                
+                if let profile = dataManager.loopManager.settings.basalProfileB{
+                    scheduleVC.timeZone = profile.timeZone
+                    scheduleVC.scheduleItems = profile.items
+                }
+                scheduleVC.delegate = self
+                scheduleVC.title = NSLocalizedString("Basal Rates B", comment: "The title of the basal rate profile screen")
+                
+                show(scheduleVC, sender: sender)
+                
             case .carbRatio:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
 
@@ -523,6 +607,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
+                } else if let timeZone = dataManager.pumpState?.timeZone {
+                    scheduleVC.timeZone = timeZone
                 }
 
                 show(scheduleVC, sender: sender)
@@ -539,15 +625,13 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
+                    if let timeZone = dataManager.pumpState?.timeZone {
+                        scheduleVC.timeZone = timeZone
+                    }
+
+                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                        scheduleVC.unit = unit
+                        self.show(scheduleVC, sender: sender)
                     }
                 }
             case .glucoseTargetRange:
@@ -564,15 +648,13 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
+                    if let timeZone = dataManager.pumpState?.timeZone {
+                        scheduleVC.timeZone = timeZone
+                    }
+
+                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                        scheduleVC.unit = unit
+                        self.show(scheduleVC, sender: sender)
                     }
                 }
             case .suspendThreshold:
@@ -582,20 +664,12 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     vc.indexPath = indexPath
                     vc.title = sender?.textLabel?.text
                     self.show(vc, sender: sender)
-                } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
-                                vc.delegate = self
-                                vc.indexPath = indexPath
-                                vc.title = sender?.textLabel?.text
-                                self.show(vc, sender: sender)
-                            }
-                        }
-                    }
+                } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                    let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
+                    vc.delegate = self
+                    vc.indexPath = indexPath
+                    vc.title = sender?.textLabel?.text
+                    self.show(vc, sender: sender)
                 }
             case .insulinModel:
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
@@ -644,33 +718,23 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 }
 
                 show(vc, sender: sender)
-            case .mLab:
-                let service = dataManager.logger.mLabService
-                let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.logger.mLabService = service
-
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
-                }
-
-                show(vc, sender: sender)
             case .loggly:
                 let service = dataManager.logger.logglyService
                 let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.logger.logglyService = service
+                vc.authenticationObserver = { [weak self] (service) in
+                    self?.dataManager.logger.logglyService = service
 
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                    self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 show(vc, sender: sender)
             case .amplitude:
                 let service = AnalyticsManager.shared.amplitudeService
                 let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
+                vc.authenticationObserver = { [weak self] (service) in
                     AnalyticsManager.shared.amplitudeService = service
 
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                    self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 show(vc, sender: sender)
@@ -868,15 +932,42 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             switch Section(rawValue: indexPath.section)! {
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
-                case .basalRate:
+        //          case .basalRate:
+        //              if let controller = controller as? SingleValueScheduleTableViewController {
+        //                  dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+        //                  AnalyticsManager.shared.didChangeBasalRateSchedule()
+        //              }
+                case .basalRateStandard:
                     if let controller = controller as? SingleValueScheduleTableViewController {
-                        dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                        AnalyticsManager.shared.didChangeBasalRateSchedule()
+                        dataManager.loopManager.settings.basalProfileStandard = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        //this checks for the edge case of the active profile being deleted by the user - if so set to nil actual basal profile
+                        if dataManager.loopManager.settings.activeBasalProfile == .standard && BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone) == nil {
+                            dataManager.loopManager.basalRateSchedule = nil
+                            dataManager.loopManager.settings.activeBasalProfile = .notSet
+                        }
+                        
+                    }
+                case .basalRateA:
+                    if let controller = controller as? SingleValueScheduleTableViewController {
+                        dataManager.loopManager.settings.basalProfileA = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        
+                        if dataManager.loopManager.settings.activeBasalProfile == .patternA && BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone) == nil {
+                            dataManager.loopManager.basalRateSchedule = nil
+                            dataManager.loopManager.settings.activeBasalProfile = .notSet
+                        }
+                    }
+                    
+                case .basalRateB:
+                    if let controller = controller as? SingleValueScheduleTableViewController {
+                        dataManager.loopManager.settings.basalProfileB = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        if dataManager.loopManager.settings.activeBasalProfile == .patternB && BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone) == nil {
+                            dataManager.loopManager.basalRateSchedule = nil
+                            dataManager.loopManager.settings.activeBasalProfile = .notSet
+                        }
                     }
                 case .glucoseTargetRange:
                     if let controller = controller as? GlucoseRangeScheduleTableViewController {
                         dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
-                        AnalyticsManager.shared.didChangeGlucoseTargetRangeSchedule()
                     }
                 case let row:
                     if let controller = controller as? DailyQuantityScheduleTableViewController {
@@ -943,6 +1034,43 @@ extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate
                     assertionFailure()
                 }
 
+            case .configuration:
+                switch ConfigurationRow(rawValue: indexPath.row)! {
+                case .activeBasalProfile:
+                    //+1 account for hidden row re notSet
+                    if let selectedIndex = controller.selectedIndex, let dataSource = BasalProfile(rawValue: selectedIndex + 1) {
+                        
+                        switch (dataSource) {
+                        case .standard :
+                            if dataManager.loopManager.settings.basalProfileStandard != nil {
+                                dataManager.loopManager.basalRateSchedule = dataManager.loopManager.settings.basalProfileStandard
+                                dataManager.loopManager.settings.activeBasalProfile = dataSource
+                                AnalyticsManager.shared.didChangeBasalRateSchedule()
+                            }
+                        case .patternA :
+                            if dataManager.loopManager.settings.basalProfileA != nil {
+                                dataManager.loopManager.basalRateSchedule = dataManager.loopManager.settings.basalProfileA
+                                dataManager.loopManager.settings.activeBasalProfile = dataSource
+                                AnalyticsManager.shared.didChangeBasalRateSchedule()
+                            }
+                        case .patternB :
+                            if dataManager.loopManager.settings.basalProfileB != nil {
+                                dataManager.loopManager.basalRateSchedule = dataManager.loopManager.settings.basalProfileB
+                                dataManager.loopManager.settings.activeBasalProfile = dataSource
+                                AnalyticsManager.shared.didChangeBasalRateSchedule()
+                            }
+                        case .notSet:
+                            ()
+                        }
+                        
+                        tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.activeBasalProfile.rawValue, section: Section.configuration.rawValue)], with: .none)
+                        // tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.basalRate.rawValue, section: Section.configuration.rawValue)], with: .none)
+                        
+                    }
+                default:
+                    assertionFailure()
+                }
+                
             case .pump:
                 switch PumpRow(rawValue: indexPath.row)! {
                 case .batteryChemistry:
@@ -961,8 +1089,8 @@ extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate
     }
 }
 
-extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDelegate {
-    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKit.TextFieldTableViewController) {
+extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDelegate {
+    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKitUI.TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
             switch Section(rawValue: indexPath.section)! {
             case .pump:
@@ -978,6 +1106,7 @@ extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDeleg
                 default:
                     assertionFailure()
                 }
+                
             case .cgm:
                 switch CGMRow(rawValue: indexPath.row)! {
                 case .g5TransmitterID:
@@ -1023,7 +1152,7 @@ extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDeleg
         tableView.reloadData()
     }
 
-    func textFieldTableViewControllerDidReturn(_ controller: LoopKit.TextFieldTableViewController) {
+    func textFieldTableViewControllerDidReturn(_ controller: LoopKitUI.TextFieldTableViewController) {
         _ = navigationController?.popViewController(animated: true)
     }
 }
