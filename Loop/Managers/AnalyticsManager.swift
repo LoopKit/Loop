@@ -25,7 +25,7 @@ final class AnalyticsManager: IdentifiableClass {
             amplitudeService = AmplitudeService(APIKey: nil)
         }
 
-        logger = DiagnosticLogger.shared?.forCategory(type(of: self).className)
+        logger = DiagnosticLogger.shared.forCategory(type(of: self).className)
     }
 
     static let shared = AnalyticsManager()
@@ -60,10 +60,6 @@ final class AnalyticsManager: IdentifiableClass {
     }
 
     // MARK: - Config Events
-
-    func didChangeRileyLinkConnectionState() {
-        logEvent("RileyLink Connection", outOfSession: true)
-    }
 
     func transmitterTimeDidDrift(_ drift: TimeInterval) {
         logEvent("Transmitter time change", withProperties: ["value" : drift], outOfSession: true)
@@ -101,13 +97,7 @@ final class AnalyticsManager: IdentifiableClass {
         logEvent("Insulin sensitivity change")
     }
 
-    func didChangeGlucoseTargetRangeSchedule() {
-        logEvent("Glucose target range change")
-    }
-
     func didChangeLoopSettings(from oldValue: LoopSettings, to newValue: LoopSettings) {
-        logEvent("Loop settings change", outOfSession: true)
-
         if newValue.maximumBasalRatePerHour != oldValue.maximumBasalRatePerHour {
             logEvent("Maximum basal rate change")
         }
@@ -127,7 +117,18 @@ final class AnalyticsManager: IdentifiableClass {
         if newValue.retrospectiveCorrectionEnabled != oldValue.retrospectiveCorrectionEnabled {
             logEvent("Retrospective correction enabled change")
         }
+
+        if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
+            if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
+                self.punpTimeZoneDidChange()
+            } else if newValue.glucoseTargetRangeSchedule?.override != oldValue.glucoseTargetRangeSchedule?.override {
+                logEvent("Glucose target range override change", outOfSession: true)
+            } else {
+                logEvent("Glucose target range change")
+            }
+        }
     }
+
 
     // MARK: - Loop Events
 

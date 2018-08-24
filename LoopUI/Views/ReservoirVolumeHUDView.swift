@@ -54,12 +54,12 @@ public final class ReservoirVolumeHUDView: LevelHUDView {
     }()
 
     public func setReservoirVolume(volume: Double, at date: Date) {
-        if let units = numberFormatter.string(from: NSNumber(value: volume)) {
-            volumeLabel.text = String(format: NSLocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
+        if let units = numberFormatter.string(from: volume) {
+            volumeLabel.text = String(format: LocalizedString("%@U", comment: "Format string for reservoir volume. (1: The localized volume)"), units)
             let time = timeFormatter.string(from: date)
             caption?.text = time
 
-            accessibilityValue = String(format: NSLocalizedString("%1$@ units remaining at %2$@", comment: "Accessibility format string for (1: localized volume)(2: time)"), units, time)
+            accessibilityValue = String(format: LocalizedString("%1$@ units remaining at %2$@", comment: "Accessibility format string for (1: localized volume)(2: time)"), units, time)
         }
     }
 }
