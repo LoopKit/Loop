@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1F7FBE9D2130BB6E0088E3B3 /* NightscoutUploader+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7FBE9B2130BB6D0088E3B3 /* NightscoutUploader+Profile.swift */; };
+		1F7FBE9E2130BB6E0088E3B3 /* UserDefaults+katie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F7FBE9C2130BB6D0088E3B3 /* UserDefaults+katie.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -443,6 +445,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1F7FBE9B2130BB6D0088E3B3 /* NightscoutUploader+Profile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "NightscoutUploader+Profile.swift"; path = "Loop/Extensions/NightscoutUploader+Profile.swift"; sourceTree = SOURCE_ROOT; };
+		1F7FBE9C2130BB6D0088E3B3 /* UserDefaults+katie.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UserDefaults+katie.swift"; path = "Loop/Extensions/UserDefaults+katie.swift"; sourceTree = SOURCE_ROOT; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		4309786D1E73DAD100BEBC82 /* CGM.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGM.swift; sourceTree = "<group>"; };
@@ -1174,6 +1178,8 @@
 				435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */,
 				437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
+				1F7FBE9B2130BB6D0088E3B3 /* NightscoutUploader+Profile.swift */,
+				1F7FBE9C2130BB6D0088E3B3 /* UserDefaults+katie.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
 			);
@@ -1869,6 +1875,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */,
+				1F7FBE9E2130BB6E0088E3B3 /* UserDefaults+katie.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				434F54571D287FDB002A9274 /* NibLoadable.swift in Sources */,
 				43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */,
@@ -1898,6 +1905,7 @@
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				435CB6271F37AE5600C320C7 /* WalshInsulinModel.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
+				1F7FBE9D2130BB6E0088E3B3 /* NightscoutUploader+Profile.swift in Sources */,
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,

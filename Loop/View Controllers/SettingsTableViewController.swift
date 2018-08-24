@@ -40,6 +40,10 @@ final class SettingsTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup.uploadProfile(uploader: uploader)
+        }
 
         if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
             dataManager.loopManager.glucoseStore.authorize { (result) -> Void in
