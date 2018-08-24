@@ -26,6 +26,32 @@ final class ActionHUDController: HUDInterfaceController {
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
+    // Add this code inside the class definition for ActionHUDController.swift in WatchApp Extension --> Controllers
+    // Add force-touch menu items to set workout mode for certain fixed durations:
+    override init() {
+        super.init()
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 30 minutes", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout30Min))
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 1 hour", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout1Hour))
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 2 hours", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout2Hours))
+    }
+    
+    private func setWorkoutMode(duration: Double) {
+        let endDate = Date().addingTimeInterval(TimeInterval(hours: duration))
+        let userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .workout, startDate: Date(), endDate: endDate)
+        updateForOverrideContext(userInfo.context)
+        sendGlucoseRangeOverride(userInfo: userInfo)
+    }
+    
+    @objc func setWorkout30Min() {
+        setWorkoutMode(duration: 0.5)
+    }
+    @objc func setWorkout1Hour() {
+        setWorkoutMode(duration: 1.0)
+    }
+    @objc func setWorkout2Hours() {
+        setWorkoutMode(duration: 2.0)
+    }
+    
     override func update() {
         super.update()
 
