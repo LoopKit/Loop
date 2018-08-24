@@ -1,0 +1,6 @@
+/* (No Comment) */
+"CFBundleDisplayName" = "WatchApp Extension";
+
+/* (No Comment) */
+"CFBundleName" = "$(PRODUCT_NAME)";
+

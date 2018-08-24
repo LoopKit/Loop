@@ -373,6 +373,13 @@ enum CalibrationError: Error {
 extension CalibrationError: LocalizedError {
     var errorDescription: String? {
         switch self {
+        case .unreliableState:
+            return NSLocalizedString("Glucose data is unavailable", comment: "Error description for unreliable state")
+        }
+    }
+
+    var failureReason: String? {
+        switch self {
         case .unreliableState(let state):
             return state.localizedDescription
         }

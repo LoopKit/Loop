@@ -17,7 +17,7 @@ public class LevelHUDView: BaseHUDView {
 
         updateColor()
 
-        accessibilityValue = NSLocalizedString("Unknown", comment: "Accessibility value for an unknown value")
+        accessibilityValue = LocalizedString("Unknown", comment: "Accessibility value for an unknown value")
     }
 
     public var stateColors: StateColorPalette? {

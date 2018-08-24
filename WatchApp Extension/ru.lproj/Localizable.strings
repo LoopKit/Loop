@@ -1,24 +1,22 @@
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Болюс не состоялся";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
 /* The action button title to dismiss an error message */
 "Dismiss" = "Пропустить";
 
-/* Glucose trend down */
-"Falling" = "Падение";
-
-/* Glucose trend down-down */
-"Falling fast" = "Быстрое падение";
-
-/* Glucose trend down-down-down */
-"Falling very fast" = "Очень быстрое падение";
-
-/* Glucose trend flat */
-"Flat" = "Стабильно";
+/* The short unit display string for grams */
+"g" = "г";
 
 /* The recovery message displayed after a bolus attempt fails
-   The recovery message displayed after a carb entry send attempt fails */
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Убедитесь, что ваш iPhone поблизости и повторите попытку";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "ммоль/л";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
@@ -26,18 +24,10 @@
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Рекомендовано: %@ ед";
 
-/* Glucose trend up */
-"Rising" = "Повышение";
-
-/* Glucose trend up-up */
-"Rising fast" = "Быстрое повышение";
-
-/* Glucose trend up-up-up */
-"Rising very fast" = "Очень быстрое повышение";
-
-/* The title of the alert controller displayed after a carb entry send attempt fails */
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Ошибка отправки";
 
-/* The unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+/* The short unit display string for international units of insulin */
+"U" = "ед";
 
