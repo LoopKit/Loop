@@ -128,7 +128,51 @@ final class NightscoutDataManager {
         let loopName = Bundle.main.bundleDisplayName
         let loopVersion = Bundle.main.shortVersionString
 
-        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+   //add new loop parameters
+        var loopParams : String = ""
+        var loopBGTlow : String = ""
+        var loopBGThigh : String = ""
+        var loopEventualBG : String = ""
+        if let loopBGRange = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.value(at: Date()), let userUnit = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit {
+            if userUnit == HKUnit.milligramsPerDeciliter() {
+                loopBGTlow = String(Int((loopBGRange.minValue)))
+                loopBGThigh = String(Int((loopBGRange.maxValue)))
+            }
+            else
+            {
+                loopBGTlow = String(format:"%.1f", (loopBGRange.minValue))
+                loopBGThigh = String(format:"%.1f",(loopBGRange.maxValue))
+            }
+        }
+        
+        else {
+            loopBGTlow = "N/A"
+            loopBGThigh = "N/A"
+        }
+        
+        if let loopEventualBGquantity = predictedGlucose?.last?.quantity, let userUnit = deviceDataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit  {
+            if userUnit == HKUnit.milligramsPerDeciliter() {
+                loopEventualBG = String(Int(loopEventualBGquantity.doubleValue(for: userUnit)))
+            }
+            else
+            {
+                loopEventualBG = String(format:"%.1f",loopEventualBGquantity.doubleValue(for: userUnit))
+            }
+        }
+        else
+        {
+            loopEventualBG = "N/A"
+        }
+        
+        loopParams = "BGTargets (" + loopBGTlow + ":" + loopBGThigh + ") | EvBG " + loopEventualBG + " | " + loopName
+        
+        //upload loopParams instead of just loopName
+        //that is the only pill that has the option to modify the text
+        let loopStatus = LoopStatus(name: loopParams, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+        
+        //if you wish to have the Loop pill clean, without the added BGtargets and EventualBG showing, remove the slashes on code line below, and add slashes to code line above
+        
+        //let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
         
         upload(pumpStatus: nil, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, lastValidFrequency: nil, lastTuned: nil, uploaderStatus: getUploaderStatus())
 
