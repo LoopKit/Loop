@@ -261,7 +261,6 @@
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D2366E421250E0A0028B67D /* InfoPlist.strings */; };
-		7D2366E821250E7B0028B67D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D2366E421250E0A0028B67D /* InfoPlist.strings */; };
 		7D7076351FE06EDE004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076371FE06EDE004AC8EA /* Localizable.strings */; };
 		7D70763A1FE06EDF004AC8EA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70763C1FE06EDF004AC8EA /* InfoPlist.strings */; };
 		7D70763F1FE06EDF004AC8EA /* ckcomplication.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076411FE06EDF004AC8EA /* ckcomplication.strings */; };
@@ -1530,7 +1529,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
 					432CF87720D8B8380066B889 = {
@@ -1710,7 +1709,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */,
-				7D2366E821250E7B0028B67D /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
