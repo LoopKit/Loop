@@ -117,6 +117,10 @@ final class AnalyticsManager: IdentifiableClass {
         if newValue.retrospectiveCorrectionEnabled != oldValue.retrospectiveCorrectionEnabled {
             logEvent("Retrospective correction enabled change")
         }
+        
+        if newValue.integralRetrospectiveCorrectionEnabled != oldValue.integralRetrospectiveCorrectionEnabled {
+            logEvent("Integral retrospective correction enabled change")
+        }
 
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {

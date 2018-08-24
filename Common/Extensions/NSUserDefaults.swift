@@ -112,7 +112,8 @@ extension UserDefaults {
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
-                    retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
+                    retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled"),
+                    integralRetrospectiveCorrectionEnabled: bool(forKey: "com.loopkit.Loop.IntegralRetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings
 
