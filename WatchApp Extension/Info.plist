@@ -48,5 +48,7 @@
 	<string>$(PRODUCT_MODULE_NAME).StatusInterfaceController</string>
 	<key>WKExtensionDelegateClassName</key>
 	<string>$(PRODUCT_MODULE_NAME).ExtensionDelegate</string>
+	<key>AppGroupIdentifier</key>
+	<string>$(APP_GROUP_IDENTIFIER)</string>
 </dict>
 </plist>

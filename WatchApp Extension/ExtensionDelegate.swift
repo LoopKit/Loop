@@ -14,6 +14,7 @@ import UserNotifications
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
+    private(set) lazy var loopManager = LoopDataManager()
 
     static func shared() -> ExtensionDelegate {
         return WKExtension.shared().extensionDelegate
@@ -50,7 +51,13 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    func applicationWillResignActive() {
+        UserDefaults.standard.startOnChartPage = (WKExtension.shared().visibleInterfaceController as? ChartHUDController) != nil
+    }
+
     func handle(_ backgroundTasks: Set<WKRefreshBackgroundTask>) {
+        loopManager.glucoseStore.maybeRequestGlucoseBackfill()
+
         for task in backgroundTasks {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
@@ -101,9 +108,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     // Main queue only
-    private(set) var lastContext: WatchContext? {
+    private(set) var activeContext: WatchContext? {
         didSet {
-            WKExtension.shared().rootUpdatableInterfaceController?.update(with: lastContext)
+            loopManager.activeContext = activeContext
 
             if WKExtension.shared().applicationState != .active {
                 WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: Date(), userInfo: nil) { (_) in }
@@ -137,12 +144,12 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                     context.preferredGlucoseUnit = units[type]
 
                     DispatchQueue.main.async {
-                        self.lastContext = context
+                        self.activeContext = context
                     }
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.lastContext = context
+                    self.activeContext = context
                 }
             }
         }
@@ -191,9 +198,5 @@ extension ExtensionDelegate {
 fileprivate extension WKExtension {
     var extensionDelegate: ExtensionDelegate! {
         return delegate as? ExtensionDelegate
-    }
-
-    var rootUpdatableInterfaceController: ContextUpdatable? {
-        return rootInterfaceController as? ContextUpdatable
     }
 }

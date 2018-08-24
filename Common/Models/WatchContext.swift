@@ -9,10 +9,11 @@
 import Foundation
 import HealthKit
 
+
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 3
+    private let version = 4
 
     var preferredGlucoseUnit: HKUnit?
     var maxBolus: Double?
@@ -22,6 +23,8 @@ final class WatchContext: NSObject, RawRepresentable {
     var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
+    var targetRanges: [WatchDatedRange]?
+    var temporaryOverride: WatchDatedRange?
     var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
     var configuredOverrideContexts: [GlucoseRangeScheduleOverrideUserInfo.Context] = []
 
@@ -41,6 +44,7 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoir: Double?
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
+    var predictedGlucose: WatchPredictedGlucose?
 
     var cgm: CGM?
 
@@ -56,16 +60,15 @@ final class WatchContext: NSObject, RawRepresentable {
         }
 
         if let unitString = rawValue["gu"] as? String {
-            let unit = HKUnit(from: unitString)
-            preferredGlucoseUnit = unit
+            preferredGlucoseUnit = HKUnit(from: unitString)
         }
-
+        let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
         if let glucoseValue = rawValue["gv"] as? Double {
-            glucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
+            glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         if let glucoseValue = rawValue["egv"] as? Double {
-            eventualGlucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
+            eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
@@ -92,6 +95,18 @@ final class WatchContext: NSObject, RawRepresentable {
         recommendedBolusDose = rawValue["rbo"] as? Double
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
+
+        if let rawValue = rawValue["pg"] as? WatchPredictedGlucose.RawValue {
+            predictedGlucose = WatchPredictedGlucose(rawValue: rawValue)
+        }
+
+        if let rawValue = rawValue["tr"] as? [WatchDatedRange.RawValue] {
+            targetRanges = rawValue.compactMap({return WatchDatedRange(rawValue: $0)})
+        }
+
+        if let rawValue = rawValue["to"] as? WatchDatedRange.RawValue {
+            temporaryOverride = WatchDatedRange(rawValue: rawValue)
+        }
 
         if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
             cgm = CGM(rawValue: cgmRawValue)
@@ -126,6 +141,11 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
+
+        raw["pg"] = predictedGlucose?.rawValue
+
+        raw["tr"] = targetRanges?.map { $0.rawValue }
+        raw["to"] = temporaryOverride?.rawValue
 
         return raw
     }

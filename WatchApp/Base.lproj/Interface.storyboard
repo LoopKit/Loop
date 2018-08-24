@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="13771" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
-    <device id="watch38" orientation="portrait">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14113" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+    <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="13756"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14033"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -117,12 +117,12 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="520" y="345"/>
+            <point key="canvasLocation" x="38" y="370"/>
         </scene>
         <!--Loop-->
         <scene sceneID="gQv-2Z-iCt">
             <objects>
-                <controller title="Loop" contentMode="scaleAspectFit" id="rNf-Mh-tID" customClass="StatusInterfaceController" customModule="WatchApp_Extension">
+                <controller identifier="ActionHUDController" title="Loop" contentMode="scaleAspectFit" id="rNf-Mh-tID" customClass="ActionHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="1wc-65-vel">
                             <items>
@@ -149,15 +149,12 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="center" verticalAlignment="bottom" textAlignment="center" id="PI8-dB-Ykw">
+                                        <label width="1" alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="cZW-uY-zIa">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
                                 </group>
                             </items>
-                        </group>
-                        <group width="1" height="0.080000000000000002" alignment="left" id="rSt-1g-97T">
-                            <variation key="device=watch42mm" height="0.10000000000000001"/>
                         </group>
                         <group width="1" height="0.59999999999999998" alignment="center" verticalAlignment="bottom" id="VU2-MR-CSd">
                             <items>
@@ -260,14 +257,14 @@
                         <outlet property="preMealButton" destination="jY0-1m-ful" id="IMe-rm-JYl"/>
                         <outlet property="preMealButtonBackground" destination="mBB-jG-wHy" id="Ouy-xo-rMR"/>
                         <outlet property="preMealButtonImage" destination="Asx-tm-mEg" id="DIe-5b-uc1"/>
-                        <outlet property="statusLabel" destination="PI8-dB-Ykw" id="T85-wv-NB2"/>
                         <outlet property="workoutButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
                         <outlet property="workoutButtonBackground" destination="HCn-yQ-9kV" id="SXL-jK-n6U"/>
                         <outlet property="workoutButtonImage" destination="8OJ-hd-8Va" id="Xyt-Yx-PZO"/>
+                        <segue destination="v5b-sO-bb8" kind="relationship" relationship="nextPage" id="aFP-Ra-jw9"/>
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="235" y="345"/>
+            <point key="canvasLocation" x="38" y="769"/>
         </scene>
         <!--BolusInterfaceController-->
         <scene sceneID="vCl-Xb-hzF">
@@ -332,7 +329,96 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="791" y="347"/>
+            <point key="canvasLocation" x="342" y="370"/>
+        </scene>
+        <!--Loop-->
+        <scene sceneID="3Z2-ZE-636">
+            <objects>
+                <controller identifier="ChartHUDController" title="Loop" contentMode="scaleAspectFit" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
+                    <items>
+                        <group width="1" alignment="left" id="z0r-4k-Z7h">
+                            <items>
+                                <group width="0.25" alignment="left" layout="overlap" id="Z7g-qg-0wK">
+                                    <items>
+                                        <imageView alignment="center" image="loop_unknown" contentMode="center" id="ifw-dh-btK"/>
+                                        <timer width="1" alignment="left" verticalAlignment="center" textAlignment="center" enabled="YES" previewedSeconds="500" id="P2b-9P-EbP">
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                            <calendarUnit key="units" minute="YES"/>
+                                        </timer>
+                                    </items>
+                                </group>
+                                <group width="0.75" alignment="left" layout="overlap" id="nPX-XN-diX">
+                                    <items>
+                                        <group width="1" height="26" alignment="left" id="pYI-3J-lxs">
+                                            <items>
+                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="Dt1-kz-jMZ">
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="yl8-ZP-c3l">
+                                                    <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                            </items>
+                                            <variation key="device=watch42mm" height="29"/>
+                                        </group>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" layout="vertical" id="GqJ-yv-NKQ">
+                            <items>
+                                <spriteKitScene width="2" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
+                                    <variation key="device=watch38mm" height="90" width="134"/>
+                                    <variation key="device=watch42mm" height="86" width="154"/>
+                                </spriteKitScene>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" id="izB-yd-ACI">
+                            <items>
+                                <label alignment="left" verticalAlignment="bottom" text="---" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
+                                <label alignment="center" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
+                                <label alignment="right" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
+                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
+                                </label>
+                            </items>
+                        </group>
+                    </items>
+                    <menu key="menu" id="Da1-jh-2yL">
+                        <items>
+                            <menuItem title="1 hour" image="1-hour-graph" id="vL1-NA-WZ1">
+                                <connections>
+                                    <action selector="setChartWindow1Hour" destination="v5b-sO-bb8" id="yp1-H2-0e5"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="2 hours" image="2-hour-graph" id="dPh-7b-Tfv">
+                                <connections>
+                                    <action selector="setChartWindow2Hours" destination="v5b-sO-bb8" id="IQe-Uh-AOb"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="3 hours" image="3-hour-graph" id="fR1-7h-SNe">
+                                <connections>
+                                    <action selector="setChartWindow3Hours" destination="v5b-sO-bb8" id="HhZ-89-5Yp"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                    <connections>
+                        <outlet property="basalLabel" destination="U5L-zt-Ck7" id="mM0-Vf-6uk"/>
+                        <outlet property="cobLabel" destination="gC1-LZ-QMz" id="zeH-DE-pAh"/>
+                        <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
+                        <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
+                        <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
+                        <outlet property="iobLabel" destination="PI8-dB-Ykw" id="S3x-RE-C7L"/>
+                        <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
+                        <outlet property="loopTimer" destination="P2b-9P-EbP" id="5xU-ne-x8i"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="342" y="754"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
@@ -359,7 +445,7 @@
                     </connections>
                 </notificationController>
             </objects>
-            <point key="canvasLocation" x="235" y="1001"/>
+            <point key="canvasLocation" x="38" y="1153"/>
         </scene>
     </scenes>
     <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
