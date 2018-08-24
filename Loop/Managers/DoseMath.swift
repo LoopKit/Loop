@@ -145,14 +145,14 @@ extension TempBasalRecommendation {
             /// If the last temp basal has the same rate, and has more than `continuationInterval` of time remaining, don't set a new temp
             if matchesRate(lastTempBasal.unitsPerHour),
                 lastTempBasal.endDate.timeIntervalSince(date) > continuationInterval {
-                return nil
+                return self
             } else if matchesRate(scheduledBasalRate) {
                 // If our new temp matches the scheduled rate, cancel the current temp
-                return .cancel
+                return self
             }
         } else if matchesRate(scheduledBasalRate) {
             // If we recommend the in-progress scheduled basal rate, do nothing
-            return nil
+            return self
         }
 
         return self
@@ -415,7 +415,7 @@ extension Collection where Iterator.Element == GlucoseValue {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
-            suspendThreshold: suspendThreshold ?? correctionRange.minQuantity(at: date),
+            suspendThreshold: HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: 55.0),
             sensitivity: sensitivity.quantity(at: date),
             model: model
         ) else {
