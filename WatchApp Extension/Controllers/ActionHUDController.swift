@@ -25,6 +25,8 @@ final class ActionHUDController: HUDInterfaceController {
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
+    
+    private lazy var remoteTempTargetButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
     // Add this code inside the class definition for ActionHUDController.swift in WatchApp Extension --> Controllers
     // Add force-touch menu items to set workout mode for certain fixed durations:
@@ -90,6 +92,8 @@ final class ActionHUDController: HUDInterfaceController {
         case nil:
             preMealButtonGroup.turnOff()
             workoutButtonGroup.turnOff()
+        case .remoteTempTarget?:
+            ()
         }
     }
 
@@ -99,6 +103,8 @@ final class ActionHUDController: HUDInterfaceController {
             return preMealButtonGroup
         case .workout:
             return workoutButtonGroup
+        case .remoteTempTarget:
+            return remoteTempTargetButtonGroup
         }
     }
 
