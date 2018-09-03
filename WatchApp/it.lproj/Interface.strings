@@ -16,6 +16,12 @@
 /* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
 "dPF-QZ-sh6.title" = "🍕";
 
+/* Class = "WKInterfaceMenuItem"; title = "2 hours"; ObjectID = "dPh-7b-Tfv"; */
+"dPh-7b-Tfv.title" = "2 ore";
+
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "Dt1-kz-jMZ"; */
+"Dt1-kz-jMZ.text" = "---";
+
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
 "DZc-Gn-RLu.accessibilityLabel" = "Aggiungi";
 
@@ -31,8 +37,14 @@
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
 "f5G-bS-9pd.text" = "Pre-Pasto";
 
+/* Class = "WKInterfaceMenuItem"; title = "3 hours"; ObjectID = "fR1-7h-SNe"; */
+"fR1-7h-SNe.title" = "3 ore";
+
 /* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
 "gAn-qe-OvX.title" = "🍭";
+
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "gC1-LZ-QMz"; */
+"gC1-LZ-QMz.text" = "---";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "hjF-xr-cwO"; */
 "hjF-xr-cwO.accessibilityLabel" = "Sottrarre";
@@ -52,6 +64,9 @@
 /* Class = "WKInterfaceLabel"; text = "Workout"; ObjectID = "nC0-X3-oFJ"; */
 "nC0-X3-oFJ.text" = "Attività fisica";
 
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "PI8-dB-Ykw"; */
+"PI8-dB-Ykw.text" = "---";
+
 /* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
 "Qsq-p5-1J0.title" = "Bolo";
 
@@ -64,9 +79,21 @@
 /* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
 "smL-Rc-IZh.text" = "Bolo";
 
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "U5L-zt-Ck7"; */
+"U5L-zt-Ck7.text" = "---";
+
 /* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
 "Ury-of-vQg.text" = "10:09 AM";
 
+/* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "v5b-sO-bb8"; */
+"v5b-sO-bb8.title" = "Loop";
+
+/* Class = "WKInterfaceMenuItem"; title = "1 hour"; ObjectID = "vL1-NA-WZ1"; */
+"vL1-NA-WZ1.title" = "1 ora";
+
 /* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
 "XkS-y5-khE.text" = "<body>";
+
+/* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "yl8-ZP-c3l"; */
+"yl8-ZP-c3l.text" = "---";
 

@@ -71,7 +71,7 @@
 "hZZ-2S-lrd.title" = "Effetti dei Carboidrati";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Per valutare l'assorbimento dei carboidrati, è possibile utilizzare i cambiamenti osservati nel glucosio, sottraendo i cambiamenti modellati dall'erogazione di insulina.";
+"IxU-As-glo.text" = "E' possibile valutare il reale assorbimento dei carboidrati osservando la glicemia attuale in rapporto all'insulina somministrata.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Dettaglio";

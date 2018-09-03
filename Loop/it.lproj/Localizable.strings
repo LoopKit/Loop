@@ -1,7 +1,20 @@
-/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
-
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = " (prevista l'erogazione di: %@)";
+" (pending: %@)" = "(somministrando: %@)";
+
+/* Low Target high Target */
+" LowTarget: %1$@ HighTarget: %2$@ Duration: %3$@" = "Obiettivo inferiore: %1$@ Obiettivo maggiore: %2$@ Durata: %3$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ assorbiti";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U Totali";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
    Format string for insulin sensitivity average (1: value)(2: glucose unit) */
@@ -22,23 +35,14 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+/* Formats (1: carb value) and (2: food type) */
+"%1$@: %2$@" = "%1$@: %2$@";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
 
-/* Formats (1: carb value) and (2: food type) */
-"%1$@: %2$@" = "%1$@: %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ assorbiti";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Totali";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
+/* Format string describing disabled retrospective correction. */
+"⚠️ Retrospective correction is disabled" = "⚠️ La correzione retrospettiva è disattivata";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "Coefficiente di regressione del glucosio a 15 min (b₁), interpolato con il decadimento a 30 min.";
@@ -250,11 +254,17 @@
    The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Sensibilità Insulinica";
 
+/* Title of the switch which toggles integral retrospective correction effects */
+"Integral Retrospective Correction" = "Correzione retrospettiva con metodo integrale";
+
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Dati non validi: %1$@";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Segnalazione";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
+"Last 30 min comparison: %1$@ → %2$@ vs %3$@" = "Comparativa rispetto agli ultimi 30 minuti: %1$@ → %2$@ vs %3$@";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
 "Last comparison: %1$@ → %2$@ vs %3$@" = "Ultimo confronto: %1$@ → %2$@ vs %3$@";
@@ -288,6 +298,9 @@
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Effetto glicemico attuale";
+
+/* The description of the switch which toggles retrospective correction effects */
+"More agressively increase or decrease basal delivery when  glucose movement over past 30 min doesn't match the carbohydrate and insulin-based model." = "Riduce o aumenta con maggiore aggressività la somministrazione della basale quando la variazione della glicemia negli ultimi 30 minuti non rispecchia I carboidrati assunti o il modello insulinico.";
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Fai Attenzione";
@@ -334,11 +347,17 @@
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "Serbatoio microinfusore Basso";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Insulina ultrarapida – Adulti";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Children" = "Insulina ultrarapida – Bambini";
+
+/* Format string describing retrospective correction. (1: Current discrepancy)(2: Integral retrospective correction effect)(3: Total retrospective correction effect) */
+"RC effect: %1$@, Integral effect: %2$@\nTotal glucose effect: %3$@" = "Effetto RC: %1$@, Effetto basato su integrale: %2$@\n Effetto glicemico totale: %3$@";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
 "Recommendation expired: %1$@ old" = "La dose raccomandata e' scaduta da %1$@";
@@ -349,13 +368,23 @@
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Bolo Consigliato: %@ Unità";
 
+/* The notification title for a remote temp being canceled */
+"Remote Temporary Target Canceled " = "L’obiettivo glicemico impostato da remoto è stato cancellato";
+
+/* The notification title for Remote Target Being Set */
+"Remote Temporary Target Set " = "L’obiettivo glicemico impostato da remoto è stato inserito ";
+
 /* The default placeholder string for a credential */
 "Required" = "Necessario";
 
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Serbatoio";
 
-/* Title of the prediction input effect for retrospective correction */
+/* The description of the switch which toggles integral retrospective correction effects */
+"Respond more aggressively to persistent discrepancies in glucose movement." = "Risponde con maggiore aggressività a persistenti discrepanze nell’andamento glicemico.";
+
+/* Title of the prediction input effect for retrospective correction
+   Title of the switch which toggles retrospective correction effects */
 "Retrospective Correction" = "Correzione Retrospettiva";
 
 /* The title of the notification action to retry a bolus command */
@@ -403,6 +432,9 @@
 /* The title text in settings */
 "Suspend Threshold" = "Blocco Erogazione";
 
+/* Format string describing inactive retrospective correction. */
+"Temporarily inactive due to recent calibration or missing data" = "Temporaneamente inattivo per recente calibrazione o dati glicemici ";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "ll modello legacy utilizzato da Loop, che consente la personalizzazione della durata dell'azione.";
 
@@ -434,7 +466,7 @@
 "Verifying" = "Sto verificando";
 
 /* Title of insulin model setting */
-"Walsh" = "Walsh"; 
+"Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Quando l'attuale valore glicemico o un valore previsto nel futuro e' al di sotto del valore minimo previsto per la sospensione dell'erogazione, Loop non consigliera' un bolo e blocchera' l'erogazione delle basali.";

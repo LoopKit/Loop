@@ -41,7 +41,7 @@
 "Rapid-Acting – Children" = "Insulina ultrarapida – Bambini";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "ll modello legacy utilizzato da Loop, che consente la personalizzazione della durata dell'azione.";
+"The legacy model used by Loop, allowing customization of action duration." = "ll modello classico utilizzato da Loop, che consente la personalizzazione della durata dell'azione.";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";

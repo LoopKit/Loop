@@ -1,3 +1,15 @@
+/* The subtitle format describing grams of active carbs. (1: localized carb value description) */
+"%1$@ g" = "%1$@ g";
+
+/* The subtitle format describing units of active insulin. (1: localized insulin value description) */
+"%1$@ U" = "%1$@ U";
+
+/* The subtitle format describing the current temp basal rate. (1: localized basal rate description) */
+"%1$@ U/hr" = "%1$@ U/ora";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolo Fallito";
 
@@ -33,4 +45,13 @@
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Menu title for setting workout duration from watch */
+"Workout 1 hour" = "Attività 1 ora";
+
+/* Menu title for setting workout duration from watch */
+"Workout 2 hours" = "Attività 2 ore";
+
+/* Menu title for setting workout duration from watch */
+"Workout 30 minutes" = "Attività 30 minuti";
 
