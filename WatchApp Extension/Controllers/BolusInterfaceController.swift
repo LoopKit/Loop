@@ -135,11 +135,16 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             let bolus = SetBolusUserInfo(value: bolusValue, startDate: Date())
 
             do {
-                try WCSession.default.sendBolusMessage(bolus) { (error) in
-                    DispatchQueue.main.async {
-                        ExtensionDelegate.shared().present(error)
+                try WCSession.default.sendBolusMessage(bolus,
+                    replyHandler: { _ in
+                        WKInterfaceDevice.current().play(.success)
+                    },
+                    errorHandler: { (error) in
+                        DispatchQueue.main.async {
+                            ExtensionDelegate.shared().present(error)
+                        }
                     }
-                }
+                )
             } catch {
                 presentAlert(
                     withTitle: NSLocalizedString("Bolus Failed", comment: "The title of the alert controller displayed after a bolus attempt fails"),
