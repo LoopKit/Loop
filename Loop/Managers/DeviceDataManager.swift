@@ -170,6 +170,8 @@ extension DeviceDataManager: PumpManagerDelegate {
         if let newValue = pumpManager.pumpBatteryChargeRemaining {
             if newValue == 0 {
                 NotificationManager.sendPumpBatteryLowNotification()
+            } else {
+                NotificationManager.clearPumpBatteryLowNotification()
             }
 
             if let oldValue = oldValue, newValue - oldValue >= 0.5 {
@@ -246,12 +248,18 @@ extension DeviceDataManager: PumpManagerDelegate {
                         return
                     }
 
+                    var didSendLowNotification = false
                     let warningThresholds: [Double] = [10, 20, 30]
 
                     for threshold in warningThresholds {
                         if newValue.unitVolume <= threshold && previousVolume > threshold {
                             NotificationManager.sendPumpReservoirLowNotificationForAmount(newValue.unitVolume, andTimeRemaining: nil)
+                            didSendLowNotification = true
                         }
+                    }
+
+                    if !didSendLowNotification {
+                        NotificationManager.clearPumpReservoirNotification()
                     }
 
                     if newValue.unitVolume > previousVolume + 1 {
@@ -303,7 +311,7 @@ extension DeviceDataManager: DoseStoreDelegate {
 extension DeviceDataManager {
     func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
         guard let pumpManager = pumpManager else {
-            completion(LoopError.configurationError("Pump Manager"))
+            completion(LoopError.configurationError(.pumpManager))
             return
         }
 
@@ -330,7 +338,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         completion: @escaping (_ result: Result<DoseEntry>) -> Void
     ) {
         guard let pumpManager = pumpManager else {
-            completion(.failure(LoopError.configurationError("Pump Manager")))
+            completion(.failure(LoopError.configurationError(.pumpManager)))
             return
         }
 

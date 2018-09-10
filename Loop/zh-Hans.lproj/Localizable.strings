@@ -1,0 +1,444 @@
+/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
+
+/* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
+" (pending: %@)" = "(待执行: %@)";
+
+/* Format string for carb ratio average. (1: value)(2: carb unit)
+   Format string for insulin sensitivity average (1: value)(2: glucose unit) */
+"%1$@ %2$@/U" = "%1$@ %2$@/单位";
+
+/* Formats (1: carb start time) and (2: carb absorption duration) */
+"%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* Low reservoir alert format string. (1: Number of units remaining) */
+"%1$@ U left" = "%1$@ 单位 剩余";
+
+/* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
+"%1$@ U left: %2$@" = "%1$@ 单位 剩余: %2$@";
+
+/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
+"%1$@ U/hour @ %2$@" = "%1$@ 单位/小时 @ %2$@";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/分钟";
+
+/* Formats (1: carb value) and (2: food type) */
+"%1$@: %2$@" = "%1$@: %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ 已吸收";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ 单位 总量";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Description of the prediction input effect for glucose momentum */
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15分钟葡萄糖回归系数（b1），持续30分钟衰减";
+
+/* Description of the prediction input effect for retrospective correction */
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30分钟葡萄糖预测与实际比较，持续60分钟以上衰减";
+
+/* Subtitle of Fiasp preset */
+"A model based on the published absorption of Fiasp insulin." = "基于公布的Fiasp胰岛素吸收的模型";
+
+/* Subtitle of Rapid-Acting – Adult preset */
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "基于已公布的Humalog，Novolog和Apidra胰岛素在成人中吸收的模型。";
+
+/* Action to copy the recommended Bolus value to the actual Bolus Field */
+"AcceptRecommendedBolus" = "按照推荐的大剂量输注";
+
+/* The title of the Carbs On-Board graph */
+"Active Carbohydrates" = "活性碳水化合物";
+
+/* The string format describing active carbohydrates. (1: localized glucose value description) */
+"Active Carbohydrates: %@" = "活性碳水化合物: %@";
+
+/* The title of the Insulin On-Board graph */
+"Active Insulin" = "活性胰岛素";
+
+/* The string format describing active insulin. (1: localized insulin value description) */
+"Active Insulin: %@" = "活性胰岛素: %@";
+
+/* The title of the button to add the credentials for a service */
+"Add Account" = "添加账户";
+
+/* The label of the carb entry button */
+"Add Meal" = "添加用餐信息";
+
+/* Title text for button to set up a new pump */
+"Add Pump" = "添加泵";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "算法设置";
+
+/* The title of the Amplitude service */
+"Amplitude" = "Amplitude";
+
+/* Subtitle of Rapid-Acting – Children preset */
+"An adjustment to the adult model based on empirical effects in children." = "在成人胰岛素模型基础上专为儿童修改的胰岛素代谢模型";
+
+/* The title of the amplitude API key credential */
+"API Key" = "API Key";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API密码";
+
+/* Format fragment for a specific time */
+"at %@" = "%@分钟内";
+
+/* The message displayed during a device authentication prompt for bolus specification */
+"Authenticate to Bolus %@ Units" = "解锁以输注大剂量 %@ 单位";
+
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "基础率表";
+
+/* The title of the basal rate profile screen
+   The title text for the basal rate schedule */
+"Basal Rates" = "基础率";
+
+/* The label of the bolus entry button
+   The notification title for a bolus failure */
+"Bolus" = "大剂量";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "取消";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "碳水效果";
+
+/* The title of the carb ratios schedule screen
+   The title text for the carb ratio schedule */
+"Carb Ratios" = "碳水化合物吸收率";
+
+/* Title of the prediction input effect for carbohydrates */
+"Carbohydrates" = "碳水化合物";
+
+/* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "已吸收碳水化合物（克）÷碳水化合物吸收率（克 / 单位）×胰岛素敏感系数 (%1$@/单位)";
+
+/* The notification alert describing a low pump battery */
+"Change the pump battery immediately" = "立即更换胰岛素泵电池";
+
+/* The notification alert describing an empty pump reservoir */
+"Change the pump reservoir now" = "立即更换储药器";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "检查设置";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "请检查你的泵是否在范围内";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "请检查你的动态血糖数据来源";
+
+/* The title text for the looping enabled switch cell */
+"Closed Loop" = "开启闭环";
+
+/* The title of the configuration section in settings */
+"Configuration" = "配置";
+
+/* The error message displayed for configuration errors. (1: configuration error details) */
+"Configuration Error: %1$@" = "配置错误：%1$@";
+
+/* The title of the continuous glucose monitor section in settings */
+"Continuous Glucose Monitor" = "连续葡萄糖监测";
+
+/* The title of the glucose target range schedule screen
+   The title text for the glucose target range schedule */
+"Correction Range" = "修正范围";
+
+/* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
+"Current glucose of %1$@ is below correction range." = "当前葡萄糖%1$@低于修正范围";
+
+/* The title of the Loggly customer token credential */
+"Customer Token" = "用户Token";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "删除账户";
+
+/* Title text for delivery limits */
+"Delivery Limits" = "输注限制";
+
+/* The title of the Dexcom Share service */
+"Dexcom Share" = "德康远程";
+
+/* The action hint of the workout mode toggle button when enabled */
+"Disables" = "禁用";
+
+/* Title of the switch which toggles retrospective correction effects */
+"Enable Retrospective Correction" = "启用回溯修正算法";
+
+/* The action hint of the workout mode toggle button when disabled */
+"Enables" = "启用";
+
+/* The placeholder text instructing users to enter a suspend treshold */
+"Enter suspend threshold" = "输入暂停阈值";
+
+/* The placeholder text instructing users how to enter a transmitter ID */
+"Enter the 6-digit transmitter ID" = "输入6位数的发射器编号";
+
+/* The subtitle format describing eventual glucose. (1: localized glucose value description) */
+"Eventually %@" = "最终 %@";
+
+/* The title of the alert describing a maximum bolus validation error */
+"Exceeds Maximum Bolus" = "超过大剂量最大输注限制";
+
+/* Title of insulin model preset */
+"Fiasp" = "Fiasp";
+
+/* The format string used to describe a finite workout targets duration */
+"For %1$@" = "对于 %1$@";
+
+/* The short unit display string for grams */
+"g" = "克";
+
+/* The title text for the G4 Share Receiver switch cell */
+"G4 Share Receiver" = "带有蓝牙功能G4接收器";
+
+/* The title text for the G5/G6 Transmitter switch cell */
+"G5/G6 Transmitter" = "G5/G6发射器";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "葡萄糖";
+
+/* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
+"Glucose data is %1$@ old" = "葡萄糖%1$@分钟未更新";
+
+/* Error description for unreliable state */
+"Glucose data is unavailable" = "葡萄糖数据不可用";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "血糖数据不可用";
+
+/* Title of the prediction input effect for glucose momentum */
+"Glucose Momentum" = "葡萄糖增量预测算法";
+
+/* The placeholder text for the nightscout site URL credential */
+"https://mysite.azurewebsites.net" = "https://mysite.azurewebsites.net";
+
+/* The title of a target alert action specifying an indefinitely long workout targets duration */
+"Indefinitely" = "永久";
+
+/* Title of the prediction input effect for insulin */
+"Insulin" = "胰岛素";
+
+/* Description of the prediction input effect for insulin */
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "已吸收胰岛素×胰岛素敏感系数";
+
+/* The title of the insulin delivery graph */
+"Insulin Delivery" = "已输注胰岛素";
+
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "胰岛素效果";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
+"Insulin Model" = "胰岛素模型";
+
+/* The title of the insulin sensitivities schedule screen
+   The title text for the insulin sensitivity schedule */
+"Insulin Sensitivities" = "胰岛素敏感系数";
+
+/* The error message when invalid data was encountered. (1: details of invalid data) */
+"Invalid data: %1$@" = "无效数据: %1$@";
+
+/* The title text for the issue report cell */
+"Issue Report" = "反馈问题";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
+"Last comparison: %1$@ → %2$@ vs %3$@" = "的最后一次对比: %1$@ → %2$@ vs %3$@";
+
+/* Glucose HUD accessibility hint */
+"Launches CGM app" = "启动CGM软件";
+
+/* The loading message for the diagnostic report screen */
+"Loading..." = "读取中...";
+
+/* The title of the loggly service */
+"Loggly" = "Loggly";
+
+/* The notification title for a loop failure */
+"Loop Failure" = "Loop失败";
+
+/* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
+"Loop has not completed successfully in %@" = "Loop运行异常 %@";
+
+/* The description of a low G5/G6 transmitter battery with a leading space */
+"Low Battery" = "电量低";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "毫克/分升";
+
+/* The error message for missing data. (1: missing data details) */
+"Missing data: %1$@" = "数据缺失: %1$@";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "毫摩尔/升";
+
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "葡萄糖动量效应";
+
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "请注意";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* The error message displayed for device connection errors. */
+"No connected devices, or failure during device connection" = "没有连接的设备，或设备连接期间发生故障";
+
+/* Sensor state description for the valid state */
+"OK" = "好";
+
+/* Outside US share server option title */
+"Outside US" = "非美国地区";
+
+/* The title of the Dexcom share password credential */
+"Password" = "密码";
+
+/* The label of the pre-meal mode toggle button */
+"Pre-Meal Targets" = "餐前目标";
+
+/* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
+"Predicted glucose at %1$@ is %2$@." = "预测%1$@时的葡萄糖是%2$@";
+
+/* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "预测葡萄糖%1$@低于您的暂停阈值设置";
+
+/* The title of the pump section in settings */
+"Pump" = "胰岛素泵";
+
+/* The notification title for a low pump battery */
+"Pump Battery Low" = "胰岛素泵电量低";
+
+/* The error message when pump data is too old to be used. (1: pump data age in minutes) */
+"Pump data is %1$@ old" = "胰岛素泵数据%1$@分钟未更新";
+
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "泵管理";
+
+/* The notification title for an empty pump reservoir */
+"Pump Reservoir Empty" = "储药器药量已用完";
+
+/* The notification title for a low pump reservoir */
+"Pump Reservoir Low" = "药量低";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Adults" = "速效胰岛素 - 成人模型";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Children" = "速效胰岛素 - 儿童模型";
+
+/* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
+"Recommendation expired: %1$@ old" = "%1$@分钟前推荐剂量已过期";
+
+/* The title of the cell displaying a recommended temp basal value */
+"Recommended Basal" = "推荐基础率";
+
+/* Accessibility hint describing recommended bolus units */
+"Recommended Bolus: %@ Units" = "推荐大剂量：%@单位";
+
+/* The default placeholder string for a credential */
+"Required" = "需要";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "储药器";
+
+/* Title of the prediction input effect for retrospective correction */
+"Retrospective Correction" = "回顾性修正";
+
+/* The title of the notification action to retry a bolus command */
+"Retry" = "重试";
+
+/* The description of sensor calibration state when sensor calibration is ok. */
+"Sensor calibration is OK" = "传感器校准成功";
+
+/* The description of sensor calibration state when raw value is unknown. (1: missing data details) */
+"Sensor is in unknown state %1$d" = "传感器处于未知状态 %1$d";
+
+/* The description of sensor calibration state when sensor sensor is stopped. */
+"Sensor is stopped" = "传感器停止";
+
+/* The description of sensor calibration state when sensor sensor is warming up. */
+"Sensor is warming up" = "传感器在启动中";
+
+/* The description of sensor calibration state when sensor needs calibration. */
+"Sensor needs calibration" = "传感器需要校准";
+
+/* The title of the Dexcom share server URL credential */
+"Server" = "服务器";
+
+/* The title of the services section in settings */
+"Services" = "服务";
+
+/* The label of the settings button */
+"Settings" = "设置";
+
+/* Loop Completion HUD accessibility hint */
+"Shows last loop error" = "显示Loop上一次的错误";
+
+/* Format fragment for a start time */
+"since %@" = "自从%@分钟前";
+
+/* The title of the nightscout site URL credential */
+"Site URL" = "网址";
+
+/* The title text for the Medtronic sensor switch cell */
+"Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";
+
+/* The title of the cell indicating a bolus is being sent */
+"Starting Bolus" = "开始输注大剂量";
+
+/* The title text in settings */
+"Suspend Threshold" = "暂停阈值";
+
+/* Subtitle description of Walsh insulin model setting */
+"The legacy model used by Loop, allowing customization of action duration." = "Loop使用的默认模型参数，您可以自行修改胰岛素代谢时间。";
+
+/* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
+"The maximum bolus amount is %@ Units" = "大剂量输注最大限制为%@单位";
+
+/* Instructions on where to find the transmitter ID */
+"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "G5发射器编号可以在发射器背部，或者发射器包盒、以及接收器找找到";
+
+/* The description of the switch which toggles retrospective correction effects */
+"This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "当葡萄糖与碳水化合物和基于胰岛素的模型不匹配时，这将更积极地增加或减少基础递送。";
+
+/* The title text for the Dexcom G5/G6 transmitter ID config value */
+"Transmitter ID" = "发射器编号";
+
+/* The short unit display string for international units of insulin */
+"U" = "单位";
+
+/* U.S. share server option title */
+"US" = "美国";
+
+/* The title of the alert controller used to select a duration for workout targets */
+"Use Workout Glucose Targets" = "使用运动状态的血糖目标";
+
+/* The title of the Dexcom share username credential */
+"Username" = "用户名";
+
+/* Label indicating validation is occurring */
+"Verifying" = "验证";
+
+/* Title of insulin model setting */
+"Walsh" = "Walsh";
+
+/* Explanation of suspend threshold */
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "当前或预测的葡萄糖低于暂停阈值时，Loop不推荐推注，并且总是建议每小时0单位的临时基础速率。";
+
+/* The label of the workout mode toggle button */
+"Workout Targets" = "运动模式血糖目标";
+

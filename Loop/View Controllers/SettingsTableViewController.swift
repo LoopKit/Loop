@@ -28,9 +28,11 @@ final class SettingsTableViewController: UITableViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        // Manually invoke the delegate for rows deselecting on appear
-        for indexPath in tableView.indexPathsForSelectedRows ?? [] {
-            _ = tableView(tableView, willDeselectRowAt: indexPath)
+        if clearsSelectionOnViewWillAppear {
+            // Manually invoke the delegate for rows deselecting on appear
+            for indexPath in tableView.indexPathsForSelectedRows ?? [] {
+                _ = tableView(tableView, willDeselectRowAt: indexPath)
+            }
         }
 
         super.viewWillAppear(animated)
