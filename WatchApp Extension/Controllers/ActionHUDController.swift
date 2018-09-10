@@ -1,5 +1,5 @@
 //
-//  StatusInterfaceController.swift
+//  ActionHUDController.swift
 //  Loop
 //
 //  Created by Nathan Racklyeft on 5/29/16.
@@ -12,99 +12,29 @@ import CGMBLEKit
 import LoopKit
 
 
-final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
-
-    @IBOutlet weak var loopHUDImage: WKInterfaceImage!
-    @IBOutlet weak var loopTimer: WKInterfaceTimer!
-    @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var statusLabel: WKInterfaceLabel!
-
+final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var preMealButton: WKInterfaceButton!
     @IBOutlet var preMealButtonImage: WKInterfaceImage!
     @IBOutlet var preMealButtonBackground: WKInterfaceGroup!
-
     @IBOutlet var workoutButton: WKInterfaceButton!
     @IBOutlet var workoutButtonImage: WKInterfaceImage!
     @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
+
+    private var lastOverrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
 
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
-    private var lastOverrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
+    override func update() {
+        super.update()
 
-    private var lastContext: WatchContext?
-
-    override func didAppear() {
-        super.didAppear()
-    }
-
-    override func willActivate() {
-        super.willActivate()
-
-        updateLoopHUD()
-    }
-
-    private func updateLoopHUD() {
-        guard let date = lastContext?.loopLastRunDate else {
-            loopHUDImage.setLoopImage(.unknown)
+        guard let activeContext = loopManager?.activeContext else {
             return
         }
 
-        let loopImage: LoopImage
-
-        switch date.timeIntervalSinceNow {
-        case let t where t > .minutes(-6):
-            loopImage = .fresh
-        case let t where t > .minutes(-20):
-            loopImage = .aging
-        default:
-            loopImage = .stale
-        }
-
-        loopHUDImage.setLoopImage(loopImage)
-    }
-
-    func update(with context: WatchContext?) {
-        lastContext = context
-
-        if let date = context?.loopLastRunDate {
-            loopTimer.setDate(date)
-            loopTimer.setHidden(false)
-            loopTimer.start()
-
-            updateLoopHUD()
-        } else {
-            loopTimer.setHidden(true)
-            loopHUDImage.setLoopImage(.unknown)
-        }
-        
-        if let glucose = context?.glucose, let unit = context?.preferredGlucoseUnit {
-            let formatter = NumberFormatter.glucoseFormatter(for: unit)
-
-            if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
-                let trend = context?.glucoseTrend?.symbol ?? ""
-                glucoseLabel.setText(glucoseValue + trend)
-                glucoseLabel.setHidden(false)
-            } else {
-                glucoseLabel.setHidden(true)
-            }
-
-            if let eventualGlucose = context?.eventualGlucose {
-                let glucoseValue = formatter.string(from: eventualGlucose.doubleValue(for: unit))
-                eventualGlucoseLabel.setText(glucoseValue)
-                eventualGlucoseLabel.setHidden(false)
-            } else {
-                eventualGlucoseLabel.setHidden(true)
-            }
-        } else {
-            glucoseLabel.setHidden(true)
-            eventualGlucoseLabel.setHidden(true)
-        }
-
         let overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
-        if let glucoseRangeScheduleOverride = context?.glucoseRangeScheduleOverride, glucoseRangeScheduleOverride.dateInterval.contains(Date())
+        if let glucoseRangeScheduleOverride = activeContext.glucoseRangeScheduleOverride, glucoseRangeScheduleOverride.dateInterval.contains(Date())
         {
             overrideContext = glucoseRangeScheduleOverride.context
         } else {
@@ -113,19 +43,14 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         updateForOverrideContext(overrideContext)
         lastOverrideContext = overrideContext
 
-        if let configuredOverrideContexts = context?.configuredOverrideContexts {
-            for overrideContext in GlucoseRangeScheduleOverrideUserInfo.Context.allContexts {
-                let contextButtonGroup = buttonGroup(for: overrideContext)
-                if !configuredOverrideContexts.contains(overrideContext) {
-                    contextButtonGroup.state = .disabled
-                } else if contextButtonGroup.state == .disabled {
-                    contextButtonGroup.state = .off
-                }
+        for overrideContext in GlucoseRangeScheduleOverrideUserInfo.Context.allContexts {
+            let contextButtonGroup = buttonGroup(for: overrideContext)
+            if !activeContext.configuredOverrideContexts.contains(overrideContext) {
+                contextButtonGroup.state = .disabled
+            } else if contextButtonGroup.state == .disabled {
+                contextButtonGroup.state = .off
             }
         }
-
-        // TODO: Other elements
-        statusLabel.setHidden(true)
     }
 
     private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {
@@ -158,7 +83,7 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
     }
 
     @IBAction func setBolus() {
-        presentController(withName: BolusInterfaceController.className, context: lastContext?.bolusSuggestion)
+        presentController(withName: BolusInterfaceController.className, context: loopManager?.activeContext?.bolusSuggestion ?? 0)
     }
 
     @IBAction func togglePreMealMode() {

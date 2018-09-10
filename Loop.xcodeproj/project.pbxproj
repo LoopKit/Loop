@@ -42,7 +42,7 @@
 		431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */; };
 		431E73481FF95A900069B5F7 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431E73471FF95A900069B5F7 /* PersistenceController.swift */; };
 		4326BA641F3A44D9007CCAD4 /* ChartLineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326BA631F3A44D9007CCAD4 /* ChartLineModel.swift */; };
-		4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */; };
+		4328E01A1CFBE1DA00E199AA /* ActionHUDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* ActionHUDController.swift */; };
 		4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */; };
 		4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */; };
 		4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */; };
@@ -113,7 +113,6 @@
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
 		438172D91F4E9E37003C3328 /* NewPumpEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438172D81F4E9E37003C3328 /* NewPumpEvent.swift */; };
 		43846AD51D8FA67800799272 /* Base.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 43846AD41D8FA67800799272 /* Base.lproj */; };
-		43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43846ADA1D91057000799272 /* ContextUpdatable.swift */; };
 		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
@@ -208,6 +207,10 @@
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4F08DE9D1E81D0E9006741EA /* StatusChartsManager+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430C1ABC1E5568A80067F1AE /* StatusChartsManager+LoopKit.swift */; };
+		4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */; };
+		4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */; };
+		4F11D3C320DD84DB006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */; };
+		4F11D3C420DD881A006E072C /* WatchHistoricalGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */; };
 		4F20AE621E6B879C00D07A06 /* ReservoirVolumeHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEC71CD84CBB003C8C80 /* ReservoirVolumeHUDView.swift */; };
 		4F20AE631E6B87B100D07A06 /* ChartContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313EDDF1D8A6BF90060FA79 /* ChartContainerView.swift */; };
 		4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
@@ -228,6 +231,7 @@
 		4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */; };
 		4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
 		4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */; };
+		4F73F5FC20E2E7FA00E8D82C /* GlucoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F73F5FB20E2E7FA00E8D82C /* GlucoseStore.swift */; };
 		4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
 		4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F75288B1DFE1DC600C322D6 /* LoopUI.framework */; };
 		4F75289A1DFE1F6000C322D6 /* BasalRateHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */; };
@@ -240,6 +244,13 @@
 		4F7528A21DFE200B00C322D6 /* LevelMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FBEDD71D73843700B21F22 /* LevelMaskView.swift */; };
 		4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
+		4F75F00220FCFE8C00B5570E /* GlucoseChartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F75F00120FCFE8C00B5570E /* GlucoseChartScene.swift */; };
+		4F7E8AC520E2AB9600AEA65E /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC420E2AB9600AEA65E /* Date.swift */; };
+		4F7E8AC720E2AC0300AEA65E /* WatchPredictedGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */; };
+		4F7E8AC920E2AC3700AEA65E /* WatchDatedRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC820E2AC3700AEA65E /* WatchDatedRange.swift */; };
+		4F7E8ACA20E2ACAE00AEA65E /* WatchDatedRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC820E2AC3700AEA65E /* WatchDatedRange.swift */; };
+		4F7E8ACB20E2ACB500AEA65E /* WatchPredictedGlucose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */; };
+		4F82655020E69F9A0031A8F5 /* HUDInterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F82654F20E69F9A0031A8F5 /* HUDInterfaceController.swift */; };
 		4FAC02541E22F6B20087A773 /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
 		4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */; };
@@ -255,13 +266,16 @@
 		4FB76FCE1E8C835D00B39636 /* ChartColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
+		4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */; };
+		4FF0F75E20E1E5D100FC6291 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431E73471FF95A900069B5F7 /* PersistenceController.swift */; };
+		4FF0F75F20E1E5EF00FC6291 /* NSBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430DA58D1D4AEC230097D1CA /* NSBundle.swift */; };
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		4FF4D0F91E17268800846527 /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */; };
 		4FF4D1001E18374700846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
+		4FFEDFBF20E5CF22000BFC58 /* ChartHUDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D2366E421250E0A0028B67D /* InfoPlist.strings */; };
-		7D2366E821250E7B0028B67D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D2366E421250E0A0028B67D /* InfoPlist.strings */; };
 		7D7076351FE06EDE004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076371FE06EDE004AC8EA /* Localizable.strings */; };
 		7D70763A1FE06EDF004AC8EA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70763C1FE06EDF004AC8EA /* InfoPlist.strings */; };
 		7D70763F1FE06EDF004AC8EA /* ckcomplication.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076411FE06EDF004AC8EA /* ckcomplication.strings */; };
@@ -446,7 +460,7 @@
 		431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircleMaskView.swift; sourceTree = "<group>"; };
 		431E73471FF95A900069B5F7 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		4326BA631F3A44D9007CCAD4 /* ChartLineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartLineModel.swift; sourceTree = "<group>"; };
-		4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInterfaceController.swift; sourceTree = "<group>"; };
+		4328E0151CFBE1DA00E199AA /* ActionHUDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionHUDController.swift; sourceTree = "<group>"; };
 		4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusInterfaceController.swift; sourceTree = "<group>"; };
 		4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddCarbsInterfaceController.swift; sourceTree = "<group>"; };
 		4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
@@ -516,7 +530,6 @@
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
 		438172D81F4E9E37003C3328 /* NewPumpEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPumpEvent.swift; sourceTree = "<group>"; };
 		43846AD41D8FA67800799272 /* Base.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Base.lproj; sourceTree = "<group>"; };
-		43846ADA1D91057000799272 /* ContextUpdatable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextUpdatable.swift; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
@@ -615,6 +628,8 @@
 		4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsScatterDownTrianglesLayer.swift; sourceTree = "<group>"; };
 		4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsTouchHighlightLayerViewCache.swift; sourceTree = "<group>"; };
 		4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CollectionType+Loop.swift"; sourceTree = "<group>"; };
+		4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseBackfillRequestUserInfo.swift; sourceTree = "<group>"; };
+		4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalGlucose.swift; sourceTree = "<group>"; };
 		4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WatchContext+WatchApp.swift"; sourceTree = "<group>"; };
 		4F2C15921E09BF2C00E160D4 /* HUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HUDView.swift; sourceTree = "<group>"; };
 		4F2C15941E09BF3C00E160D4 /* HUDView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = HUDView.xib; sourceTree = "<group>"; };
@@ -630,13 +645,21 @@
 		4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Loop Status Extension.entitlements"; sourceTree = "<group>"; };
 		4F70C20F1DE8FAC5006380B7 /* StatusExtensionDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionDataManager.swift; sourceTree = "<group>"; };
 		4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusExtensionContext.swift; sourceTree = "<group>"; };
+		4F73F5FB20E2E7FA00E8D82C /* GlucoseStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseStore.swift; sourceTree = "<group>"; };
 		4F75288B1DFE1DC600C322D6 /* LoopUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F75288D1DFE1DC600C322D6 /* LoopUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LoopUI.h; sourceTree = "<group>"; };
 		4F75288E1DFE1DC600C322D6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4F75F00120FCFE8C00B5570E /* GlucoseChartScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseChartScene.swift; sourceTree = "<group>"; };
+		4F7E8AC420E2AB9600AEA65E /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
+		4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchPredictedGlucose.swift; sourceTree = "<group>"; };
+		4F7E8AC820E2AC3700AEA65E /* WatchDatedRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchDatedRange.swift; sourceTree = "<group>"; };
+		4F82654F20E69F9A0031A8F5 /* HUDInterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDInterfaceController.swift; sourceTree = "<group>"; };
 		4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartColorPalette.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
+		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
+		4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartHUDController.swift; sourceTree = "<group>"; };
 		7D199D92212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		7D199D93212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Main.strings; sourceTree = "<group>"; };
 		7D199D94212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/MainInterface.strings; sourceTree = "<group>"; };
@@ -903,9 +926,10 @@
 			children = (
 				4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */,
 				4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */,
-				43846ADA1D91057000799272 /* ContextUpdatable.swift */,
 				43A943891B926B7B0051FA24 /* NotificationController.swift */,
-				4328E0151CFBE1DA00E199AA /* StatusInterfaceController.swift */,
+				4F82654F20E69F9A0031A8F5 /* HUDInterfaceController.swift */,
+				4328E0151CFBE1DA00E199AA /* ActionHUDController.swift */,
+				4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -915,6 +939,8 @@
 			children = (
 				4344629120A7C19800C4BE6F /* ButtonGroup.swift */,
 				4328E0221CFBE2C500E199AA /* CLKComplicationTemplate.swift */,
+				4F7E8AC420E2AB9600AEA65E /* Date.swift */,
+				4F73F5FB20E2E7FA00E8D82C /* GlucoseStore.swift */,
 				4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */,
 				4328E0231CFBE2C500E199AA /* NSUserDefaults.swift */,
 				4328E0241CFBE2C500E199AA /* UIColor.swift */,
@@ -1058,6 +1084,8 @@
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
 				4328E0121CFBE1B700E199AA /* Controllers */,
 				4328E01F1CFBE2B100E199AA /* Extensions */,
+				4FE3475F20D5D7FA00A86D03 /* Managers */,
+				4F75F0052100146B00B5570E /* Scenes */,
 				43A943831B926B7B0051FA24 /* Supporting Files */,
 			);
 			path = "WatchApp Extension";
@@ -1273,6 +1301,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		4F75F0052100146B00B5570E /* Scenes */ = {
+			isa = PBXGroup;
+			children = (
+				4F75F00120FCFE8C00B5570E /* GlucoseChartScene.swift */,
+			);
+			path = Scenes;
+			sourceTree = "<group>";
+		};
 		4FB76FC31E8C575900B39636 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1291,6 +1327,14 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		4FE3475F20D5D7FA00A86D03 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 		4FF4D0FA1E1834BD00846527 /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -1306,6 +1350,7 @@
 				43673E2E1F37BDA10058AC7C /* Insulin */,
 				435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */,
 				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
+				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4309786D1E73DAD100BEBC82 /* CGM.swift */,
 				894B91CC1FF9F45900DA65F5 /* GlucoseRangeScheduleOverrideUserInfo.swift */,
 				430B298D2041F56500BA9F93 /* GlucoseThreshold.swift */,
@@ -1313,6 +1358,9 @@
 				435400331C9F878D00D5819C /* SetBolusUserInfo.swift */,
 				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
 				4FF4D0FF1E18374700846527 /* WatchContext.swift */,
+				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
+				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
+				4F7E8AC820E2AC3700AEA65E /* WatchDatedRange.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1530,7 +1578,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "LoopKit Authors";
 				TargetAttributes = {
 					432CF87720D8B8380066B889 = {
@@ -1710,7 +1758,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */,
-				7D2366E821250E7B0028B67D /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1838,6 +1885,7 @@
 				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
 				43BFF0CB1E466C0900FF19A9 /* StateColorPalette.swift in Sources */,
+				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */,
 				437CCADE1D2858FD0075D2C3 /* AuthenticationViewController.swift in Sources */,
@@ -1874,6 +1922,7 @@
 				4309786E1E73DAD100BEBC82 /* CGM.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
+				4F7E8ACA20E2ACAE00AEA65E /* WatchDatedRange.swift in Sources */,
 				4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
@@ -1901,8 +1950,10 @@
 				43CEE6E61E56AFD400CB9116 /* NightscoutUploader.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */,
+				4F7E8ACB20E2ACB500AEA65E /* WatchPredictedGlucose.swift in Sources */,
 				43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */,
 				436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */,
+				4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */,
 				435CB6231F37967800C320C7 /* InsulinModelSettingsViewController.swift in Sources */,
 				43E2D8C61D204678004DA55F /* KeychainManager.swift in Sources */,
 				431E73481FF95A900069B5F7 /* PersistenceController.swift in Sources */,
@@ -1939,27 +1990,38 @@
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
+				4F75F00220FCFE8C00B5570E /* GlucoseChartScene.swift in Sources */,
 				4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */,
 				4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */,
+				4FF0F75F20E1E5EF00FC6291 /* NSBundle.swift in Sources */,
 				4344629820A8B2D700C4BE6F /* OSLog.swift in Sources */,
 				4328E02A1CFBE2C500E199AA /* UIColor.swift in Sources */,
+				4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */,
 				4328E01B1CFBE1DA00E199AA /* BolusInterfaceController.swift in Sources */,
+				4F82655020E69F9A0031A8F5 /* HUDInterfaceController.swift in Sources */,
 				4328E02B1CFBE2C500E199AA /* WKAlertAction.swift in Sources */,
 				4365050520A793FA00EA8D7A /* CGM.swift in Sources */,
+				4F7E8AC720E2AC0300AEA65E /* WatchPredictedGlucose.swift in Sources */,
 				4344628E20A7ADD100C4BE6F /* UserDefaults+CGM.swift in Sources */,
+				4F7E8AC520E2AB9600AEA65E /* Date.swift in Sources */,
+				4FFEDFBF20E5CF22000BFC58 /* ChartHUDController.swift in Sources */,
 				894B91CE1FF9F45900DA65F5 /* GlucoseRangeScheduleOverrideUserInfo.swift in Sources */,
+				4F11D3C420DD881A006E072C /* WatchHistoricalGlucose.swift in Sources */,
 				4328E0281CFBE2C500E199AA /* CLKComplicationTemplate.swift in Sources */,
 				4328E01E1CFBE25F00E199AA /* AddCarbsInterfaceController.swift in Sources */,
-				43846ADB1D91057000799272 /* ContextUpdatable.swift in Sources */,
 				4328E0261CFBE2C500E199AA /* IdentifiableClass.swift in Sources */,
+				4F73F5FC20E2E7FA00E8D82C /* GlucoseStore.swift in Sources */,
 				432CF87520D8AC950066B889 /* NSUserDefaults.swift in Sources */,
 				43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */,
 				4344629220A7C19800C4BE6F /* ButtonGroup.swift in Sources */,
+				4F7E8AC920E2AC3700AEA65E /* WatchDatedRange.swift in Sources */,
 				43CB2B2B1D924D450079823D /* WCSession.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
+				4FF0F75E20E1E5D100FC6291 /* PersistenceController.swift in Sources */,
 				43BFF0B51E45C1E700FF19A9 /* NumberFormatter.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
-				4328E01A1CFBE1DA00E199AA /* StatusInterfaceController.swift in Sources */,
+				4328E01A1CFBE1DA00E199AA /* ActionHUDController.swift in Sources */,
+				4F11D3C320DD84DB006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
