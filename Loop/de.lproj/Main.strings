@@ -131,7 +131,7 @@
 "Wk3-xv-IM5.text" = "4 Stunden";
 
 /* Class = "UIButton"; normalTitle = "Deliver"; ObjectID = "Ya0-9b-ZAS"; */
-"Ya0-9b-ZAS.normalTitle" = "Verwalten";
+"Ya0-9b-ZAS.normalTitle" = "Abgeben";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
