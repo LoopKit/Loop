@@ -140,7 +140,7 @@
 "Check your CGM data source" = "Überprüfen Sie Ihre CGM-Datenquelle";
 
 /* The title text for the looping enabled switch cell */
-"Closed Loop" = "Geschlossene Loop";
+"Closed Loop" = "Closed Loop";
 
 /* The title of the configuration section in settings */
 "Configuration" = "Konfiguration";
@@ -198,7 +198,7 @@
 "Fiasp" = "Fiasp";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "Für %1$@";
+"For %1$@" = "für %1$@";
 
 /* The short unit display string for grams */
 "g" = "g";
@@ -228,7 +228,7 @@
 "https://mysite.azurewebsites.net" = "https://mysite.azurewebsites.net";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
-"Indefinitely" = "Unendlich";
+"Indefinitely" = "für unendlich";
 
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulin";
@@ -272,7 +272,7 @@
 "Loop Failure" = "Loop Fehler";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop wurde nicht erfolgreich abgeschlossen um %@";
+"Loop has not completed successfully in %@" = "Loop funktionert nicht mehr erfolgreich seit %@";
 
 /* The description of a low G5/G6 transmitter battery with a leading space */
 "Low Battery" = "Niedriger Batteriestatus";
@@ -344,7 +344,7 @@
 "Recommendation expired: %1$@ old" = "Empfehlung abgelaufen: %1$@ alt";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Empfohlen Basal";
+"Recommended Basal" = "Empfohlene Basalrate";
 
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Empfohlener Bolus: %@ Einheiten";
@@ -422,10 +422,10 @@
 "U" = "E";
 
 /* U.S. share server option title */
-"US" = "DE";
+"US" = "US";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Verwenden Training Glucose Targets";
+"Use Workout Glucose Targets" = "Training Glukose-Ziel aktivieren";
 
 /* The title of the Dexcom share username credential */
 "Username" = "Nutzername";
