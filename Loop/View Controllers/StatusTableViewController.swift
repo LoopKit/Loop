@@ -414,7 +414,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
                         at: glucose.startDate,
                         unit: self.charts.glucoseUnit,
-                        sensor: self.deviceManager.sensorInfo
+                        sensor: self.deviceManager.cgmManager?.sensorState
                     )
                 }
 
@@ -990,7 +990,7 @@ final class StatusTableViewController: ChartsTableViewController {
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
-            if deviceManager.cgm?.appURL != nil {
+            if deviceManager.cgmManager?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
 
@@ -1019,7 +1019,7 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let url = deviceManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
+        if let url = deviceManager.cgmManager?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }
