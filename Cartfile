@@ -1,4 +1,4 @@
-github "LoopKit/LoopKit" "dev"
+github "LoopKit/LoopKit" == 2.1.2
 github "LoopKit/CGMBLEKit" == 2.1.1
 github "i-schuetz/SwiftCharts" == 0.6.2
 github "mddub/dexcom-share-client-swift" == 0.4.1

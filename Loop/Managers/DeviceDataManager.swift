@@ -268,7 +268,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
     }
-
+    
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         loopManager.loop()
     }
@@ -280,6 +280,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewReservoirEvents(for manager: PumpManager) -> Date {
         return loopManager.doseStore.lastReservoirValue?.startDate ?? .distantPast
     }
+    
 }
 
 

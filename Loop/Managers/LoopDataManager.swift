@@ -866,11 +866,8 @@ extension LoopDataManager {
             throw LoopError.missingDataError(.glucose)
         }
 
-        guard let pumpStatusDate = doseStore.lastReservoirValue?.startDate else {
-            self.predictedGlucose = nil
-            throw LoopError.missingDataError(.reservoir)
-        }
-
+        let pumpStatusDate = doseStore.lastAddedPumpData
+        
         let startDate = Date()
 
         guard startDate.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
@@ -1191,4 +1188,10 @@ protocol LoopDataManagerDelegate: class {
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
     func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+}
+
+extension DoseStore {
+    var lastAddedPumpData: Date {
+        return max(lastReservoirValue?.startDate ?? .distantPast, lastAddedPumpEvents)
+    }
 }
