@@ -18,7 +18,6 @@ extension UserDefaults {
         if let shared = shared, standard.basalRateSchedule != nil && shared.basalRateSchedule == nil {
             shared.basalRateSchedule = standard.basalRateSchedule
             shared.carbRatioSchedule = standard.carbRatioSchedule
-            shared.cgm               = standard.cgm
             shared.loopSettings      = standard.loopSettings
             shared.insulinModelSettings = standard.insulinModelSettings
             shared.insulinSensitivitySchedule = standard.insulinSensitivitySchedule
@@ -30,6 +29,7 @@ extension UserDefaults {
         shared?.removeObject(forKey: "com.loopkit.Loop.PumpState")
         shared?.removeObject(forKey: "com.loopkit.Loop.PumpSettings")
         shared?.removeObject(forKey: "com.loudnate.Naterade.ConnectedPeripheralIDs")
+        shared?.removeObject(forKey: "com.loopkit.Loop.cgmSettings")
 
         return shared ?? standard
     }()
@@ -51,6 +51,27 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.pumpManagerState.rawValue)
+        }
+    }
+
+    var isCGMManagerValidPumpManager: Bool {
+        guard let rawValue = cgmManagerState else {
+            return false
+        }
+
+        return PumpManagerTypeFromRawValue(rawValue) != nil
+    }
+
+    var cgmManager: CGMManager? {
+        get {
+            guard let rawValue = cgmManagerState else {
+                return nil
+            }
+
+            return CGMManagerFromRawValue(rawValue)
+        }
+        set {
+            cgmManagerState = newValue?.rawValue
         }
     }
 }

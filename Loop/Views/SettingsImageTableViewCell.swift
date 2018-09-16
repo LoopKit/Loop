@@ -49,5 +49,6 @@ class SettingsImageTableViewCell: UITableViewCell {
         super.prepareForReuse()
 
         imageView?.image = nil
+        accessoryType = .none
     }
 }

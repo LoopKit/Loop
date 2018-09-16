@@ -117,7 +117,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         charts.startDate = chartStartDate
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate)
+        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.loopManager.carbStore.maximumAbsorptionTimeInterval))
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -130,7 +130,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
-        self.deviceManager.loopManager.getLoopState { (manager, state) in
+        deviceManager.loopManager.getLoopState { (manager, state) in
             if shouldUpdateGlucose || shouldUpdateCarbs {
                 let insulinCounteractionEffects = state.insulinCounteractionEffects
                 self.charts.setInsulinCounteractionEffects(state.insulinCounteractionEffects.filterDateRange(chartStartDate, nil))
@@ -150,7 +150,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
 
                 reloadGroup.enter()
-                manager.carbStore.getGlucoseEffects(start:  chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                manager.carbStore.getGlucoseEffects(start: chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success(let effects):
                         carbEffects = effects
@@ -172,7 +172,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         if shouldUpdateCarbs {
             reloadGroup.enter()
-            self.deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
+            deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
                 switch result {
                 case .success(let total):
                     carbTotal = total

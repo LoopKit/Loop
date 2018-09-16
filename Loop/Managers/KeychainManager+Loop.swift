@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import LoopKit
 
 
 private let NightscoutAccount = "NightscoutAPI"

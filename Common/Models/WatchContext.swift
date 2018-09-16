@@ -8,11 +8,12 @@
 
 import Foundation
 import HealthKit
+import LoopKit
 
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 3
+    private let version = 4
 
     var preferredGlucoseUnit: HKUnit?
     var maxBolus: Double?
@@ -42,7 +43,7 @@ final class WatchContext: NSObject, RawRepresentable {
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
 
-    var cgm: CGM?
+    var cgmManagerState: CGMManager.RawStateValue?
 
     override init() {
         super.init()
@@ -93,9 +94,7 @@ final class WatchContext: NSObject, RawRepresentable {
         COB = rawValue["cob"] as? Double
         maxBolus = rawValue["mb"] as? Double
 
-        if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
-            cgm = CGM(rawValue: cgmRawValue)
-        }
+        cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
     }
 
     var rawValue: RawValue {
@@ -107,7 +106,7 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["bad"] = lastNetTempBasalDate
         raw["bp"] = batteryPercentage
 
-        raw["cgm"] = cgm?.rawValue
+        raw["cgmManagerState"] = cgmManagerState
 
         raw["cob"] = COB
 
