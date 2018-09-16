@@ -26,5 +26,5 @@ extension UIColor {
 
     @nonobjc static let unknownColor = UIColor(red: 198 / 255, green: 199 / 255, blue: 201 / 255, alpha: 1)
 
-    @nonobjc static let deleteColor = UIColor.HIGRedColor()
+    static let delete = UIColor.HIGRedColor()
 }
