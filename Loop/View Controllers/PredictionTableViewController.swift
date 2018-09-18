@@ -238,7 +238,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         if let eventualGlucose = eventualGlucoseDescription {
             cell.titleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
         } else {
-            cell.titleLabel?.text = "–"
+            cell.titleLabel?.text = SettingsTableViewCell.NoValueString
         }
     }
 

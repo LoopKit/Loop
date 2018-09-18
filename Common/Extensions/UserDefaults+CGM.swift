@@ -6,23 +6,20 @@
 //
 
 import Foundation
+import LoopKit
 
 
 extension UserDefaults {
     private enum Key: String {
-        case cgmSettings = "com.loopkit.Loop.cgmSettings"
+        case cgmManagerState = "com.loopkit.Loop.CGMManagerState"
     }
 
-    var cgm: CGM? {
+    var cgmManagerState: CGMManager.RawStateValue? {
         get {
-            if let rawValue = dictionary(forKey: Key.cgmSettings.rawValue) {
-                return CGM(rawValue: rawValue)
-            } else {
-                return nil
-            }
+            return dictionary(forKey: Key.cgmManagerState.rawValue)
         }
         set {
-            set(newValue?.rawValue, forKey: Key.cgmSettings.rawValue)
+            set(newValue, forKey: Key.cgmManagerState.rawValue)
         }
     }
 }
