@@ -1,6 +1,6 @@
 github "kdisimone/LoopKit" "katie"
 github "LoopKit/CGMBLEKit" == 2.1.1
-github "i-schuetz/SwiftCharts" == 0.6.1
+github "i-schuetz/SwiftCharts" == 0.6.2
 github "mddub/dexcom-share-client-swift" == 0.4.1
 github "mddub/G4ShareSpy" == 0.3.3
 github "kdisimone/rileylink_ios" "katie"
