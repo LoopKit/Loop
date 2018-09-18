@@ -93,6 +93,9 @@
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
 		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
+		43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */; };
+		43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */; };
+		43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
 		4379CFF021112CF700AADC79 /* ShareClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4379CFEF21112CF700AADC79 /* ShareClientUI.framework */; };
 		437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */; };
 		437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
@@ -112,6 +115,9 @@
 		438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */; };
 		43947D731F529FAA00A07D31 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
 		439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897361CD2F80600223065 /* AnalyticsManager.swift */; };
+		439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A7941211F631C0041B75F /* RootNavigationController.swift */; };
+		439A7944211FE22F0041B75F /* NSUserActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A7943211FE22F0041B75F /* NSUserActivity.swift */; };
+		439A7945211FE23A0041B75F /* NSUserActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439A7943211FE22F0041B75F /* NSUserActivity.swift */; };
 		439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439BED291E76093C00B0AED5 /* CGMManager.swift */; };
 		43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A51E1E1EB6D62A000736CC /* CarbAbsorptionViewController.swift */; };
 		43A51E211EB6DBDD000736CC /* ChartsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */; };
@@ -479,6 +485,12 @@
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		43776F981B8022E90074EA36 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NewCarbEntryIntent+Loop.swift"; sourceTree = "<group>"; };
+		43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "INRelevantShortcutStore+Loop.swift"; sourceTree = "<group>"; };
+		43785E9A2120E7060057DED1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
+		43785E9F2122774A0057DED1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Intents.strings; sourceTree = "<group>"; };
+		43785EA12122774B0057DED1 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Intents.strings; sourceTree = "<group>"; };
+		43785EA32122774B0057DED1 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
 		4379CFEF21112CF700AADC79 /* ShareClientUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShareClientUI.framework; path = Carthage/Build/iOS/ShareClientUI.framework; sourceTree = SOURCE_ROOT; };
 		437AFEE6203688CF008C4892 /* LoopKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKitUI.framework; path = Carthage/Build/iOS/LoopKitUI.framework; sourceTree = "<group>"; };
 		437CEEBB1CD6DE6A003C8C80 /* BaseHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseHUDView.swift; sourceTree = "<group>"; };
@@ -503,6 +515,8 @@
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
 		439897341CD2F7DE00223065 /* NSTimeInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTimeInterval.swift; sourceTree = "<group>"; };
 		439897361CD2F80600223065 /* AnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AnalyticsManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		439A7941211F631C0041B75F /* RootNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootNavigationController.swift; sourceTree = "<group>"; };
+		439A7943211FE22F0041B75F /* NSUserActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSUserActivity.swift; sourceTree = "<group>"; };
 		439BED291E76093C00B0AED5 /* CGMManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMManager.swift; sourceTree = "<group>"; };
 		43A51E1E1EB6D62A000736CC /* CarbAbsorptionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionViewController.swift; sourceTree = "<group>"; };
 		43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartsTableViewController.swift; sourceTree = "<group>"; };
@@ -534,6 +548,7 @@
 		43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImageTableViewCell.swift; sourceTree = "<group>"; };
 		43C3B6F620BBCAA30026CAFA /* PumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManager.swift; sourceTree = "<group>"; };
 		43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeSchedule.swift; sourceTree = "<group>"; };
+		43C98058212A799E003B5D17 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
 		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MinimedKit.framework; path = Carthage/Build/iOS/MinimedKit.framework; sourceTree = SOURCE_ROOT; };
 		43CB2B2A1D924D450079823D /* WCSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WCSession.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
@@ -888,6 +903,7 @@
 				4344629120A7C19800C4BE6F /* ButtonGroup.swift */,
 				4328E0221CFBE2C500E199AA /* CLKComplicationTemplate.swift */,
 				4328E0201CFBE2C500E199AA /* IdentifiableClass.swift */,
+				43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */,
 				4328E0231CFBE2C500E199AA /* NSUserDefaults.swift */,
 				4328E0241CFBE2C500E199AA /* UIColor.swift */,
 				4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */,
@@ -1100,6 +1116,7 @@
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
 				435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */,
 				437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */,
+				439A7941211F631C0041B75F /* RootNavigationController.swift */,
 				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
@@ -1246,6 +1263,7 @@
 			children = (
 				4FF4D0FC1E1834CC00846527 /* Extensions */,
 				4FF4D0FB1E1834C400846527 /* Models */,
+				43785E9B2120E7060057DED1 /* Intents.intentdefinition */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -1271,9 +1289,11 @@
 			children = (
 				4F526D5E1DF2459000A04910 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
+				43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
 				430DA58D1D4AEC230097D1CA /* NSBundle.swift */,
 				439897341CD2F7DE00223065 /* NSTimeInterval.swift */,
+				439A7943211FE22F0041B75F /* NSUserActivity.swift */,
 				430B29892041F54A00BA9F93 /* NSUserDefaults.swift */,
 				4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */,
 				43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */,
@@ -1503,6 +1523,9 @@
 							com.apple.Keychain = {
 								enabled = 0;
 							};
+							com.apple.Siri = {
+								enabled = 1;
+							};
 						};
 					};
 					43A943711B926B7B0051FA24 = {
@@ -1532,6 +1555,9 @@
 							};
 							com.apple.Keychain = {
 								enabled = 0;
+							};
+							com.apple.Siri = {
+								enabled = 1;
 							};
 						};
 					};
@@ -1788,6 +1814,7 @@
 				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
 				43BFF0CB1E466C0900FF19A9 /* StateColorPalette.swift in Sources */,
+				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				434FF1EA1CF26C29000DB779 /* IdentifiableClass.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
@@ -1826,6 +1853,7 @@
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				43D381621EBD9759007F8C8F /* HeaderValuesTableViewCell.swift in Sources */,
 				43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */,
+				43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				4374B5F4209D89A900D17AA8 /* TextFieldTableViewCell.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
@@ -1841,7 +1869,9 @@
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
 				43D2E8231F00425400AE5CBF /* BolusViewController+LoopDataManager.swift in Sources */,
 				430B29952041F5CB00BA9F93 /* LoopSettings+Loop.swift in Sources */,
+				43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */,
 				43CEE6E61E56AFD400CB9116 /* NightscoutUploader.swift in Sources */,
+				439A7944211FE22F0041B75F /* NSUserActivity.swift in Sources */,
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */,
 				43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */,
@@ -1877,6 +1907,7 @@
 				4FF4D1011E18375000846527 /* WatchContext.swift in Sources */,
 				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
+				439A7945211FE23A0041B75F /* NSUserActivity.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
 				4328E02F1CFBF81800E199AA /* WKInterfaceImage.swift in Sources */,
 				4F2C15811E0495B200E160D4 /* WatchContext+WatchApp.swift in Sources */,
@@ -1893,6 +1924,7 @@
 				432CF87520D8AC950066B889 /* NSUserDefaults.swift in Sources */,
 				43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */,
 				4344629220A7C19800C4BE6F /* ButtonGroup.swift in Sources */,
+				43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */,
 				43CB2B2B1D924D450079823D /* WCSession.swift in Sources */,
 				43DE925A1C5479E4001FFDE1 /* CarbEntryUserInfo.swift in Sources */,
 				43BFF0B51E45C1E700FF19A9 /* NumberFormatter.swift in Sources */,
@@ -2073,6 +2105,18 @@
 				7D199D92212A067600241026 /* pl */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		43785E9B2120E7060057DED1 /* Intents.intentdefinition */ = {
+			isa = PBXVariantGroup;
+			children = (
+				43785E9A2120E7060057DED1 /* Base */,
+				43785E9F2122774A0057DED1 /* es */,
+				43785EA12122774B0057DED1 /* ru */,
+				43785EA32122774B0057DED1 /* it */,
+				43C98058212A799E003B5D17 /* en */,
+			);
+			name = Intents.intentdefinition;
 			sourceTree = "<group>";
 		};
 		43A943741B926B7B0051FA24 /* Interface.storyboard */ = {

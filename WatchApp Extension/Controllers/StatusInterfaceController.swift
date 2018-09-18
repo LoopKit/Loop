@@ -43,6 +43,13 @@ final class StatusInterfaceController: WKInterfaceController, ContextUpdatable {
         super.willActivate()
 
         updateLoopHUD()
+
+        let userActivity = NSUserActivity.forViewLoopStatus()
+        if #available(watchOSApplicationExtension 5.0, *) {
+            update(userActivity)
+        } else {
+            updateUserActivity(userActivity.activityType, userInfo: userActivity.userInfo, webpageURL: nil)
+        }
     }
 
     private func updateLoopHUD() {
