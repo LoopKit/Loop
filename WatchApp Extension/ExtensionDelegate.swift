@@ -9,11 +9,15 @@
 import WatchConnectivity
 import WatchKit
 import HealthKit
+import Intents
 import os
+import os.log
 import UserNotifications
 
 
 final class ExtensionDelegate: NSObject, WKExtensionDelegate {
+
+    private let log = OSLog(category: "ExtensionDelegate")
 
     static func shared() -> ExtensionDelegate {
         return WKExtension.shared().extensionDelegate
@@ -42,6 +46,9 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
 
     func applicationDidFinishLaunching() {
         UNUserNotificationCenter.current().delegate = self
+        if #available(watchOSApplicationExtension 5.0, *) {
+            INRelevantShortcutStore.default.registerShortcuts()
+        }
     }
 
     func applicationDidBecomeActive() {
@@ -54,16 +61,16 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         for task in backgroundTasks {
             switch task {
             case is WKApplicationRefreshBackgroundTask:
-                os_log("Processing WKApplicationRefreshBackgroundTask")
+                log.default("Processing WKApplicationRefreshBackgroundTask")
                 break
             case let task as WKSnapshotRefreshBackgroundTask:
-                os_log("Processing WKSnapshotRefreshBackgroundTask")
+                log.default("Processing WKSnapshotRefreshBackgroundTask")
                 task.setTaskCompleted(restoredDefaultState: false, estimatedSnapshotExpiration: Date(timeIntervalSinceNow: TimeInterval(minutes: 5)), userInfo: nil)
                 return  // Don't call the standard setTaskCompleted handler
             case is WKURLSessionRefreshBackgroundTask:
                 break
             case let task as WKWatchConnectivityRefreshBackgroundTask:
-                os_log("Processing WKWatchConnectivityRefreshBackgroundTask")
+                log.default("Processing WKWatchConnectivityRefreshBackgroundTask")
 
                 pendingConnectivityTasks.append(task)
 
@@ -100,13 +107,30 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         }
     }
 
+    func handle(_ userActivity: NSUserActivity) {
+        if #available(watchOSApplicationExtension 5.0, *) {
+            switch userActivity.activityType {
+            case NSUserActivity.newCarbEntryActivityType, NSUserActivity.didAddCarbEntryOnWatchActivityType:
+                if let statusController = WKExtension.shared().visibleInterfaceController as? StatusInterfaceController {
+                    statusController.addCarbs()
+                }
+            default:
+                break
+            }
+        }
+    }
+
     // Main queue only
     private(set) var lastContext: WatchContext? {
         didSet {
             WKExtension.shared().rootUpdatableInterfaceController?.update(with: lastContext)
 
             if WKExtension.shared().applicationState != .active {
-                WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: Date(), userInfo: nil) { (_) in }
+                WKExtension.shared().scheduleSnapshotRefresh(withPreferredDate: Date(), userInfo: nil) { (error) in
+                    if let error = error {
+                        self.log.error("scheduleSnapshotRefresh error: %{public}@", String(describing: error))
+                    }
+                }
             }
 
             // Update complication data if needed
@@ -115,10 +139,10 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                 // In watchOS 2, we forced a timeline reload every 8 hours because attempting to extend it indefinitely seemed to lead to the complication "freezing".
                 if UserDefaults.standard.complicationDataLastRefreshed.timeIntervalSinceNow < TimeInterval(hours: -8) {
                     UserDefaults.standard.complicationDataLastRefreshed = Date()
-                    os_log("Reloading complication timeline")
+                    log.default("Reloading complication timeline")
                     server.reloadTimeline(for: complication)
                 } else {
-                    os_log("Extending complication timeline")
+                    log.default("Extending complication timeline")
                     // TODO: Switch this back to extendTimeline if things are working correctly.
                     // Time Travel appears to be disabled by default in watchOS 3 anyway
                     server.reloadTimeline(for: complication)
@@ -137,12 +161,16 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
                     context.preferredGlucoseUnit = units[type]
 
                     DispatchQueue.main.async {
-                        self.lastContext = context
+                        if self.lastContext == nil || context.shouldReplace(self.lastContext!) {
+                            self.lastContext = context
+                        }
                     }
                 }
             } else {
                 DispatchQueue.main.async {
-                    self.lastContext = context
+                    if self.lastContext == nil || context.shouldReplace(self.lastContext!) {
+                        self.lastContext = context
+                    }
                 }
             }
         }
@@ -158,10 +186,12 @@ extension ExtensionDelegate: WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        log.default("didReceiveApplicationContext")
         updateContext(applicationContext)
     }
 
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+        log.default("didReceiveUserInfo")
         // WatchContext is the only userInfo type without a "name" key. This isn't a great heuristic.
         if !(userInfo["name"] is String) {
             updateContext(userInfo)

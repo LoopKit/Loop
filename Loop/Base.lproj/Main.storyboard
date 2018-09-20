@@ -554,7 +554,7 @@
                     <navigationItem key="navigationItem" title="Carbohydrates" id="Vpi-5b-bY5">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="VBt-zR-6uw">
                             <connections>
-                                <segue destination="YJ1-01-QoA" kind="presentation" id="UnO-ql-F0K"/>
+                                <segue destination="YJ1-01-QoA" kind="presentation" identifier="CarbEntryEditViewController" id="UnO-ql-F0K"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -929,10 +929,10 @@
             </objects>
             <point key="canvasLocation" x="1652" y="1167.1664167916042"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Root Navigation Controller-->
         <scene sceneID="1UI-1d-xLb">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="74s-IX-WF0" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="74s-IX-WF0" customClass="RootNavigationController" customModule="Loop" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" systemItem="mostRecent" id="bDY-ie-wv9"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Jzc-8D-hlF">
@@ -1136,8 +1136,8 @@
         <image name="workout" width="30" height="29"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="viB-eQ-p7y"/>
-        <segue reference="PC7-vP-CUY"/>
-        <segue reference="76q-VW-DX3"/>
+        <segue reference="UnO-ql-F0K"/>
+        <segue reference="Isc-NM-GBt"/>
+        <segue reference="xCA-IG-jXB"/>
     </inferredMetricsTieBreakers>
 </document>

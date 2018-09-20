@@ -8,6 +8,9 @@
 
 import WatchKit
 import WatchConnectivity
+import HealthKit
+import LoopKit
+import os.log
 
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
@@ -108,6 +111,12 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
+    }
+
+    override func didAppear() {
+        super.didAppear()
+
+        updateNewCarbEntryUserActivity()
 
         crownSequencer.focus()
     }
@@ -207,5 +216,22 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         }
 
         accumulatedRotation = remainder
+    }
+}
+
+extension AddCarbsInterfaceController: NSUserActivityDelegate {
+    func updateNewCarbEntryUserActivity() {
+        if #available(watchOSApplicationExtension 5.0, *) {
+            let userActivity = NSUserActivity.forDidAddCarbEntryOnWatch()
+            update(userActivity)
+        } else {
+            let userActivity = NSUserActivity.forNewCarbEntry()
+            userActivity.update(from: entry)
+            updateUserActivity(userActivity.activityType, userInfo: userActivity.userInfo, webpageURL: nil)
+        }
+    }
+
+    private var entry: NewCarbEntry {
+        return NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: Double(carbValue)), startDate: date, foodType: nil, absorptionTime: nil)
     }
 }

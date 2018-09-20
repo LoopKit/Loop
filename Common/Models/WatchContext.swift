@@ -129,3 +129,14 @@ final class WatchContext: NSObject, RawRepresentable {
         return raw
     }
 }
+
+
+extension WatchContext {
+    func shouldReplace(_ other: WatchContext) -> Bool {
+        if let date = self.glucoseDate, let otherDate = other.glucoseDate {
+            return date >= otherDate
+        } else {
+            return true
+        }
+    }
+}
