@@ -8,10 +8,12 @@
 import Foundation
 import LoopKit
 import MinimedKit
+import OmniKit
 
 
 let allPumpManagers: [PumpManager.Type] = [
-    MinimedPumpManager.self
+    OmnipodPumpManager.self,
+    //MinimedPumpManager.self
 ]
 
 private let managersByIdentifier: [String: PumpManager.Type] = allPumpManagers.reduce(into: [:]) { (map, Type) in
