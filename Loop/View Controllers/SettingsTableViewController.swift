@@ -330,6 +330,9 @@ final class SettingsTableViewController: UITableViewController {
                         if let PumpManagerType = pumpManagers.first {
                             var setupViewController = PumpManagerType.setupViewController()
                             setupViewController.setupDelegate = self
+                            setupViewController.basalSchedule = dataManager.loopManager.basalRateSchedule
+                            setupViewController.maxBolusUnits = dataManager.loopManager.settings.maximumBolus
+                            setupViewController.maxBasalRateUnitsPerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
                             present(setupViewController, animated: true, completion: nil)
                         }
                     case let x where x > 1:
