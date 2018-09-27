@@ -7,6 +7,8 @@
 
 import UIKit
 import HealthKit
+import Intents
+import os.log
 
 import LoopKit
 import LoopKitUI
@@ -117,7 +119,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         charts.startDate = chartStartDate
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate)
+        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.loopManager.carbStore.maximumAbsorptionTimeInterval))
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -130,7 +132,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
-        self.deviceManager.loopManager.getLoopState { (manager, state) in
+        deviceManager.loopManager.getLoopState { (manager, state) in
             if shouldUpdateGlucose || shouldUpdateCarbs {
                 let insulinCounteractionEffects = state.insulinCounteractionEffects
                 self.charts.setInsulinCounteractionEffects(state.insulinCounteractionEffects.filterDateRange(chartStartDate, nil))
@@ -150,7 +152,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
 
                 reloadGroup.enter()
-                manager.carbStore.getGlucoseEffects(start:  chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                manager.carbStore.getGlucoseEffects(start: chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success(let effects):
                         carbEffects = effects
@@ -172,7 +174,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         if shouldUpdateCarbs {
             reloadGroup.enter()
-            self.deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
+            deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
                 switch result {
                 case .success(let total):
                     carbTotal = total
@@ -467,6 +469,15 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
     // MARK: - Navigation
 
+    override func restoreUserActivityState(_ activity: NSUserActivity) {
+        switch activity.activityType {
+        case NSUserActivity.newCarbEntryActivityType:
+            performSegue(withIdentifier: CarbEntryEditViewController.className, sender: activity)
+        default:
+            break
+        }
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
 
@@ -485,6 +496,8 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         case let vc as CarbEntryEditViewController:
             if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
                 vc.originalCarbEntry = carbStatuses[indexPath.row].entry
+            } else if let activity = sender as? NSUserActivity {
+                vc.restoreUserActivityState(activity)
             }
 
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
@@ -504,6 +517,14 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
             return
         }
 
+        if #available(iOS 12.0, *), editVC.originalCarbEntry == nil {
+            let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
+            interaction.donate { (error) in
+                if let error = error {
+                    os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
+                }
+            }
+        }
         deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry, replacing: editVC.originalCarbEntry) { (result) in
             DispatchQueue.main.async {
                 switch result {

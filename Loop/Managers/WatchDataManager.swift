@@ -18,6 +18,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
+        self.log = deviceManager.logger.forCategory("WatchDataManager")
 
         super.init()
 
@@ -26,6 +27,8 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         watchSession?.delegate = self
         watchSession?.activate()
     }
+
+    private let log: CategoryLogger
 
     private var watchSession: WCSession? = {
         if WCSession.isSupported() {
@@ -99,13 +102,15 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             }
 
             if session.isComplicationEnabled && complicationShouldUpdate {
+                log.default("transferCurrentComplicationUserInfo")
                 session.transferCurrentComplicationUserInfo(context.rawValue)
                 lastComplicationContext = context
             } else {
                 do {
+                    log.default("updateApplicationContext")
                     try session.updateApplicationContext(context.rawValue)
                 } catch let error {
-                    deviceManager.logger.addError(error, fromSource: "WCSession")
+                    log.error(error)
                 }
             }
         }
@@ -126,7 +131,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.maxBolus = manager.settings.maximumBolus
 
-            context.cgm = self.deviceManager.cgm
+            context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
 
             if let glucoseTargetRangeSchedule = manager.settings.glucoseTargetRangeSchedule {
                 if let override = glucoseTargetRangeSchedule.override {
@@ -142,7 +147,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                 context.configuredOverrideContexts = configuredUserInfoOverrideContexts
             }
 
-            if let trend = self.deviceManager.sensorInfo?.trendType {
+            if let trend = self.deviceManager.cgmManager?.sensorState?.trendType {
                 context.glucoseTrendRawValue = trend.rawValue
             }
 
@@ -165,7 +170,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
                     AnalyticsManager.shared.didAddCarbsFromWatch(carbEntry.value)
                     completionHandler?(recommendation?.amount)
                 case .failure(let error):
-                    self.deviceManager.logger.addError(error, fromSource: error is CarbStore.CarbStoreError ? "CarbStore" : "Bolus")
+                    self.log.error(error)
                     completionHandler?(nil)
                 }
             }
@@ -225,7 +230,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
         switch activationState {
         case .activated:
             if let error = error {
-                deviceManager.logger.addError(error, fromSource: "WCSession")
+                log.error(error)
             }
         case .inactive, .notActivated:
             break
@@ -234,7 +239,7 @@ final class WatchDataManager: NSObject, WCSessionDelegate {
 
     func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
         if let error = error {
-            deviceManager.logger.addError(error, fromSource: "WCSession")
+            log.error(error)
         }
     }
 

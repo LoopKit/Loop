@@ -1116,6 +1116,20 @@ extension LoopDataManager {
                 }),
                 "]",
 
+                "insulinEffect: [",
+                "* GlucoseEffect(start, end, md/dL",
+                (manager.insulinEffect ?? []).reduce(into: "", { (entries, entry) in
+                    entries.append("* \(entry.startDate), \(entry.endDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
+                }),
+                "]",
+
+                "carbEffect: [",
+                "* GlucoseEffect(start, end, md/dL",
+                (manager.carbEffect ?? []).reduce(into: "", { (entries, entry) in
+                    entries.append("* \(entry.startDate), \(entry.endDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
+                }),
+                "]",
+
                 "predictedGlucose: [",
                 "* PredictedGlucoseValue(start, mg/dL)",
                 (state.predictedGlucose ?? []).reduce(into: "", { (entries, entry) in

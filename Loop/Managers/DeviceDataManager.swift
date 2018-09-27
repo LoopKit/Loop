@@ -17,6 +17,11 @@ final class DeviceDataManager {
 
     var pumpManager: PumpManagerUI? {
         didSet {
+            // If the current CGMManager is a PumpManager, we clear it out.
+            if cgmManager is PumpManagerUI {
+                cgmManager = nil
+            }
+
             setupPump()
 
             UserDefaults.appGroup.pumpManager = pumpManager
@@ -45,26 +50,16 @@ final class DeviceDataManager {
 
     // MARK: - CGM
 
-    var cgm: CGM? = UserDefaults.appGroup.cgm {
+    var cgmManager: CGMManager? {
         didSet {
-            if cgm != oldValue {
-                setupCGM()
-            }
+            setupCGM()
 
-            UserDefaults.appGroup.cgm = cgm
+            UserDefaults.appGroup.cgmManager = cgmManager
         }
     }
 
-    private(set) var cgmManager: CGMManager?
-
     /// TODO: Isolate to queue
     private func setupCGM() {
-        if case .usePump? = cgm, let pumpManager = pumpManager as? CGMManager {
-            cgmManager = pumpManager
-        } else {
-            cgmManager = cgm?.createManager()
-        }
-
         cgmManager?.cgmManagerDelegate = self
         loopManager.glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
 
@@ -78,12 +73,6 @@ final class DeviceDataManager {
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
             loopManager?.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
-
-        setupCGM()
-    }
-
-    var sensorInfo: SensorDisplayable? {
-        return cgmManager?.sensorState
     }
 
     // MARK: - Configuration
@@ -102,6 +91,11 @@ final class DeviceDataManager {
 
     init() {
         pumpManager = UserDefaults.appGroup.pumpManager as? PumpManagerUI
+        if let cgmManager = UserDefaults.appGroup.cgmManager {
+            self.cgmManager = cgmManager
+        } else if UserDefaults.appGroup.isCGMManagerValidPumpManager {
+            self.cgmManager = pumpManager as? CGMManager
+        }
 
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
@@ -117,6 +111,7 @@ final class DeviceDataManager {
         loopManager.doseStore.delegate = self
 
         setupPump()
+        setupCGM()
     }
 }
 
@@ -129,6 +124,10 @@ extension DeviceDataManager: RemoteDataManagerDelegate {
 
 
 extension DeviceDataManager: CGMManagerDelegate {
+    func cgmManagerWantsDeletion(_ manager: CGMManager) {
+        self.cgmManager = nil
+    }
+
     func cgmManager(_ manager: CGMManager, didUpdateWith result: CGMResult) {
         /// TODO: Isolate to queue
         switch result {
@@ -365,9 +364,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "",
             "## DeviceDataManager",
             "launchDate: \(launchDate)",
-            "cgm: \(String(describing: cgm))",
             "lastError: \(String(describing: lastError))",
-            "sensorInfo: \(String(reflecting: sensorInfo))",
             "",
             cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
             "",
