@@ -26,8 +26,6 @@ class SettingsImageTableViewCell: UITableViewCell {
             return
         }
         
-        separatorInset = .zero
-
         textLabel.adjustsFontForContentSizeCategory = true
         textLabel.font = UIFont.preferredFont(forTextStyle: .body)
         textLabel.translatesAutoresizingMaskIntoConstraints = false
