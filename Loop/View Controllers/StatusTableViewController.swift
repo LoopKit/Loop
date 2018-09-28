@@ -24,7 +24,6 @@ private enum BolusState {
     case enacting
 }
 
-
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
 }
@@ -41,6 +40,10 @@ final class StatusTableViewController: ChartsTableViewController {
             min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100),
             max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
         )
+        
+        if let pumpManager = deviceManager.pumpManager {
+            pumpIsSuspended = pumpManager.isDeliverySuspended
+        }
 
         let notificationCenter = NotificationCenter.default
 
@@ -70,6 +73,14 @@ final class StatusTableViewController: ChartsTableViewController {
             notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
+                }
+            },
+            notificationCenter.addObserver(forName: .PumpSuspendStateChanged, object: deviceManager, queue: OperationQueue.main) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    if let isPumpSuspended = notification.userInfo?[DeviceDataManager.pumpSuspendStateKey] as? Bool, let self = self {
+                        self.pumpIsSuspended = isPumpSuspended
+                        self.reloadData(animated: true)
+                    }
                 }
             }
         ]
@@ -162,6 +173,12 @@ final class StatusTableViewController: ChartsTableViewController {
                 updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
             }
 
+            refreshContext.update(with: .status)
+        }
+    }
+    
+    public var pumpIsSuspended: Bool = false {
+        didSet {
             refreshContext.update(with: .status)
         }
     }
@@ -433,15 +450,19 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Show/hide the table view rows
             let statusRowMode: StatusRowMode?
-
-            switch bolusState {
-            case .recommended?, .enacting?:
-                statusRowMode = nil
-            case .none:
-                if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
-                    statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
-                } else {
-                    statusRowMode = .hidden
+            
+            if self.pumpIsSuspended {
+                statusRowMode = .pumpSuspended(resuming: false)
+            } else {
+                switch bolusState {
+                case .recommended?, .enacting?:
+                    statusRowMode = nil
+                case .none:
+                    if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
+                        statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+                    } else {
+                        statusRowMode = .hidden
+                    }
                 }
             }
 
@@ -509,6 +530,7 @@ final class StatusTableViewController: ChartsTableViewController {
         case hidden
         case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
         case enactingBolus
+        case pumpSuspended(resuming: Bool)
 
         var hasRow: Bool {
             switch self {
@@ -575,6 +597,14 @@ final class StatusTableViewController: ChartsTableViewController {
                     }
                 }
             case (.enactingBolus, .enactingBolus):
+                break
+            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
+                if isResuming, !wasResuming, let cell = tableView.cellForRow(at: statusIndexPath) as? TitleSubtitleTableViewCell {
+                    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                    indicatorView.startAnimating()
+                    cell.accessoryView = indicatorView
+                    cell.subtitleLabel.text = nil
+                }
                 break
             default:
                 self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
@@ -726,6 +756,10 @@ final class StatusTableViewController: ChartsTableViewController {
                     let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
+                case .pumpSuspended:
+                    cell.titleLabel.text = NSLocalizedString("Pump Suspended", comment: "The title of the cell indicating the pump is suspended")
+                    cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
+                    cell.selectionStyle = .default
                 }
             }
 
@@ -815,23 +849,43 @@ final class StatusTableViewController: ChartsTableViewController {
             case .status:
                 tableView.deselectRow(at: indexPath, animated: true)
 
-                if case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) = statusRowMode, !enacting {
-                    self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
-
-                    self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
-                        DispatchQueue.main.async {
-                            self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
-
-                            if let error = error {
-                                self.deviceManager.logger.addError(error, fromSource: "TempBasal")
-                                self.presentAlertController(with: error)
-                            } else {
-                                self.refreshContext.update(with: .status)
-                                self.log.debug("[reloadData] after manually enacting temp basal")
-                                self.reloadData()
+                switch statusRowMode {
+                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
+                    if !enacting {
+                        self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
+                        
+                        self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
+                            DispatchQueue.main.async {
+                                self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+                                
+                                if let error = error {
+                                    self.deviceManager.logger.addError(error, fromSource: "TempBasal")
+                                    self.presentAlertController(with: error)
+                                } else {
+                                    self.refreshContext.update(with: .status)
+                                    self.log.debug("[reloadData] after manually enacting temp basal")
+                                    self.reloadData()
+                                }
                             }
                         }
                     }
+                case .pumpSuspended(let resuming):
+                    if !resuming {
+                        self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
+                        self.deviceManager.pumpManager?.resumeDelivery(completion: { (result) in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .failure(let error):
+                                    let alert = UIAlertController(title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"), error: error)
+                                    self.present(alert, animated: true, completion: nil)
+                                case .success:
+                                    break
+                                }
+                            }
+                        })
+                    }
+                default:
+                    break
                 }
             }
         case .hud:
@@ -1024,3 +1078,32 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 }
+
+extension UIAlertController {
+    fileprivate convenience init(title: String, error: Error) {
+        
+        let message: String
+        
+        if let localizedError = error as? LocalizedError {
+            let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
+            message = [localizedError.failureReason, localizedError.recoverySuggestion].compactMap({ $0 }).map({
+                String(format: sentenceFormat, $0)
+            }).joined(separator: "\n")
+        } else {
+            message = String(describing: error)
+        }
+        
+        self.init(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        addAction(UIAlertAction(
+            title: NSLocalizedString("OK", comment: "Button title to acknowledge error"),
+            style: .default,
+            handler: nil
+        ))
+    }
+}
+

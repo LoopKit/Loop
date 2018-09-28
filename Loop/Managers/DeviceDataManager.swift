@@ -161,6 +161,7 @@ extension DeviceDataManager: CGMManagerDelegate {
 
 
 extension DeviceDataManager: PumpManagerDelegate {
+    
     func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
         AnalyticsManager.shared.pumpTimeDidDrift(adjustment)
     }
@@ -281,6 +282,10 @@ extension DeviceDataManager: PumpManagerDelegate {
         return loopManager.doseStore.lastReservoirValue?.startDate ?? .distantPast
     }
     
+    func pumpManager(_ pumpManager: PumpManager, didUpdateSuspendState suspendState: Bool) {
+        NotificationCenter.default.post(name: .PumpSuspendStateChanged, object: self, userInfo: [DeviceDataManager.pumpSuspendStateKey: suspendState])
+    }
+    
 }
 
 
@@ -374,4 +379,12 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             String(reflecting: statusExtensionManager!),
         ].joined(separator: "\n")
     }
+}
+
+extension Notification.Name {
+    static let PumpSuspendStateChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpSuspendStateChanged")
+}
+
+extension DeviceDataManager {
+    public static let pumpSuspendStateKey = "com.loopkit.PumpSuspendState"
 }

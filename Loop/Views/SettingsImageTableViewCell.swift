@@ -25,6 +25,8 @@ class SettingsImageTableViewCell: UITableViewCell {
         guard let textLabel = textLabel, let imageView = imageView else {
             return
         }
+        
+        separatorInset = .zero
 
         textLabel.adjustsFontForContentSizeCategory = true
         textLabel.font = UIFont.preferredFont(forTextStyle: .body)
