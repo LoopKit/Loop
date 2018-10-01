@@ -898,6 +898,8 @@ final class StatusTableViewController: ChartsTableViewController {
         guard let carbVC = segue.source as? CarbEntryEditViewController, let updatedEntry = carbVC.updatedCarbEntry else {
             return
         }
+        
+        // RSS - Do we need to do an addCarbEntry here for the Protain and Fat portion?
 
         if #available(iOS 12.0, *) {
             let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)

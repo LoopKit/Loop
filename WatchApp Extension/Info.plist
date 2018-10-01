@@ -17,7 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
+<<<<<<< HEAD
 	<string>1.9.4 dev</string>
+=======
+	<string>1.9.3</string>
+>>>>>>> 46de1404... Fix issue report crash, and track pump frequency. (#821)
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
