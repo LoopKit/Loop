@@ -247,9 +247,6 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Segnalazione";
 
-/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
-"Last comparison: %1$@ → %2$@ vs %3$@" = "Ultimo confronto: %1$@ → %2$@ vs %3$@";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Avvia CGM app";
 
