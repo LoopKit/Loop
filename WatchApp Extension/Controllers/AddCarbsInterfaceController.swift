@@ -218,41 +218,13 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
-        var delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
         case .value:
-            let oldValue = carbValue
             carbValue += delta
-
-            // If we didn't change, adjust the delta to prevent the haptic
-            if oldValue == carbValue {
-                delta = 0
-            }
         case .date:
-            let oldValue = date
             date += TimeInterval(minutes: Double(delta))
-
-            // If we didn't change, adjust the delta to prevent the haptic
-            if oldValue == date {
-                delta = 0
-            }
-        }
-
-        let isHapticFeedbackEnabled: Bool
-
-        if #available(watchOSApplicationExtension 5.0, *), let crownSequencer = crownSequencer {
-            isHapticFeedbackEnabled = !crownSequencer.isHapticFeedbackEnabled
-        } else {
-            isHapticFeedbackEnabled = false
-        }
-
-        if !isHapticFeedbackEnabled {
-            if delta > 0 {
-                WKInterfaceDevice.current().play(.click)
-            } else if delta < 0 {
-                WKInterfaceDevice.current().play(.click)
-            }
         }
 
         accumulatedRotation = remainder

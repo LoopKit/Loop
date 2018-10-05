@@ -178,31 +178,9 @@ extension BolusInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
-        var delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
 
-        let oldValue = pickerValue
         pickerValue += delta
-
-        // If we didn't change, adjust the delta to prevent the haptic
-        if oldValue == pickerValue {
-            delta = 0
-        }
-
-        let isHapticFeedbackEnabled: Bool
-
-        if #available(watchOSApplicationExtension 5.0, *), let crownSequencer = crownSequencer {
-            isHapticFeedbackEnabled = !crownSequencer.isHapticFeedbackEnabled
-        } else {
-            isHapticFeedbackEnabled = false
-        }
-
-        if !isHapticFeedbackEnabled {
-            if delta > 0 {
-                WKInterfaceDevice.current().play(.click)
-            } else if delta < 0 {
-                WKInterfaceDevice.current().play(.click)
-            }
-        }
 
         accumulatedRotation = remainder
     }
