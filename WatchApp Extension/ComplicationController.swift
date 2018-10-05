@@ -92,6 +92,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         let timeText = CLKRelativeDateTextProvider(date: Date(), style: .natural, units: .minute)
 
         switch complication.family {
+        case .graphicCorner, .graphicCircular, .graphicRectangular, .graphicBezel:
+            template = nil
         case .modularSmall:
             let modularSmall = CLKComplicationTemplateModularSmallStackText()
             modularSmall.line1TextProvider = glucoseText

@@ -47,6 +47,8 @@ extension CLKComplicationTemplate {
         timeFormatter.timeStyle = .short
 
         switch family {
+        case .graphicCorner, .graphicCircular, .graphicRectangular, .graphicBezel:
+            return nil
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
             template.line1TextProvider = glucoseAndTrendText
