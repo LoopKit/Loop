@@ -85,7 +85,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         var pickerValue = 0
 
         if let context = context as? BolusSuggestionUserInfo {
-            let recommendedBolus = context.recommendedBolus
+            let recommendedBolus = context.recommendedBolus ?? 0
 
             if let maxBolus = context.maxBolus {
                 maxBolusValue = maxBolus
@@ -95,7 +95,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
             pickerValue = pickerValueFromBolusValue(recommendedBolus * 0.75)
 
-            if let valueString = formatter.string(from: recommendedBolus) {
+            if let recommendedBolus = context.recommendedBolus, let valueString = formatter.string(from: recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
         }
@@ -122,10 +122,14 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     @IBAction func decrement() {
         pickerValue -= 10
+
+        WKInterfaceDevice.current().play(.directionDown)
     }
 
     @IBAction func increment() {
         pickerValue += 10
+
+        WKInterfaceDevice.current().play(.directionUp)
     }
 
     @IBAction func deliver() {
@@ -166,7 +170,22 @@ extension BolusInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
-        pickerValue += Int((accumulatedRotation - remainder) / rotationsPerValue)
+        var delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
+
+        let oldValue = pickerValue
+        pickerValue += delta
+
+        // If we didn't change, adjust the delta to prevent the haptic
+        if oldValue == pickerValue {
+            delta = 0
+        }
+
+        if delta > 0 {
+            WKInterfaceDevice.current().play(.click)
+        } else if delta < 0 {
+            WKInterfaceDevice.current().play(.click)
+        }
+
         accumulatedRotation = remainder
     }
 }

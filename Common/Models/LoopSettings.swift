@@ -8,7 +8,7 @@
 import LoopKit
 
 
-struct LoopSettings {
+struct LoopSettings: Equatable {
     var dosingEnabled = false
 
     let dynamicCarbAbsorptionEnabled = true
