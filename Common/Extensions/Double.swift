@@ -8,8 +8,8 @@
 import Foundation
 
 
-extension Double {
-    func floored(to increment: Double) -> Double {
+extension FloatingPoint {
+    func floored(to increment: Self) -> Self {
         if increment == 0 {
             return self
         }
@@ -17,7 +17,7 @@ extension Double {
         return floor(self / increment) * increment
     }
 
-    func ceiled(to increment: Double) -> Double {
+    func ceiled(to increment: Self) -> Self {
         if increment == 0 {
             return self
         }

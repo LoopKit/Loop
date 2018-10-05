@@ -69,6 +69,18 @@ extension LoopDataManager {
         }
     }
 
+    func addConfirmedBolus(_ bolus: SetBolusUserInfo) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        activeContext?.iob = (activeContext?.iob ?? 0) + bolus.value
+    }
+
+    func addConfirmedCarbEntry(_ entry: CarbEntryUserInfo) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        activeContext?.cob = (activeContext?.cob ?? 0) + entry.value
+    }
+
     func sendDidUpdateContextNotificationIfNecessary() {
         dispatchPrecondition(condition: .onQueue(.main))
 

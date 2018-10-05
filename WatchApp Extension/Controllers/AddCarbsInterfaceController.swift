@@ -181,6 +181,9 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                     replyHandler: { (suggestion) in
                         DispatchQueue.main.async {
                             WKInterfaceDevice.current().play(.success)
+
+                            ExtensionDelegate.shared().loopManager.addConfirmedCarbEntry(entry)
+
                             WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                         }
                     },
@@ -236,10 +239,20 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
             }
         }
 
-        if delta > 0 {
-            WKInterfaceDevice.current().play(.click)
-        } else if delta < 0 {
-            WKInterfaceDevice.current().play(.click)
+        let isHapticFeedbackEnabled: Bool
+
+        if #available(watchOSApplicationExtension 5.0, *), let crownSequencer = crownSequencer {
+            isHapticFeedbackEnabled = !crownSequencer.isHapticFeedbackEnabled
+        } else {
+            isHapticFeedbackEnabled = false
+        }
+
+        if !isHapticFeedbackEnabled {
+            if delta > 0 {
+                WKInterfaceDevice.current().play(.click)
+            } else if delta < 0 {
+                WKInterfaceDevice.current().play(.click)
+            }
         }
 
         accumulatedRotation = remainder
