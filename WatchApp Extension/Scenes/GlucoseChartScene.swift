@@ -182,7 +182,11 @@ class GlucoseChartScene: SKScene {
         return lowerBound..<upperBound
     }
 
-    var visibleDuration = TimeInterval(hours: 6)
+    var visibleDuration = TimeInterval(hours: 6) {
+        didSet {
+            setNeedsUpdate()
+        }
+    }
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
