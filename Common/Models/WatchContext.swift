@@ -17,17 +17,15 @@ final class WatchContext: NSObject, RawRepresentable {
     private let version = 4
 
     var preferredGlucoseUnit: HKUnit?
-    var maxBolus: Double?
 
     var glucose: HKQuantity?
     var glucoseTrendRawValue: Int?
-    var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
-    var targetRanges: [WatchDatedRange]?
-    var temporaryOverride: WatchDatedRange?
-    var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
-    var configuredOverrideContexts: [GlucoseRangeScheduleOverrideUserInfo.Context] = []
+    var predictedGlucose: WatchPredictedGlucose?
+    var eventualGlucose: HKQuantity? {
+        return predictedGlucose?.values.last?.quantity
+    }
 
     var loopLastRunDate: Date?
     var lastNetTempBasalDose: Double?
@@ -37,15 +35,14 @@ final class WatchContext: NSObject, RawRepresentable {
     var bolusSuggestion: BolusSuggestionUserInfo? {
         guard let recommended = recommendedBolusDose else { return nil }
 
-        return BolusSuggestionUserInfo(recommendedBolus: recommended, maxBolus: maxBolus)
+        return BolusSuggestionUserInfo(recommendedBolus: recommended)
     }
 
-    var COB: Double?
-    var IOB: Double?
+    var cob: Double?
+    var iob: Double?
     var reservoir: Double?
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
-    var predictedGlucose: WatchPredictedGlucose?
 
     var cgmManagerState: CGMManager.RawStateValue?
 
@@ -68,24 +65,9 @@ final class WatchContext: NSObject, RawRepresentable {
             glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
-        if let glucoseValue = rawValue["egv"] as? Double {
-            eventualGlucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
-        }
-
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
-
-        if let overrideUserInfoRawValue = rawValue["grsoc"] as? GlucoseRangeScheduleOverrideUserInfo.RawValue,
-            let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: overrideUserInfoRawValue)
-        {
-            glucoseRangeScheduleOverride = overrideUserInfo
-        }
-
-        if let configuredOverrideContextsRawValues = rawValue["coc"] as? [GlucoseRangeScheduleOverrideUserInfo.Context.RawValue] {
-            configuredOverrideContexts = configuredOverrideContextsRawValues.compactMap(GlucoseRangeScheduleOverrideUserInfo.Context.init(rawValue:))
-        }
-
-        IOB = rawValue["iob"] as? Double
+        iob = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
         reservoirPercentage = rawValue["rp"] as? Double
         batteryPercentage = rawValue["bp"] as? Double
@@ -94,24 +76,12 @@ final class WatchContext: NSObject, RawRepresentable {
         lastNetTempBasalDose = rawValue["ba"] as? Double
         lastNetTempBasalDate = rawValue["bad"] as? Date
         recommendedBolusDose = rawValue["rbo"] as? Double
-        COB = rawValue["cob"] as? Double
-        maxBolus = rawValue["mb"] as? Double
+        cob = rawValue["cob"] as? Double
 
         cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
+
         if let rawValue = rawValue["pg"] as? WatchPredictedGlucose.RawValue {
             predictedGlucose = WatchPredictedGlucose(rawValue: rawValue)
-        }
-
-        if let rawValue = rawValue["tr"] as? [WatchDatedRange.RawValue] {
-            targetRanges = rawValue.compactMap({return WatchDatedRange(rawValue: $0)})
-        }
-
-        if let rawValue = rawValue["to"] as? WatchDatedRange.RawValue {
-            temporaryOverride = WatchDatedRange(rawValue: rawValue)
-        }
-
-        if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
-            cgm = CGM(rawValue: cgmRawValue)
         }
     }
 
@@ -126,28 +96,21 @@ final class WatchContext: NSObject, RawRepresentable {
 
         raw["cgmManagerState"] = cgmManagerState
 
-        raw["cob"] = COB
+        raw["cob"] = cob
 
         let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
-        raw["egv"] = eventualGlucose?.doubleValue(for: unit)
         raw["gu"] = preferredGlucoseUnit?.unitString
         raw["gv"] = glucose?.doubleValue(for: unit)
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
-        raw["grsoc"] = glucoseRangeScheduleOverride?.rawValue
-        raw["coc"] = configuredOverrideContexts.map { $0.rawValue }
-        raw["iob"] = IOB
+        raw["iob"] = iob
         raw["ld"] = loopLastRunDate
-        raw["mb"] = maxBolus
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
 
         raw["pg"] = predictedGlucose?.rawValue
-
-        raw["tr"] = targetRanges?.map { $0.rawValue }
-        raw["to"] = temporaryOverride?.rawValue
 
         return raw
     }

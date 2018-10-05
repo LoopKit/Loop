@@ -11,6 +11,7 @@ import WatchConnectivity
 import CGMBLEKit
 import LoopKit
 import SpriteKit
+import os.log
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet weak var basalLabel: WKInterfaceLabel!
@@ -18,23 +19,31 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     @IBOutlet weak var cobLabel: WKInterfaceLabel!
     @IBOutlet weak var glucoseScene: WKInterfaceSKScene!
     @IBAction func setChartWindow1Hour() {
-        scene.visibleHours = 1
+        scene.visibleDuration = .hours(2)
     }
     @IBAction func setChartWindow2Hours() {
-        scene.visibleHours = 2
+        scene.visibleDuration = .hours(4)
     }
     @IBAction func setChartWindow3Hours() {
-        scene.visibleHours = 3
+        scene.visibleDuration = .hours(6)
     }
     private let scene = GlucoseChartScene()
+    private var timer: Timer? {
+        didSet {
+            oldValue?.invalidate()
+        }
+    }
+    private let log = OSLog(category: "ChartHUDController")
 
     override init() {
         super.init()
 
         loopManager = ExtensionDelegate.shared().loopManager
-        NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager?.glucoseStore, queue: nil) { _ in
+        NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager?.glucoseStore, queue: nil) { [weak self] (note) in
+            self?.log.default("Received GlucoseSamplesDidChange notification: %{public}@. Updating chart", String(describing: note.userInfo ?? [:]))
+
             DispatchQueue.main.async {
-                self.updateGlucoseChart()
+                self?.updateGlucoseChart()
             }
         }
 
@@ -42,8 +51,11 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     }
 
     override func awake(withContext context: Any?) {
+        super.awake(withContext: context)
+
         if UserDefaults.standard.startOnChartPage {
-            self.becomeCurrentPage()
+            log.default("Switching to startOnChartPage")
+            becomeCurrentPage()
 
             // For some reason, .didAppear() does not get called when we do this. It gets called *twice* the next
             // time this view appears. Force it by hand now, until we figure out the root cause.
@@ -57,16 +69,44 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
     override func didAppear() {
         super.didAppear()
+
+        log.default("didAppear")
+
+        // Force an update when our pixels need to move
+        let pixelsWide = scene.size.width * WKInterfaceDevice.current().screenScale
+        let pixelInterval = scene.visibleDuration / TimeInterval(pixelsWide)
+
+        timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
+            self?.scene.setNeedsUpdate()
+        }
+    }
+
+    override func willDisappear() {
+        super.willDisappear()
+
+        log.default("willDisappear")
+
+        timer = nil
     }
 
     override func willActivate() {
-        crownSequencer.delegate = self
-        crownSequencer.focus()
-
         super.willActivate()
 
-        loopManager?.glucoseStore.maybeRequestGlucoseBackfill()
-        glucoseScene.isPaused = false
+        if glucoseScene.isPaused {
+            log.default("willActivate() unpausing")
+            glucoseScene.isPaused = false
+        } else {
+            log.default("willActivate() unpausing")
+        }
+
+        loopManager?.requestGlucoseBackfillIfNecessary()
+    }
+
+    override func didDeactivate() {
+        super.didDeactivate()
+
+        log.default("didDeactivate() pausing")
+        glucoseScene.isPaused = true
     }
 
     override func update() {
@@ -87,25 +127,29 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         }()
 
         iobLabel.setHidden(true)
-        if let activeInsulin = activeContext.IOB, let valueStr = insulinFormatter.string(from:NSNumber(value:activeInsulin)) {
+        if let activeInsulin = activeContext.iob, let valueStr = insulinFormatter.string(from: activeInsulin) {
             iobLabel.setText(String(format: NSLocalizedString(
-                "IOB %1$@ U",
-                comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"),
-                                       valueStr))
+                    "IOB %1$@ U",
+                    comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"
+                ),
+                valueStr
+            ))
             iobLabel.setHidden(false)
         }
 
         cobLabel.setHidden(true)
-        if let carbsOnBoard = activeContext.COB {
+        if let carbsOnBoard = activeContext.cob {
             let carbFormatter = NumberFormatter()
             carbFormatter.numberStyle = .decimal
             carbFormatter.maximumFractionDigits = 0
-            let valueStr = carbFormatter.string(from:NSNumber(value:carbsOnBoard))
+            let valueStr = carbFormatter.string(from: carbsOnBoard)
 
             cobLabel.setText(String(format: NSLocalizedString(
-                "COB %1$@ g",
-                comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"),
-                                      valueStr!))
+                    "COB %1$@ g",
+                    comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"
+                ),
+                valueStr!
+            ))
             cobLabel.setHidden(false)
         }
 
@@ -116,7 +160,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             basalFormatter.minimumFractionDigits = 1
             basalFormatter.maximumFractionDigits = 3
             basalFormatter.positivePrefix = basalFormatter.plusSign
-            let valueStr = basalFormatter.string(from:NSNumber(value:tempBasal))
+            let valueStr = basalFormatter.string(from: tempBasal)
 
             let basalLabelText = String(format: NSLocalizedString(
                 "%1$@ U/hr",
@@ -124,6 +168,11 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
                                       valueStr!)
             basalLabel.setText(basalLabelText)
             basalLabel.setHidden(false)
+        }
+
+        if glucoseScene.isPaused {
+            log.default("update() unpausing")
+            glucoseScene.isPaused = false
         }
 
         updateGlucoseChart()
@@ -135,26 +184,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         }
 
         scene.predictedGlucose = activeContext.predictedGlucose?.values
-        scene.targetRanges = activeContext.targetRanges
-        scene.temporaryOverride = activeContext.temporaryOverride
+        scene.correctionRange = loopManager?.settings.glucoseTargetRangeSchedule
         scene.unit = activeContext.preferredGlucoseUnit
 
-        loopManager?.glucoseStore.getCachedGlucoseSamples(start: .EarliestGlucoseCutoff) { (samples) in
+        loopManager?.glucoseStore.getCachedGlucoseSamples(start: .earliestGlucoseCutoff) { (samples) in
             DispatchQueue.main.async {
                 self.scene.historicalGlucose = samples
-                self.scene.updateNodes(animated: false)
+                self.scene.setNeedsUpdate()
             }
-        }
-    }
-
-    // MARK: WKCrownDelegate
-    var crownAccumulator = 0.0
-
-    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
-        crownAccumulator += rotationalDelta
-        if abs(crownAccumulator) >= 0.25 {
-            scene.visibleBg += Int(sign(crownAccumulator))
-            crownAccumulator = 0
         }
     }
 }

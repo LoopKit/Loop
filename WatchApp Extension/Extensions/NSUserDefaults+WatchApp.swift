@@ -11,7 +11,6 @@ import Foundation
 
 extension UserDefaults {
     private enum Key: String {
-        case ComplicationDataLastRefreshed = "com.loudnate.Naterade.ComplicationDataLastRefreshed"
         case StartOnChartPage = "com.loudnate.Naterade.StartOnChartPage"
     }
 
@@ -21,15 +20,6 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.StartOnChartPage.rawValue)
-        }
-    }
-
-    var complicationDataLastRefreshed: Date {
-        get {
-            return object(forKey: Key.ComplicationDataLastRefreshed.rawValue) as? Date ?? Date.distantPast
-        }
-        set {
-            set(newValue, forKey: Key.ComplicationDataLastRefreshed.rawValue)
         }
     }
 }

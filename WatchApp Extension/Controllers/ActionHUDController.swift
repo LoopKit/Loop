@@ -19,16 +19,12 @@ final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var workoutButtonImage: WKInterfaceImage!
     @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
 
-    private var lastOverrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
-
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
 
     override func willActivate() {
         super.willActivate()
-
-        updateLoopHUD()
 
         let userActivity = NSUserActivity.forViewLoopStatus()
         if #available(watchOSApplicationExtension 5.0, *) {
@@ -40,23 +36,19 @@ final class ActionHUDController: HUDInterfaceController {
     override func update() {
         super.update()
 
-        guard let activeContext = loopManager?.activeContext else {
-            return
-        }
-
-        let overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context?
-        if let glucoseRangeScheduleOverride = activeContext.glucoseRangeScheduleOverride, glucoseRangeScheduleOverride.dateInterval.contains(Date())
+        let schedule = loopManager?.settings.glucoseTargetRangeSchedule
+        let activeOverrideContext: GlucoseRangeSchedule.Override.Context?
+        if let glucoseRangeScheduleOverride = schedule?.override, glucoseRangeScheduleOverride.isActive()
         {
-            overrideContext = glucoseRangeScheduleOverride.context
+            activeOverrideContext = glucoseRangeScheduleOverride.context
         } else {
-            overrideContext = nil
+            activeOverrideContext = nil
         }
-        updateForOverrideContext(overrideContext)
-        lastOverrideContext = overrideContext
+        updateForOverrideContext(activeOverrideContext)
 
-        for overrideContext in GlucoseRangeScheduleOverrideUserInfo.Context.allContexts {
+        for overrideContext in GlucoseRangeSchedule.Override.Context.all {
             let contextButtonGroup = buttonGroup(for: overrideContext)
-            if !activeContext.configuredOverrideContexts.contains(overrideContext) {
+            if schedule == nil || !(schedule!.configuredOverrideContexts.contains(overrideContext)) {
                 contextButtonGroup.state = .disabled
             } else if contextButtonGroup.state == .disabled {
                 contextButtonGroup.state = .off
@@ -64,7 +56,7 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
-    private func updateForOverrideContext(_ context: GlucoseRangeScheduleOverrideUserInfo.Context?) {
+    private func updateForOverrideContext(_ context: GlucoseRangeSchedule.Override.Context?) {
         switch context {
         case .preMeal?:
             preMealButtonGroup.state = .on
@@ -78,7 +70,7 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
-    private func buttonGroup(for overrideContext: GlucoseRangeScheduleOverrideUserInfo.Context) -> ButtonGroup {
+    private func buttonGroup(for overrideContext: GlucoseRangeSchedule.Override.Context) -> ButtonGroup {
         switch overrideContext {
         case .preMeal:
             return preMealButtonGroup
@@ -89,67 +81,65 @@ final class ActionHUDController: HUDInterfaceController {
 
     // MARK: - Menu Items
 
-    @IBAction func addCarbs() {
-        presentController(withName: AddCarbsInterfaceController.className, context: nil)
-    }
-
-    @IBAction func setBolus() {
-        presentController(withName: BolusInterfaceController.className, context: loopManager?.activeContext?.bolusSuggestion ?? 0)
-    }
-
     @IBAction func togglePreMealMode() {
-        let userInfo: GlucoseRangeScheduleOverrideUserInfo?
+        guard var glucoseTargetRangeSchedule = loopManager?.settings.glucoseTargetRangeSchedule else {
+            return
+        }
         if preMealButtonGroup.state == .on {
-            userInfo = nil
+            glucoseTargetRangeSchedule.clearOverride()
         } else {
-            userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .preMeal, startDate: Date(), endDate: Date(timeIntervalSinceNow: .hours(1)))
+            guard glucoseTargetRangeSchedule.setOverride(.preMeal, until: Date(timeIntervalSinceNow: .hours(1))) else {
+                return
+            }
         }
 
-        updateForOverrideContext(userInfo?.context)
-        sendGlucoseRangeOverride(userInfo: userInfo)
+        sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
     }
 
     @IBAction func toggleWorkoutMode() {
-        let userInfo: GlucoseRangeScheduleOverrideUserInfo?
+        guard var glucoseTargetRangeSchedule = loopManager?.settings.glucoseTargetRangeSchedule else {
+            return
+        }
         if workoutButtonGroup.state == .on {
-            userInfo = nil
+            glucoseTargetRangeSchedule.clearOverride()
         } else {
-            userInfo = GlucoseRangeScheduleOverrideUserInfo(context: .workout, startDate: Date(), endDate: nil)
+            guard glucoseTargetRangeSchedule.setOverride(.workout, until: .distantFuture) else {
+                return
+            }
         }
 
-        updateForOverrideContext(userInfo?.context)
-        sendGlucoseRangeOverride(userInfo: userInfo)
+        sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
     }
 
     private var pendingMessageResponses = 0
 
-    private func sendGlucoseRangeOverride(userInfo: GlucoseRangeScheduleOverrideUserInfo?) {
+    private func sendGlucoseRangeSchedule(_ schedule: GlucoseRangeSchedule) {
+        updateForOverrideContext(schedule.override?.context)
         pendingMessageResponses += 1
         do {
-            try WCSession.default.sendGlucoseRangeScheduleOverrideMessage(userInfo,
-                replyHandler: { _ in
-                    DispatchQueue.main.async {
-                        self.pendingMessageResponses -= 1
+            var settings = LoopSettings()
+            settings.glucoseTargetRangeSchedule = schedule
+            let userInfo = LoopSettingsUserInfo(settings: settings)
+
+            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (error) in
+                DispatchQueue.main.async {
+                    self.pendingMessageResponses -= 1
+                    if let error = error {
                         if self.pendingMessageResponses == 0 {
-                            self.updateForOverrideContext(userInfo?.context)
+                            ExtensionDelegate.shared().present(error)
+                            self.updateForOverrideContext(self.loopManager?.settings.glucoseTargetRangeSchedule?.override?.context)
                         }
-                        self.lastOverrideContext = userInfo?.context
-                    }
-                },
-                errorHandler: { error in
-                    DispatchQueue.main.async {
-                        self.pendingMessageResponses -= 1
+                    } else {
                         if self.pendingMessageResponses == 0 {
-                            self.updateForOverrideContext(self.lastOverrideContext)
+                            self.loopManager?.settings.glucoseTargetRangeSchedule = schedule
                         }
-                        ExtensionDelegate.shared().present(error)
                     }
                 }
-            )
+            })
         } catch {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
-                updateForOverrideContext(lastOverrideContext)
+                updateForOverrideContext(self.loopManager?.settings.glucoseTargetRangeSchedule?.override?.context)
             }
             presentAlert(
                 withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
@@ -159,4 +149,9 @@ final class ActionHUDController: HUDInterfaceController {
             )
         }
     }
+}
+
+
+extension GlucoseRangeSchedule.Override.Context {
+    static let all: [GlucoseRangeSchedule.Override.Context] = [.preMeal, .workout]
 }

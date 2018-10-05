@@ -25,17 +25,24 @@ class HUDInterfaceController: WKInterfaceController {
     override func willActivate() {
         super.willActivate()
 
+        update()
+
         if activeContextObserver == nil {
-            activeContextObserver = NotificationCenter.default.addObserver(forName: .ContextUpdated, object: nil, queue: nil) { _ in
+            activeContextObserver = NotificationCenter.default.addObserver(forName: LoopDataManager.didUpdateContextNotification, object: loopManager, queue: nil) { [weak self] _ in
                 DispatchQueue.main.async {
-                    self.update()
+                    self?.update()
                 }
             }
         }
     }
 
-    override func didAppear() {
-        update()
+    override func didDeactivate() {
+        super.didDeactivate()
+
+        if let observer = activeContextObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        activeContextObserver = nil
     }
 
     func update() {
@@ -78,4 +85,19 @@ class HUDInterfaceController: WKInterfaceController {
             }
         }())
     }
+
+    @IBAction func addCarbs() {
+        presentController(withName: AddCarbsInterfaceController.className, context: nil)
+    }
+
+    @IBAction func setBolus() {
+        var context = loopManager?.activeContext?.bolusSuggestion ?? BolusSuggestionUserInfo(recommendedBolus: nil)
+
+        if context.maxBolus == nil {
+            context.maxBolus = loopManager?.settings.maximumBolus
+        }
+
+        presentController(withName: BolusInterfaceController.className, context: context)
+    }
+
 }

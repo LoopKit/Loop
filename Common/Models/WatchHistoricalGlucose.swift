@@ -16,7 +16,7 @@ struct WatchHistoricalGlucose {
 
     init(with samples: [StoredGlucoseSample]) {
         self.samples = samples.map {
-            NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: false, syncIdentifier: $0.syncIdentifier)
+            NewGlucoseSample(date: $0.startDate, quantity: $0.quantity, isDisplayOnly: false, syncIdentifier: $0.syncIdentifier, syncVersion: 0)
         }
     }
 }
@@ -45,7 +45,7 @@ extension WatchHistoricalGlucose: RawRepresentable {
         }
 
         self.samples = (0..<dates.count).map {
-            NewGlucoseSample(date: dates[$0], quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: Double(values[$0])), isDisplayOnly: false, syncIdentifier: syncIdentifiers[$0])
+            NewGlucoseSample(date: dates[$0], quantity: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: Double(values[$0])), isDisplayOnly: false, syncIdentifier: syncIdentifiers[$0], syncVersion: 0)
         }
     }
 }

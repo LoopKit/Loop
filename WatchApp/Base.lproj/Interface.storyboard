@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14113" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.13.2" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14033"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.9"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14238.4.1"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -334,7 +334,7 @@
         <!--Loop-->
         <scene sceneID="3Z2-ZE-636">
             <objects>
-                <controller identifier="ChartHUDController" title="Loop" contentMode="scaleAspectFit" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ChartHUDController" title="Loop" contentMode="scaleAspectFit" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="z0r-4k-Z7h">
                             <items>
@@ -368,13 +368,11 @@
                                 </group>
                             </items>
                         </group>
-                        <group alignment="left" layout="overlap" id="GqJ-yv-NKQ">
+                        <group width="1" height="86" alignment="left" layout="overlap" id="GqJ-yv-NKQ">
                             <items>
-                                <spriteKitScene width="1" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
-                                    <variation key="device=watch38mm" height="68"/>
-                                    <variation key="device=watch42mm" height="86"/>
-                                </spriteKitScene>
+                                <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
+                            <variation key="device=watch38mm" height="68"/>
                         </group>
                         <group width="1" alignment="left" id="rSt-1g-97T">
                             <items>

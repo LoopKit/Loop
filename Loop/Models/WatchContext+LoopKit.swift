@@ -11,12 +11,11 @@ import HealthKit
 import LoopKit
 
 extension WatchContext {
-    convenience init(glucose: GlucoseValue?, eventualGlucose: GlucoseValue?, glucoseUnit: HKUnit?) {
+    convenience init(glucose: GlucoseValue?, glucoseUnit: HKUnit?) {
         self.init()
 
         self.glucose = glucose?.quantity
         self.glucoseDate = glucose?.startDate
-        self.eventualGlucose = eventualGlucose?.quantity
         self.preferredGlucoseUnit = glucoseUnit
     }
 }
