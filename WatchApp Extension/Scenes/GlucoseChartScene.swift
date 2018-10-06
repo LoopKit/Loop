@@ -42,7 +42,7 @@ private extension SKLabelNode {
 
 private extension SKSpriteNode {
     func move(to rect: CGRect, animated: Bool) {
-        if parent == nil || animated == false {
+        if parent == nil || animated == false || (size.equalTo(rect.size) && position.equalTo(rect.origin)) {
             size = rect.size
             position = rect.origin
         } else {
@@ -52,6 +52,19 @@ private extension SKSpriteNode {
                 .resize(toHeight: rect.size.height, duration: 0.25)
             ]))
         }
+    }
+}
+
+extension CGRect {
+    fileprivate func alignedToScreenScale(_ screenScale: CGFloat) -> CGRect {
+        let factor = 1 / screenScale
+
+        return CGRect(
+            x: origin.x.floored(to: factor),
+            y: origin.y.floored(to: factor),
+            width: size.width.ceiled(to: factor),
+            height: size.height.ceiled(to: factor)
+        )
     }
 }
 
@@ -81,7 +94,7 @@ private struct Scaler {
         let a = point(max(dates.start, range.start), minY)
         let b = point(min(dates.end, range.end), maxY)
         let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, minHeight))
-        return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size)
+        return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
     }
 }
 
@@ -109,6 +122,8 @@ private extension HKUnit {
 
 class GlucoseChartScene: SKScene {
     let log = OSLog(category: "GlucoseChartScene")
+
+    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
 
     var unit: HKUnit?
     var correctionRange: GlucoseRangeSchedule?
@@ -167,14 +182,18 @@ class GlucoseChartScene: SKScene {
         return lowerBound..<upperBound
     }
 
-    var visibleDuration = TimeInterval(hours: 6)
+    var visibleDuration = TimeInterval(hours: 6) {
+        didSet {
+            setNeedsUpdate()
+        }
+    }
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
     private var nodes: [Int: SKSpriteNode] = [:]
     private var predictedPathNode: SKShapeNode?
 
-    private var needsUpdate = false
+    private var needsUpdate = true
     private var shouldAnimatePredictionPath = false
 
     private lazy var dateFormatter: DateComponentsFormatter = {
@@ -188,7 +207,16 @@ class GlucoseChartScene: SKScene {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         let screen = WKInterfaceDevice.current().screenBounds
         let width = screen.width - 2 /* insets */
-        let height: CGFloat = width < 150 ? 68 : 86
+        let height: CGFloat
+
+        switch width {
+        case let x where x < 150:  // 38mm
+            height = 68
+        case let x where x > 180:  // 44mm
+            height = 106
+        default:
+            height = 86
+        }
 
         super.init(size: CGSize(width: screen.width, height: height))
     }
@@ -206,14 +234,14 @@ class GlucoseChartScene: SKScene {
         now.zPosition = NodePlane.lines.zPosition
         addChild(now)
 
-        hoursLabel = SKLabelNode.basic(at: CGPoint(x: 5, y: size.height - 5))
+        hoursLabel = SKLabelNode.basic(at: CGPoint(x: textInsets.left, y: size.height - textInsets.top))
         addChild(hoursLabel)
 
-        maxBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - 5, y: size.height - 5))
+        maxBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - textInsets.right, y: size.height - textInsets.top))
         maxBGLabel.horizontalAlignmentMode = .right
         addChild(maxBGLabel)
 
-        minBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - 5, y: 5))
+        minBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - textInsets.right, y: textInsets.bottom))
         minBGLabel.horizontalAlignmentMode = .right
         minBGLabel.verticalAlignmentMode = .bottom
         addChild(minBGLabel)
@@ -241,8 +269,6 @@ class GlucoseChartScene: SKScene {
                 break
             }
         }
-
-        log.default("childNodesHaveActions: %d", childNodesHaveActions)
 
         return childNodesHaveActions
     }
@@ -275,7 +301,7 @@ class GlucoseChartScene: SKScene {
         needsUpdate = true
 
         if isPaused {
-            log.default("updateNodes(animated:) unpausing")
+            log.default("setNeedsUpdate() unpausing")
             isPaused = false
         }
     }
@@ -340,7 +366,7 @@ class GlucoseChartScene: SKScene {
             let (sprite, created) = getSprite(forHash: $0.chartHashValue)
             sprite.color = .glucose
             sprite.zPosition = NodePlane.values.zPosition
-            sprite.move(to: CGRect(origin: origin, size: size), animated: !created)
+            sprite.move(to: CGRect(origin: origin, size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale), animated: !created)
             inactiveNodes.removeValue(forKey: $0.chartHashValue)
         }
 

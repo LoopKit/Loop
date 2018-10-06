@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.13.2" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
-    <device id="watch42" orientation="portrait">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+    <device id="watch44" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.9"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14238.4.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14238.10"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
         <scene sceneID="hZK-vD-D34">
             <objects>
-                <controller identifier="AddCarbsInterfaceController" hidesWhenLoading="NO" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
+                <controller identifier="AddCarbsInterfaceController" hidesWhenLoading="NO" fullBounds="YES" id="zh0-gB-D44" customClass="AddCarbsInterfaceController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="uPt-Z4-ngs">
                             <items>
@@ -98,14 +98,22 @@
                                         </button>
                                     </items>
                                 </group>
-                                <button width="1" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
-                                    <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
-                                    <connections>
-                                        <action selector="save" destination="zh0-gB-D44" id="yLR-xy-bGK"/>
-                                    </connections>
-                                </button>
+                                <group width="1" alignment="center" verticalAlignment="bottom" id="Qa8-MQ-ht1">
+                                    <items>
+                                        <button width="1" height="40" alignment="left" verticalAlignment="bottom" title="Add Carbs" id="b6f-3I-jki">
+                                            <color key="backgroundColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
+                                            <connections>
+                                                <action selector="save" destination="zh0-gB-D44" id="yLR-xy-bGK"/>
+                                            </connections>
+                                        </button>
+                                    </items>
+                                    <variation key="device=watch40mm" radius="20" widthAdjustment="-8"/>
+                                    <variation key="device=watch44mm" radius="20" widthAdjustment="-8"/>
+                                </group>
                             </items>
+                            <variation key="device=watch40mm" heightAdjustment="-2"/>
+                            <variation key="device=watch44mm" heightAdjustment="-4"/>
                         </group>
                     </items>
                     <connections>
@@ -153,6 +161,8 @@
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
+                                    <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch44mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
@@ -269,7 +279,7 @@
         <!--BolusInterfaceController-->
         <scene sceneID="vCl-Xb-hzF">
             <objects>
-                <controller identifier="BolusInterfaceController" hidesWhenLoading="NO" id="zTm-yH-n4A" customClass="BolusInterfaceController" customModule="WatchApp_Extension">
+                <controller identifier="BolusInterfaceController" hidesWhenLoading="NO" fullBounds="YES" id="zTm-yH-n4A" customClass="BolusInterfaceController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" height="1" alignment="left" layout="vertical" spacing="1" id="PJO-Ol-ya8">
                             <items>
@@ -313,14 +323,22 @@
                                     <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <fontDescription key="font" style="UICTFontTextStyleBody"/>
                                 </label>
-                                <button width="1" alignment="left" verticalAlignment="bottom" title="Bolus" id="Qsq-p5-1J0">
-                                    <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
-                                    <connections>
-                                        <action selector="deliver" destination="zTm-yH-n4A" id="jrt-Ee-Tbn"/>
-                                    </connections>
-                                </button>
+                                <group width="1" alignment="center" verticalAlignment="bottom" id="8jd-ZY-t1c">
+                                    <items>
+                                        <button width="1" height="40" alignment="left" title="Bolus" id="Qsq-p5-1J0">
+                                            <color key="backgroundColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="semibold" pointSize="15"/>
+                                            <connections>
+                                                <action selector="deliver" destination="zTm-yH-n4A" id="jrt-Ee-Tbn"/>
+                                            </connections>
+                                        </button>
+                                    </items>
+                                    <variation key="device=watch40mm" radius="20" widthAdjustment="-8"/>
+                                    <variation key="device=watch44mm" radius="20" widthAdjustment="-8"/>
+                                </group>
                             </items>
+                            <variation key="device=watch40mm" heightAdjustment="-2"/>
+                            <variation key="device=watch44mm" heightAdjustment="-4"/>
                         </group>
                     </items>
                     <connections>
@@ -334,7 +352,7 @@
         <!--Loop-->
         <scene sceneID="3Z2-ZE-636">
             <objects>
-                <controller identifier="ChartHUDController" title="Loop" contentMode="scaleAspectFit" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
+                <controller identifier="ChartHUDController" title="Loop" alwaysBounce="YES" id="v5b-sO-bb8" customClass="ChartHUDController" customModule="WatchApp_Extension">
                     <items>
                         <group width="1" alignment="left" id="z0r-4k-Z7h">
                             <items>
@@ -361,10 +379,12 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="right" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
+                                        <label width="1" alignment="left" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
                                             <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                         </label>
                                     </items>
+                                    <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch44mm" widthAdjustment="-9.5"/>
                                 </group>
                             </items>
                         </group>
@@ -373,16 +393,19 @@
                                 <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
                             <variation key="device=watch38mm" height="68"/>
+                            <variation key="device=watch44mm" height="106"/>
                         </group>
-                        <group width="1" alignment="left" id="rSt-1g-97T">
+                        <group width="1" alignment="center" id="rSt-1g-97T">
                             <items>
-                                <label alignment="left" verticalAlignment="bottom" text="---" textAlignment="left" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
+                                <label alignment="left" verticalAlignment="bottom" text="---" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
                                     <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                 </label>
-                                <label alignment="right" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
+                                <label alignment="right" verticalAlignment="bottom" text="---" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
                                     <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
                                 </label>
                             </items>
+                            <variation key="device=watch40mm" widthAdjustment="-17"/>
+                            <variation key="device=watch44mm" widthAdjustment="-19"/>
                         </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">

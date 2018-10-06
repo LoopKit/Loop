@@ -109,6 +109,10 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
+    }
+
+    override func didAppear() {
+        super.didAppear()
 
         crownSequencer.focus()
     }
@@ -141,7 +145,11 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             do {
                 try WCSession.default.sendBolusMessage(bolus) { (error) in
                     DispatchQueue.main.async {
-                        ExtensionDelegate.shared().present(error)
+                        if let error = error {
+                            ExtensionDelegate.shared().present(error)
+                        } else {
+                            ExtensionDelegate.shared().loopManager.addConfirmedBolus(bolus)
+                        }
                     }
                 }
             } catch {
@@ -170,21 +178,9 @@ extension BolusInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
-        var delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
 
-        let oldValue = pickerValue
         pickerValue += delta
-
-        // If we didn't change, adjust the delta to prevent the haptic
-        if oldValue == pickerValue {
-            delta = 0
-        }
-
-        if delta > 0 {
-            WKInterfaceDevice.current().play(.click)
-        } else if delta < 0 {
-            WKInterfaceDevice.current().play(.click)
-        }
 
         accumulatedRotation = remainder
     }

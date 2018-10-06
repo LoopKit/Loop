@@ -16,11 +16,7 @@ class HUDInterfaceController: WKInterfaceController {
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
 
-    weak var loopManager: LoopDataManager?
-
-    override init() {
-        loopManager = ExtensionDelegate.shared().loopManager
-    }
+    var loopManager = ExtensionDelegate.shared().loopManager
 
     override func willActivate() {
         super.willActivate()
@@ -46,7 +42,9 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     func update() {
-        guard let activeContext = loopManager?.activeContext, let date = activeContext.loopLastRunDate else {
+        guard let activeContext = loopManager.activeContext,
+            let date = activeContext.loopLastRunDate
+        else {
             loopHUDImage.setLoopImage(.unknown)
             loopTimer.setHidden(true)
             return
@@ -91,10 +89,10 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     @IBAction func setBolus() {
-        var context = loopManager?.activeContext?.bolusSuggestion ?? BolusSuggestionUserInfo(recommendedBolus: nil)
+        var context = loopManager.activeContext?.bolusSuggestion ?? BolusSuggestionUserInfo(recommendedBolus: nil)
 
         if context.maxBolus == nil {
-            context.maxBolus = loopManager?.settings.maximumBolus
+            context.maxBolus = loopManager.settings.maximumBolus
         }
 
         presentController(withName: BolusInterfaceController.className, context: context)
