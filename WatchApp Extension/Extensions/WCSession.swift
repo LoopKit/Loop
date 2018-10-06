@@ -49,7 +49,7 @@ extension WCSession {
         )
     }
 
-    func sendBolusMessage(_ userInfo: SetBolusUserInfo, errorHandler: @escaping (Error) -> Void) throws {
+    func sendBolusMessage(_ userInfo: SetBolusUserInfo, completionHandler: @escaping (Error?) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }
@@ -59,8 +59,12 @@ extension WCSession {
         }
 
         sendMessage(userInfo.rawValue,
-            replyHandler: { reply in },
-            errorHandler: errorHandler
+            replyHandler: { reply in
+                completionHandler(nil)
+            },
+            errorHandler: { error in
+                completionHandler(error)
+            }
         )
     }
 

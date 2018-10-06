@@ -34,12 +34,13 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         }
     }
     private let log = OSLog(category: "ChartHUDController")
+    private var hasInitialActivation = false
 
     override init() {
         super.init()
 
         loopManager = ExtensionDelegate.shared().loopManager
-        NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager?.glucoseStore, queue: nil) { [weak self] (note) in
+        NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager.glucoseStore, queue: nil) { [weak self] (note) in
             self?.log.default("Received GlucoseSamplesDidChange notification: %{public}@. Updating chart", String(describing: note.userInfo ?? [:]))
 
             DispatchQueue.main.async {
@@ -99,7 +100,14 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             log.default("willActivate() unpausing")
         }
 
-        loopManager?.requestGlucoseBackfillIfNecessary()
+        if !hasInitialActivation && UserDefaults.standard.startOnChartPage {
+            log.default("Switching to startOnChartPage")
+            becomeCurrentPage()
+        }
+
+        hasInitialActivation = true
+
+        loopManager.requestGlucoseBackfillIfNecessary()
     }
 
     override func didDeactivate() {
@@ -112,7 +120,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     override func update() {
         super.update()
 
-        guard let activeContext = loopManager?.activeContext else {
+        guard let activeContext = loopManager.activeContext else {
             return
         }
 
@@ -179,15 +187,15 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     }
 
     func updateGlucoseChart() {
-        guard let activeContext = loopManager?.activeContext else {
+        guard let activeContext = loopManager.activeContext else {
             return
         }
 
         scene.predictedGlucose = activeContext.predictedGlucose?.values
-        scene.correctionRange = loopManager?.settings.glucoseTargetRangeSchedule
+        scene.correctionRange = loopManager.settings.glucoseTargetRangeSchedule
         scene.unit = activeContext.preferredGlucoseUnit
 
-        loopManager?.glucoseStore.getCachedGlucoseSamples(start: .earliestGlucoseCutoff) { (samples) in
+        loopManager.glucoseStore.getCachedGlucoseSamples(start: .earliestGlucoseCutoff) { (samples) in
             DispatchQueue.main.async {
                 self.scene.historicalGlucose = samples
                 self.scene.setNeedsUpdate()

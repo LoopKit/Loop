@@ -42,33 +42,18 @@ final class WatchDataManager: NSObject {
     @objc private func updateWatch(_ notification: Notification) {
         guard
             let rawUpdateContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
-            let updateContext = LoopDataManager.LoopUpdateContext(rawValue: rawUpdateContext),
-            let session = watchSession
+            let updateContext = LoopDataManager.LoopUpdateContext(rawValue: rawUpdateContext)
         else {
             return
         }
 
         switch updateContext {
-        case .glucose:
-            break
-        case .tempBasal:
-            break
+        case .glucose, .tempBasal:
+            sendWatchContextIfNeeded()
         case .preferences:
             sendSettingsIfNeeded()
-            return
         default:
-            return
-        }
-
-        switch session.activationState {
-        case .notActivated, .inactive:
-            session.activate()
-        case .activated:
-            createWatchContext { (context) in
-                if let context = context {
-                    self.sendWatchContext(context)
-                }
-            }
+            break
         }
     }
 
@@ -98,6 +83,17 @@ final class WatchDataManager: NSObject {
 
         log.default("Transferring LoopSettingsUserInfo")
         session.transferUserInfo(LoopSettingsUserInfo(settings: settings).rawValue)
+    }
+
+    private func sendWatchContextIfNeeded() {
+        guard let session = watchSession, session.isPaired, session.isWatchAppInstalled else {
+            return
+        }
+
+        guard case .activated = session.activationState else {
+            session.activate()
+            return
+        }
 
         createWatchContext { (context) in
             if let context = context {
@@ -107,32 +103,39 @@ final class WatchDataManager: NSObject {
     }
 
     private func sendWatchContext(_ context: WatchContext) {
-        if let session = watchSession, session.isPaired && session.isWatchAppInstalled {
-            let complicationShouldUpdate: Bool
+        guard let session = watchSession, session.isPaired, session.isWatchAppInstalled else {
+            return
+        }
 
-            if let lastContext = lastComplicationContext,
-                let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
-                let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
-            {
-                let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate).minutes >= 30
-                let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
+        guard case .activated = session.activationState else {
+            session.activate()
+            return
+        }
 
-                complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
-            } else {
-                complicationShouldUpdate = true
-            }
+        let complicationShouldUpdate: Bool
 
-            if session.isComplicationEnabled && complicationShouldUpdate {
-                log.default("transferCurrentComplicationUserInfo")
-                session.transferCurrentComplicationUserInfo(context.rawValue)
-                lastComplicationContext = context
-            } else {
-                do {
-                    log.default("updateApplicationContext")
-                    try session.updateApplicationContext(context.rawValue)
-                } catch let error {
-                    log.error(error)
-                }
+        if let lastContext = lastComplicationContext,
+            let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
+            let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
+        {
+            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval
+            let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
+
+            complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
+        } else {
+            complicationShouldUpdate = true
+        }
+
+        if session.isComplicationEnabled && complicationShouldUpdate {
+            log.default("transferCurrentComplicationUserInfo")
+            session.transferCurrentComplicationUserInfo(context.rawValue)
+            lastComplicationContext = context
+        } else {
+            do {
+                log.default("updateApplicationContext")
+                try session.updateApplicationContext(context.rawValue)
+            } catch let error {
+                log.error(error)
             }
         }
     }
@@ -266,6 +269,7 @@ extension WatchDataManager: WCSessionDelegate {
                 log.error(error)
             } else {
                 sendSettingsIfNeeded()
+                sendWatchContextIfNeeded()
             }
         case .inactive, .notActivated:
             break
@@ -292,6 +296,7 @@ extension WatchDataManager: WCSessionDelegate {
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
+        lastSentSettings = nil
         watchSession = WCSession.default
         watchSession?.delegate = self
         watchSession?.activate()
@@ -299,5 +304,59 @@ extension WatchDataManager: WCSessionDelegate {
 
     func sessionReachabilityDidChange(_ session: WCSession) {
         sendSettingsIfNeeded()
+    }
+}
+
+
+extension WatchDataManager {
+    override var debugDescription: String {
+        var items = [
+            "## WatchDataManager",
+            "lastSentSettings: \(String(describing: lastSentSettings))",
+            "lastComplicationContext: \(String(describing: lastComplicationContext))",
+        ]
+
+        if let session = watchSession {
+            items.append(String(reflecting: session))
+        } else {
+            items.append(contentsOf: [
+                "watchSession: nil"
+            ])
+        }
+
+        return items.joined(separator: "\n")
+    }
+}
+
+
+extension WCSession {
+    open override var debugDescription: String {
+        return [
+            "\(self)",
+            "* hasContentPending: \(hasContentPending)",
+            "* isComplicationEnabled: \(isComplicationEnabled)",
+            "* isPaired: \(isPaired)",
+            "* isReachable: \(isReachable)",
+            "* isWatchAppInstalled: \(isWatchAppInstalled)",
+            "* outstandingFileTransfers: \(outstandingFileTransfers)",
+            "* outstandingUserInfoTransfers: \(outstandingUserInfoTransfers)",
+            "* receivedApplicationContext: \(receivedApplicationContext)",
+            "* remainingComplicationUserInfoTransfers: \(remainingComplicationUserInfoTransfers)",
+            "* complicationUserInfoTransferInterval: \(round(complicationUserInfoTransferInterval.minutes)) min",
+            "* watchDirectoryURL: \(watchDirectoryURL?.absoluteString ?? "nil")",
+        ].joined(separator: "\n")
+    }
+
+    fileprivate var complicationUserInfoTransferInterval: TimeInterval {
+        let now = Date()
+        let timeUntilMidnight: TimeInterval
+
+        if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
+            timeUntilMidnight = midnight.timeIntervalSince(now)
+        } else {
+            timeUntilMidnight = .hours(24)
+        }
+
+        return timeUntilMidnight / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }

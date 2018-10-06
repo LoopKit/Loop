@@ -181,6 +181,9 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                     replyHandler: { (suggestion) in
                         DispatchQueue.main.async {
                             WKInterfaceDevice.current().play(.success)
+
+                            ExtensionDelegate.shared().loopManager.addConfirmedCarbEntry(entry)
+
                             WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                         }
                     },
@@ -215,31 +218,13 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
-        var delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
         case .value:
-            let oldValue = carbValue
             carbValue += delta
-
-            // If we didn't change, adjust the delta to prevent the haptic
-            if oldValue == carbValue {
-                delta = 0
-            }
         case .date:
-            let oldValue = date
             date += TimeInterval(minutes: Double(delta))
-
-            // If we didn't change, adjust the delta to prevent the haptic
-            if oldValue == date {
-                delta = 0
-            }
-        }
-
-        if delta > 0 {
-            WKInterfaceDevice.current().play(.click)
-        } else if delta < 0 {
-            WKInterfaceDevice.current().play(.click)
         }
 
         accumulatedRotation = remainder

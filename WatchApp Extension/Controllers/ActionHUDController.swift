@@ -36,7 +36,7 @@ final class ActionHUDController: HUDInterfaceController {
     override func update() {
         super.update()
 
-        let schedule = loopManager?.settings.glucoseTargetRangeSchedule
+        let schedule = loopManager.settings.glucoseTargetRangeSchedule
         let activeOverrideContext: GlucoseRangeSchedule.Override.Context?
         if let glucoseRangeScheduleOverride = schedule?.override, glucoseRangeScheduleOverride.isActive()
         {
@@ -82,7 +82,7 @@ final class ActionHUDController: HUDInterfaceController {
     // MARK: - Menu Items
 
     @IBAction func togglePreMealMode() {
-        guard var glucoseTargetRangeSchedule = loopManager?.settings.glucoseTargetRangeSchedule else {
+        guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
             return
         }
         if preMealButtonGroup.state == .on {
@@ -97,7 +97,7 @@ final class ActionHUDController: HUDInterfaceController {
     }
 
     @IBAction func toggleWorkoutMode() {
-        guard var glucoseTargetRangeSchedule = loopManager?.settings.glucoseTargetRangeSchedule else {
+        guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
             return
         }
         if workoutButtonGroup.state == .on {
@@ -127,11 +127,11 @@ final class ActionHUDController: HUDInterfaceController {
                     if let error = error {
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
-                            self.updateForOverrideContext(self.loopManager?.settings.glucoseTargetRangeSchedule?.override?.context)
+                            self.updateForOverrideContext(self.loopManager.settings.glucoseTargetRangeSchedule?.override?.context)
                         }
                     } else {
                         if self.pendingMessageResponses == 0 {
-                            self.loopManager?.settings.glucoseTargetRangeSchedule = schedule
+                            self.loopManager.settings.glucoseTargetRangeSchedule = schedule
                         }
                     }
                 }
@@ -139,7 +139,7 @@ final class ActionHUDController: HUDInterfaceController {
         } catch {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
-                updateForOverrideContext(self.loopManager?.settings.glucoseTargetRangeSchedule?.override?.context)
+                updateForOverrideContext(self.loopManager.settings.glucoseTargetRangeSchedule?.override?.context)
             }
             presentAlert(
                 withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
