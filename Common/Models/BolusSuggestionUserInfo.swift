@@ -9,11 +9,11 @@
 import Foundation
 
 
-final class BolusSuggestionUserInfo: RawRepresentable {
-    let recommendedBolus: Double
-    let maxBolus: Double?
+struct BolusSuggestionUserInfo: RawRepresentable {
+    let recommendedBolus: Double?
+    var maxBolus: Double?
 
-    init(recommendedBolus: Double, maxBolus: Double? = nil) {
+    init(recommendedBolus: Double?, maxBolus: Double? = nil) {
         self.recommendedBolus = recommendedBolus
         self.maxBolus = maxBolus
     }
@@ -24,7 +24,7 @@ final class BolusSuggestionUserInfo: RawRepresentable {
     static let version = 1
     static let name = "BolusSuggestionUserInfo"
 
-    required init?(rawValue: RawValue) {
+    init?(rawValue: RawValue) {
         guard rawValue["v"] as? Int == type(of: self).version && rawValue["name"] as? String == BolusSuggestionUserInfo.name,
             let recommendedBolus = rawValue["br"] as? Double else
         {
@@ -39,12 +39,10 @@ final class BolusSuggestionUserInfo: RawRepresentable {
         var raw: RawValue = [
             "v": type(of: self).version,
             "name": BolusSuggestionUserInfo.name,
-            "br": recommendedBolus
         ]
 
-        if let maxBolus = maxBolus {
-            raw["mb"] = maxBolus
-        }
+        raw["br"] = recommendedBolus
+        raw["mb"] = maxBolus
 
         return raw
     }

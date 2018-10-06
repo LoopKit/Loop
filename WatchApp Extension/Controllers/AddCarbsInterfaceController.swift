@@ -17,15 +17,18 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     private var carbValue: Int = 15 {
         didSet {
-            if carbValue < 0 {
-                carbValue = 0
-            } else if carbValue > 100 {
-                carbValue = 100
+            if carbValue < minimumCarbValue {
+                carbValue = minimumCarbValue
+            } else if carbValue > maximumCarbValue {
+                carbValue = maximumCarbValue
             }
 
             valueLabel.setText(String(carbValue))
         }
     }
+
+    private let minimumCarbValue = 0
+    private let maximumCarbValue = 100
 
     private let maximumDatePastInterval = TimeInterval(hours: 8)
     private let maximumDateFutureInterval = TimeInterval(hours: 4)
@@ -138,6 +141,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         case .date:
             date -= dateIncrement
         }
+
+        WKInterfaceDevice.current().play(.directionDown)
     }
 
     @IBAction func increment() {
@@ -147,6 +152,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         case .date:
             date += dateIncrement
         }
+
+        WKInterfaceDevice.current().play(.directionUp)
     }
 
     @IBAction func toggleInputMode() {
@@ -173,11 +180,13 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                 try WCSession.default.sendCarbEntryMessage(entry,
                     replyHandler: { (suggestion) in
                         DispatchQueue.main.async {
+                            WKInterfaceDevice.current().play(.success)
                             WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                         }
                     },
                     errorHandler: { (error) in
                         DispatchQueue.main.async {
+                            WKInterfaceDevice.current().play(.failure)
                             ExtensionDelegate.shared().present(error)
                         }
                     }
@@ -206,13 +215,31 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
-        let delta = (accumulatedRotation - remainder) / rotationsPerIncrement
+        var delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
         case .value:
-            carbValue += Int(delta)
+            let oldValue = carbValue
+            carbValue += delta
+
+            // If we didn't change, adjust the delta to prevent the haptic
+            if oldValue == carbValue {
+                delta = 0
+            }
         case .date:
-            date += TimeInterval(minutes: delta)
+            let oldValue = date
+            date += TimeInterval(minutes: Double(delta))
+
+            // If we didn't change, adjust the delta to prevent the haptic
+            if oldValue == date {
+                delta = 0
+            }
+        }
+
+        if delta > 0 {
+            WKInterfaceDevice.current().play(.click)
+        } else if delta < 0 {
+            WKInterfaceDevice.current().play(.click)
         }
 
         accumulatedRotation = remainder
