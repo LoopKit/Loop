@@ -79,6 +79,35 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
+    // Add force-touch menu items to set workout mode for certain fixed durations:
+    override init() {
+        super.init()
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 30 minutes", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout30Min))
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 1 hour", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout1Hour))
+        addMenuItem(withImageNamed: "workout", title: NSLocalizedString("Workout 2 hours", comment: "Menu title for setting workout duration from watch"), action: #selector(ActionHUDController.setWorkout2Hours))
+    }
+    
+    private func setWorkoutMode(duration: Double) {
+        guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
+            return
+        }
+        let endDate = Date().addingTimeInterval(TimeInterval(hours: duration))
+        guard glucoseTargetRangeSchedule.setOverride(.workout, until: endDate) else {
+            return
+        }
+        sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
+    }
+    
+    @objc func setWorkout30Min() {
+        setWorkoutMode(duration: 0.5)
+    }
+    @objc func setWorkout1Hour() {
+        setWorkoutMode(duration: 1.0)
+    }
+    @objc func setWorkout2Hours() {
+        setWorkoutMode(duration: 2.0)
+    }
+
     // MARK: - Menu Items
 
     @IBAction func togglePreMealMode() {
