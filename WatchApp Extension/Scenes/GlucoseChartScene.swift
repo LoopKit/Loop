@@ -173,6 +173,9 @@ class GlucoseChartScene: SKScene {
             max = Swift.max(max, predictedGlucoseRange.upperBound.doubleValue(for: unit))
         }
 
+        // Set minimum of graph at zero if prediction is negative:
+        min = Swift.max(min, 0.0)
+        
         min = min.floored(to: unit.axisIncrement)
         max = max.ceiled(to: unit.axisIncrement)
 
