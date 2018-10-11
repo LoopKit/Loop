@@ -92,13 +92,19 @@ extension HKUnit {
 extension WKInterfaceDevice {
     enum WatchSize {
         case watch38mm
+        case watch40mm
         case watch42mm
+        case watch44mm
     }
 
     func watchSize() -> WatchSize {
         switch screenBounds.width {
         case 136:
             return .watch38mm
+        case 162:
+            return .watch40mm
+        case 184:
+            return .watch44mm
         default:
             return .watch42mm
         }
@@ -160,8 +166,12 @@ class GlucoseChartScene: SKScene {
             switch WKInterfaceDevice.current().watchSize() {
             case .watch38mm:
                 return CGSize(width: 134, height: 90)
+            case .watch40mm:
+                return CGSize(width: 158, height: 100)
             case .watch42mm:
                 return CGSize(width: 154, height: 86)
+            case .watch44mm:
+                return CGSize(width: 180, height: 130)
             }
         }())
 
