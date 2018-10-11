@@ -31,5 +31,9 @@
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
 	<key>WKWatchKitApp</key>
 	<true/>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.loopkit.Loop.AddCarbEntryOnWatch</string>
+	</array>
 </dict>
 </plist>

@@ -391,6 +391,8 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "",
             pumpManager != nil ? String(reflecting: pumpManager!) : "pumpManager: nil",
             "",
+            String(reflecting: watchManager!),
+            "",
             String(reflecting: statusExtensionManager!),
         ].joined(separator: "\n")
     }

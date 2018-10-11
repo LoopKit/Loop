@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import Intents
 import LoopKit
 import LoopKitUI
 import LoopUI
@@ -895,6 +896,15 @@ final class StatusTableViewController: ChartsTableViewController {
 
     // MARK: - Actions
 
+    override func restoreUserActivityState(_ activity: NSUserActivity) {
+        switch activity.activityType {
+        case NSUserActivity.newCarbEntryActivityType:
+            performSegue(withIdentifier: CarbEntryEditViewController.className, sender: activity)
+        default:
+            break
+        }
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
 
@@ -914,6 +924,10 @@ final class StatusTableViewController: ChartsTableViewController {
         case let vc as CarbEntryEditViewController:
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+
+            if let activity = sender as? NSUserActivity {
+                vc.restoreUserActivityState(activity)
+            }
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
@@ -939,6 +953,14 @@ final class StatusTableViewController: ChartsTableViewController {
             return
         }
 
+        if #available(iOS 12.0, *) {
+            let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
+            interaction.donate { [weak self] (error) in
+                if let error = error {
+                    self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
+                }
+            }
+        }
         deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
             DispatchQueue.main.async {
                 switch result {

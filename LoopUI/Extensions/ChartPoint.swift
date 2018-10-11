@@ -59,7 +59,7 @@ extension ChartPoint {
     static func pointsForGlucoseRangeScheduleOverride(_ override: GlucoseRangeSchedule.Override, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
         let range = override.value.rangeWithMinimumIncremement(unit.chartableIncrement)
         let startDate = Date()
-        let endDate = override.end ?? .distantFuture
+        let endDate = override.end
 
         guard endDate.timeIntervalSince(startDate) > 0,
             let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate

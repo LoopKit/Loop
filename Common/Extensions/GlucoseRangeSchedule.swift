@@ -23,12 +23,26 @@ extension GlucoseRangeSchedule {
         return override.isActive()
     }
 
-    var activeOverrideContext: GlucoseRangeSchedule.Override.Context? {
+    var activeOverride: GlucoseRangeSchedule.Override? {
         guard let override = override, override.isActive() else {
             return nil
         }
 
-        return override.context
+        return override
+    }
+
+    var activeOverrideContext: GlucoseRangeSchedule.Override.Context? {
+        return activeOverride?.context
+    }
+
+    var activeOverrideQuantityRange: Range<HKQuantity>? {
+        guard let activeOverride = activeOverride else {
+            return nil
+        }
+
+        let lowerBound = HKQuantity(unit: unit, doubleValue: activeOverride.value.minValue)
+        let upperBound = HKQuantity(unit: unit, doubleValue: activeOverride.value.maxValue)
+        return lowerBound..<upperBound
     }
 
     var configuredOverrideContexts: [GlucoseRangeSchedule.Override.Context] {
