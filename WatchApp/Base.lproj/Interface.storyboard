@@ -371,7 +371,7 @@
                                     <variation key="device=watch38mm" height="90" width="134"/>
                                     <variation key="device=watch40mm" height="100" width="158"/>
                                     <variation key="device=watch42mm" height="100" width="154"/>
-                                    <variation key="device=watch44mm" height="130" width="180"/>
+                                    <variation key="device=watch44mm" height="115" width="180"/>
                                 </spriteKitScene>
                             </items>
                         </group>

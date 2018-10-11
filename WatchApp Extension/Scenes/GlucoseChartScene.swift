@@ -171,7 +171,7 @@ class GlucoseChartScene: SKScene {
             case .watch42mm:
                 return CGSize(width: 154, height: 100)
             case .watch44mm:
-                return CGSize(width: 180, height: 130)
+                return CGSize(width: 180, height: 115)
             }
         }())
 
