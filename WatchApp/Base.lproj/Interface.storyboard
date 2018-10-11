@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14113" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14033"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14238.10"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -367,9 +367,11 @@
                         </group>
                         <group width="1" alignment="left" layout="vertical" id="GqJ-yv-NKQ">
                             <items>
-                                <spriteKitScene width="2" height="2" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
+                                <spriteKitScene width="4" height="4" alignment="center" verticalAlignment="center" id="9BI-AC-l6c">
                                     <variation key="device=watch38mm" height="90" width="134"/>
-                                    <variation key="device=watch42mm" height="86" width="154"/>
+                                    <variation key="device=watch40mm" height="100" width="158"/>
+                                    <variation key="device=watch42mm" height="100" width="154"/>
+                                    <variation key="device=watch44mm" height="130" width="180"/>
                                 </spriteKitScene>
                             </items>
                         </group>
