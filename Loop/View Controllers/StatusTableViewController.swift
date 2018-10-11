@@ -42,7 +42,7 @@ final class StatusTableViewController: ChartsTableViewController {
         )
         
         if let pumpManager = deviceManager.pumpManager {
-            pumpIsSuspended = pumpManager.isDeliverySuspended
+            self.pumpIsSuspended = pumpManager.status.isSuspended
         }
 
         let notificationCenter = NotificationCenter.default
@@ -445,7 +445,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
 
                 // Battery HUD
-                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpManager?.pumpBatteryChargeRemaining ?? UserDefaults.appGroup.statusExtensionContext?.batteryPercentage
+                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpManager?.status.pumpBatteryChargeRemaining ?? UserDefaults.appGroup.statusExtensionContext?.batteryPercentage
             }
 
             // Show/hide the table view rows

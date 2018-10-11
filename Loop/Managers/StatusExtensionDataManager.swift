@@ -98,8 +98,9 @@ final class StatusExtensionDataManager {
 
                 context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, start: netBasal.start, end: netBasal.end)
             }
-
-            context.batteryPercentage = dataManager.pumpManager?.pumpBatteryChargeRemaining
+            
+            
+            context.batteryPercentage = dataManager.pumpManager?.status.pumpBatteryChargeRemaining
             context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
             if let sensorInfo = dataManager.cgmManager?.sensorState {

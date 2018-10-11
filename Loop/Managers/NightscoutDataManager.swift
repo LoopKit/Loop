@@ -129,8 +129,36 @@ final class NightscoutDataManager {
         let loopVersion = Bundle.main.shortVersionString
 
         let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+       
         
-        upload(pumpStatus: nil, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, lastValidFrequency: nil, lastTuned: nil, uploaderStatus: getUploaderStatus())
+        
+        let pumpStatus: NightscoutUploadKit.PumpStatus?
+        
+        if let pumpManagerStatus = deviceManager.pumpManagerStatus
+        {
+            
+            let battery: BatteryStatus?
+            
+            if let chargeRemaining = pumpManagerStatus.pumpBatteryChargeRemaining {
+                battery = BatteryStatus(percent: Int(round(chargeRemaining * 100)), voltage: nil, status: nil)
+            } else {
+                battery = nil
+            }
+            
+            pumpStatus = NightscoutUploadKit.PumpStatus(
+                clock: Date(),
+                pumpID: pumpManagerStatus.device.localIdentifier ?? "Unknown",
+                iob: nil,
+                battery: battery,
+                suspended: pumpManagerStatus.isSuspended,
+                bolusing: pumpManagerStatus.isBolusing,
+                reservoir: deviceManager.loopManager.doseStore.lastReservoirValue?.unitVolume,
+                secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())
+        } else {
+            pumpStatus = nil
+        }
+        
+        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus())
 
     }
     
@@ -147,21 +175,11 @@ final class NightscoutDataManager {
         return UploaderStatus(name: uploaderDevice.name, timestamp: Date(), battery: battery)
     }
 
-    func upload(pumpStatus: PumpManagerStatus) {
-        upload(
-            pumpStatus: pumpStatus.pumpStatus,
-            deviceName: pumpStatus.device?.name,
-            firmwareVersion: pumpStatus.device?.firmwareVersion,
-            lastValidFrequency: pumpStatus.lastValidFrequency,
-            lastTuned: pumpStatus.lastTuned
-        )
+    func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, deviceName: String?, firmwareVersion: String?) {
+        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, uploaderStatus: nil)
     }
 
-    func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, deviceName: String?, firmwareVersion: String?, lastValidFrequency: Measurement<UnitFrequency>?, lastTuned: Date?) {
-        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, lastValidFrequency: lastValidFrequency, lastTuned: lastTuned, uploaderStatus: nil)
-    }
-
-    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, lastValidFrequency: Measurement<UnitFrequency>?, lastTuned: Date?, uploaderStatus: UploaderStatus?) {
+    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?) {
 
         guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
             return
@@ -176,22 +194,8 @@ final class NightscoutDataManager {
 
         let uploaderDevice = UIDevice.current
 
-        var radioAdapter: NightscoutUploadKit.RadioAdapter? = nil
-
-        if let firmwareVersion = firmwareVersion {
-            radioAdapter = NightscoutUploadKit.RadioAdapter(
-                hardware: "RileyLink",
-                frequency: lastValidFrequency?.value,
-                name: deviceName ?? "Unknown",
-                lastTuned: lastTuned,
-                firmwareVersion: firmwareVersion,
-                RSSI: nil, // TODO: device.RSSI,
-                pumpRSSI: nil // TODO: device.pumpRSSI
-            )
-        }
-
         // Build DeviceStatus
-        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: radioAdapter)
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: nil)
 
         self.lastDeviceStatusUpload = Date()
         uploader.uploadDeviceStatus(deviceStatus)
@@ -231,35 +235,3 @@ final class NightscoutDataManager {
     }
 }
 
-
-private extension PumpManagerStatus {
-    var batteryStatus: NightscoutUploadKit.BatteryStatus? {
-        return NightscoutUploadKit.BatteryStatus(
-            percent: battery?.percent != nil ? Int(battery!.percent! * 100) : nil,
-            voltage: battery?.voltage?.converted(to: .volts).value,
-            status: {
-                switch battery?.state {
-                case .normal?:
-                    return .normal
-                case .low?:
-                    return .low
-                case .none:
-                    return nil
-                }
-            }()
-        )
-    }
-
-    var pumpStatus: NightscoutUploadKit.PumpStatus {
-        return PumpStatus(
-            clock: date,
-            pumpID: device?.localIdentifier ?? "",
-            iob: nil,
-            battery: batteryStatus,
-            suspended: isSuspended,
-            bolusing: isBolusing,
-            reservoir: remainingReservoir?.doubleValue(for: .internationalUnit()),
-            secondsFromGMT: timeZone.secondsFromGMT()
-        )
-    }
-}

@@ -186,7 +186,7 @@ final class SettingsTableViewController: UITableViewController {
             case .suspendResume:
                 let pumpManager = dataManager.pumpManager!
                 let cell = tableView.dequeueReusableCell(withIdentifier: SuspendResumeTableViewCell.className, for: indexPath) as! SuspendResumeTableViewCell
-                cell.option = pumpManager.isDeliverySuspended ? .resume : .suspend
+                cell.option = pumpManager.status.isSuspended ? .resume : .suspend
                 return cell
             }
         case .cgm:
@@ -463,7 +463,7 @@ final class SettingsTableViewController: UITableViewController {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                } else if let timeZone = dataManager.pumpManager?.pumpTimeZone {
+                } else if let timeZone = dataManager.pumpManager?.status.timeZone {
                     scheduleVC.timeZone = timeZone
                 }
 
@@ -481,7 +481,7 @@ final class SettingsTableViewController: UITableViewController {
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    if let timeZone = dataManager.pumpManager?.pumpTimeZone {
+                    if let timeZone = dataManager.pumpManager?.status.timeZone {
                         scheduleVC.timeZone = timeZone
                     }
 
@@ -504,7 +504,7 @@ final class SettingsTableViewController: UITableViewController {
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    if let timeZone = dataManager.pumpManager?.pumpTimeZone {
+                    if let timeZone = dataManager.pumpManager?.status.timeZone {
                         scheduleVC.timeZone = timeZone
                     }
 
@@ -546,7 +546,7 @@ final class SettingsTableViewController: UITableViewController {
                 if let profile = dataManager.loopManager.basalRateSchedule {
                     vc.scheduleItems = profile.items
                     vc.timeZone = profile.timeZone
-                } else if let timeZone = dataManager.pumpManager?.pumpTimeZone {
+                } else if let timeZone = dataManager.pumpManager?.status.timeZone {
                     vc.timeZone = timeZone
                 }
 

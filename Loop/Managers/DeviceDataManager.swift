@@ -57,6 +57,37 @@ final class DeviceDataManager {
             UserDefaults.appGroup.cgmManager = cgmManager
         }
     }
+    
+    var pumpManagerStatus: PumpManagerStatus? {
+        didSet {
+            if let status = pumpManagerStatus {
+                
+                loopManager.doseStore.device = status.device
+                
+                if let newBatteryValue = status.pumpBatteryChargeRemaining {
+                    if newBatteryValue == 0 {
+                        NotificationManager.sendPumpBatteryLowNotification()
+                    } else {
+                        NotificationManager.clearPumpBatteryLowNotification()
+                    }
+                    
+                    if let oldBatteryValue = oldValue?.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= 0.5 {
+                        AnalyticsManager.shared.pumpBatteryWasReplaced()
+                    }
+                }
+                    
+                if oldValue?.isSuspended != status.isSuspended {
+                    NotificationCenter.default.post(name: .PumpSuspendStateChanged, object: self, userInfo: [DeviceDataManager.pumpSuspendStateKey: status.isSuspended])
+                }
+                
+                // Update the pump-schedule based settings
+                loopManager.setScheduleTimeZone(status.timeZone)
+
+            } else {
+                loopManager.doseStore.device = nil
+            }
+        }
+    }
 
     /// TODO: Isolate to queue
     private func setupCGM() {
@@ -68,6 +99,11 @@ final class DeviceDataManager {
 
     private func setupPump() {
         pumpManager?.pumpManagerDelegate = self
+        
+        if let pumpManager = pumpManager {
+            self.pumpManagerStatus = pumpManager.status
+            self.loopManager.doseStore.device = self.pumpManagerStatus?.device
+        }
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -96,7 +132,7 @@ final class DeviceDataManager {
         } else if UserDefaults.appGroup.isCGMManagerValidPumpManager {
             self.cgmManager = pumpManager as? CGMManager
         }
-
+        
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
@@ -166,20 +202,6 @@ extension DeviceDataManager: PumpManagerDelegate {
         AnalyticsManager.shared.pumpTimeDidDrift(adjustment)
     }
 
-    func pumpManagerDidUpdatePumpBatteryChargeRemaining(_ pumpManager: PumpManager, oldValue: Double?) {
-        if let newValue = pumpManager.pumpBatteryChargeRemaining {
-            if newValue == 0 {
-                NotificationManager.sendPumpBatteryLowNotification()
-            } else {
-                NotificationManager.clearPumpBatteryLowNotification()
-            }
-
-            if let oldValue = oldValue, newValue - oldValue >= 0.5 {
-                AnalyticsManager.shared.pumpBatteryWasReplaced()
-            }
-        }
-    }
-
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
         UserDefaults.appGroup.pumpManager = pumpManager
     }
@@ -202,10 +224,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManager(_ pumpManager: PumpManager, didUpdateStatus status: PumpManagerStatus) {
-        loopManager.doseStore.device = status.device
-        // Update the pump-schedule based settings
-        loopManager.setScheduleTimeZone(status.timeZone)
-        nightscoutDataManager.upload(pumpStatus: status)
+        self.pumpManagerStatus = status
     }
 
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
@@ -280,10 +299,6 @@ extension DeviceDataManager: PumpManagerDelegate {
 
     func startDateToFilterNewReservoirEvents(for manager: PumpManager) -> Date {
         return loopManager.doseStore.lastReservoirValue?.startDate ?? .distantPast
-    }
-    
-    func pumpManager(_ pumpManager: PumpManager, didUpdateSuspendState suspendState: Bool) {
-        NotificationCenter.default.post(name: .PumpSuspendStateChanged, object: self, userInfo: [DeviceDataManager.pumpSuspendStateKey: suspendState])
     }
     
 }
