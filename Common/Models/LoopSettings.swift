@@ -8,7 +8,7 @@
 import LoopKit
 
 
-struct LoopSettings {
+struct LoopSettings: Equatable {
     var dosingEnabled = false
 
     let dynamicCarbAbsorptionEnabled = true
@@ -23,7 +23,11 @@ struct LoopSettings {
 
     var retrospectiveCorrectionEnabled = true
 
-    let retrospectiveCorrectionInterval = TimeInterval(minutes: 30)
+    /// The interval over which to aggregate changes in glucose for retrospective correction
+    let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
+
+    /// The maximum duration over which to integrate retrospective correction changes
+    let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 30)
 
     /// The amount of time since a given date that data should be considered valid
     let recencyInterval = TimeInterval(minutes: 15)
