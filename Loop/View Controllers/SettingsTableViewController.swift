@@ -46,28 +46,29 @@ final class SettingsTableViewController: UITableViewController {
 
     var dataManager: DeviceDataManager!
 
-    fileprivate enum Section: Int, CaseCountable {
+    private enum Section: Int, CaseCountable {
         case loop = 0
         case pump
         case cgm
         case configuration
         case services
+        case watch
     }
 
-    fileprivate enum LoopRow: Int, CaseCountable {
+    private enum LoopRow: Int, CaseCountable {
         case dosing = 0
         case diagnostic
     }
 
-    fileprivate enum PumpRow: Int, CaseCountable {
+    private enum PumpRow: Int, CaseCountable {
         case pumpSettings = 0
     }
 
-    fileprivate enum CGMRow: Int, CaseCountable {
+    private enum CGMRow: Int, CaseCountable {
         case cgmSettings = 0
     }
 
-    fileprivate enum ConfigurationRow: Int, CaseCountable {
+    private enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
         case suspendThreshold
         case basalRate
@@ -77,13 +78,17 @@ final class SettingsTableViewController: UITableViewController {
         case insulinSensitivity
     }
 
-    fileprivate enum ServiceRow: Int, CaseCountable {
+    private enum ServiceRow: Int, CaseCountable {
         case nightscout = 0
         case loggly
         case amplitude
     }
 
-    fileprivate lazy var valueNumberFormatter: NumberFormatter = {
+    private enum WatchRow: Int, CaseCountable {
+        case wakingHours = 0
+    }
+
+    private lazy var valueNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
 
         formatter.numberStyle = .decimal
@@ -108,11 +113,15 @@ final class SettingsTableViewController: UITableViewController {
             break
         }
     }
-    
+
     // MARK: - UITableViewDataSource
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.count
+        if dataManager.watchManager.isWatchAppAvailable {
+            return Section.count
+        } else {
+            return Section.count - 1
+        }
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -127,6 +136,8 @@ final class SettingsTableViewController: UITableViewController {
             return ConfigurationRow.count
         case .services:
             return ServiceRow.count
+        case .watch:
+            return WatchRow.count
         }
     }
 
@@ -230,7 +241,7 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .suspendThreshold:
                 configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
-                
+
                 if let suspendThreshold = dataManager.loopManager.settings.suspendThreshold {
                     let value = valueNumberFormatter.string(from: suspendThreshold.value, unit: suspendThreshold.unit) ?? SettingsTableViewCell.TapToSetString
                     configCell.detailTextLabel?.text = value
@@ -288,6 +299,17 @@ final class SettingsTableViewController: UITableViewController {
 
             configCell.accessoryType = .disclosureIndicator
             return configCell
+        case .watch:
+            let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
+
+            switch WatchRow(rawValue: indexPath.row)! {
+            case .wakingHours:
+                configCell.textLabel?.text = NSLocalizedString("Waking Hours", comment: "The title text for the waking hours cell in settings")
+                configCell.detailTextLabel?.text = String(describing: dataManager.watchManager.settings.wakingHours)
+                configCell.accessoryType = .disclosureIndicator
+            }
+
+            return configCell
         }
     }
 
@@ -303,6 +325,8 @@ final class SettingsTableViewController: UITableViewController {
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .services:
             return NSLocalizedString("Services", comment: "The title of the services section in settings")
+        case .watch:
+            return NSLocalizedString("Apple Watch Configuration", comment: "The title of the Apple Watch configuration section in settings")
         }
     }
 
@@ -542,6 +566,11 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             }
+        case .watch:
+            let vc = WakingHoursTableViewController(dailyScheduleInterval: dataManager.watchManager.settings.wakingHours)
+            vc.delegate = self
+
+            show(vc, sender: sender)
         }
     }
 
@@ -557,6 +586,8 @@ final class SettingsTableViewController: UITableViewController {
         case .configuration:
             break
         case .services:
+            break
+        case .watch:
             break
         }
 
@@ -600,7 +631,7 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
 
 
 extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
-    fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
+    private func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
         if var setupViewController = CGMManagerType.setupViewController() {
             setupViewController.setupDelegate = self
             present(setupViewController, animated: true, completion: nil)
@@ -609,7 +640,7 @@ extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
         }
     }
 
-    fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
+    private func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
         dataManager.cgmManager = cgmManager
         tableView.deselectRow(at: indexPath, animated: true)
         _ = self.tableView(tableView, willDeselectRowAt: indexPath)
@@ -734,5 +765,13 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
 
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
+    }
+}
+
+extension SettingsTableViewController: DailyScheduleIntervalTableViewControllerDelegate {
+    func dailyScheduleIntervalTableViewController(_ controller: DailyScheduleIntervalTableViewController, dailyScheduleIntervalDidChangeTo dailyScheduleInterval: DailyScheduleInterval) {
+        dataManager.watchManager.settings.wakingHours = dailyScheduleInterval
+
+        tableView.reloadRows(at: [[Section.watch.rawValue, WatchRow.wakingHours.rawValue]], with: .none)
     }
 }

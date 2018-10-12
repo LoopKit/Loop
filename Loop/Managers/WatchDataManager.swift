@@ -15,8 +15,19 @@ final class WatchDataManager: NSObject {
 
     unowned let deviceManager: DeviceDataManager
 
-    init(deviceManager: DeviceDataManager) {
+    var settings: WatchSettings {
+        didSet {
+            UserDefaults.appGroup.watchSettings = settings
+            AnalyticsManager.shared.didChangeWatchSettings(from: oldValue, to: settings)
+        }
+    }
+
+    init(
+        deviceManager: DeviceDataManager,
+        settings: WatchSettings = UserDefaults.appGroup.watchSettings ?? .default
+    ) {
         self.deviceManager = deviceManager
+        self.settings = settings
         self.log = deviceManager.logger.forCategory("WatchDataManager")
 
         super.init()
@@ -39,6 +50,14 @@ final class WatchDataManager: NSObject {
 
     private var lastSentSettings: LoopSettings?
 
+    var isWatchAppAvailable: Bool {
+        if let session = watchSession, session.isPaired && session.isWatchAppInstalled {
+            return true
+        } else {
+            return false
+        }
+    }
+
     @objc private func updateWatch(_ notification: Notification) {
         guard
             let rawUpdateContext = notification.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
@@ -56,11 +75,6 @@ final class WatchDataManager: NSObject {
             break
         }
     }
-
-    private var lastComplicationContext: WatchContext?
-
-    private let minTrendDrift: Double = 20
-    private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
 
     private func sendSettingsIfNeeded() {
         let settings = deviceManager.loopManager.settings
@@ -102,6 +116,8 @@ final class WatchDataManager: NSObject {
         }
     }
 
+    private lazy var complicationUpdateManager = WatchComplicationUpdateManager(watchManager: self)
+
     private func sendWatchContext(_ context: WatchContext) {
         guard let session = watchSession, session.isPaired, session.isWatchAppInstalled else {
             return
@@ -112,24 +128,10 @@ final class WatchDataManager: NSObject {
             return
         }
 
-        let complicationShouldUpdate: Bool
-
-        if let lastContext = lastComplicationContext,
-            let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
-            let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
-        {
-            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval
-            let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
-
-            complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
-        } else {
-            complicationShouldUpdate = true
-        }
-
-        if session.isComplicationEnabled && complicationShouldUpdate {
+        if session.isComplicationEnabled && complicationUpdateManager.shouldUpdateComplicationImmediately(with: context) {
             log.default("transferCurrentComplicationUserInfo")
+            complicationUpdateManager.lastComplicationContext = context
             session.transferCurrentComplicationUserInfo(context.rawValue)
-            lastComplicationContext = context
         } else {
             do {
                 log.default("updateApplicationContext")
@@ -277,12 +279,13 @@ extension WatchDataManager: WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
+        let name = userInfoTransfer.userInfo["name"] as? String
         if let error = error {
             log.error(error)
 
             // This might be useless, as userInfoTransfer.userInfo seems to be nil when error is non-nil.
-            switch userInfoTransfer.userInfo["name"] as? String {
-            case LoopSettingsUserInfo.name?, .none:
+            switch name {
+            case LoopSettingsUserInfo.name, WatchContext.name:
                 lastSentSettings = nil
                 sendSettingsIfNeeded()
             default:
@@ -312,8 +315,7 @@ extension WatchDataManager {
     override var debugDescription: String {
         var items = [
             "## WatchDataManager",
-            "lastSentSettings: \(String(describing: lastSentSettings))",
-            "lastComplicationContext: \(String(describing: lastComplicationContext))",
+            "lastSentSettings: \(String(describing: lastSentSettings))"
         ]
 
         if let session = watchSession {
@@ -323,6 +325,8 @@ extension WatchDataManager {
                 "watchSession: nil"
             ])
         }
+
+        items.append(String(reflecting: complicationUpdateManager))
 
         return items.joined(separator: "\n")
     }
@@ -342,21 +346,7 @@ extension WCSession {
             "* outstandingUserInfoTransfers: \(outstandingUserInfoTransfers)",
             "* receivedApplicationContext: \(receivedApplicationContext)",
             "* remainingComplicationUserInfoTransfers: \(remainingComplicationUserInfoTransfers)",
-            "* complicationUserInfoTransferInterval: \(round(complicationUserInfoTransferInterval.minutes)) min",
             "* watchDirectoryURL: \(watchDirectoryURL?.absoluteString ?? "nil")",
         ].joined(separator: "\n")
-    }
-
-    fileprivate var complicationUserInfoTransferInterval: TimeInterval {
-        let now = Date()
-        let timeUntilMidnight: TimeInterval
-
-        if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
-            timeUntilMidnight = midnight.timeIntervalSince(now)
-        } else {
-            timeUntilMidnight = .hours(24)
-        }
-
-        return timeUntilMidnight / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }

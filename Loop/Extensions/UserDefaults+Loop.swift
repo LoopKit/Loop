@@ -39,6 +39,7 @@ extension UserDefaults {
 extension UserDefaults {
     private enum Key: String {
         case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
+        case watchSettings = "com.loopkit.Loop.WatchSettings"
     }
 
     var pumpManager: PumpManager? {
@@ -72,6 +73,19 @@ extension UserDefaults {
         }
         set {
             cgmManagerState = newValue?.rawValue
+        }
+    }
+
+    var watchSettings: WatchSettings? {
+        get {
+            if let rawValue = dictionary(forKey: Key.watchSettings.rawValue) {
+                return WatchSettings(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.watchSettings.rawValue)
         }
     }
 }

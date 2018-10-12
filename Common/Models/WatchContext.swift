@@ -14,7 +14,10 @@ import LoopKit
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 4
+    private static let version = 4
+    static let name = "WatchContext"
+
+    let creationDate: Date
 
     var preferredGlucoseUnit: HKUnit?
 
@@ -46,16 +49,21 @@ final class WatchContext: NSObject, RawRepresentable {
 
     var cgmManagerState: CGMManager.RawStateValue?
 
-    override init() {
-        super.init()
+    init(creationDate: Date = Date()) {
+        self.creationDate = creationDate
     }
 
     required init?(rawValue: RawValue) {
-        super.init()
-
-        guard rawValue["v"] as? Int == version else {
+        guard
+            rawValue["v"] as? Int == WatchContext.version,
+            rawValue["name"] as? String == WatchContext.name,
+            let creationDate = rawValue["cd"] as? Date
+        else {
             return nil
         }
+
+        self.creationDate = creationDate
+        super.init()
 
         if let unitString = rawValue["gu"] as? String {
             preferredGlucoseUnit = HKUnit(from: unitString)
@@ -87,7 +95,9 @@ final class WatchContext: NSObject, RawRepresentable {
 
     var rawValue: RawValue {
         var raw: [String: Any] = [
-            "v": version
+            "v": WatchContext.version,
+            "name": WatchContext.name,
+            "cd": creationDate
         ]
 
         raw["ba"] = lastNetTempBasalDose
@@ -114,15 +124,32 @@ final class WatchContext: NSObject, RawRepresentable {
 
         return raw
     }
+
+    override var debugDescription: String {
+        return """
+        \(WatchContext.self)
+        * creationDate: \(creationDate)
+        * preferredGlucoseUnit: \(String(describing: preferredGlucoseUnit))
+        * glucose: \(String(describing: glucose))
+        * glucoseDate: \(String(describing: glucoseDate))
+        * predictedGlucose: \(String(describing: predictedGlucose))
+        * loopLastRunDate: \(String(describing: loopLastRunDate))
+        * lastNetTempBasalDose: \(String(describing: lastNetTempBasalDose))
+        * lastNetTempBasalDate: \(String(describing: lastNetTempBasalDate))
+        * recommendedBolusDose: \(String(describing: recommendedBolusDose))
+        * cob: \(String(describing: cob))
+        * iob: \(String(describing: iob))
+        * reservoir: \(String(describing: reservoir))
+        * reservoirPercentage: \(String(describing: reservoirPercentage))
+        * batteryPercentage: \(String(describing: batteryPercentage))
+        * cgmManagerState: \(String(describing: cgmManagerState))
+        """
+    }
 }
 
 
 extension WatchContext {
     func shouldReplace(_ other: WatchContext) -> Bool {
-        if let date = self.glucoseDate, let otherDate = other.glucoseDate {
-            return date >= otherDate
-        } else {
-            return true
-        }
+        return creationDate >= other.creationDate
     }
 }

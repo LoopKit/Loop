@@ -130,6 +130,11 @@ final class AnalyticsManager: IdentifiableClass {
         }
     }
 
+    func didChangeWatchSettings(from oldValue: WatchSettings, to newValue: WatchSettings) {
+        if newValue.wakingHours != oldValue.wakingHours {
+            logEvent("Waking hours change")
+        }
+    }
 
     // MARK: - Loop Events
 

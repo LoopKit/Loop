@@ -208,7 +208,9 @@ extension ExtensionDelegate: WCSessionDelegate {
 
     // This method is called on a background thread of your app
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
-        let name = userInfo["name"] as? String ?? "WatchContext"
+        guard let name = userInfo["name"] as? String else {
+            return
+        }
 
         log.default("didReceiveUserInfo: %{public}@", name)
 
@@ -221,8 +223,7 @@ extension ExtensionDelegate: WCSessionDelegate {
             } else {
                 log.error("Could not decode LoopSettingsUserInfo: %{public}@", userInfo)
             }
-        case "WatchContext":
-            // WatchContext is the only userInfo type without a "name" key. This isn't a great heuristic.
+        case WatchContext.name:
             updateContext(userInfo)
         default:
             break

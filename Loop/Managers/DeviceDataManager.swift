@@ -79,11 +79,11 @@ final class DeviceDataManager {
 
     // MARK: - WatchKit
 
-    fileprivate var watchManager: WatchDataManager!
+    private(set) var watchManager: WatchDataManager!
 
     // MARK: - Status Extension
 
-    fileprivate var statusExtensionManager: StatusExtensionDataManager!
+    private var statusExtensionManager: StatusExtensionDataManager!
 
     // MARK: - Initialization
 
