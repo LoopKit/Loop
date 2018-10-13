@@ -96,18 +96,11 @@ extension DailyScheduleIntervalTableViewController: DatePickerTableViewCellDeleg
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         switch Row(rawValue: indexPath.row)! {
         case .startTime:
-            dailyScheduleInterval.startTime = cell.date.timeIntervalSinceMidnight
+            dailyScheduleInterval.startTime = DailyScheduleTime(of: cell.date)
         case .endTime:
-            dailyScheduleInterval.endTime = cell.date.timeIntervalSinceMidnight
+            dailyScheduleInterval.endTime = DailyScheduleTime(of: cell.date)
         }
 
         delegate?.dailyScheduleIntervalTableViewController(self, dailyScheduleIntervalDidChangeTo: dailyScheduleInterval)
-    }
-}
-
-private extension Date {
-    var timeIntervalSinceMidnight: DailyScheduleTime {
-        let midnight = Calendar.current.startOfDay(for: self)
-        return timeIntervalSince(midnight)
     }
 }

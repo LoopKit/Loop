@@ -15,7 +15,7 @@ struct WatchSettings {
 
 extension WatchSettings {
     static var `default`: WatchSettings {
-        return WatchSettings(wakingHours: DailyScheduleInterval(startTime: .hours(6), endTime: .hours(22)))
+        return WatchSettings(wakingHours: DailyScheduleInterval(startTime: .hour(6), endTime: .hour(22)))
     }
 
     var sleepingHours: DailyScheduleInterval {

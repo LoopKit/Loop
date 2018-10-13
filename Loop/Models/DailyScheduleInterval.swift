@@ -9,26 +9,6 @@
 import Foundation
 
 
-/// Represents a time on a daily schedule as an offset from midnight.
-/// Only values in seconds between 0 and 24 hours are valid.
-typealias DailyScheduleTime = TimeInterval
-
-private extension DailyScheduleTime {
-    var isValid: Bool {
-        let validRange = 0..<TimeInterval(hours: 24)
-        return validRange.contains(self)
-    }
-
-    func relative(to date: Date, calendar: Calendar = .current) -> Date {
-        let startOfDay = calendar.startOfDay(for: date)
-        return startOfDay.addingTimeInterval(self)
-    }
-}
-
-private func assertValid(_ time: DailyScheduleTime) {
-    assert(time.isValid, "DailyScheduleTime values must represent a number of seconds between 0 and 24 hours.")
-}
-
 /// Represents a daily schedule interval relative to a specific date.
 enum DateRelativeDailyScheduleInterval {
     case closed(DateInterval)
@@ -58,7 +38,7 @@ enum DateRelativeDailyScheduleInterval {
 /// an interval in the morning and an interval in the evening.
 ///
 /// The following diagram demonstrates the two types of intervals
-/// that can be modeled by `DailySchedulePeriod`:
+/// that can be modeled by `DailyScheduleInterval`
 /// ```
 /// 1) Closed interval within the day
 ///       ●────────────────●
@@ -104,7 +84,6 @@ enum DailyScheduleInterval {
     }
 
     init(startTime: DailyScheduleTime, endTime: DailyScheduleTime) {
-        assertValid(startTime); assertValid(endTime)
         if startTime > endTime {
             self = .disjoint(morning: ...endTime, evening: startTime...)
         } else {
@@ -113,7 +92,6 @@ enum DailyScheduleInterval {
     }
 
     func contains(_ time: DailyScheduleTime) -> Bool {
-        assertValid(time)
         switch self {
         case .closed(let range):
             return range.contains(time)
@@ -136,27 +114,46 @@ enum DailyScheduleInterval {
     ///  ◆───────────◆───────────◆
     /// 12am        12pm       12am
     /// ```
-    func relative(to date: Date, calendar: Calendar = .current) -> DateRelativeDailyScheduleInterval {
+    func relative(to date: Date, calendar: Calendar = .current) -> DateRelativeDailyScheduleInterval? {
         switch self {
         case .closed(let range):
-            return .closed(DateInterval(start: range.lowerBound.relative(to: date, calendar: calendar), end: range.upperBound.relative(to: date, calendar: calendar)))
-        case .disjoint(morning: let morning, evening: let evening):
-            guard let dayInterval = calendar.dateInterval(of: .day, for: date) else {
-                preconditionFailure("Unable to get day interval for \(date)")
+            guard
+                let start = range.lowerBound.relative(toDayOf: date, calendar: calendar),
+                let end = range.upperBound.relative(toDayOf: date, calendar: calendar)
+            else {
+                return nil
             }
+
+            return .closed(DateInterval(start: start, end: end))
+        case .disjoint(morning: let morning, evening: let evening):
+            guard
+                let dayInterval = calendar.dateInterval(of: .day, for: date),
+                let morningEnd = morning.upperBound.relative(toDayOf: date, calendar: calendar),
+                let eveningStart = evening.lowerBound.relative(toDayOf: date, calendar: calendar)
+            else {
+                return nil
+            }
+
             return .disjoint(
-                morning: DateInterval(start: dayInterval.start, end: morning.upperBound.relative(to: date, calendar: calendar)),
-                evening: DateInterval(start: evening.lowerBound.relative(to: date, calendar: calendar), end: dayInterval.end)
+                morning: DateInterval(start: dayInterval.start, end: morningEnd),
+                evening: DateInterval(start: eveningStart, end: dayInterval.end)
             )
         }
     }
 
     var duration: TimeInterval {
-        return relative(to: Date(timeIntervalSince1970: 0)).duration
+        guard let scheduleInterval = relative(to: Date(timeIntervalSince1970: 0)) else {
+            preconditionFailure("Unable to compute date relative daily schedule interval using current calendar.")
+        }
+        return scheduleInterval.duration
     }
 
     func isInProgress(at date: Date = Date(), calendar: Calendar = .current) -> Bool {
-        return relative(to: date, calendar: calendar).contains(date)
+        guard let scheduleInterval = relative(to: date, calendar: calendar) else {
+            // TODO: Is returning `false` the right behavior if we can't compute the date interval using this calendar?
+            return false
+        }
+        return scheduleInterval.contains(date)
     }
 
     /// Returns a single date interval corresponding to the daily schedule interval
@@ -173,26 +170,32 @@ enum DailyScheduleInterval {
     ///  ◆───────────◆───────────◆───────────◆
     /// 12am        12pm       12am         12pm
     /// ```
-    func dateInterval(beginningOnDayOf date: Date, calendar: Calendar = .current) -> DateInterval {
-        switch relative(to: date) {
+    func dateInterval(beginningOnDayOf date: Date, calendar: Calendar = .current) -> DateInterval? {
+        guard let scheduleInterval = relative(to: date, calendar: calendar) else {
+            return nil
+        }
+        switch scheduleInterval {
         case .closed(let interval):
             return interval
         case .disjoint(morning: let morning, evening: let evening):
             guard let nextMorning = calendar.date(byAdding: .day, value: 1, to: morning.end) else {
-                preconditionFailure("Unable to compute the day after \(morning.end)")
+                return nil
             }
             return DateInterval(start: evening.start, end: nextMorning)
         }
     }
 
     /// Returns the next date after the given date on which the daily schedule interval begins.
-    func nextStartDate(after date: Date, calendar: Calendar = .current) -> Date {
-        let startDateOnDayOf = { self.dateInterval(beginningOnDayOf: $0, calendar: calendar).start }
-        if case let startDate = startDateOnDayOf(date), startDate > date {
+    func nextStartDate(after date: Date, calendar: Calendar = .current) -> Date? {
+        let startDateOnDayOf = { self.dateInterval(beginningOnDayOf: $0, calendar: calendar)?.start }
+        guard let startDate = startDateOnDayOf(date) else {
+            return nil
+        }
+        if startDate > date {
             return startDate
         } else {
             guard let nextDay = calendar.date(byAdding: .day, value: 1, to: date) else {
-                preconditionFailure("Unable to compute the day after \(date)")
+                return nil
             }
             return startDateOnDayOf(nextDay)
         }
@@ -203,9 +206,15 @@ enum DailyScheduleInterval {
     /// - Precondition: The given interval must span no more than one day.
     func durationInProgress(in interval: DateInterval, calendar: Calendar = .current) -> TimeInterval {
         let oneDayAfterStart = calendar.date(byAdding: .day, value: 1, to: interval.start)!
-        precondition(interval.end <= oneDayAfterStart, "End date must be within a day after start date.")
-        let startDayInterval = dateInterval(beginningOnDayOf: interval.start)
-        let endDayInterval = dateInterval(beginningOnDayOf: interval.end)
+        precondition(interval.end <= oneDayAfterStart, "End date must be within a day of start date.")
+        guard
+            let startDayInterval = dateInterval(beginningOnDayOf: interval.start),
+            let endDayInterval = dateInterval(beginningOnDayOf: interval.end)
+        else {
+            // TODO: Is returning 0 the right behavior if we can't compute the date intervals using this calendar?
+            return 0
+        }
+
         let intersectionDuration = { interval.intersection(with: $0)?.duration ?? 0 }
         if startDayInterval == endDayInterval {
             // `interval` starts and ends on the same day; avoid double-counting intersection
@@ -219,7 +228,7 @@ enum DailyScheduleInterval {
     /// Do not rely on any property of these dates other than their offsets from midnight.
     func dayInsensitiveDates() -> (start: Date, end: Date) {
         let referenceDate = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: 0))
-        return (start: referenceDate + startTime, end: referenceDate + endTime)
+        return (start: startTime.relative(toDayOf: referenceDate)!, end: endTime.relative(toDayOf: referenceDate)!)
     }
 
     /// Returns the complementary daily schedule interval for this interval.
@@ -250,20 +259,21 @@ extension DailyScheduleInterval: CustomStringConvertible {
 }
 
 extension DailyScheduleInterval: RawRepresentable {
-    typealias RawValue = [DailyScheduleTime]
+    typealias RawValue = [DailyScheduleTime.RawValue]
 
     init?(rawValue: RawValue) {
         guard
             rawValue.count == 2,
-            rawValue.allSatisfy({ $0.isValid })
+            let startTime = DailyScheduleTime(rawValue: rawValue[0]),
+            let endTime = DailyScheduleTime(rawValue: rawValue[1])
         else {
             return nil
         }
 
-        self.init(startTime: rawValue[0], endTime: rawValue[1])
+        self.init(startTime: startTime, endTime: endTime)
     }
 
     var rawValue: RawValue {
-        return [startTime, endTime]
+        return [startTime, endTime].map { $0.rawValue }
     }
 }

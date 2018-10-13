@@ -298,6 +298,7 @@
 		89732E84216A987900069E29 /* DateAndDurationTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 89732E81216A987900069E29 /* DateAndDurationTableViewCell.xib */; };
 		89732E85216A987900069E29 /* DatePickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89732E82216A987900069E29 /* DatePickerTableViewCell.swift */; };
 		89732E87216A988E00069E29 /* WakingHoursTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89732E86216A988D00069E29 /* WakingHoursTableViewController.swift */; };
+		8981B31D217179280078BC68 /* DailyScheduleTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8981B31C217179280078BC68 /* DailyScheduleTime.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -840,6 +841,7 @@
 		89732E81216A987900069E29 /* DateAndDurationTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DateAndDurationTableViewCell.xib; sourceTree = "<group>"; };
 		89732E82216A987900069E29 /* DatePickerTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatePickerTableViewCell.swift; sourceTree = "<group>"; };
 		89732E86216A988D00069E29 /* WakingHoursTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakingHoursTableViewController.swift; sourceTree = "<group>"; };
+		8981B31C217179280078BC68 /* DailyScheduleTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyScheduleTime.swift; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = SOURCE_ROOT; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
@@ -982,6 +984,8 @@
 				43880F961D9D8052009061A8 /* ServiceAuthentication */,
 				43DE92601C555C26001FFDE1 /* AbsorptionTimeType+CarbKit.swift */,
 				C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */,
+				89732E7A216A981000069E29 /* DailyScheduleInterval.swift */,
+				8981B31C217179280078BC68 /* DailyScheduleTime.swift */,
 				43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */,
 				4374B5F1209D897600D17AA8 /* Locked.swift */,
 				436A0DA41D236A2A00104B24 /* LoopError.swift */,
@@ -991,7 +995,6 @@
 				43D848AF1E7DCBE100DADCBC /* Result.swift */,
 				43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
-				89732E7A216A981000069E29 /* DailyScheduleInterval.swift */,
 				89732E7C216A981E00069E29 /* WatchSettings.swift */,
 			);
 			path = Models;
@@ -1944,6 +1947,7 @@
 				43BFF0C51E465A2D00FF19A9 /* UIColor+HIG.swift in Sources */,
 				43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
+				8981B31D217179280078BC68 /* DailyScheduleTime.swift in Sources */,
 				4374B5F4209D89A900D17AA8 /* TextFieldTableViewCell.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				89732E79216A975B00069E29 /* WatchComplicationUpdateManager.swift in Sources */,

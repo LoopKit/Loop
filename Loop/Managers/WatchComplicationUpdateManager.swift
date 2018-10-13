@@ -56,7 +56,7 @@ final class WatchComplicationUpdateManager {
             return remainingTimeInWakingHours / Double(WCSession.default.remainingComplicationUserInfoTransfers + 1)
         } else {
             // Sleeping hours now; send next complication user info transfer at beginning of waking hours.
-            return wakingHours.nextStartDate(after: now).timeIntervalSince(now)
+            return wakingHours.nextStartDate(after: now)?.timeIntervalSince(now) ?? .hours(24)
         }
     }
 
