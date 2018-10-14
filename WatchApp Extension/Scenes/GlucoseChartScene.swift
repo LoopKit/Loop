@@ -204,20 +204,19 @@ class GlucoseChartScene: SKScene {
     }()
 
     override init() {
-        // Use the fixed sizes specified in the storyboard, based on our guess of the model size
+        // Set the height based on the model size, which we guess from the screen width
         let screen = WKInterfaceDevice.current().screenBounds
-        let width = screen.width - 2 /* insets */
         let height: CGFloat
 
-        switch width {
+        switch screen.width {
         case 136: // 38mm
-            height = 68
-        case 156: // 42mm
-            height = 86
+            height = 138
         case 162: // 40mm
-            height = 88
+            height = 143
+        case 156: // 42mm
+            height = 148
         case 184: // 44mm
-            height = 106
+            height = 153
         default:
             height = 86
         }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
-    <device id="watch44" orientation="portrait">
+    <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -377,8 +377,10 @@
                             <items>
                                 <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
-                            <variation key="device=watch38mm" height="68"/>
-                            <variation key="device=watch44mm" height="106"/>
+                            <variation key="device=watch38mm" height="138"/>
+                            <variation key="device=watch40mm" height="143"/>
+                            <variation key="device=watch42mm" height="148"/>
+                            <variation key="device=watch44mm" height="153"/>
                         </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
@@ -409,7 +411,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="340" y="751.62436548223343"/>
+            <point key="canvasLocation" x="340" y="751.48717948717956"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
@@ -478,7 +480,7 @@
                                             <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
                                         </label>
                                         <label alignment="left" text="6.225 U" id="0xu-iL-rTb">
-                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <fontDescription key="font" style="UICTFontTextStyleBody"/>
                                         </label>
                                     </items>
@@ -489,7 +491,7 @@
                                             <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
                                         </label>
                                         <label alignment="left" text="+0.425 U/h" id="jEm-it-PQ9">
-                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </label>
                                     </items>
                                 </group>

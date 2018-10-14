@@ -60,7 +60,7 @@ final class DataHUDController: HUDInterfaceController {
 
         if let activeInsulin = activeContext.iob, let valueStr = insulinFormatter.string(from: activeInsulin) {
             iobLabel.setText(String(format: NSLocalizedString(
-                    "IOB %1$@ U",
+                    "%1$@ U",
                     comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"
                 ),
                 valueStr
@@ -74,7 +74,7 @@ final class DataHUDController: HUDInterfaceController {
             let valueStr = carbFormatter.string(from: carbsOnBoard)
 
             cobLabel.setText(String(format: NSLocalizedString(
-                    "COB %1$@ g",
+                    "%1$@ g",
                     comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"
                 ),
                 valueStr!
