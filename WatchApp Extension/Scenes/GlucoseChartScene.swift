@@ -210,13 +210,13 @@ class GlucoseChartScene: SKScene {
 
         switch screen.width {
         case 136: // 38mm
-            height = 138
+            height = 116
         case 162: // 40mm
-            height = 143
+            height = 127
         case 156: // 42mm
-            height = 148
+            height = 126
         case 184: // 44mm
-            height = 153
+            height = 144
         default:
             height = 86
         }
