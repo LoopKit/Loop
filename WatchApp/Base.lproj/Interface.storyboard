@@ -137,10 +137,6 @@
                                 <group width="0.25" alignment="left" layout="vertical" id="2Qn-78-Zex">
                                     <items>
                                         <imageView alignment="center" image="loop_unknown" contentMode="center" id="Q7C-xN-eH8"/>
-                                        <timer width="1" alignment="left" hidden="YES" textAlignment="center" enabled="YES" format="abbreviated" previewedSeconds="500" id="sG9-yO-4Xy">
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                            <calendarUnit key="units" minute="YES"/>
-                                        </timer>
                                     </items>
                                 </group>
                                 <group width="0.75" alignment="left" layout="vertical" id="QDM-Gw-2Ex">
@@ -157,9 +153,6 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="right" verticalAlignment="bottom" textAlignment="right" minimumScaleFactor="0.5" id="cZW-uY-zIa">
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                        </label>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
@@ -263,7 +256,6 @@
                         <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
-                        <outlet property="loopTimer" destination="sG9-yO-4Xy" id="tfl-hp-Eu5"/>
                         <outlet property="preMealButton" destination="jY0-1m-ful" id="IMe-rm-JYl"/>
                         <outlet property="preMealButtonBackground" destination="mBB-jG-wHy" id="Ouy-xo-rMR"/>
                         <outlet property="preMealButtonImage" destination="Asx-tm-mEg" id="DIe-5b-uc1"/>
@@ -359,10 +351,6 @@
                                 <group width="0.25" alignment="left" layout="vertical" id="Z7g-qg-0wK">
                                     <items>
                                         <imageView alignment="center" image="loop_unknown" contentMode="center" id="ifw-dh-btK"/>
-                                        <timer width="1" alignment="left" hidden="YES" textAlignment="center" enabled="YES" format="abbreviated" previewedSeconds="500" id="P2b-9P-EbP">
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                            <calendarUnit key="units" minute="YES"/>
-                                        </timer>
                                     </items>
                                 </group>
                                 <group width="0.75" alignment="left" layout="vertical" id="nPX-XN-diX">
@@ -379,9 +367,6 @@
                                             </items>
                                             <variation key="device=watch42mm" height="29"/>
                                         </group>
-                                        <label width="1" alignment="left" verticalAlignment="bottom" text="---" textAlignment="right" minimumScaleFactor="0.5" id="U5L-zt-Ck7">
-                                            <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                        </label>
                                     </items>
                                     <variation key="device=watch40mm" widthAdjustment="-8.5"/>
                                     <variation key="device=watch44mm" widthAdjustment="-9.5"/>
@@ -394,18 +379,6 @@
                             </items>
                             <variation key="device=watch38mm" height="68"/>
                             <variation key="device=watch44mm" height="106"/>
-                        </group>
-                        <group width="1" alignment="center" id="rSt-1g-97T">
-                            <items>
-                                <label alignment="left" verticalAlignment="bottom" text="---" minimumScaleFactor="0.5" id="PI8-dB-Ykw" userLabel="IOB Label">
-                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                </label>
-                                <label alignment="right" verticalAlignment="bottom" text="---" minimumScaleFactor="0.5" id="gC1-LZ-QMz" userLabel="COB Label">
-                                    <fontDescription key="font" style="UICTFontTextStyleCaption1"/>
-                                </label>
-                            </items>
-                            <variation key="device=watch40mm" widthAdjustment="-17"/>
-                            <variation key="device=watch44mm" widthAdjustment="-19"/>
                         </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
@@ -428,18 +401,15 @@
                         </items>
                     </menu>
                     <connections>
-                        <outlet property="basalLabel" destination="U5L-zt-Ck7" id="mM0-Vf-6uk"/>
-                        <outlet property="cobLabel" destination="gC1-LZ-QMz" id="zeH-DE-pAh"/>
                         <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
-                        <outlet property="iobLabel" destination="PI8-dB-Ykw" id="S3x-RE-C7L"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
-                        <outlet property="loopTimer" destination="P2b-9P-EbP" id="5xU-ne-x8i"/>
+                        <segue destination="L6b-jz-BPv" kind="relationship" relationship="nextPage" id="51l-PY-yDG"/>
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="342" y="754"/>
+            <point key="canvasLocation" x="340" y="751.62436548223343"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
@@ -467,6 +437,86 @@
                 </notificationController>
             </objects>
             <point key="canvasLocation" x="38" y="1153"/>
+        </scene>
+        <!--Loop-->
+        <scene sceneID="mYv-uf-Zz0">
+            <objects>
+                <controller identifier="DataHUDController" title="Loop" alwaysBounce="YES" id="L6b-jz-BPv" customClass="DataHUDController" customModule="WatchApp_Extension">
+                    <items>
+                        <group width="1" alignment="left" id="pXN-2b-PyZ">
+                            <items>
+                                <group width="0.25" alignment="left" layout="vertical" id="DSZ-LM-LvX">
+                                    <items>
+                                        <imageView alignment="center" image="loop_unknown" contentMode="center" id="6ud-R0-YBi"/>
+                                    </items>
+                                </group>
+                                <group width="0.75" alignment="left" layout="vertical" id="tbu-dc-kPL">
+                                    <items>
+                                        <group width="1" height="26" alignment="left" id="B98-ff-cNG">
+                                            <items>
+                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="lww-lD-Daq">
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="FJh-kf-aL9">
+                                                    <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
+                                                </label>
+                                            </items>
+                                            <variation key="device=watch42mm" height="29"/>
+                                        </group>
+                                    </items>
+                                    <variation key="device=watch40mm" widthAdjustment="-8.5"/>
+                                    <variation key="device=watch44mm" widthAdjustment="-9.5"/>
+                                </group>
+                            </items>
+                        </group>
+                        <group width="1" alignment="left" layout="vertical" id="agX-Be-Wll">
+                            <items>
+                                <group width="1" alignment="left" layout="vertical" id="seG-UI-feg">
+                                    <items>
+                                        <label alignment="left" text="INSULIN ON BOARD" id="kvt-sg-hNd">
+                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                        </label>
+                                        <label alignment="left" text="6.225 U" id="0xu-iL-rTb">
+                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleBody"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" layout="vertical" id="e7V-wS-E8a">
+                                    <items>
+                                        <label alignment="left" text="TEMP BASAL" id="2Xn-N5-rPe">
+                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                        </label>
+                                        <label alignment="left" text="+0.425 U/h" id="jEm-it-PQ9">
+                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <group width="1" alignment="left" layout="vertical" id="rT0-gY-m7w">
+                                    <items>
+                                        <label alignment="left" text="CARBS ON BOARD" id="KgQ-eG-Qak">
+                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                        </label>
+                                        <label alignment="left" text="125 g" id="Gwb-Qi-J05">
+                                            <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </label>
+                                    </items>
+                                </group>
+                            </items>
+                        </group>
+                    </items>
+                    <connections>
+                        <outlet property="basalLabel" destination="jEm-it-PQ9" id="zF3-4c-yTb"/>
+                        <outlet property="cobLabel" destination="Gwb-Qi-J05" id="r1y-JW-9Lz"/>
+                        <outlet property="eventualGlucoseLabel" destination="FJh-kf-aL9" id="3oh-a3-WlL"/>
+                        <outlet property="glucoseLabel" destination="lww-lD-Daq" id="ITS-iM-xqW"/>
+                        <outlet property="iobLabel" destination="0xu-iL-rTb" id="mm8-t8-aIr"/>
+                        <outlet property="loopHUDImage" destination="6ud-R0-YBi" id="JQN-dJ-bg3"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="646" y="753.61607142857144"/>
         </scene>
     </scenes>
     <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

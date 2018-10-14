@@ -210,9 +210,13 @@ class GlucoseChartScene: SKScene {
         let height: CGFloat
 
         switch width {
-        case let x where x < 150:  // 38mm
+        case 136: // 38mm
             height = 68
-        case let x where x > 180:  // 44mm
+        case 156: // 42mm
+            height = 86
+        case 162: // 40mm
+            height = 88
+        case 184: // 44mm
             height = 106
         default:
             height = 86

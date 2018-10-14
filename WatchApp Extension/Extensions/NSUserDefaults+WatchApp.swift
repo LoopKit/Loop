@@ -8,18 +8,23 @@
 
 import Foundation
 
+enum Page: Int8 {
+    case Action = 0
+    case Chart = 1
+    case Data = 2
+}
 
 extension UserDefaults {
     private enum Key: String {
-        case StartOnChartPage = "com.loudnate.Naterade.StartOnChartPage"
+        case StartPage = "com.loudnate.Naterade.StartPage"
     }
 
-    var startOnChartPage: Bool {
+    var startPage: Page {
         get {
-            return object(forKey: Key.StartOnChartPage.rawValue) as? Bool ?? false
+            return object(forKey: Key.StartPage.rawValue) as? Page ?? .Action
         }
         set {
-            set(newValue, forKey: Key.StartOnChartPage.rawValue)
+            set(newValue, forKey: Key.StartPage.rawValue)
         }
     }
 }
