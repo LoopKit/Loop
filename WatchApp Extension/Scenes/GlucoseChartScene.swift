@@ -28,7 +28,7 @@ private enum NodePlane: Int {
 private extension SKLabelNode {
     static func basic(at position: CGPoint) -> SKLabelNode {
         let basic = SKLabelNode(text: "--")
-        basic.fontSize = 15
+        basic.fontSize = UIFont.preferredFont(forTextStyle: .caption2).pointSize
         basic.fontName = "HelveticaNeue"
         basic.fontColor = .chartLabel
         basic.alpha = 0.8
