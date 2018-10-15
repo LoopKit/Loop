@@ -255,29 +255,17 @@
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
                                     </items>
+                                    <gestureRecognizers>
+                                        <longPressGestureRecognizer id="eN1-TN-G1D">
+                                            <connections>
+                                                <action selector="workoutLongPress:" destination="rNf-Mh-tID" id="TQb-t9-xwV"/>
+                                            </connections>
+                                        </longPressGestureRecognizer>
+                                    </gestureRecognizers>
                                 </group>
                             </items>
                         </group>
                     </items>
-                    <menu key="menu" id="IVn-Nn-Mtu">
-                        <items>
-                            <menuItem title="Workout 30 minutes" image="workout" id="JiF-Cj-y5x">
-                                <connections>
-                                    <action selector="setWorkout30Min" destination="rNf-Mh-tID" id="019-4M-zpG"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Workout 1 hour" image="workout" id="q7I-Be-Fm4">
-                                <connections>
-                                    <action selector="setWorkout1Hour" destination="rNf-Mh-tID" id="YaT-YF-3u9"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Workout 2 hours" image="workout" id="QQ3-gL-dit">
-                                <connections>
-                                    <action selector="setWorkout2Hours" destination="rNf-Mh-tID" id="8PX-C0-J1b"/>
-                                </connections>
-                            </menuItem>
-                        </items>
-                    </menu>
                     <connections>
                         <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>

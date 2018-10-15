@@ -19,6 +19,18 @@ final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var workoutButtonImage: WKInterfaceImage!
     @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
 
+    @IBAction func workoutLongPress(_ sender: Any) {
+        guard let longPressGesture = sender as? WKLongPressGestureRecognizer else {
+            return
+        }
+        switch longPressGesture.state {
+        case .began:
+            presentWorkoutOptions()
+        default:
+            break
+        }
+    }
+    
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
 
     private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
@@ -81,27 +93,34 @@ final class ActionHUDController: HUDInterfaceController {
 
     // MARK: - Menu Items
 
-    private func setWorkoutMode(duration: Double) {
+    private func setWorkoutMode(endDate: Date) {
         guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
             return
         }
-        let endDate = Date().addingTimeInterval(TimeInterval(hours: duration))
         guard glucoseTargetRangeSchedule.setOverride(.workout, until: endDate) else {
             return
         }
         sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
     }
     
-    // Add force-touch menu items to set workout mode for certain fixed durations:
-    @IBAction func setWorkout30Min() {
-        setWorkoutMode(duration: 0.5)
+    // Present action sheet to set workout mode for certain fixed durations:
+    private func presentWorkoutOptions() {
+        var workoutActions: [WKAlertAction] = []
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .full
+        for duration in [0.5, 1.0, 2.0] {
+            let durationString = formatter.string(from: duration*3600)!
+            let endDate = Date().addingTimeInterval(TimeInterval(hours: duration))
+            let action = WKAlertAction(title: durationString, style: .default, handler: { self.setWorkoutMode(endDate: endDate) } )
+            workoutActions.append(action)
+        }
+        let distantFuture = NSLocalizedString("Indefinitely", comment: "The title of a target alert action specifying an indefinitely long workout targets duration")
+        let indefiniteAction = WKAlertAction(title: distantFuture, style: .default, handler: { self.setWorkoutMode(endDate: .distantFuture) } )
+        workoutActions.append(indefiniteAction)
+        let workoutMessage = NSLocalizedString("Workout for", comment: "The title of a watch menu asking the user to specify the duration of workout targets")
+        presentAlert(withTitle: "", message: workoutMessage, preferredStyle: .actionSheet, actions: workoutActions)
     }
-    @IBAction func setWorkout1Hour() {
-        setWorkoutMode(duration: 1.0)
-    }
-    @IBAction func setWorkout2Hours() {
-        setWorkoutMode(duration: 2.0)
-    }
+    
 
     @IBAction func togglePreMealMode() {
         guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
