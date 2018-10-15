@@ -46,8 +46,45 @@ extension CLKComplicationTemplate {
         timeFormatter.dateStyle = .none
         timeFormatter.timeStyle = .short
 
+        
         switch family {
-        case .graphicCorner, .graphicCircular, .graphicRectangular, .graphicBezel:
+        case .graphicCorner:
+            // ***************************************
+            // ** Apple Watch Series 4 Complication **
+            // ***************************************
+            // Corner Text
+            // Outer Text: Current Glucose and Trend
+            // Inner Text: timeText
+
+            if #available(watchOSApplicationExtension 5.0, *) {
+                let cornerTemplate = CLKComplicationTemplateGraphicCornerStackText()
+                cornerTemplate.outerTextProvider = glucoseAndTrendText
+                cornerTemplate.outerTextProvider.tintColor = .green
+                cornerTemplate.innerTextProvider = timeText
+                return cornerTemplate
+            } else {
+                // Fallback on earlier versions
+                return  nil
+            }
+        case .graphicCircular:
+            // ***************************************
+            // ** Apple Watch Series 4 Complication **
+            // ***************************************
+            // Circular Gauge
+            // Full Ring
+            // Current Glucose in Center, Trend Arrow Below
+            // * future enhancement - update gauge colors to reflect loop status, or time in range for the day
+            if #available(watchOSApplicationExtension 5.0, *) {
+                let circularTemplate = CLKComplicationTemplateGraphicCircularOpenGaugeSimpleText()
+                circularTemplate.gaugeProvider = CLKSimpleGaugeProvider(style: .fill, gaugeColor: .green, fillFraction: 1)
+                circularTemplate.centerTextProvider = CLKSimpleTextProvider(text: glucoseString)
+                circularTemplate.bottomTextProvider = CLKSimpleTextProvider(text: (trend?.symbol ?? " "))
+                return circularTemplate
+            } else {
+                // Fallback on earlier versions
+                return nil
+            }
+        case .graphicRectangular, .graphicBezel:
             return nil
         case .modularSmall:
             let template = CLKComplicationTemplateModularSmallStackText()
