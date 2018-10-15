@@ -339,7 +339,7 @@ class GlucoseChartScene: SKScene {
 
         correctionRange?.quantityBetween(start: start, end: end).forEach({ (range) in
             let (sprite, created) = getSprite(forHash: range.chartHashValue)
-            sprite.color = UIColor.glucose.withAlphaComponent(activeOverride != nil ? 0.3 : 0.5)
+            sprite.color = UIColor.glucose.withAlphaComponent(activeOverride != nil ? 0.2 : 0.3)
             sprite.zPosition = NodePlane.ranges.zPosition
             sprite.move(to: scaler.rect(for: range, unit: unit), animated: !created)
             inactiveNodes.removeValue(forKey: range.chartHashValue)
@@ -350,7 +350,7 @@ class GlucoseChartScene: SKScene {
         // extends to the end of the visible window.
         if let range = activeOverride {
             let (sprite1, created) = getSprite(forHash: range.chartHashValue)
-            sprite1.color = UIColor.glucose.withAlphaComponent(0.5)
+            sprite1.color = UIColor.glucose.withAlphaComponent(0.4)
             sprite1.zPosition = NodePlane.overrideRanges.zPosition
             sprite1.move(to: scaler.rect(for: range, unit: unit), animated: !created)
             inactiveNodes.removeValue(forKey: range.chartHashValue)
@@ -358,7 +358,7 @@ class GlucoseChartScene: SKScene {
             if range.end < end {
                 let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: end, value: range.value)
                 let (sprite2, created) = getSprite(forHash: extendedRange.chartHashValue)
-                sprite2.color = UIColor.glucose.withAlphaComponent(0.3)
+                sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition
                 sprite2.move(to: scaler.rect(for: extendedRange, unit: unit), animated: !created)
                 inactiveNodes.removeValue(forKey: extendedRange.chartHashValue)
