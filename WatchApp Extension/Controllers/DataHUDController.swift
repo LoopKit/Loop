@@ -21,15 +21,6 @@ final class DataHUDController: HUDInterfaceController {
     private let log = OSLog(category: "DataHUDController")
     private var hasInitialActivation = false
 
-    override func awake(withContext context: Any?) {
-        super.awake(withContext: context)
-
-        if UserDefaults.standard.startPage == .Data {
-            log.default("Switching to start on Data page")
-            becomeCurrentPage()
-        }
-    }
-
     override func willActivate() {
         super.willActivate()
 

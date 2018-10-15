@@ -48,23 +48,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         glucoseScene.presentScene(scene)
     }
 
-    override func awake(withContext context: Any?) {
-        super.awake(withContext: context)
-
-        if UserDefaults.standard.startPage == .Chart {
-            log.default("Switching to start on Chart page")
-            becomeCurrentPage()
-
-            // For some reason, .didAppear() does not get called when we do this. It gets called *twice* the next
-            // time this view appears. Force it by hand now, until we figure out the root cause.
-            //
-            // TODO: possibly because I'm not calling super.awake()? investigate that.
-            DispatchQueue.main.async {
-                self.didAppear()
-            }
-        }
-    }
-
     override func didAppear() {
         super.didAppear()
 
