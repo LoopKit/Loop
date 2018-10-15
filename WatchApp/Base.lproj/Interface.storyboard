@@ -472,40 +472,42 @@
                                 </group>
                             </items>
                         </group>
-                        <group width="1" alignment="left" layout="vertical" id="agX-Be-Wll">
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="seG-UI-feg">
                             <items>
-                                <group width="1" alignment="left" layout="vertical" id="seG-UI-feg">
-                                    <items>
-                                        <label alignment="left" text="INSULIN ON BOARD" id="kvt-sg-hNd">
-                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                        </label>
-                                        <label alignment="left" text="6.225 U" id="0xu-iL-rTb">
-                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleBody"/>
-                                        </label>
-                                    </items>
-                                </group>
-                                <group width="1" alignment="left" layout="vertical" id="e7V-wS-E8a">
-                                    <items>
-                                        <label alignment="left" text="TEMP BASAL" id="2Xn-N5-rPe">
-                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                        </label>
-                                        <label alignment="left" text="+0.425 U/h" id="jEm-it-PQ9">
-                                            <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        </label>
-                                    </items>
-                                </group>
-                                <group width="1" alignment="left" layout="vertical" id="rT0-gY-m7w">
-                                    <items>
-                                        <label alignment="left" text="CARBS ON BOARD" id="KgQ-eG-Qak">
-                                            <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                        </label>
-                                        <label alignment="left" text="125 g" id="Gwb-Qi-J05">
-                                            <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        </label>
-                                    </items>
-                                </group>
+                                <label alignment="left" text="INSULIN ON BOARD" id="kvt-sg-hNd">
+                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                </label>
+                                <label alignment="left" text="6.225 U" id="0xu-iL-rTb">
+                                    <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleBody"/>
+                                </label>
                             </items>
+                            <color key="backgroundColor" red="0.12941176470588234" green="0.13333333333333333" blue="0.13725490196078433" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                        </group>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="e7V-wS-E8a">
+                            <items>
+                                <label alignment="left" text="TEMP BASAL" id="2Xn-N5-rPe">
+                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                </label>
+                                <label alignment="left" text="+0.425 U/h" id="jEm-it-PQ9">
+                                    <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" red="0.12941176469999999" green="0.1333333333" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                        </group>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="rT0-gY-m7w">
+                            <items>
+                                <label alignment="left" text="CARBS ON BOARD" id="KgQ-eG-Qak">
+                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                </label>
+                                <label alignment="left" text="125 g" id="Gwb-Qi-J05">
+                                    <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" red="0.12941176469999999" green="0.1333333333" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
                         </group>
                     </items>
                     <connections>
