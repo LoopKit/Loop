@@ -238,12 +238,10 @@ class GlucoseChartScene: SKScene {
         addChild(now)
 
         hoursLabel = SKLabelNode.basic(at: CGPoint(x: textInsets.left, y: size.height - textInsets.top))
-        hoursLabel.verticalAlignmentMode = .top
         addChild(hoursLabel)
 
         maxBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - textInsets.right, y: size.height - textInsets.top))
         maxBGLabel.horizontalAlignmentMode = .right
-        maxBGLabel.verticalAlignmentMode = .top
         addChild(maxBGLabel)
 
         minBGLabel = SKLabelNode.basic(at: CGPoint(x: size.width - textInsets.right, y: textInsets.bottom))
