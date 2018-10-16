@@ -17,6 +17,7 @@ enum Page: NSNumber {
 extension UserDefaults {
     private enum Key: String {
         case StartPage = "com.loudnate.Naterade.StartPage"
+        case VisibleDuration = "com.loudnate.Naterade.VisibleDuration"
     }
 
     var startPage: Page {
@@ -28,6 +29,18 @@ extension UserDefaults {
         }
         set {
             set(newValue.rawValue, forKey: Key.StartPage.rawValue)
+        }
+    }
+
+    var visibleDuration: TimeInterval  {
+        get {
+            if let rawValue = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval, let visibleDuration = TimeInterval(rawValue: rawValue) {
+                return visibleDuration
+            }
+            return TimeInterval (hours: 6)
+        }
+        set {
+            set(newValue.rawValue, forKey: Key.VisibleDuration.rawValue)
         }
     }
 }
