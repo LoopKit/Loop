@@ -8,10 +8,10 @@
 
 import Foundation
 
-enum Page: Int8 {
+enum Page: NSNumber {
     case Action = 0
-    case Chart = 1
-    case Data = 2
+    case Chart  = 1
+    case Data   = 2
 }
 
 extension UserDefaults {
@@ -21,10 +21,13 @@ extension UserDefaults {
 
     var startPage: Page {
         get {
-            return object(forKey: Key.StartPage.rawValue) as? Page ?? .Action
+            if let rawValue = object(forKey: Key.StartPage.rawValue) as? NSNumber, let page = Page(rawValue: rawValue) {
+                return page
+            }
+            return .Action
         }
         set {
-            set(newValue, forKey: Key.StartPage.rawValue)
+            set(newValue.rawValue, forKey: Key.StartPage.rawValue)
         }
     }
 }
