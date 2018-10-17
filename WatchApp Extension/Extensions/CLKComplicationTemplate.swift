@@ -93,4 +93,63 @@ extension CLKComplicationTemplate {
             return template
         }
     }
+
+    static func imageTemplate(for family: CLKComplicationFamily) -> CLKComplicationTemplate? {
+        switch family {
+        case .modularSmall:
+            guard let image = UIImage(named: "Modular") else { return nil }
+
+            let template = CLKComplicationTemplateModularSmallSimpleImage()
+            template.imageProvider = CLKImageProvider(onePieceImage: image)
+            return template
+        case .modularLarge:
+            return nil
+        case .utilitarianSmall:
+            guard let image = UIImage(named: "Utility") else { return nil }
+
+            let template = CLKComplicationTemplateUtilitarianSmallSquare()
+            template.imageProvider = CLKImageProvider(onePieceImage: image)
+            return template
+        case .utilitarianSmallFlat:
+            return nil
+        case .utilitarianLarge:
+            return nil
+        case .circularSmall:
+            guard let image = UIImage(named: "Circular") else { return nil }
+
+            let template = CLKComplicationTemplateCircularSmallSimpleImage()
+            template.imageProvider = CLKImageProvider(onePieceImage: image)
+            return template
+        case .extraLarge:
+            guard let image = UIImage(named: "Extra Large") else { return nil }
+
+            let template = CLKComplicationTemplateExtraLargeSimpleImage()
+            template.imageProvider = CLKImageProvider(onePieceImage: image)
+            return template
+        case .graphicCorner:
+            guard #available(watchOSApplicationExtension 5.0, *), let image = UIImage(named: "Graphic Corner") else { return nil }
+
+            let template = CLKComplicationTemplateGraphicCornerCircularImage()
+            template.imageProvider = CLKFullColorImageProvider(fullColorImage: image)
+            return template
+        case .graphicBezel:
+            guard #available(watchOSApplicationExtension 5.0, *), let image = UIImage(named: "Graphic Bezel") else { return nil }
+
+            let template = CLKComplicationTemplateGraphicBezelCircularText()
+            template.circularTemplate = {
+                let template = CLKComplicationTemplateGraphicCircularImage()
+                template.imageProvider = CLKFullColorImageProvider(fullColorImage: image)
+                return template
+            }()
+            return template
+        case .graphicCircular:
+            guard #available(watchOSApplicationExtension 5.0, *), let image = UIImage(named: "Graphic Circular") else { return nil }
+
+            let template = CLKComplicationTemplateGraphicCircularImage()
+            template.imageProvider = CLKFullColorImageProvider(fullColorImage: image)
+            return template
+        case .graphicRectangular:
+            return nil
+        }
+    }
 }

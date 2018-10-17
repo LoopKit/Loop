@@ -1,6 +1,3 @@
-/* The complication template example unit string */
-"120↘︎" = "120↘︎";
-
 /* Utilitarian large flat format string (1: Glucose & Trend symbol) (2: Eventual Glucose) (3: Time) */
 "UtilitarianLargeFlat" = "%@%@ %@";
 
