@@ -83,7 +83,13 @@ final class StatusTableViewController: ChartsTableViewController {
                         self.reloadData(animated: true)
                     }
                 }
+            },
+            notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: OperationQueue.main) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    self?.configurePumpManagerHUDViews()
+                }
             }
+
         ]
 
         if let gestureRecognizer = charts.gestureRecognizer {
@@ -435,18 +441,6 @@ final class StatusTableViewController: ChartsTableViewController {
                         sensor: self.deviceManager.cgmManager?.sensorState
                     )
                 }
-
-                // Reservoir HUD
-                if let reservoir = lastReservoirValue {
-                    if let capacity = self.deviceManager.pumpManager?.pumpReservoirCapacity {
-                        hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, reservoir.unitVolume / capacity))
-                    }
-
-                    hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
-                }
-
-                // Battery HUD
-                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpManager?.status.pumpBatteryChargeRemaining ?? UserDefaults.appGroup.statusExtensionContext?.batteryPercentage
             }
 
             // Show/hide the table view rows
@@ -1069,17 +1063,34 @@ final class StatusTableViewController: ChartsTableViewController {
             if deviceManager.cgmManager?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
-
+            
+            configurePumpManagerHUDViews()
+            
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.glucoseHUD.stateColors = .cgmStatus
             hudView.glucoseHUD.tintColor = .glucoseTintColor
             hudView.basalRateHUD.tintColor = .doseTintColor
-            hudView.reservoirVolumeHUD.stateColors = .pumpStatus
-            hudView.batteryHUD.stateColors = .pumpStatus
 
             refreshContext.update(with: .status)
             self.log.debug("[reloadData] after hudView loaded")
             reloadData()
+        }
+    }
+    
+    private func configurePumpManagerHUDViews() {
+        if let pumpManager = deviceManager.pumpManager,
+            let hudView = hudView
+        {
+            let views = pumpManager.hudViews()
+            for view in views {
+                let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
+                view.addGestureRecognizer(hudTapGestureRecognizer)
+                
+                if let levelHUDView = view as? LevelHUDView {
+                    levelHUDView.stateColors = .pumpStatus
+                }
+            }
+            hudView.setAdditionalHUDViews(views)
         }
     }
 
@@ -1097,6 +1108,20 @@ final class StatusTableViewController: ChartsTableViewController {
     @objc private func openCGMApp(_: Any) {
         if let url = deviceManager.cgmManager?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
+        }
+    }
+
+    @objc private func hudViewTapped(_ sender: UIGestureRecognizer) {
+        if let hudSubView = sender.view as? BaseHUDView,
+            let pumpManager = deviceManager.pumpManager,
+            let action = pumpManager.hudTapAction(identifier: hudSubView.hudViewIdentifier)
+        {
+            switch action {
+            case .presentViewController(let vc):
+                self.present(vc, animated: true, completion: nil)
+            case .openAppURL(let url):
+                UIApplication.shared.open(url)
+            }
         }
     }
 }

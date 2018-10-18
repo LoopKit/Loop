@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LoopKitUI
 
 public final class LoopCompletionHUDView: BaseHUDView {
 

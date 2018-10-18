@@ -111,6 +111,10 @@ final class StatusExtensionDataManager {
                     isLocal: sensorInfo.isLocal
                 )
             }
+            
+            if let pumpManager = dataManager.pumpManager {
+                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerUI: pumpManager)
+            }
 
             completionHandler(context)
         }

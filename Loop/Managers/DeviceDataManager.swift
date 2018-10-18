@@ -23,6 +23,8 @@ final class DeviceDataManager {
             }
 
             setupPump()
+            
+            NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
             UserDefaults.appGroup.pumpManager = pumpManager
         }
@@ -400,6 +402,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 
 extension Notification.Name {
     static let PumpSuspendStateChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpSuspendStateChanged")
+    static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
 }
 
 extension DeviceDataManager {

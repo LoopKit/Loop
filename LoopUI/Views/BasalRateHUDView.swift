@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import LoopKitUI
 
 public final class BasalRateHUDView: BaseHUDView {
 
