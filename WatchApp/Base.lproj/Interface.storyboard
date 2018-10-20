@@ -382,6 +382,58 @@
                             <variation key="device=watch42mm" height="126"/>
                             <variation key="device=watch44mm" height="144"/>
                         </group>
+                        <group width="1" height="12" alignment="left" id="man-Ev-vTI" userLabel="Spacer"/>
+                        <separator alignment="left" alpha="0.5" id="qXC-hQ-e1L">
+                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mgy-04-czh">
+                            <items>
+                                <label alignment="left" text="TEMP BASAL" id="Lht-zi-xKw">
+                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                </label>
+                                <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                        </group>
+                        <separator alignment="left" alpha="0.5" id="Idh-32-omJ">
+                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="prj-d2-lfq">
+                            <items>
+                                <label alignment="left" text="ACTIVE INSULIN" id="CgF-0q-8tP">
+                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                </label>
+                                <label alignment="left" text="6.225 U" id="WWK-X3-2ZP">
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                        </group>
+                        <separator alignment="left" alpha="0.5" id="Gm6-EW-QpU">
+                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                        </separator>
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mbG-2a-yiB">
+                            <items>
+                                <label alignment="left" text="ACTIVE CARBS" id="zMo-N8-tex">
+                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                </label>
+                                <label alignment="left" text="125 g" id="Bix-bw-zdh">
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                        </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
                         <items>
@@ -403,11 +455,13 @@
                         </items>
                     </menu>
                     <connections>
+                        <outlet property="basalLabel" destination="yBm-Bi-1HM" id="bnX-p6-wMh"/>
+                        <outlet property="cobLabel" destination="Bix-bw-zdh" id="gdF-gd-MBZ"/>
                         <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
+                        <outlet property="iobLabel" destination="WWK-X3-2ZP" id="Lv5-07-80I"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
-                        <segue destination="L6b-jz-BPv" kind="relationship" relationship="nextPage" id="51l-PY-yDG"/>
                     </connections>
                 </controller>
             </objects>
@@ -439,88 +493,6 @@
                 </notificationController>
             </objects>
             <point key="canvasLocation" x="38" y="1153"/>
-        </scene>
-        <!--Loop-->
-        <scene sceneID="mYv-uf-Zz0">
-            <objects>
-                <controller identifier="DataHUDController" title="Loop" alwaysBounce="YES" id="L6b-jz-BPv" customClass="DataHUDController" customModule="WatchApp_Extension">
-                    <items>
-                        <group width="1" alignment="left" id="pXN-2b-PyZ">
-                            <items>
-                                <group width="0.25" alignment="left" layout="vertical" id="DSZ-LM-LvX">
-                                    <items>
-                                        <imageView alignment="center" image="loop_unknown" contentMode="center" id="6ud-R0-YBi"/>
-                                    </items>
-                                </group>
-                                <group width="0.75" alignment="left" layout="vertical" id="tbu-dc-kPL">
-                                    <items>
-                                        <group width="1" height="26" alignment="left" id="B98-ff-cNG">
-                                            <items>
-                                                <label height="1" alignment="left" hidden="YES" text="---" textAlignment="center" id="lww-lD-Daq">
-                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
-                                                </label>
-                                                <label height="1" alignment="right" hidden="YES" text="---" textAlignment="center" id="FJh-kf-aL9">
-                                                    <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
-                                                </label>
-                                            </items>
-                                            <variation key="device=watch42mm" height="29"/>
-                                        </group>
-                                    </items>
-                                    <variation key="device=watch40mm" widthAdjustment="-8.5"/>
-                                    <variation key="device=watch44mm" widthAdjustment="-9.5"/>
-                                </group>
-                            </items>
-                        </group>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="seG-UI-feg">
-                            <items>
-                                <label alignment="left" text="INSULIN ON BOARD" id="kvt-sg-hNd">
-                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                </label>
-                                <label alignment="left" text="6.225 U" id="0xu-iL-rTb">
-                                    <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleBody"/>
-                                </label>
-                            </items>
-                            <color key="backgroundColor" red="0.12941176470588234" green="0.13333333333333333" blue="0.13725490196078433" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                        </group>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="e7V-wS-E8a">
-                            <items>
-                                <label alignment="left" text="TEMP BASAL" id="2Xn-N5-rPe">
-                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                </label>
-                                <label alignment="left" text="+0.425 U/h" id="jEm-it-PQ9">
-                                    <color key="textColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </label>
-                            </items>
-                            <color key="backgroundColor" red="0.12941176469999999" green="0.1333333333" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                        </group>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="rT0-gY-m7w">
-                            <items>
-                                <label alignment="left" text="CARBS ON BOARD" id="KgQ-eG-Qak">
-                                    <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
-                                </label>
-                                <label alignment="left" text="125 g" id="Gwb-Qi-J05">
-                                    <color key="textColor" red="0.38823529410000002" green="0.85490196080000003" blue="0.21960784310000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </label>
-                            </items>
-                            <color key="backgroundColor" red="0.12941176469999999" green="0.1333333333" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                        </group>
-                    </items>
-                    <connections>
-                        <outlet property="basalLabel" destination="jEm-it-PQ9" id="zF3-4c-yTb"/>
-                        <outlet property="cobLabel" destination="Gwb-Qi-J05" id="r1y-JW-9Lz"/>
-                        <outlet property="eventualGlucoseLabel" destination="FJh-kf-aL9" id="3oh-a3-WlL"/>
-                        <outlet property="glucoseLabel" destination="lww-lD-Daq" id="ITS-iM-xqW"/>
-                        <outlet property="iobLabel" destination="0xu-iL-rTb" id="mm8-t8-aIr"/>
-                        <outlet property="loopHUDImage" destination="6ud-R0-YBi" id="JQN-dJ-bg3"/>
-                    </connections>
-                </controller>
-            </objects>
-            <point key="canvasLocation" x="646" y="753.61607142857144"/>
         </scene>
     </scenes>
     <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

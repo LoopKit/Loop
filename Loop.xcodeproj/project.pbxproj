@@ -268,7 +268,6 @@
 		4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
 		4FB76FC61E8C57B100B39636 /* StatusChartsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */; };
 		4FB76FCE1E8C835D00B39636 /* ChartColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */; };
-		4FBC91092173B096001C58B5 /* DataHUDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBC91082173B096001C58B5 /* DataHUDController.swift */; };
 		4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */; };
 		4FDDD23720DC51DF00D04B16 /* LoopDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */; };
@@ -654,7 +653,6 @@
 		4F82654F20E69F9A0031A8F5 /* HUDInterfaceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDInterfaceController.swift; sourceTree = "<group>"; };
 		4FB76FC51E8C57B100B39636 /* StatusChartsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartColorPalette.swift; sourceTree = "<group>"; };
-		4FBC91082173B096001C58B5 /* DataHUDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataHUDController.swift; sourceTree = "<group>"; };
 		4FC8C8001DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSUserDefaults+StatusExtension.swift"; sourceTree = "<group>"; };
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
@@ -923,7 +921,6 @@
 		4328E0121CFBE1B700E199AA /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				4FBC91082173B096001C58B5 /* DataHUDController.swift */,
 				4328E0151CFBE1DA00E199AA /* ActionHUDController.swift */,
 				4328E01D1CFBE25F00E199AA /* AddCarbsInterfaceController.swift */,
 				4328E0161CFBE1DA00E199AA /* BolusInterfaceController.swift */,
@@ -1968,7 +1965,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FBC91092173B096001C58B5 /* DataHUDController.swift in Sources */,
 				4372E488213C862B0068E043 /* SampleValue.swift in Sources */,
 				4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */,
 				4FF4D1011E18375000846527 /* WatchContext.swift in Sources */,

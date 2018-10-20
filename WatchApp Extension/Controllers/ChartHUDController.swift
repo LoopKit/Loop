@@ -14,6 +14,9 @@ import SpriteKit
 import os.log
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
+    @IBOutlet weak var basalLabel: WKInterfaceLabel!
+    @IBOutlet weak var iobLabel: WKInterfaceLabel!
+    @IBOutlet weak var cobLabel: WKInterfaceLabel!
     @IBOutlet weak var glucoseScene: WKInterfaceSKScene!
     @IBAction func setChartWindow1Hour() {
         scene.visibleDuration = .hours(2)
@@ -80,7 +83,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             log.default("willActivate() unpausing")
         }
 
-        if !hasInitialActivation && UserDefaults.standard.startPage == .Chart {
+        if !hasInitialActivation && UserDefaults.standard.startOnChartPage {
             log.default("Switching to start on Chart page")
             becomeCurrentPage()
         }
@@ -99,6 +102,58 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
     override func update() {
         super.update()
+
+        guard let activeContext = loopManager.activeContext else {
+            return
+        }
+
+        let insulinFormatter: NumberFormatter = {
+            let numberFormatter = NumberFormatter()
+
+            numberFormatter.numberStyle = .decimal
+            numberFormatter.minimumFractionDigits = 1
+            numberFormatter.maximumFractionDigits = 1
+
+            return numberFormatter
+        }()
+
+        if let activeInsulin = activeContext.iob, let valueStr = insulinFormatter.string(from: activeInsulin) {
+            iobLabel.setText(String(format: NSLocalizedString(
+                    "IOB %1$@ U",
+                    comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"
+                ),
+                valueStr
+            ))
+        }
+
+        if let carbsOnBoard = activeContext.cob {
+            let carbFormatter = NumberFormatter()
+            carbFormatter.numberStyle = .decimal
+            carbFormatter.maximumFractionDigits = 0
+            let valueStr = carbFormatter.string(from: carbsOnBoard)
+
+            cobLabel.setText(String(format: NSLocalizedString(
+                    "COB %1$@ g",
+                    comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"
+                ),
+                valueStr!
+            ))
+        }
+
+        if let tempBasal = activeContext.lastNetTempBasalDose {
+            let basalFormatter = NumberFormatter()
+            basalFormatter.numberStyle = .decimal
+            basalFormatter.minimumFractionDigits = 1
+            basalFormatter.maximumFractionDigits = 3
+            basalFormatter.positivePrefix = basalFormatter.plusSign
+            let valueStr = basalFormatter.string(from: tempBasal)
+
+            let basalLabelText = String(format: NSLocalizedString(
+                "%1$@ U/hr",
+                comment: "The subtitle format describing the current temp basal rate. (1: localized basal rate description)"),
+                                      valueStr!)
+            basalLabel.setText(basalLabelText)
+        }
 
         if glucoseScene.isPaused {
             log.default("update() unpausing")

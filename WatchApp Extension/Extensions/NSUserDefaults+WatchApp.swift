@@ -8,27 +8,19 @@
 
 import Foundation
 
-enum Page: NSNumber {
-    case Action = 0
-    case Chart  = 1
-    case Data   = 2
-}
 
 extension UserDefaults {
     private enum Key: String {
-        case StartPage = "com.loudnate.Naterade.StartPage"
+        case StartOnChartPage = "com.loudnate.Naterade.StartOnChartPage"
         case VisibleDuration = "com.loudnate.Naterade.VisibleDuration"
     }
 
-    var startPage: Page {
+    var startOnChartPage: Bool {
         get {
-            if let rawValue = object(forKey: Key.StartPage.rawValue) as? NSNumber, let page = Page(rawValue: rawValue) {
-                return page
-            }
-            return .Action
+            return object(forKey: Key.StartOnChartPage.rawValue) as? Bool ?? false
         }
         set {
-            set(newValue.rawValue, forKey: Key.StartPage.rawValue)
+            set(newValue, forKey: Key.StartOnChartPage.rawValue)
         }
     }
 

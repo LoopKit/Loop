@@ -81,16 +81,7 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
     }
 
     func applicationWillResignActive() {
-        UserDefaults.standard.startPage = {
-            switch WKExtension.shared().visibleInterfaceController {
-            case is ChartHUDController:
-                return .Chart
-            case is DataHUDController:
-                return .Data
-            default:
-                return .Action
-            }
-        }()
+        UserDefaults.standard.startOnChartPage = (WKExtension.shared().visibleInterfaceController as? ChartHUDController) != nil
     }
 
     // Presumably the main thread?
