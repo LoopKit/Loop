@@ -53,7 +53,7 @@ class ShareService: ServiceAuthentication {
          */
 
         
-        let customServer = "https://127.0.0.1:1979"
+        let customServer = "http://127.0.0.1:1979"
         let customServerTitle = "Spike"
 
         credentials[2].options?.append(
