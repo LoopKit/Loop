@@ -1081,7 +1081,7 @@ final class StatusTableViewController: ChartsTableViewController {
         if let pumpManager = deviceManager.pumpManager,
             let hudView = hudView
         {
-            let views = pumpManager.hudViews()
+            let views = pumpManager.createHUDViews()
             for view in views {
                 let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
                 view.addGestureRecognizer(hudTapGestureRecognizer)
@@ -1114,10 +1114,10 @@ final class StatusTableViewController: ChartsTableViewController {
     @objc private func hudViewTapped(_ sender: UIGestureRecognizer) {
         if let hudSubView = sender.view as? BaseHUDView,
             let pumpManager = deviceManager.pumpManager,
-            let action = pumpManager.hudTapAction(identifier: hudSubView.hudViewIdentifier)
+            let action = pumpManager.didTapOnHudView(hudSubView)
         {
             switch action {
-            case .presentViewController(let vc):
+            case .showViewController(let vc):
                 self.present(vc, animated: true, completion: nil)
             case .openAppURL(let url):
                 UIApplication.shared.open(url)

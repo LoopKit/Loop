@@ -37,7 +37,7 @@ func PumpManagerHUDViewsFromRawValue(_ rawValue: [String: Any]) -> [BaseHUDView]
             return nil
     }
     
-    return Manager.instantiateHUDViews(rawValue: rawState)
+    return Manager.createHUDViews(rawValue: rawState)
 }
 
 extension PumpManagerUI {
