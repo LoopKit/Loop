@@ -373,66 +373,82 @@
                                 </group>
                             </items>
                         </group>
-                        <group width="1" height="86" alignment="left" layout="overlap" id="GqJ-yv-NKQ">
+                        <group width="1" height="86" alignment="left" layout="overlap" id="GqJ-yv-NKQ" userLabel="Graph">
                             <items>
-                                <spriteKitScene width="1" height="1" alignment="center" verticalAlignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
+                                <group width="1" alignment="left" verticalAlignment="bottom" id="YjC-M7-2Jk">
+                                    <items>
+                                        <label alignment="left" text="+0.425 U/h" id="RFD-1a-nh4">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="6.225 U" id="aWM-ld-pSU">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="125 g" id="f3U-7h-wWO">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                    </items>
+                                </group>
+                                <spriteKitScene width="1" height="1" alignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
                             <variation key="device=watch38mm" height="110"/>
                             <variation key="device=watch40mm" height="127"/>
                             <variation key="device=watch42mm" height="126"/>
                             <variation key="device=watch44mm" height="144"/>
                         </group>
-                        <group width="1" height="12" alignment="left" id="man-Ev-vTI" userLabel="Spacer"/>
-                        <separator alignment="left" alpha="0.5" id="qXC-hQ-e1L">
-                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mgy-04-czh">
+                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="bUF-MG-jsb" userLabel="Data">
                             <items>
-                                <label alignment="left" text="TEMP BASAL" id="Lht-zi-xKw">
-                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                </label>
-                                <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
-                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
-                                </label>
+                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mgy-04-czh">
+                                    <items>
+                                        <label alignment="left" text="TEMP BASAL" id="Lht-zi-xKw">
+                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                </group>
+                                <separator alignment="left" alpha="0.5" id="Idh-32-omJ">
+                                    <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                </separator>
+                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="prj-d2-lfq">
+                                    <items>
+                                        <label alignment="left" text="ACTIVE INSULIN" id="CgF-0q-8tP">
+                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="6.225 U" id="WWK-X3-2ZP">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                </group>
+                                <separator alignment="left" alpha="0.5" id="Gm6-EW-QpU">
+                                    <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                </separator>
+                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mbG-2a-yiB">
+                                    <items>
+                                        <label alignment="left" text="ACTIVE CARBS" id="zMo-N8-tex">
+                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="125 g" id="Bix-bw-zdh">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                </group>
                             </items>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                        </group>
-                        <separator alignment="left" alpha="0.5" id="Idh-32-omJ">
-                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="prj-d2-lfq">
-                            <items>
-                                <label alignment="left" text="ACTIVE INSULIN" id="CgF-0q-8tP">
-                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                </label>
-                                <label alignment="left" text="6.225 U" id="WWK-X3-2ZP">
-                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
-                                </label>
-                            </items>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                        </group>
-                        <separator alignment="left" alpha="0.5" id="Gm6-EW-QpU">
-                            <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                        </separator>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mbG-2a-yiB">
-                            <items>
-                                <label alignment="left" text="ACTIVE CARBS" id="zMo-N8-tex">
-                                    <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                </label>
-                                <label alignment="left" text="125 g" id="Bix-bw-zdh">
-                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
-                                </label>
-                            </items>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
                         </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
@@ -460,6 +476,7 @@
                         <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
+                        <outlet property="graphGroup" destination="GqJ-yv-NKQ" id="rII-ss-6a9"/>
                         <outlet property="iobLabel" destination="WWK-X3-2ZP" id="Lv5-07-80I"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
                     </connections>
