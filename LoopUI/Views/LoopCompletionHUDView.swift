@@ -65,10 +65,9 @@ public final class LoopCompletionHUDView: BaseHUDView {
         }
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateTintColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateTintColor()
     }
 
     private func updateTintColor() {

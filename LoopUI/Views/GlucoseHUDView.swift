@@ -43,10 +43,9 @@ public final class GlucoseHUDView: BaseHUDView {
         glucoseLabel.textColor = tintColor
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateColor()
     }
 
     private func updateColor() {

@@ -191,9 +191,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             if let hudViewsContext = context.pumpManagerHUDViewsContext,
                 let hudViews = hudViewsContext.hudViews {
                 for view in hudViews {
-                    if let levelView = view as? LevelHUDView {
-                        levelView.stateColors = .pumpStatus
-                    }
+                    view.stateColors = .pumpStatus
                 }
                 self.hudView.setAdditionalHUDViews(hudViews)
             }

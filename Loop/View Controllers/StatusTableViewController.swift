@@ -254,7 +254,6 @@ final class StatusTableViewController: ChartsTableViewController {
         reloading = true
 
         let reloadGroup = DispatchGroup()
-        var lastReservoirValue: ReservoirValue?
         var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
         var glucoseValues: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
@@ -363,18 +362,6 @@ final class StatusTableViewController: ChartsTableViewController {
                     totalDelivery = nil
                 case .success(let total):
                     totalDelivery = total.value
-                }
-
-                reloadGroup.leave()
-            }
-
-            reloadGroup.enter()
-            deviceManager.loopManager.doseStore.getReservoirValues(since: Date(timeIntervalSinceNow: .minutes(-30)), limit: 1) { (result) in
-                switch result {
-                case .success(let values):
-                    lastReservoirValue = values.first
-                case .failure:
-                    retryContext.update(with: .insulin)
                 }
 
                 reloadGroup.leave()
@@ -1085,10 +1072,7 @@ final class StatusTableViewController: ChartsTableViewController {
             for view in views {
                 let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
                 view.addGestureRecognizer(hudTapGestureRecognizer)
-                
-                if let levelHUDView = view as? LevelHUDView {
-                    levelHUDView.stateColors = .pumpStatus
-                }
+                view.stateColors = .pumpStatus
             }
             hudView.setAdditionalHUDViews(views)
         }
@@ -1118,7 +1102,7 @@ final class StatusTableViewController: ChartsTableViewController {
         {
             switch action {
             case .showViewController(let vc):
-                self.present(vc, animated: true, completion: nil)
+                self.navigationController?.pushViewController(vc, animated: true)
             case .openAppURL(let url):
                 UIApplication.shared.open(url)
             }
