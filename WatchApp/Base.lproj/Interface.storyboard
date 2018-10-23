@@ -375,48 +375,15 @@
                         </group>
                         <group width="1" height="86" alignment="left" layout="overlap" id="GqJ-yv-NKQ" userLabel="Graph">
                             <items>
-                                <group width="1" alignment="left" verticalAlignment="bottom" id="YjC-M7-2Jk">
-                                    <items>
-                                        <label alignment="left" text="+0.425 U/h" id="RFD-1a-nh4">
-                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                        <label alignment="left" text="6.225 U" id="aWM-ld-pSU">
-                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                        <label alignment="left" text="125 g" id="f3U-7h-wWO">
-                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                    </items>
-                                </group>
                                 <spriteKitScene width="1" height="1" alignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
-                            <variation key="device=watch38mm" height="110"/>
-                            <variation key="device=watch40mm" height="127"/>
-                            <variation key="device=watch42mm" height="126"/>
-                            <variation key="device=watch44mm" height="144"/>
+                            <variation key="device=watch38mm" height="70"/>
+                            <variation key="device=watch40mm" height="87"/>
+                            <variation key="device=watch42mm" height="86"/>
+                            <variation key="device=watch44mm" height="108"/>
                         </group>
-                        <group width="1" alignment="left" layout="vertical" spacing="0.0" id="bUF-MG-jsb" userLabel="Data">
+                        <group width="1" alignment="left" layout="vertical" id="2cX-Uf-1Zg">
                             <items>
-                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mgy-04-czh">
-                                    <items>
-                                        <label alignment="left" text="TEMP BASAL" id="Lht-zi-xKw">
-                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
-                                        </label>
-                                        <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
-                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
-                                        </label>
-                                    </items>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
-                                </group>
-                                <separator alignment="left" alpha="0.5" id="Idh-32-omJ">
-                                    <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                </separator>
                                 <group width="1" alignment="left" layout="vertical" spacing="0.0" id="prj-d2-lfq">
                                     <items>
                                         <label alignment="left" text="ACTIVE INSULIN" id="CgF-0q-8tP">
@@ -431,16 +398,33 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
                                 </group>
-                                <separator alignment="left" alpha="0.5" id="Gm6-EW-QpU">
-                                    <color key="color" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
-                                </separator>
-                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mbG-2a-yiB">
+                                <group width="1" height="2" alignment="left" alpha="0.5" spacing="0.0" id="JiH-G9-onh" userLabel="Separator">
+                                    <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                </group>
+                                <group alignment="left" layout="vertical" spacing="0.0" id="mbG-2a-yiB">
                                     <items>
                                         <label alignment="left" text="ACTIVE CARBS" id="zMo-N8-tex">
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
                                         <label alignment="left" text="125 g" id="Bix-bw-zdh">
+                                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                </group>
+                                <group width="1" height="2" alignment="left" alpha="0.5" spacing="0.0" id="kI0-24-T81" userLabel="Separator">
+                                    <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                </group>
+                                <group width="1" alignment="left" layout="vertical" spacing="0.0" id="mgy-04-czh">
+                                    <items>
+                                        <label alignment="left" text="TEMP BASAL" id="Lht-zi-xKw">
+                                            <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
+                                            <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
+                                        </label>
+                                        <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
                                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                         </label>

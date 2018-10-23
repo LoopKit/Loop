@@ -48,7 +48,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             }
         }
 
-        crownSequencer.delegate = self
         glucoseScene.presentScene(scene)
     }
 
@@ -64,8 +63,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
             self?.scene.setNeedsUpdate()
         }
-
-        crownSequencer.focus()
     }
 
     override func willDisappear() {
@@ -74,7 +71,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         log.default("willDisappear")
 
         timer = nil
-        crownSequencer.resignFocus()
     }
 
     override func willActivate() {
@@ -180,48 +176,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             DispatchQueue.main.async {
                 self.scene.historicalGlucose = samples
                 self.scene.setNeedsUpdate()
-            }
-        }
-    }
-
-    // MARK: WKCrownDelegate
-
-    enum DisplayMode: Int {
-        case GraphOnly = 0
-        case Hybrid
-        case DataOnly
-    }
-
-    var displayMode: DisplayMode = .GraphOnly {
-        didSet {
-            if oldValue != displayMode {
-                transitionDisplay(to: displayMode)
-            }
-        }
-    }
-    private var rotation: Double  = 0
-
-    func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
-        rotation = max(0.0, min(2.0, rotation + rotationalDelta))
-        displayMode = DisplayMode(rawValue: Int(rotation.rawValue))!
-    }
-
-    @IBOutlet var graphGroup: WKInterfaceGroup!
-    func transitionDisplay(to mode: DisplayMode) {
-        switch mode {
-        case .GraphOnly:
-            animate(withDuration: 0.5) {
-                self.graphGroup.setHeight(110)
-                self.glucoseScene.setHeight(110)
-            }
-        case .Hybrid:
-            animate(withDuration: 0.5) {
-                self.graphGroup.setHeight(110)
-                self.glucoseScene.setHeight(90)
-            }
-        case .DataOnly:
-            animate(withDuration: 0.5) {
-                self.graphGroup.setHeight(0)
             }
         }
     }
