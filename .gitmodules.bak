@@ -1,0 +1,21 @@
+[submodule "Carthage/Checkouts/rileylink_ios"]
+	path = Carthage/Checkouts/rileylink_ios
+	url = https://github.com/rsilvers129/rileylink_ios.git
+[submodule "Carthage/Checkouts/CGMBLEKit"]
+	path = Carthage/Checkouts/CGMBLEKit
+	url = https://github.com/rsilvers129/CGMBLEKit.git
+[submodule "Carthage/Checkouts/SwiftCharts"]
+	path = Carthage/Checkouts/SwiftCharts
+	url = https://github.com/i-schuetz/SwiftCharts.git
+[submodule "Carthage/Checkouts/G4ShareSpy"]
+	path = Carthage/Checkouts/G4ShareSpy
+	url = https://github.com/rsilvers129/G4ShareSpy.git
+[submodule "Carthage/Checkouts/dexcom-share-client-swift"]
+	path = Carthage/Checkouts/dexcom-share-client-swift
+	url = https://github.com/rsilvers129/dexcom-share-client-swift.git
+[submodule "Carthage/Checkouts/LoopKit"]
+	path = Carthage/Checkouts/LoopKit
+	url = https://github.com/rsilvers129/LoopKit.git
+[submodule "Carthage/Checkouts/Amplitude-iOS"]
+	path = Carthage/Checkouts/Amplitude-iOS
+	url = https://github.com/LoopKit/Amplitude-iOS.git

@@ -4,6 +4,7 @@
 //
 //  Copyright © 2017 LoopKit Authors. All rights reserved.
 //
+//  Fat-Protein Unit code by Robert Silvers, 10/2018.
 
 import LoopKit
 
@@ -20,6 +21,10 @@ struct LoopSettings: Equatable {
     var maximumBolus: Double?
 
     var suspendThreshold: GlucoseThreshold? = nil
+    
+    var fpuRatio: Double?
+    
+    var fpuDelay: Double?
 
     var retrospectiveCorrectionEnabled = true
 
@@ -63,6 +68,10 @@ extension LoopSettings: RawRepresentable {
         self.maximumBasalRatePerHour = rawValue["maximumBasalRatePerHour"] as? Double
 
         self.maximumBolus = rawValue["maximumBolus"] as? Double
+        
+        self.fpuRatio = rawValue["fpuRatio"] as? Double
+        
+        self.fpuDelay = rawValue["fpuDelay"] as? Double
 
         if let rawThreshold = rawValue["minimumBGGuard"] as? GlucoseThreshold.RawValue {
             self.suspendThreshold = GlucoseThreshold(rawValue: rawThreshold)
@@ -84,6 +93,8 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
+        raw["fpuRatio"] = fpuRatio
+        raw["fpuDelay"] = fpuDelay
 
         return raw
     }

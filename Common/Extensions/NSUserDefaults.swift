@@ -4,6 +4,7 @@
 //
 //  Created by Nathan Racklyeft on 8/30/15.
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
+//  Fat-Protein Unit code by Robert Silvers, 10/2018.
 //
 
 import Foundation
@@ -100,6 +101,16 @@ extension UserDefaults {
                 if maximumBasalRatePerHour! <= 0 {
                     maximumBasalRatePerHour = nil
                 }
+                
+                var fpuRatio: Double? = double(forKey: "com.loudnate.Naterade.FPURatio")
+                if fpuRatio! <= 0 {
+                    fpuRatio = nil
+                }
+                
+                var fpuDelay: Double? = double(forKey: "com.loudnate.Naterade.FPUDelay")
+                if fpuDelay! <= 0 {
+                    fpuDelay = nil
+                }
 
                 var maximumBolus: Double? = double(forKey: "com.loudnate.Naterade.MaximumBolus")
                 if maximumBolus! <= 0 {
@@ -112,6 +123,8 @@ extension UserDefaults {
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
+                    fpuRatio: fpuRatio,
+                    fpuDelay: fpuDelay,
                     retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
                 )
                 self.loopSettings = settings
