@@ -373,13 +373,13 @@
                                 </group>
                             </items>
                         </group>
-                        <group width="1" height="86" alignment="left" layout="overlap" id="GqJ-yv-NKQ" userLabel="Graph">
+                        <group width="1" height="86" alignment="left" layout="vertical" id="GqJ-yv-NKQ" userLabel="Graph">
                             <items>
                                 <spriteKitScene width="1" height="1" alignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
                             <variation key="device=watch38mm" height="70"/>
                             <variation key="device=watch40mm" height="87"/>
-                            <variation key="device=watch42mm" height="86"/>
+                            <variation key="device=watch42mm" height="90"/>
                             <variation key="device=watch44mm" height="108"/>
                         </group>
                         <group width="1" alignment="left" layout="vertical" id="2cX-Uf-1Zg">
@@ -433,6 +433,7 @@
                                     <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
                                 </group>
                             </items>
+                            <edgeInsets key="margins" left="4" right="0.0" top="0.0" bottom="0.0"/>
                         </group>
                     </items>
                     <menu key="menu" id="Da1-jh-2yL">
@@ -460,7 +461,6 @@
                         <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
-                        <outlet property="graphGroup" destination="GqJ-yv-NKQ" id="rII-ss-6a9"/>
                         <outlet property="iobLabel" destination="WWK-X3-2ZP" id="Lv5-07-80I"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>
                     </connections>
