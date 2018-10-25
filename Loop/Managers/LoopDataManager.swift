@@ -29,6 +29,8 @@ final class LoopDataManager {
     let glucoseStore: GlucoseStore
 
     weak var delegate: LoopDataManagerDelegate?
+    
+    private let integralRC: IntegralRetrospectiveCorrection
 
     private let logger: CategoryLogger
 
@@ -85,6 +87,8 @@ final class LoopDataManager {
 
         glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: .hours(24))
 
+        integralRC = IntegralRetrospectiveCorrection(settings, insulinSensitivitySchedule, basalRateSchedule)
+        
         cacheStore.delegate = self
 
         // Observe changes
@@ -838,17 +842,12 @@ extension LoopDataManager {
         // If enabled, calculate integral retrospective correction
         if settings.integralRetrospectiveCorrectionEnabled {
             
-            /// Calculate integral retrospective correction if user settings and past discrepancies over integration interval are available
-            if  let correctionRange = settings.glucoseTargetRangeSchedule,
-                let insulinSensitivity = insulinSensitivitySchedule,
-                let basalRates = basalRateSchedule,
-                let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(currentDate.addingTimeInterval(-settings.retrospectiveCorrectionIntegrationInterval), currentDate) {
-                
-                let integralRC = IntegralRetrospectiveCorrection(effectDuration, settings, correctionRange, insulinSensitivity, basalRates)
-                
+            /// Calculate integral retrospective correction if past discrepancies over integration interval are available
+            if  let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(currentDate.addingTimeInterval(-settings.retrospectiveCorrectionIntegrationInterval), currentDate) {
+
                 // Calculate overall retrospective correction effect and effect duration
-                let (totalRC, integralCorrectionDuration) = integralRC.updateIntegralRetrospectiveCorrection(currentDate,                                                                                                   currentDiscrepancy, latestGlucose, pastDiscrepancies)
-                
+                let (totalRC, integralCorrectionDuration) = integralRC.updateIntegralRetrospectiveCorrection(
+                    effectDuration, currentDate, currentDiscrepancy, latestGlucose, pastDiscrepancies)
                 self.totalRetrospectiveCorrection = totalRC
                 correctionEffectDuration = integralCorrectionDuration
                 
@@ -1166,7 +1165,9 @@ extension LoopDataManager {
                 "]",
 
                 "glucoseMomentumEffect: \(manager.glucoseMomentumEffect ?? [])",
+                "",
                 "retrospectiveGlucoseEffect: \(manager.retrospectiveGlucoseEffect)",
+                "",
                 "recommendedTempBasal: \(String(describing: state.recommendedTempBasal))",
                 "recommendedBolus: \(String(describing: state.recommendedBolus))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
@@ -1179,6 +1180,10 @@ extension LoopDataManager {
                 "",
             ]
 
+            self.integralRC.generateDiagnosticReport { (report) in
+                entries.append(report)
+                entries.append("")
+            }
             self.glucoseStore.generateDiagnosticReport { (report) in
                 entries.append(report)
                 entries.append("")
