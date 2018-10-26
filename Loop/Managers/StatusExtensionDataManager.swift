@@ -112,8 +112,8 @@ final class StatusExtensionDataManager {
                 )
             }
             
-            if let pumpManager = dataManager.pumpManager {
-                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerUI: pumpManager)
+            if let pumpManagerHUDProvider = dataManager.pumpManagerHUDProvider {
+                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDProvider: pumpManagerHUDProvider)
             }
 
             completionHandler(context)

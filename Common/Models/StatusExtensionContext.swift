@@ -156,15 +156,15 @@ struct PumpManagerHUDViewsContext: RawRepresentable {
     typealias RawValue = [String: Any]
     
     let hudViews: [BaseHUDView]?
-    let pumpManagerUI: PumpManagerUI?
+    let pumpManagerHUDProvider: HUDProvider?
     
-    init(pumpManagerUI: PumpManagerUI) {
-        self.pumpManagerUI = pumpManagerUI
+    init(pumpManagerHUDProvider: HUDProvider) {
+        self.pumpManagerHUDProvider = pumpManagerHUDProvider
         self.hudViews = nil
     }
     
     init?(rawValue: [String : Any]) {
-        pumpManagerUI = nil
+        pumpManagerHUDProvider = nil
         if let hudViews = PumpManagerHUDViewsFromRawValue(rawValue) {
             self.hudViews = hudViews
         } else {
@@ -173,8 +173,8 @@ struct PumpManagerHUDViewsContext: RawRepresentable {
     }
     
     var rawValue: [String : Any] {
-        if let pumpManagerUI = pumpManagerUI {
-            return pumpManagerUI.rawPumpManagerHUDViewsValue
+        if let pumpManagerHUDProvider = pumpManagerHUDProvider {
+            return pumpManagerHUDProvider.rawHUDProviderViewsValue
         } else {
             return [:]
         }

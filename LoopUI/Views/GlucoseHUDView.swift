@@ -12,6 +12,10 @@ import LoopKit
 import LoopKitUI
 
 public final class GlucoseHUDView: BaseHUDView {
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 2
+    }
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {

@@ -190,10 +190,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
             if let hudViewsContext = context.pumpManagerHUDViewsContext,
                 let hudViews = hudViewsContext.hudViews {
+                self.hudView.removeNonStandardHUDViews()
                 for view in hudViews {
                     view.stateColors = .pumpStatus
+                    self.hudView.addHUDView(view)
                 }
-                self.hudView.setAdditionalHUDViews(hudViews)
             }
 
             if let netBasal = context.netBasal {

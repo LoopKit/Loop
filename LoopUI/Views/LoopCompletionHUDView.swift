@@ -12,6 +12,10 @@ import LoopKitUI
 public final class LoopCompletionHUDView: BaseHUDView {
 
     @IBOutlet private weak var loopStateView: LoopStateView!
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 1
+    }
 
     enum Freshness {
         case fresh

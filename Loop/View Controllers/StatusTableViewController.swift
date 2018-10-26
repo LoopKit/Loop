@@ -1065,16 +1065,24 @@ final class StatusTableViewController: ChartsTableViewController {
     }
     
     private func configurePumpManagerHUDViews() {
-        if let pumpManager = deviceManager.pumpManager,
+        if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider,
             let hudView = hudView
         {
-            let views = pumpManager.createHUDViews()
+            let views = pumpManagerHUDProvider.createHUDViews()
+            hudView.removeNonStandardHUDViews()
             for view in views {
-                let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
-                view.addGestureRecognizer(hudTapGestureRecognizer)
-                view.stateColors = .pumpStatus
+                addViewToHUD(view)
             }
-            hudView.setAdditionalHUDViews(views)
+            pumpManagerHUDProvider.delegate = self
+        }
+    }
+    
+    private func addViewToHUD(_ view: BaseHUDView) {
+        if let hudView = hudView {
+            let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
+            view.addGestureRecognizer(hudTapGestureRecognizer)
+            view.stateColors = .pumpStatus
+            hudView.addHUDView(view)
         }
     }
 
@@ -1097,8 +1105,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
     @objc private func hudViewTapped(_ sender: UIGestureRecognizer) {
         if let hudSubView = sender.view as? BaseHUDView,
-            let pumpManager = deviceManager.pumpManager,
-            let action = pumpManager.didTapOnHudView(hudSubView)
+            let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider,
+            let action = pumpManagerHUDProvider.didTapOnHudView(hudSubView)
         {
             switch action {
             case .showViewController(let vc):
@@ -1106,6 +1114,24 @@ final class StatusTableViewController: ChartsTableViewController {
             case .openAppURL(let url):
                 UIApplication.shared.open(url)
             }
+        }
+    }
+}
+
+extension StatusTableViewController: HUDProviderDelegate {
+    func newHUDViewsAvailable(_ views: [BaseHUDView]) {
+        DispatchQueue.main.async {
+            for view in views {
+                view.isHidden = true
+                view.alpha = 0
+                self.addViewToHUD(view)
+            }
+            UIView.animate(withDuration: 1, animations: {
+                for view in views {
+                    view.isHidden = false
+                    view.alpha = 1
+                }
+            })
         }
     }
 }

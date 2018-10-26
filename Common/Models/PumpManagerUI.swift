@@ -31,7 +31,7 @@ func PumpManagerUITypeFromRawValue(_ rawValue: [String: Any]) -> PumpManagerUI.T
 }
 
 func PumpManagerHUDViewsFromRawValue(_ rawValue: [String: Any]) -> [BaseHUDView]? {
-    guard let rawState = rawValue["pumpManagerHUDViews"] as? PumpManagerUI.PumpManagerHUDViewsRawState,
+    guard let rawState = rawValue["hudProviderViews"] as? HUDProvider.HUDViewsRawState,
         let Manager = PumpManagerUITypeFromRawValue(rawValue)
         else {
             return nil
@@ -40,11 +40,11 @@ func PumpManagerHUDViewsFromRawValue(_ rawValue: [String: Any]) -> [BaseHUDView]
     return Manager.createHUDViews(rawValue: rawState)
 }
 
-extension PumpManagerUI {
-    var rawPumpManagerHUDViewsValue: [String: Any] {
+extension HUDProvider {
+    var rawHUDProviderViewsValue: [String: Any] {
         return [
-            "managerIdentifier": type(of: self).managerIdentifier,
-            "pumpManagerHUDViews": self.hudViewsRawState
+            "managerIdentifier": self.managerIdentifier,
+            "hudProviderViews": self.hudViewsRawState
         ]
     }
 }

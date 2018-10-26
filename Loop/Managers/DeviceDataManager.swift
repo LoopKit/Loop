@@ -29,6 +29,8 @@ final class DeviceDataManager {
             UserDefaults.appGroup.pumpManager = pumpManager
         }
     }
+    
+    var pumpManagerHUDProvider: HUDProvider?
 
     let logger = DiagnosticLogger.shared
 
@@ -105,6 +107,7 @@ final class DeviceDataManager {
         if let pumpManager = pumpManager {
             self.pumpManagerStatus = pumpManager.status
             self.loopManager.doseStore.device = self.pumpManagerStatus?.device
+            self.pumpManagerHUDProvider = pumpManager.hudProvider()
         }
 
         // Proliferate PumpModel preferences to DoseStore
@@ -386,8 +389,8 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             Bundle.main.localizedNameAndVersion,
             "",
             "## DeviceDataManager",
-            "launchDate: \(launchDate)",
-            "lastError: \(String(describing: lastError))",
+            "* launchDate: \(launchDate)",
+            "* lastError: \(String(describing: lastError))",
             "",
             cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
             "",
