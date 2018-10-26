@@ -377,6 +377,7 @@
                             <items>
                                 <spriteKitScene width="1" height="1" alignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
+                            <edgeInsets key="margins" left="0.0" right="0.0" top="4" bottom="0.0"/>
                             <variation key="device=watch38mm" height="70"/>
                             <variation key="device=watch40mm" height="87"/>
                             <variation key="device=watch42mm" height="90"/>

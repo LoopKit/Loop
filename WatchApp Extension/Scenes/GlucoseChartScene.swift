@@ -210,16 +210,14 @@ class GlucoseChartScene: SKScene {
         let height: CGFloat
 
         switch screen.width {
-        case 136: // 38mm       136x170 px
+        case let x where x < 150:  // 38mm       136x170 px
             height = 70
-        case 162: // 40mm       162x197 px
-            height = 87
-        case 156: // 42mm       156x195 px
+        case let x where x < 160:  // 42mm       156x195 px
             height = 90
-        case 184: // 44mm       184x224 px
+        case let x where x < 180:  // 40mm       162x197 px
+            height = 87
+        default:                   // 44mm       184x224 px
             height = 108
-        default:
-            height = 86
         }
 
         super.init(size: CGSize(width: screen.width, height: height))
