@@ -21,8 +21,8 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
     /// RetrospectiveCorrection protocol variables
     /// Standard effect duration
     let standardEffectDuration: TimeInterval
-    /// Retrospective correction glucose effects
-    var glucoseCorrectionEffect: [GlucoseEffect] = []
+    /// Overall retrospective correction effect
+    var totalGlucoseCorrectionEffect: HKQuantity?
     
     /**
      Integral retrospective correction parameters:
@@ -56,7 +56,6 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
     
     /// State variables reported in diagnostic issue report
     private var recentDiscrepancyValues: [Double] = []
-    private var totalRetrospectiveCorrection: HKQuantity?
     private var integralCorrectionEffectDuration: TimeInterval?
     private var proportionalCorrection: Double = 0.0
     private var integralCorrection: Double = 0.0
@@ -91,22 +90,24 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
      - Returns:
      - totalRetrospectiveCorrection: Overall glucose effect
      */
-    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> HKQuantity? {
+    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
         
         // Last discrepancy should be recent, otherwise clear the effect and return
         currentDate = Date()
+        var glucoseCorrectionEffect: [GlucoseEffect] = []
         guard let currentDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed?.last,
             currentDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
             else {
                 ircStatus = "discrepancy not available, effect not computed."
-                glucoseCorrectionEffect = []
-                return( nil )
+                totalGlucoseCorrectionEffect = nil
+                return( [] )
         }
         
         // Default values if we are not able to calculate integral retrospective correction
         ircStatus = "defaulted to standard RC because past discrepancies or user settings are not available."
         let currentDiscrepancyValue = currentDiscrepancy.quantity.doubleValue(for: unit)
         var scaledCorrection = currentDiscrepancyValue
+        totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: currentDiscrepancyValue)
         integralCorrectionEffectDuration = standardEffectDuration
         
         // Calculate integral retrospective correction if past discrepancies over integration interval are available and if user settings are available
@@ -174,7 +175,7 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
             proportionalCorrection = IntegralRetrospectiveCorrection.proportionalGain * currentDiscrepancyValue
             differentialCorrection = IntegralRetrospectiveCorrection.differentialGain * differentialDiscrepancy
             let totalCorrection = proportionalCorrection + integralCorrection + differentialCorrection
-            totalRetrospectiveCorrection = HKQuantity(unit: unit, doubleValue: totalCorrection)
+            totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: totalCorrection)
             integralCorrectionEffectDuration = TimeInterval(minutes: integralCorrectionEffectMinutes)
             
             // correction value scaled to account for extended effect duration
@@ -188,8 +189,8 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
         // Update array of glucose correction effects
         glucoseCorrectionEffect = glucose.decayEffect(atRate: velocity, for: integralCorrectionEffectDuration!)
         
-        // Return overall retrospective correction effect
-        return( totalRetrospectiveCorrection )
+        // Return glucose correction effects
+        return( glucoseCorrectionEffect )
     }
     
 }
@@ -215,7 +216,7 @@ extension IntegralRetrospectiveCorrection {
             "proportionalCorrection [mg/dL]: \(proportionalCorrection)",
             "integralCorrection [mg/dL]: \(integralCorrection)",
             "differentialCorrection [mg/dL]: \(differentialCorrection)",
-            "totalRetrospectiveCorrection: \(String(describing: totalRetrospectiveCorrection))",
+            "totalGlucoseCorrectionEffect: \(String(describing: totalGlucoseCorrectionEffect))",
             "integralCorrectionEffectDuration [min]: \(String(describing: integralCorrectionEffectDuration?.minutes))"
         ]
         report.append("")

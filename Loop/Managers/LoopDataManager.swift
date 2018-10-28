@@ -830,12 +830,12 @@ extension LoopDataManager {
         // Calculate retrospective correction
         if settings.integralRetrospectiveCorrectionEnabled {
             // Integral retrospective correction, if enabled
-            totalRetrospectiveCorrection = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
-            retrospectiveGlucoseEffect = integralRC.glucoseCorrectionEffect
+            retrospectiveGlucoseEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+            totalRetrospectiveCorrection = integralRC.totalGlucoseCorrectionEffect
         } else {
             // Standard retrospective correction
-            totalRetrospectiveCorrection = standardRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
-            retrospectiveGlucoseEffect = standardRC.glucoseCorrectionEffect
+            retrospectiveGlucoseEffect = standardRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+            totalRetrospectiveCorrection = standardRC.totalGlucoseCorrectionEffect
         }
     }
 
@@ -974,8 +974,8 @@ protocol RetrospectiveCorrection {
     /// Standard effect duration, nominally set to 60 min
     var standardEffectDuration: TimeInterval { get }
     
-    /// Retrospective correction glucose effects
-    var glucoseCorrectionEffect: [GlucoseEffect] { get }
+    /// Overall retrospective correction effect
+    var totalGlucoseCorrectionEffect: HKQuantity? { get }
     
     /**
      Calculates overall correction effect based on timeline of discrepancies, and updates glucoseCorrectionEffect
@@ -985,9 +985,9 @@ protocol RetrospectiveCorrection {
         - retrospectiveGlucoseDiscrepanciesSummed: Timeline of past discepancies
      
      - Returns:
-        - totalRetrospectiveCorrection: Overall glucose effect
+        - retrospectiveGlucoseEffect: Glucose correction effects
      */
-    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> HKQuantity?
+    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect]
 }
 
 /// Describes a view into the loop state

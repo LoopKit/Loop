@@ -20,8 +20,8 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
     /// RetrospectiveCorrection protocol variables
     /// Standard effect duration
     let standardEffectDuration: TimeInterval
-    /// Retrospective correction glucose effects
-    var glucoseCorrectionEffect: [GlucoseEffect] = []
+    /// Overall retrospective correction effect
+    var totalGlucoseCorrectionEffect: HKQuantity?
 
     /// All math is performed with glucose expressed in mg/dL
     private let unit = HKUnit.milligramsPerDeciliter
@@ -29,7 +29,7 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
     private let settings: LoopSettings
     
     /**
-     Initialize standard retrospective correction based on user settings
+     Initialize standard retrospective correction based on settings
      
      - Parameters:
         - settings: User settings
@@ -43,29 +43,31 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
     }
     
     /**
-     Calculates overall correction effect based on the most recent discrepany, and updates glucoseCorrectionEffect
+     Calculates glucose correction effects based on the most recent discrepany, and updates overall correction effect totalGlucoseCorrectionEffect
      
      - Parameters:
-     - glucose: Most recent glucose
-     - retrospectiveGlucoseDiscrepanciesSummed: Timeline of past discepancies
+        - glucose: Most recent glucose
+        - retrospectiveGlucoseDiscrepanciesSummed: Timeline of past discepancies
      
      - Returns:
-     - totalRetrospectiveCorrection: Overall glucose effect
+        - glucoseCorrectionEffect: Glucose correction effects
      */
-    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> HKQuantity? {
+    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
+        
+        var glucoseCorrectionEffect: [GlucoseEffect] = []
         
         // Last discrepancy should be recent, otherwise clear the effect and return
         let currentDate = Date()
         guard let currentDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed?.last,
             currentDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
             else {
-                glucoseCorrectionEffect = []
-                return( nil )
+                totalGlucoseCorrectionEffect = nil
+                return( [] )
         }
         
         // Standard retrospective correction math
         let currentDiscrepancyValue = currentDiscrepancy.quantity.doubleValue(for: unit)
-        let correction = HKQuantity(unit: unit, doubleValue: currentDiscrepancyValue)
+        totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: currentDiscrepancyValue)
         
         let retrospectionTimeInterval = currentDiscrepancy.endDate.timeIntervalSince(currentDiscrepancy.startDate)
         let discrepancyTime = max(retrospectionTimeInterval, settings.retrospectiveCorrectionGroupingInterval)
@@ -74,7 +76,7 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
         // Update array of glucose correction effects
         glucoseCorrectionEffect = glucose.decayEffect(atRate: velocity, for: standardEffectDuration)
         
-        // Return overall retrospective correction effect
-        return(correction)
+        // Return glucose correction effects
+        return( glucoseCorrectionEffect )
     }
 }
