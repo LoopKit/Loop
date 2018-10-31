@@ -21,6 +21,12 @@ final class DeviceDataManager {
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
             }
+            
+            if let pumpManager = pumpManager {
+                pumpManagerHUDProvider = pumpManager.hudProvider()
+            } else {
+                pumpManagerHUDProvider = nil
+            }
 
             setupPump()
             

@@ -1065,15 +1065,16 @@ final class StatusTableViewController: ChartsTableViewController {
     }
     
     private func configurePumpManagerHUDViews() {
-        if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider,
-            let hudView = hudView
-        {
-            let views = pumpManagerHUDProvider.createHUDViews()
+        if let hudView = hudView {
             hudView.removeNonStandardHUDViews()
-            for view in views {
-                addViewToHUD(view)
+            if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
+            {
+                let views = pumpManagerHUDProvider.createHUDViews()
+                for view in views {
+                    addViewToHUD(view)
+                }
+                pumpManagerHUDProvider.delegate = self
             }
-            pumpManagerHUDProvider.delegate = self
         }
     }
     
