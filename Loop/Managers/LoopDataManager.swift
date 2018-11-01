@@ -91,9 +91,9 @@ final class LoopDataManager {
 
         glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: .hours(24))
 
-        integralRC = IntegralRetrospectiveCorrection(settings, standardCorrectionEffectDuration, insulinSensitivitySchedule, basalRateSchedule)
+        integralRC = IntegralRetrospectiveCorrection(standardCorrectionEffectDuration)
         
-        standardRC = StandardRetrospectiveCorrection(settings, standardCorrectionEffectDuration)
+        standardRC = StandardRetrospectiveCorrection(standardCorrectionEffectDuration)
         
         cacheStore.delegate = self
 

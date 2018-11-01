@@ -25,8 +25,6 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
 
     /// All math is performed with glucose expressed in mg/dL
     private let unit = HKUnit.milligramsPerDeciliter
-    /// Loop settings
-    private let settings: LoopSettings
     
     /**
      Initialize standard retrospective correction based on settings
@@ -37,8 +35,7 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
      
      - Returns: Standard Retrospective Correction with user settings
      */
-    init(_ settings: LoopSettings, _ standardEffectDuration: TimeInterval) {
-        self.settings = settings
+    init(_ standardEffectDuration: TimeInterval) {
         self.standardEffectDuration = standardEffectDuration
     }
     
@@ -54,6 +51,9 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
      */
     func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
         
+        // Loop settings
+        let settings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+
         var glucoseCorrectionEffect: [GlucoseEffect] = []
         
         // Last discrepancy should be recent, otherwise clear the effect and return
