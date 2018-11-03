@@ -290,8 +290,12 @@
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
 		7D7076681FE0702F004AC8EA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70766A1FE0702F004AC8EA /* InfoPlist.strings */; };
 		894F71E21FFEC4D8007D365C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* Assets.xcassets */; };
+		9E0F6349218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */; };
 		9E575201217D87E7002D167B /* IntegralRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E575200217D87E7002D167B /* IntegralRetrospectiveCorrection.swift */; };
+		9E604099218F8850003D93A9 /* glucose_discrepancies_constant_positive.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */; };
+		9E60409B218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */; };
 		9EA324932184BF2300F337DB /* StandardRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA324922184BF2300F337DB /* StandardRetrospectiveCorrection.swift */; };
+		9EAFDFEE218E6CBC0016F9ED /* glucose_discrepancies_sampled.json in Resources */ = {isa = PBXBuildFile; fileRef = 9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -826,8 +830,12 @@
 		7DD382781F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/MainInterface.strings; sourceTree = "<group>"; };
 		7DD382791F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Interface.strings; sourceTree = "<group>"; };
 		894F71E11FFEC4D8007D365C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionTests.swift; sourceTree = "<group>"; };
 		9E575200217D87E7002D167B /* IntegralRetrospectiveCorrection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrection.swift; sourceTree = "<group>"; };
+		9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_constant_positive.json; sourceTree = "<group>"; };
+		9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_single_same_sign.json; sourceTree = "<group>"; };
 		9EA324922184BF2300F337DB /* StandardRetrospectiveCorrection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandardRetrospectiveCorrection.swift; sourceTree = "<group>"; };
+		9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_sampled.json; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = SOURCE_ROOT; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
@@ -1208,9 +1216,11 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E0F634A218D4DC8006E5D21 /* Fixtures */,
 				43E2D90F1D20C581004DA55F /* Info.plist */,
 				7D2366E421250E0A0028B67D /* InfoPlist.strings */,
 				43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */,
+				9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */,
 			);
 			path = LoopTests;
 			sourceTree = "<group>";
@@ -1406,6 +1416,16 @@
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9E0F634A218D4DC8006E5D21 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */,
+				9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */,
+				9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1747,7 +1767,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E60409B218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json in Resources */,
 				7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */,
+				9E604099218F8850003D93A9 /* glucose_discrepancies_constant_positive.json in Resources */,
+				9EAFDFEE218E6CBC0016F9ED /* glucose_discrepancies_sampled.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2044,6 +2067,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */,
+				9E0F6349218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

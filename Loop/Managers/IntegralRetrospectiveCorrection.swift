@@ -88,12 +88,13 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
         let settings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
         let insulinSensitivity = UserDefaults.appGroup.insulinSensitivitySchedule
         let basalRates = UserDefaults.appGroup.basalRateSchedule
+        currentDate = Date()
         
         // Last discrepancy should be recent, otherwise clear the effect and return
-        currentDate = Date()
+        let glucoseDate = glucose.startDate
         var glucoseCorrectionEffect: [GlucoseEffect] = []
         guard let currentDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed?.last,
-            currentDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
+            glucoseDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
             else {
                 ircStatus = "discrepancy not available, effect not computed."
                 totalGlucoseCorrectionEffect = nil
@@ -101,14 +102,14 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
         }
         
         // Default values if we are not able to calculate integral retrospective correction
-        ircStatus = "defaulted to standard RC because past discrepancies or user settings are not available."
+        ircStatus = "defaulted to standard RC, past discrepancies or user settings not available."
         let currentDiscrepancyValue = currentDiscrepancy.quantity.doubleValue(for: unit)
         var scaledCorrection = currentDiscrepancyValue
         totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: currentDiscrepancyValue)
         integralCorrectionEffectDuration = standardEffectDuration
         
         // Calculate integral retrospective correction if past discrepancies over integration interval are available and if user settings are available
-        if  let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(currentDate.addingTimeInterval(-settings.retrospectiveCorrectionIntegrationInterval), currentDate),
+        if  let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(glucoseDate.addingTimeInterval(-settings.retrospectiveCorrectionIntegrationInterval), glucoseDate),
             let sensitivity = insulinSensitivity,
             let basals = basalRates,
             let correctionRange = settings.glucoseTargetRangeSchedule {
@@ -134,10 +135,10 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
             }
             recentDiscrepancyValues = recentDiscrepancyValues.reversed()
      
-            let currentSensitivity = sensitivity.quantity(at: currentDate).doubleValue(for: unit)
-            let currentBasalRate = basals.value(at: currentDate)
-            let correctionRangeMin = correctionRange.minQuantity(at: currentDate).doubleValue(for: unit)
-            let correctionRangeMax = correctionRange.maxQuantity(at: currentDate).doubleValue(for: unit)
+            let currentSensitivity = sensitivity.quantity(at: glucoseDate).doubleValue(for: unit)
+            let currentBasalRate = basals.value(at: glucoseDate)
+            let correctionRangeMin = correctionRange.minQuantity(at: glucoseDate).doubleValue(for: unit)
+            let correctionRangeMax = correctionRange.maxQuantity(at: glucoseDate).doubleValue(for: unit)
             let latestGlucoseValue = glucose.quantity.doubleValue(for: unit) // most recent glucose
             
             // Safety limit for (+) integral effect. The limit is set to a larger value if the current blood glucose is further away from the correction range because we have more time available for corrections

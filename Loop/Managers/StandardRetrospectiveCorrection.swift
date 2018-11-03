@@ -57,9 +57,9 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
         var glucoseCorrectionEffect: [GlucoseEffect] = []
         
         // Last discrepancy should be recent, otherwise clear the effect and return
-        let currentDate = Date()
+        let glucoseDate = glucose.startDate
         guard let currentDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed?.last,
-            currentDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
+            glucoseDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
             else {
                 totalGlucoseCorrectionEffect = nil
                 return( [] )
