@@ -253,6 +253,14 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManager(_ pumpManager: PumpManager, didReadPumpEvents events: [NewPumpEvent], completion: @escaping (_ error: Error?) -> Void) {
+        for event in events {
+            if let dose = event.dose {
+                if dose.type == .bolus && dose.startDate != dose.endDate {
+                    print("square?!?!")
+                }
+            }
+        }
+
         loopManager.addPumpEvents(events) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: \(error)")
@@ -346,15 +354,17 @@ extension DeviceDataManager {
             return
         }
 
-        pumpManager.enactBolus(units: units, at: startDate, willRequest: { (units, date) in
-            self.loopManager.addRequestedBolus(units: units, at: date, completion: nil)
+        var requestedDose: DoseEntry?
+        pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
+            self.loopManager.addRequestedBolus(dose: dose, completion: nil)
+            requestedDose = dose
         }) { (error) in
             if let error = error {
                 self.log.error(error)
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
                 completion(error)
-            } else {
-                self.loopManager.addConfirmedBolus(units: units, at: Date()) {
+            } else if let dose = requestedDose {
+                self.loopManager.addConfirmedBolus(dose) {
                     completion(nil)
                 }
             }

@@ -349,6 +349,11 @@ final class StatusTableViewController: ChartsTableViewController {
                     retryContext.update(with: .insulin)
                     doseEntries = []
                 case .success(let doses):
+                    for dose in doses {
+                        if dose.type == .bolus && dose.startDate != dose.endDate {
+                            print("square?!?!")
+                        }
+                    }
                     doseEntries = doses
                 }
                 reloadGroup.leave()

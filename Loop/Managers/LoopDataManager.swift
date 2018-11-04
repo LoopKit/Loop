@@ -172,7 +172,7 @@ final class LoopDataManager {
     fileprivate var carbsOnBoard: CarbValue?
 
     fileprivate var lastTempBasal: DoseEntry?
-    fileprivate var lastRequestedBolus: (units: Double, date: Date)?
+    fileprivate var lastRequestedBolus: DoseEntry?
 
     /// The last date at which a loop completed, from prediction to dose (if dosing is enabled)
     var lastLoopCompleted: Date? {
@@ -451,11 +451,10 @@ extension LoopDataManager {
     /// Adds a bolus requested of the pump, but not confirmed.
     ///
     /// - Parameters:
-    ///   - units: The bolus amount, in units
-    ///   - date: The date the bolus was requested
-    func addRequestedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
+    ///   - dose: The DoseEntry representing the requested bolus
+    func addRequestedBolus(dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
-            self.lastRequestedBolus = (units: units, date: date)
+            self.lastRequestedBolus = dose
             self.notify(forChange: .bolus)
 
             completion?()
@@ -465,10 +464,9 @@ extension LoopDataManager {
     /// Adds a bolus enacted by the pump, but not fully delivered.
     ///
     /// - Parameters:
-    ///   - units: The bolus amount, in units
-    ///   - date: The date the bolus was enacted
-    func addConfirmedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
-        self.doseStore.addPendingPumpEvent(.enactedBolus(units: units, at: date)) {
+    ///   - dose: The DoseEntry representing the confirmed bolus
+    func addConfirmedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
+        self.doseStore.addPendingPumpEvent(.enactedBolus(dose: dose)) {
             self.dataAccessQueue.async {
                 self.lastRequestedBolus = nil
                 self.insulinEffect = nil
@@ -491,7 +489,8 @@ extension LoopDataManager {
                 if error == nil {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    // TODO: Ask pumpManager if dose represented in data
+                    if let bolusDate = self.lastRequestedBolus?.startDate, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
                         self.lastRequestedBolus = nil
                     }
                 }
@@ -519,7 +518,8 @@ extension LoopDataManager {
                 self.dataAccessQueue.async {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if areStoredValuesContinuous, let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    // TODO: Ask pumpManager if dose represented in data
+                    if areStoredValuesContinuous, let bolusDate = self.lastRequestedBolus?.startDate, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
                         self.lastRequestedBolus = nil
                     }
 
