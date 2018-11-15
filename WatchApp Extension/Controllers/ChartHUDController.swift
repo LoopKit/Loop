@@ -63,6 +63,11 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
             self?.scene.setNeedsUpdate()
         }
+
+        if #available(watchOSApplicationExtension 5.0, *) {
+            scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
+            scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+        }
     }
 
     override func willDisappear() {
