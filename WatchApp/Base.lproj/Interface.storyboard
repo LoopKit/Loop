@@ -391,13 +391,13 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="left" text="6.225 U" id="WWK-X3-2ZP">
+                                        <label alignment="left" text="-.--- U" id="WWK-X3-2ZP">
                                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                         </label>
                                     </items>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                    <edgeInsets key="margins" left="0.0" right="4" top="4" bottom="4"/>
                                 </group>
                                 <group width="1" height="2" alignment="left" alpha="0.5" spacing="0.0" id="JiH-G9-onh" userLabel="Separator">
                                     <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
@@ -408,13 +408,13 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="left" text="125 g" id="Bix-bw-zdh">
+                                        <label alignment="left" text="--- g" id="Bix-bw-zdh">
                                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                         </label>
                                     </items>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                    <edgeInsets key="margins" left="0.0" right="4" top="4" bottom="4"/>
                                 </group>
                                 <group width="1" height="2" alignment="left" alpha="0.5" spacing="0.0" id="kI0-24-T81" userLabel="Separator">
                                     <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
@@ -425,13 +425,13 @@
                                             <color key="textColor" white="0.66666666669999997" alpha="1" colorSpace="calibratedWhite"/>
                                             <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                         </label>
-                                        <label alignment="left" text="+0.425 U/h" id="yBm-Bi-1HM">
+                                        <label alignment="left" text="+-.--- U/h" id="yBm-Bi-1HM">
                                             <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
                                         </label>
                                     </items>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <edgeInsets key="margins" left="4" right="4" top="4" bottom="4"/>
+                                    <edgeInsets key="margins" left="0.0" right="4" top="4" bottom="4"/>
                                 </group>
                             </items>
                             <edgeInsets key="margins" left="4" right="0.0" top="0.0" bottom="0.0"/>

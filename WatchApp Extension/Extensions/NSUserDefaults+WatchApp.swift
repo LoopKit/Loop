@@ -26,8 +26,8 @@ extension UserDefaults {
 
     var visibleDuration: TimeInterval  {
         get {
-            if let rawValue = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval, let visibleDuration = TimeInterval(rawValue: rawValue) {
-                return visibleDuration
+            if let value = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval {
+                return value
             }
             return TimeInterval (hours: 6)
         }
