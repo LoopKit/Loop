@@ -17,7 +17,9 @@ final class DeviceDataManager {
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
 
     var pumpManager: PumpManagerUI? {
+        
         didSet {
+            
             // If the current CGMManager is a PumpManager, we clear it out.
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
@@ -87,10 +89,6 @@ final class DeviceDataManager {
                     }
                 }
                     
-                if oldValue?.isSuspended != status.isSuspended {
-                    NotificationCenter.default.post(name: .PumpSuspendStateChanged, object: self, userInfo: [DeviceDataManager.pumpSuspendStateKey: status.isSuspended])
-                }
-                
                 // Update the pump-schedule based settings
                 loopManager.setScheduleTimeZone(status.timeZone)
 
@@ -260,14 +258,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManager(_ pumpManager: PumpManager, didReadPumpEvents events: [NewPumpEvent], completion: @escaping (_ error: Error?) -> Void) {
-        for event in events {
-            if let dose = event.dose {
-                if dose.type == .bolus && dose.startDate != dose.endDate {
-                    print("square?!?!")
-                }
-            }
-        }
-
+        
         loopManager.addPumpEvents(events) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: \(error)")
@@ -406,7 +397,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 }
 
 
-extension DeviceDataManager: CustomDebugStringConvertible {
+extension DeviceDataManager {
     var debugDescription: String {
         return [
             Bundle.main.localizedNameAndVersion,
@@ -427,10 +418,5 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 }
 
 extension Notification.Name {
-    static let PumpSuspendStateChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpSuspendStateChanged")
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
-}
-
-extension DeviceDataManager {
-    public static let pumpSuspendStateKey = "com.loopkit.PumpSuspendState"
 }

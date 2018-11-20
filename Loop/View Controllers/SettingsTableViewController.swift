@@ -25,7 +25,6 @@ final class SettingsTableViewController: UITableViewController {
         tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
         tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
-        tableView.register(SuspendResumeTableViewCell.self, forCellReuseIdentifier: SuspendResumeTableViewCell.className)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -63,7 +62,6 @@ final class SettingsTableViewController: UITableViewController {
 
     fileprivate enum PumpRow: Int, CaseCountable {
         case pumpSettings = 0
-        case suspendResume
     }
 
     fileprivate enum CGMRow: Int, CaseCountable {
@@ -183,11 +181,6 @@ final class SettingsTableViewController: UITableViewController {
                     cell.textLabel?.text = NSLocalizedString("Add Pump", comment: "Title text for button to set up a new pump")
                     return cell
                 }
-            case .suspendResume:
-                let pumpManager = dataManager.pumpManager!
-                let cell = tableView.dequeueReusableCell(withIdentifier: SuspendResumeTableViewCell.className, for: indexPath) as! SuspendResumeTableViewCell
-                cell.option = pumpManager.status.isSuspended ? .resume : .suspend
-                return cell
             }
         case .cgm:
             if let cgmManager = dataManager.cgmManager {
@@ -368,42 +361,6 @@ final class SettingsTableViewController: UITableViewController {
                     default:
                         break
                     }
-                }
-            case .suspendResume:
-                if let cell = tableView.cellForRow(at: indexPath) as? SuspendResumeTableViewCell,
-                    let pumpManager = dataManager.pumpManager
-                {
-                    cell.isLoading = true
-                    cell.isEnabled = false
-                    switch cell.option {
-                    case .resume:
-                        pumpManager.resumeDelivery { (result) in
-                            DispatchQueue.main.async {
-                                cell.isEnabled = true
-                                cell.isLoading = false
-                                if case .failure(let error) = result {
-                                    let alert = UIAlertController(title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"), error: error)
-                                    self.present(alert, animated: true, completion: nil)
-                                } else {
-                                    self.tableView.reloadRows(at: [indexPath], with: .none)
-                                }
-                            }
-                        }
-                    case .suspend:
-                        pumpManager.suspendDelivery { (result) in
-                            DispatchQueue.main.async {
-                                cell.isEnabled = true
-                                cell.isLoading = false
-                                if case .failure(let error) = result {
-                                    let alert = UIAlertController(title: NSLocalizedString("Error Suspending", comment: "The alert title for a suspend error"), error: error)
-                                    self.present(alert, animated: true, completion: nil)
-                                } else {
-                                    self.tableView.reloadRows(at: [indexPath], with: .none)
-                                }
-                            }
-                        }
-                    }
-                    tableView.deselectRow(at: indexPath, animated: true)
                 }
             }
         case .cgm:
@@ -792,52 +749,5 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
 
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
-    }
-}
-
-extension UIAlertController {
-    fileprivate convenience init(title: String, error: Error) {
-        
-        let message: String
-        
-        if let localizedError = error as? LocalizedError {
-            let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
-            message = [localizedError.failureReason, localizedError.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: "\n")
-        } else {
-            message = String(describing: error)
-        }
-        
-        self.init(
-            title: title,
-            message: message,
-            preferredStyle: .alert
-        )
-        
-        addAction(UIAlertAction(
-            title: NSLocalizedString("OK", comment: "Button title to acknowledge error"),
-            style: .default,
-            handler: nil
-        ))
-    }
-}
-
-class SuspendResumeTableViewCell: TextButtonTableViewCell {
-    
-    enum Option {
-        case suspend
-        case resume
-    }
-    
-    var option: Option = .suspend {
-        didSet {
-            switch option {
-            case .suspend:
-                textLabel?.text = NSLocalizedString("Suspend Delivery", comment: "Title text for button to suspend insulin delivery")
-            case .resume:
-                textLabel?.text = NSLocalizedString("Resume Delivery", comment: "Title text for button to resume insulin delivery")
-            }
-        }
     }
 }

@@ -43,7 +43,8 @@ final class StatusTableViewController: ChartsTableViewController {
         )
         
         if let pumpManager = deviceManager.pumpManager {
-            self.pumpIsSuspended = pumpManager.status.isSuspended
+            self.suspendState = pumpManager.status.suspendState
+            pumpManager.addStatusObserver(self)
         }
 
         let notificationCenter = NotificationCenter.default
@@ -74,14 +75,6 @@ final class StatusTableViewController: ChartsTableViewController {
             notificationCenter.addObserver(forName: .LoopRunning, object: deviceManager.loopManager, queue: nil) { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
-                }
-            },
-            notificationCenter.addObserver(forName: .PumpSuspendStateChanged, object: deviceManager, queue: OperationQueue.main) { [weak self] (notification: Notification) in
-                DispatchQueue.main.async {
-                    if let isPumpSuspended = notification.userInfo?[DeviceDataManager.pumpSuspendStateKey] as? Bool, let self = self {
-                        self.pumpIsSuspended = isPumpSuspended
-                        self.reloadData(animated: true)
-                    }
                 }
             },
             notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: OperationQueue.main) { [weak self] (notification: Notification) in
@@ -184,7 +177,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
-    public var pumpIsSuspended: Bool = false {
+    public var suspendState: PumpManagerStatus.SuspendState = .none {
         didSet {
             refreshContext.update(with: .status)
         }
@@ -349,11 +342,6 @@ final class StatusTableViewController: ChartsTableViewController {
                     retryContext.update(with: .insulin)
                     doseEntries = []
                 case .success(let doses):
-                    for dose in doses {
-                        if dose.type == .bolus && dose.startDate != dose.endDate {
-                            print("square?!?!")
-                        }
-                    }
                     doseEntries = doses
                 }
                 reloadGroup.leave()
@@ -438,8 +426,10 @@ final class StatusTableViewController: ChartsTableViewController {
             // Show/hide the table view rows
             let statusRowMode: StatusRowMode?
             
-            if self.pumpIsSuspended {
+            if self.suspendState == .suspended {
                 statusRowMode = .pumpSuspended(resuming: false)
+            } else if self.suspendState == .resuming {
+                statusRowMode = .pumpSuspended(resuming: true)
             } else {
                 switch bolusState {
                 case .recommended?, .enacting?:
@@ -1120,6 +1110,15 @@ final class StatusTableViewController: ChartsTableViewController {
             case .openAppURL(let url):
                 UIApplication.shared.open(url)
             }
+        }
+    }
+}
+
+extension StatusTableViewController: PumpManagerStatusObserver {
+    func pumpManager(_ pumpManager: PumpManager, didUpdateStatus status: PumpManagerStatus) {
+        DispatchQueue.main.async {
+            self.suspendState = status.suspendState
+            self.reloadData(animated: true)
         }
     }
 }

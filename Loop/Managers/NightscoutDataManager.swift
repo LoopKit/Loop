@@ -145,13 +145,20 @@ final class NightscoutDataManager {
                 battery = nil
             }
             
+            let bolusing: Bool
+            if case .bolusing = pumpManagerStatus.bolusState {
+                bolusing = true
+            } else {
+                bolusing = false
+            }
+            
             pumpStatus = NightscoutUploadKit.PumpStatus(
                 clock: Date(),
                 pumpID: pumpManagerStatus.device.localIdentifier ?? "Unknown",
                 iob: nil,
                 battery: battery,
-                suspended: pumpManagerStatus.isSuspended,
-                bolusing: pumpManagerStatus.isBolusing,
+                suspended: pumpManagerStatus.suspendState == .suspended,
+                bolusing: bolusing,
                 reservoir: deviceManager.loopManager.doseStore.lastReservoirValue?.unitVolume,
                 secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())
         } else {
