@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14313.18" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch42" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14238.10"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
     <scenes>
         <!--AddCarbsInterfaceController-->
@@ -377,11 +377,11 @@
                             <items>
                                 <spriteKitScene width="1" height="1" alignment="center" scene="GlucoseChartScene" id="9BI-AC-l6c"/>
                             </items>
-                            <edgeInsets key="margins" left="0.0" right="0.0" top="4" bottom="0.0"/>
-                            <variation key="device=watch38mm" height="70"/>
-                            <variation key="device=watch40mm" height="87"/>
-                            <variation key="device=watch42mm" height="90"/>
-                            <variation key="device=watch44mm" height="108"/>
+                            <edgeInsets key="margins" left="0.0" right="0.0" top="1" bottom="0.0"/>
+                            <variation key="device=watch38mm" height="73"/>
+                            <variation key="device=watch40mm" height="90"/>
+                            <variation key="device=watch42mm" height="93"/>
+                            <variation key="device=watch44mm" height="111"/>
                         </group>
                         <group width="1" alignment="left" layout="vertical" id="2cX-Uf-1Zg">
                             <items>
