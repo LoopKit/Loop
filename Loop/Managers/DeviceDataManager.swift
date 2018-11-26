@@ -397,7 +397,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 }
 
 
-extension DeviceDataManager {
+extension DeviceDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             Bundle.main.localizedNameAndVersion,
