@@ -139,7 +139,8 @@ final class DeviceDataManager {
         pumpManager = UserDefaults.appGroup.pumpManager as? PumpManagerUI
         
 //        if pumpManager == nil {
-//            pumpManager = OmnipodPumpManager.jumpStartPod(address: 520595206, lot: 43461, tid: 940516)
+//            let basalSchedule = BasalSchedule(entries: [BasalScheduleEntry(rate: 1.0, startTime: 0)])
+//            pumpManager = OmnipodPumpManager.jumpStartPod(address: 520344533, lot: 40505, tid: 6882, schedule: basalSchedule)
 //            UserDefaults.appGroup.pumpManager = pumpManager
 //        }
         

@@ -146,7 +146,7 @@ final class NightscoutDataManager {
             }
             
             let bolusing: Bool
-            if case .bolusing = pumpManagerStatus.bolusState {
+            if case .inProgress = pumpManagerStatus.bolusState {
                 bolusing = true
             } else {
                 bolusing = false

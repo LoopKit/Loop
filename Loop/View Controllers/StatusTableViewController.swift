@@ -134,6 +134,8 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
         }
+        
+        deviceManager.pumpManagerHUDProvider?.hudDidAppear()
 
         AnalyticsManager.shared.didDisplayStatusScreen()
     }
@@ -849,17 +851,14 @@ final class StatusTableViewController: ChartsTableViewController {
                 case .pumpSuspended(let resuming):
                     if !resuming {
                         self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
-                        self.deviceManager.pumpManager?.resumeDelivery(completion: { (result) in
+                        self.deviceManager.pumpManager?.resumeDelivery() { (error) in
                             DispatchQueue.main.async {
-                                switch result {
-                                case .failure(let error):
+                                if let error = error {
                                     let alert = UIAlertController(title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"), error: error)
                                     self.present(alert, animated: true, completion: nil)
-                                case .success:
-                                    break
                                 }
                             }
-                        })
+                        }
                     }
                 default:
                     break
@@ -1107,6 +1106,8 @@ final class StatusTableViewController: ChartsTableViewController {
             switch action {
             case .showViewController(let vc):
                 self.navigationController?.pushViewController(vc, animated: true)
+            case .presentViewController(let vc):
+                self.present(vc, animated: true, completion: nil)
             case .openAppURL(let url):
                 UIApplication.shared.open(url)
             }
@@ -1124,7 +1125,7 @@ extension StatusTableViewController: PumpManagerStatusObserver {
 }
 
 extension StatusTableViewController: HUDProviderDelegate {
-    func newHUDViewsAvailable(_ views: [BaseHUDView]) {
+    func addHudViews(_ views: [BaseHUDView]) {
         DispatchQueue.main.async {
             for view in views {
                 view.isHidden = true
@@ -1135,6 +1136,20 @@ extension StatusTableViewController: HUDProviderDelegate {
                 for view in views {
                     view.isHidden = false
                     view.alpha = 1
+                }
+            })
+        }
+    }
+    
+    func removeHudViews(_ views: [BaseHUDView]) {
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 1, animations: {
+                for view in views {
+                    view.alpha = 0
+                }
+            }, completion: { (didFinish) in
+                for view in views {
+                    view.removeFromSuperview()
                 }
             })
         }
