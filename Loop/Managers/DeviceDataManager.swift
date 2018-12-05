@@ -9,8 +9,6 @@
 import HealthKit
 import LoopKit
 import LoopKitUI
-//import OmniKit
-//import OmniKitUI
 
 final class DeviceDataManager {
 
@@ -137,12 +135,6 @@ final class DeviceDataManager {
 
     init() {
         pumpManager = UserDefaults.appGroup.pumpManager as? PumpManagerUI
-        
-//        if pumpManager == nil {
-//            let basalSchedule = BasalSchedule(entries: [BasalScheduleEntry(rate: 1.0, startTime: 0)])
-//            pumpManager = OmnipodPumpManager.jumpStartPod(address: 520344533, lot: 40505, tid: 6882, schedule: basalSchedule)
-//            UserDefaults.appGroup.pumpManager = pumpManager
-//        }
         
         if let cgmManager = UserDefaults.appGroup.cgmManager {
             self.cgmManager = cgmManager
