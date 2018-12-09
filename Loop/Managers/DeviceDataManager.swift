@@ -413,3 +413,4 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
 }
+

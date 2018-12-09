@@ -1069,6 +1069,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
                 pumpManagerHUDProvider.delegate = self
             }
+            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
     }
     
@@ -1138,6 +1139,7 @@ extension StatusTableViewController: HUDProviderDelegate {
                     view.alpha = 1
                 }
             })
+            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
     }
     
@@ -1152,6 +1154,7 @@ extension StatusTableViewController: HUDProviderDelegate {
                     view.removeFromSuperview()
                 }
             })
+            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
     }
 }
@@ -1184,3 +1187,6 @@ extension UIAlertController {
     }
 }
 
+extension Notification.Name {
+    static let HUDViewsChanged = Notification.Name(rawValue:  "com.loopKit.notification.HUDViewsChanged")
+}
