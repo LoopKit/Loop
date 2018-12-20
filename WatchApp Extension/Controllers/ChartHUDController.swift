@@ -51,23 +51,6 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         glucoseScene.presentScene(scene)
     }
 
-    override func awake(withContext context: Any?) {
-        super.awake(withContext: context)
-
-        if UserDefaults.standard.startOnChartPage {
-            log.default("Switching to startOnChartPage")
-            becomeCurrentPage()
-
-            // For some reason, .didAppear() does not get called when we do this. It gets called *twice* the next
-            // time this view appears. Force it by hand now, until we figure out the root cause.
-            //
-            // TODO: possibly because I'm not calling super.awake()? investigate that.
-            DispatchQueue.main.async {
-                self.didAppear()
-            }
-        }
-    }
-
     override func didAppear() {
         super.didAppear()
 
@@ -79,6 +62,11 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
 
         timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
             self?.scene.setNeedsUpdate()
+        }
+
+        if #available(watchOSApplicationExtension 5.0, *) {
+            scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
+            scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
         }
     }
 
