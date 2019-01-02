@@ -54,13 +54,20 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     override func didAppear() {
         super.didAppear()
 
-        log.default("didAppear")
+        if glucoseScene.isPaused {
+            log.default("didAppear() unpausing")
+            glucoseScene.isPaused = false
+        } else {
+            log.default("didAppear() not paused")
+            glucoseScene.isPaused = false
+        }
 
         // Force an update when our pixels need to move
         let pixelsWide = scene.size.width * WKInterfaceDevice.current().screenScale
         let pixelInterval = scene.visibleDuration / TimeInterval(pixelsWide)
 
         timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
+            self?.log.default("Timer fired, triggering update")
             self?.scene.setNeedsUpdate()
         }
 
@@ -85,7 +92,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             log.default("willActivate() unpausing")
             glucoseScene.isPaused = false
         } else {
-            log.default("willActivate() unpausing")
+            log.default("willActivate()")
         }
 
         if !hasInitialActivation && UserDefaults.standard.startOnChartPage {
@@ -174,7 +181,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         updateGlucoseChart()
     }
 
-    func updateGlucoseChart() {
+    private func updateGlucoseChart() {
         guard let activeContext = loopManager.activeContext else {
             return
         }
