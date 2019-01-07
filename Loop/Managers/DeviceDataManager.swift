@@ -247,22 +247,19 @@ extension DeviceDataManager: PumpManagerDelegate {
                         return
                     }
 
-                    var didSendLowNotification = false
                     let warningThresholds: [Double] = [10, 20, 30]
 
                     for threshold in warningThresholds {
                         if newValue.unitVolume <= threshold && previousVolume > threshold {
                             NotificationManager.sendPumpReservoirLowNotificationForAmount(newValue.unitVolume, andTimeRemaining: nil)
-                            didSendLowNotification = true
+                            break
                         }
-                    }
-
-                    if !didSendLowNotification {
-                        NotificationManager.clearPumpReservoirNotification()
                     }
 
                     if newValue.unitVolume > previousVolume + 1 {
                         AnalyticsManager.shared.reservoirWasRewound()
+
+                        NotificationManager.clearPumpReservoirNotification()
                     }
                 }
             }
