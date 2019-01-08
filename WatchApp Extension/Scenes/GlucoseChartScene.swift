@@ -13,6 +13,11 @@ import LoopKit
 import WatchKit
 import os.log
 
+private extension TimeInterval {
+    static let moveAnimationDuration: TimeInterval = 0.25
+    static let fadeAnimationDuration: TimeInterval = 0.75
+}
+
 private enum NodePlane: Int {
     case lines = 0
     case ranges
@@ -42,14 +47,26 @@ private extension SKLabelNode {
 
 private extension SKSpriteNode {
     func move(to rect: CGRect, animated: Bool) {
-        if parent == nil || animated == false || (size.equalTo(rect.size) && position.equalTo(rect.origin)) {
+        guard !size.equalTo(rect.size) || !position.equalTo(rect.origin) else {
+            return
+        }
+
+        if parent == nil || !animated {
             size = rect.size
             position = rect.origin
+
+            if parent != nil {
+                alpha = 0
+                run(.sequence([
+                    .wait(forDuration: .moveAnimationDuration),
+                    .fadeIn(withDuration: .fadeAnimationDuration)
+                ]))
+            }
         } else {
             run(.group([
-                .move(to: rect.origin, duration: 0.25),
-                .resize(toWidth: rect.size.width, duration: 0.25),
-                .resize(toHeight: rect.size.height, duration: 0.25)
+                .move(to: rect.origin, duration: .moveAnimationDuration),
+                .resize(toWidth: rect.size.width, duration: .moveAnimationDuration),
+                .resize(toHeight: rect.size.height, duration: .moveAnimationDuration)
             ]))
         }
     }
@@ -388,8 +405,8 @@ class GlucoseChartScene: SKScene {
                 // SKShapeNode paths cannot be easily animated. Make it vanish, then fade in at the new location.
                 predictedPathNode!.alpha = 0
                 predictedPathNode!.run(.sequence([
-                        .wait(forDuration: 0.25),
-                        .fadeIn(withDuration: 0.75)
+                        .wait(forDuration: .moveAnimationDuration),
+                        .fadeIn(withDuration: .fadeAnimationDuration)
                     ]),
                     withKey: "move"
                 )
