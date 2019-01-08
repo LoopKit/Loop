@@ -43,6 +43,14 @@ private extension SKLabelNode {
         basic.zPosition = NodePlane.labels.zPosition
         return basic
     }
+
+    func move(to position: CGPoint) {
+        guard !self.position.equalTo(position) else {
+            return
+        }
+
+        self.position = position
+    }
 }
 
 private extension SKSpriteNode {
@@ -140,7 +148,11 @@ private extension HKUnit {
 class GlucoseChartScene: SKScene {
     let log = OSLog(category: "GlucoseChartScene")
 
-    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5) {
+        didSet {
+            setNeedsUpdate()
+        }
+    }
 
     var unit: HKUnit?
     var correctionRange: GlucoseRangeSchedule?
@@ -190,7 +202,9 @@ class GlucoseChartScene: SKScene {
             max = Swift.max(max, predictedGlucoseRange.upperBound.doubleValue(for: unit))
         }
 
-        min = min.floored(to: unit.axisIncrement)
+        // Predicted glucose values can be below a concentration of 0,
+        // but we want to let those fall off the graph since it's technically impossible
+        min = Swift.max(0, min.floored(to: unit.axisIncrement))
         max = max.ceiled(to: unit.axisIncrement)
 
         let lowerBound = HKQuantity(unit: unit, doubleValue: min)
@@ -199,9 +213,10 @@ class GlucoseChartScene: SKScene {
         return lowerBound..<upperBound
     }
 
-    var visibleDuration = TimeInterval(hours: 6) {
+    var visibleDuration = UserDefaults.standard.visibleDuration {
         didSet {
             setNeedsUpdate()
+            UserDefaults.standard.visibleDuration = visibleDuration
         }
     }
     private var hoursLabel: SKLabelNode!
@@ -223,16 +238,15 @@ class GlucoseChartScene: SKScene {
     override init() {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         let screen = WKInterfaceDevice.current().screenBounds
-        let width = screen.width - 2 /* insets */
         let height: CGFloat
 
-        switch width {
+        switch screen.width {
         case let x where x < 150:  // 38mm
-            height = 68
+            height = 73
         case let x where x > 180:  // 44mm
-            height = 106
+            height = 111
         default:
-            height = 86
+            height = 90
         }
 
         super.init(size: CGSize(width: screen.width, height: height))
@@ -341,8 +355,11 @@ class GlucoseChartScene: SKScene {
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         minBGLabel.text = numberFormatter.string(from: yRange.lowerBound.doubleValue(for: unit))
+        minBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: textInsets.bottom))
         maxBGLabel.text = numberFormatter.string(from: yRange.upperBound.doubleValue(for: unit))
+        maxBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: size.height - textInsets.top))
         hoursLabel.text = dateFormatter.string(from: visibleDuration)
+        hoursLabel.move(to: CGPoint(x: textInsets.left, y: size.height - textInsets.top))
 
         // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
         var inactiveNodes = nodes
