@@ -10,21 +10,23 @@ import WatchKit
 import WatchConnectivity
 import CGMBLEKit
 import LoopKit
+import HealthKit
 import SpriteKit
 import os.log
 
 final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
-    @IBOutlet weak var basalLabel: WKInterfaceLabel!
-    @IBOutlet weak var iobLabel: WKInterfaceLabel!
-    @IBOutlet weak var cobLabel: WKInterfaceLabel!
-    @IBOutlet weak var glucoseScene: WKInterfaceSKScene!
-    @IBAction func setChartWindow1Hour() {
+    @IBOutlet private weak var tableGroup: WKInterfaceGroup!
+    @IBOutlet private weak var basalLabel: WKInterfaceLabel!
+    @IBOutlet private weak var iobLabel: WKInterfaceLabel!
+    @IBOutlet private weak var cobLabel: WKInterfaceLabel!
+    @IBOutlet private weak var glucoseScene: WKInterfaceSKScene!
+    @IBAction private func setChartWindow1Hour() {
         scene.visibleDuration = .hours(2)
     }
-    @IBAction func setChartWindow2Hours() {
+    @IBAction private func setChartWindow2Hours() {
         scene.visibleDuration = .hours(4)
     }
-    @IBAction func setChartWindow3Hours() {
+    @IBAction private func setChartWindow3Hours() {
         scene.visibleDuration = .hours(6)
     }
     private let scene = GlucoseChartScene()
@@ -54,19 +56,27 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
     override func didAppear() {
         super.didAppear()
 
-        log.default("didAppear")
+        if glucoseScene.isPaused {
+            log.default("didAppear() unpausing")
+            glucoseScene.isPaused = false
+        } else {
+            log.default("didAppear() not paused")
+            glucoseScene.isPaused = false
+        }
 
         // Force an update when our pixels need to move
         let pixelsWide = scene.size.width * WKInterfaceDevice.current().screenScale
         let pixelInterval = scene.visibleDuration / TimeInterval(pixelsWide)
 
         timer = Timer.scheduledTimer(withTimeInterval: pixelInterval, repeats: true) { [weak self] _ in
+            self?.log.default("Timer fired, triggering update")
             self?.scene.setNeedsUpdate()
         }
 
         if #available(watchOSApplicationExtension 5.0, *) {
             scene.textInsets.left = max(scene.textInsets.left, systemMinimumLayoutMargins.leading)
             scene.textInsets.right = max(scene.textInsets.right, systemMinimumLayoutMargins.trailing)
+            tableGroup.setContentInset(UIEdgeInsets(top: 0, left: systemMinimumLayoutMargins.leading, bottom: 0, right: systemMinimumLayoutMargins.trailing))
         }
     }
 
@@ -85,7 +95,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             log.default("willActivate() unpausing")
             glucoseScene.isPaused = false
         } else {
-            log.default("willActivate() unpausing")
+            log.default("willActivate()")
         }
 
         if !hasInitialActivation && UserDefaults.standard.startOnChartPage {
@@ -112,58 +122,44 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             return
         }
 
-        let insulinFormatter: NumberFormatter = {
-            let numberFormatter = NumberFormatter()
+        if let activeInsulin = activeContext.activeInsulin {
+            let insulinFormatter: QuantityFormatter = {
+                let insulinFormatter = QuantityFormatter()
+                insulinFormatter.numberFormatter.minimumFractionDigits = 1
+                insulinFormatter.numberFormatter.maximumFractionDigits = 1
 
-            numberFormatter.numberStyle = .decimal
-            numberFormatter.minimumFractionDigits = 1
-            numberFormatter.maximumFractionDigits = 1
+                return insulinFormatter
+            }()
 
-            return numberFormatter
-        }()
-
-        iobLabel.setHidden(true)
-        if let activeInsulin = activeContext.iob, let valueStr = insulinFormatter.string(from: activeInsulin) {
-            iobLabel.setText(String(format: NSLocalizedString(
-                    "IOB %1$@ U",
-                    comment: "The subtitle format describing units of active insulin. (1: localized insulin value description)"
-                ),
-                valueStr
-            ))
-            iobLabel.setHidden(false)
+            iobLabel.setText(insulinFormatter.string(from: activeInsulin, for: .internationalUnit()))
+        } else {
+            iobLabel.setText("—")
         }
 
-        cobLabel.setHidden(true)
-        if let carbsOnBoard = activeContext.cob {
-            let carbFormatter = NumberFormatter()
-            carbFormatter.numberStyle = .decimal
-            carbFormatter.maximumFractionDigits = 0
-            let valueStr = carbFormatter.string(from: carbsOnBoard)
+        if let carbsOnBoard = activeContext.activeCarbohydrates {
+            let carbFormatter = QuantityFormatter()
+            carbFormatter.numberFormatter.maximumFractionDigits = 0
 
-            cobLabel.setText(String(format: NSLocalizedString(
-                    "COB %1$@ g",
-                    comment: "The subtitle format describing grams of active carbs. (1: localized carb value description)"
-                ),
-                valueStr!
-            ))
-            cobLabel.setHidden(false)
+            cobLabel.setText(carbFormatter.string(from: carbsOnBoard, for: .gram()))
+        } else {
+            cobLabel.setText("—")
         }
 
-        basalLabel.setHidden(true)
         if let tempBasal = activeContext.lastNetTempBasalDose {
             let basalFormatter = NumberFormatter()
             basalFormatter.numberStyle = .decimal
             basalFormatter.minimumFractionDigits = 1
             basalFormatter.maximumFractionDigits = 3
             basalFormatter.positivePrefix = basalFormatter.plusSign
-            let valueStr = basalFormatter.string(from: tempBasal)
 
-            let basalLabelText = String(format: NSLocalizedString(
-                "%1$@ U/hr",
-                comment: "The subtitle format describing the current temp basal rate. (1: localized basal rate description)"),
-                                      valueStr!)
-            basalLabel.setText(basalLabelText)
-            basalLabel.setHidden(false)
+            let unit = NSLocalizedString(
+                "U/hr",
+                comment: "The short unit display string for international units of insulin delivery per hour"
+            )
+
+            basalLabel.setText(basalFormatter.string(from: tempBasal, unit: unit))
+        } else {
+            basalLabel.setText("—")
         }
 
         if glucoseScene.isPaused {

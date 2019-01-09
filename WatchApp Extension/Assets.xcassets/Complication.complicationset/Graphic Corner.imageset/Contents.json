@@ -7,7 +7,7 @@
     },
     {
       "idiom" : "watch",
-      "filename" : "Icon-AppleWatch-32x32@2x.png",
+      "filename" : "Icon-Complication-20x20@2x.png",
       "screen-width" : ">161",
       "scale" : "2x"
     },
@@ -18,7 +18,7 @@
     },
     {
       "idiom" : "watch",
-      "filename" : "Icon-AppleWatch-36x36@2x.png",
+      "filename" : "Icon-Complication-22x22@2x.png",
       "screen-width" : ">183",
       "scale" : "2x"
     }

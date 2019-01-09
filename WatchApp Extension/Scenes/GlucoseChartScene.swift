@@ -13,6 +13,11 @@ import LoopKit
 import WatchKit
 import os.log
 
+private extension TimeInterval {
+    static let moveAnimationDuration: TimeInterval = 0.25
+    static let fadeAnimationDuration: TimeInterval = 0.75
+}
+
 private enum NodePlane: Int {
     case lines = 0
     case ranges
@@ -38,18 +43,38 @@ private extension SKLabelNode {
         basic.zPosition = NodePlane.labels.zPosition
         return basic
     }
+
+    func move(to position: CGPoint) {
+        guard !self.position.equalTo(position) else {
+            return
+        }
+
+        self.position = position
+    }
 }
 
 private extension SKSpriteNode {
     func move(to rect: CGRect, animated: Bool) {
-        if parent == nil || animated == false || (size.equalTo(rect.size) && position.equalTo(rect.origin)) {
+        guard !size.equalTo(rect.size) || !position.equalTo(rect.origin) else {
+            return
+        }
+
+        if parent == nil || !animated {
             size = rect.size
             position = rect.origin
+
+            if parent != nil {
+                alpha = 0
+                run(.sequence([
+                    .wait(forDuration: .moveAnimationDuration),
+                    .fadeIn(withDuration: .fadeAnimationDuration)
+                ]))
+            }
         } else {
             run(.group([
-                .move(to: rect.origin, duration: 0.25),
-                .resize(toWidth: rect.size.width, duration: 0.25),
-                .resize(toHeight: rect.size.height, duration: 0.25)
+                .move(to: rect.origin, duration: .moveAnimationDuration),
+                .resize(toWidth: rect.size.width, duration: .moveAnimationDuration),
+                .resize(toHeight: rect.size.height, duration: .moveAnimationDuration)
             ]))
         }
     }
@@ -58,7 +83,11 @@ private extension SKSpriteNode {
 class GlucoseChartScene: SKScene {
     let log = OSLog(category: "GlucoseChartScene")
 
-    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+    var textInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5) {
+        didSet {
+            setNeedsUpdate()
+        }
+    }
 
     var data: GlucoseChartData? {
         didSet {
@@ -70,9 +99,10 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    var visibleDuration = TimeInterval(hours: 6) {
+    var visibleDuration = UserDefaults.standard.visibleDuration {
         didSet {
             setNeedsUpdate()
+            UserDefaults.standard.visibleDuration = visibleDuration
         }
     }
 
@@ -95,16 +125,15 @@ class GlucoseChartScene: SKScene {
     override init() {
         // Use the fixed sizes specified in the storyboard, based on our guess of the model size
         let screen = WKInterfaceDevice.current().screenBounds
-        let width = screen.width - 2 /* insets */
         let height: CGFloat
 
-        switch width {
+        switch screen.width {
         case let x where x < 150:  // 38mm
-            height = 68
+            height = 73
         case let x where x > 180:  // 44mm
-            height = 106
+            height = 111
         default:
-            height = 86
+            height = 90
         }
 
         super.init(size: CGSize(width: screen.width, height: height))
@@ -199,8 +228,11 @@ class GlucoseChartScene: SKScene {
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         minBGLabel.text = numberFormatter.string(from: glucoseRange.lowerBound.doubleValue(for: unit))
+        minBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: textInsets.bottom))
         maxBGLabel.text = numberFormatter.string(from: glucoseRange.upperBound.doubleValue(for: unit))
+        maxBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: size.height - textInsets.top))
         hoursLabel.text = dateFormatter.string(from: visibleDuration)
+        hoursLabel.move(to: CGPoint(x: textInsets.left, y: size.height - textInsets.top))
 
         // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
         var inactiveNodes = nodes
@@ -262,8 +294,8 @@ class GlucoseChartScene: SKScene {
                 // SKShapeNode paths cannot be easily animated. Make it vanish, then fade in at the new location.
                 predictedPathNode!.alpha = 0
                 predictedPathNode!.run(.sequence([
-                        .wait(forDuration: 0.25),
-                        .fadeIn(withDuration: 0.75)
+                        .wait(forDuration: .moveAnimationDuration),
+                        .fadeIn(withDuration: .fadeAnimationDuration)
                     ]),
                     withKey: "move"
                 )

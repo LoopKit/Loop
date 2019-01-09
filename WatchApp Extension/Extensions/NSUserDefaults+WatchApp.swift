@@ -12,6 +12,7 @@ import Foundation
 extension UserDefaults {
     private enum Key: String {
         case StartOnChartPage = "com.loudnate.Naterade.StartOnChartPage"
+        case VisibleDuration = "com.loudnate.Naterade.VisibleDuration"
     }
 
     var startOnChartPage: Bool {
@@ -20,6 +21,18 @@ extension UserDefaults {
         }
         set {
             set(newValue, forKey: Key.StartOnChartPage.rawValue)
+        }
+    }
+
+    var visibleDuration: TimeInterval  {
+        get {
+            if let value = object(forKey: Key.VisibleDuration.rawValue) as? TimeInterval {
+                return value
+            }
+            return TimeInterval (hours: 6)
+        }
+        set {
+            set(newValue.rawValue, forKey: Key.VisibleDuration.rawValue)
         }
     }
 }

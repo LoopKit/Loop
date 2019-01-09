@@ -554,6 +554,7 @@ extension LoopDataManager {
     /// temporary basal rate.
     func loop() {
         self.dataAccessQueue.async {
+            self.logger.default("Loop running")
             NotificationCenter.default.post(name: .LoopRunning, object: self)
 
             self.lastLoopError = nil
@@ -582,6 +583,7 @@ extension LoopDataManager {
                 self.lastLoopError = error
             }
 
+            self.logger.default("Loop ended")
             self.notify(forChange: .tempBasal)
         }
     }
