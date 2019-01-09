@@ -80,71 +80,6 @@ private extension SKSpriteNode {
     }
 }
 
-extension CGRect {
-    fileprivate func alignedToScreenScale(_ screenScale: CGFloat) -> CGRect {
-        let factor = 1 / screenScale
-
-        return CGRect(
-            x: origin.x.floored(to: factor),
-            y: origin.y.floored(to: factor),
-            width: size.width.ceiled(to: factor),
-            height: size.height.ceiled(to: factor)
-        )
-    }
-}
-
-private struct Scaler {
-    let dates: DateInterval
-    let glucoseMin: Double
-    let xScale: CGFloat
-    let yScale: CGFloat
-
-    func point(_ x: Date, _ y: Double) -> CGPoint {
-        return CGPoint(x: CGFloat(x.timeIntervalSince(dates.start)) * xScale, y: CGFloat(y - glucoseMin) * yScale)
-    }
-
-    // By default enforce a minimum height so that the range is visible
-    func rect(for range: GlucoseChartValueHashable, unit: HKUnit, minHeight: CGFloat = 2) -> CGRect {
-        let minY: Double
-        let maxY: Double
-
-        if unit != .milligramsPerDeciliter {
-            minY = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: range.min).doubleValue(for: unit)
-            maxY = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: range.max).doubleValue(for: unit)
-        } else {
-            minY = range.min
-            maxY = range.max
-        }
-
-        let a = point(max(dates.start, range.start), minY)
-        let b = point(min(dates.end, range.end), maxY)
-        let size = CGSize(width: b.x - a.x, height: max(b.y - a.y, minHeight))
-        return CGRect(origin: CGPoint(x: a.x + size.width / 2, y: a.y + size.height / 2), size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
-    }
-}
-
-private extension HKUnit {
-    var axisIncrement: Double {
-        return chartableIncrement * 25
-    }
-
-    var highWatermark: Double {
-        if self == .milligramsPerDeciliter {
-            return 150
-        } else {
-            return 8
-        }
-    }
-
-    var lowWatermark: Double {
-        if self == .milligramsPerDeciliter {
-            return 50.0
-        } else {
-            return 3.0
-        }
-    }
-}
-
 class GlucoseChartScene: SKScene {
     let log = OSLog(category: "GlucoseChartScene")
 
@@ -154,63 +89,14 @@ class GlucoseChartScene: SKScene {
         }
     }
 
-    var unit: HKUnit?
-    var correctionRange: GlucoseRangeSchedule?
-    var historicalGlucose: [SampleValue]? {
+    var data: GlucoseChartData? {
         didSet {
-            historicalGlucoseRange = historicalGlucose?.quantityRange
-        }
-    }
-    private(set) var historicalGlucoseRange: Range<HKQuantity>?
-    var predictedGlucose: [SampleValue]? {
-        didSet {
-            predictedGlucoseRange = predictedGlucose?.quantityRange
-
-            if let firstNewValue = predictedGlucose?.first {
-                if oldValue?.first == nil || oldValue?.first!.startDate != firstNewValue.startDate {
+            if let firstNewValue = data?.predictedGlucose?.first {
+                if oldValue?.predictedGlucose?.first == nil || oldValue?.predictedGlucose?.first!.startDate != firstNewValue.startDate {
                     shouldAnimatePredictionPath = true
                 }
             }
         }
-    }
-    private(set) var predictedGlucoseRange: Range<HKQuantity>?
-
-    private func chartableGlucoseRange(from start: Date, to end: Date) -> Range<HKQuantity> {
-        let unit = self.unit ?? .milligramsPerDeciliter
-
-        // Defaults
-        var min = unit.lowWatermark
-        var max = unit.highWatermark
-
-        for correction in correctionRange?.quantityBetween(start: start, end: end) ?? [] {
-            min = Swift.min(min, correction.value.lowerBound.doubleValue(for: unit))
-            max = Swift.max(max, correction.value.upperBound.doubleValue(for: unit))
-        }
-
-        if let override = correctionRange?.activeOverrideQuantityRange {
-            min = Swift.min(min, override.lowerBound.doubleValue(for: unit))
-            max = Swift.max(max, override.upperBound.doubleValue(for: unit))
-        }
-
-        if let historicalGlucoseRange = historicalGlucoseRange {
-            min = Swift.min(min, historicalGlucoseRange.lowerBound.doubleValue(for: unit))
-            max = Swift.max(max, historicalGlucoseRange.upperBound.doubleValue(for: unit))
-        }
-
-        if let predictedGlucoseRange = predictedGlucoseRange {
-            min = Swift.min(min, predictedGlucoseRange.lowerBound.doubleValue(for: unit))
-            max = Swift.max(max, predictedGlucoseRange.upperBound.doubleValue(for: unit))
-        }
-
-        // Predicted glucose values can be below a concentration of 0,
-        // but we want to let those fall off the graph since it's technically impossible
-        min = Swift.max(0, min.floored(to: unit.axisIncrement))
-        max = max.ceiled(to: unit.axisIncrement)
-
-        let lowerBound = HKQuantity(unit: unit, doubleValue: min)
-        let upperBound = HKQuantity(unit: unit, doubleValue: max)
-
-        return lowerBound..<upperBound
     }
 
     var visibleDuration = UserDefaults.standard.visibleDuration {
@@ -219,6 +105,7 @@ class GlucoseChartScene: SKScene {
             UserDefaults.standard.visibleDuration = visibleDuration
         }
     }
+
     private var hoursLabel: SKLabelNode!
     private var maxBGLabel: SKLabelNode!
     private var minBGLabel: SKLabelNode!
@@ -292,16 +179,7 @@ class GlucoseChartScene: SKScene {
     }
 
     private var childNodesHaveActions: Bool {
-        var childNodesHaveActions = false
-
-        for node in children {
-            if node.hasActions() {
-                childNodesHaveActions = true
-                break
-            }
-        }
-
-        return childNodesHaveActions
+        return children.contains(where: { $0.hasActions() })
     }
 
     override func didFinishUpdate() {
@@ -318,13 +196,15 @@ class GlucoseChartScene: SKScene {
     }
 
     private func getSprite(forHash hashValue: Int) -> (sprite: SKSpriteNode, created: Bool) {
-        var created = false
-        if nodes[hashValue] == nil {
-            nodes[hashValue] = SKSpriteNode(color: .clear, size: CGSize(width: 0, height: 0))
-            addChild(nodes[hashValue]!)
-            created = true
+        if let existingNode = nodes[hashValue] {
+            return (sprite: existingNode, created: false)
+        } else {
+            let newNode = SKSpriteNode(color: .clear, size: CGSize(width: 0, height: 0))
+            newNode.anchorPoint = CGPoint(x: 0, y: 0)
+            nodes[hashValue] = newNode
+            addChild(newNode)
+            return (sprite: newNode, created: true)
         }
-        return (sprite: nodes[hashValue]!, created: created)
     }
 
     func setNeedsUpdate() {
@@ -338,25 +218,18 @@ class GlucoseChartScene: SKScene {
     }
 
     private func performUpdate(animated: Bool) {
-        guard let unit = unit else {
+        guard let data = data, let unit = data.unit else {
             return
         }
 
-        let window = visibleDuration / 2
-        let start = Date(timeIntervalSinceNow: -window)
-        let end = start.addingTimeInterval(visibleDuration)
-        let yRange = chartableGlucoseRange(from: start, to: end)
-        let scaler = Scaler(
-            dates: DateInterval(start: start, end: end),
-            glucoseMin: yRange.lowerBound.doubleValue(for: unit),
-            xScale: size.width / CGFloat(window * 2),
-            yScale: size.height / CGFloat(yRange.upperBound.doubleValue(for: unit) - yRange.lowerBound.doubleValue(for: unit))
-        )
+        let spannedInterval = DateInterval(start: Date() - visibleDuration / 2, duration: visibleDuration)
+        let glucoseRange = data.chartableGlucoseRange(from: spannedInterval)
+        let scaler = GlucoseChartScaler(size: size, dateInterval: spannedInterval, glucoseRange: glucoseRange, unit: unit, coordinateSystem: .inverted)
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        minBGLabel.text = numberFormatter.string(from: yRange.lowerBound.doubleValue(for: unit))
+        minBGLabel.text = numberFormatter.string(from: glucoseRange.lowerBound.doubleValue(for: unit))
         minBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: textInsets.bottom))
-        maxBGLabel.text = numberFormatter.string(from: yRange.upperBound.doubleValue(for: unit))
+        maxBGLabel.text = numberFormatter.string(from: glucoseRange.upperBound.doubleValue(for: unit))
         maxBGLabel.move(to: CGPoint(x: size.width - textInsets.right, y: size.height - textInsets.top))
         hoursLabel.text = dateFormatter.string(from: visibleDuration)
         hoursLabel.move(to: CGPoint(x: textInsets.left, y: size.height - textInsets.top))
@@ -364,15 +237,15 @@ class GlucoseChartScene: SKScene {
         // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
         var inactiveNodes = nodes
 
-        let activeOverride = correctionRange?.activeOverride
+        let activeOverride = data.correctionRange?.activeOverride
 
-        correctionRange?.quantityBetween(start: start, end: end).forEach({ (range) in
+        data.correctionRange?.quantityBetween(start: spannedInterval.start, end: spannedInterval.end).forEach { range in
             let (sprite, created) = getSprite(forHash: range.chartHashValue)
             sprite.color = UIColor.glucose.withAlphaComponent(activeOverride != nil ? 0.2 : 0.3)
             sprite.zPosition = NodePlane.ranges.zPosition
             sprite.move(to: scaler.rect(for: range, unit: unit), animated: !created)
             inactiveNodes.removeValue(forKey: range.chartHashValue)
-        })
+        }
 
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
@@ -384,8 +257,8 @@ class GlucoseChartScene: SKScene {
             sprite1.move(to: scaler.rect(for: range, unit: unit), animated: !created)
             inactiveNodes.removeValue(forKey: range.chartHashValue)
 
-            if range.end < end {
-                let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: end, value: range.value)
+            if range.end < spannedInterval.end {
+                let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: spannedInterval.end, value: range.value)
                 let (sprite2, created) = getSprite(forHash: extendedRange.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition
@@ -394,9 +267,10 @@ class GlucoseChartScene: SKScene {
             }
         }
 
-        historicalGlucose?.filter { scaler.dates.contains($0.startDate) }.forEach {
-            let origin = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
+        data.historicalGlucose?.filter { scaler.dates.contains($0.startDate) }.forEach {
+            let center = scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
             let size = CGSize(width: 2, height: 2)
+            let origin = CGPoint(x: center.x - size.width / 2, y: center.y - size.height / 2)
             let (sprite, created) = getSprite(forHash: $0.chartHashValue)
             sprite.color = .glucose
             sprite.zPosition = NodePlane.values.zPosition
@@ -405,7 +279,7 @@ class GlucoseChartScene: SKScene {
         }
 
         predictedPathNode?.removeFromParent()
-        if let predictedGlucose = predictedGlucose, predictedGlucose.count > 2 {
+        if let predictedGlucose = data.predictedGlucose, predictedGlucose.count > 2 {
             let predictedPath = CGMutablePath()
             predictedPath.addLines(between: predictedGlucose.map {
                 scaler.point($0.startDate, $0.quantity.doubleValue(for: unit))
