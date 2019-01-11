@@ -170,18 +170,10 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         updateGlucoseChart()
     }
 
-    private func updateGlucoseChart() {
-        guard let activeContext = loopManager.activeContext else {
-            return
-        }
-
-        scene.predictedGlucose = activeContext.predictedGlucose?.values
-        scene.correctionRange = loopManager.settings.glucoseTargetRangeSchedule
-        scene.unit = activeContext.preferredGlucoseUnit
-
-        loopManager.glucoseStore.getCachedGlucoseSamples(start: .earliestGlucoseCutoff) { (samples) in
+    func updateGlucoseChart() {
+        loopManager.generateChartData { chartData in
             DispatchQueue.main.async {
-                self.scene.historicalGlucose = samples
+                self.scene.data = chartData
                 self.scene.setNeedsUpdate()
             }
         }
