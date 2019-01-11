@@ -6,15 +6,16 @@
 //  Copyright © 2018 LoopKit Authors. All rights reserved.
 //
 
-#ifndef CLKTextProvider_Compound_h
 #define CLKTextProvider_Compound_h
 
 #import <ClockKit/ClockKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface CLKTextProvider (Compound)
 
-+ (CLKTextProvider *)textProviderByJoiningTextProviders: (nonnull NSArray<CLKTextProvider *> *)textProviders separator:(nullable NSString *) separator;
++ (CLKTextProvider *)textProviderByJoiningTextProviders: (NSArray<CLKTextProvider *> *)textProviders separator:(NSString *) separator;
 
 @end
 
-#endif /* CLKTextProvider_Compound_h */
+NS_ASSUME_NONNULL_END

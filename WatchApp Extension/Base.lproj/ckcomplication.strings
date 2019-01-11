@@ -12,5 +12,8 @@
 /* The complication template example glucose string */
 "120" = "120";
 
+/* The complication template example time string */
+"3MIN" = "3MIN";
+
 /* Utilitarian large flat format string (1: Glucose & Trend symbol) (2: Eventual Glucose) (3: Time) */
 "UtilitarianLargeFlat" = "%@%@ %@";

@@ -11,15 +11,14 @@ import UIKit
 import HealthKit
 import WatchKit
 
-
-private enum ComplicationChartConstants {
-    static let textInsets = UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1)
-    static let glucoseSize = CGSize(width: 1, height: 1)
-    static let glucoseLabelAttributes: [NSAttributedString.Key: Any] = [
-        .font: UIFont(name: "HelveticaNeue", size: 5)!,
-        .foregroundColor: UIColor.chartLabel
-    ]
-}
+private let textInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
+private let glucoseSize = CGSize(width: 2, height: 2)
+private let glucoseLabelAttributes: [NSAttributedString.Key: Any] = [
+    .font: UIFont(name: "HelveticaNeue", size: 10)!,
+    .foregroundColor: UIColor.chartLabel
+]
+private let predictionDashPhase: CGFloat = 11
+private let predictionDashLengths: [CGFloat] = [5, 3]
 
 private enum GlucoseLabelPosition {
     case high
@@ -36,23 +35,29 @@ final class ComplicationChartManager {
         return data?.unit ?? .milligramsPerDeciliter
     }
 
-    func renderChartImage(size: CGSize) -> UIImage? {
+    func renderChartImage(size: CGSize, scale: CGFloat) -> UIImage? {
+        guard let data = data else {
+            renderedChartImage = nil
+            return nil
+        }
+
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
 
         let context = UIGraphicsGetCurrentContext()!
-        drawChart(in: context, size: size)
-        let image = context.makeImage().map(UIImage.init(cgImage:))
+        drawChart(in: context, data: data, size: size)
+
+        guard let cgImage = context.makeImage() else {
+            renderedChartImage = nil
+            return nil
+        }
+
+        let image = UIImage(cgImage: cgImage, scale: scale, orientation: .up)
         renderedChartImage = image
         return image
     }
 
-    private func drawChart(in context: CGContext, size: CGSize) {
-        guard let data = data else {
-            // TODO: handle empty data case
-            return
-        }
-
+    private func drawChart(in context: CGContext, data: GlucoseChartData, size: CGSize) {
         let now = Date()
         lastRenderDate = now
         let spannedInterval = DateInterval(start: now - visibleInterval / 2, duration: visibleInterval)
@@ -70,15 +75,15 @@ final class ComplicationChartManager {
     }
 
     private func drawGlucoseLabelText(_ text: String, position: GlucoseLabelPosition, scaler: GlucoseChartScaler) {
-        let attributedText = NSAttributedString(string: text, attributes: ComplicationChartConstants.glucoseLabelAttributes)
+        let attributedText = NSAttributedString(string: text, attributes: glucoseLabelAttributes)
         let size = attributedText.size()
-        let x = scaler.xCoordinate(for: scaler.dates.end) - size.width -  ComplicationChartConstants.textInsets.right
+        let x = scaler.xCoordinate(for: scaler.dates.end) - size.width -  textInsets.right
         let y: CGFloat = {
             switch position {
             case .high:
-                return scaler.yCoordinate(for: scaler.glucoseMax) + ComplicationChartConstants.textInsets.top
+                return scaler.yCoordinate(for: scaler.glucoseMax) + textInsets.top
             case .low:
-                return scaler.yCoordinate(for: scaler.glucoseMin) - size.height - ComplicationChartConstants.textInsets.bottom
+                return scaler.yCoordinate(for: scaler.glucoseMin) - size.height - textInsets.bottom
             }
         }()
         let rect = CGRect(origin: CGPoint(x: x, y: y), size: size).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
@@ -110,7 +115,7 @@ final class ComplicationChartManager {
             .filter { scaler.dates.contains($0.startDate) }
             .forEach { glucose in
                 let origin = scaler.point(for: glucose, unit: unit)
-                let glucoseRect = CGRect(origin: origin, size: ComplicationChartConstants.glucoseSize).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
+                let glucoseRect = CGRect(origin: origin, size: glucoseSize).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
                 context.fill(glucoseRect)
         }
     }
@@ -122,7 +127,7 @@ final class ComplicationChartManager {
         let predictedPath = CGMutablePath()
         let glucosePoints = predictedGlucose.map { scaler.point(for: $0, unit: unit) }
         predictedPath.addLines(between: glucosePoints)
-        let dashedPath = predictedPath.copy(dashingWithPhase: 6.5, lengths: [2.5, 1.5])
+        let dashedPath = predictedPath.copy(dashingWithPhase: predictionDashPhase, lengths: predictionDashLengths)
         context.setStrokeColor(UIColor.white.cgColor)
         context.addPath(dashedPath)
         context.strokePath()

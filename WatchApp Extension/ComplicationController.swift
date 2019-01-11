@@ -43,38 +43,38 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     private let chartManager = ComplicationChartManager()
 
     private func updateChartManagerIfNeeded(completion: @escaping () -> Void) {
-        if #available(watchOSApplicationExtension 5.0, *) {
-            guard
-                let activeComplications = CLKComplicationServer.sharedInstance().activeComplications,
-                activeComplications.contains(where: { $0.family == .graphicRectangular })
-            else {
-                completion()
-                return
-            }
+        guard
+            #available(watchOSApplicationExtension 5.0, *),
+            let activeComplications = CLKComplicationServer.sharedInstance().activeComplications,
+            activeComplications.contains(where: { $0.family == .graphicRectangular })
+        else {
+            completion()
+            return
+        }
 
-            ExtensionDelegate.shared().loopManager.generateChartData { chartData in
-                self.chartManager.data = chartData
-                completion()
-            }
+        ExtensionDelegate.shared().loopManager.generateChartData { chartData in
+            self.chartManager.data = chartData
+            completion()
         }
     }
 
-    var makeChart: () -> UIImage? {
+    func makeChart() -> UIImage? {
         // c.f. https://developer.apple.com/design/human-interface-guidelines/watchos/icons-and-images/complication-images/
         let size: CGSize = {
-            let scaleFactor = 1 / WKInterfaceDevice.current().screenScale
             switch WKInterfaceDevice.current().screenBounds.width {
             case 162: // 40mm
-                return CGSize(width: 150.0 * scaleFactor, height: 47.0 * scaleFactor)
+                return CGSize(width: 150.0, height: 47.0)
             default /* case 184 */: // 44mm
-                return CGSize(width: 171.0 * scaleFactor, height: 54.0 * scaleFactor)
+                return CGSize(width: 171.0, height: 54.0)
             }
         }()
-        return { [chartManager] in chartManager.renderChartImage(size: size) }
+
+        let scale = WKInterfaceDevice.current().screenScale
+        return chartManager.renderChartImage(size: size, scale: scale)
     }
 
     func getCurrentTimelineEntry(for complication: CLKComplication, withHandler handler: (@escaping (CLKComplicationTimelineEntry?) -> Void)) {
-        updateChartManagerIfNeeded {
+        updateChartManagerIfNeeded(completion: {
             let entry: CLKComplicationTimelineEntry?
 
             if  let context = ExtensionDelegate.shared().loopManager.activeContext,
@@ -94,7 +94,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             }
 
             handler(entry)
-        }
+        })
     }
     
     func getTimelineEntries(for complication: CLKComplication, before date: Date, limit: Int, withHandler handler: (@escaping ([CLKComplicationTimelineEntry]?) -> Void)) {
@@ -131,7 +131,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
     func getLocalizableSampleTemplate(for family: CLKComplicationFamily) -> CLKComplicationTemplate? {
         let glucoseAndTrendText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "120↘︎")
         let glucoseText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "120")
-        let timeText = CLKRelativeDateTextProvider(date: Date(), style: .natural, units: .minute)
+        let timeText = CLKSimpleTextProvider.localizableTextProvider(withStringsFileTextKey: "3MIN")
 
         switch family {
         case .modularSmall:

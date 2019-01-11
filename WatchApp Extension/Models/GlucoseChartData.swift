@@ -68,7 +68,9 @@ struct GlucoseChartData {
             max = Swift.max(max, predictedGlucoseRange.upperBound.doubleValue(for: unit))
         }
 
-        min = min.floored(to: unit.axisIncrement)
+        // Predicted glucose values can be below a concentration of 0,
+        // but we want to let those fall off the graph since it's technically impossible
+        min = Swift.max(0, min.floored(to: unit.axisIncrement))
         max = max.ceiled(to: unit.axisIncrement)
 
         let lowerBound = HKQuantity(unit: unit, doubleValue: min)
