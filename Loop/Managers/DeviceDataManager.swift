@@ -232,7 +232,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         return !(cgmManager?.providesBLEHeartbeat == true)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didUpdateStatus status: PumpManagerStatus) {
+    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
         self.pumpManagerStatus = status
     }
 

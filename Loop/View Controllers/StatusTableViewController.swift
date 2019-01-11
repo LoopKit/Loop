@@ -43,7 +43,7 @@ final class StatusTableViewController: ChartsTableViewController {
         )
         
         if let pumpManager = deviceManager.pumpManager {
-            self.suspendState = pumpManager.status.suspendState
+            self.basalDeliveryState = pumpManager.status.basalDeliveryState
             pumpManager.addStatusObserver(self)
         }
 
@@ -179,7 +179,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
-    public var suspendState: PumpManagerStatus.SuspendState = .none {
+    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .none {
         didSet {
             refreshContext.update(with: .status)
         }
@@ -428,9 +428,9 @@ final class StatusTableViewController: ChartsTableViewController {
             // Show/hide the table view rows
             let statusRowMode: StatusRowMode?
             
-            if self.suspendState == .suspended {
+            if self.basalDeliveryState == .suspended {
                 statusRowMode = .pumpSuspended(resuming: false)
-            } else if self.suspendState == .resuming {
+            } else if self.basalDeliveryState == .resuming {
                 statusRowMode = .pumpSuspended(resuming: true)
             } else {
                 switch bolusState {
@@ -1117,16 +1117,17 @@ final class StatusTableViewController: ChartsTableViewController {
 }
 
 extension StatusTableViewController: PumpManagerStatusObserver {
-    func pumpManager(_ pumpManager: PumpManager, didUpdateStatus status: PumpManagerStatus) {
+    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
         DispatchQueue.main.async {
-            self.suspendState = status.suspendState
+            self.basalDeliveryState = status.basalDeliveryState
             self.reloadData(animated: true)
         }
     }
 }
 
 extension StatusTableViewController: HUDProviderDelegate {
-    func addHudViews(_ views: [BaseHUDView]) {
+    
+    func hudProvider(_ provider: HUDProvider, didAddHudViews views: [BaseHUDView]) {
         DispatchQueue.main.async {
             for view in views {
                 view.isHidden = true
@@ -1143,7 +1144,7 @@ extension StatusTableViewController: HUDProviderDelegate {
         }
     }
     
-    func removeHudViews(_ views: [BaseHUDView]) {
+    func hudProvider(_ provider: HUDProvider, didRemoveHudViews views: [BaseHUDView]) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: 1, animations: {
                 for view in views {

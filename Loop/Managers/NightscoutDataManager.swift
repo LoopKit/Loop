@@ -157,7 +157,7 @@ final class NightscoutDataManager {
                 pumpID: pumpManagerStatus.device.localIdentifier ?? "Unknown",
                 iob: nil,
                 battery: battery,
-                suspended: pumpManagerStatus.suspendState == .suspended,
+                suspended: pumpManagerStatus.basalDeliveryState == .suspended,
                 bolusing: bolusing,
                 reservoir: deviceManager.loopManager.doseStore.lastReservoirValue?.unitVolume,
                 secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())
