@@ -179,7 +179,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
-    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .none {
+    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active {
         didSet {
             refreshContext.update(with: .status)
         }
@@ -839,7 +839,7 @@ final class StatusTableViewController: ChartsTableViewController {
                                 
                                 if let error = error {
                                     self.deviceManager.logger.addError(error, fromSource: "TempBasal")
-                                    self.presentAlertController(with: error)
+                                    self.present(UIAlertController(with: error), animated: true)
                                 } else {
                                     self.refreshContext.update(with: .status)
                                     self.log.debug("[reloadData] after manually enacting temp basal")
@@ -854,7 +854,7 @@ final class StatusTableViewController: ChartsTableViewController {
                         self.deviceManager.pumpManager?.resumeDelivery() { (error) in
                             DispatchQueue.main.async {
                                 if let error = error {
-                                    let alert = UIAlertController(title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"), error: error)
+                                    let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
                                     self.present(alert, animated: true, completion: nil)
                                 }
                             }
@@ -947,7 +947,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 case .failure(let error):
                     // Ignore bolus wizard errors
                     if error is CarbStore.CarbStoreError {
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     } else {
                         self.deviceManager.logger.addError(error, fromSource: "Bolus")
                     }
@@ -1087,9 +1087,9 @@ final class StatusTableViewController: ChartsTableViewController {
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.presentAlertController(with: deviceError.error)
+            self.present(UIAlertController(with: deviceError.error), animated: true)
         } else if let lastLoopError = lastLoopError {
-            self.presentAlertController(with: lastLoopError)
+            self.present(UIAlertController(with: lastLoopError), animated: true)
         }
     }
 
@@ -1102,7 +1102,7 @@ final class StatusTableViewController: ChartsTableViewController {
     @objc private func hudViewTapped(_ sender: UIGestureRecognizer) {
         if let hudSubView = sender.view as? BaseHUDView,
             let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider,
-            let action = pumpManagerHUDProvider.didTapOnHudView(hudSubView)
+            let action = pumpManagerHUDProvider.didTapOnHUDView(hudSubView)
         {
             switch action {
             case .showViewController(let vc):
@@ -1127,7 +1127,7 @@ extension StatusTableViewController: PumpManagerStatusObserver {
 
 extension StatusTableViewController: HUDProviderDelegate {
     
-    func hudProvider(_ provider: HUDProvider, didAddHudViews views: [BaseHUDView]) {
+    func hudProvider(_ provider: HUDProvider, didAddViews views: [BaseHUDView]) {
         DispatchQueue.main.async {
             for view in views {
                 view.isHidden = true
@@ -1144,7 +1144,7 @@ extension StatusTableViewController: HUDProviderDelegate {
         }
     }
     
-    func hudProvider(_ provider: HUDProvider, didRemoveHudViews views: [BaseHUDView]) {
+    func hudProvider(_ provider: HUDProvider, didRemoveViews views: [BaseHUDView]) {
         DispatchQueue.main.async {
             UIView.animate(withDuration: 1, animations: {
                 for view in views {
@@ -1158,33 +1158,17 @@ extension StatusTableViewController: HUDProviderDelegate {
             NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
     }
-}
 
-extension UIAlertController {
-    fileprivate convenience init(title: String, error: Error) {
-        
-        let message: String
-        
-        if let localizedError = error as? LocalizedError {
-            let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
-            message = [localizedError.failureReason, localizedError.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: "\n")
-        } else {
-            message = String(describing: error)
+    func hudProvider(_ provider: HUDProvider, didReplaceViews views: [BaseHUDView]) {
+        DispatchQueue.main.async {
+            self.hudView?.removeNonStandardHUDViews()
+            for view in views {
+                view.isHidden = true
+                view.alpha = 0
+                self.addViewToHUD(view)
+            }
+            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
-        
-        self.init(
-            title: title,
-            message: message,
-            preferredStyle: .alert
-        )
-        
-        addAction(UIAlertAction(
-            title: NSLocalizedString("OK", comment: "Button title to acknowledge error"),
-            style: .default,
-            handler: nil
-        ))
     }
 }
 
