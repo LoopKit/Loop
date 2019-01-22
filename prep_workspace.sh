@@ -17,7 +17,7 @@ git reset HEAD
 cd Carthage/Checkouts
 cd LoopKit; git fetch; git checkout pumpmanager-updates; git pull; cd ..
 cd rileylink_ios; git fetch; git checkout omnipod-testing; git pull; cd ..
-cd CGMBLEKit; git fetch; git checkout dev; git pull; cd ..
+cd CGMBLEKit; git fetch; git checkout omnikit-testing; git pull; cd ..
 cd dexcom-share-client-swift; git fetch; git checkout carthage-recursive; git pull; cd ..
 cd G4ShareSpy; git fetch; git checkout fix-cartfile; git pull; cd ..
 cd ../..
