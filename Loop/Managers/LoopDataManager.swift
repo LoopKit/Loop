@@ -90,7 +90,7 @@ final class LoopDataManager {
                 queue: nil
             ) { (note) -> Void in
                 self.dataAccessQueue.async {
-                    self.logger.info("Received notification of carb entries updating")
+                    self.logger.default("Received notification of carb entries updating")
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
@@ -103,7 +103,7 @@ final class LoopDataManager {
                 queue: nil
             ) { (note) in
                 self.dataAccessQueue.async {
-                    self.logger.info("Received notification of glucose samples changing")
+                    self.logger.default("Received notification of glucose samples changing")
 
                     self.glucoseMomentumEffect = nil
 
@@ -571,6 +571,7 @@ extension LoopDataManager {
                         } else {
                             self.lastLoopCompleted = Date()
                         }
+                        self.logger.default("Loop ended")
                         self.notify(forChange: .tempBasal)
                     }
 
