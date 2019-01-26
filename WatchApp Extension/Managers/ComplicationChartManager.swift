@@ -12,24 +12,37 @@ import HealthKit
 import WatchKit
 
 private let textInsets = UIEdgeInsets(top: 2, left: 2, bottom: 2, right: 2)
-private let glucoseSize = CGSize(width: 2, height: 2)
-private let glucoseLabelAttributes: [NSAttributedString.Key: Any] = [
-    .font: UIFont(name: "HelveticaNeue", size: 10)!,
-    .foregroundColor: UIColor.chartLabel
-]
-private let predictionDashPhase: CGFloat = 11
-private let predictionDashLengths: [CGFloat] = [5, 3]
 
-private enum GlucoseLabelPosition {
-    case high
-    case low
+extension CGSize {
+    fileprivate static let glucosePoint = CGSize(width: 2, height: 2)
 }
 
+extension NSAttributedString {
+    fileprivate class func forGlucoseLabel(string: String) -> NSAttributedString {
+        return NSAttributedString(string: string, attributes: [
+            .font: UIFont(name: "HelveticaNeue", size: 10)!,
+            .foregroundColor: UIColor.chartLabel
+        ])
+    }
+}
+
+extension CGFloat {
+    fileprivate static let predictionDashPhase: CGFloat = 11
+}
+
+private let predictionDashLengths: [CGFloat] = [5, 3]
+
+
 final class ComplicationChartManager {
+    private enum GlucoseLabelPosition {
+        case high
+        case low
+    }
+
     var data: GlucoseChartData?
-    var lastRenderDate: Date?
-    var renderedChartImage: UIImage?
-    var visibleInterval: TimeInterval = .hours(4)
+    private var lastRenderDate: Date?
+    private var renderedChartImage: UIImage?
+    private var visibleInterval: TimeInterval = .hours(4)
 
     private var unit: HKUnit {
         return data?.unit ?? .milligramsPerDeciliter
@@ -44,7 +57,10 @@ final class ComplicationChartManager {
         UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
 
-        let context = UIGraphicsGetCurrentContext()!
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return nil
+        }
+
         drawChart(in: context, data: data, size: size)
 
         guard let cgImage = context.makeImage() else {
@@ -75,9 +91,9 @@ final class ComplicationChartManager {
     }
 
     private func drawGlucoseLabelText(_ text: String, position: GlucoseLabelPosition, scaler: GlucoseChartScaler) {
-        let attributedText = NSAttributedString(string: text, attributes: glucoseLabelAttributes)
+        let attributedText = NSAttributedString.forGlucoseLabel(string: text)
         let size = attributedText.size()
-        let x = scaler.xCoordinate(for: scaler.dates.end) - size.width -  textInsets.right
+        let x = scaler.xCoordinate(for: scaler.dates.end) - size.width - textInsets.right
         let y: CGFloat = {
             switch position {
             case .high:
@@ -111,12 +127,12 @@ final class ComplicationChartManager {
 
     private func drawHistoricalGlucose(in context: CGContext, using scaler: GlucoseChartScaler) {
         context.setFillColor(UIColor.glucose.cgColor)
-        data?.historicalGlucose?.lazy
-            .filter { scaler.dates.contains($0.startDate) }
-            .forEach { glucose in
-                let origin = scaler.point(for: glucose, unit: unit)
-                let glucoseRect = CGRect(origin: origin, size: glucoseSize).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
-                context.fill(glucoseRect)
+        data?.historicalGlucose?.lazy.filter {
+            scaler.dates.contains($0.startDate)
+        }.forEach { glucose in
+            let origin = scaler.point(for: glucose, unit: unit)
+            let glucoseRect = CGRect(origin: origin, size: .glucosePoint).alignedToScreenScale(WKInterfaceDevice.current().screenScale)
+            context.fill(glucoseRect)
         }
     }
 
@@ -127,7 +143,7 @@ final class ComplicationChartManager {
         let predictedPath = CGMutablePath()
         let glucosePoints = predictedGlucose.map { scaler.point(for: $0, unit: unit) }
         predictedPath.addLines(between: glucosePoints)
-        let dashedPath = predictedPath.copy(dashingWithPhase: predictionDashPhase, lengths: predictionDashLengths)
+        let dashedPath = predictedPath.copy(dashingWithPhase: .predictionDashPhase, lengths: predictionDashLengths)
         context.setStrokeColor(UIColor.white.cgColor)
         context.addPath(dashedPath)
         context.strokePath()
