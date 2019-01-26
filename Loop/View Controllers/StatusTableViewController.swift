@@ -8,6 +8,7 @@
 
 import UIKit
 import HealthKit
+import Intents
 import LoopKit
 import LoopKitUI
 import LoopUI
@@ -414,7 +415,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
                         at: glucose.startDate,
                         unit: self.charts.glucoseUnit,
-                        sensor: self.deviceManager.sensorInfo
+                        sensor: self.deviceManager.cgmManager?.sensorState
                     )
                 }
 
@@ -841,6 +842,15 @@ final class StatusTableViewController: ChartsTableViewController {
 
     // MARK: - Actions
 
+    override func restoreUserActivityState(_ activity: NSUserActivity) {
+        switch activity.activityType {
+        case NSUserActivity.newCarbEntryActivityType:
+            performSegue(withIdentifier: CarbEntryEditViewController.className, sender: activity)
+        default:
+            break
+        }
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
 
@@ -860,6 +870,10 @@ final class StatusTableViewController: ChartsTableViewController {
         case let vc as CarbEntryEditViewController:
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+
+            if let activity = sender as? NSUserActivity {
+                vc.restoreUserActivityState(activity)
+            }
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
@@ -885,6 +899,14 @@ final class StatusTableViewController: ChartsTableViewController {
             return
         }
 
+        if #available(iOS 12.0, *) {
+            let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
+            interaction.donate { [weak self] (error) in
+                if let error = error {
+                    self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
+                }
+            }
+        }
         deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
             DispatchQueue.main.async {
                 switch result {
@@ -990,7 +1012,7 @@ final class StatusTableViewController: ChartsTableViewController {
             let glucoseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openCGMApp(_:)))
             hudView.glucoseHUD.addGestureRecognizer(glucoseTapGestureRecognizer)
             
-            if deviceManager.cgm?.appURL != nil {
+            if deviceManager.cgmManager?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
 
@@ -1019,7 +1041,7 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func openCGMApp(_: Any) {
-        if let url = deviceManager.cgm?.appURL, UIApplication.shared.canOpenURL(url) {
+        if let url = deviceManager.cgmManager?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }

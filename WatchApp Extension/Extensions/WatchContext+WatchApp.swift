@@ -7,16 +7,31 @@
 //
 
 import Foundation
+import HealthKit
 import LoopKit
 
 extension WatchContext {
     var glucoseTrend: GlucoseTrend? {
-        get {
-            if let glucoseTrendRawValue = glucoseTrendRawValue {
-                return GlucoseTrend(rawValue: glucoseTrendRawValue)
-            } else {
-                return nil
-            }
+        if let glucoseTrendRawValue = glucoseTrendRawValue {
+            return GlucoseTrend(rawValue: glucoseTrendRawValue)
+        } else {
+            return nil
         }
+    }
+
+    var activeInsulin: HKQuantity? {
+        guard let value = iob else {
+            return nil
+        }
+
+        return HKQuantity(unit: .internationalUnit(), doubleValue: value)
+    }
+
+    var activeCarbohydrates: HKQuantity? {
+        guard let value = cob else {
+            return nil
+        }
+
+        return HKQuantity(unit: .gram(), doubleValue: value)
     }
 }

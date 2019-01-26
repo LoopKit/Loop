@@ -41,12 +41,6 @@ final class SettingsTableViewController: UITableViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
-            dataManager.loopManager.glucoseStore.authorize { (result) -> Void in
-                // Do nothing for now
-            }
-        }
-
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
 
@@ -70,11 +64,7 @@ final class SettingsTableViewController: UITableViewController {
     }
 
     fileprivate enum CGMRow: Int, CaseCountable {
-        case enlite = 0
-        case g4
-        case g5
-        case dexcomShare      // only displayed if g4 or g5 switched on
-        case g5TransmitterID  // only displayed if g5 switched on
+        case cgmSettings = 0
     }
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
@@ -132,14 +122,7 @@ final class SettingsTableViewController: UITableViewController {
         case .pump:
             return PumpRow.count
         case .cgm:
-            switch dataManager.cgm {
-            case .g4?:
-                return CGMRow.count - 1  // No Transmitter ID cell
-            case .g5?:
-                return CGMRow.count
-            default:
-                return CGMRow.count - 2  // No Share or Transmitter ID cell
-            }
+            return 1
         case .configuration:
             return ConfigurationRow.count
         case .services:
@@ -186,54 +169,24 @@ final class SettingsTableViewController: UITableViewController {
                 }
             }
         case .cgm:
-            let row = CGMRow(rawValue: indexPath.row)!
-            switch row {
-            case .dexcomShare:
-                let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-                let shareService = dataManager.remoteDataManager.shareService
+            if let cgmManager = dataManager.cgmManager {
+                let cgmManagerUI = cgmManager as? CGMManagerUI
 
-                configCell.textLabel?.text = shareService.title
-                configCell.detailTextLabel?.text = shareService.username ?? SettingsTableViewCell.TapToSetString
-                configCell.accessoryType = .disclosureIndicator
-
-                return configCell
-            case .g5TransmitterID:
-                let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-
-                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the Dexcom G5/G6 transmitter ID config value")
-
-                if case .g5(let transmitterID)? = dataManager.cgm {
-                    configCell.detailTextLabel?.text = transmitterID ?? SettingsTableViewCell.TapToSetString
+                let image = cgmManagerUI?.smallImage
+                let cell = tableView.dequeueReusableCell(withIdentifier: image == nil ? SettingsTableViewCell.className : SettingsImageTableViewCell.className, for: indexPath)
+                if let image = image {
+                    cell.imageView?.image = image
                 }
-                configCell.accessoryType = .disclosureIndicator
-
-                return configCell
-            default:
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-                switch row {
-                case .enlite:
-                    switchCell.switch?.isOn = dataManager.cgm == .usePump
-                    switchCell.textLabel?.text = NSLocalizedString("Sof-Sensor / Enlite", comment: "The title text for the Medtronic sensor switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(enliteChanged(_:)), for: .valueChanged)
-                case .g4:
-                    switchCell.switch?.isOn = dataManager.cgm == .g4
-                    switchCell.textLabel?.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(g4Changed(_:)), for: .valueChanged)
-                case .g5:
-                    if case .g5? = dataManager.cgm {
-                        switchCell.switch?.isOn = true
-                    } else {
-                        switchCell.switch?.isOn = false
-                    }
-
-                    switchCell.textLabel?.text = NSLocalizedString("G5/G6 Transmitter", comment: "The title text for the G5/G6 Transmitter switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(g5Changed(_:)), for: .valueChanged)
-                case .dexcomShare, .g5TransmitterID:
-                    assertionFailure()
+                cell.textLabel?.text = cgmManager.localizedTitle
+                cell.detailTextLabel?.text = nil
+                if cgmManagerUI != nil {
+                    cell.accessoryType = .disclosureIndicator
                 }
-
-                return switchCell
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath)
+                cell.textLabel?.text = NSLocalizedString("Add CGM", comment: "Title text for button to set up a CGM")
+                return cell
             }
         case .configuration:
             let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
@@ -244,7 +197,7 @@ final class SettingsTableViewController: UITableViewController {
 
                 if let carbRatioSchedule = dataManager.loopManager.carbRatioSchedule {
                     let unit = carbRatioSchedule.unit
-                    let value = valueNumberFormatter.string(from: carbRatioSchedule.averageQuantity().doubleValue(for: unit)) ?? "—"
+                    let value = valueNumberFormatter.string(from: carbRatioSchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for carb ratio average. (1: value)(2: carb unit)"), value, unit)
                 } else {
@@ -255,7 +208,7 @@ final class SettingsTableViewController: UITableViewController {
 
                 if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
-                    let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? "—"
+                    let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.localizedShortUnitString
                     )
@@ -268,8 +221,8 @@ final class SettingsTableViewController: UITableViewController {
                 if let glucoseTargetRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
                     let unit = glucoseTargetRangeSchedule.unit
                     let value = glucoseTargetRangeSchedule.value(at: Date())
-                    let minTarget = valueNumberFormatter.string(from: value.minValue) ?? "—"
-                    let maxTarget = valueNumberFormatter.string(from: value.maxValue) ?? "—"
+                    let minTarget = valueNumberFormatter.string(from: value.minValue) ?? SettingsTableViewCell.NoValueString
+                    let maxTarget = valueNumberFormatter.string(from: value.maxValue) ?? SettingsTableViewCell.NoValueString
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.localizedShortUnitString)
                 } else {
@@ -355,22 +308,6 @@ final class SettingsTableViewController: UITableViewController {
 
     // MARK: - UITableViewDelegate
 
-    override func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-        switch Section(rawValue: indexPath.section)! {
-        case .cgm:
-            switch CGMRow(rawValue: indexPath.row)! {
-            case .dexcomShare, .g5TransmitterID:
-                return 1
-            default:
-                break
-            }
-        default:
-            break
-        }
-
-        return 0
-    }
-
     override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return true
     }
@@ -386,41 +323,74 @@ final class SettingsTableViewController: UITableViewController {
                     show(settings, sender: sender)
                 } else {
                     // Add new pump
-                    if let pumpManagerType = allPumpManagers.first?.value as? PumpManagerUI.Type {
-                        var setupViewController = pumpManagerType.setupViewController()
-                        setupViewController.setupDelegate = self
-                        present(setupViewController, animated: true, completion: nil)
+                    let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
+
+                    switch pumpManagers.count {
+                    case 1:
+                        if let PumpManagerType = pumpManagers.first {
+                            var setupViewController = PumpManagerType.setupViewController()
+                            setupViewController.setupDelegate = self
+                            present(setupViewController, animated: true, completion: nil)
+                        }
+                    case let x where x > 1:
+                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (manager) in
+                            var setupViewController = manager.setupViewController()
+                            setupViewController.setupDelegate = self
+                            self?.present(setupViewController, animated: true, completion: nil)
+                        }
+
+                        alert.addCancelAction { (_) in
+                            tableView.deselectRow(at: indexPath, animated: true)
+                        }
+
+                        present(alert, animated: true, completion: nil)
+                    default:
+                        break
                     }
                 }
             }
         case .cgm:
-            switch CGMRow(rawValue: indexPath.row)! {
-            case .dexcomShare:
-                let service = dataManager.remoteDataManager.shareService
-                let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [weak self] (service) in
-                    self?.dataManager.remoteDataManager.shareService = service
-
-                    self?.tableView.reloadRows(at: [indexPath], with: .none)
+            if let cgmManager = dataManager.cgmManager as? CGMManagerUI {
+                if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                    show(cgmManager.settingsViewController(for: unit), sender: sender)
                 }
+            } else if dataManager.cgmManager is PumpManagerUI {
+                // The pump manager is providing glucose, but allow reverting the CGM
+                let alert = UIAlertController(deleteCGMManagerHandler: { [weak self] (isDeleted) in
+                    if isDeleted {
+                        self?.dataManager.cgmManager = nil
+                    }
 
-                show(vc, sender: sender)
-            case .g5TransmitterID:
-                let vc: LoopKitUI.TextFieldTableViewController
-                var value: String?
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    _ = self?.tableView(tableView, willDeselectRowAt: indexPath)
+                })
+                present(alert, animated: true, completion: nil)
+            } else {
+                // Add new CGM
+                let cgmManagers = allCGMManagers.compactMap({ $0 as? CGMManagerUI.Type })
 
-                if case .g5(let transmitterID)? = dataManager.cgm {
-                    value = transmitterID
+                switch cgmManagers.count {
+                case 1:
+                    if let CGMManagerType = cgmManagers.first {
+                        setupCGMManager(CGMManagerType, indexPath: indexPath)
+                    }
+                case let x where x > 1:
+                    let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (cgmManager, pumpManager) in
+                        if let CGMManagerType = cgmManager {
+                            self?.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                        } else if let pumpManager = pumpManager {
+                            self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                        }
+                    }
+
+                    alert.addCancelAction { (_) in
+                        tableView.deselectRow(at: indexPath, animated: true)
+                    }
+
+                    present(alert, animated: true, completion: nil)
+                default:
+                    break
                 }
-
-                vc = .transmitterID(value)
-                vc.title = sender?.textLabel?.text
-                vc.indexPath = indexPath
-                vc.delegate = self
-
-                show(vc, sender: indexPath)
-            default:
-                break
             }
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
@@ -581,8 +551,9 @@ final class SettingsTableViewController: UITableViewController {
             break
         case .pump:
             tableView.reloadRows(at: [indexPath], with: .fade)
+            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
         case .cgm:
-            break
+            tableView.reloadRows(at: [indexPath], with: .fade)
         case .configuration:
             break
         case .services:
@@ -594,101 +565,6 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
-    }
-
-    // MARK: - CGM State
-
-    // MARK: Model
-
-    /// Temporarily caches the last transmitter ID so curious switch-flippers don't lose it!
-    private var g5TransmitterID: String?
-
-    @objc private func g5Changed(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG4SwitchOff()
-            setEnliteSwitchOff()
-            let shareRowExists = tableView.numberOfRows(inSection: Section.cgm.rawValue) > CGMRow.dexcomShare.rawValue
-            dataManager.cgm = .g5(transmitterID: g5TransmitterID)
-
-            var indexPaths = [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section: Section.cgm.rawValue)]
-            if !shareRowExists {
-                indexPaths.insert(IndexPath(row: CGMRow.dexcomShare.rawValue, section: Section.cgm.rawValue), at: 0)
-            }
-
-            tableView.insertRows(at: indexPaths, with: .top)
-        } else {
-            removeDexcomShareRow()
-            removeG5TransmitterIDRow()
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    @objc private func g4Changed(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG5SwitchOff()
-            setEnliteSwitchOff()
-            removeG5TransmitterIDRow()
-            let shareRowExists = tableView.numberOfRows(inSection: Section.cgm.rawValue) > CGMRow.dexcomShare.rawValue
-            dataManager.cgm = .g4
-
-            if !shareRowExists {
-                tableView.insertRows(at: [IndexPath(row: CGMRow.dexcomShare.rawValue, section:Section.cgm.rawValue)], with: .top)
-            }
-        } else {
-            removeDexcomShareRow()
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    @objc func enliteChanged(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG5SwitchOff()
-            setG4SwitchOff()
-            removeDexcomShareRow()
-            removeG5TransmitterIDRow()
-            dataManager.cgm = .usePump
-        } else {
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    // MARK: Views
-
-    private func removeDexcomShareRow() {
-        switch dataManager.cgm {
-        case .g4?, .g5?:
-            tableView.deleteRows(at: [IndexPath(row: CGMRow.dexcomShare.rawValue, section: Section.cgm.rawValue)], with: .top)
-        default:
-            break
-        }
-    }
-
-    private func removeG5TransmitterIDRow() {
-        if case .g5(let transmitterID)? = dataManager.cgm {
-            g5TransmitterID = transmitterID
-            tableView.deleteRows(at: [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section: Section.cgm.rawValue)], with: .top)
-        }
-    }
-
-    private func setG5SwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g5.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
-    }
-
-    private func setG4SwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g4.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
-    }
-
-    private func setEnliteSwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.enlite.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
     }
 }
 
@@ -718,6 +594,35 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
     }
 
     func pumpManagerSetupViewControllerDidCancel(_ pumpManagerSetupViewController: PumpManagerSetupViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+}
+
+
+extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
+    fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
+        if var setupViewController = CGMManagerType.setupViewController() {
+            setupViewController.setupDelegate = self
+            present(setupViewController, animated: true, completion: nil)
+        } else {
+            completeCGMManagerSetup(CGMManagerType.init(rawState: [:]), indexPath: indexPath)
+        }
+    }
+
+    fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
+        dataManager.cgmManager = cgmManager
+        tableView.deselectRow(at: indexPath, animated: true)
+        _ = self.tableView(tableView, willDeselectRowAt: indexPath)
+    }
+
+    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+        dataManager.cgmManager = cgmManager
+        tableView.selectRow(at: IndexPath(row: CGMRow.cgmSettings.rawValue, section: Section.cgm.rawValue), animated: false, scrollPosition: .none)
+        show(cgmManager.settingsViewController(for: dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter), sender: nil)
+        dismiss(animated: true, completion: nil)
+    }
+
+    func cgmManagerSetupViewControllerDidCancel(_ cgmManagerSetupViewController: CGMManagerSetupViewController) {
         dismiss(animated: true, completion: nil)
     }
 }
@@ -792,19 +697,6 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
     func textFieldTableViewControllerDidEndEditing(_ controller: LoopKitUI.TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
             switch Section(rawValue: indexPath.section)! {
-            case .cgm:
-                switch CGMRow(rawValue: indexPath.row)! {
-                case .g5TransmitterID:
-                    var transmitterID = controller.value
-
-                    if transmitterID?.isEmpty ?? false {
-                        transmitterID = nil
-                    }
-
-                    dataManager.cgm = .g5(transmitterID: transmitterID)
-                default:
-                    assertionFailure()
-                }
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
                 case .suspendThreshold:

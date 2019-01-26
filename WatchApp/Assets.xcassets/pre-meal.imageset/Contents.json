@@ -2,15 +2,48 @@
   "images" : [
     {
       "idiom" : "watch",
+      "filename" : "Pre-Meal 42mm.pdf"
+    },
+    {
+      "idiom" : "watch",
+      "screen-width" : "<=145"
+    },
+    {
+      "idiom" : "watch",
+      "screen-width" : ">161"
+    },
+    {
+      "idiom" : "watch",
+      "screen-width" : ">145"
+    },
+    {
+      "idiom" : "watch",
+      "screen-width" : ">183"
+    },
+    {
+      "idiom" : "watch",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "watch",
       "filename" : "Pre-Meal 38mm.png",
       "screen-width" : "<=145",
       "scale" : "2x"
     },
     {
       "idiom" : "watch",
-      "filename" : "Pre-Meal 42mm.png",
-      "screen-width" : ">145",
-      "scale" : "2x"
+      "scale" : "2x",
+      "screen-width" : ">161"
+    },
+    {
+      "idiom" : "watch",
+      "scale" : "2x",
+      "screen-width" : ">145"
+    },
+    {
+      "idiom" : "watch",
+      "scale" : "2x",
+      "screen-width" : ">183"
     }
   ],
   "info" : {
@@ -18,6 +51,7 @@
     "author" : "xcode"
   },
   "properties" : {
-    "template-rendering-intent" : "template"
+    "template-rendering-intent" : "template",
+    "auto-scaling" : "auto"
   }
 }

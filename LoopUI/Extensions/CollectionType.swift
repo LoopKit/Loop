@@ -9,7 +9,7 @@
 import Foundation
 
 
-extension BidirectionalCollection where Index: Strideable, Iterator.Element: Comparable, Index.Stride == Int {
+extension BidirectionalCollection where Index: Strideable, Element: Comparable, Index.Stride == Int {
 
     /**
      Returns the insertion index of a new value in a sorted collection
@@ -20,7 +20,7 @@ extension BidirectionalCollection where Index: Strideable, Iterator.Element: Com
 
      - returns: The appropriate insertion index, between `startIndex` and `endIndex`
      */
-    func findInsertionIndex(for value: Iterator.Element) -> Index {
+    func findInsertionIndex(for value: Element) -> Index {
         var low = startIndex
         var high = endIndex
 
@@ -39,7 +39,7 @@ extension BidirectionalCollection where Index: Strideable, Iterator.Element: Com
 }
 
 
-extension BidirectionalCollection where Index: Strideable, Iterator.Element: Strideable, Index.Stride == Int {
+extension BidirectionalCollection where Index: Strideable, Element: Strideable, Index.Stride == Int {
     /**
      Returns the index of the closest element to a specified value in a sorted collection
 
@@ -47,7 +47,7 @@ extension BidirectionalCollection where Index: Strideable, Iterator.Element: Str
 
      - returns: The index of the closest element, or nil if the collection is empty
      */
-    func findClosestElementIndex(matching value: Iterator.Element) -> Index? {
+    func findClosestElementIndex(matching value: Element) -> Index? {
         let upperBound = findInsertionIndex(for: value)
 
         if upperBound == startIndex {

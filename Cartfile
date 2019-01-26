@@ -1,7 +1,8 @@
-github "LoopKit/LoopKit" == 2.1.5
-github "LoopKit/CGMBLEKit" == 2.1.1
+
+github "LoopKit/LoopKit" == 2.2.1
+github "LoopKit/CGMBLEKit" == 3.0
 github "i-schuetz/SwiftCharts" == 0.6.2
-github "mddub/dexcom-share-client-swift" == 0.4.1
-github "mddub/G4ShareSpy" == 0.3.3
-github "ps2/rileylink_ios" == 2.0.7
+github "LoopKit/dexcom-share-client-swift" == 1.0
+github "LoopKit/G4ShareSpy" == 1.0
+github "ps2/rileylink_ios" == 2.1.0
 github "LoopKit/Amplitude-iOS" "decreepify"

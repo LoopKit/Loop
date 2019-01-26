@@ -1,3 +1,6 @@
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Add Carb Entry";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus Failed";
 
@@ -34,4 +37,5 @@
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
-
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/hr";
