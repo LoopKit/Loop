@@ -70,10 +70,18 @@ struct GlucoseChartScaler {
             maxY = range.max
         }
 
-        let bottomLeft = point(max(dates.start, range.start), minY)
-        let topRight = point(min(dates.end, range.end), maxY)
-        let size = CGSize(width: topRight.x - bottomLeft.x, height: max(topRight.y - bottomLeft.y, minHeight))
-        return CGRect(origin: bottomLeft, size: size).alignedToScreenScale(screenScale)
+        switch coordinateSystem {
+        case .standard:
+            let topLeft = point(max(dates.start, range.start), maxY)
+            let bottomRight = point(min(dates.end, range.end), minY)
+            let size = CGSize(width: bottomRight.x - topLeft.x, height: max(bottomRight.y - topLeft.y, minHeight))
+            return CGRect(origin: topLeft, size: size).alignedToScreenScale(screenScale)
+        case .inverted:
+            let bottomLeft = point(max(dates.start, range.start), minY)
+            let topRight = point(min(dates.end, range.end), maxY)
+            let size = CGSize(width: topRight.x - bottomLeft.x, height: max(topRight.y - bottomLeft.y, minHeight))
+            return CGRect(origin: bottomLeft, size: size).alignedToScreenScale(screenScale)
+        }
     }
 }
 
@@ -89,7 +97,7 @@ extension GlucoseChartScaler {
 }
 
 extension Range where Bound == HKQuantity {
-    func span(with unit: HKUnit) -> Double {
+    fileprivate func span(with unit: HKUnit) -> Double {
         return upperBound.doubleValue(for: unit) - lowerBound.doubleValue(for: unit)
     }
 }

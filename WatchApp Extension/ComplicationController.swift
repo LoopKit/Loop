@@ -62,10 +62,10 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
         // c.f. https://developer.apple.com/design/human-interface-guidelines/watchos/icons-and-images/complication-images/
         let size: CGSize = {
             switch WKInterfaceDevice.current().screenBounds.width {
-            case 162: // 40mm
-                return CGSize(width: 150.0, height: 47.0)
-            default /* case 184 */: // 44mm
+            case let x where x > 180:  // 44mm
                 return CGSize(width: 171.0, height: 54.0)
+            default: // 40mm
+                return CGSize(width: 150.0, height: 47.0)
             }
         }()
 
