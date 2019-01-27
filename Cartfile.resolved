@@ -3,6 +3,6 @@ github "LoopKit/CGMBLEKit" "v3.0"
 github "LoopKit/G4ShareSpy" "v1.0"
 github "LoopKit/LoopKit" "v2.2.1"
 github "LoopKit/dexcom-share-client-swift" "v1.0"
-github "dabear/spike-client-swift" "v.0.9.2
+github "dabear/spike-client-swift" "0.9.2"
 github "i-schuetz/SwiftCharts" "0.6.2"
 github "ps2/rileylink_ios" "v2.1.0"
