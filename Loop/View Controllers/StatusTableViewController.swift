@@ -1105,8 +1105,6 @@ final class StatusTableViewController: ChartsTableViewController {
             let action = pumpManagerHUDProvider.didTapOnHUDView(hudSubView)
         {
             switch action {
-            case .showViewController(let vc):
-                self.navigationController?.pushViewController(vc, animated: true)
             case .presentViewController(let vc):
                 self.present(vc, animated: true, completion: nil)
             case .openAppURL(let url):
