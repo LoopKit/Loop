@@ -247,6 +247,9 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Problembericht";
 
+/* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
+"prediction-description-retrospective-correction" = "Vorausgesagt: %1$@\nAktuell: %2$@ (%3$@)";
+
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Startet die CGM-App";
 
@@ -377,11 +380,10 @@
 "Use Workout Glucose Targets" = "Trainings-Blutzuckerziele verwenden";
 
 /* Title of insulin model setting */
-"Walsh" = "Walsh"; 
+"Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder prognostizierte Blutzucker unter dem Schwellenwert für die Aufhebung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 IE/h.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder vorhergesagte Blutzucker unter dem Schwellwert für die Unterbrechung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 IE/h.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Trainings-Blutzuckerziele";
-
