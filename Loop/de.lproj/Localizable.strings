@@ -225,7 +225,7 @@
 "Insulin" = "Insulin";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin absorbiert (IE) × Insulinempfindlichkeit (%1$@/IE)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Absorbiertes Insulin (IE) × Insulinempfindlichkeit (%1$@/IE)";
 
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Insulinabgabe";
