@@ -1106,10 +1106,20 @@ final class StatusTableViewController: ChartsTableViewController {
         {
             switch action {
             case .presentViewController(let vc):
+                var completionNotifyingVC = vc
+                completionNotifyingVC.completionDelegate = self
                 self.present(vc, animated: true, completion: nil)
             case .openAppURL(let url):
                 UIApplication.shared.open(url)
             }
+        }
+    }
+}
+
+extension StatusTableViewController: CompletionDelegate {
+    func completionNotifyingDidComplete(_ object: CompletionNotifying) {
+        if let vc = object as? UIViewController {
+            vc.dismiss(animated: true, completion: nil)
         }
     }
 }
