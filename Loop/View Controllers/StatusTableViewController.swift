@@ -358,8 +358,8 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         }
 
-        workoutMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.overrideEnabledForContext(.workout)
-        preMealMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.overrideEnabledForContext(.preMeal)
+        preMealMode = deviceManager.loopManager.settings.preMealTargetEnabled()
+        workoutMode = deviceManager.loopManager.settings.nonPreMealOverrideEnabled()
 
         reloadGroup.notify(queue: .main) {
             /// Update the chart data
@@ -378,6 +378,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
             if currentContext.contains(.targets) {
                 self.charts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
+                self.charts.scheduleOverride = self.deviceManager.loopManager.settings.scheduleOverride
             }
 
             // Active Insulin
@@ -434,15 +435,20 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Show/hide the table view rows
             let statusRowMode: StatusRowMode?
-
-            switch bolusState {
-            case .recommended?, .enacting?:
-                statusRowMode = nil
-            case .none:
-                if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
-                    statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
-                } else {
-                    statusRowMode = .hidden
+            
+            if let scheduleOverride = self.deviceManager.loopManager.settings.scheduleOverride,
+                scheduleOverride.context != .preMeal, !scheduleOverride.hasFinished() {
+                statusRowMode = .scheduleOverrideEnabled(scheduleOverride)
+            } else {
+                switch bolusState {
+                case .recommended?, .enacting?:
+                    statusRowMode = nil
+                case .none:
+                    if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
+                        statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+                    } else {
+                        statusRowMode = .hidden
+                    }
                 }
             }
 
@@ -509,6 +515,7 @@ final class StatusTableViewController: ChartsTableViewController {
     private enum StatusRowMode {
         case hidden
         case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
+        case scheduleOverrideEnabled(TemporaryScheduleOverride)
         case enactingBolus
 
         var hasRow: Bool {
@@ -720,6 +727,28 @@ final class StatusTableViewController: ChartsTableViewController {
                     } else {
                         cell.accessoryView = nil
                     }
+                case .scheduleOverrideEnabled(let override):
+                    switch override.context {
+                    case .preMeal:
+                        assertionFailure("Pre-Meal mode should not produce a status row")
+                    case .preset(let preset):
+                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active override preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
+                    case .custom:
+                        cell.titleLabel.text = NSLocalizedString("Override Enabled", comment: "The title of the cell indicating a generic temporary override is enabled")
+                    }
+
+                    switch override.duration {
+                    case .finite:
+                        if override.isActive() {
+                            let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
+                        } else {
+                            let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
+                        }
+                    case .indefinite:
+                        cell.subtitleLabel.text?.removeAll()
+                    }
                 case .enactingBolus:
                     cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")
                     cell.subtitleLabel.text = nil
@@ -816,7 +845,8 @@ final class StatusTableViewController: ChartsTableViewController {
             case .status:
                 tableView.deselectRow(at: indexPath, animated: true)
 
-                if case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) = statusRowMode, !enacting {
+                switch statusRowMode {
+                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
                     self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
 
                     self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
@@ -833,6 +863,13 @@ final class StatusTableViewController: ChartsTableViewController {
                             }
                         }
                     }
+                case .scheduleOverrideEnabled(let override):
+                    let vc = AddEditOverrideTableViewController(glucoseUnit: charts.glucoseUnit)
+                    vc.inputMode = .editOverride(override)
+                    vc.delegate = self
+                    show(vc, sender: tableView.cellForRow(at: indexPath))
+                default:
+                    break
                 }
             }
         case .hud:
@@ -882,6 +919,13 @@ final class StatusTableViewController: ChartsTableViewController {
                 recommendation: sender as? BolusRecommendation,
                 glucoseUnit: self.charts.glucoseUnit
             )
+        case let vc as OverrideSelectionViewController:
+            if deviceManager.loopManager.settings.futureOverrideEnabled() {
+                vc.scheduledOverride = deviceManager.loopManager.settings.scheduleOverride
+            }
+            vc.presets = deviceManager.loopManager.settings.overridePresets
+            vc.glucoseUnit = charts.glucoseUnit
+            vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
         case let vc as SettingsTableViewController:
@@ -979,21 +1023,17 @@ final class StatusTableViewController: ChartsTableViewController {
 
     @IBAction func togglePreMealMode(_ sender: UIBarButtonItem) {
         if preMealMode == true {
-            deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride(matching: .preMeal)
+            deviceManager.loopManager.settings.clearOverride(matching: .preMeal)
         } else {
-            _ = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(.preMeal, until: Date(timeIntervalSinceNow: .hours(1)))
+            deviceManager.loopManager.settings.enablePreMealOverride(for: .hours(1))
         }
     }
 
     @IBAction func toggleWorkoutMode(_ sender: UIBarButtonItem) {
         if workoutMode == true {
-            deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.clearOverride(matching: .workout)
+            deviceManager.loopManager.settings.clearOverride()
         } else {
-            let vc = UIAlertController(workoutDurationSelectionHandler: { (endDate) in
-                _ = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.setOverride(.workout, until: endDate)
-            })
-
-            present(vc, animated: true, completion: nil)
+            performSegue(withIdentifier: OverrideSelectionViewController.className, sender: toolbarItems![6])
         }
     }
 
@@ -1044,5 +1084,25 @@ final class StatusTableViewController: ChartsTableViewController {
         if let url = deviceManager.cgmManager?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = override
+    }
+
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = nil
+    }
+}
+
+extension StatusTableViewController: AddEditOverrideTableViewControllerDelegate {
+    func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didSaveOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = override
+    }
+
+    func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didCancelOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = nil
     }
 }

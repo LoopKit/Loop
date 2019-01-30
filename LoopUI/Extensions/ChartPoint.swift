@@ -56,20 +56,24 @@ extension ChartPoint {
         return maxPoints + minPoints.reversed()
     }
 
-    static func pointsForGlucoseRangeScheduleOverride(_ override: GlucoseRangeSchedule.Override, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
-        let range = override.value.rangeWithMinimumIncremement(unit.chartableIncrement)
-        let startDate = Date()
-        let endDate = override.end
+    static func pointsForGlucoseRangeScheduleOverride(_ override: TemporaryScheduleOverride, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
+        return pointsForGlucoseRangeScheduleOverride(
+            range: override.settings.targetRange.rangeWithMinimumIncremement(unit.chartableIncrement),
+            activeInterval: override.activeInterval,
+            unit: unit,
+            xAxisValues: xAxisValues,
+            extendEndDateToChart: extendEndDateToChart
+        )
+    }
 
-        guard endDate.timeIntervalSince(startDate) > 0,
-            let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
-        else {
+    private static func pointsForGlucoseRangeScheduleOverride(range: DoubleRange, activeInterval: DateInterval, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool) -> [ChartPoint] {
+        guard let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate else {
             return []
         }
 
         let dateFormatter = DateFormatter()
-        let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
-        let displayEndDate = min(lastXAxisValue.date, extendEndDateToChart ? .distantFuture : endDate)
+        let startDateAxisValue = ChartAxisValueDate(date: activeInterval.start, formatter: dateFormatter)
+        let displayEndDate = min(lastXAxisValue.date, extendEndDateToChart ? .distantFuture : activeInterval.end)
         let endDateAxisValue = ChartAxisValueDate(date: displayEndDate, formatter: dateFormatter)
         let minValue = ChartAxisValueDouble(range.minValue)
         let maxValue = ChartAxisValueDouble(range.maxValue)

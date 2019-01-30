@@ -109,6 +109,9 @@ extension UserDefaults {
                 let settings = LoopSettings(
                     dosingEnabled: bool(forKey: "com.loudnate.Naterade.DosingEnabled"),
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
+                    preMealTargetRange: nil,
+                    overridePresets: [],
+                    scheduleOverride: nil,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
