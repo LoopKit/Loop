@@ -12,7 +12,6 @@ class HUDInterfaceController: WKInterfaceController {
     private var activeContextObserver: NSObjectProtocol?
 
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
-    @IBOutlet weak var loopTimer: WKInterfaceTimer!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
     @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
 
@@ -46,13 +45,8 @@ class HUDInterfaceController: WKInterfaceController {
             let date = activeContext.loopLastRunDate
         else {
             loopHUDImage.setLoopImage(.unknown)
-            loopTimer.setHidden(true)
             return
         }
-
-        loopTimer.setDate(date)
-        loopTimer.setHidden(false)
-        loopTimer.start()
 
         glucoseLabel.setHidden(true)
         eventualGlucoseLabel.setHidden(true)

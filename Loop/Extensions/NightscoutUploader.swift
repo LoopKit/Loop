@@ -75,6 +75,7 @@ extension NightscoutUploader {
         var treatments = [NightscoutTreatment]()
 
         for event in events {
+
             objectIDURLs.append(event.objectIDURL)
 
             guard let treatment = event.treatment(enteredBy: source) else {
