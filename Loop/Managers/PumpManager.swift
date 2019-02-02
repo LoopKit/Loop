@@ -8,11 +8,9 @@
 import Foundation
 import LoopKit
 import MinimedKit
-import OmniKit
 
 
 let allPumpManagers: [PumpManager.Type] = [
-    OmnipodPumpManager.self,
     MinimedPumpManager.self
 ]
 

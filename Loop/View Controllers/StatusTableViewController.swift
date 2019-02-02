@@ -1060,7 +1060,7 @@ final class StatusTableViewController: ChartsTableViewController {
     
     private func configurePumpManagerHUDViews() {
         if let hudView = hudView {
-            hudView.removeNonStandardHUDViews()
+            hudView.removePumpManagerProvidedViews()
             if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
             {
                 let views = pumpManagerHUDProvider.createHUDViews()
@@ -1068,6 +1068,12 @@ final class StatusTableViewController: ChartsTableViewController {
                     addViewToHUD(view)
                 }
                 pumpManagerHUDProvider.delegate = self
+            } else {
+                let reservoirView = ReservoirVolumeHUDView.instantiate()
+                let batteryView = BatteryLevelHUDView.instantiate()
+                for view in [ reservoirView, batteryView] {
+                    addViewToHUD(view)
+                }
             }
             NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
@@ -1169,7 +1175,7 @@ extension StatusTableViewController: HUDProviderDelegate {
 
     func hudProvider(_ provider: HUDProvider, didReplaceViews views: [BaseHUDView]) {
         DispatchQueue.main.async {
-            self.hudView?.removeNonStandardHUDViews()
+            self.hudView?.removePumpManagerProvidedViews()
             for view in views {
                 view.isHidden = true
                 view.alpha = 0

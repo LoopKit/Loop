@@ -162,6 +162,11 @@ struct PumpManagerHUDViewsContext: RawRepresentable {
         self.pumpManagerHUDProvider = pumpManagerHUDProvider
         self.hudViews = nil
     }
+
+    init(hudViews: [BaseHUDView]) {
+        self.hudViews = hudViews
+        pumpManagerHUDProvider = nil
+    }
     
     init?(rawValue: [String : Any]) {
         pumpManagerHUDProvider = nil
@@ -218,6 +223,10 @@ struct StatusExtensionContext: RawRepresentable {
         
         if let rawPumpManagerHUDViewsContext = rawValue["pumpManagerHUDViewsContext"] as? PumpManagerHUDViewsContext.RawValue {
             pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(rawValue: rawPumpManagerHUDViewsContext)
+        } else {
+            let reservoirView = ReservoirVolumeHUDView.instantiate()
+            let batteryView = BatteryLevelHUDView.instantiate()
+            pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(hudViews: [reservoirView, batteryView])
         }
 
     }

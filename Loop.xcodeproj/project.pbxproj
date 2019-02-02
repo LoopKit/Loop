@@ -296,8 +296,6 @@
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C168C40521B0D53E00ADE90E /* MinimedKit.framework */; };
 		C168C40821B0D53E00ADE90E /* MinimedKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C168C40721B0D53E00ADE90E /* MinimedKitUI.framework */; };
-		C168C40921B0D53E00ADE90E /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13A8213EE35800F9EEDA /* OmniKit.framework */; };
-		C168C40A21B0D53E00ADE90E /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13AA213EE35800F9EEDA /* OmniKitUI.framework */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
@@ -307,13 +305,10 @@
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
-		C1CB13A9213EE35800F9EEDA /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13A8213EE35800F9EEDA /* OmniKit.framework */; };
-		C1CB13AB213EE35800F9EEDA /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13AA213EE35800F9EEDA /* OmniKitUI.framework */; };
 		C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
-		C9886AE51E5B2FAD00473BB8 /* gallery.ckcomplication in Resources */ = {isa = PBXBuildFile; fileRef = C9886AE41E5B2FAD00473BB8 /* gallery.ckcomplication */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -850,7 +845,6 @@
 		C1CB13AA213EE35800F9EEDA /* OmniKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = OmniKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
-		C9886AE41E5B2FAD00473BB8 /* gallery.ckcomplication */ = {isa = PBXFileReference; lastKnownFileType = folder; path = gallery.ckcomplication; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -865,8 +859,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C1CB13A9213EE35800F9EEDA /* OmniKit.framework in Frameworks */,
-				C1CB13AB213EE35800F9EEDA /* OmniKitUI.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
 				43A8EC6F210E622700A81379 /* CGMBLEKitUI.framework in Frameworks */,
@@ -920,8 +912,6 @@
 			files = (
 				C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */,
 				C168C40821B0D53E00ADE90E /* MinimedKitUI.framework in Frameworks */,
-				C168C40921B0D53E00ADE90E /* OmniKit.framework in Frameworks */,
-				C168C40A21B0D53E00ADE90E /* OmniKitUI.framework in Frameworks */,
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
 			);
@@ -1851,8 +1841,6 @@
 				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/LoopKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/OmniKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/OmniKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClientUI.framework",
 			);

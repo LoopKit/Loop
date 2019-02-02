@@ -189,8 +189,9 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             }
 
             if let hudViewsContext = context.pumpManagerHUDViewsContext,
-                let hudViews = hudViewsContext.hudViews {
-                self.hudView.removeNonStandardHUDViews()
+                let hudViews = hudViewsContext.hudViews
+            {
+                self.hudView.removePumpManagerProvidedViews()
                 for view in hudViews {
                     view.stateColors = .pumpStatus
                     self.hudView.addHUDView(view)

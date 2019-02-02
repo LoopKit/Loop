@@ -28,10 +28,10 @@ public class HUDView: UIView, NibLoadable {
         self.addConstraints([horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint])
     }
     
-    public func removeNonStandardHUDViews() {
+    public func removePumpManagerProvidedViews() {
         let standardViews: [UIView] = [loopCompletionHUD, glucoseHUD, basalRateHUD]
-        let nonStandardHudViews = stackView.subviews.filter { !standardViews.contains($0) }
-        for view in nonStandardHudViews {
+        let pumpManagerViews = stackView.subviews.filter { !standardViews.contains($0) }
+        for view in pumpManagerViews {
             view.removeFromSuperview()
         }
     }

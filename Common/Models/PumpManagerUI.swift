@@ -8,13 +8,10 @@
 
 import Foundation
 import LoopKitUI
-import OmniKit
-import OmniKitUI
 import MinimedKit
 import MinimedKitUI
 
 let allPumpManagerUIs: [PumpManagerUI.Type] = [
-    OmnipodPumpManager.self,
     MinimedPumpManager.self
 ]
 
