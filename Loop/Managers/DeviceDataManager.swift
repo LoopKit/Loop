@@ -364,16 +364,15 @@ extension DeviceDataManager {
             return
         }
 
-        var requestedDose: DoseEntry?
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
             self.loopManager.addRequestedBolus(dose: dose, completion: nil)
-            requestedDose = dose
-        }) { (error) in
-            if let error = error {
+        }) { (result) in
+            switch result {
+            case .failure(let error):
                 self.log.error(error)
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
                 completion(error)
-            } else if let dose = requestedDose {
+            case .success(let dose):
                 self.loopManager.addConfirmedBolus(dose) {
                     completion(nil)
                 }
