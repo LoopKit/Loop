@@ -7,43 +7,31 @@
 //
 
 import Foundation
+import LoopKit
 import LoopKitUI
 import MinimedKit
 import MinimedKitUI
 
-let allPumpManagerUIs: [PumpManagerUI.Type] = [
-    MinimedPumpManager.self
-]
-
-private let managersByIdentifier: [String: PumpManagerUI.Type] = allPumpManagerUIs.reduce(into: [:]) { (map, Type) in
+private let managersByIdentifier: [String: PumpManagerUI.Type] = allPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
 }
 
-func PumpManagerUITypeFromRawValue(_ rawValue: [String: Any]) -> PumpManagerUI.Type? {
-    guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
-        return nil
-    }
-    
-    return managersByIdentifier[managerIdentifier]
-}
+typealias PumpManagerHUDViewsRawValue = [String: Any]
 
-func PumpManagerHUDViewsFromRawValue(_ rawValue: [String: Any]) -> [BaseHUDView]? {
+func PumpManagerHUDViewsFromRawValue(_ rawValue: PumpManagerHUDViewsRawValue) -> [BaseHUDView]? {
     guard let rawState = rawValue["hudProviderViews"] as? HUDProvider.HUDViewsRawState,
-        let Manager = PumpManagerUITypeFromRawValue(rawValue)
+        let managerIdentifier = rawValue["managerIdentifier"] as? String,
+        let manager = managersByIdentifier[managerIdentifier]
         else {
             return nil
     }
     
-    return Manager.createHUDViews(rawValue: rawState)
+    return manager.createHUDViews(rawValue: rawState)
 }
 
-extension HUDProvider {
-    var rawHUDProviderViewsValue: [String: Any] {
-        return [
-            "managerIdentifier": self.managerIdentifier,
-            "hudProviderViews": self.hudViewsRawState
-        ]
-    }
+func PumpManagerHUDViewsRawValueFromHudProvider(_ hudProvider: HUDProvider) -> PumpManagerHUDViewsRawValue {
+    return [
+        "managerIdentifier": hudProvider.managerIdentifier,
+        "hudProviderViews": hudProvider.hudViewsRawState
+    ]
 }
-
-
