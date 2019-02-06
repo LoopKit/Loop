@@ -296,6 +296,8 @@
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C168C40521B0D53E00ADE90E /* MinimedKit.framework */; };
 		C168C40821B0D53E00ADE90E /* MinimedKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C168C40721B0D53E00ADE90E /* MinimedKitUI.framework */; };
+		C16E6127220A5DDB0069F357 /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13A8213EE35800F9EEDA /* OmniKit.framework */; };
+		C16E6128220A5DDB0069F357 /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1CB13AA213EE35800F9EEDA /* OmniKitUI.framework */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
@@ -859,6 +861,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C16E6127220A5DDB0069F357 /* OmniKit.framework in Frameworks */,
+				C16E6128220A5DDB0069F357 /* OmniKitUI.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
 				43A8EC6F210E622700A81379 /* CGMBLEKitUI.framework in Frameworks */,
@@ -1843,6 +1847,8 @@
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClientUI.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/OmniKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/OmniKitUI.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
