@@ -259,7 +259,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Net basal rate HUD
             let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first {
+            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideIfActive?.between(start: date, end: date).first {
                 netBasal = NetBasal(
                     lastTempBasal: state.lastTempBasal,
                     maxBasal: manager.settings.maximumBasalRatePerHour,
@@ -358,7 +358,11 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         }
 
-        preMealMode = deviceManager.loopManager.settings.preMealTargetEnabled()
+        if deviceManager.loopManager.settings.preMealTargetRange == nil {
+            preMealMode = nil
+        } else {
+            preMealMode = deviceManager.loopManager.settings.preMealTargetEnabled()
+        }
         workoutMode = deviceManager.loopManager.settings.nonPreMealOverrideEnabled()
 
         reloadGroup.notify(queue: .main) {
@@ -737,17 +741,17 @@ final class StatusTableViewController: ChartsTableViewController {
                         cell.titleLabel.text = NSLocalizedString("Override Enabled", comment: "The title of the cell indicating a generic temporary override is enabled")
                     }
 
-                    switch override.duration {
-                    case .finite:
-                        if override.isActive() {
+                    if override.isActive() {
+                        switch override.duration {
+                        case .finite:
                             let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
                             cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
-                        } else {
-                            let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
-                            cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
+                        case .indefinite:
+                            cell.subtitleLabel.text?.removeAll()
                         }
-                    case .indefinite:
-                        cell.subtitleLabel.text?.removeAll()
+                    } else {
+                        let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
+                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
                     }
                 case .enactingBolus:
                     cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")

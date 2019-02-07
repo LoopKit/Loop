@@ -75,8 +75,14 @@ extension LoopSettings {
     }
 
     mutating func enablePreMealOverride(at date: Date = Date(), for duration: TimeInterval) {
-        guard let premealTargetRange = preMealTargetRange else { return }
-        scheduleOverride = TemporaryScheduleOverride(
+        scheduleOverride = preMealOverride(beginningAt: date, for: duration)
+    }
+
+    func preMealOverride(beginningAt date: Date = Date(), for duration: TimeInterval) -> TemporaryScheduleOverride? {
+        guard let premealTargetRange = preMealTargetRange else {
+            return nil
+        }
+        return TemporaryScheduleOverride(
             context: .preMeal,
             settings: TemporaryScheduleOverrideSettings(targetRange: premealTargetRange),
             startDate: date,
@@ -112,8 +118,14 @@ extension LoopSettings: RawRepresentable {
             self.dosingEnabled = dosingEnabled
         }
 
-        if let rawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
-            self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: rawValue)
+        if let glucoseRangeScheduleRawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
+            self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: glucoseRangeScheduleRawValue)
+
+            // Migrate the pre-meal target
+            if let overrideRangesRawValue = glucoseRangeScheduleRawValue["overrideRanges"] as? [String: DoubleRange.RawValue],
+                let preMealTargetRawValue = overrideRangesRawValue["preMeal"] {
+                self.preMealTargetRange = DoubleRange(rawValue: preMealTargetRawValue)
+            }
         }
 
         if let rawPreMealTargetRange = rawValue["preMealTargetRange"] as? DoubleRange.RawValue {

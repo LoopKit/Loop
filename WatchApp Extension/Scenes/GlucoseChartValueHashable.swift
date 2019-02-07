@@ -76,12 +76,20 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQu
 }
 
 
-extension GlucoseRangeSchedule.Override: GlucoseChartValueHashable {
+extension TemporaryScheduleOverride: GlucoseChartValueHashable {
+    var start: Date {
+        return activeInterval.start
+    }
+
+    var end: Date {
+        return activeInterval.end
+    }
+
     var min: Double {
-        return value.minValue
+        return settings.targetRange.minValue
     }
 
     var max: Double {
-        return value.maxValue
+        return settings.targetRange.maxValue
     }
 }

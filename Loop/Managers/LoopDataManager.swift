@@ -919,7 +919,7 @@ extension LoopDataManager {
             recommendedTempBasal = nil
             return
         }
-        
+
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
@@ -927,7 +927,8 @@ extension LoopDataManager {
             model: model,
             basalRates: basalRates,
             maxBasalRate: maxBasal,
-            lastTempBasal: lastTempBasal
+            lastTempBasal: lastTempBasal,
+            isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
         )
         
         if let temp = tempBasal {
@@ -1201,4 +1202,14 @@ protocol LoopDataManagerDelegate: class {
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
     func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+}
+
+
+private extension TemporaryScheduleOverride {
+    func isBasalRateScheduleOverriden(at date: Date) -> Bool {
+        guard isActive(at: date), let basalRateMultiplier = settings.basalRateMultiplier else {
+            return false
+        }
+        return abs(basalRateMultiplier - 1.0) >= .ulpOfOne
+    }
 }

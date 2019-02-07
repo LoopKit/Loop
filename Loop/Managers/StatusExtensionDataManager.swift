@@ -89,7 +89,7 @@ final class StatusExtensionDataManager {
             }
 
             let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first {
+            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideIfActive?.between(start: date, end: date).first {
                 let netBasal = NetBasal(
                     lastTempBasal: state.lastTempBasal,
                     maxBasal: manager.settings.maximumBasalRatePerHour,

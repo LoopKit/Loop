@@ -174,7 +174,7 @@ final class WatchDataManager: NSObject {
 
             // Only set this value in the Watch context if there is a temp basal running that hasn't ended yet
             let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateSchedule?.between(start: date, end: date).first,
+            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideIfActive?.between(start: date, end: date).first,
                 let lastTempBasal = state.lastTempBasal,
                 lastTempBasal.endDate > Date() {
                 context.lastNetTempBasalDose =  lastTempBasal.unitsPerHour - scheduledBasal.value
@@ -235,9 +235,9 @@ extension WatchDataManager: WCSessionDelegate {
             replyHandler([:])
         case LoopSettingsUserInfo.name?:
             if let watchSettings = LoopSettingsUserInfo(rawValue: message)?.settings {
-                // So far we only support watch changes of target range overrides
+                // So far we only support watch changes of temporary schedule overrides
                 var settings = deviceManager.loopManager.settings
-                settings.glucoseTargetRangeSchedule = watchSettings.glucoseTargetRangeSchedule
+                settings.scheduleOverride = watchSettings.scheduleOverride
 
                 // Prevent re-sending these updated settings back to the watch
                 lastSentSettings = settings

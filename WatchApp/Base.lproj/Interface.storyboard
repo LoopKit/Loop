@@ -247,10 +247,10 @@
                                                         <variation key="device=watch44mm" height="64" radius="32" width="64"/>
                                                     </group>
                                                     <connections>
-                                                        <action selector="toggleWorkoutMode" destination="rNf-Mh-tID" id="pMD-b9-FoF"/>
+                                                        <action selector="toggleOverride" destination="rNf-Mh-tID" id="pMD-b9-FoF"/>
                                                     </connections>
                                                 </button>
-                                                <label alignment="center" text="Workout" id="nC0-X3-oFJ">
+                                                <label alignment="center" text="Override" id="nC0-X3-oFJ">
                                                     <fontDescription key="font" style="UICTFontTextStyleFootnote"/>
                                                 </label>
                                             </items>
@@ -266,12 +266,12 @@
                         <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
+                        <outlet property="overrideButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
+                        <outlet property="overrideButtonBackground" destination="HCn-yQ-9kV" id="SXL-jK-n6U"/>
+                        <outlet property="overrideButtonImage" destination="8OJ-hd-8Va" id="Xyt-Yx-PZO"/>
                         <outlet property="preMealButton" destination="jY0-1m-ful" id="IMe-rm-JYl"/>
                         <outlet property="preMealButtonBackground" destination="mBB-jG-wHy" id="Ouy-xo-rMR"/>
                         <outlet property="preMealButtonImage" destination="Asx-tm-mEg" id="DIe-5b-uc1"/>
-                        <outlet property="workoutButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
-                        <outlet property="workoutButtonBackground" destination="HCn-yQ-9kV" id="SXL-jK-n6U"/>
-                        <outlet property="workoutButtonImage" destination="8OJ-hd-8Va" id="Xyt-Yx-PZO"/>
                         <segue destination="v5b-sO-bb8" kind="relationship" relationship="nextPage" id="aFP-Ra-jw9"/>
                     </connections>
                 </controller>
@@ -501,6 +501,46 @@
                 </notificationController>
             </objects>
             <point key="canvasLocation" x="38" y="1153"/>
+        </scene>
+        <!--OverrideSelectionController-->
+        <scene sceneID="xuA-WA-jUi">
+            <objects>
+                <controller identifier="OverrideSelectionController" hidesWhenLoading="NO" id="b7N-KJ-LM1" customClass="OverrideSelectionController" customModule="WatchApp_Extension">
+                    <items>
+                        <table alignment="left" spacing="2" id="REj-Zm-ktV">
+                            <items>
+                                <tableRow identifier="OverridePresetRow" selectable="NO" id="ATQ-Ov-Kjj" customClass="OverridePresetRow" customModule="WatchApp_Extension">
+                                    <group key="rootItem" width="1" height="0.0" alignment="left" id="5i1-02-dTe">
+                                        <items>
+                                            <button width="0.5" alignment="left" title="🏃‍♀️" id="EkP-Dd-ltn">
+                                                <fontDescription key="font" type="system" pointSize="28"/>
+                                                <connections>
+                                                    <action selector="leftPresetButtonTapped" destination="ATQ-Ov-Kjj" id="cg7-rb-3F8"/>
+                                                </connections>
+                                            </button>
+                                            <button width="0.5" alignment="left" title="🚴‍♀️" id="TqD-mm-xd1">
+                                                <fontDescription key="font" type="system" pointSize="28"/>
+                                                <connections>
+                                                    <action selector="rightPresetButtonTapped" destination="ATQ-Ov-Kjj" id="dHz-gr-YUk"/>
+                                                </connections>
+                                            </button>
+                                        </items>
+                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </group>
+                                    <connections>
+                                        <outlet property="leftPresetButton" destination="EkP-Dd-ltn" id="4QB-or-ULS"/>
+                                        <outlet property="rightPresetButton" destination="TqD-mm-xd1" id="Zcr-ro-8Wr"/>
+                                    </connections>
+                                </tableRow>
+                            </items>
+                        </table>
+                    </items>
+                    <connections>
+                        <outlet property="table" destination="REj-Zm-ktV" id="XOu-nU-VQS"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="641" y="370"/>
         </scene>
     </scenes>
     <color key="tintColor" red="0.29803921570000003" green="0.85098039219999999" blue="0.3921568627" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

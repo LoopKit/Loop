@@ -237,7 +237,7 @@ class GlucoseChartScene: SKScene {
         // Keep track of the nodes we started this pass with so we can expire obsolete nodes at the end
         var inactiveNodes = nodes
 
-        let activeOverride = data.correctionRange?.activeOverride
+        let activeOverride = data.activeScheduleOverride
 
         data.correctionRange?.quantityBetween(start: spannedInterval.start, end: spannedInterval.end).forEach { range in
             let (sprite, created) = getSprite(forHash: range.chartHashValue)
@@ -258,7 +258,8 @@ class GlucoseChartScene: SKScene {
             inactiveNodes.removeValue(forKey: range.chartHashValue)
 
             if range.end < spannedInterval.end {
-                let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: spannedInterval.end, value: range.value)
+                let extendedDuration = spannedInterval.end.timeIntervalSince(range.start)
+                let extendedRange = TemporaryScheduleOverride(context: range.context, settings: range.settings, startDate: range.start, duration: .finite(extendedDuration))
                 let (sprite2, created) = getSprite(forHash: extendedRange.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition

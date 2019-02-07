@@ -452,7 +452,7 @@ final class SettingsTableViewController: UITableViewController {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.overrideRanges = schedule.overrideRanges
+                    scheduleVC.preMealRange = dataManager.loopManager.settings.preMealTargetRange
 
                     show(scheduleVC, sender: sender)
                 } else {
@@ -657,8 +657,8 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .glucoseTargetRange:
                 if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                    dataManager.loopManager.settings.preMealTargetRange = controller.overrideRanges[.preMeal]
-                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
+                    dataManager.loopManager.settings.preMealTargetRange = controller.preMealRange
+                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                 }
             case .basalRate:
                 if let controller = controller as? SingleValueScheduleTableViewController {
