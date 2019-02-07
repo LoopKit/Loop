@@ -22,6 +22,7 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
     @IBOutlet private var table: WKInterfaceTable!
 
     private let loopManager = ExtensionDelegate.shared().loopManager
+    private lazy var presets = loopManager.settings.overridePresets
 
     weak var delegate: OverrideSelectionControllerDelegate?
     
@@ -29,34 +30,22 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
         super.awake(withContext: context)
         delegate = context as? OverrideSelectionControllerDelegate
 
-        let presets = loopManager.settings.overridePresets
         guard !presets.isEmpty else {
             assertionFailure("Instantiating override selection controller without configured presets")
             return
         }
 
-        configureTable(withPresets: presets)
+        configureTable()
     }
 
-    private func configureTable(withPresets presets: [TemporaryScheduleOverridePreset]) {
+    private func configureTable() {
         table.setRowTypes([OverridePresetRow.className])
-        let presetsPerRow = 2
-        let rowCount = Int(ceil(Double(presets.count) / Double(presetsPerRow)))
-        table.setNumberOfRows(rowCount, withRowType: OverridePresetRow.className)
-        for rowIndex in 0..<rowCount {
-            let row = table.rowController(at: rowIndex) as! OverridePresetRow
-            let leftPresetIndex = rowIndex * 2
-            let leftPreset = presets[leftPresetIndex]
-
-            if rowIndex == rowCount - 1, presets.count % presetsPerRow != 0 {
-                // Odd number of presets; last row includes only the left.
-                row.presets = (left: leftPreset, right: nil)
-            } else {
-                let rightPreset = presets[leftPresetIndex + 1]
-                row.presets = (left: leftPreset, right: rightPreset)
-            }
-
-            row.delegate = self
+        table.setNumberOfRows(presets.count, withRowType: OverridePresetRow.className)
+        for index in presets.indices {
+            let row = table.rowController(at: index) as! OverridePresetRow
+            let preset = presets[index]
+            row.symbolLabel.setText(preset.symbol)
+            row.nameLabel.setText(preset.name)
         }
     }
 
@@ -71,26 +60,9 @@ final class OverrideSelectionController: WKInterfaceController, IdentifiableClas
     override func didDeactivate() {
         super.didDeactivate()
     }
-}
 
-extension OverrideSelectionController: OverridePresetRowDelegate {
-    func overridePresetRowDidTapLeftPresetButton(_ row: OverridePresetRow) {
-        guard let preset = row.presets?.left else {
-            assertionFailure("Preset row button tapped prior to configuration")
-            return
-        }
-        enabledOverride(fromPreset: preset)
-    }
-
-    func overridePresetRowDidTapRightPresetButton(_ row: OverridePresetRow) {
-        guard let preset = row.presets?.right else {
-            assertionFailure("Preset row button tapped prior to configuration")
-            return
-        }
-        enabledOverride(fromPreset: preset)
-    }
-
-    private func enabledOverride(fromPreset preset: TemporaryScheduleOverridePreset) {
+    override func table(_ table: WKInterfaceTable, didSelectRowAt rowIndex: Int) {
+        let preset = presets[rowIndex]
         delegate?.overrideSelectionController(self, didSelectPreset: preset)
         dismiss()
     }

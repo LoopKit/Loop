@@ -507,29 +507,24 @@
             <objects>
                 <controller identifier="OverrideSelectionController" hidesWhenLoading="NO" id="b7N-KJ-LM1" customClass="OverrideSelectionController" customModule="WatchApp_Extension">
                     <items>
-                        <table alignment="left" spacing="2" id="REj-Zm-ktV">
+                        <table alignment="left" id="REj-Zm-ktV">
                             <items>
-                                <tableRow identifier="OverridePresetRow" selectable="NO" id="ATQ-Ov-Kjj" customClass="OverridePresetRow" customModule="WatchApp_Extension">
-                                    <group key="rootItem" width="1" height="0.0" alignment="left" id="5i1-02-dTe">
+                                <tableRow identifier="OverridePresetRow" id="ATQ-Ov-Kjj" customClass="OverridePresetRow" customModule="WatchApp_Extension">
+                                    <group key="rootItem" width="1" height="48" alignment="left" id="5i1-02-dTe">
                                         <items>
-                                            <button width="0.5" alignment="left" title="🏃‍♀️" id="EkP-Dd-ltn">
-                                                <fontDescription key="font" type="system" pointSize="28"/>
-                                                <connections>
-                                                    <action selector="leftPresetButtonTapped" destination="ATQ-Ov-Kjj" id="cg7-rb-3F8"/>
-                                                </connections>
-                                            </button>
-                                            <button width="0.5" alignment="left" title="🚴‍♀️" id="TqD-mm-xd1">
-                                                <fontDescription key="font" type="system" pointSize="28"/>
-                                                <connections>
-                                                    <action selector="rightPresetButtonTapped" destination="ATQ-Ov-Kjj" id="dHz-gr-YUk"/>
-                                                </connections>
-                                            </button>
+                                            <group width="1" alignment="left" verticalAlignment="center" id="Wzt-hR-TyJ">
+                                                <items>
+                                                    <label alignment="left" verticalAlignment="center" text="🏃‍♀️" id="UVY-pa-SUL">
+                                                        <fontDescription key="font" type="system" pointSize="24"/>
+                                                    </label>
+                                                    <label alignment="left" verticalAlignment="center" text="Running" id="JXa-s1-PJx"/>
+                                                </items>
+                                            </group>
                                         </items>
-                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </group>
                                     <connections>
-                                        <outlet property="leftPresetButton" destination="EkP-Dd-ltn" id="4QB-or-ULS"/>
-                                        <outlet property="rightPresetButton" destination="TqD-mm-xd1" id="Zcr-ro-8Wr"/>
+                                        <outlet property="nameLabel" destination="JXa-s1-PJx" id="fBX-PE-LZR"/>
+                                        <outlet property="symbolLabel" destination="UVY-pa-SUL" id="LSi-5o-js8"/>
                                     </connections>
                                 </tableRow>
                             </items>

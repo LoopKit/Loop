@@ -11,33 +11,7 @@ import WatchKit
 import LoopKit
 
 
-protocol OverridePresetRowDelegate: AnyObject {
-    func overridePresetRowDidTapLeftPresetButton(_ row: OverridePresetRow)
-    func overridePresetRowDidTapRightPresetButton(_ row: OverridePresetRow)
-}
-
 final class OverridePresetRow: NSObject, IdentifiableClass {
-    @IBOutlet private var leftPresetButton: WKInterfaceButton!
-    @IBOutlet private var rightPresetButton: WKInterfaceButton!
-
-    var presets: (left: TemporaryScheduleOverridePreset, right: TemporaryScheduleOverridePreset?)? {
-        didSet {
-            leftPresetButton.setTitle(presets?.left.symbol)
-            if let right = presets?.right {
-                rightPresetButton.setTitle(right.symbol)
-            } else {
-                rightPresetButton.setHidden(true)
-            }
-        }
-    }
-
-    weak var delegate: OverridePresetRowDelegate?
-
-    @IBAction func leftPresetButtonTapped() {
-        delegate?.overridePresetRowDidTapLeftPresetButton(self)
-    }
-
-    @IBAction func rightPresetButtonTapped() {
-        delegate?.overridePresetRowDidTapRightPresetButton(self)
-    }
+    @IBOutlet var symbolLabel: WKInterfaceLabel!
+    @IBOutlet var nameLabel: WKInterfaceLabel!
 }
