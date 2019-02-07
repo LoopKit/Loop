@@ -1061,13 +1061,12 @@ final class StatusTableViewController: ChartsTableViewController {
     private func configurePumpManagerHUDViews() {
         if let hudView = hudView {
             hudView.removePumpManagerProvidedViews()
-            if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
+            if let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
             {
                 let views = pumpManagerHUDProvider.createHUDViews()
                 for view in views {
                     addViewToHUD(view)
                 }
-                pumpManagerHUDProvider.delegate = self
             } else {
                 let reservoirView = ReservoirVolumeHUDView.instantiate()
                 let batteryView = BatteryLevelHUDView.instantiate()
@@ -1075,7 +1074,6 @@ final class StatusTableViewController: ChartsTableViewController {
                     addViewToHUD(view)
                 }
             }
-            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
         }
     }
     
@@ -1137,55 +1135,4 @@ extension StatusTableViewController: PumpManagerStatusObserver {
             self.reloadData(animated: true)
         }
     }
-}
-
-extension StatusTableViewController: HUDProviderDelegate {
-    
-    func hudProvider(_ provider: HUDProvider, didAddViews views: [BaseHUDView]) {
-        DispatchQueue.main.async {
-            for view in views {
-                view.isHidden = true
-                view.alpha = 0
-                self.addViewToHUD(view)
-            }
-            UIView.animate(withDuration: 1, animations: {
-                for view in views {
-                    view.isHidden = false
-                    view.alpha = 1
-                }
-            })
-            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
-        }
-    }
-    
-    func hudProvider(_ provider: HUDProvider, didRemoveViews views: [BaseHUDView]) {
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: 1, animations: {
-                for view in views {
-                    view.alpha = 0
-                }
-            }, completion: { (didFinish) in
-                for view in views {
-                    view.removeFromSuperview()
-                }
-            })
-            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
-        }
-    }
-
-    func hudProvider(_ provider: HUDProvider, didReplaceViews views: [BaseHUDView]) {
-        DispatchQueue.main.async {
-            self.hudView?.removePumpManagerProvidedViews()
-            for view in views {
-                view.isHidden = true
-                view.alpha = 0
-                self.addViewToHUD(view)
-            }
-            NotificationCenter.default.post(name: .HUDViewsChanged, object: self)
-        }
-    }
-}
-
-extension Notification.Name {
-    static let HUDViewsChanged = Notification.Name(rawValue:  "com.loopKit.notification.HUDViewsChanged")
 }

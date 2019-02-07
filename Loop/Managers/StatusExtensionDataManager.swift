@@ -18,7 +18,7 @@ final class StatusExtensionDataManager {
         self.deviceManager = deviceDataManager
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
-        NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .HUDViewsChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .PumpManagerChanged, object: nil)
     }
 
     fileprivate var defaults: UserDefaults? {
