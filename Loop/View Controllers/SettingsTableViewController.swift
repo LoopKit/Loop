@@ -110,9 +110,10 @@ final class SettingsTableViewController: UITableViewController {
         }
     }
     
-    func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController) {
+    func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController & CompletionNotifying) {
         var setupViewController = pumpManager.setupViewController()
         setupViewController.setupDelegate = self
+        setupViewController.completionDelegate = self
         setupViewController.basalSchedule = dataManager.loopManager.basalRateSchedule
         setupViewController.maxBolusUnits = dataManager.loopManager.settings.maximumBolus
         setupViewController.maxBasalRateUnitsPerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
@@ -610,14 +611,6 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
             dataManager.loopManager.settings.maximumBolus = maxBolusUnits
             tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
         }
-        var settingsViewController = pumpManager.settingsViewController()
-        settingsViewController.completionDelegate = self
-        show(settingsViewController, sender: nil)
-        dismiss(animated: true, completion: nil)
-    }
-
-    func pumpManagerSetupViewControllerDidCancel(_ pumpManagerSetupViewController: PumpManagerSetupViewController) {
-        dismiss(animated: true, completion: nil)
     }
 }
 
@@ -626,6 +619,7 @@ extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
     fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
         if var setupViewController = CGMManagerType.setupViewController() {
             setupViewController.setupDelegate = self
+            setupViewController.completionDelegate = self
             present(setupViewController, animated: true, completion: nil)
         } else {
             completeCGMManagerSetup(CGMManagerType.init(rawState: [:]), indexPath: indexPath)
@@ -641,13 +635,6 @@ extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
     func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
         dataManager.cgmManager = cgmManager
         tableView.selectRow(at: IndexPath(row: CGMRow.cgmSettings.rawValue, section: Section.cgm.rawValue), animated: false, scrollPosition: .none)
-        var settings = cgmManager.settingsViewController(for: dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter)
-        settings.completionDelegate = self
-        show(settings, sender: nil)
-        dismiss(animated: true, completion: nil)
-    }
-
-    func cgmManagerSetupViewControllerDidCancel(_ cgmManagerSetupViewController: CGMManagerSetupViewController) {
         dismiss(animated: true, completion: nil)
     }
 }
