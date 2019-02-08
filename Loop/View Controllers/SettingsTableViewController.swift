@@ -34,7 +34,6 @@ final class SettingsTableViewController: UITableViewController {
                 _ = tableView(tableView, willDeselectRowAt: indexPath)
             }
         }
-        tableView.reloadSections([Section.pump.rawValue], with: .none)
 
         super.viewWillAppear(animated)
     }
@@ -594,7 +593,6 @@ extension SettingsTableViewController: CompletionDelegate {
 extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
     func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController, didSetUpPumpManager pumpManager: PumpManagerUI) {
         dataManager.pumpManager = pumpManager
-        tableView.reloadSections([Section.pump.rawValue], with: .none)
         tableView.selectRow(at: IndexPath(row: PumpRow.pumpSettings.rawValue, section: Section.pump.rawValue), animated: false, scrollPosition: .none)
 
         if let basalRateSchedule = pumpManagerSetupViewController.basalSchedule {

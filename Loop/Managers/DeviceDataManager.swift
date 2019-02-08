@@ -68,10 +68,18 @@ final class DeviceDataManager {
             UserDefaults.appGroup.cgmManager = cgmManager
         }
     }
+
+    private let lockedPumpManagerStatus: Locked<PumpManagerStatus?> = Locked(nil)
     
     var pumpManagerStatus: PumpManagerStatus? {
-        didSet {
-            if let status = pumpManagerStatus {
+        get {
+            return lockedPumpManagerStatus.value
+        }
+        set {
+            let oldValue = lockedPumpManagerStatus.value
+            lockedPumpManagerStatus.value = newValue
+
+            if let status = newValue {
                 
                 loopManager.doseStore.device = status.device
                 
