@@ -5,19 +5,19 @@
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
    Format string for insulin sensitivity average (1: value)(2: glucose unit) */
-"%1$@ %2$@/U" = "%1$@ %2$@/IE";
+"%1$@ %2$@/U" = "%1$@ %2$@/E";
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
 "%1$@ + %2$@" = "%1$@ + %2$@";
 
 /* Low reservoir alert format string. (1: Number of units remaining) */
-"%1$@ U left" = "%1$@ IE verbleibend";
+"%1$@ U left" = "%1$@ E verbleibend";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ IE verbleibend: %2$@";
+"%1$@ U left: %2$@" = "%1$@ E verbleibend: %2$@";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
-"%1$@ U/hour @ %2$@" = "%1$@ IE/h @ %2$@";
+"%1$@ U/hour @ %2$@" = "%1$@ E/h @ %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -35,7 +35,7 @@
 "%@ absorbed" = "%@ absorbiert";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ Gesamt-IE";
+"%@ U Total" = "%@ Gesamt-E";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
@@ -92,7 +92,7 @@
 "at %@" = "bei %@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
-"Authenticate to Bolus %@ Units" = "Bolusabgabe von %@ IE bestätigen";
+"Authenticate to Bolus %@ Units" = "Bolusabgabe von %@ E bestätigen";
 
 /* Details for configuration error when basal rate schedule is missing */
 "Basal Rate Schedule" = "Basalraten-Zeitplan";
@@ -119,7 +119,7 @@
 "Carbohydrates" = "Kohlenhydrate";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Aufgenommene Kohlenhydrate (g) ÷ Kohlenhydrat-Verhältnis (g/IE) × Insulinempfindlichkeit (%1$@/IE)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Aufgenommene Kohlenhydrate (g) ÷ Kohlenhydrat-Verhältnis (g/E) × Insulinempfindlichkeit (%1$@/E)";
 
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Wechseln Sie sofort die Pumpenbatterie";
@@ -225,7 +225,7 @@
 "Insulin" = "Insulin";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Absorbiertes Insulin (IE) × Insulinempfindlichkeit (%1$@/IE)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Absorbiertes Insulin (E) × Insulinempfindlichkeit (%1$@/E)";
 
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "Insulinabgabe";
@@ -326,7 +326,7 @@
 "Recommended Basal" = "Empfohlene Basalrate";
 
 /* Accessibility hint describing recommended bolus units */
-"Recommended Bolus: %@ Units" = "Empfohlener Bolus: %@ IE";
+"Recommended Bolus: %@ Units" = "Empfohlener Bolus: %@ E";
 
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Reservoir";
@@ -365,7 +365,7 @@
 "The legacy model used by Loop, allowing customization of action duration." = "Das Legacy-Modell, das von Loop verwendet wird und die Anpassung der Wirkdauer ermöglicht.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Die maximale Bolusmenge beträgt %@ IE";
+"The maximum bolus amount is %@ Units" = "Die maximale Bolusmenge beträgt %@ E";
 
 /* Instructions on where to find the transmitter ID */
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "Die Sender-ID finden Sie auf der Rückseite des Geräts, auf der Seite der Verpackung, in der es geliefert wurde, und in den Einstellungsmenüs des G5/G6-Empfängers und der mobilen App.";
@@ -374,7 +374,7 @@
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Dies wird die basale Abgabe stärker erhöhen oder verringern, wenn der Blutzuckerverlauf nicht mit dem Kohlenhydrat- und Insulin-basierten Modell übereinstimmt.";
 
 /* The short unit display string for international units of insulin */
-"U" = "IE";
+"U" = "E";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Trainings-Blutzuckerziele verwenden";
@@ -383,7 +383,7 @@
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder vorhergesagte Blutzucker unter dem Schwellwert für die Unterbrechung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 IE/h.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder vorhergesagte Blutzucker unter dem Schwellwert für die Unterbrechung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 E/h.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Trainings-Blutzuckerziele";

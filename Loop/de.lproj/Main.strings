@@ -2,7 +2,7 @@
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3,5 IE/h @ 12:12 PM";
+"5gz-kZ-iF1.text" = "3,5 E/h @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
 "5oA-6d-ZTL.text" = "Bolus";
@@ -38,7 +38,7 @@
 "BR0-dr-Fj2.accessibilityLabel" = "Einheiten";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.text" = "IE";
+"BR0-dr-Fj2.text" = "E";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
 "cpo-Po-gFM.text" = "Beschriftung";
@@ -95,7 +95,7 @@
 "mVz-dr-xLU.accessibilityLabel" = "Einheiten";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.text" = "IE";
+"mVz-dr-xLU.text" = "E";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
 "OFA-qT-ZAg.text" = "Beschriftung";
