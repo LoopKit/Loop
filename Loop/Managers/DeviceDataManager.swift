@@ -69,6 +69,8 @@ final class DeviceDataManager {
         }
     }
 
+    private var lastBLEDrivenUpdate = Date.distantPast
+
     private let lockedPumpManagerStatus: Locked<PumpManagerStatus?> = Locked(nil)
     
     var pumpManagerStatus: PumpManagerStatus? {
@@ -235,6 +237,13 @@ extension DeviceDataManager: PumpManagerDelegate {
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
         log.default("PumpManager:\(type(of: pumpManager)) did fire BLE heartbeat")
+
+        let bleHeartbeatUpdateInterval = TimeInterval(minutes: 4.5)
+        guard lastBLEDrivenUpdate.timeIntervalSinceNow < -bleHeartbeatUpdateInterval else {
+            log.default("Skipping ble heartbeat")
+            return
+        }
+        lastBLEDrivenUpdate = Date()
 
         cgmManager?.fetchNewDataIfNeeded { (result) in
             if case .newData = result {
