@@ -331,7 +331,7 @@ final class SettingsTableViewController: UITableViewController {
             case .pumpSettings:
                 if var settings = dataManager.pumpManager?.settingsViewController() {
                     settings.completionDelegate = self
-                    show(settings, sender: sender)
+                    present(settings, animated: true)
                 } else {
                     // Add new pump
                     let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
@@ -365,7 +365,7 @@ final class SettingsTableViewController: UITableViewController {
                 if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
                     var settings = cgmManager.settingsViewController(for: unit)
                     settings.completionDelegate = self
-                    show(settings, sender: sender)
+                    present(settings, animated: true)
                 }
             } else if dataManager.cgmManager is PumpManagerUI {
                 // The pump manager is providing glucose, but allow reverting the CGM
