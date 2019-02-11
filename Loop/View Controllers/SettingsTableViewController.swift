@@ -563,7 +563,7 @@ final class SettingsTableViewController: UITableViewController {
         case .loop:
             break
         case .pump:
-            tableView.reloadSections([Section.pump.rawValue], with: .none)
+            tableView.reloadSections([Section.pump.rawValue], with: .fade)
             tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
         case .cgm:
             tableView.reloadRows(at: [indexPath], with: .fade)

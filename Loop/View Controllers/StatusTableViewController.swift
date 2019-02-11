@@ -77,7 +77,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
                 }
             },
-            notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: OperationQueue.main) { [weak self] (notification: Notification) in
+            notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
                 DispatchQueue.main.async {
                     self?.configurePumpManagerHUDViews()
                 }
