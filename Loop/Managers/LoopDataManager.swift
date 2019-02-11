@@ -452,7 +452,7 @@ extension LoopDataManager {
     ///
     /// - Parameters:
     ///   - dose: The DoseEntry representing the requested bolus
-    func addRequestedBolus(dose: DoseEntry, completion: (() -> Void)?) {
+    func addRequestedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
             self.lastRequestedBolus = dose
             self.notify(forChange: .bolus)

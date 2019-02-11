@@ -373,7 +373,7 @@ extension DeviceDataManager {
         }
 
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            self.loopManager.addRequestedBolus(dose: dose, completion: nil)
+            self.loopManager.addRequestedBolus(dose, completion: nil)
         }) { (result) in
             switch result {
             case .failure(let error):

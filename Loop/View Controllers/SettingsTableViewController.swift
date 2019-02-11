@@ -130,13 +130,9 @@ final class SettingsTableViewController: UITableViewController {
         case .loop:
             return LoopRow.count
         case .pump:
-            if dataManager.pumpManager != nil {
-                return PumpRow.count
-            } else {
-                return 1
-            }
+            return PumpRow.count
         case .cgm:
-            return 1
+            return CGMRow.count
         case .configuration:
             return ConfigurationRow.count
         case .services:
