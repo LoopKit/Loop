@@ -829,34 +829,30 @@ final class StatusTableViewController: ChartsTableViewController {
                 tableView.deselectRow(at: indexPath, animated: true)
 
                 switch statusRowMode {
-                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting):
-                    if !enacting {
-                        self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
-                        
-                        self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
-                            DispatchQueue.main.async {
-                                self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
-                                
-                                if let error = error {
-                                    self.deviceManager.logger.addError(error, fromSource: "TempBasal")
-                                    self.present(UIAlertController(with: error), animated: true)
-                                } else {
-                                    self.refreshContext.update(with: .status)
-                                    self.log.debug("[reloadData] after manually enacting temp basal")
-                                    self.reloadData()
-                                }
+                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
+                    self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
+
+                    self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
+                        DispatchQueue.main.async {
+                            self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
+
+                            if let error = error {
+                                self.deviceManager.logger.addError(error, fromSource: "TempBasal")
+                                self.present(UIAlertController(with: error), animated: true)
+                            } else {
+                                self.refreshContext.update(with: .status)
+                                self.log.debug("[reloadData] after manually enacting temp basal")
+                                self.reloadData()
                             }
                         }
                     }
-                case .pumpSuspended(let resuming):
-                    if !resuming {
-                        self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
-                        self.deviceManager.pumpManager?.resumeDelivery() { (error) in
-                            DispatchQueue.main.async {
-                                if let error = error {
-                                    let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
-                                    self.present(alert, animated: true, completion: nil)
-                                }
+                case .pumpSuspended(let resuming) where !resuming:
+                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
+                    self.deviceManager.pumpManager?.resumeDelivery() { (error) in
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
+                                self.present(alert, animated: true, completion: nil)
                             }
                         }
                     }
@@ -1070,7 +1066,7 @@ final class StatusTableViewController: ChartsTableViewController {
             } else {
                 let reservoirView = ReservoirVolumeHUDView.instantiate()
                 let batteryView = BatteryLevelHUDView.instantiate()
-                for view in [ reservoirView, batteryView] {
+                for view in [reservoirView, batteryView] {
                     addViewToHUD(view)
                 }
             }
