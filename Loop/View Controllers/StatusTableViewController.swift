@@ -384,6 +384,9 @@ final class StatusTableViewController: ChartsTableViewController {
                 self.charts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
                 self.charts.scheduleOverride = self.deviceManager.loopManager.settings.scheduleOverride
             }
+            if self.charts.scheduleOverride?.hasFinished() == true {
+                self.charts.scheduleOverride = nil
+            }
 
             // Active Insulin
             if let iobValues = iobValues {
