@@ -130,13 +130,9 @@ final class SettingsTableViewController: UITableViewController {
         case .loop:
             return LoopRow.count
         case .pump:
-            if dataManager.pumpManager != nil {
-                return PumpRow.count
-            } else {
-                return 1
-            }
+            return PumpRow.count
         case .cgm:
-            return 1
+            return CGMRow.count
         case .configuration:
             return ConfigurationRow.count
         case .services:
@@ -331,7 +327,7 @@ final class SettingsTableViewController: UITableViewController {
             case .pumpSettings:
                 if var settings = dataManager.pumpManager?.settingsViewController() {
                     settings.completionDelegate = self
-                    show(settings, sender: sender)
+                    present(settings, animated: true)
                 } else {
                     // Add new pump
                     let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
@@ -365,7 +361,7 @@ final class SettingsTableViewController: UITableViewController {
                 if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
                     var settings = cgmManager.settingsViewController(for: unit)
                     settings.completionDelegate = self
-                    show(settings, sender: sender)
+                    present(settings, animated: true)
                 }
             } else if dataManager.cgmManager is PumpManagerUI {
                 // The pump manager is providing glucose, but allow reverting the CGM
@@ -563,7 +559,7 @@ final class SettingsTableViewController: UITableViewController {
         case .loop:
             break
         case .pump:
-            tableView.reloadSections([Section.pump.rawValue], with: .none)
+            tableView.reloadSections([Section.pump.rawValue], with: .fade)
             tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
         case .cgm:
             tableView.reloadRows(at: [indexPath], with: .fade)

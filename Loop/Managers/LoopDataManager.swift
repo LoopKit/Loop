@@ -452,7 +452,7 @@ extension LoopDataManager {
     ///
     /// - Parameters:
     ///   - dose: The DoseEntry representing the requested bolus
-    func addRequestedBolus(dose: DoseEntry, completion: (() -> Void)?) {
+    func addRequestedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
             self.lastRequestedBolus = dose
             self.notify(forChange: .bolus)
@@ -490,7 +490,7 @@ extension LoopDataManager {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
                     // TODO: Ask pumpManager if dose represented in data
-                    if let bolusDate = self.lastRequestedBolus?.startDate, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    if let bolusEndDate = self.lastRequestedBolus?.endDate, bolusEndDate < Date() {
                         self.lastRequestedBolus = nil
                     }
                 }
@@ -519,7 +519,7 @@ extension LoopDataManager {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
                     // TODO: Ask pumpManager if dose represented in data
-                    if areStoredValuesContinuous, let bolusDate = self.lastRequestedBolus?.startDate, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    if areStoredValuesContinuous, let bolusEndDate = self.lastRequestedBolus?.endDate, bolusEndDate < Date() {
                         self.lastRequestedBolus = nil
                     }
 

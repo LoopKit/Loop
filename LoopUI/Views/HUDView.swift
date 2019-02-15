@@ -37,16 +37,14 @@ public class HUDView: UIView, NibLoadable {
     }
     
     public func addHUDView(_ viewToAdd: BaseHUDView) {
-        var insertIndex = 0
-        for view in stackView.arrangedSubviews {
-            if let hudView = view as? BaseHUDView {
-                if viewToAdd.orderPriority <= hudView.orderPriority {
-                    break
-                }
+        let insertIndex = stackView.arrangedSubviews.firstIndex { (view) -> Bool in
+            guard let hudView = view as? BaseHUDView else {
+                return false
             }
-            insertIndex += 1
+            return viewToAdd.orderPriority <= hudView.orderPriority
         }
-        stackView.insertArrangedSubview(viewToAdd, at: insertIndex)
+
+        stackView.insertArrangedSubview(viewToAdd, at: insertIndex ?? stackView.arrangedSubviews.count)
     }
 
     public override init(frame: CGRect) {
