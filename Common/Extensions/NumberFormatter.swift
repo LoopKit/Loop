@@ -20,8 +20,20 @@ extension NumberFormatter {
         return numberFormatter
     }
 
+    func string(from number: Double) -> String? {
+        return string(from: NSNumber(value: number))
+    }
+
+    func string(from quantity: HKQuantity, unit: HKUnit) -> String? {
+        return string(from: quantity.doubleValue(for: unit), unit: unit)
+    }
+
+    func string(from number: Double, unit: HKUnit) -> String? {
+        return string(from: number, unit: unit.localizedShortUnitString)
+    }
+
     func string(from number: Double, unit: String) -> String? {
-        guard let stringValue = string(from: NSNumber(value: number)) else {
+        guard let stringValue = string(from: number) else {
             return nil
         }
 
@@ -38,18 +50,9 @@ extension NumberFormatter {
 
     func decibleString(from decibles: Int?) -> String? {
         if let decibles = decibles {
-            return string(from: Double(decibles), unit: "dB")
+            return string(from: Double(decibles), unit: NSLocalizedString("dB", comment: "The short unit display string for decibles"))
         } else {
             return nil
         }
     }
-
-    func describingGlucose(_ value: Double, for unit: HKUnit) -> String? {
-        return string(from: value, unit: unit.glucoseUnitDisplayString)
-    }
-
-    @nonobjc func describingGlucose(_ value: HKQuantity, for unit: HKUnit) -> String? {
-        return describingGlucose(value.doubleValue(for: unit), for: unit)
-    }
-
 }
