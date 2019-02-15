@@ -134,14 +134,16 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
         }
-        
-        deviceManager.pumpManagerHUDProvider?.hudDidAppear()
+
+        hudVisible = true
 
         AnalyticsManager.shared.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+
+        hudVisible = false
 
         if presentedViewController == nil {
             navigationController?.setNavigationBarHidden(false, animated: animated)
@@ -157,12 +159,15 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - State
 
     override var active: Bool {
-        get {
-            return super.active
-        }
-        set {
-            super.active = newValue
+        didSet {
             hudView?.loopCompletionHUD.assertTimer(active)
+            updateHUDActive()
+        }
+    }
+
+    var hudVisible: Bool = false {
+        didSet {
+            updateHUDActive()
         }
     }
 
@@ -177,6 +182,20 @@ final class StatusTableViewController: ChartsTableViewController {
 
             refreshContext.update(with: .status)
         }
+    }
+
+    private var hudActive: Bool = false {
+        didSet {
+            print("didSet hudActive = \(hudActive)")
+            if oldValue != hudActive {
+                deviceManager.pumpManagerHUDProvider?.active = hudActive
+            }
+        }
+    }
+
+    private func updateHUDActive() {
+        print("active = \(active), hudVisible = \(hudVisible)")
+        hudActive = active && hudVisible
     }
     
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active {
@@ -1057,12 +1076,13 @@ final class StatusTableViewController: ChartsTableViewController {
     private func configurePumpManagerHUDViews() {
         if let hudView = hudView {
             hudView.removePumpManagerProvidedViews()
-            if let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
+            if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
             {
                 let views = pumpManagerHUDProvider.createHUDViews()
                 for view in views {
                     addViewToHUD(view)
                 }
+                pumpManagerHUDProvider.active = hudActive
             } else {
                 let reservoirView = ReservoirVolumeHUDView.instantiate()
                 let batteryView = BatteryLevelHUDView.instantiate()
