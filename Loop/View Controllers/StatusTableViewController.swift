@@ -135,7 +135,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         }
 
-        hudVisible = true
+        onscreen = true
 
         AnalyticsManager.shared.didDisplayStatusScreen()
     }
@@ -143,7 +143,7 @@ final class StatusTableViewController: ChartsTableViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
-        hudVisible = false
+        onscreen = false
 
         if presentedViewController == nil {
             navigationController?.setNavigationBarHidden(false, animated: animated)
@@ -165,7 +165,9 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    var hudVisible: Bool = false {
+    // This is similar to the visible property, but is set later, on viewDidAppear, to be
+    // suitable for animations that should be seen in their entirety.
+    var onscreen: Bool = false {
         didSet {
             updateHUDActive()
         }
@@ -184,18 +186,8 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    private var hudActive: Bool = false {
-        didSet {
-            print("didSet hudActive = \(hudActive)")
-            if oldValue != hudActive {
-                deviceManager.pumpManagerHUDProvider?.active = hudActive
-            }
-        }
-    }
-
     private func updateHUDActive() {
-        print("active = \(active), hudVisible = \(hudVisible)")
-        hudActive = active && hudVisible
+        deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
     
     public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active {
@@ -1082,7 +1074,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 for view in views {
                     addViewToHUD(view)
                 }
-                pumpManagerHUDProvider.active = hudActive
+                pumpManagerHUDProvider.visible = active && onscreen
             } else {
                 let reservoirView = ReservoirVolumeHUDView.instantiate()
                 let batteryView = BatteryLevelHUDView.instantiate()
