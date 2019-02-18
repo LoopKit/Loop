@@ -57,8 +57,11 @@ extension ChartPoint {
     }
 
     static func pointsForGlucoseRangeScheduleOverride(_ override: TemporaryScheduleOverride, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
+        guard let targetRange = override.settings.targetRange else {
+            return []
+        }
         return pointsForGlucoseRangeScheduleOverride(
-            range: override.settings.targetRange.rangeWithMinimumIncremement(unit.chartableIncrement),
+            range: targetRange.rangeWithMinimumIncremement(unit.chartableIncrement),
             activeInterval: override.activeInterval,
             unit: unit,
             xAxisValues: xAxisValues,
