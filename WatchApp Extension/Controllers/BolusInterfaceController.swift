@@ -148,6 +148,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
                         if let error = error {
                             ExtensionDelegate.shared().present(error)
                         } else {
+                            WKInterfaceDevice.current().play(.success)
                             ExtensionDelegate.shared().loopManager.addConfirmedBolus(bolus)
                         }
                     }
