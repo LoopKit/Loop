@@ -90,13 +90,13 @@ struct GlucoseChartData {
     }
 
     private var activeOverrideQuantityRange: Range<HKQuantity>? {
-        guard let override = activeScheduleOverride else {
+        guard let targetRange = activeScheduleOverride?.settings.targetRange else {
             return nil
         }
 
         let unit = self.unit ?? .milligramsPerDeciliter
-        let lowerBound = HKQuantity(unit: unit, doubleValue: override.settings.targetRange.minValue)
-        let upperBound = HKQuantity(unit: unit, doubleValue: override.settings.targetRange.maxValue)
+        let lowerBound = HKQuantity(unit: unit, doubleValue: targetRange.minValue)
+        let upperBound = HKQuantity(unit: unit, doubleValue: targetRange.maxValue)
         return lowerBound..<upperBound
     }
 }

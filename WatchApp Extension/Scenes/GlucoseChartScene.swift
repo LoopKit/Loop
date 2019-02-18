@@ -250,21 +250,22 @@ class GlucoseChartScene: SKScene {
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
         // extends to the end of the visible window.
-        if let range = activeOverride {
-            let (sprite1, created) = getSprite(forHash: range.chartHashValue)
+        if let range = activeOverride, let rangeHashable = TemporaryScheduleOverrideHashable(range) {
+            let (sprite1, created) = getSprite(forHash: rangeHashable.chartHashValue)
             sprite1.color = UIColor.glucose.withAlphaComponent(0.4)
             sprite1.zPosition = NodePlane.overrideRanges.zPosition
-            sprite1.move(to: scaler.rect(for: range, unit: unit), animated: !created)
-            inactiveNodes.removeValue(forKey: range.chartHashValue)
+            sprite1.move(to: scaler.rect(for: rangeHashable, unit: unit), animated: !created)
+            inactiveNodes.removeValue(forKey: rangeHashable.chartHashValue)
 
-            if range.end < spannedInterval.end {
-                let extendedDuration = spannedInterval.end.timeIntervalSince(range.start)
-                let extendedRange = TemporaryScheduleOverride(context: range.context, settings: range.settings, startDate: range.start, duration: .finite(extendedDuration))
-                let (sprite2, created) = getSprite(forHash: extendedRange.chartHashValue)
+            if rangeHashable.end < spannedInterval.end {
+                let extendedDuration = spannedInterval.end.timeIntervalSince(rangeHashable.start)
+                let extendedRange = TemporaryScheduleOverride(context: rangeHashable.override.context, settings: rangeHashable.override.settings, startDate: rangeHashable.start, duration: .finite(extendedDuration))
+                let extendedRangeHashable = TemporaryScheduleOverrideHashable(extendedRange)! // Target range already known to be non-nil
+                let (sprite2, created) = getSprite(forHash: extendedRangeHashable.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition
-                sprite2.move(to: scaler.rect(for: extendedRange, unit: unit), animated: !created)
-                inactiveNodes.removeValue(forKey: extendedRange.chartHashValue)
+                sprite2.move(to: scaler.rect(for: extendedRangeHashable, unit: unit), animated: !created)
+                inactiveNodes.removeValue(forKey: extendedRangeHashable.chartHashValue)
             }
         }
 
