@@ -10,6 +10,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopKitUI
 
 
 struct NetBasalContext {
@@ -151,6 +152,32 @@ extension PredictedGlucoseContext: RawRepresentable {
     }
 }
 
+struct PumpManagerHUDViewsContext: RawRepresentable {
+    typealias RawValue = [String: Any]
+
+    let pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue
+
+    var hudViews: [BaseHUDView]? {
+        return PumpManagerHUDViewsFromRawValue(pumpManagerHUDViewsRawValue)
+    }
+
+    init(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue) {
+        self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+    }
+    
+    init?(rawValue: RawValue) {
+        if let pumpManagerHUDViewsRawValue = rawValue["pumpManagerHUDViewsRawValue"] as? PumpManagerHUDViewsRawValue {
+            self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+        } else {
+            return nil
+        }
+    }
+    
+    var rawValue: RawValue {
+        return ["pumpManagerHUDViewsRawValue": pumpManagerHUDViewsRawValue]
+    }
+}
+
 struct StatusExtensionContext: RawRepresentable {
     typealias RawValue = [String: Any]
     private let version = 5
@@ -161,6 +188,7 @@ struct StatusExtensionContext: RawRepresentable {
     var batteryPercentage: Double?
     var reservoirCapacity: Double?
     var sensor: SensorDisplayableContext?
+    var pumpManagerHUDViewsContext: PumpManagerHUDViewsContext?
     
     init() { }
     
@@ -184,6 +212,10 @@ struct StatusExtensionContext: RawRepresentable {
         if let rawValue = rawValue["sensor"] as? SensorDisplayableContext.RawValue {
             sensor = SensorDisplayableContext(rawValue: rawValue)
         }
+        
+        if let rawPumpManagerHUDViewsContext = rawValue["pumpManagerHUDViewsContext"] as? PumpManagerHUDViewsContext.RawValue {
+            pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(rawValue: rawPumpManagerHUDViewsContext)
+        }
     }
     
     var rawValue: RawValue {
@@ -197,6 +229,8 @@ struct StatusExtensionContext: RawRepresentable {
         raw["batteryPercentage"] = batteryPercentage
         raw["reservoirCapacity"] = reservoirCapacity
         raw["sensor"] = sensor?.rawValue
+        raw["pumpManagerHUDViewsContext"] = pumpManagerHUDViewsContext?.rawValue
+        
         return raw
     }
 }

@@ -25,7 +25,6 @@ private enum BolusState {
     case enacting
 }
 
-
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
 }
@@ -42,6 +41,11 @@ final class StatusTableViewController: ChartsTableViewController {
             min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100),
             max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
         )
+        
+        if let pumpManager = deviceManager.pumpManager {
+            self.basalDeliveryState = pumpManager.status.basalDeliveryState
+            pumpManager.addStatusObserver(self)
+        }
 
         let notificationCenter = NotificationCenter.default
 
@@ -72,7 +76,13 @@ final class StatusTableViewController: ChartsTableViewController {
                 DispatchQueue.main.async {
                     self?.hudView?.loopCompletionHUD.loopInProgress = true
                 }
+            },
+            notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    self?.configurePumpManagerHUDViews()
+                }
             }
+
         ]
 
         if let gestureRecognizer = charts.gestureRecognizer {
@@ -125,11 +135,15 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         }
 
+        onscreen = true
+
         AnalyticsManager.shared.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+
+        onscreen = false
 
         if presentedViewController == nil {
             navigationController?.setNavigationBarHidden(false, animated: animated)
@@ -145,12 +159,17 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - State
 
     override var active: Bool {
-        get {
-            return super.active
-        }
-        set {
-            super.active = newValue
+        didSet {
             hudView?.loopCompletionHUD.assertTimer(active)
+            updateHUDActive()
+        }
+    }
+
+    // This is similar to the visible property, but is set later, on viewDidAppear, to be
+    // suitable for animations that should be seen in their entirety.
+    var onscreen: Bool = false {
+        didSet {
+            updateHUDActive()
         }
     }
 
@@ -163,6 +182,16 @@ final class StatusTableViewController: ChartsTableViewController {
                 updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
             }
 
+            refreshContext.update(with: .status)
+        }
+    }
+
+    private func updateHUDActive() {
+        deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
+    }
+    
+    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active {
+        didSet {
             refreshContext.update(with: .status)
         }
     }
@@ -231,7 +260,6 @@ final class StatusTableViewController: ChartsTableViewController {
         reloading = true
 
         let reloadGroup = DispatchGroup()
-        var lastReservoirValue: ReservoirValue?
         var newRecommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
         var glucoseValues: [StoredGlucoseSample]?
         var predictedGlucoseValues: [GlucoseValue]?
@@ -344,18 +372,6 @@ final class StatusTableViewController: ChartsTableViewController {
 
                 reloadGroup.leave()
             }
-
-            reloadGroup.enter()
-            deviceManager.loopManager.doseStore.getReservoirValues(since: Date(timeIntervalSinceNow: .minutes(-30)), limit: 1) { (result) in
-                switch result {
-                case .success(let values):
-                    lastReservoirValue = values.first
-                case .failure:
-                    retryContext.update(with: .insulin)
-                }
-
-                reloadGroup.leave()
-            }
         }
 
         workoutMode = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.overrideEnabledForContext(.workout)
@@ -418,31 +434,25 @@ final class StatusTableViewController: ChartsTableViewController {
                         sensor: self.deviceManager.cgmManager?.sensorState
                     )
                 }
-
-                // Reservoir HUD
-                if let reservoir = lastReservoirValue {
-                    if let capacity = self.deviceManager.pumpManager?.pumpReservoirCapacity {
-                        hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, reservoir.unitVolume / capacity))
-                    }
-
-                    hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
-                }
-
-                // Battery HUD
-                hudView.batteryHUD.batteryLevel = self.deviceManager.pumpManager?.pumpBatteryChargeRemaining ?? UserDefaults.appGroup.statusExtensionContext?.batteryPercentage
             }
 
             // Show/hide the table view rows
             let statusRowMode: StatusRowMode?
-
-            switch bolusState {
-            case .recommended?, .enacting?:
-                statusRowMode = nil
-            case .none:
-                if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
-                    statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
-                } else {
-                    statusRowMode = .hidden
+            
+            if self.basalDeliveryState == .suspended {
+                statusRowMode = .pumpSuspended(resuming: false)
+            } else if self.basalDeliveryState == .resuming {
+                statusRowMode = .pumpSuspended(resuming: true)
+            } else {
+                switch bolusState {
+                case .recommended?, .enacting?:
+                    statusRowMode = nil
+                case .none:
+                    if let (recommendation: tempBasal, date: date) = newRecommendedTempBasal {
+                        statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+                    } else {
+                        statusRowMode = .hidden
+                    }
                 }
             }
 
@@ -510,6 +520,7 @@ final class StatusTableViewController: ChartsTableViewController {
         case hidden
         case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
         case enactingBolus
+        case pumpSuspended(resuming: Bool)
 
         var hasRow: Bool {
             switch self {
@@ -576,6 +587,14 @@ final class StatusTableViewController: ChartsTableViewController {
                     }
                 }
             case (.enactingBolus, .enactingBolus):
+                break
+            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
+                if isResuming, !wasResuming, let cell = tableView.cellForRow(at: statusIndexPath) as? TitleSubtitleTableViewCell {
+                    let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+                    indicatorView.startAnimating()
+                    cell.accessoryView = indicatorView
+                    cell.subtitleLabel.text = nil
+                }
                 break
             default:
                 self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
@@ -727,6 +746,10 @@ final class StatusTableViewController: ChartsTableViewController {
                     let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
+                case .pumpSuspended:
+                    cell.titleLabel.text = NSLocalizedString("Pump Suspended", comment: "The title of the cell indicating the pump is suspended")
+                    cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
+                    cell.selectionStyle = .default
                 }
             }
 
@@ -816,7 +839,8 @@ final class StatusTableViewController: ChartsTableViewController {
             case .status:
                 tableView.deselectRow(at: indexPath, animated: true)
 
-                if case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) = statusRowMode, !enacting {
+                switch statusRowMode {
+                case .recommendedTempBasal(tempBasal: let tempBasal, at: let date, enacting: let enacting) where !enacting:
                     self.updateHUDandStatusRows(statusRowMode: .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: true), newSize: nil, animated: true)
 
                     self.deviceManager.loopManager.enactRecommendedTempBasal { (error) in
@@ -825,7 +849,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
                             if let error = error {
                                 self.deviceManager.logger.addError(error, fromSource: "TempBasal")
-                                self.presentAlertController(with: error)
+                                self.present(UIAlertController(with: error), animated: true)
                             } else {
                                 self.refreshContext.update(with: .status)
                                 self.log.debug("[reloadData] after manually enacting temp basal")
@@ -833,6 +857,18 @@ final class StatusTableViewController: ChartsTableViewController {
                             }
                         }
                     }
+                case .pumpSuspended(let resuming) where !resuming:
+                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
+                    self.deviceManager.pumpManager?.resumeDelivery() { (error) in
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
+                                self.present(alert, animated: true, completion: nil)
+                            }
+                        }
+                    }
+                default:
+                    break
                 }
             }
         case .hud:
@@ -918,7 +954,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 case .failure(let error):
                     // Ignore bolus wizard errors
                     if error is CarbStore.CarbStoreError {
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     } else {
                         self.deviceManager.logger.addError(error, fromSource: "Bolus")
                     }
@@ -1015,17 +1051,46 @@ final class StatusTableViewController: ChartsTableViewController {
             if deviceManager.cgmManager?.appURL != nil {
                 hudView.glucoseHUD.accessibilityHint = NSLocalizedString("Launches CGM app", comment: "Glucose HUD accessibility hint")
             }
-
+            
+            configurePumpManagerHUDViews()
+            
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.glucoseHUD.stateColors = .cgmStatus
             hudView.glucoseHUD.tintColor = .glucoseTintColor
             hudView.basalRateHUD.tintColor = .doseTintColor
-            hudView.reservoirVolumeHUD.stateColors = .pumpStatus
-            hudView.batteryHUD.stateColors = .pumpStatus
 
             refreshContext.update(with: .status)
             self.log.debug("[reloadData] after hudView loaded")
             reloadData()
+        }
+    }
+    
+    private func configurePumpManagerHUDViews() {
+        if let hudView = hudView {
+            hudView.removePumpManagerProvidedViews()
+            if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
+            {
+                let views = pumpManagerHUDProvider.createHUDViews()
+                for view in views {
+                    addViewToHUD(view)
+                }
+                pumpManagerHUDProvider.visible = active && onscreen
+            } else {
+                let reservoirView = ReservoirVolumeHUDView.instantiate()
+                let batteryView = BatteryLevelHUDView.instantiate()
+                for view in [reservoirView, batteryView] {
+                    addViewToHUD(view)
+                }
+            }
+        }
+    }
+    
+    private func addViewToHUD(_ view: BaseHUDView) {
+        if let hudView = hudView {
+            let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
+            view.addGestureRecognizer(hudTapGestureRecognizer)
+            view.stateColors = .pumpStatus
+            hudView.addHUDView(view)
         }
     }
 
@@ -1034,15 +1099,48 @@ final class StatusTableViewController: ChartsTableViewController {
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.presentAlertController(with: deviceError.error)
+            self.present(UIAlertController(with: deviceError.error), animated: true)
         } else if let lastLoopError = lastLoopError {
-            self.presentAlertController(with: lastLoopError)
+            self.present(UIAlertController(with: lastLoopError), animated: true)
         }
     }
 
     @objc private func openCGMApp(_: Any) {
         if let url = deviceManager.cgmManager?.appURL, UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
+        }
+    }
+
+    @objc private func hudViewTapped(_ sender: UIGestureRecognizer) {
+        if let hudSubView = sender.view as? BaseHUDView,
+            let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider,
+            let action = pumpManagerHUDProvider.didTapOnHUDView(hudSubView)
+        {
+            switch action {
+            case .presentViewController(let vc):
+                var completionNotifyingVC = vc
+                completionNotifyingVC.completionDelegate = self
+                self.present(vc, animated: true, completion: nil)
+            case .openAppURL(let url):
+                UIApplication.shared.open(url)
+            }
+        }
+    }
+}
+
+extension StatusTableViewController: CompletionDelegate {
+    func completionNotifyingDidComplete(_ object: CompletionNotifying) {
+        if let vc = object as? UIViewController {
+            vc.dismiss(animated: true, completion: nil)
+        }
+    }
+}
+
+extension StatusTableViewController: PumpManagerStatusObserver {
+    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
+        DispatchQueue.main.async {
+            self.basalDeliveryState = status.basalDeliveryState
+            self.reloadData(animated: true)
         }
     }
 }

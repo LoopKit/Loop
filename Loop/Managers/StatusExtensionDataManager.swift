@@ -18,6 +18,7 @@ final class StatusExtensionDataManager {
         self.deviceManager = deviceDataManager
 
         NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .PumpManagerChanged, object: nil)
     }
 
     fileprivate var defaults: UserDefaults? {
@@ -98,8 +99,9 @@ final class StatusExtensionDataManager {
 
                 context.netBasal = NetBasalContext(rate: netBasal.rate, percentage: netBasal.percent, start: netBasal.start, end: netBasal.end)
             }
-
-            context.batteryPercentage = dataManager.pumpManager?.pumpBatteryChargeRemaining
+            
+            
+            context.batteryPercentage = dataManager.pumpManager?.status.pumpBatteryChargeRemaining
             context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
             if let sensorInfo = dataManager.cgmManager?.sensorState {
@@ -109,6 +111,10 @@ final class StatusExtensionDataManager {
                     trendType: sensorInfo.trendType,
                     isLocal: sensorInfo.isLocal
                 )
+            }
+            
+            if let pumpManagerHUDProvider = dataManager.pumpManagerHUDProvider {
+                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValueFromHudProvider(pumpManagerHUDProvider))
             }
 
             completionHandler(context)
