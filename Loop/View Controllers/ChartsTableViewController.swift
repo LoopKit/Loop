@@ -86,15 +86,13 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
         let notificationCenter = NotificationCenter.default
         notificationObservers += [
-            notificationCenter.addObserver(forName: .UIApplicationWillResignActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
+            notificationCenter.addObserver(forName: .UIApplicationDidEnterBackground, object: UIApplication.shared, queue: .main) { [weak self] _ in
                 self?.active = false
             },
             notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
                 self?.active = true
             }
         ]
-
-        active = UIApplication.shared.applicationState == .active
 
         let gestureRecognizer = UILongPressGestureRecognizer()
         gestureRecognizer.delegate = self
@@ -168,8 +166,11 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // References to registered notification center observers
     var notificationObservers: [Any] = []
 
-    var active: Bool = false {
-        didSet {
+    var active: Bool {
+        get {
+            return UIApplication.shared.applicationState == .active
+        }
+        set {
             log.debug("[reloadData] for app change to active: %d", active)
             reloadData()
         }
