@@ -4,6 +4,7 @@ osx_image: xcode10
 # xcode_project: Loop.xcodeproj
 # xcode_scheme: Loop
 before_script:
+    - git config --global protocol.version 1
     - set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile
 script:
     # Build the app target
