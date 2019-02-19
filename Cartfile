@@ -1,7 +1,7 @@
-github "LoopKit/LoopKit" "pumpmanager-updates"
-github "LoopKit/CGMBLEKit" "omnikit"
+github "LoopKit/LoopKit" "dev"
+github "LoopKit/CGMBLEKit" "dev"
 github "i-schuetz/SwiftCharts" == 0.6.2
-github "LoopKit/dexcom-share-client-swift" "omnikit"
-github "LoopKit/G4ShareSpy" "omnikit"
+github "LoopKit/dexcom-share-client-swift" "dev"
+github "LoopKit/G4ShareSpy" "dev"
 github "ps2/rileylink_ios" "omnipod-testing"
 github "LoopKit/Amplitude-iOS" "decreepify"
