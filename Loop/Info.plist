@@ -40,6 +40,7 @@
 		<string>dexcomg6</string>
 		<string>dexcomcgm</string>
 		<string>dexcomshare</string>
+		<string>spikeapp</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
