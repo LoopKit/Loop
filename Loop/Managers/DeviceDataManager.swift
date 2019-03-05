@@ -68,6 +68,8 @@ final class DeviceDataManager {
     private var lastBLEDrivenUpdate = Date.distantPast
 
     private let lockedPumpManagerStatus: Locked<PumpManagerStatus?> = Locked(nil)
+
+    static let batteryReplacementDetectionThreshold = 0.5
     
     var pumpManagerStatus: PumpManagerStatus? {
         get {
@@ -88,7 +90,7 @@ final class DeviceDataManager {
                         NotificationManager.clearPumpBatteryLowNotification()
                     }
                     
-                    if let oldBatteryValue = oldValue?.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= 0.5 {
+                    if let oldBatteryValue = oldValue?.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= DeviceDataManager.batteryReplacementDetectionThreshold {
                         AnalyticsManager.shared.pumpBatteryWasReplaced()
                     }
                 }
