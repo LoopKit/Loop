@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Der aktuell Blutzucker von %1$@ liegt unterhalb des Korrekturbereiches.";
+"Current glucose of %1$@ is below correction range." = "Der aktuelle Blutzucker von %1$@ liegt unterhalb des Korrekturbereiches.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -8,13 +8,13 @@
 "g" = "g";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+"mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+"mmol/L" = "mmol/l";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Der Vorhergesagte Blutzucker um %1$@ ist %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Der vorhergesagte Blutzucker um %1$@ ist %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Der vorhergesagte Blutzucker von %1$@ liegt unterhalb des eingestellten Schwellwertes zur Unterbrechung der Basalrate. ";
@@ -23,5 +23,4 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
-"U" = "E";
-
+"U" = "IE";
