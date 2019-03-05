@@ -493,18 +493,23 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             case .basalRate:
-                let vc = SingleValueScheduleTableViewController(style: .grouped)
+                guard let pumpManager = dataManager.pumpManager else {
+                    // Not allowing basal schedule entry without a configured pump.
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    return
+                }
+                let vc = BasalScheduleTableViewController(allowedBasalRates: pumpManager.supportedBasalRates, maximumScheduleItemCount: pumpManager.maximumBasalScheduleEntryCount, minimumTimeInterval: pumpManager.minimumBasalScheduleEntryDuration)
 
                 if let profile = dataManager.loopManager.basalRateSchedule {
                     vc.scheduleItems = profile.items
                     vc.timeZone = profile.timeZone
-                } else if let timeZone = dataManager.pumpManager?.status.timeZone {
-                    vc.timeZone = timeZone
+                } else {
+                    vc.timeZone = pumpManager.status.timeZone
                 }
 
                 vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
                 vc.delegate = self
-                vc.syncSource = dataManager.pumpManager
+                vc.syncSource = pumpManager
 
                 show(vc, sender: sender)
             }
@@ -648,7 +653,7 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
                     dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
                 }
             case .basalRate:
-                if let controller = controller as? SingleValueScheduleTableViewController {
+                if let controller = controller as? BasalScheduleTableViewController {
                     dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                 }
             case let row:
