@@ -48,12 +48,14 @@ final class LoopDataManager {
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup.carbRatioSchedule,
         insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup.insulinModelSettings,
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings(),
+        supportedTempBasalRates: [Double] = [0]
     ) {
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lastTempBasal = lastTempBasal
         self.settings = settings
+        self.lockedSupportedTempBasalRates = Locked<[Double]>(supportedTempBasalRates)
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -124,6 +126,19 @@ final class LoopDataManager {
         }
     }
 
+    // Delivery constraints
+    var supportedTempBasalRates: [Double] {
+        get {
+            return lockedSupportedTempBasalRates.value
+        }
+
+        set {
+            lockedSupportedTempBasalRates.value = newValue
+        }
+    }
+    private var lockedSupportedTempBasalRates: Locked<[Double]>
+
+
     // MARK: - Calculation state
 
     fileprivate let dataAccessQueue: DispatchQueue = DispatchQueue(label: "com.loudnate.Naterade.LoopDataManager.dataAccessQueue", qos: .utility)
@@ -167,6 +182,7 @@ final class LoopDataManager {
     }
 
     fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+
     fileprivate var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
 
     fileprivate var carbsOnBoard: CarbValue?
@@ -901,7 +917,8 @@ extension LoopDataManager {
             model: model,
             basalRates: basalRates,
             maxBasalRate: maxBasal,
-            lastTempBasal: lastTempBasal
+            lastTempBasal: lastTempBasal,
+            supportedBasalRates: supportedTempBasalRates
         )
         
         if let temp = tempBasal {
