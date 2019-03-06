@@ -184,7 +184,9 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
                             ExtensionDelegate.shared().loopManager.addConfirmedCarbEntry(entry)
 
-                            WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                            if let recommendedBolus = suggestion.recommendedBolus?.rawValue, recommendedBolus > 0.0 {
+                                WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                            }
                         }
                     },
                     errorHandler: { (error) in
