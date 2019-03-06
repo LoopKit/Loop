@@ -44,7 +44,7 @@ extension InsulinCorrection {
         scheduledBasalRate: Double,
         maxBasalRate: Double,
         duration: TimeInterval,
-        minimumProgrammableIncrementPerUnit: Double
+        supportedBasalRates: [Double]
     ) -> TempBasalRecommendation {
         var rate = units / (duration / TimeInterval(hours: 1))  // units/hour
         switch self {
@@ -55,7 +55,8 @@ extension InsulinCorrection {
         }
 
         rate = Swift.min(maxBasalRate, Swift.max(0, rate))
-        rate = round(rate * minimumProgrammableIncrementPerUnit) / minimumProgrammableIncrementPerUnit
+
+        rate = supportedBasalRates.filter({$0 <= rate}).max() ?? 0
 
         return TempBasalRecommendation(
             unitsPerHour: rate,
@@ -354,7 +355,7 @@ extension Collection where Element == GlucoseValue {
         maxBasalRate: Double,
         lastTempBasal: DoseEntry?,
         duration: TimeInterval = .minutes(30),
-        minimumProgrammableIncrementPerUnit: Double = 40,
+        supportedBasalRates: [Double],
         continuationInterval: TimeInterval = .minutes(11)
     ) -> TempBasalRecommendation? {
         let correction = self.insulinCorrection(
@@ -379,7 +380,7 @@ extension Collection where Element == GlucoseValue {
             scheduledBasalRate: scheduledBasalRate,
             maxBasalRate: maxBasalRate,
             duration: duration,
-            minimumProgrammableIncrementPerUnit: minimumProgrammableIncrementPerUnit
+            supportedBasalRates: supportedBasalRates
         )
 
         return temp?.ifNecessary(
