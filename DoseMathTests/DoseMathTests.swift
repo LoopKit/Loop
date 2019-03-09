@@ -54,6 +54,8 @@ class RecommendTempBasalTests: XCTestCase {
 
     fileprivate let maxBasalRate = 3.0
 
+    fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
+
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
         let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
@@ -440,6 +442,8 @@ class RecommendBolusTests: XCTestCase {
 
     fileprivate let maxBolus = 10.0
 
+    fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
+
     func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
         let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
@@ -560,7 +564,8 @@ class RecommendBolusTests: XCTestCase {
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: fortyIncrementsPerUnitRounder
         )
 
         XCTAssertEqual(1.575, dose.amount)
@@ -628,7 +633,8 @@ class RecommendBolusTests: XCTestCase {
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 0,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: fortyIncrementsPerUnitRounder
         )
         
         XCTAssertEqual(1.4, dose.amount)
@@ -646,7 +652,8 @@ class RecommendBolusTests: XCTestCase {
             sensitivity: insulinSensitivitySchedule,
             model: insulinModel,
             pendingInsulin: 1,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: fortyIncrementsPerUnitRounder
         )
         
         XCTAssertEqual(0.575, dose.amount)
@@ -740,7 +747,8 @@ class RecommendBolusTests: XCTestCase {
             sensitivity: insulinSensitivitySchedule,
             model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0),
             pendingInsulin: 0,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: fortyIncrementsPerUnitRounder
         )
 
         XCTAssertEqual(0.275, dose.amount)
