@@ -5,6 +5,7 @@
 //  Copyright © 2018 LoopKit Authors. All rights reserved.
 //
 
+import LoopCore
 
 // MARK: - Static configuration
 extension LoopSettings {

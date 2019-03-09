@@ -9,6 +9,7 @@
 import WatchKit
 import WatchConnectivity
 import LoopKit
+import LoopCore
 
 
 final class ActionHUDController: HUDInterfaceController {

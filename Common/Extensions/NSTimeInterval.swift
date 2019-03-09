@@ -22,12 +22,20 @@ extension TimeInterval {
         return TimeInterval(hours: hours)
     }
 
+    static func days(_ days: Double) -> TimeInterval {
+        return TimeInterval(days: days)
+    }
+
     init(minutes: Double) {
         self.init(minutes * 60)
     }
 
     init(hours: Double) {
         self.init(minutes: hours * 60)
+    }
+
+    init(days: Double) {
+        self.init(hours: days * 24)
     }
 
     var minutes: Double {

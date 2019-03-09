@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import LoopCore
 import LoopKit
 import SwiftCharts
 import os.log

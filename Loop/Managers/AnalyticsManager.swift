@@ -9,6 +9,7 @@
 import Foundation
 import Amplitude
 import LoopKit
+import LoopCore
 
 
 final class AnalyticsManager: IdentifiableClass {

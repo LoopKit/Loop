@@ -7,15 +7,16 @@
 //
 
 import UIKit
+import LoopCore
 
 
-protocol NibLoadable: IdentifiableClass {
+public protocol NibLoadable: IdentifiableClass {
     static func nib() -> UINib
 }
 
 
 extension NibLoadable {
-    static func nib() -> UINib {
+    public static func nib() -> UINib {
         return UINib(nibName: className, bundle: Bundle(for: self))
     }
 }

@@ -21,7 +21,9 @@ extension UserDefaults {
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
     }
 
-    var basalRateSchedule: BasalRateSchedule? {
+    public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+
+    public var basalRateSchedule: BasalRateSchedule? {
         get {
             if let rawValue = dictionary(forKey: Key.basalRateSchedule.rawValue) {
                 return BasalRateSchedule(rawValue: rawValue)
@@ -34,7 +36,7 @@ extension UserDefaults {
         }
     }
 
-    var carbRatioSchedule: CarbRatioSchedule? {
+    public var carbRatioSchedule: CarbRatioSchedule? {
         get {
             if let rawValue = dictionary(forKey: Key.carbRatioSchedule.rawValue) {
                 return CarbRatioSchedule(rawValue: rawValue)
@@ -47,7 +49,7 @@ extension UserDefaults {
         }
     }
 
-    var insulinModelSettings: InsulinModelSettings? {
+    public var insulinModelSettings: InsulinModelSettings? {
         get {
             if let rawValue = dictionary(forKey: Key.insulinModelSettings.rawValue) {
                 return InsulinModelSettings(rawValue: rawValue)
@@ -67,7 +69,7 @@ extension UserDefaults {
         }
     }
 
-    var loopSettings: LoopSettings? {
+    public var loopSettings: LoopSettings? {
         get {
             if let rawValue = dictionary(forKey: Key.loopSettings.rawValue) {
                 return LoopSettings(rawValue: rawValue)
@@ -124,7 +126,7 @@ extension UserDefaults {
         }
     }
 
-    var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
+    public var insulinSensitivitySchedule: InsulinSensitivitySchedule? {
         get {
             if let rawValue = dictionary(forKey: Key.insulinSensitivitySchedule.rawValue) {
                 return InsulinSensitivitySchedule(rawValue: rawValue)

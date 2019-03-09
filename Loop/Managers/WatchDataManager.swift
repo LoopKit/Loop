@@ -10,6 +10,8 @@ import HealthKit
 import UIKit
 import WatchConnectivity
 import LoopKit
+import LoopCore
+
 
 final class WatchDataManager: NSObject {
 

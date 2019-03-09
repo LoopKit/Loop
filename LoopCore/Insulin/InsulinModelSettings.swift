@@ -8,11 +8,11 @@
 import LoopKit
 
 
-enum InsulinModelSettings {
+public enum InsulinModelSettings {
     case exponentialPreset(ExponentialInsulinModelPreset)
     case walsh(WalshInsulinModel)
 
-    var model: InsulinModel {
+    public var model: InsulinModel {
         switch self {
         case .exponentialPreset(let model):
             return model
@@ -21,7 +21,7 @@ enum InsulinModelSettings {
         }
     }
 
-    init?(model: InsulinModel) {
+    public init?(model: InsulinModel) {
         switch model {
         case let model as ExponentialInsulinModelPreset:
             self = .exponentialPreset(model)
@@ -35,25 +35,16 @@ enum InsulinModelSettings {
 
 
 extension InsulinModelSettings: CustomDebugStringConvertible {
-    var title: String {
-        switch self {
-        case .exponentialPreset(let model):
-            return model.title
-        case .walsh(let model):
-            return model.title
-        }
-    }
-
-    var debugDescription: String {
+    public var debugDescription: String {
         return String(reflecting: model)
     }
 }
 
 
 extension InsulinModelSettings: RawRepresentable {
-    typealias RawValue = [String: Any]
+    public typealias RawValue = [String: Any]
 
-    init?(rawValue: RawValue) {
+    public init?(rawValue: RawValue) {
         guard let typeName = rawValue["type"] as? InsulinModelType.RawValue,
             let type = InsulinModelType(rawValue: typeName)
         else {
@@ -80,7 +71,7 @@ extension InsulinModelSettings: RawRepresentable {
         }
     }
 
-    var rawValue: [String : Any] {
+    public var rawValue: [String : Any] {
         switch self {
         case .exponentialPreset(let model):
             return [
