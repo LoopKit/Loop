@@ -23,15 +23,3 @@ extension WalshInsulinModel: RawRepresentable {
         return ["actionDuration": self.actionDuration]
     }
 }
-
-
-// MARK: - Localization
-extension WalshInsulinModel {
-    var title: String {
-        return NSLocalizedString("Walsh", comment: "Title of insulin model setting")
-    }
-
-    var subtitle: String {
-        return NSLocalizedString("The legacy model used by Loop, allowing customization of action duration.", comment: "Subtitle description of Walsh insulin model setting")
-    }
-}

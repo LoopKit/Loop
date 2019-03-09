@@ -8,6 +8,7 @@
 import UIKit
 import HealthKit
 import LoopKit
+import LoopCore
 
 
 protocol InsulinModelSettingsViewControllerDelegate: class {

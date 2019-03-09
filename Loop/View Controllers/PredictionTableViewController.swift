@@ -10,6 +10,7 @@ import UIKit
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopCore
 
 
 private extension RefreshContext {

@@ -10,6 +10,7 @@ import CoreData
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopCore
 import LoopUI
 import NotificationCenter
 import UIKit
@@ -60,7 +61,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     var statusExtensionContext: StatusExtensionContext?
 
-    lazy var defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+    lazy var defaults = UserDefaults.appGroup
 
     private var observers: [Any] = []
 

@@ -9,6 +9,7 @@
 import XCTest
 import HealthKit
 import LoopKit
+import LoopCore
 
 
 extension XCTestCase {
