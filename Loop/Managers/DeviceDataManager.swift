@@ -120,7 +120,6 @@ final class DeviceDataManager {
             self.pumpManagerStatus = pumpManager.status
             self.loopManager.doseStore.device = self.pumpManagerStatus?.device
             self.pumpManagerHUDProvider = pumpManager.hudProvider()
-            self.loopManager.supportedTempBasalRates = pumpManager.supportedBasalRates
         }
 
         // Proliferate PumpModel preferences to DoseStore

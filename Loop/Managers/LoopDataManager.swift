@@ -55,7 +55,6 @@ final class LoopDataManager {
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lastTempBasal = lastTempBasal
         self.settings = settings
-        self.lockedSupportedTempBasalRates = Locked<[Double]>(supportedTempBasalRates)
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -125,19 +124,6 @@ final class LoopDataManager {
             AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
     }
-
-    // Delivery constraints
-    var supportedTempBasalRates: [Double] {
-        get {
-            return lockedSupportedTempBasalRates.value
-        }
-
-        set {
-            lockedSupportedTempBasalRates.value = newValue
-        }
-    }
-    private var lockedSupportedTempBasalRates: Locked<[Double]>
-
 
     // MARK: - Calculation state
 
