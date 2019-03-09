@@ -9,6 +9,7 @@
 import UIKit
 import HealthKit
 import Intents
+import LoopCore
 import LoopKit
 import LoopKitUI
 import LoopUI

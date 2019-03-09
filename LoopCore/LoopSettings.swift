@@ -8,43 +8,59 @@
 import LoopKit
 
 
-struct LoopSettings: Equatable {
-    var dosingEnabled = false
+public struct LoopSettings: Equatable {
+    public var dosingEnabled = false
 
-    let dynamicCarbAbsorptionEnabled = true
+    public let dynamicCarbAbsorptionEnabled = true
 
-    var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
+    public var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
-    var maximumBasalRatePerHour: Double?
+    public var maximumBasalRatePerHour: Double?
 
-    var maximumBolus: Double?
+    public var maximumBolus: Double?
 
-    var suspendThreshold: GlucoseThreshold? = nil
+    public var suspendThreshold: GlucoseThreshold? = nil
 
-    var retrospectiveCorrectionEnabled = true
+    public var retrospectiveCorrectionEnabled = true
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
-    let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
+    public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 
     /// The maximum duration over which to integrate retrospective correction changes
-    let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 30)
+    public let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 30)
 
     /// The amount of time since a given date that data should be considered valid
-    let recencyInterval = TimeInterval(minutes: 15)
+    public let recencyInterval = TimeInterval(minutes: 15)
 
     // MARK - Display settings
 
-    let minimumChartWidthPerHour: CGFloat = 50
+    public let minimumChartWidthPerHour: CGFloat = 50
 
-    let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
+    public let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
+
+    public init(
+        dosingEnabled: Bool = false,
+        glucoseTargetRangeSchedule: GlucoseRangeSchedule? = nil,
+        maximumBasalRatePerHour: Double? = nil,
+        maximumBolus: Double? = nil,
+        suspendThreshold: GlucoseThreshold? = nil,
+        retrospectiveCorrectionEnabled: Bool = true
+    ) {
+        self.dosingEnabled = dosingEnabled
+        self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
+        self.maximumBasalRatePerHour = maximumBasalRatePerHour
+        self.maximumBolus = maximumBolus
+        self.suspendThreshold = suspendThreshold
+        self.retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
+    }
 }
 
 
 extension LoopSettings: RawRepresentable {
-    typealias RawValue = [String: Any]
+    public typealias RawValue = [String: Any]
     private static let version = 1
 
-    init?(rawValue: RawValue) {
+    public init?(rawValue: RawValue) {
         guard
             let version = rawValue["version"] as? Int,
             version == LoopSettings.version
@@ -73,7 +89,7 @@ extension LoopSettings: RawRepresentable {
         }
     }
 
-    var rawValue: RawValue {
+    public var rawValue: RawValue {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,

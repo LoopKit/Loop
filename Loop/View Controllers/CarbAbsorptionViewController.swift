@@ -12,6 +12,7 @@ import os.log
 
 import LoopKit
 import LoopKitUI
+import LoopCore
 
 
 private extension RefreshContext {

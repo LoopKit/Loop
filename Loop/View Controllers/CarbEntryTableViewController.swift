@@ -7,6 +7,7 @@
 //
 
 import LoopKitUI
+import LoopCore
 
 
 extension CarbEntryTableViewController: IdentifiableClass {

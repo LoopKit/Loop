@@ -6,6 +6,7 @@
 //
 
 import LoopKitUI
+import LoopUI
 
 
 extension TextFieldTableViewCell: NibLoadable { }

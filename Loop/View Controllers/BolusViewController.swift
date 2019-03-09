@@ -10,6 +10,7 @@ import UIKit
 import LocalAuthentication
 import LoopKit
 import HealthKit
+import LoopCore
 
 
 final class BolusViewController: UITableViewController, IdentifiableClass, UITextFieldDelegate {

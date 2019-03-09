@@ -95,9 +95,9 @@ private extension HKUnit {
 
     var lowWatermark: Double {
         if self == .milligramsPerDeciliter {
-            return 50.0
+            return 75
         } else {
-            return 3.0
+            return 3
         }
     }
 }
