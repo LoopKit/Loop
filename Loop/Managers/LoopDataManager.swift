@@ -909,6 +909,10 @@ extension LoopDataManager {
             recommendedTempBasal = nil
             return
         }
+
+        let rateRounder = { (_ rate: Double) in
+            return self.delegate?.loopDataManager(self, roundBasalRate: rate) ?? rate
+        }
         
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -918,7 +922,7 @@ extension LoopDataManager {
             basalRates: basalRates,
             maxBasalRate: maxBasal,
             lastTempBasal: lastTempBasal,
-            supportedBasalRates: supportedTempBasalRates
+            rateRounder: rateRounder
         )
         
         if let temp = tempBasal {
@@ -929,13 +933,18 @@ extension LoopDataManager {
 
         let pendingInsulin = try self.getPendingInsulin()
 
+        let volumeRounder = { (_ units: Double) in
+            return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+        }
+
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
             pendingInsulin: pendingInsulin,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: volumeRounder
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
     }
@@ -1192,6 +1201,20 @@ protocol LoopDataManagerDelegate: class {
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
     func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+
+    /// Asks the delegate to round a recommended basal rate to a supported rate
+    ///
+    /// - Parameters:
+    ///   - rate: The recommended rate in U/hr
+    /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
+    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double
+
+    /// Asks the delegate to round a recommended bolus volume to a supported volume
+    ///
+    /// - Parameters:
+    ///   - units: The recommended bolus in U
+    /// - Returns: a supported bolus volume in U. The volume returned should not be larger than the passed in rate.
+    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
 }
 
 extension DoseStore {
