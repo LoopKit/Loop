@@ -258,7 +258,7 @@ class GlucoseChartScene: SKScene {
             inactiveNodes.removeValue(forKey: range.chartHashValue)
 
             if range.end < spannedInterval.end {
-                let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: spannedInterval.end, value: range.value)
+                let extendedRange = GlucoseRangeSchedule.Override(context: range.context, start: range.start, end: spannedInterval.end, unit: range.unit, value: range.value)
                 let (sprite2, created) = getSprite(forHash: extendedRange.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition
