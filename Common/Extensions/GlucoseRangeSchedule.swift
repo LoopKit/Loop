@@ -35,16 +35,6 @@ extension GlucoseRangeSchedule {
         return activeOverride?.context
     }
 
-    var activeOverrideQuantityRange: Range<HKQuantity>? {
-        guard let activeOverride = activeOverride else {
-            return nil
-        }
-
-        let lowerBound = HKQuantity(unit: unit, doubleValue: activeOverride.value.minValue)
-        let upperBound = HKQuantity(unit: unit, doubleValue: activeOverride.value.maxValue)
-        return lowerBound..<upperBound
-    }
-
     var configuredOverrideContexts: [GlucoseRangeSchedule.Override.Context] {
         var contexts: [GlucoseRangeSchedule.Override.Context] = []
         for (context, range) in overrideRanges where !range.isZero {
@@ -53,15 +43,13 @@ extension GlucoseRangeSchedule {
 
         return contexts
     }
-
-    func minQuantity(at date: Date) -> HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
-    }
 }
 
 
-extension DoubleRange {
-    var averageValue: Double {
+extension Range where Bound == HKQuantity {
+    func averageValue(for unit: HKUnit) -> Double {
+        let minValue = lowerBound.doubleValue(for: unit)
+        let maxValue = upperBound.doubleValue(for: unit)
         return (maxValue + minValue) / 2
     }
 }

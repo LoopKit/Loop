@@ -78,10 +78,10 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQu
 
 extension GlucoseRangeSchedule.Override: GlucoseChartValueHashable {
     var min: Double {
-        return value.minValue
+        return quantityRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
     }
 
     var max: Double {
-        return value.maxValue
+        return quantityRange.upperBound.doubleValue(for: .milligramsPerDeciliter)
     }
 }
