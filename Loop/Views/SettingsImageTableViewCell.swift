@@ -25,7 +25,7 @@ class SettingsImageTableViewCell: UITableViewCell {
         guard let textLabel = textLabel, let imageView = imageView else {
             return
         }
-
+        
         textLabel.adjustsFontForContentSizeCategory = true
         textLabel.font = UIFont.preferredFont(forTextStyle: .body)
         textLabel.translatesAutoresizingMaskIntoConstraints = false

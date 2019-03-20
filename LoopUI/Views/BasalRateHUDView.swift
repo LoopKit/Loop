@@ -7,9 +7,13 @@
 //
 
 import UIKit
-
+import LoopKitUI
 
 public final class BasalRateHUDView: BaseHUDView {
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 3
+    }
 
     @IBOutlet private weak var basalStateView: BasalStateView!
 

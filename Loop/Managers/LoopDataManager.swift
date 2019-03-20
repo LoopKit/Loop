@@ -175,12 +175,13 @@ final class LoopDataManager {
     }
 
     fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
+
     fileprivate var recommendedBolus: (recommendation: BolusRecommendation, date: Date)?
 
     fileprivate var carbsOnBoard: CarbValue?
 
     fileprivate var lastTempBasal: DoseEntry?
-    fileprivate var lastRequestedBolus: (units: Double, date: Date)?
+    fileprivate var lastRequestedBolus: DoseEntry?
 
     /// The last date at which a loop completed, from prediction to dose (if dosing is enabled)
     var lastLoopCompleted: Date? {
@@ -474,11 +475,10 @@ extension LoopDataManager {
     /// Adds a bolus requested of the pump, but not confirmed.
     ///
     /// - Parameters:
-    ///   - units: The bolus amount, in units
-    ///   - date: The date the bolus was requested
-    func addRequestedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
+    ///   - dose: The DoseEntry representing the requested bolus
+    func addRequestedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
-            self.lastRequestedBolus = (units: units, date: date)
+            self.lastRequestedBolus = dose
             self.notify(forChange: .bolus)
 
             completion?()
@@ -488,10 +488,9 @@ extension LoopDataManager {
     /// Adds a bolus enacted by the pump, but not fully delivered.
     ///
     /// - Parameters:
-    ///   - units: The bolus amount, in units
-    ///   - date: The date the bolus was enacted
-    func addConfirmedBolus(units: Double, at date: Date, completion: (() -> Void)?) {
-        self.doseStore.addPendingPumpEvent(.enactedBolus(units: units, at: date)) {
+    ///   - dose: The DoseEntry representing the confirmed bolus
+    func addConfirmedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
+        self.doseStore.addPendingPumpEvent(.enactedBolus(dose: dose)) {
             self.dataAccessQueue.async {
                 self.lastRequestedBolus = nil
                 self.insulinEffect = nil
@@ -514,7 +513,8 @@ extension LoopDataManager {
                 if error == nil {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    // TODO: Ask pumpManager if dose represented in data
+                    if let bolusEndDate = self.lastRequestedBolus?.endDate, bolusEndDate < Date() {
                         self.lastRequestedBolus = nil
                     }
                 }
@@ -542,7 +542,8 @@ extension LoopDataManager {
                 self.dataAccessQueue.async {
                     self.insulinEffect = nil
                     // Expire any bolus values now represented in the insulin data
-                    if areStoredValuesContinuous, let bolusDate = self.lastRequestedBolus?.date, bolusDate.timeIntervalSinceNow < TimeInterval(minutes: -5) {
+                    // TODO: Ask pumpManager if dose represented in data
+                    if areStoredValuesContinuous, let bolusEndDate = self.lastRequestedBolus?.endDate, bolusEndDate < Date() {
                         self.lastRequestedBolus = nil
                     }
 
@@ -864,11 +865,8 @@ extension LoopDataManager {
             throw LoopError.missingDataError(.glucose)
         }
 
-        guard let pumpStatusDate = doseStore.lastReservoirValue?.startDate else {
-            self.predictedGlucose = nil
-            throw LoopError.missingDataError(.reservoir)
-        }
-
+        let pumpStatusDate = doseStore.lastAddedPumpData
+        
         let startDate = Date()
 
         guard startDate.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
@@ -920,6 +918,10 @@ extension LoopDataManager {
             return
         }
 
+        let rateRounder = { (_ rate: Double) in
+            return self.delegate?.loopDataManager(self, roundBasalRate: rate) ?? rate
+        }
+        
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
@@ -928,6 +930,7 @@ extension LoopDataManager {
             basalRates: basalRates,
             maxBasalRate: maxBasal,
             lastTempBasal: lastTempBasal,
+            rateRounder: rateRounder
             isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
         )
         
@@ -939,13 +942,18 @@ extension LoopDataManager {
 
         let pendingInsulin = try self.getPendingInsulin()
 
+        let volumeRounder = { (_ units: Double) in
+            return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+        }
+
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
             pendingInsulin: pendingInsulin,
-            maxBolus: maxBolus
+            maxBolus: maxBolus,
+            volumeRounder: volumeRounder
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
     }
@@ -1202,6 +1210,26 @@ protocol LoopDataManagerDelegate: class {
     ///   - completion: A closure called once on completion
     ///   - result: The enacted basal
     func loopDataManager(_ manager: LoopDataManager, didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date), completion: @escaping (_ result: Result<DoseEntry>) -> Void) -> Void
+
+    /// Asks the delegate to round a recommended basal rate to a supported rate
+    ///
+    /// - Parameters:
+    ///   - rate: The recommended rate in U/hr
+    /// - Returns: a supported rate of delivery in Units/hr. The rate returned should not be larger than the passed in rate.
+    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double
+
+    /// Asks the delegate to round a recommended bolus volume to a supported volume
+    ///
+    /// - Parameters:
+    ///   - units: The recommended bolus in U
+    /// - Returns: a supported bolus volume in U. The volume returned should not be larger than the passed in rate.
+    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
+}
+
+extension DoseStore {
+    var lastAddedPumpData: Date {
+        return max(lastReservoirValue?.startDate ?? .distantPast, lastAddedPumpEvents)
+    }
 }
 
 

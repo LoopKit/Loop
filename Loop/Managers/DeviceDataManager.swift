@@ -9,6 +9,7 @@
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopTestingKit
 
 
 final class DeviceDataManager {
@@ -16,17 +17,25 @@ final class DeviceDataManager {
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
 
     var pumpManager: PumpManagerUI? {
+        
         didSet {
+            
             // If the current CGMManager is a PumpManager, we clear it out.
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
             }
 
+            pumpManagerHUDProvider = pumpManager?.hudProvider()
+
             setupPump()
+            
+            NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
             UserDefaults.appGroup.pumpManager = pumpManager
         }
     }
+    
+    var pumpManagerHUDProvider: HUDProvider?
 
     let logger = DiagnosticLogger.shared
 
@@ -58,6 +67,43 @@ final class DeviceDataManager {
         }
     }
 
+    private let lockedPumpManagerStatus: Locked<PumpManagerStatus?> = Locked(nil)
+
+    static let batteryReplacementDetectionThreshold = 0.5
+    
+    var pumpManagerStatus: PumpManagerStatus? {
+        get {
+            return lockedPumpManagerStatus.value
+        }
+        set {
+            let oldValue = lockedPumpManagerStatus.value
+            lockedPumpManagerStatus.value = newValue
+
+            if let status = newValue {
+                
+                loopManager.doseStore.device = status.device
+                
+                if let newBatteryValue = status.pumpBatteryChargeRemaining {
+                    if newBatteryValue == 0 {
+                        NotificationManager.sendPumpBatteryLowNotification()
+                    } else {
+                        NotificationManager.clearPumpBatteryLowNotification()
+                    }
+                    
+                    if let oldBatteryValue = oldValue?.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= DeviceDataManager.batteryReplacementDetectionThreshold {
+                        AnalyticsManager.shared.pumpBatteryWasReplaced()
+                    }
+                }
+                    
+                // Update the pump-schedule based settings
+                loopManager.setScheduleTimeZone(status.timeZone)
+
+            } else {
+                loopManager.doseStore.device = nil
+            }
+        }
+    }
+
     /// TODO: Isolate to queue
     private func setupCGM() {
         cgmManager?.cgmManagerDelegate = self
@@ -68,6 +114,12 @@ final class DeviceDataManager {
 
     private func setupPump() {
         pumpManager?.pumpManagerDelegate = self
+        
+        if let pumpManager = pumpManager {
+            self.pumpManagerStatus = pumpManager.status
+            self.loopManager.doseStore.device = self.pumpManagerStatus?.device
+            self.pumpManagerHUDProvider = pumpManager.hudProvider()
+        }
 
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
@@ -91,12 +143,13 @@ final class DeviceDataManager {
 
     init() {
         pumpManager = UserDefaults.appGroup.pumpManager as? PumpManagerUI
+        
         if let cgmManager = UserDefaults.appGroup.cgmManager {
             self.cgmManager = cgmManager
         } else if UserDefaults.appGroup.isCGMManagerValidPumpManager {
             self.cgmManager = pumpManager as? CGMManager
         }
-
+        
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
@@ -163,30 +216,19 @@ extension DeviceDataManager: CGMManagerDelegate {
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
         return loopManager.glucoseStore.latestGlucose?.startDate
     }
+
+    func cgmManagerDidUpdateState(_ manager: CGMManager) {
+        UserDefaults.appGroup.cgmManager = manager
+    }
 }
 
 
 extension DeviceDataManager: PumpManagerDelegate {
+    
     func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
         log.default("PumpManager:\(type(of: pumpManager)) did adjust pump block by \(adjustment)s")
 
         AnalyticsManager.shared.pumpTimeDidDrift(adjustment)
-    }
-
-    func pumpManagerDidUpdatePumpBatteryChargeRemaining(_ pumpManager: PumpManager, oldValue: Double?) {
-        log.default("PumpManager:\(type(of: pumpManager)) did update pump battery from \(String(describing: oldValue))")
-
-        if let newValue = pumpManager.pumpBatteryChargeRemaining {
-            if newValue == 0 {
-                NotificationManager.sendPumpBatteryLowNotification()
-            } else {
-                NotificationManager.clearPumpBatteryLowNotification()
-            }
-
-            if let oldValue = oldValue, newValue - oldValue >= 0.5 {
-                AnalyticsManager.shared.pumpBatteryWasReplaced()
-            }
-        }
     }
 
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
@@ -214,13 +256,8 @@ extension DeviceDataManager: PumpManagerDelegate {
         return !(cgmManager?.providesBLEHeartbeat == true)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didUpdateStatus status: PumpManagerStatus) {
-        log.default("PumpManager:\(type(of: pumpManager)) did update status")
-
-        loopManager.doseStore.device = status.device
-        // Update the pump-schedule based settings
-        loopManager.setScheduleTimeZone(status.timeZone)
-        nightscoutDataManager.upload(pumpStatus: status)
+    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
+        self.pumpManagerStatus = status
     }
 
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
@@ -291,7 +328,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
     }
-
+    
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         log.default("PumpManager:\(type(of: pumpManager)) recommends loop")
         loopManager.loop()
@@ -304,6 +341,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewReservoirEvents(for manager: PumpManager) -> Date {
         return loopManager.doseStore.lastReservoirValue?.startDate ?? .distantPast
     }
+    
 }
 
 
@@ -338,15 +376,16 @@ extension DeviceDataManager {
             return
         }
 
-        pumpManager.enactBolus(units: units, at: startDate, willRequest: { (units, date) in
-            self.loopManager.addRequestedBolus(units: units, at: date, completion: nil)
-        }) { (error) in
-            if let error = error {
+        pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
+            self.loopManager.addRequestedBolus(dose, completion: nil)
+        }) { (result) in
+            switch result {
+            case .failure(let error):
                 self.log.error(error)
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
                 completion(error)
-            } else {
-                self.loopManager.addConfirmedBolus(units: units, at: Date()) {
+            case .success(let dose):
+                self.loopManager.addConfirmedBolus(dose) {
                     completion(nil)
                 }
             }
@@ -354,7 +393,60 @@ extension DeviceDataManager {
     }
 }
 
+extension DeviceDataManager {
+    func deleteTestingPumpData() {
+        assertingDebugOnly {
+            guard let testingPumpManager = pumpManager as? TestingPumpManager else {
+                assertionFailure("\(#function) should be invoked only when a testing pump manager is in use")
+                return
+            }
+            let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
+
+            // DoseStore.deleteAllPumpEvents first syncs the events to the health store,
+            // so HKHealthStore.deleteObjects catches any that were still in the cache.
+            let doseStore = loopManager.doseStore
+            let healthStore = doseStore.insulinDeliveryStore.healthStore
+            doseStore.deleteAllPumpEvents { doseStoreError in
+                if doseStoreError != nil {
+                    healthStore.deleteObjects(of: doseStore.sampleType!, predicate: devicePredicate) { success, deletedObjectCount, error in
+                        // errors are already logged through the store, so we'll ignore them here
+                    }
+                }
+            }
+        }
+    }
+
+    func deleteTestingCGMData() {
+        assertingDebugOnly {
+            guard let testingCGMManager = cgmManager as? TestingCGMManager else {
+                assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
+                return
+            }
+            let predicate = HKQuery.predicateForObjects(from: [testingCGMManager.testingDevice])
+            loopManager.glucoseStore.purgeGlucoseSamples(matchingCachePredicate: nil, healthKitPredicate: predicate) { success, count, error in
+                // result already logged through the store, so ignore the error here
+            }
+        }
+    }
+}
+
 extension DeviceDataManager: LoopDataManagerDelegate {
+    func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double {
+        guard let pumpManager = pumpManager else {
+            return unitsPerHour
+        }
+        
+        return pumpManager.roundToSupportedBasalRate(unitsPerHour: unitsPerHour)
+    }
+
+    func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double {
+        guard let pumpManager = pumpManager else {
+            return units
+        }
+
+        return pumpManager.roundToSupportedBolusVolume(units: units)
+    }
+
     func loopDataManager(
         _ manager: LoopDataManager,
         didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
@@ -380,6 +472,8 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             }
         )
     }
+
+
 }
 
 
@@ -389,8 +483,8 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             Bundle.main.localizedNameAndVersion,
             "",
             "## DeviceDataManager",
-            "launchDate: \(launchDate)",
-            "lastError: \(String(describing: lastError))",
+            "* launchDate: \(launchDate)",
+            "* lastError: \(String(describing: lastError))",
             "",
             cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
             "",
@@ -402,3 +496,8 @@ extension DeviceDataManager: CustomDebugStringConvertible {
         ].joined(separator: "\n")
     }
 }
+
+extension Notification.Name {
+    static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
+}
+

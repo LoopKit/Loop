@@ -94,6 +94,8 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         ]
 
+        active = UIApplication.shared.applicationState == .active
+
         let gestureRecognizer = UILongPressGestureRecognizer()
         gestureRecognizer.delegate = self
         gestureRecognizer.minimumPressDuration = 0.1
@@ -166,11 +168,8 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     // References to registered notification center observers
     var notificationObservers: [Any] = []
 
-    var active: Bool {
-        get {
-            return UIApplication.shared.applicationState == .active
-        }
-        set {
+    var active: Bool = false {
+        didSet {
             log.debug("[reloadData] for app change to active: %d", active)
             reloadData()
         }
