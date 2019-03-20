@@ -325,6 +325,11 @@
 		7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076601FE06EE3004AC8EA /* Localizable.strings */; };
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
 		7D7076681FE0702F004AC8EA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70766A1FE0702F004AC8EA /* InfoPlist.strings */; };
+		892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D29222EF60A008961AB /* MockKit.framework */; };
+		892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D2B222EF60A008961AB /* MockKitUI.framework */; };
+		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
+		892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */; };
+		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
 		894F71E21FFEC4D8007D365C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* Assets.xcassets */; };
 		898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */; };
 		898ECA61218ABD17001E9D35 /* GlucoseChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */; };
@@ -964,6 +969,11 @@
 		7DD382771F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Main.strings; sourceTree = "<group>"; };
 		7DD382781F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/MainInterface.strings; sourceTree = "<group>"; };
 		7DD382791F8DBFC60071272B /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Interface.strings; sourceTree = "<group>"; };
+		892A5D29222EF60A008961AB /* MockKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		892A5D2B222EF60A008961AB /* MockKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MockKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		892A5D58222F0A27008961AB /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
+		892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopTestingKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeReplaceableCollection.swift; sourceTree = "<group>"; };
 		894F71E11FFEC4D8007D365C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartScaler.swift; sourceTree = "<group>"; };
 		898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartData.swift; sourceTree = "<group>"; };
@@ -1004,6 +1014,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
+				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
+				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
+				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
 				43A8EC6F210E622700A81379 /* CGMBLEKitUI.framework in Frameworks */,
@@ -1429,6 +1442,8 @@
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
+				892A5D58222F0A27008961AB /* Debug.swift */,
+				892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1671,6 +1686,9 @@
 			isa = PBXGroup;
 			children = (
 				C1E2773D224177C000354103 /* ClockKit.framework */,
+				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
+				892A5D29222EF60A008961AB /* MockKit.framework */,
+				892A5D2B222EF60A008961AB /* MockKitUI.framework */,
 				C168C40521B0D53E00ADE90E /* MinimedKit.framework */,
 				C168C40721B0D53E00ADE90E /* MinimedKitUI.framework */,
 				C1C108C22152F46D00EA5165 /* CGMBLEKitUI.framework */,
@@ -2380,8 +2398,11 @@
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
+				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
 				4F70C2101DE8FAC5006380B7 /* StatusExtensionDataManager.swift in Sources */,
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
+				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
+				435CB6291F37B01300C320C7 /* InsulinModelSettings.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsManager.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
@@ -3163,6 +3184,7 @@
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
 				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";

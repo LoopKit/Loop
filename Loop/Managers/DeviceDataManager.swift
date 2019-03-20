@@ -10,6 +10,8 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 import LoopCore
+import LoopTestingKit
+
 
 final class DeviceDataManager {
 
@@ -215,6 +217,10 @@ extension DeviceDataManager: CGMManagerDelegate {
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
         return loopManager.glucoseStore.latestGlucose?.startDate
     }
+
+    func cgmManagerDidUpdateState(_ manager: CGMManager) {
+        UserDefaults.appGroup?.cgmManager = manager
+    }
 }
 
 
@@ -383,6 +389,43 @@ extension DeviceDataManager {
                 self.loopManager.addConfirmedBolus(dose) {
                     completion(nil)
                 }
+            }
+        }
+    }
+}
+
+extension DeviceDataManager {
+    func deleteTestingPumpData() {
+        assertingDebugOnly {
+            guard let testingPumpManager = pumpManager as? TestingPumpManager else {
+                assertionFailure("\(#function) should be invoked only when a testing pump manager is in use")
+                return
+            }
+            let devicePredicate = HKQuery.predicateForObjects(from: [testingPumpManager.testingDevice])
+
+            // DoseStore.deleteAllPumpEvents first syncs the events to the health store,
+            // so HKHealthStore.deleteObjects catches any that were still in the cache.
+            let doseStore = loopManager.doseStore
+            let healthStore = doseStore.insulinDeliveryStore.healthStore
+            doseStore.deleteAllPumpEvents { doseStoreError in
+                if doseStoreError != nil {
+                    healthStore.deleteObjects(of: doseStore.sampleType!, predicate: devicePredicate) { success, deletedObjectCount, error in
+                        // errors are already logged through the store, so we'll ignore them here
+                    }
+                }
+            }
+        }
+    }
+
+    func deleteTestingCGMData() {
+        assertingDebugOnly {
+            guard let testingCGMManager = cgmManager as? TestingCGMManager else {
+                assertionFailure("\(#function) should be invoked only when a testing CGM manager is in use")
+                return
+            }
+            let predicate = HKQuery.predicateForObjects(from: [testingCGMManager.testingDevice])
+            loopManager.glucoseStore.purgeGlucoseSamples(matchingCachePredicate: nil, healthKitPredicate: predicate) { success, count, error in
+                // result already logged through the store, so ignore the error here
             }
         }
     }

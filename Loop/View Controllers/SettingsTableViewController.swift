@@ -11,6 +11,7 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 import LoopCore
+import LoopTestingKit
 
 
 final class SettingsTableViewController: UITableViewController {
@@ -47,12 +48,17 @@ final class SettingsTableViewController: UITableViewController {
 
     var dataManager: DeviceDataManager!
 
-    fileprivate enum Section: Int, CaseCountable {
+    private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
+    private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
+
+    fileprivate enum Section: Int, CaseIterable {
         case loop = 0
         case pump
         case cgm
         case configuration
         case services
+        case testingPumpDataDeletion
+        case testingCGMDataDeletion
     }
 
     fileprivate enum LoopRow: Int, CaseCountable {
@@ -122,12 +128,23 @@ final class SettingsTableViewController: UITableViewController {
     
     // MARK: - UITableViewDataSource
 
+    private var sections: [Section] {
+        var sections = Section.allCases
+        if !isTestingPumpManager {
+            sections.remove(.testingPumpDataDeletion)
+        }
+        if !isTestingCGMManager {
+            sections.remove(.testingCGMDataDeletion)
+        }
+        return sections
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.count
+        return sections.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch Section(rawValue: section)! {
+        switch sections[section] {
         case .loop:
             return LoopRow.count
         case .pump:
@@ -138,11 +155,13 @@ final class SettingsTableViewController: UITableViewController {
             return ConfigurationRow.count
         case .services:
             return ServiceRow.count
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
+            return 1
         }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
             case .dosing:
@@ -295,11 +314,25 @@ final class SettingsTableViewController: UITableViewController {
 
             configCell.accessoryType = .disclosureIndicator
             return configCell
+        case .testingPumpDataDeletion:
+            let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
+            cell.textLabel?.text = "Delete Pump Data"
+            cell.textLabel?.textAlignment = .center
+            cell.tintColor = .delete
+            cell.isEnabled = true
+            return cell
+        case .testingCGMDataDeletion:
+            let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
+            cell.textLabel?.text = "Delete CGM Data"
+            cell.textLabel?.textAlignment = .center
+            cell.tintColor = .delete
+            cell.isEnabled = true
+            return cell
         }
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        switch Section(rawValue: section)! {
+        switch sections[section] {
         case .loop:
             return Bundle.main.localizedNameAndVersion
         case .pump:
@@ -310,6 +343,8 @@ final class SettingsTableViewController: UITableViewController {
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
         case .services:
             return NSLocalizedString("Services", comment: "The title of the services section in settings")
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
+            return nil
         }
     }
 
@@ -322,7 +357,7 @@ final class SettingsTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sender = tableView.cellForRow(at: indexPath)
 
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .pump:
             switch PumpRow(rawValue: indexPath.row)! {
             case .pumpSettings:
@@ -557,21 +592,61 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             }
+        case .testingPumpDataDeletion:
+            let confirmVC = UIAlertController(pumpDataDeletionHandler: dataManager.deleteTestingPumpData)
+            present(confirmVC, animated: true) {
+                tableView.deselectRow(at: indexPath, animated: true)
+            }
+        case .testingCGMDataDeletion:
+            let confirmVC = UIAlertController(cgmDataDeletionHandler: dataManager.deleteTestingCGMData)
+            present(confirmVC, animated: true) {
+                tableView.deselectRow(at: indexPath, animated: true)
+            }
         }
     }
 
     override func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .loop:
             break
         case .pump:
+            let previousTestingPumpDataDeletionSection = sections.index(of: .testingPumpDataDeletion)
+            let wasTestingPumpManager = isTestingPumpManager
+            isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
+            if !wasTestingPumpManager, isTestingPumpManager {
+                guard let testingPumpDataDeletionSection = sections.index(of: .testingPumpDataDeletion) else {
+                    fatalError("Expected to find testing pump data deletion section with testing pump in use")
+                }
+                tableView.insertSections([testingPumpDataDeletionSection], with: .automatic)
+            } else if wasTestingPumpManager, !isTestingPumpManager {
+                guard let previousTestingPumpDataDeletionSection = previousTestingPumpDataDeletionSection else {
+                    fatalError("Expected to have had testing pump data deletion section when testing pump was in use")
+                }
+                tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
+            }
             tableView.reloadSections([Section.pump.rawValue], with: .fade)
             tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
         case .cgm:
+            let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
+            let wasTestingCGMManager = isTestingCGMManager
+            isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
+            if !wasTestingCGMManager, isTestingCGMManager {
+                guard let testingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion) else {
+                    fatalError("Expected to find testing CGM data deletion section with testing CGM in use")
+                }
+                tableView.insertSections([testingCGMDataDeletionSection], with: .automatic)
+            } else if wasTestingCGMManager, !isTestingCGMManager {
+                guard let previousTestingCGMDataDeletionSection = previousTestingCGMDataDeletionSection else {
+                    fatalError("Expected to have had testing CGM data deletion section when testing CGM was in use")
+                }
+                tableView.deleteSections([previousTestingCGMDataDeletionSection], with: .automatic)
+            }
             tableView.reloadRows(at: [indexPath], with: .fade)
         case .configuration:
             break
         case .services:
+            break
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
             break
         }
 
@@ -646,7 +721,7 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
             return
         }
 
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .glucoseTargetRange:
@@ -686,7 +761,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
             return
         }
 
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .insulinModel:
@@ -708,7 +783,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
 extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDelegate {
     func textFieldTableViewControllerDidEndEditing(_ controller: LoopKitUI.TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
-            switch Section(rawValue: indexPath.section)! {
+            switch sections[indexPath.section] {
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
                 case .suspendThreshold:
@@ -746,5 +821,39 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
 
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
+    }
+}
+
+private extension UIAlertController {
+    convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {
+        self.init(
+            title: nil,
+            message: "Are you sure you want to delete testing pump health data?",
+            preferredStyle: .actionSheet
+        )
+
+        addAction(UIAlertAction(
+            title: "Delete Pump Data",
+            style: .destructive,
+            handler: { _ in handler() }
+        ))
+
+        addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+    }
+
+    convenience init(cgmDataDeletionHandler handler: @escaping () -> Void) {
+        self.init(
+            title: nil,
+            message: "Are you sure you want to delete testing CGM health data?",
+            preferredStyle: .actionSheet
+        )
+
+        addAction(UIAlertAction(
+            title: "Delete CGM Data",
+            style: .destructive,
+            handler: { _ in handler() }
+        ))
+
+        addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     }
 }
