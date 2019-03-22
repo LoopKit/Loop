@@ -53,7 +53,7 @@
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Ein Modell auf der Grundlage der veröffentlichten Absorption von Humalog, Novolog und Apidra Insulin bei Erwachsenen.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
-"AcceptRecommendedBolus" = "AkzeptiereEmpfohlenenBolus";
+"AcceptRecommendedBolus" = "Akzeptiere empfohlenen Bolus";
 
 /* The title of the Carbs On-Board graph */
 "Active Carbohydrates" = "Aktive Kohlenhydrate";
@@ -119,7 +119,7 @@
 "Carbohydrates" = "Kohlenhydrate";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Aufgenommene Kohlenhydrate (g) ÷ Kohlenhydrat-Verhältnis (g/IE) × Insulinempfindlichkeit (%1$@/IE)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Aufgenommene Kohlenhydrate (G) ÷ Kohlenhydrat-Verhältnis (G/E) × Insulinempfindlichkeit (%1$@/E)";
 
 /* The notification alert describing a low pump battery */
 "Change the pump battery immediately" = "Wechseln Sie sofort die Pumpenbatterie";
@@ -171,13 +171,13 @@
 "Disables" = "Deaktivieren";
 
 /* Title of the switch which toggles retrospective correction effects */
-"Enable Retrospective Correction" = "Nachträgliche Korrektur aktivieren";
+"Enable Retrospective Correction" = "Retrospektive Korrektur aktivieren";
 
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Aktivieren";
 
 /* The placeholder text instructing users to enter a suspend treshold */
-"Enter suspend threshold" = "Unterbrechnungs-Schwellenwert eingeben";
+"Enter suspend threshold" = "Schwellwert für Suspendierung eingeben";
 
 /* The placeholder text instructing users how to enter a transmitter ID */
 "Enter the 6-digit transmitter ID" = "Geben Sie die 6-stellige Sender-ID ein";
@@ -278,7 +278,7 @@
 "Momentum effects" = "Momentumwirkungen";
 
 /* Sensor state description for the non-valid state */
-"Needs Attention" = "Erfordert Aufmerksamkeit";
+"Needs Attention" = "Erfordert Prüfung";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
@@ -377,13 +377,14 @@
 "U" = "IE";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Trainings-Blutzuckerziele verwenden";
+"Use Workout Glucose Targets" = "Verwende Trainings-Blutzuckerziele";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder vorhergesagte Blutzucker unter dem Schwellwert für die Unterbrechung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 IE/h.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Wenn der aktuelle oder prognostizierte Blutzucker unter dem Schwellenwert für die Suspendierung liegt, empfiehlt Loop keinen Bolus und immer eine temporäre Basalrate von 0 Einheiten pro Stunde.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Trainings-Blutzuckerziele";
+
