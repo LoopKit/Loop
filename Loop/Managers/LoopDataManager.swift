@@ -278,8 +278,8 @@ extension LoopDataManager {
         }
     }
 
-    /// The basal rate schedule, applying the most recently enabled override if active
-    var basalRateScheduleApplyingOverrideIfActive: BasalRateSchedule? {
+    /// The basal rate schedule, applying recent overrides relative to the current moment in time.
+    var basalRateScheduleApplyingOverrideHistory: BasalRateSchedule? {
         return doseStore.basalProfileApplyingOverrideHistory
     }
 
@@ -301,8 +301,8 @@ extension LoopDataManager {
         }
     }
 
-    /// The carb ratio schedule, applying the most recently enabled override if active
-    var carbRatioScheduleApplyingOverrideIfActive: CarbRatioSchedule? {
+    /// The carb ratio schedule, applying recent overrides relative to the current moment in time.
+    var carbRatioScheduleApplyingOverrideHistory: CarbRatioSchedule? {
         return carbStore.carbRatioScheduleApplyingOverrideHistory
     }
 
@@ -353,8 +353,8 @@ extension LoopDataManager {
         }
     }
 
-    /// The insulin sensitivity schedule, applying the most recently enabled override if active
-    var insulinSensitivityScheduleApplyingOverrideIfActive: InsulinSensitivitySchedule? {
+    /// The insulin sensitivity schedule, applying recent overrides relative to the current moment in time.
+    var insulinSensitivityScheduleApplyingOverrideHistory: InsulinSensitivitySchedule? {
         return carbStore.insulinSensitivityScheduleApplyingOverrideHistory
     }
 
@@ -764,7 +764,7 @@ extension LoopDataManager {
     private func getPendingInsulin() throws -> Double {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard let basalRates = basalRateScheduleApplyingOverrideIfActive else {
+        guard let basalRates = basalRateScheduleApplyingOverrideHistory else {
             throw LoopError.configurationError(.basalRateSchedule)
         }
 
@@ -915,8 +915,8 @@ extension LoopDataManager {
         guard
             let maxBasal = settings.maximumBasalRatePerHour,
             let glucoseTargetRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
-            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideIfActive,
-            let basalRates = basalRateScheduleApplyingOverrideIfActive,
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
+            let basalRates = basalRateScheduleApplyingOverrideHistory,
             let maxBolus = settings.maximumBolus,
             let model = insulinModelSettings?.model
         else {

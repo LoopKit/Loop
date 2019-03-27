@@ -174,7 +174,7 @@ final class WatchDataManager: NSObject {
 
             // Only set this value in the Watch context if there is a temp basal running that hasn't ended yet
             let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideIfActive?.between(start: date, end: date).first,
+            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideHistory?.between(start: date, end: date).first,
                 let lastTempBasal = state.lastTempBasal,
                 lastTempBasal.endDate > Date() {
                 context.lastNetTempBasalDose =  lastTempBasal.unitsPerHour - scheduledBasal.value

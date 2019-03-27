@@ -287,7 +287,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Net basal rate HUD
             let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideIfActive?.between(start: date, end: date).first {
+            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideHistory?.between(start: date, end: date).first {
                 netBasal = NetBasal(
                     lastTempBasal: state.lastTempBasal,
                     maxBasal: manager.settings.maximumBasalRatePerHour,
