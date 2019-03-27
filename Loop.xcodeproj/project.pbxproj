@@ -297,6 +297,7 @@
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
+		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
 		C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C168C40521B0D53E00ADE90E /* MinimedKit.framework */; };
@@ -310,6 +311,8 @@
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
+		C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
+		C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */; };
 		C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428B217806A300FAB378 /* StateColorPalette.swift */; };
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
@@ -851,6 +854,9 @@
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C108C22152F46D00EA5165 /* CGMBLEKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
+		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MKRingProgressView.framework; path = Carthage/Build/iOS/MKRingProgressView.framework; sourceTree = "<group>"; };
+		C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusProgressTableViewCell.swift; sourceTree = "<group>"; };
+		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -867,6 +873,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
 				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
 				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
 				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
@@ -1201,6 +1208,8 @@
 				4374B5F3209D89A900D17AA8 /* TextFieldTableViewCell.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
+				C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */,
+				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1409,6 +1418,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C1E2774722433D7A00354103 /* MKRingProgressView.framework */,
 				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
 				892A5D29222EF60A008961AB /* MockKit.framework */,
 				892A5D2B222EF60A008961AB /* MockKitUI.framework */,
@@ -1721,6 +1731,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
 				7D70764F1FE06EE1004AC8EA /* InfoPlist.strings in Resources */,
 				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
@@ -1857,6 +1868,10 @@
 				"$(SRCROOT)/Carthage/Build/iOS/MinimedKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/ShareClientUI.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/MockKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/MKRingProgressView.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
@@ -1910,6 +1925,7 @@
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
 				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
+				C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */,
 				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
