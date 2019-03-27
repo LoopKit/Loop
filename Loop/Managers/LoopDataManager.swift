@@ -48,12 +48,14 @@ final class LoopDataManager {
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup.carbRatioSchedule,
         insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup.insulinModelSettings,
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings(),
+        overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup.overrideHistory ?? .init()
     ) {
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lastTempBasal = lastTempBasal
         self.settings = settings
+        self.overrideHistory = overrideHistory
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -67,7 +69,8 @@ final class LoopDataManager {
                 slow: TimeInterval(hours: 4)
             ),
             carbRatioSchedule: carbRatioSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            overrideHistory: overrideHistory
         )
 
         doseStore = DoseStore(
@@ -75,11 +78,13 @@ final class LoopDataManager {
             cacheStore: cacheStore,
             insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            overrideHistory: overrideHistory
         )
 
         glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: .hours(24))
 
+        overrideHistory.delegate = self
         cacheStore.delegate = self
 
         // Observe changes
@@ -119,8 +124,8 @@ final class LoopDataManager {
     var settings: LoopSettings {
         didSet {
             if settings.scheduleOverride != oldValue.scheduleOverride {
-                doseStore.scheduleOverride = settings.scheduleOverride
-                carbStore.scheduleOverride = settings.scheduleOverride
+                overrideHistory.recordOverride(settings.scheduleOverride)
+
                 // Invalidate cached effects affected by the override
                 self.carbEffect = nil
                 self.carbsOnBoard = nil
@@ -131,6 +136,8 @@ final class LoopDataManager {
             AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
     }
+
+    let overrideHistory: TemporaryScheduleOverrideHistory
 
     // MARK: - Calculation state
 
@@ -244,6 +251,14 @@ extension LoopDataManager: PersistenceControllerDelegate {
     }
 }
 
+
+// MARK: Override history tracking
+extension LoopDataManager: TemporaryScheduleOverrideHistoryDelegate {
+    func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
+        UserDefaults.appGroup.overrideHistory = history
+    }
+}
+
 // MARK: - Preferences
 extension LoopDataManager {
 
@@ -265,7 +280,7 @@ extension LoopDataManager {
 
     /// The basal rate schedule, applying the most recently enabled override if active
     var basalRateScheduleApplyingOverrideIfActive: BasalRateSchedule? {
-        return doseStore.basalProfileApplyingOverrideIfActive
+        return doseStore.basalProfileApplyingOverrideHistory
     }
 
     /// The daily schedule of carbs-to-insulin ratios
@@ -288,7 +303,7 @@ extension LoopDataManager {
 
     /// The carb ratio schedule, applying the most recently enabled override if active
     var carbRatioScheduleApplyingOverrideIfActive: CarbRatioSchedule? {
-        return carbStore.carbRatioScheduleApplyingOverrideIfActive
+        return carbStore.carbRatioScheduleApplyingOverrideHistory
     }
 
     /// The length of time insulin has an effect on blood glucose
@@ -340,7 +355,7 @@ extension LoopDataManager {
 
     /// The insulin sensitivity schedule, applying the most recently enabled override if active
     var insulinSensitivityScheduleApplyingOverrideIfActive: InsulinSensitivitySchedule? {
-        return carbStore.insulinSensitivityScheduleApplyingOverrideIfActive
+        return carbStore.insulinSensitivityScheduleApplyingOverrideHistory
     }
 
     /// Sets a new time zone for a the schedule-based settings

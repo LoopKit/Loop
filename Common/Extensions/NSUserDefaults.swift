@@ -19,6 +19,7 @@ extension UserDefaults {
         case insulinModelSettings = "com.loopkit.Loop.insulinModelSettings"
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
+        case overrideHistory = "com.tidepool.loopkit.overrideHistory"
     }
 
     var basalRateSchedule: BasalRateSchedule? {
@@ -137,6 +138,19 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.insulinSensitivitySchedule.rawValue)
+        }
+    }
+
+    var overrideHistory: TemporaryScheduleOverrideHistory? {
+        get {
+            if let rawValue = object(forKey: Key.overrideHistory.rawValue) as? TemporaryScheduleOverrideHistory.RawValue {
+                return TemporaryScheduleOverrideHistory(rawValue: rawValue)
+            } else {
+                return nil
+            }
+        }
+        set {
+            set(newValue?.rawValue, forKey: Key.overrideHistory.rawValue)
         }
     }
 }
