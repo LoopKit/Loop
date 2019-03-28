@@ -551,14 +551,16 @@ final class StatusTableViewController: ChartsTableViewController {
             statusRowMode = .pumpSuspended(resuming: false)
         } else if self.basalDeliveryState == .resuming {
             statusRowMode = .pumpSuspended(resuming: true)
+        } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
+            statusRowMode = .bolusing(dose: dose)
+        } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
+            statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
+        } else if let scheduleOverride = deviceManager.loopManager.settings.scheduleOverride,
+            scheduleOverride.context != .preMeal, !scheduleOverride.hasFinished()
+        {
+            statusRowMode = .scheduleOverrideEnabled(scheduleOverride)
         } else {
-            if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
-                statusRowMode = .bolusing(dose: dose)
-            } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
-                statusRowMode = .recommendedTempBasal(tempBasal: tempBasal, at: date, enacting: false)
-            } else {
-                statusRowMode = .hidden
-            }
+            statusRowMode = .hidden
         }
 
         return statusRowMode
@@ -774,6 +776,30 @@ final class StatusTableViewController: ChartsTableViewController {
                         cell.accessoryView = indicatorView
                     } else {
                         cell.accessoryView = nil
+                    }
+                    return cell
+                case .scheduleOverrideEnabled(let override):
+                    let cell = getTitleSubtitleCell()
+                    switch override.context {
+                    case .preMeal:
+                        assertionFailure("Pre-Meal mode should not produce a status row")
+                    case .preset(let preset):
+                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active override preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
+                    case .custom:
+                        cell.titleLabel.text = NSLocalizedString("Override Enabled", comment: "The title of the cell indicating a generic temporary override is enabled")
+                    }
+
+                    if override.isActive() {
+                        switch override.duration {
+                        case .finite:
+                            let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
+                        case .indefinite:
+                            cell.subtitleLabel.text?.removeAll()
+                        }
+                    } else {
+                        let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
+                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
                     }
                     return cell
                 case .enactingBolus:
@@ -1251,22 +1277,21 @@ extension StatusTableViewController: DoseProgressObserver {
 }
 
 extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
-func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
-deviceManager.loopManager.settings.scheduleOverride = override
-}
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = override
+    }
 
-func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
-deviceManager.loopManager.settings.scheduleOverride = nil
-}
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didCancelOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = nil
+    }
 }
 
 extension StatusTableViewController: AddEditOverrideTableViewControllerDelegate {
-func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didSaveOverride override: TemporaryScheduleOverride) {
-deviceManager.loopManager.settings.scheduleOverride = override
-}
+    func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didSaveOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = override
+    }
 
-func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didCancelOverride override: TemporaryScheduleOverride) {
-deviceManager.loopManager.settings.scheduleOverride = nil
+    func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didCancelOverride override: TemporaryScheduleOverride) {
+        deviceManager.loopManager.settings.scheduleOverride = nil
+    }
 }
-}
-
