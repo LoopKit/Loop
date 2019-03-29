@@ -171,7 +171,7 @@ final class DeviceDataManager {
     }
 }
 
-
+// MARK: - RemoteDataManagerDelegate
 extension DeviceDataManager: RemoteDataManagerDelegate {
     func remoteDataManagerDidUpdateServices(_ dataManager: RemoteDataManager) {
         loopManager.carbStore.syncDelegate = dataManager.nightscoutService.uploader
@@ -179,6 +179,7 @@ extension DeviceDataManager: RemoteDataManagerDelegate {
 }
 
 
+// MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {
     func cgmManagerWantsDeletion(_ manager: CGMManager) {
         self.cgmManager = nil
@@ -226,6 +227,7 @@ extension DeviceDataManager: CGMManagerDelegate {
 }
 
 
+// MARK: - PumpManagerDelegate
 extension DeviceDataManager: PumpManagerDelegate {
     
     func pumpManager(_ pumpManager: PumpManager, didAdjustPumpClockBy adjustment: TimeInterval) {
@@ -267,6 +269,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
+        log.default("PumpManager:\(type(of: pumpManager)) did update status: \(status)")
         self.pumpManagerStatus = status
     }
 
@@ -354,7 +357,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     
 }
 
-
+// MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
     func doseStore(_ doseStore: DoseStore,
         hasEventsNeedingUpload pumpEvents: [PersistedPumpEvent],
@@ -440,6 +443,7 @@ extension DeviceDataManager {
     }
 }
 
+// MARK: - LoopDataManagerDelegate
 extension DeviceDataManager: LoopDataManagerDelegate {
     func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double {
         guard let pumpManager = pumpManager else {
@@ -487,6 +491,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 }
 
 
+// MARK: - CustomDebugStringConvertible
 extension DeviceDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
