@@ -1107,13 +1107,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-<<<<<<< HEAD
 				C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */,
 				C168C40821B0D53E00ADE90E /* MinimedKitUI.framework in Frameworks */,
 				43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */,
-=======
 				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
->>>>>>> master
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
 			);
