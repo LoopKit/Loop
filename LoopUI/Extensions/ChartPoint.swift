@@ -103,6 +103,23 @@ extension ChartPoint: TimelineValue {
 }
 
 
+private extension Range where Bound == HKQuantity {
+    func doubleRangeWithMinimumIncrement(in unit: HKUnit) -> DoubleRange {
+        let increment = unit.chartableIncrement
+
+        var minValue = self.lowerBound.doubleValue(for: unit)
+        var maxValue = self.upperBound.doubleValue(for: unit)
+
+        if (maxValue - minValue) < .ulpOfOne {
+            minValue -= increment
+            maxValue += increment
+        }
+
+        return DoubleRange(minValue: minValue, maxValue: maxValue)
+    }
+}
+
+
 private extension DoubleRange {
     func rangeWithMinimumIncremement(_ increment: Double) -> DoubleRange {
         var minValue = self.minValue

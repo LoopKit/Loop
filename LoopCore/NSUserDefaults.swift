@@ -112,9 +112,6 @@ extension UserDefaults {
                 let settings = LoopSettings(
                     dosingEnabled: bool(forKey: "com.loudnate.Naterade.DosingEnabled"),
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
-                    preMealTargetRange: nil,
-                    overridePresets: [],
-                    scheduleOverride: nil,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
                     suspendThreshold: suspendThreshold,
@@ -143,7 +140,7 @@ extension UserDefaults {
         }
     }
 
-    var overrideHistory: TemporaryScheduleOverrideHistory? {
+    public var overrideHistory: TemporaryScheduleOverrideHistory? {
         get {
             if let rawValue = object(forKey: Key.overrideHistory.rawValue) as? TemporaryScheduleOverrideHistory.RawValue {
                 return TemporaryScheduleOverrideHistory(rawValue: rawValue)

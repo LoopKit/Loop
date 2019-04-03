@@ -45,12 +45,12 @@ final class LoopDataManager {
     init(
         lastLoopCompleted: Date?,
         lastTempBasal: DoseEntry?,
-        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup.basalRateSchedule,
-        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup.carbRatioSchedule,
-        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup.insulinModelSettings,
-        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings(),
-        overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup.overrideHistory ?? .init()
+        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup?.basalRateSchedule,
+        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup?.carbRatioSchedule,
+        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup?.insulinModelSettings,
+        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
+        settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
+        overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup?.overrideHistory ?? .init()
     ) {
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -256,7 +256,7 @@ extension LoopDataManager: PersistenceControllerDelegate {
 // MARK: Override history tracking
 extension LoopDataManager: TemporaryScheduleOverrideHistoryDelegate {
     func temporaryScheduleOverrideHistoryDidUpdate(_ history: TemporaryScheduleOverrideHistory) {
-        UserDefaults.appGroup.overrideHistory = history
+        UserDefaults.appGroup?.overrideHistory = history
     }
 }
 

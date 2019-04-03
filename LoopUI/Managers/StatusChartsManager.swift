@@ -958,7 +958,7 @@ public final class StatusChartsManager {
             let xAxisValues = xAxisValues, xAxisValues.count > 1,
             let schedule = targetGlucoseSchedule
         {
-            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, xAxisValues: xAxisValues)
+            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
 
             if let override = scheduleOverride, override.isActive() || override.startDate > Date() {
                 targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues, extendEndDateToChart: true)
