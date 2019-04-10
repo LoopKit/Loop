@@ -77,7 +77,7 @@ extension CarbEntryListController {
     }
 
     private func reloadCarbEntries() {
-        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -carbStore.maximumAbsorptionTimeInterval)
+        let start = min(Calendar.current.startOfDay(for: Date()), Date(timeIntervalSinceNow: -loopManager.carbStore.maximumAbsorptionTimeInterval))
 
         loopManager.carbStore.getCarbEntries(start: start) { (result) in
             switch result {

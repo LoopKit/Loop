@@ -97,7 +97,7 @@ private extension HKUnit {
         if self == .milligramsPerDeciliter {
             return 75
         } else {
-            return 3
+            return 4
         }
     }
 }

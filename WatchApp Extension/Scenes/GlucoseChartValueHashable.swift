@@ -12,8 +12,8 @@ import HealthKit
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: Double { get }
-    var max: Double { get }
+    var min: Double { get } // milligramsPerDeciliter
+    var max: Double { get } // milligramsPerDeciliter
 
     var chartHashValue: Int { get }
 }
