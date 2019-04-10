@@ -349,6 +349,7 @@
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
 		C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
+		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C18852E22082AB1B00BECC8C /* RileyLinkKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
@@ -995,6 +996,7 @@
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
 		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
+		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKitUI.framework; path = Carthage/Build/iOS/RileyLinkKitUI.framework; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C108C22152F46D00EA5165 /* CGMBLEKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1308,6 +1310,7 @@
 				4345E3FD21F04A50009E00E5 /* DateIntervalFormatter.swift */,
 				43D9F81F21EF0906000578CD /* NSNumber.swift */,
 				43D9F81921EC593C000578CD /* UITableViewCell.swift */,
+				C1814B85225E507C008D2D8E /* Sequence.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2531,6 +2534,7 @@
 				43C05CC221EC06E4006FB252 /* LessonConfigurationViewController.swift in Sources */,
 				43C05CC621EC29E7006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				43C05CC021EBFFA4006FB252 /* Lesson.swift in Sources */,
+				C1814B86225E507C008D2D8E /* Sequence.swift in Sources */,
 				43D9FFA521EA9A0C00AF44BF /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

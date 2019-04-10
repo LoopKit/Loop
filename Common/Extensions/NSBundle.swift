@@ -30,6 +30,10 @@ extension Bundle {
         return object(forInfoDictionaryKey: "AppGroupIdentifier") as! String
     }
 
+    var isAppExtension: Bool {
+        return bundleURL.pathExtension == "appex"
+    }
+
     var mainAppUrl: URL? {
         if let mainAppBundleIdentifier = mainAppBundleIdentifier {
             return URL(string: "\(mainAppBundleIdentifier)://")

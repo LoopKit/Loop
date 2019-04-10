@@ -52,7 +52,11 @@ final class TimeInRangeLesson: Lesson {
             unitString: NSLocalizedString("Weeks", comment: "Unit string for a count of calendar weeks")
         )
 
-        rangeEntry = QuantityRangeEntry.glucoseRange(quantityFormatter: glucoseFormatter, unit: glucoseUnit)
+        rangeEntry = QuantityRangeEntry.glucoseRange(
+            minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
+            maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 160),
+            quantityFormatter: glucoseFormatter,
+            unit: glucoseUnit)
 
         self.configurationSections = [
             LessonSection(headerTitle: nil, footerTitle: nil, cells: [dateEntry, weeksEntry]),
@@ -95,7 +99,7 @@ final class TimeInRangeLesson: Lesson {
 
                 completion([
                     TimesInRangeSection(
-                        ranges: aggregator.dictionary,
+                        ranges: aggregator.results.map { [$0.range:$0.value] } ?? [:],
                         dateFormatter: dateFormatter,
                         numberFormatter: numberFormatter
                     ),
@@ -110,24 +114,7 @@ final class TimeInRangeLesson: Lesson {
     }
 }
 
-
-private extension QuantityRangeEntry {
-    class func glucoseRange(quantityFormatter: QuantityFormatter, unit: HKUnit) -> QuantityRangeEntry {
-        return QuantityRangeEntry(
-            headerTitle: NSLocalizedString("Range", comment: "Section title for glucose range"),
-            minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
-            maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 160),
-            quantityFormatter: quantityFormatter,
-            unit: unit,
-            keyboardType: unit == .milligramsPerDeciliter ? .numberPad : .decimalPad
-        )
-    }
-}
-
-
 class TimesInRangeSection: LessonSectionProviding {
-    let headerTitle: String? = nil
-    let footerTitle: String? = nil
 
     let cells: [LessonCellProviding]
 
@@ -152,12 +139,12 @@ struct TimeInRangeAggregator {
         return sum / Double(count)
     }
 
-    var dictionary: [DateInterval: Double] {
+    var results: (range: DateInterval, value: Double)? {
         guard let allDates = allDates, let averagePercentInRange = averagePercentInRange else {
-            return [:]
+            return nil
         }
 
-        return [allDates: averagePercentInRange]
+        return (range: allDates, value: averagePercentInRange)
     }
 
     mutating func add(percentInRange: Double, for dates: DateInterval) {
@@ -231,19 +218,10 @@ private class TimeInRangeCalculator {
                     os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))
                     anyError = error
                 case .success(let samples):
-                    var inRangeCount = 0
-                    var totalCount = 0
 
-                    for sample in samples {
-                        if self.range.contains(sample.quantity) {
-                            inRangeCount += 1
-                        }
-                        totalCount += 1
-                    }
-
-                    if totalCount > 0 {
+                    if let timeInRange = samples.proportion(where: { self.range.contains($0.quantity) }) {
                         _ = lockedResults.mutate({ (results) in
-                            results[interval] = Double(inRangeCount) / Double(totalCount)
+                            results[interval] = timeInRange
                         })
                     }
                 }
