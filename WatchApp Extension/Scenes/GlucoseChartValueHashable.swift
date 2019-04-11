@@ -12,8 +12,8 @@ import HealthKit
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: Double { get }
-    var max: Double { get }
+    var min: Double { get } // milligramsPerDeciliter
+    var max: Double { get } // milligramsPerDeciliter
 
     var chartHashValue: Int { get }
 }
@@ -78,10 +78,10 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQu
 
 extension GlucoseRangeSchedule.Override: GlucoseChartValueHashable {
     var min: Double {
-        return value.minValue
+        return quantityRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
     }
 
     var max: Double {
-        return value.maxValue
+        return quantityRange.upperBound.doubleValue(for: .milligramsPerDeciliter)
     }
 }

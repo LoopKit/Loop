@@ -9,6 +9,7 @@
 import HealthKit
 import LoopKit
 import LoopKitUI
+import LoopCore
 import LoopTestingKit
 
 
@@ -31,7 +32,7 @@ final class DeviceDataManager {
             
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
-            UserDefaults.appGroup.pumpManager = pumpManager
+            UserDefaults.appGroup?.pumpManager = pumpManager
         }
     }
     
@@ -63,7 +64,7 @@ final class DeviceDataManager {
         didSet {
             setupCGM()
 
-            UserDefaults.appGroup.cgmManager = cgmManager
+            UserDefaults.appGroup?.cgmManager = cgmManager
         }
     }
 
@@ -142,11 +143,11 @@ final class DeviceDataManager {
     private(set) var loopManager: LoopDataManager!
 
     init() {
-        pumpManager = UserDefaults.appGroup.pumpManager as? PumpManagerUI
-        
-        if let cgmManager = UserDefaults.appGroup.cgmManager {
+        pumpManager = UserDefaults.appGroup?.pumpManager as? PumpManagerUI
+
+        if let cgmManager = UserDefaults.appGroup?.cgmManager {
             self.cgmManager = cgmManager
-        } else if UserDefaults.appGroup.isCGMManagerValidPumpManager {
+        } else if UserDefaults.appGroup?.isCGMManagerValidPumpManager == true {
             self.cgmManager = pumpManager as? CGMManager
         }
         
@@ -219,7 +220,7 @@ extension DeviceDataManager: CGMManagerDelegate {
     }
 
     func cgmManagerDidUpdateState(_ manager: CGMManager) {
-        UserDefaults.appGroup.cgmManager = manager
+        UserDefaults.appGroup?.cgmManager = manager
     }
 }
 
@@ -236,7 +237,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerDidUpdateState(_ pumpManager: PumpManager) {
         log.default("PumpManager:\(type(of: pumpManager)) did update state")
 
-        UserDefaults.appGroup.pumpManager = pumpManager
+        UserDefaults.appGroup?.pumpManager = pumpManager
     }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {

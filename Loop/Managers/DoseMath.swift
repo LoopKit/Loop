@@ -257,7 +257,7 @@ extension Collection where Element == GlucoseValue {
             let targetValue = targetGlucoseValue(
                 percentEffectDuration: time / model.effectDuration,
                 minValue: suspendThresholdValue, 
-                maxValue: correctionRange.value(at: prediction.startDate).averageValue
+                maxValue: correctionRange.quantityRange(at: prediction.startDate).averageValue(for: unit)
             )
 
             // Compute the dose required to bring this prediction to target:
@@ -287,23 +287,20 @@ extension Collection where Element == GlucoseValue {
         }
 
         // Choose either the minimum glucose or eventual glocse as the correction delta
-        let minGlucoseTargets = correctionRange.value(at: min.startDate)
-        let eventualGlucoseTargets = correctionRange.value(at: eventual.startDate)
-
-        let minGlucoseValue = min.quantity.doubleValue(for: unit)
-        let eventualGlucoseValue = eventual.quantity.doubleValue(for: unit)
+        let minGlucoseTargets = correctionRange.quantityRange(at: min.startDate)
+        let eventualGlucoseTargets = correctionRange.quantityRange(at: eventual.startDate)
 
         // Treat the mininum glucose when both are below range
-        if minGlucoseValue < minGlucoseTargets.minValue &&
-            eventual.quantity.doubleValue(for: unit) < eventualGlucoseTargets.minValue
+        if min.quantity < minGlucoseTargets.lowerBound &&
+            eventual.quantity < eventualGlucoseTargets.lowerBound
         {
             let time = min.startDate.timeIntervalSince(date)
             // For time = 0, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
             let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
 
             guard let units = insulinCorrectionUnits(
-                fromValue: minGlucoseValue,
-                toValue: minGlucoseTargets.averageValue,
+                fromValue: min.quantity.doubleValue(for: unit),
+                toValue: minGlucoseTargets.averageValue(for: unit),
                 effectedSensitivity: sensitivityValue * percentEffected
             ) else {
                 return nil
@@ -311,16 +308,16 @@ extension Collection where Element == GlucoseValue {
 
             return .entirelyBelowRange(
                 correcting: min,
-                minTarget: HKQuantity(unit: unit, doubleValue: minGlucoseTargets.minValue),
+                minTarget: minGlucoseTargets.lowerBound,
                 units: units
             )
-        } else if eventualGlucoseValue > eventualGlucoseTargets.maxValue,
+        } else if eventual.quantity > eventualGlucoseTargets.upperBound,
             let minCorrectionUnits = minCorrectionUnits, let correctingGlucose = correctingGlucose
         {
             return .aboveRange(
                 min: min,
                 correcting: correctingGlucose,
-                minTarget: HKQuantity(unit: unit, doubleValue: eventualGlucoseTargets.minValue),
+                minTarget: eventualGlucoseTargets.lowerBound,
                 units: minCorrectionUnits
             )
         } else {
@@ -361,7 +358,7 @@ extension Collection where Element == GlucoseValue {
         let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
-            suspendThreshold: suspendThreshold ?? correctionRange.minQuantity(at: date),
+            suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model
         )
@@ -416,7 +413,7 @@ extension Collection where Element == GlucoseValue {
         guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
-            suspendThreshold: suspendThreshold ?? correctionRange.minQuantity(at: date),
+            suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model
         ) else {
@@ -432,7 +429,7 @@ extension Collection where Element == GlucoseValue {
         // Handle the "current BG below target" notice here
         // TODO: Don't assume in the future that the first item in the array is current BG
         if case .predictedGlucoseBelowTarget? = bolus.notice,
-            let first = first, first.quantity < correctionRange.minQuantity(at: first.startDate)
+            let first = first, first.quantity < correctionRange.quantityRange(at: first.startDate).lowerBound
         {
             bolus.notice = .currentGlucoseBelowTarget(glucose: first)
         }

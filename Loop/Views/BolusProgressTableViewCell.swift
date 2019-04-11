@@ -8,6 +8,7 @@
 
 import Foundation
 import LoopKit
+import LoopUI
 import HealthKit
 import MKRingProgressView
 

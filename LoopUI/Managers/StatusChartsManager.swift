@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import LoopCore
 import LoopKit
 import SwiftCharts
 import os.log
@@ -951,16 +952,9 @@ public final class StatusChartsManager {
             let xAxisValues = xAxisValues, xAxisValues.count > 1,
             let schedule = targetGlucoseSchedule
         {
-            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, xAxisValues: xAxisValues)
-
-            if let override = schedule.override {
-                targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues, extendEndDateToChart: true)
-
-                targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues)
-            } else {
-                targetOverridePoints = []
-                targetOverrideDurationPoints = []
-            }
+            targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
+            targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(schedule, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
+            targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
         }
     }
 }

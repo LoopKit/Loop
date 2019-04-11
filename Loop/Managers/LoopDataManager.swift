@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopCore
 
 
 final class LoopDataManager {
@@ -44,11 +45,11 @@ final class LoopDataManager {
     init(
         lastLoopCompleted: Date?,
         lastTempBasal: DoseEntry?,
-        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup.basalRateSchedule,
-        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup.carbRatioSchedule,
-        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup.insulinModelSettings,
-        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup.insulinSensitivitySchedule,
-        settings: LoopSettings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+        basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup?.basalRateSchedule,
+        carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup?.carbRatioSchedule,
+        insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup?.insulinModelSettings,
+        insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
+        settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
     ) {
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -61,11 +62,7 @@ final class LoopDataManager {
         carbStore = CarbStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            defaultAbsorptionTimes: (
-                fast: TimeInterval(hours: 2),
-                medium: TimeInterval(hours: 3),
-                slow: TimeInterval(hours: 4)
-            ),
+            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule
         )
@@ -118,7 +115,7 @@ final class LoopDataManager {
     /// These are not thread-safe.
     var settings: LoopSettings {
         didSet {
-            UserDefaults.appGroup.loopSettings = settings
+            UserDefaults.appGroup?.loopSettings = settings
             notify(forChange: .preferences)
             AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
         }
@@ -246,7 +243,7 @@ extension LoopDataManager {
         }
         set {
             doseStore.basalProfile = newValue
-            UserDefaults.appGroup.basalRateSchedule = newValue
+            UserDefaults.appGroup?.basalRateSchedule = newValue
             notify(forChange: .preferences)
 
             if let newValue = newValue, let oldValue = doseStore.basalProfile, newValue.items != oldValue.items {
@@ -263,7 +260,7 @@ extension LoopDataManager {
         }
         set {
             carbStore.carbRatioSchedule = newValue
-            UserDefaults.appGroup.carbRatioSchedule = newValue
+            UserDefaults.appGroup?.carbRatioSchedule = newValue
 
             // Invalidate cached effects based on this schedule
             carbEffect = nil
@@ -284,7 +281,7 @@ extension LoopDataManager {
         }
         set {
             doseStore.insulinModel = newValue?.model
-            UserDefaults.appGroup.insulinModelSettings = newValue
+            UserDefaults.appGroup?.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
                 // Invalidate cached effects based on this schedule
@@ -307,7 +304,7 @@ extension LoopDataManager {
             carbStore.insulinSensitivitySchedule = newValue
             doseStore.insulinSensitivitySchedule = newValue
 
-            UserDefaults.appGroup.insulinSensitivitySchedule = newValue
+            UserDefaults.appGroup?.insulinSensitivitySchedule = newValue
 
             dataAccessQueue.async {
                 // Invalidate cached effects based on this schedule

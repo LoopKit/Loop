@@ -9,6 +9,7 @@
 import UIKit
 import HealthKit
 import Intents
+import LoopCore
 import LoopKit
 import LoopKitUI
 import LoopUI
@@ -253,6 +254,10 @@ final class StatusTableViewController: ChartsTableViewController {
 
         updateChartDateRange()
         redrawCharts()
+
+        if case .bolusing = statusRowMode, bolusProgressReporter?.progress.isComplete == true {
+            refreshContext.update(with: .status)
+        }
 
         if visible && active {
             bolusProgressReporter?.addObserver(self)
