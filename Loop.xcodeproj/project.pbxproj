@@ -238,7 +238,6 @@
 		43E2D8F51D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EA1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json */; };
 		43E2D8F61D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */; };
 		43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */; };
-		43E2D9171D2226BD004DA55F /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		43E2D9191D222759004DA55F /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E93FB51E4675E800EAB8DB /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
@@ -494,6 +493,48 @@
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
 		};
+		A942E444225FD97F00DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
+			remoteInfo = LoopCore;
+		};
+		A942E446225FD9A300DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
+			remoteInfo = LoopCore;
+		};
+		A942E449225FDDAB00DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 432CF87720D8B8380066B889;
+			remoteInfo = Cartfile;
+		};
+		A942E44B225FDDB000DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 432CF87720D8B8380066B889;
+			remoteInfo = Cartfile;
+		};
+		A942E44D225FDE0D00DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 432CF87720D8B8380066B889;
+			remoteInfo = Cartfile;
+		};
+		A942E44F225FDE3800DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 432CF87720D8B8380066B889;
+			remoteInfo = Cartfile;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -560,7 +601,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				43E2D9171D2226BD004DA55F /* LoopKit.framework in CopyFiles */,
 				4345E40021F051DD009E00E5 /* LoopCore.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1825,6 +1865,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				A942E450225FDE3800DD4980 /* PBXTargetDependency */,
 				43A943811B926B7B0051FA24 /* PBXTargetDependency */,
 			);
 			name = WatchApp;
@@ -1887,6 +1928,7 @@
 			dependencies = (
 				43D9FFB821EA9C9F00AF44BF /* PBXTargetDependency */,
 				43D9FFBA21EA9CA400AF44BF /* PBXTargetDependency */,
+				A942E447225FD9A300DD4980 /* PBXTargetDependency */,
 			);
 			name = Learn;
 			productName = Learn;
@@ -1920,10 +1962,13 @@
 				43E2D8CE1D20BF42004DA55F /* Frameworks */,
 				43E2D8CF1D20BF42004DA55F /* Resources */,
 				43E2D8DD1D20C072004DA55F /* CopyFiles */,
+				A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A942E44C225FDDB000DD4980 /* PBXTargetDependency */,
+				A942E445225FD97F00DD4980 /* PBXTargetDependency */,
 			);
 			name = DoseMathTests;
 			productName = DoseMathTests;
@@ -1941,6 +1986,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				A942E44A225FDDAB00DD4980 /* PBXTargetDependency */,
 				43E2D9111D20C581004DA55F /* PBXTargetDependency */,
 			);
 			name = LoopTests;
@@ -1959,6 +2005,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				A942E44E225FDE0D00DD4980 /* PBXTargetDependency */,
 				43D9000D21EB0BEA00AF44BF /* PBXTargetDependency */,
 				4F7528991DFE1ED800C322D6 /* PBXTargetDependency */,
 			);
@@ -2287,18 +2334,21 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/iOS\nif [ -f $PROJECT_DIR/.gitmodules && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 		43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2306,36 +2356,53 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MinimedKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Amplitude.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/G4ShareSpy.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MinimedKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/ShareClientUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MKRingProgressView.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/MinimedKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/Amplitude.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/NightscoutUploadKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/Crypto.framework",
+				"$(BUILT_PRODUCTS_DIR)/G4ShareSpy.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/MinimedKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClientUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopTestingKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/MockKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/MockKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/MKRingProgressView.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Amplitude.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/NightscoutUploadKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/G4ShareSpy.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClientUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopTestingKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MKRingProgressView.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/iOS\nif [ -f $PROJECT_DIR/.gitmodules ] && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\necho using $BUILT_PRODUCTS_DIR for ${varname}\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 		43FF3DF620A8EFE800F8E62C /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2343,9 +2410,9 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/watchOS/CGMBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/watchOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/watchOS/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
@@ -2355,7 +2422,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/watchOS\nif [ -f $PROJECT_DIR/.gitmodules && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+		};
+		A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+			);
+			name = "Copy Frameworks with Carthage";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2755,6 +2842,36 @@
 			isa = PBXTargetDependency;
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
 			targetProxy = 4F7528981DFE1ED800C322D6 /* PBXContainerItemProxy */;
+		};
+		A942E445225FD97F00DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
+			targetProxy = A942E444225FD97F00DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E447225FD9A300DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
+			targetProxy = A942E446225FD9A300DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E44A225FDDAB00DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 432CF87720D8B8380066B889 /* Cartfile */;
+			targetProxy = A942E449225FDDAB00DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E44C225FDDB000DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 432CF87720D8B8380066B889 /* Cartfile */;
+			targetProxy = A942E44B225FDDB000DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E44E225FDE0D00DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 432CF87720D8B8380066B889 /* Cartfile */;
+			targetProxy = A942E44D225FDE0D00DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E450225FDE3800DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 432CF87720D8B8380066B889 /* Cartfile */;
+			targetProxy = A942E44F225FDE3800DD4980 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
