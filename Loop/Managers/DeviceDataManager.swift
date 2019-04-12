@@ -190,11 +190,15 @@ extension DeviceDataManager: DeviceManagerDelegate {
             trigger: trigger
         )
 
-        UNUserNotificationCenter.current().add(request)
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().add(request)
+        }
     }
 
     func clearNotification(for manager: DeviceManager, identifier: String) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+        }
     }
 }
 
