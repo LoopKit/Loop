@@ -11,7 +11,7 @@ import LoopKit
 
 extension Collection where Element == SampleValue {
     /// O(n)
-    var quantityRange: Range<HKQuantity>? {
+    var quantityRange: ClosedRange<HKQuantity>? {
         var lowest: HKQuantity?
         var highest: HKQuantity?
 
@@ -33,6 +33,6 @@ extension Collection where Element == SampleValue {
             return nil
         }
 
-        return l..<h
+        return l...h
     }
 }

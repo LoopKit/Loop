@@ -57,7 +57,7 @@ extension SampleValue {
 }
 
 
-extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQuantity> {
+extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRange<HKQuantity> {
     var start: Date {
         return startDate
     }
