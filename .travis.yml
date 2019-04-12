@@ -3,6 +3,12 @@ osx_image: xcode10.2
 # xcode_sdk: iphonesimulator11
 # xcode_project: Loop.xcodeproj
 # xcode_scheme: Loop
+
+addons:
+  homebrew:
+    packages:
+    - carthage
+    update: true
 before_script:
     - git config --global protocol.version 1
     - set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile

@@ -255,6 +255,10 @@ final class StatusTableViewController: ChartsTableViewController {
         updateChartDateRange()
         redrawCharts()
 
+        if case .bolusing = statusRowMode, bolusProgressReporter?.progress.isComplete == true {
+            refreshContext.update(with: .status)
+        }
+
         if visible && active {
             bolusProgressReporter?.addObserver(self)
         } else {

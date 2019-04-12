@@ -11,7 +11,7 @@ import LoopKit
 import LoopKitUI
 import LoopCore
 import LoopTestingKit
-
+import UserNotifications
 
 final class DeviceDataManager {
 
@@ -178,6 +178,25 @@ extension DeviceDataManager: RemoteDataManagerDelegate {
     }
 }
 
+// MARK: - DeviceManagerDelegate
+extension DeviceDataManager: DeviceManagerDelegate {
+    func scheduleNotification(for manager: DeviceManager,
+                              identifier: String,
+                              content: UNNotificationContent,
+                              trigger: UNNotificationTrigger?) {
+        let request = UNNotificationRequest(
+            identifier: identifier,
+            content: content,
+            trigger: trigger
+        )
+
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    func clearNotification(for manager: DeviceManager, identifier: String) {
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+    }
+}
 
 // MARK: - CGMManagerDelegate
 extension DeviceDataManager: CGMManagerDelegate {

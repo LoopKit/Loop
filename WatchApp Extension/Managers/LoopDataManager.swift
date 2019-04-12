@@ -14,6 +14,8 @@ import WatchConnectivity
 import os.log
 
 class LoopDataManager {
+    let carbStore: CarbStore
+
     let glucoseStore: GlucoseStore
 
     var healthStore: HKHealthStore {
@@ -49,9 +51,18 @@ class LoopDataManager {
     init(settings: LoopSettings = UserDefaults.standard.loopSettings ?? LoopSettings()) {
         self.settings = settings
 
+        let healthStore = HKHealthStore()
+        let cacheStore = PersistenceController.controllerInLocalDirectory()
+
+        carbStore = CarbStore(
+            healthStore: healthStore,
+            cacheStore: cacheStore,
+            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
+            syncVersion: 0
+        )
         glucoseStore = GlucoseStore(
-            healthStore: HKHealthStore(),
-            cacheStore: PersistenceController.controllerInLocalDirectory(),
+            healthStore: healthStore,
+            cacheStore: cacheStore,
             cacheLength: .hours(4)
         )
     }
@@ -76,10 +87,17 @@ extension LoopDataManager {
         activeContext?.iob = (activeContext?.iob ?? 0) + bolus.value
     }
 
-    func addConfirmedCarbEntry(_ entry: CarbEntryUserInfo) {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        activeContext?.cob = (activeContext?.cob ?? 0) + entry.value
+    func addConfirmedCarbEntry(_ entry: NewCarbEntry) {
+        carbStore.addCarbEntry(entry) { (result) in
+            switch result {
+            case .success(let entry):
+                DispatchQueue.main.async {
+                    self.activeContext?.cob = (self.activeContext?.cob ?? 0) + entry.quantity.doubleValue(for: .gram())
+                }
+            case .failure(let error):
+                self.log.error("Error adding entry to carbStore: %{public}@", String(describing: error))
+            }
+        }
     }
 
     func sendDidUpdateContextNotificationIfNecessary() {
