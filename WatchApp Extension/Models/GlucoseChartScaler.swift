@@ -86,7 +86,7 @@ struct GlucoseChartScaler {
 }
 
 extension GlucoseChartScaler {
-    init(size: CGSize, dateInterval: DateInterval, glucoseRange: Range<HKQuantity>, unit: HKUnit, coordinateSystem: CoordinateSystem = .standard) {
+    init(size: CGSize, dateInterval: DateInterval, glucoseRange: ClosedRange<HKQuantity>, unit: HKUnit, coordinateSystem: CoordinateSystem = .standard) {
         self.dates = dateInterval
         self.glucoseMin = glucoseRange.lowerBound.doubleValue(for: unit)
         self.glucoseMax = glucoseRange.upperBound.doubleValue(for: unit)
@@ -96,7 +96,7 @@ extension GlucoseChartScaler {
     }
 }
 
-extension Range where Bound == HKQuantity {
+extension ClosedRange where Bound == HKQuantity {
     fileprivate func span(with unit: HKUnit) -> Double {
         return upperBound.doubleValue(for: unit) - lowerBound.doubleValue(for: unit)
     }

@@ -46,7 +46,7 @@ extension GlucoseRangeSchedule {
 }
 
 
-extension Range where Bound == HKQuantity {
+extension ClosedRange where Bound == HKQuantity {
     func averageValue(for unit: HKUnit) -> Double {
         let minValue = lowerBound.doubleValue(for: unit)
         let maxValue = upperBound.doubleValue(for: unit)
