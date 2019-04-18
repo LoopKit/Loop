@@ -907,7 +907,9 @@ public final class StatusChartsManager {
 
     private func generateXAxisValues() {
         let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h a"
+        timeFormatter.dateFormat = self.isAmPmTimeFormat()
+            ? "h a"
+            : "H:mm"
 
         let points = [
             ChartPoint(
@@ -962,5 +964,11 @@ public final class StatusChartsManager {
                 targetOverrideDurationPoints = []
             }
         }
+    }
+    
+    // Checks if phone has am/pm or 24h time format.
+    private func isAmPmTimeFormat() -> Bool {
+        let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
+        return dateFormat.index( of: "a") != nil
     }
 }
