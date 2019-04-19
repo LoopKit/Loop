@@ -30,10 +30,7 @@ final class StatusTableViewController: ChartsTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100),
-            max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
-        )
+        statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
         
         if let pumpManager = deviceManager.pumpManager {
             self.basalDeliveryState = pumpManager.status.basalDeliveryState
@@ -224,6 +221,12 @@ final class StatusTableViewController: ChartsTableViewController {
         refreshContext = RefreshContext.all
     }
 
+    private lazy var statusCharts = StatusChartsManager(colors: .default, settings: .default)
+
+    override func createChartsManager() -> ChartsManager {
+        return statusCharts
+    }
+
     private func updateChartDateRange() {
         let settings = deviceManager.loopManager.settings
 
@@ -398,33 +401,35 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Glucose
             if let glucoseValues = glucoseValues {
-                self.charts.setGlucoseValues(glucoseValues)
+                self.statusCharts.setGlucoseValues(glucoseValues)
             }
             if let predictedGlucoseValues = predictedGlucoseValues {
-                self.charts.setPredictedGlucoseValues(predictedGlucoseValues)
+                self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             }
-            if let lastPoint = self.charts.predictedGlucosePoints.last?.y {
+            if let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
             } else {
                 self.eventualGlucoseDescription = nil
             }
             if currentContext.contains(.targets) {
-                self.charts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
+                self.statusCharts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
             }
+
+            let charts = self.statusCharts
 
             // Active Insulin
             if let iobValues = iobValues {
-                self.charts.setIOBValues(iobValues)
+                charts.setIOBValues(iobValues)
             }
-            if let index = self.charts.iobPoints.closestIndexPriorToDate(Date()) {
-                self.currentIOBDescription = String(describing: self.charts.iobPoints[index].y)
+            if let index = charts.iob.iobPoints.closestIndex(priorTo: Date()) {
+                self.currentIOBDescription = String(describing: charts.iob.iobPoints[index].y)
             } else {
                 self.currentIOBDescription = nil
             }
 
             // Insulin Delivery
             if let doseEntries = doseEntries {
-                self.charts.setDoseEntries(doseEntries)
+                charts.setDoseEntries(doseEntries)
             }
             if let totalDelivery = totalDelivery {
                 self.totalDelivery = totalDelivery
@@ -432,10 +437,10 @@ final class StatusTableViewController: ChartsTableViewController {
 
             // Active Carbohydrates
             if let cobValues = cobValues {
-                self.charts.setCOBValues(cobValues)
+                charts.setCOBValues(cobValues)
             }
-            if let index = self.charts.cobPoints.closestIndexPriorToDate(Date()) {
-                self.currentCOBDescription = String(describing: self.charts.cobPoints[index].y)
+            if let index = charts.cob.cobPoints.closestIndex(priorTo: 	Date()) {
+                self.currentCOBDescription = String(describing: charts.cob.cobPoints[index].y)
             } else {
                 self.currentCOBDescription = nil
             }
@@ -444,9 +449,10 @@ final class StatusTableViewController: ChartsTableViewController {
             if let hudView = self.hudView {
                 // Glucose HUD
                 if let glucose = self.deviceManager.loopManager.glucoseStore.latestGlucose {
-                    hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: self.charts.glucoseUnit),
+                    let unit = self.statusCharts.glucose.glucoseUnit
+                    hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                         at: glucose.startDate,
-                        unit: self.charts.glucoseUnit,
+                        unit: unit,
                         sensor: self.deviceManager.cgmManager?.sensorState
                     )
                 }
@@ -708,22 +714,22 @@ final class StatusTableViewController: ChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 cell.chartContentView.chartGenerator = { [weak self] (frame) in
-                    return self?.charts.glucoseChartWithFrame(frame)?.view
+                    return self?.statusCharts.glucoseChart(withFrame: frame)?.view
                 }
                 cell.titleLabel?.text = NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph")
             case .iob:
                 cell.chartContentView.chartGenerator = { [weak self] (frame) in
-                    return self?.charts.iobChartWithFrame(frame)?.view
+                    return self?.statusCharts.iobChart(withFrame: frame)?.view
                 }
                 cell.titleLabel?.text = NSLocalizedString("Active Insulin", comment: "The title of the Insulin On-Board graph")
             case .dose:
                 cell.chartContentView?.chartGenerator = { [weak self] (frame) in
-                    return self?.charts.doseChartWithFrame(frame)?.view
+                    return self?.statusCharts.doseChart(withFrame: frame)?.view
                 }
                 cell.titleLabel?.text = NSLocalizedString("Insulin Delivery", comment: "The title of the insulin delivery graph")
             case .cob:
                 cell.chartContentView?.chartGenerator = { [weak self] (frame) in
-                    return self?.charts.cobChartWithFrame(frame)?.view
+                    return self?.statusCharts.cobChart(withFrame: frame)?.view
                 }
                 cell.titleLabel?.text = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph")
             }
@@ -1001,7 +1007,7 @@ final class StatusTableViewController: ChartsTableViewController {
         case let vc as BolusViewController:
             vc.configureWithLoopManager(self.deviceManager.loopManager,
                 recommendation: sender as? BolusRecommendation,
-                glucoseUnit: self.charts.glucoseUnit
+                glucoseUnit: self.statusCharts.glucose.glucoseUnit
             )
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager

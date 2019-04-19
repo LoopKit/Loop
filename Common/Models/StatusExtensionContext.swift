@@ -27,7 +27,7 @@ struct SensorDisplayableContext: SensorDisplayable {
     let isLocal: Bool
 }
 
-struct GlucoseContext {
+struct GlucoseContext: GlucoseValue {
     let value: Double
     let unit: HKUnit
     let startDate: Date

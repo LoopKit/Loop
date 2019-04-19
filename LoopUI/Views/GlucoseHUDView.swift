@@ -125,12 +125,6 @@ public final class GlucoseHUDView: BaseHUDView {
         accessibilityValue = accessibilityStrings.joined(separator: ", ")
     }
 
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-
-        return formatter
-    }()
+    private lazy var timeFormatter = DateFormatter(timeStyle: .short)
 
 }
