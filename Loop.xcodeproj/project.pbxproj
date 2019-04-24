@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		2ECCD21322709905006B19C5 /* SpikeClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ECCD21122709904006B19C5 /* SpikeClient.framework */; };
+		2ECCD21422709905006B19C5 /* SpikeClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ECCD21222709904006B19C5 /* SpikeClientUI.framework */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -579,6 +581,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2ECCD21122709904006B19C5 /* SpikeClient.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpikeClient.framework; path = Carthage/Build/iOS/SpikeClient.framework; sourceTree = "<group>"; };
+		2ECCD21222709904006B19C5 /* SpikeClientUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpikeClientUI.framework; path = Carthage/Build/iOS/SpikeClientUI.framework; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -1057,6 +1061,8 @@
 				43B371881CE597D10013C5A6 /* ShareClient.framework in Frameworks */,
 				4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */,
 				4379CFF021112CF700AADC79 /* ShareClientUI.framework in Frameworks */,
+				2ECCD21322709905006B19C5 /* SpikeClient.framework in Frameworks */,
+				2ECCD21422709905006B19C5 /* SpikeClientUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1712,6 +1718,8 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2ECCD21122709904006B19C5 /* SpikeClient.framework */,
+				2ECCD21222709904006B19C5 /* SpikeClientUI.framework */,
 				C1C7F1BF220D675700689850 /* OmniKit.framework */,
 				C1C7F1C0220D675700689850 /* OmniKitUI.framework */,
 				C1E2773D224177C000354103 /* ClockKit.framework */,
@@ -2324,6 +2332,8 @@
 				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/MKRingProgressView.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/SpikeClient.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/SpikeClientUI.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
