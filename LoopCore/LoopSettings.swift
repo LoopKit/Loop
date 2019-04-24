@@ -23,13 +23,13 @@ public struct LoopSettings: Equatable {
 
     public var suspendThreshold: GlucoseThreshold? = nil
 
-    public var retrospectiveCorrectionEnabled = true
+    public var integralRetrospectiveCorrectionEnabled = true
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 
     /// The maximum duration over which to integrate retrospective correction changes
-    public let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 30)
+    public let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 180)
 
     /// The amount of time since a given date that data should be considered valid
     public let recencyInterval = TimeInterval(minutes: 15)
@@ -86,8 +86,8 @@ extension LoopSettings: RawRepresentable {
             self.suspendThreshold = GlucoseThreshold(rawValue: rawThreshold)
         }
 
-        if let retrospectiveCorrectionEnabled = rawValue["retrospectiveCorrectionEnabled"] as? Bool {
-            self.retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
+        if let integralRetrospectiveCorrectionEnabled = rawValue["integralRetrospectiveCorrectionEnabled"] as? Bool {
+            self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrectionEnabled
         }
     }
 
@@ -95,7 +95,7 @@ extension LoopSettings: RawRepresentable {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,
-            "retrospectiveCorrectionEnabled": retrospectiveCorrectionEnabled
+            "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
