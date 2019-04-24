@@ -46,14 +46,14 @@ public struct LoopSettings: Equatable {
         maximumBasalRatePerHour: Double? = nil,
         maximumBolus: Double? = nil,
         suspendThreshold: GlucoseThreshold? = nil,
-        retrospectiveCorrectionEnabled: Bool = true
+        integralRetrospectiveCorrectionEnabled: Bool = true
     ) {
         self.dosingEnabled = dosingEnabled
         self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
         self.maximumBasalRatePerHour = maximumBasalRatePerHour
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
-        self.retrospectiveCorrectionEnabled = retrospectiveCorrectionEnabled
+        self.integralRetrospectiveCorrectionEnabled = integralRetrospectiveCorrectionEnabled
     }
 }
 

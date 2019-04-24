@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopCore
 
 /**
  Standard Retrospective Correction (RC) calculates a correction effect in glucose prediction based on the most recent discrepancy between observed glucose movement and movement expected based on insulin and carb models. Standard retrospective correction acts as a proportional (P) controller aimed at reducing modeling errors in glucose prediction.
@@ -52,7 +53,7 @@ class StandardRetrospectiveCorrection: RetrospectiveCorrection {
     func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
         
         // Loop settings
-        let settings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+        let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
 
         var glucoseCorrectionEffect: [GlucoseEffect] = []
         

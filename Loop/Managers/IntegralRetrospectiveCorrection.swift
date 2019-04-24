@@ -9,6 +9,7 @@
 import Foundation
 import HealthKit
 import LoopKit
+import LoopCore
 
 /**
     Integral Retrospective Correction (IRC) calculates a correction effect in glucose prediction based on a timeline of past discrepancies between observed glucose movement and movement expected based on insulin and carb models. Integral retrospective correction acts as a proportional-integral-differential (PID) controller aimed at reducing modeling errors in glucose prediction.
@@ -85,9 +86,9 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
     func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
         
         // Loop settings relevant for calculation of effect limits
-        let settings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
-        let insulinSensitivity = UserDefaults.appGroup.insulinSensitivitySchedule
-        let basalRates = UserDefaults.appGroup.basalRateSchedule
+        let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
+        let insulinSensitivity = UserDefaults.appGroup?.insulinSensitivitySchedule
+        let basalRates = UserDefaults.appGroup?.basalRateSchedule
         currentDate = Date()
         
         // Last discrepancy should be recent, otherwise clear the effect and return
@@ -198,7 +199,7 @@ extension IntegralRetrospectiveCorrection {
     ///
     /// - parameter completion: A closure called once the report has been generated. The closure takes a single argument of the report string.
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
-        let settings = UserDefaults.appGroup.loopSettings ?? LoopSettings()
+        let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
         var report: [String] = [
             "## IntegralRetrospectiveCorrection",
             "",

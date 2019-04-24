@@ -9,6 +9,7 @@
 import XCTest
 import HealthKit
 import LoopKit
+import LoopCore
 @testable import Loop
 
 extension XCTestCase {
@@ -66,9 +67,9 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     let glucoseUnit = HKUnit.milligramsPerDeciliter
     
     // Save settings
-    let saveInsulinSensitivity = UserDefaults.appGroup.insulinSensitivitySchedule
-    let saveBasalRates = UserDefaults.appGroup.basalRateSchedule
-    let saveSettings = UserDefaults.appGroup.loopSettings
+    let saveInsulinSensitivity = UserDefaults.appGroup?.insulinSensitivitySchedule
+    let saveBasalRates = UserDefaults.appGroup?.basalRateSchedule
+    let saveSettings = UserDefaults.appGroup?.loopSettings
     
     // Initialize integral retrospective correction
     let integralRC = IntegralRetrospectiveCorrection(TimeInterval.minutes(60.0))
@@ -78,17 +79,17 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
         let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
         let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
         let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))], overrideRanges: [:])
-        UserDefaults.appGroup.insulinSensitivitySchedule = insulinSensitivity
-        UserDefaults.appGroup.basalRateSchedule = basalRate
-        UserDefaults.appGroup.loopSettings = LoopSettings()
-        UserDefaults.appGroup.loopSettings?.glucoseTargetRangeSchedule = glucoseTargetRange
+        UserDefaults.appGroup?.insulinSensitivitySchedule = insulinSensitivity
+        UserDefaults.appGroup?.basalRateSchedule = basalRate
+        UserDefaults.appGroup?.loopSettings = LoopSettings()
+        UserDefaults.appGroup?.loopSettings?.glucoseTargetRangeSchedule = glucoseTargetRange
     }
 
     /// Restore settings
     override func tearDown() {
-        UserDefaults.appGroup.insulinSensitivitySchedule = saveInsulinSensitivity
-        UserDefaults.appGroup.basalRateSchedule = saveBasalRates
-        UserDefaults.appGroup.loopSettings = saveSettings
+        UserDefaults.appGroup?.insulinSensitivitySchedule = saveInsulinSensitivity
+        UserDefaults.appGroup?.basalRateSchedule = saveBasalRates
+        UserDefaults.appGroup?.loopSettings = saveSettings
     }
     
     /// Function used to load 5-min discrepancy fixtures
