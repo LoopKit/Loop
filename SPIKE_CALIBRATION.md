@@ -1,6 +1,6 @@
 #  **Important** : about Spike calibration
 
-It is __*imperative*__ to read this document in its entirety before installing and using this branch of Loop. It is also highly recommended to refer to it regularly. A Google doc version is available here, and should be bookmarked for future reference.
+It is __*imperative*__ to read this document in its entirety before installing and using this branch of Loop. It is also highly recommended to refer to it regularly. A Google doc version is available [here](https://docs.google.com/document/d/1gmAJ4_NRaS6UUDnGDQbKy5klh0KB5SpHwgo6gzWM7ZU/edit?usp=sharing), and should be bookmarked for future reference.
 
 As Loop users, we understand the importance of accurate data. This rings especially true for calibrations done via the Spike app, whose calibration process is of different nature than those of Dexcom and xDrip, for example.
 The Dexcom app uses what is called “native calibration”, which means that it does not calibrate the values in-app. Dexcom sends the user-specified calibration number to the transmitter, who then in turn applies the calibration itself, using Dexcom’s code that resides inside the transmitter. In this case, the Dexcom transmitter algorithm is time-aware, so “presoaking” a sensor can cause inaccuracies in the algorithm.
