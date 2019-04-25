@@ -9,9 +9,13 @@
 import UIKit
 import HealthKit
 import LoopKit
-
+import LoopKitUI
 
 public final class GlucoseHUDView: BaseHUDView {
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 2
+    }
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
@@ -43,10 +47,9 @@ public final class GlucoseHUDView: BaseHUDView {
         glucoseLabel.textColor = tintColor
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateColor()
     }
 
     private func updateColor() {

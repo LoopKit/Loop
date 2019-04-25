@@ -6,6 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import LoopCore
 import WatchKit
 import Foundation
 import WatchConnectivity

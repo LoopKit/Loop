@@ -10,6 +10,8 @@ import HealthKit
 import UIKit
 import WatchConnectivity
 import LoopKit
+import LoopCore
+
 
 final class WatchDataManager: NSObject {
 
@@ -191,18 +193,11 @@ final class WatchDataManager: NSObject {
     }
 
     private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ units: Double?) -> Void)? = nil) {
-        if let carbEntry = CarbEntryUserInfo(rawValue: message) {
-            let newEntry = NewCarbEntry(
-                quantity: HKQuantity(unit: deviceManager.loopManager.carbStore.preferredUnit, doubleValue: carbEntry.value),
-                startDate: carbEntry.startDate,
-                foodType: nil,
-                absorptionTime: carbEntry.absorptionTimeType.absorptionTimeFromDefaults(deviceManager.loopManager.carbStore.defaultAbsorptionTimes)
-            )
-
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(newEntry) { (result) in
+        if let carbEntry = CarbEntryUserInfo(rawValue: message)?.carbEntry {
+            deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { (result) in
                 switch result {
                 case .success(let recommendation):
-                    AnalyticsManager.shared.didAddCarbsFromWatch(carbEntry.value)
+                    AnalyticsManager.shared.didAddCarbsFromWatch()
                     completionHandler?(recommendation?.amount)
                 case .failure(let error):
                     self.log.error(error)

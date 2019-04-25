@@ -9,6 +9,8 @@
 import CoreData
 import HealthKit
 import LoopKit
+import LoopKitUI
+import LoopCore
 import LoopUI
 import NotificationCenter
 import UIKit
@@ -22,8 +24,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             hudView.glucoseHUD.stateColors = .cgmStatus
             hudView.glucoseHUD.tintColor = .glucoseTintColor
             hudView.basalRateHUD.tintColor = .doseTintColor
-            hudView.reservoirVolumeHUD.stateColors = .pumpStatus
-            hudView.batteryHUD.stateColors = .pumpStatus
         }
     }
     @IBOutlet weak var subtitleLabel: UILabel!
@@ -61,7 +61,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     var statusExtensionContext: StatusExtensionContext?
 
-    lazy var defaults = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
+    lazy var defaults = UserDefaults.appGroup
 
     private var observers: [Any] = []
 
@@ -159,7 +159,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         let group = DispatchGroup()
 
         var activeInsulin: Double?
-        var lastReservoirValue: ReservoirValue?
         var glucose: [StoredGlucoseSample] = []
 
         group.enter()
@@ -169,17 +168,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 activeInsulin = iobValue.value
             case .failure:
                 activeInsulin = nil
-            }
-            group.leave()
-        }
-
-        group.enter()
-        doseStore.getReservoirValues(since: .distantPast, limit: 1) { (result) in
-            switch result {
-            case .success(let values):
-                lastReservoirValue = values.first
-            case .failure:
-                lastReservoirValue = nil
             }
             group.leave()
         }
@@ -201,13 +189,20 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 return
             }
 
-            if let batteryPercentage = context.batteryPercentage {
-                self.hudView.batteryHUD.batteryLevel = Double(batteryPercentage)
+            let hudViews: [BaseHUDView]
+
+            if let hudViewsContext = context.pumpManagerHUDViewsContext,
+                let contextHUDViews = hudViewsContext.hudViews
+            {
+                hudViews = contextHUDViews
+            } else {
+                hudViews = [ReservoirVolumeHUDView.instantiate(), BatteryLevelHUDView.instantiate()]
             }
 
-            if let reservoir = lastReservoirValue, let capacity = context.reservoirCapacity {
-                self.hudView.reservoirVolumeHUD.reservoirLevel = min(1, max(0, Double(reservoir.unitVolume / capacity)))
-                self.hudView.reservoirVolumeHUD.setReservoirVolume(volume: reservoir.unitVolume, at: reservoir.startDate)
+            self.hudView.removePumpManagerProvidedViews()
+            for view in hudViews {
+                view.stateColors = .pumpStatus
+                self.hudView.addHUDView(view)
             }
 
             if let netBasal = context.netBasal {

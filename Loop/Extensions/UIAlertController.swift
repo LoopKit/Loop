@@ -18,7 +18,7 @@ extension UIAlertController {
      - parameter handler: A closure to execute when the sheet is dismissed after selection. The closure has a single argument:
         - endDate: The date at which the user selected the workout to end
      */
-    convenience init(workoutDurationSelectionHandler handler: @escaping (_ endDate: Date) -> Void) {
+    internal convenience init(workoutDurationSelectionHandler handler: @escaping (_ endDate: Date) -> Void) {
         self.init(
             title: NSLocalizedString("Use Workout Glucose Targets", comment: "The title of the alert controller used to select a duration for workout targets"),
             message: nil,
@@ -51,7 +51,7 @@ extension UIAlertController {
     ///   - cgmManagers: An array of PumpManagers
     ///   - selectionHandler: A closure to execute when a manager is selected
     ///   - manager: The selected manager
-    convenience init(pumpManagers: [PumpManagerUI.Type], selectionHandler: @escaping (_ manager: PumpManagerUI.Type) -> Void) {
+    internal convenience init(pumpManagers: [PumpManagerUI.Type], selectionHandler: @escaping (_ manager: PumpManagerUI.Type) -> Void) {
         self.init(
             title: NSLocalizedString("Add Pump", comment: "Action sheet title selecting Pump"),
             message: nil,
@@ -77,7 +77,7 @@ extension UIAlertController {
     ///   - selectionHandler: A closure to execute when either a new CGMManager or the current PumpManager is selected
     ///   - cgmManager: The selected CGMManager type
     ///   - pumpManager: The selected PumpManager instance
-    convenience init(cgmManagers: [CGMManagerUI.Type], pumpManager: CGMManager?, selectionHandler: @escaping (_ cgmManager: CGMManagerUI.Type?, _ pumpManager: CGMManager?) -> Void) {
+    internal convenience init(cgmManagers: [CGMManagerUI.Type], pumpManager: CGMManager?, selectionHandler: @escaping (_ cgmManager: CGMManagerUI.Type?, _ pumpManager: CGMManager?) -> Void) {
         self.init(
             title: NSLocalizedString("Add CGM", comment: "Action sheet title selecting CGM"),
             message: nil,
@@ -105,7 +105,7 @@ extension UIAlertController {
         }
     }
 
-    convenience init(deleteCGMManagerHandler handler: @escaping (_ isDeleted: Bool) -> Void) {
+    internal convenience init(deleteCGMManagerHandler handler: @escaping (_ isDeleted: Bool) -> Void) {
         self.init(
             title: nil,
             message: NSLocalizedString("Are you sure you want to delete this CGM?", comment: "Confirmation message for deleting a CGM"),
@@ -125,7 +125,7 @@ extension UIAlertController {
         }
     }
 
-    func addCancelAction(handler: ((UIAlertAction) -> Void)? = nil) {
+    internal func addCancelAction(handler: ((UIAlertAction) -> Void)? = nil) {
         let cancel = NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet")
         addAction(UIAlertAction(title: cancel, style: .cancel, handler: handler))
     }

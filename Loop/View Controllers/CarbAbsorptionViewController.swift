@@ -12,6 +12,7 @@ import os.log
 
 import LoopKit
 import LoopKitUI
+import LoopCore
 
 
 private extension RefreshContext {
@@ -436,7 +437,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         break  // Notification will trigger update
                     case .failure(let error):
                         self.refreshContext.update(with: .carbs)
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     }
                 }
             }
@@ -535,7 +536,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 case .failure(let error):
                     // Ignore bolus wizard errors
                     if error is CarbStore.CarbStoreError {
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     }
                 }
             }

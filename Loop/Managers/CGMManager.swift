@@ -9,6 +9,7 @@ import LoopKit
 import CGMBLEKit
 import G4ShareSpy
 import ShareClient
+import MockKit
 
 
 let allCGMManagers: [CGMManager.Type] = [
@@ -16,6 +17,7 @@ let allCGMManagers: [CGMManager.Type] = [
     G5CGMManager.self,
     G4CGMManager.self,
     ShareClientManager.self,
+    MockCGMManager.self,
 ]
 
 

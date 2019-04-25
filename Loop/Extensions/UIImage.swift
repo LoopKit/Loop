@@ -31,14 +31,6 @@ extension UIImage {
         return suffix
     }
 
-    static func batteryHUDImageWithLevel(_ level: Double?) -> UIImage? {
-        return UIImage(named: "battery_\(imageSuffixForLevel(level))")
-    }
-
-    static func reservoirHUDImageWithLevel(_ level: Double?) -> UIImage? {
-        return UIImage(named: "reservoir_\(imageSuffixForLevel(level))")
-    }
-
     static func preMealImage(selected: Bool) -> UIImage? {
         return UIImage(named: selected ? "Pre-Meal Selected" : "Pre-Meal")
     }

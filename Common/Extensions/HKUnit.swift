@@ -7,6 +7,7 @@
 //
 
 import HealthKit
+import LoopCore
 
 // Code in this extension is duplicated from:
 //   https://github.com/LoopKit/LoopKit/blob/master/LoopKit/HKUnit.swift
@@ -20,14 +21,6 @@ extension HKUnit {
             return 1
         }
     }
-
-    static let milligramsPerDeciliter: HKUnit = {
-        return HKUnit.gramUnit(with: .milli).unitDivided(by: HKUnit.literUnit(with: .deci))
-    }()
-    
-    static let millimolesPerLiter: HKUnit = {
-        return HKUnit.moleUnit(with: .milli, molarMass: HKUnitMolarMassBloodGlucose).unitDivided(by: HKUnit.liter())
-    }()
 
     var localizedShortUnitString: String {
         if self == HKUnit.millimolesPerLiter {
