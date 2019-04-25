@@ -16,7 +16,7 @@ extension PersistenceController {
             return self.init(directoryURL: URL(fileURLWithPath: "/"))
         }
 
-        let isReadOnly = isReadOnly || Bundle.main.bundleURL.pathExtension == "appex"
+        let isReadOnly = isReadOnly || Bundle.main.isAppExtension
 
         return self.init(directoryURL: directoryURL.appendingPathComponent("com.loopkit.LoopKit", isDirectory: true), isReadOnly: isReadOnly)
     }
@@ -26,7 +26,7 @@ extension PersistenceController {
             fatalError("Could not access the document directory of the current process")
         }
 
-        let isReadOnly = Bundle.main.bundleURL.pathExtension == "appex"
+        let isReadOnly = Bundle.main.isAppExtension
 
         return self.init(directoryURL: directoryURL.appendingPathComponent("com.loopkit.LoopKit"), isReadOnly: isReadOnly)
     }

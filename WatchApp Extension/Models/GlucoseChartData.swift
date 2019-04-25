@@ -22,7 +22,7 @@ struct GlucoseChartData {
         }
     }
 
-    private(set) var historicalGlucoseRange: Range<HKQuantity>?
+    private(set) var historicalGlucoseRange: ClosedRange<HKQuantity>?
 
     var predictedGlucose: [SampleValue]? {
         didSet {
@@ -30,7 +30,7 @@ struct GlucoseChartData {
         }
     }
 
-    private(set) var predictedGlucoseRange: Range<HKQuantity>?
+    private(set) var predictedGlucoseRange: ClosedRange<HKQuantity>?
 
     init(unit: HKUnit?, correctionRange: GlucoseRangeSchedule?, historicalGlucose: [SampleValue]?, predictedGlucose: [SampleValue]?) {
         self.unit = unit
@@ -41,7 +41,7 @@ struct GlucoseChartData {
         self.predictedGlucoseRange = predictedGlucose?.quantityRange
     }
 
-    func chartableGlucoseRange(from interval: DateInterval) -> Range<HKQuantity> {
+    func chartableGlucoseRange(from interval: DateInterval) -> ClosedRange<HKQuantity> {
         let unit = self.unit ?? .milligramsPerDeciliter
 
         // Defaults
@@ -76,7 +76,7 @@ struct GlucoseChartData {
         let lowerBound = HKQuantity(unit: unit, doubleValue: min)
         let upperBound = HKQuantity(unit: unit, doubleValue: max)
 
-        return lowerBound..<upperBound
+        return lowerBound...upperBound
     }
 }
 
@@ -97,7 +97,7 @@ private extension HKUnit {
         if self == .milligramsPerDeciliter {
             return 75
         } else {
-            return 3
+            return 4
         }
     }
 }

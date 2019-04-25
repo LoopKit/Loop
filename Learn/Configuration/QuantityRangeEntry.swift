@@ -67,11 +67,22 @@ class QuantityRangeEntry: LessonSectionProviding {
 
         numberRange = NumberRangeEntry(
             headerTitle: headerTitle,
-            minValue: NSNumber(value: minValue?.doubleValue(for: unit)),
-            maxValue: NSNumber(value: maxValue?.doubleValue(for: unit)),
+            minValue: (minValue?.doubleValue(for: unit)).map(NSNumber.init(value:)),
+            maxValue: (maxValue?.doubleValue(for: unit)).map(NSNumber.init(value:)),
             formatter: quantityFormatter.numberFormatter,
             unitString: quantityFormatter.string(from: unit),
             keyboardType: keyboardType
+        )
+    }
+
+    internal class func glucoseRange(minValue: HKQuantity, maxValue: HKQuantity, quantityFormatter: QuantityFormatter, unit: HKUnit) -> QuantityRangeEntry {
+        return QuantityRangeEntry(
+            headerTitle: NSLocalizedString("Range", comment: "Section title for glucose range"),
+            minValue: minValue,
+            maxValue: maxValue,
+            quantityFormatter: quantityFormatter,
+            unit: unit,
+            keyboardType: unit == .milligramsPerDeciliter ? .numberPad : .decimalPad
         )
     }
 }

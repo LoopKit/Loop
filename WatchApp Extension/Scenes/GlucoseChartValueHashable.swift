@@ -12,8 +12,8 @@ import HealthKit
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: Double { get }
-    var max: Double { get }
+    var min: Double { get } // milligramsPerDeciliter
+    var max: Double { get } // milligramsPerDeciliter
 
     var chartHashValue: Int { get }
 }
@@ -57,7 +57,7 @@ extension SampleValue {
 }
 
 
-extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQuantity> {
+extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRange<HKQuantity> {
     var start: Date {
         return startDate
     }

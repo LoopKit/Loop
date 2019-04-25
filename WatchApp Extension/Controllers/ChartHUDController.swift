@@ -28,7 +28,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
             case .cob:
                 return NSLocalizedString("Active Carbs", comment: "HUD row title for COB")
             case .netBasal:
-                return NSLocalizedString("Net Basal Rate", comment: "HUD row title")
+                return NSLocalizedString("Net Basal Rate", comment: "HUD row title for Net Basal Rate")
             case .reservoirVolume:
                 return NSLocalizedString("Reservoir Volume", comment: "HUD row title for remaining reservoir volume")
             }

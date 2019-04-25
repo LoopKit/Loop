@@ -22,12 +22,12 @@ extension HUDRowController {
         textLabel.setText(title.localizedUppercase)
     }
 
-    func setContentInset(_ inset: NSDirectionalEdgeInsets) {
-        outerGroup.setContentInset(inset.deviceInsets)
-    }
-
     func setDetail(_ detail: String?) {
         detailTextLabel.setText(detail ?? "—")
+    }
+
+    func setContentInset(_ inset: NSDirectionalEdgeInsets) {
+        outerGroup.setContentInset(inset.deviceInsets)
     }
 
     func setIsLastRow(_ isLastRow: Bool) {

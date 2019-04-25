@@ -6,11 +6,12 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
-import UIKit
 import HealthKit
+import LoopCore
 import LoopKit
 import LoopKitUI
-import LoopCore
+import LoopUI
+import UIKit
 
 
 private extension RefreshContext {
@@ -26,10 +27,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
-        charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60),
-            max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
-        )
+        glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
 
         let notificationCenter = NotificationCenter.default
 
@@ -85,6 +83,12 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         }
     }
 
+    let glucoseChart = PredictedGlucoseChart()
+
+    override func createChartsManager() -> ChartsManager {
+        return ChartsManager(colors: .default, settings: .default, charts: [glucoseChart])
+    }
+
     override func glucoseUnitDidChange() {
         refreshContext = RefreshContext.all
     }
@@ -115,24 +119,24 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
-            self.charts.setPredictedGlucoseValues(state.predictedGlucose ?? [])
+            self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucose ?? [])
 
             do {
                 let glucose = try state.predictGlucose(using: self.selectedInputs)
-                self.charts.setAlternatePredictedGlucoseValues(glucose)
+                self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
             } catch {
                 self.refreshContext.update(with: .status)
-                self.charts.setAlternatePredictedGlucoseValues([])
+                self.glucoseChart.setAlternatePredictedGlucoseValues([])
             }
 
-            if let lastPoint = self.charts.alternatePredictedGlucosePoints?.last?.y {
+            if let lastPoint = self.glucoseChart.alternatePredictedGlucosePoints?.last?.y {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
             } else {
                 self.eventualGlucoseDescription = nil
             }
 
             if self.refreshContext.remove(.targets) != nil {
-                self.charts.targetGlucoseSchedule = manager.settings.glucoseTargetRangeSchedule
+                self.glucoseChart.targetGlucoseSchedule = manager.settings.glucoseTargetRangeSchedule
             }
 
             reloadGroup.leave()
@@ -140,8 +144,9 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         reloadGroup.notify(queue: .main) {
             if let glucoseValues = glucoseValues {
-                self.charts.setGlucoseValues(glucoseValues)
+                self.glucoseChart.setGlucoseValues(glucoseValues)
             }
+            self.charts.invalidateChart(atIndex: 0)
 
             self.charts.prerender()
 
@@ -203,7 +208,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             let cell = tableView.dequeueReusableCell(withIdentifier: ChartTableViewCell.className, for: indexPath) as! ChartTableViewCell
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
             cell.chartContentView.chartGenerator = { [weak self] (frame) in
-                return self?.charts.glucoseChartWithFrame(frame)?.view
+                return self?.charts.chart(atIndex: 0, frame: frame)?.view
             }
 
             self.tableView(tableView, updateTitleFor: cell, at: indexPath)
@@ -254,18 +259,18 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         cell.accessoryType = selectedInputs.contains(input) ? .checkmark : .none
         cell.enabled = input != .retrospection || deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
 
-        var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit) ?? ""
+        var subtitleText = input.localizedDescription(forGlucoseUnit: glucoseChart.glucoseUnit) ?? ""
 
         if input == .retrospection,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
             let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
         {
             let formatter = QuantityFormatter()
-            formatter.setPreferredNumberFormatter(for: charts.glucoseUnit)
-            let predicted = HKQuantity(unit: charts.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: charts.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: charts.glucoseUnit))
-            var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0, for: charts.glucoseUnit) ?? "?" }
+            formatter.setPreferredNumberFormatter(for: glucoseChart.glucoseUnit)
+            let predicted = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit))
+            var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0, for: glucoseChart.glucoseUnit) ?? "?" }
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
-            values.append(formatter.string(from: lastDiscrepancy.quantity, for: charts.glucoseUnit) ?? "?" )
+            values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?" )
 
             let retro = String(
                 format: NSLocalizedString("prediction-description-retrospective-correction", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),

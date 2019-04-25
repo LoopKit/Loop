@@ -16,7 +16,7 @@ public extension Sequence where Element: TimelineValue {
     /// - parameter date: The date to use in the search
     ///
     /// - returns: The closest index, if any exist before the specified date
-    func closestIndexPriorToDate(_ date: Date) -> Int? {
+    func closestIndex(priorTo date: Date) -> Int? {
         var closestIndex: Int?
 
         for (index, value) in self.enumerated() {
