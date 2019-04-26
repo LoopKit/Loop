@@ -7,6 +7,7 @@
 
 import LoopKit
 import NightscoutUploadKit
+import MinimedKit
 
 
 extension PersistedPumpEvent {
