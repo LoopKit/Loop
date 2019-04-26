@@ -765,7 +765,7 @@ class RecommendBolusTests: XCTestCase {
             at: glucose.first!.startDate,
             suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0),
             sensitivity: insulinSensitivitySchedule,
-            model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0),
+            model: ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0, initialDelay: 20),
             pendingInsulin: 0,
             maxBolus: maxBolus,
             volumeRounder: fortyIncrementsPerUnitRounder

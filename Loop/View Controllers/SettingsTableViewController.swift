@@ -42,6 +42,10 @@ final class SettingsTableViewController: UITableViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup?.uploadProfile(uploader: uploader)
+        }
 
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
