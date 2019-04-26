@@ -134,7 +134,7 @@ final class AnalyticsManager: IdentifiableClass {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(_ carbs: Double) {
+    func didAddCarbsFromWatch() {
         logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 

@@ -9,6 +9,7 @@
 import Foundation
 import WatchKit
 import LoopKit
+import LoopCore
 import WatchConnectivity
 
 
