@@ -486,19 +486,6 @@ extension DeviceDataManager: PumpManagerDelegate {
                         self.loopManager.settings.scheduleOverride = enactOverride
                         NotificationManager.sendRemoteTempSetNotification(lowTarget: String(format:"%.0f",lowerTarget.doubleValue(for: userUnit!)), highTarget: String(format:"%.0f", upperTarget.doubleValue(for: userUnit!)), multiplier: String(format:"%.2f",multiplier), duration: String(last.duration) )
                         
-                        
-                        //                        presets[index].settings.insulinNeedsScaleFactor = multiplier
-                        //                        //presets[index].settings.basalRateMultiplier = multiplier
-                        //                       // presets[index].settings.insulinSensitivityMultiplier = 1.0/multiplier
-                        //                         presets[index].duration = .finite(.minutes(Double(last.duration) - intervalSinceCreated ))
-                        //                       // presets[index].duration = .finite(.minutes(Double(last.duration)))
-                        //                        presets[index].settings.targetRange = DoubleRange(minValue: lowerTarget.doubleValue(for: userUnit!), maxValue: upperTarget.doubleValue(for: userUnit!))
-                        //                        self.loopManager.settings.overridePresets = presets
-                        //                        let enactOverride = presets[index].createOverride()
-                        //                        self.loopManager.settings.scheduleOverride = enactOverride
-                        //
-                        //                        NotificationManager.sendRemoteTempSetNotification(lowTarget: String(format:"%.0f",lowerTarget.doubleValue(for: userUnit!)), highTarget: String(format:"%.0f", upperTarget.doubleValue(for: userUnit!)), multiplier: String(format:"%.2f",multiplier), duration: String(last.duration) )
-                        //
                         return
                     }
                     
