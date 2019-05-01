@@ -71,3 +71,6 @@ RemoteSettings.plist
 
 # Framework development
 Loop.xcworkspace
+
+# Ignore the idea folder of Jetbrains ides
+.idea/
