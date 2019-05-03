@@ -395,6 +395,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             
             do {
                 let temptargets = try JSONDecoder().decode([NStempTarget].self, from: data)
+                self.log.default("temptarget count: \(temptargets.count)")
                 //check to see if we found some recent temp targets
                 if temptargets.count == 0 {return}
                 //find the index of the most recent temptargets - sort by date
@@ -404,7 +405,7 @@ extension DeviceDataManager: PumpManagerDelegate {
                 }
                 let last = temptargets[cdates.index(of:cdates.max()!) as! Int]
                 //if duration is 0 we dont care about minmax levels, if not we need them to exist as Double
-                
+                self.log.default("last temptarget: \(last)")
                 //cancel any prior remoteTemp if last duration = 0 and remote temp is active else return anyway
                 if last.duration < 1 {
                     if let override = self.loopManager.settings.scheduleOverride, override.isActive() {
@@ -512,14 +513,6 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.default("PumpManager:\(type(of: pumpManager)) did read reservoir value")
 
         loopManager.addReservoirValue(units, at: date) { (result) in
-            
-            //////
-            // update BG correction range overrides via NS
-            // this call may be more appropriate somewhere
-            let allowremoteTempTargets : Bool = true
-            if allowremoteTempTargets == true {self.setNStemp()}
-            /////
-            
             switch result {
             case .failure(let error):
                 self.log.error("Failed to addReservoirValue: \(error)")
@@ -555,6 +548,14 @@ extension DeviceDataManager: PumpManagerDelegate {
     
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         log.default("PumpManager:\(type(of: pumpManager)) recommends loop")
+
+        //////
+        // update BG correction range overrides via NS
+        // this call may be more appropriate somewhere
+        let allowremoteTempTargets : Bool = true
+        if allowremoteTempTargets == true {self.setNStemp()}
+        /////
+
         loopManager.loop()
     }
 
