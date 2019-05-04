@@ -155,6 +155,8 @@ final class NightscoutDataManager {
             pumpStatus = NightscoutUploadKit.PumpStatus(
                 clock: Date(),
                 pumpID: pumpManagerStatus.device.localIdentifier ?? "Unknown",
+                manufacturer: pumpManagerStatus.device.manufacturer,
+                model: pumpManagerStatus.device.model,
                 iob: nil,
                 battery: battery,
                 suspended: pumpManagerStatus.basalDeliveryState == .suspended,
