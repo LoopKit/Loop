@@ -152,6 +152,13 @@ final class NightscoutDataManager {
                 bolusing = false
             }
             
+            let currentReservoirUnits: Double?
+            if let lastReservoirValue = deviceManager.loopManager.doseStore.lastReservoirValue, lastReservoirValue.startDate > Date().addingTimeInterval(.minutes(-15)) {
+                currentReservoirUnits = lastReservoirValue.unitVolume
+            } else {
+                currentReservoirUnits = nil
+            }
+
             pumpStatus = NightscoutUploadKit.PumpStatus(
                 clock: Date(),
                 pumpID: pumpManagerStatus.device.localIdentifier ?? "Unknown",
@@ -161,7 +168,7 @@ final class NightscoutDataManager {
                 battery: battery,
                 suspended: pumpManagerStatus.basalDeliveryState == .suspended,
                 bolusing: bolusing,
-                reservoir: deviceManager.loopManager.doseStore.lastReservoirValue?.unitVolume,
+                reservoir: currentReservoirUnits,
                 secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())
         } else {
             pumpStatus = nil
