@@ -175,8 +175,7 @@ extension LoopSettings: RawRepresentable {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,
-            "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled
-            "retrospectiveCorrectionEnabled": retrospectiveCorrectionEnabled,
+            "integralRetrospectiveCorrectionEnabled": integralRetrospectiveCorrectionEnabled,
             "overridePresets": overridePresets.map { $0.rawValue }
         ]
 
