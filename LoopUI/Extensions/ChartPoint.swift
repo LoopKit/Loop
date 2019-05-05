@@ -56,24 +56,27 @@ extension ChartPoint {
         return maxPoints + minPoints.reversed()
     }
 
-    static func pointsForGlucoseRangeScheduleOverride(_ glucoseRangeSchedule: GlucoseRangeSchedule, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
-        guard let override = glucoseRangeSchedule.override else {
+    static func pointsForGlucoseRangeScheduleOverride(_ override: TemporaryScheduleOverride, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool = false) -> [ChartPoint] {
+        guard let targetRange = override.settings.targetRange else {
             return []
         }
+        return pointsForGlucoseRangeScheduleOverride(
+            range: targetRange.rangeWithMinimumIncremement(unit.chartableIncrement),
+            activeInterval: override.activeInterval,
+            unit: unit,
+            xAxisValues: xAxisValues,
+            extendEndDateToChart: extendEndDateToChart
+        )
+    }
 
-        let range = override.quantityRange.doubleRangeWithMinimumIncrement(in: unit)
-        let startDate = Date()
-        let endDate = override.end
-
-        guard endDate.timeIntervalSince(startDate) > 0,
-            let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate
-        else {
+    private static func pointsForGlucoseRangeScheduleOverride(range: DoubleRange, activeInterval: DateInterval, unit: HKUnit, xAxisValues: [ChartAxisValue], extendEndDateToChart: Bool) -> [ChartPoint] {
+        guard let lastXAxisValue = xAxisValues.last as? ChartAxisValueDate else {
             return []
         }
 
         let dateFormatter = DateFormatter()
-        let startDateAxisValue = ChartAxisValueDate(date: startDate, formatter: dateFormatter)
-        let displayEndDate = min(lastXAxisValue.date, extendEndDateToChart ? .distantFuture : endDate)
+        let startDateAxisValue = ChartAxisValueDate(date: activeInterval.start, formatter: dateFormatter)
+        let displayEndDate = min(lastXAxisValue.date, extendEndDateToChart ? .distantFuture : activeInterval.end)
         let endDateAxisValue = ChartAxisValueDate(date: displayEndDate, formatter: dateFormatter)
         let minValue = ChartAxisValueDouble(range.minValue)
         let maxValue = ChartAxisValueDouble(range.maxValue)
@@ -106,6 +109,21 @@ private extension Range where Bound == HKQuantity {
 
         var minValue = self.lowerBound.doubleValue(for: unit)
         var maxValue = self.upperBound.doubleValue(for: unit)
+
+        if (maxValue - minValue) < .ulpOfOne {
+            minValue -= increment
+            maxValue += increment
+        }
+
+        return DoubleRange(minValue: minValue, maxValue: maxValue)
+    }
+}
+
+
+private extension DoubleRange {
+    func rangeWithMinimumIncremement(_ increment: Double) -> DoubleRange {
+        var minValue = self.minValue
+        var maxValue = self.maxValue
 
         if (maxValue - minValue) < .ulpOfOne {
             minValue -= increment
