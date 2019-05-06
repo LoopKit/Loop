@@ -19,7 +19,7 @@ final class WatchDataManager: NSObject {
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
-        self.log = deviceManager.logger.forCategory("WatchDataManager")
+        self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
 
         super.init()
 
@@ -155,7 +155,7 @@ final class WatchDataManager: NSObject {
             context.loopLastRunDate = manager.lastLoopCompleted
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
             context.cob = state.carbsOnBoard?.quantity.doubleValue(for: HKUnit.gram())
-            context.glucoseTrendRawValue = self.deviceManager.cgmManager?.sensorState?.trendType?.rawValue
+            context.glucoseTrendRawValue = self.deviceManager.sensorState?.trendType?.rawValue
 
             context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
 

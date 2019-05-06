@@ -22,6 +22,8 @@ private extension RefreshContext {
 
 final class CarbAbsorptionViewController: ChartsTableViewController, IdentifiableClass {
 
+    private let log = OSLog(category: "StatusTableViewController")
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -147,7 +149,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         carbStatuses = status
                         carbsOnBoard = status.getClampedCarbsOnBoard()
                     case .failure(let error):
-                        self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                        self.log.error("CarbStore failed to get carbStatus: %{public}@", String(describing: error))
                         retryContext.update(with: .carbs)
                     }
 
@@ -161,7 +163,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         carbEffects = effects
                     case .failure(let error):
                         carbEffects = []
-                        self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                        self.log.error("CarbStore failed to get glucoseEffects: %{public}@", String(describing: error))
                         retryContext.update(with: .carbs)
                     }
                     reloadGroup.leave()
@@ -178,7 +180,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 case .success(let total):
                     carbTotal = total
                 case .failure(let error):
-                    self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                    self.log.error("CarbStore failed to get total carbs: %{public}@", String(describing: error))
                     retryContext.update(with: .carbs)
                 }
 

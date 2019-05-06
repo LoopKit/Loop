@@ -104,7 +104,7 @@ final class StatusExtensionDataManager {
             context.batteryPercentage = dataManager.pumpManager?.status.pumpBatteryChargeRemaining
             context.reservoirCapacity = dataManager.pumpManager?.pumpReservoirCapacity
 
-            if let sensorInfo = dataManager.cgmManager?.sensorState {
+            if let sensorInfo = dataManager.sensorState {
                 context.sensor = SensorDisplayableContext(
                     isStateValid: sensorInfo.isStateValid,
                     stateDescription: sensorInfo.stateDescription,
@@ -114,7 +114,7 @@ final class StatusExtensionDataManager {
             }
             
             if let pumpManagerHUDProvider = dataManager.pumpManagerHUDProvider {
-                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValueFromHudProvider(pumpManagerHUDProvider))
+                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValueFromHUDProvider(pumpManagerHUDProvider))
             }
 
             completionHandler(context)

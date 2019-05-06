@@ -40,13 +40,17 @@ extension WCSession {
         sendMessage(carbEntry.rawValue,
             replyHandler: { reply in
                 guard let suggestion = BolusSuggestionUserInfo(rawValue: reply as BolusSuggestionUserInfo.RawValue) else {
+                    log.error("sendCarbEntryMessage: could not decode reply: %{public}@", reply)
                     errorHandler(MessageError.decoding)
                     return
                 }
 
                 replyHandler(suggestion)
             },
-            errorHandler: errorHandler
+            errorHandler: { error in
+                log.error("sendCarbEntryMessage: message send failed with error: %{public}@", String(describing: error))
+                errorHandler(error)
+            }
         )
     }
 

@@ -34,6 +34,8 @@ public struct LoopSettings: Equatable {
     /// The amount of time since a given date that data should be considered valid
     public let recencyInterval = TimeInterval(minutes: 15)
 
+    public let batteryReplacementDetectionThreshold = 0.5
+
     // MARK - Display settings
 
     public let minimumChartWidthPerHour: CGFloat = 50
