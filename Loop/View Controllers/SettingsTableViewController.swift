@@ -301,7 +301,7 @@ final class SettingsTableViewController: UITableViewController {
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? SettingsTableViewCell.TapToSetString
             case .loggly:
-                let logglyService = dataManager.logger.logglyService
+                let logglyService = DiagnosticLogger.shared.logglyService
 
                 configCell.textLabel?.text = logglyService.title
                 configCell.detailTextLabel?.text = logglyService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
@@ -572,10 +572,10 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             case .loggly:
-                let service = dataManager.logger.logglyService
+                let service = DiagnosticLogger.shared.logglyService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
-                    self?.dataManager.logger.logglyService = service
+                    DiagnosticLogger.shared.logglyService = service
 
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
@@ -625,7 +625,7 @@ final class SettingsTableViewController: UITableViewController {
                 tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
             }
             tableView.reloadSections([Section.pump.rawValue], with: .fade)
-            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
+            tableView.reloadSections([Section.cgm.rawValue], with: .fade)
         case .cgm:
             let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
             let wasTestingCGMManager = isTestingCGMManager

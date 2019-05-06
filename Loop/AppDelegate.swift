@@ -48,7 +48,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceManager.pumpManager?.updateBLEHeartbeatPreference()
+        deviceManager.updatePumpManagerBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

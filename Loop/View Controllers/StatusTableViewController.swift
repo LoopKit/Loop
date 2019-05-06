@@ -34,7 +34,7 @@ final class StatusTableViewController: ChartsTableViewController {
         
         if let pumpManager = deviceManager.pumpManager {
             self.basalDeliveryState = pumpManager.status.basalDeliveryState
-            pumpManager.addStatusObserver(self)
+            pumpManager.addStatusObserver(self, queue: .main)
         }
 
         let notificationCenter = NotificationCenter.default
@@ -357,7 +357,7 @@ final class StatusTableViewController: ChartsTableViewController {
             deviceManager.loopManager.doseStore.getInsulinOnBoardValues(start: startDate) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.deviceManager.logger.addError(error, fromSource: "DoseStore")
+                    self.log.error("DoseStore failed to get insulin on board values: %{public}@", String(describing: error))
                     retryContext.update(with: .insulin)
                     iobValues = []
                 case .success(let values):
@@ -370,7 +370,7 @@ final class StatusTableViewController: ChartsTableViewController {
             deviceManager.loopManager.doseStore.getNormalizedDoseEntries(start: startDate) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.deviceManager.logger.addError(error, fromSource: "DoseStore")
+                    self.log.error("DoseStore failed to get normalized dose entries: %{public}@", String(describing: error))
                     retryContext.update(with: .insulin)
                     doseEntries = []
                 case .success(let doses):
@@ -453,7 +453,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                         at: glucose.startDate,
                         unit: unit,
-                        sensor: self.deviceManager.cgmManager?.sensorState
+                        sensor: self.deviceManager.sensorState
                     )
                 }
             }
@@ -914,7 +914,7 @@ final class StatusTableViewController: ChartsTableViewController {
                             self.updateHUDandStatusRows(statusRowMode: .hidden, newSize: nil, animated: true)
 
                             if let error = error {
-                                self.deviceManager.logger.addError(error, fromSource: "TempBasal")
+                                self.log.error("Failed to enact recommended temp basal: %{public}@", String(describing: error))
                                 self.present(UIAlertController(with: error), animated: true)
                             } else {
                                 self.refreshContext.update(with: .status)
@@ -1046,7 +1046,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     if error is CarbStore.CarbStoreError {
                         self.present(UIAlertController(with: error), animated: true)
                     } else {
-                        self.deviceManager.logger.addError(error, fromSource: "Bolus")
+                        self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
                     }
                 }
             }
@@ -1151,8 +1151,7 @@ final class StatusTableViewController: ChartsTableViewController {
     private func configurePumpManagerHUDViews() {
         if let hudView = hudView {
             hudView.removePumpManagerProvidedViews()
-            if var pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider
-            {
+            if let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider {
                 let views = pumpManagerHUDProvider.createHUDViews()
                 for view in views {
                     addViewToHUD(view)
@@ -1220,11 +1219,11 @@ extension StatusTableViewController: CompletionDelegate {
 }
 
 extension StatusTableViewController: PumpManagerStatusObserver {
-    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus) {
-        DispatchQueue.main.async {
-            self.basalDeliveryState = status.basalDeliveryState
-            self.bolusState = status.bolusState
-        }
+    func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        self.basalDeliveryState = status.basalDeliveryState
+        self.bolusState = status.bolusState
     }
 }
 

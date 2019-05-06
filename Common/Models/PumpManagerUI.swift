@@ -29,7 +29,7 @@ func PumpManagerHUDViewsFromRawValue(_ rawValue: PumpManagerHUDViewsRawValue) ->
     return manager.createHUDViews(rawValue: rawState)
 }
 
-func PumpManagerHUDViewsRawValueFromHudProvider(_ hudProvider: HUDProvider) -> PumpManagerHUDViewsRawValue {
+func PumpManagerHUDViewsRawValueFromHUDProvider(_ hudProvider: HUDProvider) -> PumpManagerHUDViewsRawValue {
     return [
         "managerIdentifier": hudProvider.managerIdentifier,
         "hudProviderViews": hudProvider.hudViewsRawState

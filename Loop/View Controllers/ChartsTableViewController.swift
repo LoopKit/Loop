@@ -11,7 +11,7 @@ import HealthKit
 import os.log
 
 
-enum RefreshContext {
+enum RefreshContext: Equatable {
     /// Catch-all for lastLoopCompleted, recommendedTempBasal, lastTempBasal, preferences
     case status
 
@@ -24,7 +24,11 @@ enum RefreshContext {
 }
 
 extension RefreshContext: Hashable {
-    var hashValue: Int {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(rawValue)
+    }
+
+    private var rawValue: Int {
         switch self {
         case .status:
             return 1
@@ -43,7 +47,7 @@ extension RefreshContext: Hashable {
     }
 
     static func ==(lhs: RefreshContext, rhs: RefreshContext) -> Bool {
-        return lhs.hashValue == rhs.hashValue
+        return lhs.rawValue == rhs.rawValue
     }
 }
 
