@@ -38,6 +38,7 @@ final class NightscoutDataManager {
         deviceManager.loopManager.getLoopState { (manager, state) in
             var loopError = state.error
             let recommendedBolus: Double?
+            
 
             recommendedBolus = state.recommendedBolus?.recommendation.amount
 
@@ -155,7 +156,12 @@ final class NightscoutDataManager {
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 0
         formatter.numberStyle = .decimal
-        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive(), override.context != .preMeal {
+        
+        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive() {
+            
+//        }
+//        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive(), override.context != .preMeal {
+            
             let basalRateMultiplier = (override.settings.basalRateMultiplier ?? 1.0) * 100.0
             loopMultiplier = formatter.string(from: basalRateMultiplier as NSNumber) ?? "N/A"
         }
@@ -226,8 +232,35 @@ final class NightscoutDataManager {
         } else {
             pumpStatus = nil
         }
+        //add overrideStatus
+       
+        let overrideStatus: NightscoutUploadKit.OverrideStatus?
+        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive() {
+            let range = deviceManager.loopManager.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: Date())
+            let unit = HKUnit.milligramsPerDeciliter
+            let lowerTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range!.minValue)
+            let upperTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range!.maxValue)
+            let correctionRange = CorrectionRange(minValue: lowerTarget, maxValue: upperTarget)
+            let endDate = override.endDate
+            let duration : TimeInterval?
+            if override.duration == .indefinite {
+                duration = nil
+            }
+            else
+            {
+                duration = endDate.timeIntervalSince(Date())
+            }
+            
+            overrideStatus = NightscoutUploadKit.OverrideStatus(name: nil, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
+            
+        }
         
-        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus())
+        else
+        
+        {
+            overrideStatus = NightscoutUploadKit.OverrideStatus(timestamp: Date(), active: false)
+        }
+        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus(), overrideStatus: overrideStatus)
 
     }
     
@@ -245,10 +278,10 @@ final class NightscoutDataManager {
     }
 
     func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, deviceName: String?, firmwareVersion: String?) {
-        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, uploaderStatus: nil)
+        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, uploaderStatus: nil, overrideStatus: nil)
     }
 
-    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?) {
+    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?, overrideStatus: OverrideStatus?) {
 
         guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
             return
@@ -264,7 +297,7 @@ final class NightscoutDataManager {
         let uploaderDevice = UIDevice.current
 
         // Build DeviceStatus
-        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: nil)
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: nil, overrideStatus: overrideStatus)
 
         self.lastDeviceStatusUpload = Date()
         uploader.uploadDeviceStatus(deviceStatus)
