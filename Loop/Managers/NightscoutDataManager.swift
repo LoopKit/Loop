@@ -250,8 +250,19 @@ final class NightscoutDataManager {
             {
                 duration = endDate.timeIntervalSince(Date())
             }
+            let name : String?
             
-            overrideStatus = NightscoutUploadKit.OverrideStatus(name: nil, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
+            switch override.context {
+            case .preMeal:
+                    name = "preMeal"
+            case .custom:
+                    name = "Custom"
+            case .preset(let preset):
+                    name = preset.name
+            }
+            
+            
+            overrideStatus = NightscoutUploadKit.OverrideStatus(name: name, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
             
         }
         
