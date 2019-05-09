@@ -129,77 +129,10 @@ final class NightscoutDataManager {
         let loopName = Bundle.main.bundleDisplayName
         let loopVersion = Bundle.main.shortVersionString
 
-        //add new loop parameters
-        var loopParams : String = ""
-        var loopBGTlow : String = ""
-        var loopBGThigh : String = ""
-        var loopEventualBG : String = ""
-        if let loopBGRange = deviceManager.loopManager.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: Date()), let userUnit = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.unit {
-            if userUnit == HKUnit.milligramsPerDeciliter {
-                loopBGTlow = String(Int((loopBGRange.minValue)))
-                loopBGThigh = String(Int((loopBGRange.maxValue)))
-            }
-            else
-            {
-                loopBGTlow = String(format:"%.1f", (loopBGRange.minValue))
-                loopBGThigh = String(format:"%.1f",(loopBGRange.maxValue))
-            }
-        }
-            
-        else {
-            loopBGTlow = "N/A"
-            loopBGThigh = "N/A"
-        }
-        
-        var loopMultiplier = "N/A"
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 0
-        formatter.numberStyle = .decimal
-        
-        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive() {
-            
-//        }
-//        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive(), override.context != .preMeal {
-            
-            let basalRateMultiplier = (override.settings.basalRateMultiplier ?? 1.0) * 100.0
-            loopMultiplier = formatter.string(from: basalRateMultiplier as NSNumber) ?? "N/A"
-        }
-        
-        if let loopEventualBGquantity = predictedGlucose?.last?.quantity, let userUnit = deviceManager.loopManager.settings.glucoseTargetRangeSchedule?.unit  {
-            if userUnit == HKUnit.milligramsPerDeciliter {
-                loopEventualBG = String(Int(loopEventualBGquantity.doubleValue(for: userUnit)))
-            }
-            else
-            {
-                loopEventualBG = String(format:"%.1f",loopEventualBGquantity.doubleValue(for: userUnit))
-            }
-        }
-        else
-        {
-            loopEventualBG = "N/A"
-        }
-        
-        //loopParams = "BGTargets (" + loopBGTlow + ":" + loopBGThigh + ") | EvBG " + loopEventualBG + " | " + loopName
-        loopParams = "BGTargets (" + loopBGTlow + ":" + loopBGThigh + ") | EvBG " + loopEventualBG
-        
-        // TODO: add check on length of loopName - if too long it goes past max pill length (not sure what that is)
-        
-        if loopMultiplier == "N/A" {
-            loopParams = loopParams + " | " + loopName
-        }
-        else  {
-            loopParams = loopParams + " | O:" + loopMultiplier + "%"
-        }
-        
-        //upload loopParams instead of just loopName
-        //that is the only pill that has the option to modify the text
-        let loopStatus = LoopStatus(name: loopParams, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
-        
-        //if you wish to have the Loop pill clean, without the added BGtargets and EventualBG showing, remove the slashes on code line below, and add slashes to code line above
-        
-        //let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
-        
+        //this is the only pill that has the option to modify the text
+        //to do that pass a different name value instead of loopName
+        let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
+
         let pumpStatus: NightscoutUploadKit.PumpStatus?
         
         if let pumpManagerStatus = deviceManager.pumpManagerStatus
