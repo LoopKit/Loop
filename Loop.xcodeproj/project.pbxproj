@@ -23,6 +23,7 @@
 
 /* Begin PBXBuildFile section */
 		2E4E0F0822845B3500D0A007 /* SpikeClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E4E0F0722845B3500D0A007 /* SpikeClient.framework */; };
+		2E4E0F0A2284811000D0A007 /* SpikeClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E4E0F092284810F00D0A007 /* SpikeClientUI.framework */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -592,6 +593,7 @@
 
 /* Begin PBXFileReference section */
 		2E4E0F0722845B3500D0A007 /* SpikeClient.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpikeClient.framework; path = Carthage/Build/iOS/SpikeClient.framework; sourceTree = "<group>"; };
+		2E4E0F092284810F00D0A007 /* SpikeClientUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpikeClientUI.framework; path = Carthage/Build/iOS/SpikeClientUI.framework; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -1057,6 +1059,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E4E0F0A2284811000D0A007 /* SpikeClientUI.framework in Frameworks */,
 				2E4E0F0822845B3500D0A007 /* SpikeClient.framework in Frameworks */,
 				4379CFF021112CF700AADC79 /* ShareClientUI.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
@@ -1747,6 +1750,7 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2E4E0F092284810F00D0A007 /* SpikeClientUI.framework */,
 				2E4E0F0722845B3500D0A007 /* SpikeClient.framework */,
 				C1C7F1BF220D675700689850 /* OmniKit.framework */,
 				C1C7F1C0220D675700689850 /* OmniKitUI.framework */,
