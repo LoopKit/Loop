@@ -1,7 +1,7 @@
-github "t1dloop/LoopKit" "omni-overrides-holly"
-github "t1dloop/CGMBLEKit" "omni-overrides-holly"
+github "kdisimone/LoopKit" "jojo"
+github "kdisimone/CGMBLEKit" "jojo"
 github "i-schuetz/SwiftCharts" == 0.6.5
-github "t1dloop/dexcom-share-client-swift" "omni-overrides-holly"
-github "t1dloop/G4ShareSpy" "omni-overrides-holly"
-github "t1dloop/rileylink_ios" "omni-overrides-holly"
+github "kdisimone/dexcom-share-client-swift" "jojo"
+github "kdisimone/G4ShareSpy" "jojo"
+github "kdisimone/rileylink_ios" "jojo"
 github "LoopKit/Amplitude-iOS" "decreepify"
