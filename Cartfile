@@ -3,5 +3,5 @@ github "kdisimone/CGMBLEKit" "jojo"
 github "i-schuetz/SwiftCharts" == 0.6.5
 github "kdisimone/dexcom-share-client-swift" "jojo"
 github "kdisimone/G4ShareSpy" "jojo"
-github "kdisimone/rileylink_ios" "jojo"
+github "kdisimone/rileylink_ios" "jojo-x15-fix"
 github "LoopKit/Amplitude-iOS" "decreepify"
