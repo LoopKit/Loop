@@ -177,11 +177,12 @@ final class NightscoutDataManager {
         //add overrideStatus
        
         let overrideStatus: NightscoutUploadKit.OverrideStatus?
-        if let override = deviceManager.loopManager.settings.scheduleOverride, override.isActive() {
-            let range = deviceManager.loopManager.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: Date())
-            let unit = HKUnit.milligramsPerDeciliter
-            let lowerTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range!.minValue)
-            let upperTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range!.maxValue)
+        let settings = deviceManager.loopManager.settings
+        let unit: HKUnit = settings.glucoseTargetRangeSchedule?.unit ?? HKUnit.milligramsPerDeciliter
+        if let override = settings.scheduleOverride, override.isActive(),
+            let range = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: Date()) {
+            let lowerTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.minValue)
+            let upperTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.maxValue)
             let correctionRange = CorrectionRange(minValue: lowerTarget, maxValue: upperTarget)
             let endDate = override.endDate
             let duration : TimeInterval?
