@@ -6,4 +6,4 @@ github "LoopKit/dexcom-share-client-swift" "3eb7e2c08335a9ad5bafb9b1e0fad1eab7e5
 github "cyoung1024/spike-client-swift-195" "50acc7c2f21f0e375f3d8be6f752c5dac5ed9efb"
 github "i-schuetz/SwiftCharts" "0.6.5"
 github "maxkonovalov/MKRingProgressView" "2.2.2"
-github "ps2/rileylink_ios" "ae755a0aeec3fdaef4eece7508814a864e20b466"
+github "ps2/rileylink_ios" "c5c1c466b5697f1c3949d7d650e36349ecf85b56"
