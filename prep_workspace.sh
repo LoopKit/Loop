@@ -2,13 +2,11 @@ set -x
 set -u
 set -e
 
-echo "RUN WITH: sh prep_workspace.sh, in the loop-priv folder."
-
 # Uncomment if you have not already cloned the repo:
 # git clone https://github.com/ps2/loop-priv.git
 # cd loop-priv
 
-git checkout omnikit
+git checkout omnipod-testing
 
 carthage bootstrap --use-submodules --no-build
 
