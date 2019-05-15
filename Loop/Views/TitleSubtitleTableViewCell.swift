@@ -30,8 +30,26 @@ class TitleSubtitleTableViewCell: UITableViewCell {
         super.awakeFromNib()
 
         gradient.frame = bounds
-        gradient.colors = [UIColor.white.cgColor, UIColor.cellBackgroundColor.cgColor]
+        
+        //DarkMode
+        NotificationCenter.default.addObserver(self, selector: #selector(darkModeEnabled(_:)), name: .darkModeEnabled, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(darkModeDisabled(_:)), name: .darkModeDisabled, object: nil)
+
+        UserDefaults.standard.bool(forKey: "DarkModeEnabled") ?
+            NotificationCenter.default.post(name: .darkModeEnabled, object: nil) :
+            NotificationCenter.default.post(name: .darkModeDisabled, object: nil)
+        //DarkMode
+        
         backgroundView?.layer.insertSublayer(gradient, at: 0)
     }
 
+    //DarkMode
+    @objc func darkModeEnabled(_ notification: Notification) {
+        gradient.colors = [UIColor.black.lighter(by: 25)!.cgColor, UIColor.black.lighter(by: 25)!.cgColor]
+    }
+    
+    @objc func darkModeDisabled(_ notification: Notification) {
+        gradient.colors = [UIColor.white.cgColor, UIColor.cellBackgroundColor.cgColor]
+    }
+    //DarkMode
 }

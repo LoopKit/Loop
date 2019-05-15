@@ -11,7 +11,7 @@ import HealthKit
 import os.log
 
 
-enum RefreshContext: Equatable {
+enum RefreshContext {
     /// Catch-all for lastLoopCompleted, recommendedTempBasal, lastTempBasal, preferences
     case status
 
@@ -24,11 +24,7 @@ enum RefreshContext: Equatable {
 }
 
 extension RefreshContext: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(rawValue)
-    }
-
-    private var rawValue: Int {
+    var hashValue: Int {
         switch self {
         case .status:
             return 1
@@ -47,7 +43,7 @@ extension RefreshContext: Hashable {
     }
 
     static func ==(lhs: RefreshContext, rhs: RefreshContext) -> Bool {
-        return lhs.rawValue == rhs.rawValue
+        return lhs.hashValue == rhs.hashValue
     }
 }
 
@@ -81,11 +77,16 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
     private let log = OSLog(category: "ChartsTableViewController")
 
+    //DarkMode
+    var darkMode = (UIApplication.shared.delegate as! AppDelegate).darkMode
+    let notificationCenter = NotificationCenter.default
+    //DarkMode
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
-            self.charts.setGlucoseUnit(unit)
+            self.charts.glucoseUnit = unit
         }
 
         let notificationCenter = NotificationCenter.default
@@ -98,6 +99,11 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         ]
 
+        //DarkMode
+        notificationCenter.addObserver(self, selector: #selector(darkModeEnabled(_:)), name: .darkModeEnabled, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(darkModeDisabled(_:)), name: .darkModeDisabled, object: nil)
+        //DarkMode
+        
         let gestureRecognizer = UILongPressGestureRecognizer()
         gestureRecognizer.delegate = self
         gestureRecognizer.minimumPressDuration = 0.1
@@ -116,6 +122,11 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        //DarkMode
+        darkMode = (UIApplication.shared.delegate as! AppDelegate).darkMode
+        notificationCenter.post(name: darkMode ? .darkModeEnabled : .darkModeDisabled, object: nil)
+        //DarkMode
+        
         visible = true
     }
 
@@ -149,9 +160,12 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
     @objc private func unitPreferencesDidChange(_ note: Notification) {
         DispatchQueue.main.async {
             if let unit = self.deviceManager.loopManager.glucoseStore.preferredUnit {
-                self.charts.setGlucoseUnit(unit)
+                let didChange = unit != self.charts.glucoseUnit
+                self.charts.glucoseUnit = unit
 
-                self.glucoseUnitDidChange()
+                if didChange {
+                    self.glucoseUnitDidChange()
+                }
             }
             self.log.debug("[reloadData] for HealthKit unit preference change")
             self.reloadData()
@@ -162,11 +176,7 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
         // To override.
     }
 
-    func createChartsManager() -> ChartsManager {
-        fatalError("Subclasses must implement \(#function)")
-    }
-
-    lazy private(set) var charts = createChartsManager()
+    let charts = StatusChartsManager(colors: .default, settings: .default)
 
     // References to registered notification center observers
     var notificationObservers: [Any] = []
@@ -232,13 +242,49 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
             }
         }
     }
-}
-
-
-fileprivate extension ChartsManager {
-    func setGlucoseUnit(_ unit: HKUnit) {
-        for case let chart as GlucoseChart in charts {
-            chart.glucoseUnit = unit
+    
+    ////DarkMode
+    // MARK: - Theme
+    
+    @objc func darkModeEnabled(_ notification: Notification) {
+        enableDarkMode()
+        self.tableView.reloadData()
+    }
+    
+    @objc func darkModeDisabled(_ notification: Notification) {
+        disableDarkMode()
+        self.tableView.reloadData()
+    }
+    
+    private func enableDarkMode() {
+        self.view.backgroundColor = UIColor.black
+        self.tableView.backgroundColor = UIColor.black
+        self.navigationController?.navigationBar.barStyle = .blackTranslucent
+        self.navigationController?.view.backgroundColor = UIColor.black
+    }
+    
+    private func disableDarkMode() {
+        self.view.backgroundColor = UIColor.white
+        self.tableView.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.barStyle = .default
+        self.navigationController?.view.backgroundColor = UIColor.white
+    }
+    
+    // MARK: - Table view data source
+    
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        if darkMode {
+            cell.textLabel?.textColor = UIColor.white
+            cell.detailTextLabel?.textColor = UIColor.white
+            cell.backgroundColor = UIColor.black.lighter(by: 25)
+        }
+        else {
+            cell.textLabel?.textColor = UIColor.black
+            cell.detailTextLabel?.textColor = UIColor.black
+            cell.backgroundColor = UIColor.white
         }
     }
+    //DarkMode
+
 }

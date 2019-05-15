@@ -18,6 +18,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    //DarkMode
+    var darkMode = UserDefaults.standard.bool(forKey: "DarkModeEnabled")
+    //DarkMode
+
     private(set) lazy var deviceManager = DeviceDataManager()
 
     private var rootViewController: RootNavigationController! {
@@ -48,7 +52,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceManager.updatePumpManagerBLEHeartbeatPreference()
+        deviceManager.pumpManager?.updateBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

@@ -17,6 +17,11 @@ import LoopTestingKit
 final class SettingsTableViewController: UITableViewController {
 
     @IBOutlet var devicesSectionTitleView: UIView?
+    
+    //DarkMode
+    private var darkMode = (UIApplication.shared.delegate as! AppDelegate).darkMode
+    let notificationCenter = NotificationCenter.default
+    //DarkMode
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +32,11 @@ final class SettingsTableViewController: UITableViewController {
         tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
         tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
+        
+        //DarkMode
+        notificationCenter.addObserver(self, selector: #selector(darkModeEnabled(_:)), name: .darkModeEnabled, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(darkModeDisabled(_:)), name: .darkModeDisabled, object: nil)
+        //DarkMode
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -38,10 +48,18 @@ final class SettingsTableViewController: UITableViewController {
         }
 
         super.viewWillAppear(animated)
+        
+        //DarkMode
+        notificationCenter.post(name: darkMode ? .darkModeEnabled : .darkModeDisabled, object: nil)
+        //DarkMode
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup?.uploadProfile(uploader: uploader)
+        }
 
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
@@ -64,6 +82,7 @@ final class SettingsTableViewController: UITableViewController {
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
         case diagnostic
+        case darkMode  //DarkMode
     }
 
     fileprivate enum PumpRow: Int, CaseCountable {
@@ -82,6 +101,7 @@ final class SettingsTableViewController: UITableViewController {
         case insulinModel
         case carbRatio
         case insulinSensitivity
+        case overridePresets
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -127,6 +147,35 @@ final class SettingsTableViewController: UITableViewController {
     }
     
     // MARK: - UITableViewDataSource
+
+    //DarkMode
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        
+        if darkMode {
+            cell.textLabel?.textColor = UIColor.white
+            cell.detailTextLabel?.textColor = UIColor.white
+            cell.backgroundColor = UIColor.black
+        }
+        else {
+            cell.textLabel?.textColor = UIColor.black
+            cell.detailTextLabel?.textColor = UIColor.black
+            cell.backgroundColor = UIColor.white
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        if let headerView = view as? UITableViewHeaderFooterView {
+            if darkMode {
+                headerView.contentView.backgroundColor = UIColor.black.lighter(by: 25)
+                headerView.textLabel?.textColor = .white
+            }
+            else {
+                headerView.contentView.backgroundColor = .white
+                headerView.textLabel?.textColor = .black
+            }
+        }
+    }
+    //DarkMode
 
     private var sections: [Section] {
         var sections = Section.allCases
@@ -181,6 +230,18 @@ final class SettingsTableViewController: UITableViewController {
                 cell.accessoryType = .disclosureIndicator
 
                 return cell
+                
+            //DarkMode
+            case .darkMode:
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+                
+                switchCell.switch?.isOn = darkMode
+                switchCell.textLabel?.text = NSLocalizedString("Dark Mode", comment: "The title text for the looping enabled switch cell")
+                
+                switchCell.switch?.addTarget(self, action: #selector(darkModeChanged(_:)), for: .valueChanged)
+                
+                return switchCell
+            //DarkMode
             }
         case .pump:
             switch PumpRow(rawValue: indexPath.row)! {
@@ -287,6 +348,14 @@ final class SettingsTableViewController: UITableViewController {
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
+            case .overridePresets:
+                configCell.textLabel?.text = NSLocalizedString("Override Presets", comment: "The title text for the override presets")
+                let maxPreviewSymbolCount = 3
+                let presetPreviewText = dataManager.loopManager.settings.overridePresets
+                    .prefix(maxPreviewSymbolCount)
+                    .map { $0.symbol }
+                    .joined(separator: " ")
+                configCell.detailTextLabel?.text = presetPreviewText
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -301,7 +370,7 @@ final class SettingsTableViewController: UITableViewController {
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? SettingsTableViewCell.TapToSetString
             case .loggly:
-                let logglyService = DiagnosticLogger.shared.logglyService
+                let logglyService = dataManager.logger.logglyService
 
                 configCell.textLabel?.text = logglyService.title
                 configCell.detailTextLabel?.text = logglyService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
@@ -488,7 +557,7 @@ final class SettingsTableViewController: UITableViewController {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.overrideRanges = schedule.overrideRanges
+                    scheduleVC.preMealRange = dataManager.loopManager.settings.preMealTargetRange
 
                     show(scheduleVC, sender: sender)
                 } else {
@@ -548,6 +617,15 @@ final class SettingsTableViewController: UITableViewController {
                 vc.syncSource = pumpManager
 
                 show(vc, sender: sender)
+            case .overridePresets:
+                guard let glucoseUnit = dataManager.loopManager.glucoseStore.preferredUnit else { break }
+                let vc = OverridePresetTableViewController(
+                    glucoseUnit: glucoseUnit,
+                    presets: dataManager.loopManager.settings.overridePresets
+                )
+                vc.delegate = self
+
+                show(vc, sender: sender)
             }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
@@ -558,6 +636,10 @@ final class SettingsTableViewController: UITableViewController {
                 show(vc, sender: sender)
             case .dosing:
                 break
+            //DarkMode
+            case .darkMode:
+                break
+            //DarkMode
             }
         case .services:
             switch ServiceRow(rawValue: indexPath.row)! {
@@ -572,10 +654,10 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             case .loggly:
-                let service = DiagnosticLogger.shared.logglyService
+                let service = dataManager.logger.logglyService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
-                    DiagnosticLogger.shared.logglyService = service
+                    self?.dataManager.logger.logglyService = service
 
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
@@ -625,7 +707,7 @@ final class SettingsTableViewController: UITableViewController {
                 tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
             }
             tableView.reloadSections([Section.pump.rawValue], with: .fade)
-            tableView.reloadSections([Section.cgm.rawValue], with: .fade)
+            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
         case .cgm:
             let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
             let wasTestingCGMManager = isTestingCGMManager
@@ -656,6 +738,41 @@ final class SettingsTableViewController: UITableViewController {
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
+    
+    //DarkMode
+    @objc private func darkModeChanged(_ sender: UISwitch) {
+        darkMode = sender.isOn
+        (UIApplication.shared.delegate as! AppDelegate).darkMode = darkMode
+        UserDefaults.standard.set(darkMode, forKey: "DarkModeEnabled")
+        notificationCenter.post(name: darkMode ? .darkModeEnabled : .darkModeDisabled, object: nil)
+    }
+
+    // MARK: - Theme
+    
+    @objc func darkModeEnabled(_ notification: Notification) {
+        enableDarkMode()
+        self.tableView.reloadData()
+    }
+    
+    @objc func darkModeDisabled(_ notification: Notification) {
+        disableDarkMode()
+        self.tableView.reloadData()
+    }
+    
+    private func enableDarkMode() {
+        self.view.backgroundColor = UIColor.black
+        self.tableView.backgroundColor = UIColor.black
+        self.navigationController?.navigationBar.barStyle = .blackTranslucent
+        self.navigationController?.view.backgroundColor = UIColor.black
+    }
+    
+    private func disableDarkMode() {
+        self.view.backgroundColor = UIColor.white
+        self.tableView.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.barStyle = .default
+        self.navigationController?.view.backgroundColor = UIColor.white
+    }
+    //DarkMode
 }
 
 extension SettingsTableViewController: CompletionDelegate {
@@ -726,7 +843,8 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .glucoseTargetRange:
                 if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
+                    dataManager.loopManager.settings.preMealTargetRange = controller.preMealRange
+                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                 }
             case .basalRate:
                 if let controller = controller as? BasalScheduleTableViewController {
@@ -823,6 +941,16 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
     }
 }
+
+
+extension SettingsTableViewController: OverridePresetTableViewControllerDelegate {
+    func overridePresetTableViewControllerDidUpdatePresets(_ vc: OverridePresetTableViewController) {
+        dataManager.loopManager.settings.overridePresets = vc.presets
+
+        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.overridePresets.rawValue]], with: .none)
+    }
+}
+
 
 private extension UIAlertController {
     convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {

@@ -69,7 +69,11 @@ final class ChartPointsTouchHighlightLayerViewCache {
                                         y: containerView.bounds.maxY + 1), // Don't clip X line
                         size: xAxisLayer.frame.size
                     )
-                    xAxisOverlayView.backgroundColor = UIColor.white
+                    // disabled follow line for DarkMode implementation - clvsjr9
+                    //xAxisOverlayView.backgroundColor = UIColor.white
+                    //DarkMode
+                    xAxisOverlayView.backgroundColor = UIColor.black
+                    //DarkMode
                     xAxisOverlayView.isOpaque = true
                     containerView.addSubview(xAxisOverlayView)
                 }
