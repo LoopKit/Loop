@@ -5,7 +5,6 @@
 //  Created by Nathan Racklyeft on 8/29/15.
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
-
 import UIKit
 import HealthKit
 import LoopKit
@@ -15,9 +14,9 @@ import LoopTestingKit
 
 
 final class SettingsTableViewController: UITableViewController {
-
-    @IBOutlet var devicesSectionTitleView: UIView?
     
+    @IBOutlet var devicesSectionTitleView: UIView?
+
     //DarkMode
     private var darkMode = (UIApplication.shared.delegate as! AppDelegate).darkMode
     let notificationCenter = NotificationCenter.default
@@ -25,10 +24,10 @@ final class SettingsTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
-
+        
         tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
         tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
@@ -37,8 +36,9 @@ final class SettingsTableViewController: UITableViewController {
         notificationCenter.addObserver(self, selector: #selector(darkModeEnabled(_:)), name: .darkModeEnabled, object: nil)
         notificationCenter.addObserver(self, selector: #selector(darkModeDisabled(_:)), name: .darkModeDisabled, object: nil)
         //DarkMode
-    }
 
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         if clearsSelectionOnViewWillAppear {
             // Manually invoke the delegate for rows deselecting on appear
@@ -46,29 +46,25 @@ final class SettingsTableViewController: UITableViewController {
                 _ = tableView(tableView, willDeselectRowAt: indexPath)
             }
         }
-
+        
         super.viewWillAppear(animated)
         
         //DarkMode
         notificationCenter.post(name: darkMode ? .darkModeEnabled : .darkModeDisabled, object: nil)
         //DarkMode
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
-            UserDefaults.appGroup?.uploadProfile(uploader: uploader)
-        }
-
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
-
+    
     var dataManager: DeviceDataManager!
-
+    
     private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
     private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
-
+    
     fileprivate enum Section: Int, CaseIterable {
         case loop = 0
         case pump
@@ -78,21 +74,21 @@ final class SettingsTableViewController: UITableViewController {
         case testingPumpDataDeletion
         case testingCGMDataDeletion
     }
-
+    
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
         case diagnostic
         case darkMode  //DarkMode
     }
-
+    
     fileprivate enum PumpRow: Int, CaseCountable {
         case pumpSettings = 0
     }
-
+    
     fileprivate enum CGMRow: Int, CaseCountable {
         case cgmSettings = 0
     }
-
+    
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
         case suspendThreshold
@@ -101,35 +97,34 @@ final class SettingsTableViewController: UITableViewController {
         case insulinModel
         case carbRatio
         case insulinSensitivity
-        case overridePresets
     }
-
+    
     fileprivate enum ServiceRow: Int, CaseCountable {
         case nightscout = 0
         case loggly
         case amplitude
     }
-
+    
     fileprivate lazy var valueNumberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
-
+        
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 2
-
+        
         return formatter
     }()
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
             vc.deviceManager = dataManager
             vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
-
+            
             if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                 vc.insulinSensitivitySchedule = insulinSensitivitySchedule
             }
-
+            
             vc.delegate = self
         default:
             break
@@ -147,7 +142,7 @@ final class SettingsTableViewController: UITableViewController {
     }
     
     // MARK: - UITableViewDataSource
-
+    
     //DarkMode
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         
@@ -187,11 +182,11 @@ final class SettingsTableViewController: UITableViewController {
         }
         return sections
     }
-
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return sections.count
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
         case .loop:
@@ -208,29 +203,28 @@ final class SettingsTableViewController: UITableViewController {
             return 1
         }
     }
-
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
             case .dosing:
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
+                
                 switchCell.switch?.isOn = dataManager.loopManager.settings.dosingEnabled
                 switchCell.textLabel?.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
-
+                
                 switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
-
+                
                 return switchCell
             case .diagnostic:
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-
+                
                 cell.textLabel?.text = NSLocalizedString("Issue Report", comment: "The title text for the issue report cell")
                 cell.detailTextLabel?.text = nil
                 cell.accessoryType = .disclosureIndicator
-
-                return cell
                 
+                return cell
             //DarkMode
             case .darkMode:
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
@@ -241,7 +235,7 @@ final class SettingsTableViewController: UITableViewController {
                 switchCell.switch?.addTarget(self, action: #selector(darkModeChanged(_:)), for: .valueChanged)
                 
                 return switchCell
-            //DarkMode
+                //DarkMode
             }
         case .pump:
             switch PumpRow(rawValue: indexPath.row)! {
@@ -261,7 +255,7 @@ final class SettingsTableViewController: UITableViewController {
         case .cgm:
             if let cgmManager = dataManager.cgmManager {
                 let cgmManagerUI = cgmManager as? CGMManagerUI
-
+                
                 let image = cgmManagerUI?.smallImage
                 let cell = tableView.dequeueReusableCell(withIdentifier: image == nil ? SettingsTableViewCell.className : SettingsImageTableViewCell.className, for: indexPath)
                 if let image = image {
@@ -277,26 +271,26 @@ final class SettingsTableViewController: UITableViewController {
             }
         case .configuration:
             let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-
+            
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .carbRatio:
                 configCell.textLabel?.text = NSLocalizedString("Carb Ratios", comment: "The title text for the carb ratio schedule")
-
+                
                 if let carbRatioSchedule = dataManager.loopManager.carbRatioSchedule {
                     let unit = carbRatioSchedule.unit
                     let value = valueNumberFormatter.string(from: carbRatioSchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
-
+                    
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for carb ratio average. (1: value)(2: carb unit)"), value, unit)
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .insulinSensitivity:
                 configCell.textLabel?.text = NSLocalizedString("Insulin Sensitivities", comment: "The title text for the insulin sensitivity schedule")
-
+                
                 if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
                     let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
-
+                    
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.localizedShortUnitString
                     )
                 } else {
@@ -304,13 +298,13 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .glucoseTargetRange:
                 configCell.textLabel?.text = NSLocalizedString("Correction Range", comment: "The title text for the glucose target range schedule")
-
+                
                 if let glucoseTargetRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
                     let unit = glucoseTargetRangeSchedule.unit
                     let value = glucoseTargetRangeSchedule.value(at: Date())
                     let minTarget = valueNumberFormatter.string(from: value.minValue) ?? SettingsTableViewCell.NoValueString
                     let maxTarget = valueNumberFormatter.string(from: value.maxValue) ?? SettingsTableViewCell.NoValueString
-
+                    
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.localizedShortUnitString)
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
@@ -326,7 +320,7 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .insulinModel:
                 configCell.textLabel?.text = NSLocalizedString("Insulin Model", comment: "The title text for the insulin model setting row")
-
+                
                 if let settings = dataManager.loopManager.insulinModelSettings {
                     configCell.detailTextLabel?.text = settings.title
                 } else {
@@ -334,7 +328,7 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .deliveryLimits:
                 configCell.textLabel?.text = NSLocalizedString("Delivery Limits", comment: "Title text for delivery limits")
-
+                
                 if dataManager.loopManager.settings.maximumBolus == nil || dataManager.loopManager.settings.maximumBasalRatePerHour == nil {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 } else {
@@ -342,45 +336,37 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .basalRate:
                 configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
-
+                
                 if let basalRateSchedule = dataManager.loopManager.basalRateSchedule {
                     configCell.detailTextLabel?.text = valueNumberFormatter.string(from: basalRateSchedule.total(), unit: "U")
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
-            case .overridePresets:
-                configCell.textLabel?.text = NSLocalizedString("Override Presets", comment: "The title text for the override presets")
-                let maxPreviewSymbolCount = 3
-                let presetPreviewText = dataManager.loopManager.settings.overridePresets
-                    .prefix(maxPreviewSymbolCount)
-                    .map { $0.symbol }
-                    .joined(separator: " ")
-                configCell.detailTextLabel?.text = presetPreviewText
             }
-
+            
             configCell.accessoryType = .disclosureIndicator
             return configCell
         case .services:
             let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-
+            
             switch ServiceRow(rawValue: indexPath.row)! {
             case .nightscout:
                 let nightscoutService = dataManager.remoteDataManager.nightscoutService
-
+                
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? SettingsTableViewCell.TapToSetString
             case .loggly:
-                let logglyService = dataManager.logger.logglyService
-
+                let logglyService = DiagnosticLogger.shared.logglyService
+                
                 configCell.textLabel?.text = logglyService.title
                 configCell.detailTextLabel?.text = logglyService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
             case .amplitude:
                 let amplitudeService = AnalyticsManager.shared.amplitudeService
-
+                
                 configCell.textLabel?.text = amplitudeService.title
                 configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
             }
-
+            
             configCell.accessoryType = .disclosureIndicator
             return configCell
         case .testingPumpDataDeletion:
@@ -399,7 +385,7 @@ final class SettingsTableViewController: UITableViewController {
             return cell
         }
     }
-
+    
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch sections[section] {
         case .loop:
@@ -416,16 +402,15 @@ final class SettingsTableViewController: UITableViewController {
             return nil
         }
     }
-
+    
     // MARK: - UITableViewDelegate
-
     override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sender = tableView.cellForRow(at: indexPath)
-
+        
         switch sections[indexPath.section] {
         case .pump:
             switch PumpRow(rawValue: indexPath.row)! {
@@ -436,7 +421,7 @@ final class SettingsTableViewController: UITableViewController {
                 } else {
                     // Add new pump
                     let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
-
+                    
                     switch pumpManagers.count {
                     case 1:
                         if let PumpManagerType = pumpManagers.first {
@@ -450,11 +435,11 @@ final class SettingsTableViewController: UITableViewController {
                                 self.present(setupViewController, animated: true, completion: nil)
                             }
                         }
-
+                        
                         alert.addCancelAction { (_) in
                             tableView.deselectRow(at: indexPath, animated: true)
                         }
-
+                        
                         present(alert, animated: true, completion: nil)
                     default:
                         break
@@ -474,7 +459,7 @@ final class SettingsTableViewController: UITableViewController {
                     if isDeleted {
                         self?.dataManager.cgmManager = nil
                     }
-
+                    
                     tableView.deselectRow(at: indexPath, animated: true)
                     _ = self?.tableView(tableView, willDeselectRowAt: indexPath)
                 })
@@ -482,7 +467,7 @@ final class SettingsTableViewController: UITableViewController {
             } else {
                 // Add new CGM
                 let cgmManagers = allCGMManagers.compactMap({ $0 as? CGMManagerUI.Type })
-
+                
                 switch cgmManagers.count {
                 case 1:
                     if let CGMManagerType = cgmManagers.first {
@@ -496,11 +481,11 @@ final class SettingsTableViewController: UITableViewController {
                             self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
                         }
                     }
-
+                    
                     alert.addCancelAction { (_) in
                         tableView.deselectRow(at: indexPath, animated: true)
                     }
-
+                    
                     present(alert, animated: true, completion: nil)
                 default:
                     break
@@ -511,11 +496,11 @@ final class SettingsTableViewController: UITableViewController {
             switch row {
             case .carbRatio:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
-
+                
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Carb Ratios", comment: "The title of the carb ratios schedule screen")
                 scheduleVC.unit = .gram()
-
+                
                 if let schedule = dataManager.loopManager.carbRatioSchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
@@ -523,25 +508,25 @@ final class SettingsTableViewController: UITableViewController {
                 } else if let timeZone = dataManager.pumpManager?.status.timeZone {
                     scheduleVC.timeZone = timeZone
                 }
-
+                
                 show(scheduleVC, sender: sender)
             case .insulinSensitivity:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
-
+                
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
-
+                
                 if let schedule = dataManager.loopManager.insulinSensitivitySchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-
+                    
                     show(scheduleVC, sender: sender)
                 } else {
                     if let timeZone = dataManager.pumpManager?.status.timeZone {
                         scheduleVC.timeZone = timeZone
                     }
-
+                    
                     if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
                         scheduleVC.unit = unit
                         self.show(scheduleVC, sender: sender)
@@ -549,22 +534,22 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .glucoseTargetRange:
                 let scheduleVC = GlucoseRangeScheduleTableViewController()
-
+                
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Correction Range", comment: "The title of the glucose target range schedule screen")
-
+                
                 if let schedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.preMealRange = dataManager.loopManager.settings.preMealTargetRange
-
+                    scheduleVC.overrideRanges = schedule.overrideRanges
+                    
                     show(scheduleVC, sender: sender)
                 } else {
                     if let timeZone = dataManager.pumpManager?.status.timeZone {
                         scheduleVC.timeZone = timeZone
                     }
-
+                    
                     if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
                         scheduleVC.unit = unit
                         self.show(scheduleVC, sender: sender)
@@ -588,14 +573,14 @@ final class SettingsTableViewController: UITableViewController {
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
             case .deliveryLimits:
                 let vc = DeliveryLimitSettingsTableViewController(style: .grouped)
-
+                
                 vc.maximumBasalRatePerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
                 vc.maximumBolus = dataManager.loopManager.settings.maximumBolus
-
+                
                 vc.title = sender?.textLabel?.text
                 vc.delegate = self
                 vc.syncSource = dataManager.pumpManager
-
+                
                 show(vc, sender: sender)
             case .basalRate:
                 guard let pumpManager = dataManager.pumpManager else {
@@ -604,27 +589,18 @@ final class SettingsTableViewController: UITableViewController {
                     return
                 }
                 let vc = BasalScheduleTableViewController(allowedBasalRates: pumpManager.supportedBasalRates, maximumScheduleItemCount: pumpManager.maximumBasalScheduleEntryCount, minimumTimeInterval: pumpManager.minimumBasalScheduleEntryDuration)
-
+                
                 if let profile = dataManager.loopManager.basalRateSchedule {
                     vc.scheduleItems = profile.items
                     vc.timeZone = profile.timeZone
                 } else {
                     vc.timeZone = pumpManager.status.timeZone
                 }
-
+                
                 vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
                 vc.delegate = self
                 vc.syncSource = pumpManager
-
-                show(vc, sender: sender)
-            case .overridePresets:
-                guard let glucoseUnit = dataManager.loopManager.glucoseStore.preferredUnit else { break }
-                let vc = OverridePresetTableViewController(
-                    glucoseUnit: glucoseUnit,
-                    presets: dataManager.loopManager.settings.overridePresets
-                )
-                vc.delegate = self
-
+                
                 show(vc, sender: sender)
             }
         case .loop:
@@ -632,14 +608,14 @@ final class SettingsTableViewController: UITableViewController {
             case .diagnostic:
                 let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: dataManager)
                 vc.title = sender?.textLabel?.text
-
+                
                 show(vc, sender: sender)
             case .dosing:
                 break
             //DarkMode
             case .darkMode:
                 break
-            //DarkMode
+                //DarkMode
             }
         case .services:
             switch ServiceRow(rawValue: indexPath.row)! {
@@ -648,30 +624,30 @@ final class SettingsTableViewController: UITableViewController {
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
                     self?.dataManager.remoteDataManager.nightscoutService = service
-
+                    
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
-
+                
                 show(vc, sender: sender)
             case .loggly:
-                let service = dataManager.logger.logglyService
+                let service = DiagnosticLogger.shared.logglyService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
-                    self?.dataManager.logger.logglyService = service
-
+                    DiagnosticLogger.shared.logglyService = service
+                    
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
-
+                
                 show(vc, sender: sender)
             case .amplitude:
                 let service = AnalyticsManager.shared.amplitudeService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
                     AnalyticsManager.shared.amplitudeService = service
-
+                    
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
-
+                
                 show(vc, sender: sender)
             }
         case .testingPumpDataDeletion:
@@ -686,7 +662,7 @@ final class SettingsTableViewController: UITableViewController {
             }
         }
     }
-
+    
     override func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
         switch sections[indexPath.section] {
         case .loop:
@@ -707,7 +683,7 @@ final class SettingsTableViewController: UITableViewController {
                 tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
             }
             tableView.reloadSections([Section.pump.rawValue], with: .fade)
-            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
+            tableView.reloadSections([Section.cgm.rawValue], with: .fade)
         case .cgm:
             let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
             let wasTestingCGMManager = isTestingCGMManager
@@ -731,10 +707,10 @@ final class SettingsTableViewController: UITableViewController {
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
             break
         }
-
+        
         return indexPath
     }
-
+    
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
@@ -746,7 +722,7 @@ final class SettingsTableViewController: UITableViewController {
         UserDefaults.standard.set(darkMode, forKey: "DarkModeEnabled")
         notificationCenter.post(name: darkMode ? .darkModeEnabled : .darkModeDisabled, object: nil)
     }
-
+    
     // MARK: - Theme
     
     @objc func darkModeEnabled(_ notification: Notification) {
@@ -788,17 +764,17 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
     func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController, didSetUpPumpManager pumpManager: PumpManagerUI) {
         dataManager.pumpManager = pumpManager
         tableView.selectRow(at: IndexPath(row: PumpRow.pumpSettings.rawValue, section: Section.pump.rawValue), animated: false, scrollPosition: .none)
-
+        
         if let basalRateSchedule = pumpManagerSetupViewController.basalSchedule {
             dataManager.loopManager.basalRateSchedule = basalRateSchedule
             tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.basalRate.rawValue]], with: .none)
         }
-
+        
         if let maxBasalRateUnitsPerHour = pumpManagerSetupViewController.maxBasalRateUnitsPerHour {
             dataManager.loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
             tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
         }
-
+        
         if let maxBolusUnits = pumpManagerSetupViewController.maxBolusUnits {
             dataManager.loopManager.settings.maximumBolus = maxBolusUnits
             tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
@@ -817,13 +793,13 @@ extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
             completeCGMManagerSetup(CGMManagerType.init(rawState: [:]), indexPath: indexPath)
         }
     }
-
+    
     fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
         dataManager.cgmManager = cgmManager
         tableView.deselectRow(at: indexPath, animated: true)
         _ = self.tableView(tableView, willDeselectRowAt: indexPath)
     }
-
+    
     func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
         dataManager.cgmManager = cgmManager
         tableView.selectRow(at: IndexPath(row: CGMRow.cgmSettings.rawValue, section: Section.cgm.rawValue), animated: false, scrollPosition: .none)
@@ -837,14 +813,13 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
         guard let indexPath = tableView.indexPathForSelectedRow else {
             return
         }
-
+        
         switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .glucoseTargetRange:
                 if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                    dataManager.loopManager.settings.preMealTargetRange = controller.preMealRange
-                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
                 }
             case .basalRate:
                 if let controller = controller as? BasalScheduleTableViewController {
@@ -867,7 +842,7 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
         default:
             break
         }
-
+        
         tableView.reloadRows(at: [indexPath], with: .none)
     }
 }
@@ -878,7 +853,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
         guard let indexPath = self.tableView.indexPathForSelectedRow else {
             return
         }
-
+        
         switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
@@ -886,7 +861,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
                 if let model = controller.insulinModel {
                     dataManager.loopManager.insulinModelSettings = InsulinModelSettings(model: model)
                 }
-
+                
                 tableView.reloadRows(at: [indexPath], with: .none)
             default:
                 assertionFailure()
@@ -918,10 +893,10 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
                 assertionFailure()
             }
         }
-
+        
         tableView.reloadData()
     }
-
+    
     func textFieldTableViewControllerDidReturn(_ controller: LoopKitUI.TextFieldTableViewController) {
         _ = navigationController?.popViewController(animated: true)
     }
@@ -931,26 +906,16 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
 extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerDelegate {
     func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBasalRatePerHour(_ vc: DeliveryLimitSettingsTableViewController) {
         dataManager.loopManager.settings.maximumBasalRatePerHour = vc.maximumBasalRatePerHour
-
+        
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
     }
-
+    
     func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBolus(_ vc: DeliveryLimitSettingsTableViewController) {
         dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
-
+        
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
     }
 }
-
-
-extension SettingsTableViewController: OverridePresetTableViewControllerDelegate {
-    func overridePresetTableViewControllerDidUpdatePresets(_ vc: OverridePresetTableViewController) {
-        dataManager.loopManager.settings.overridePresets = vc.presets
-
-        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.overridePresets.rawValue]], with: .none)
-    }
-}
-
 
 private extension UIAlertController {
     convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {
@@ -959,29 +924,29 @@ private extension UIAlertController {
             message: "Are you sure you want to delete testing pump health data?",
             preferredStyle: .actionSheet
         )
-
+        
         addAction(UIAlertAction(
             title: "Delete Pump Data",
             style: .destructive,
             handler: { _ in handler() }
         ))
-
+        
         addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     }
-
+    
     convenience init(cgmDataDeletionHandler handler: @escaping () -> Void) {
         self.init(
             title: nil,
             message: "Are you sure you want to delete testing CGM health data?",
             preferredStyle: .actionSheet
         )
-
+        
         addAction(UIAlertAction(
             title: "Delete CGM Data",
             style: .destructive,
             handler: { _ in handler() }
         ))
-
+        
         addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     }
 }
