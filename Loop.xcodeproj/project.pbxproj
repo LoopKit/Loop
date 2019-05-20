@@ -238,7 +238,6 @@
 		43E2D8F51D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EA1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json */; };
 		43E2D8F61D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */; };
 		43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */; };
-		43E2D9171D2226BD004DA55F /* LoopKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		43E2D9191D222759004DA55F /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E93FB51E4675E800EAB8DB /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
@@ -375,27 +374,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		432CF87C20D8B8990066B889 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
-		};
-		432CF87E20D8BC3B0066B889 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
-		};
-		432CF88020D8BC460066B889 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
-		};
 		43A943801B926B7B0051FA24 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -424,33 +402,12 @@
 			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
 			remoteInfo = LoopCore;
 		};
-		43D9001821EB207300AF44BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
-		};
-		43D9001C21EB209400AF44BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
-		};
 		43D9003021EB236800AF44BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 43D9001A21EB209400AF44BF;
 			remoteInfo = "LoopCore-watchOS";
-		};
-		43D9FFB721EA9C9F00AF44BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 432CF87720D8B8380066B889;
-			remoteInfo = Cartfile;
 		};
 		43D9FFB921EA9CA400AF44BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -493,6 +450,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4F75288A1DFE1DC600C322D6;
 			remoteInfo = LoopUI;
+		};
+		A942E444225FD97F00DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
+			remoteInfo = LoopCore;
+		};
+		A942E446225FD9A300DD4980 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 43D9FFCE21EAE05D00AF44BF;
+			remoteInfo = LoopCore;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -560,7 +531,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				43E2D9171D2226BD004DA55F /* LoopKit.framework in CopyFiles */,
 				4345E40021F051DD009E00E5 /* LoopCore.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -610,9 +580,10 @@
 		433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
 		4341F4EA1EDB92AC001C936B /* LogglyService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogglyService.swift; sourceTree = "<group>"; };
 		43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StatusExtensionContext+LoopKit.swift"; sourceTree = "<group>"; };
-		4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS4.3.sdk/System/Library/Frameworks/CoreBluetooth.framework; sourceTree = DEVELOPER_DIR; };
-		4344628320A7A3BE00C4BE6F /* LoopKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKit.framework; path = Carthage/Build/watchOS/LoopKit.framework; sourceTree = SOURCE_ROOT; };
-		4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CGMBLEKit.framework; path = Carthage/Build/watchOS/CGMBLEKit.framework; sourceTree = SOURCE_ROOT; };
+		4344627F20A7A37400C4BE6F /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
+		4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/CoreBluetooth.framework; sourceTree = DEVELOPER_DIR; };
+		4344628320A7A3BE00C4BE6F /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4344628D20A7ADD100C4BE6F /* UserDefaults+CGM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+CGM.swift"; sourceTree = "<group>"; };
 		4344629120A7C19800C4BE6F /* ButtonGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonGroup.swift; sourceTree = "<group>"; };
 		4345E3F721F03D2A009E00E5 /* DatesAndNumberCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatesAndNumberCell.swift; sourceTree = "<group>"; };
@@ -621,14 +592,14 @@
 		4345E40321F68AD9009E00E5 /* TextRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRowController.swift; sourceTree = "<group>"; };
 		4345E40521F68E18009E00E5 /* CarbEntryListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryListController.swift; sourceTree = "<group>"; };
 		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChartTableViewCell.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCharts.framework; path = Carthage/Build/iOS/SwiftCharts.framework; sourceTree = SOURCE_ROOT; };
-		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkBLEKit.framework; path = Carthage/Build/iOS/RileyLinkBLEKit.framework; sourceTree = SOURCE_ROOT; };
+		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SwiftCharts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		434F54561D287FDB002A9274 /* NibLoadable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
-		434FB6451D68F1CD007B9C70 /* Amplitude.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Amplitude.framework; path = Carthage/Build/iOS/Amplitude.framework; sourceTree = SOURCE_ROOT; };
+		434FB6451D68F1CD007B9C70 /* Amplitude.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplitude.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
 		434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		43511CED220FC61700566C63 /* HUDRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRowController.swift; sourceTree = "<group>"; };
-		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKit.framework; path = Carthage/Build/iOS/RileyLinkKit.framework; sourceTree = SOURCE_ROOT; };
+		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinModelSettingsViewController.swift; sourceTree = "<group>"; };
@@ -639,7 +610,7 @@
 		4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsContextFillLayer.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
 		436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommended_temp_start_low_end_just_above_range.json; sourceTree = "<group>"; };
-		43709AE920DF3F8200F941B3 /* MinimedKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MinimedKitUI.framework; path = Carthage/Build/iOS/MinimedKitUI.framework; sourceTree = SOURCE_ROOT; };
+		43709AE920DF3F8200F941B3 /* MinimedKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MinimedKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4372E486213C86240068E043 /* SampleValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleValue.swift; sourceTree = "<group>"; };
 		4372E48A213CB5F00068E043 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsUserInfo.swift; sourceTree = "<group>"; };
@@ -657,8 +628,8 @@
 		43785E9F2122774A0057DED1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Intents.strings; sourceTree = "<group>"; };
 		43785EA12122774B0057DED1 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Intents.strings; sourceTree = "<group>"; };
 		43785EA32122774B0057DED1 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
-		4379CFEF21112CF700AADC79 /* ShareClientUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShareClientUI.framework; path = Carthage/Build/iOS/ShareClientUI.framework; sourceTree = SOURCE_ROOT; };
-		437AFEE6203688CF008C4892 /* LoopKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKitUI.framework; path = Carthage/Build/iOS/LoopKitUI.framework; sourceTree = SOURCE_ROOT; };
+		4379CFEF21112CF700AADC79 /* ShareClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ShareClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		437AFEE6203688CF008C4892 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCompletionHUDView.swift; sourceTree = "<group>"; };
 		437CEEBF1CD6FCD8003C8C80 /* BasalRateHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalRateHUDView.swift; sourceTree = "<group>"; };
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
@@ -670,7 +641,7 @@
 		438849ED1D2A1EBB003B3F23 /* MLabService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLabService.swift; sourceTree = "<group>"; };
 		438991661E91B563000EEF90 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ChartSettings+Loop.swift"; sourceTree = "<group>"; };
-		438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CGMBLEKit.framework; path = Carthage/Build/iOS/CGMBLEKit.framework; sourceTree = SOURCE_ROOT; };
+		438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionInputEffect.swift; sourceTree = "<group>"; };
 		438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionInputEffectTableViewCell.swift; sourceTree = "<group>"; };
 		438DADC71CDE8F8B007697A5 /* LoopStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopStateView.swift; sourceTree = "<group>"; };
@@ -682,7 +653,7 @@
 		43A51E1E1EB6D62A000736CC /* CarbAbsorptionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionViewController.swift; sourceTree = "<group>"; };
 		43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartsTableViewController.swift; sourceTree = "<group>"; };
 		43A567681C94880B00334FAC /* LoopDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = LoopDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		43A8EC6E210E622600A81379 /* CGMBLEKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CGMBLEKitUI.framework; path = Carthage/Build/iOS/CGMBLEKitUI.framework; sourceTree = SOURCE_ROOT; };
+		43A8EC6E210E622600A81379 /* CGMBLEKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943721B926B7B0051FA24 /* WatchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43A943751B926B7B0051FA24 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		43A9437E1B926B7B0051FA24 /* WatchApp Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "WatchApp Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -694,7 +665,7 @@
 		43A943911B926B7B0051FA24 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43B260481ED248FB008CAA77 /* CarbEntryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CarbEntryTableViewCell.swift; sourceTree = "<group>"; };
 		43B371851CE583890013C5A6 /* BasalStateView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BasalStateView.swift; sourceTree = "<group>"; };
-		43B371871CE597D10013C5A6 /* ShareClient.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ShareClient.framework; path = Carthage/Build/iOS/ShareClient.framework; sourceTree = SOURCE_ROOT; };
+		43B371871CE597D10013C5A6 /* ShareClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ShareClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43BFF0B11E45C18400FF19A9 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NumberFormatter.swift; sourceTree = "<group>"; };
 		43BFF0BB1E45C80600FF19A9 /* UIColor+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+Loop.swift"; sourceTree = "<group>"; };
@@ -709,13 +680,13 @@
 		43C05CC121EC06E4006FB252 /* LessonConfigurationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonConfigurationViewController.swift; sourceTree = "<group>"; };
 		43C05CC921EC382B006FB252 /* NumberEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberEntry.swift; sourceTree = "<group>"; };
 		43C094491CACCC73001F6403 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
-		43C246A71D89990F0031F8D1 /* Crypto.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crypto.framework; path = Carthage/Build/iOS/Crypto.framework; sourceTree = SOURCE_ROOT; };
+		43C246A71D89990F0031F8D1 /* Crypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Crypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseEffectVelocity.swift; sourceTree = "<group>"; };
 		43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImageTableViewCell.swift; sourceTree = "<group>"; };
 		43C3B6F620BBCAA30026CAFA /* PumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManager.swift; sourceTree = "<group>"; };
 		43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeSchedule.swift; sourceTree = "<group>"; };
 		43C98058212A799E003B5D17 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
-		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MinimedKit.framework; path = Carthage/Build/iOS/MinimedKit.framework; sourceTree = SOURCE_ROOT; };
+		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43CB2B2A1D924D450079823D /* WCSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WCSession.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutUploader.swift; sourceTree = "<group>"; };
@@ -724,7 +695,7 @@
 		43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "WatchApp Extension.entitlements"; sourceTree = "<group>"; };
 		43D848AF1E7DCBE100DADCBC /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		43D9002A21EB209400AF44BF /* LoopCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		43D9002C21EB225D00AF44BF /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
+		43D9002C21EB225D00AF44BF /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
 		43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinModelSettings+Loop.swift"; sourceTree = "<group>"; };
 		43D9F81721EC51CC000578CD /* DateEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateEntry.swift; sourceTree = "<group>"; };
 		43D9F81921EC593C000578CD /* UITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
@@ -776,7 +747,7 @@
 		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingsTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleSubtitleTableViewCell.swift; sourceTree = "<group>"; };
 		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
-		43F78D4B1C914197002152D1 /* LoopKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LoopKit.framework; path = Carthage/Build/iOS/LoopKit.framework; sourceTree = SOURCE_ROOT; };
+		43F78D4B1C914197002152D1 /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43FCEEA8221A615B0013DD30 /* StatusChartsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChartsManager.swift; sourceTree = "<group>"; };
 		43FCEEAA221A61B40013DD30 /* IOBChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOBChart.swift; sourceTree = "<group>"; };
 		43FCEEAC221A66780013DD30 /* DateFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatter.swift; sourceTree = "<group>"; };
@@ -788,7 +759,7 @@
 		43FCEEB8221BCF790013DD30 /* GlucoseChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseChart.swift; sourceTree = "<group>"; };
 		43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEffectChart.swift; sourceTree = "<group>"; };
 		43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictedGlucoseChart.swift; sourceTree = "<group>"; };
-		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = G4ShareSpy.framework; path = Carthage/Build/iOS/G4ShareSpy.framework; sourceTree = SOURCE_ROOT; };
+		4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = G4ShareSpy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleLog.swift; sourceTree = "<group>"; };
 		4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartAxisValueDoubleUnit.swift; sourceTree = "<group>"; };
 		4F08DE801E7BB6F1006741EA /* CGPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGPoint.swift; sourceTree = "<group>"; };
@@ -1005,7 +976,7 @@
 		898ECA66218ABDA8001E9D35 /* WatchApp Extension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WatchApp Extension-Bridging-Header.h"; sourceTree = "<group>"; };
 		898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLKTextProvider+Compound.m"; sourceTree = "<group>"; };
 		898ECA68218ABDA9001E9D35 /* CLKTextProvider+Compound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLKTextProvider+Compound.h"; sourceTree = "<group>"; };
-		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NightscoutUploadKit.framework; path = Carthage/Build/iOS/NightscoutUploadKit.framework; sourceTree = SOURCE_ROOT; };
+		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
@@ -1016,12 +987,12 @@
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
 		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
-		C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RileyLinkKitUI.framework; path = Carthage/Build/iOS/RileyLinkKitUI.framework; sourceTree = "<group>"; };
+		C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C108C22152F46D00EA5165 /* CGMBLEKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
-		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS5.1.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
-		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MKRingProgressView.framework; path = Carthage/Build/iOS/MKRingProgressView.framework; sourceTree = "<group>"; };
+		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
+		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusProgressTableViewCell.swift; sourceTree = "<group>"; };
 		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
@@ -1803,7 +1774,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				432CF87D20D8B8990066B889 /* PBXTargetDependency */,
 				4F7528971DFE1ED400C322D6 /* PBXTargetDependency */,
 				43A943931B926B7B0051FA24 /* PBXTargetDependency */,
 				4F70C1E71DE8DCA7006380B7 /* PBXTargetDependency */,
@@ -1845,7 +1815,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				432CF88120D8BC460066B889 /* PBXTargetDependency */,
 				43D9003121EB236800AF44BF /* PBXTargetDependency */,
 			);
 			name = "WatchApp Extension";
@@ -1865,7 +1834,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				43D9001B21EB209400AF44BF /* PBXTargetDependency */,
 			);
 			name = "LoopCore-watchOS";
 			productName = LoopCore;
@@ -1885,8 +1853,8 @@
 			buildRules = (
 			);
 			dependencies = (
-				43D9FFB821EA9C9F00AF44BF /* PBXTargetDependency */,
 				43D9FFBA21EA9CA400AF44BF /* PBXTargetDependency */,
+				A942E447225FD9A300DD4980 /* PBXTargetDependency */,
 			);
 			name = Learn;
 			productName = Learn;
@@ -1905,7 +1873,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				43D9001921EB207300AF44BF /* PBXTargetDependency */,
 			);
 			name = LoopCore;
 			productName = LoopCore;
@@ -1920,10 +1887,12 @@
 				43E2D8CE1D20BF42004DA55F /* Frameworks */,
 				43E2D8CF1D20BF42004DA55F /* Resources */,
 				43E2D8DD1D20C072004DA55F /* CopyFiles */,
+				A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A942E445225FD97F00DD4980 /* PBXTargetDependency */,
 			);
 			name = DoseMathTests;
 			productName = DoseMathTests;
@@ -1979,7 +1948,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				432CF87F20D8BC3B0066B889 /* PBXTargetDependency */,
 				43D9001321EB137A00AF44BF /* PBXTargetDependency */,
 			);
 			name = LoopUI;
@@ -2287,18 +2255,21 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/iOS\nif [ -f $PROJECT_DIR/.gitmodules && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 		43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2306,36 +2277,53 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/SwiftCharts.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MinimedKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Amplitude.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/ShareClient.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/NightscoutUploadKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/Crypto.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/G4ShareSpy.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/RileyLinkKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MinimedKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/CGMBLEKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/ShareClientUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MockKitUI.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/LoopTestingKit.framework",
-				"$(SRCROOT)/Carthage/Build/iOS/MKRingProgressView.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/MinimedKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/Amplitude.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/NightscoutUploadKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/Crypto.framework",
+				"$(BUILT_PRODUCTS_DIR)/G4ShareSpy.framework",
+				"$(BUILT_PRODUCTS_DIR)/RileyLinkKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/MinimedKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClientUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopTestingKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/MockKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/MockKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/MKRingProgressView.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Amplitude.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/NightscoutUploadKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/G4ShareSpy.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClientUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopTestingKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKitUI.framework",
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MKRingProgressView.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/iOS\nif [ -f $PROJECT_DIR/.gitmodules ] && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\necho using $BUILT_PRODUCTS_DIR for ${varname}\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 		43FF3DF620A8EFE800F8E62C /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2343,9 +2331,9 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/watchOS/CGMBLEKit.framework",
-				"$(SRCROOT)/Carthage/Build/watchOS/LoopKit.framework",
-				"$(SRCROOT)/Carthage/Build/watchOS/ShareClient.framework",
+				"$(BUILT_PRODUCTS_DIR)/CGMBLEKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
@@ -2355,7 +2343,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "carthage_frameworks_dir=${SRCROOT}/Carthage/Build/watchOS\nif [ -f $PROJECT_DIR/.gitmodules && [ $ACTION != \"install\" ]; then\nfor varname in ${!SCRIPT_INPUT_FILE_*}\ndo\nexport ${varname}=${!varname/$carthage_frameworks_dir/$BUILT_PRODUCTS_DIR}\ndone\nfi\n/usr/local/bin/carthage copy-frameworks\n";
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+		};
+		A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+			);
+			name = "Copy Frameworks with Carthage";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2671,21 +2679,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		432CF87D20D8B8990066B889 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 432CF87C20D8B8990066B889 /* PBXContainerItemProxy */;
-		};
-		432CF87F20D8BC3B0066B889 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 432CF87E20D8BC3B0066B889 /* PBXContainerItemProxy */;
-		};
-		432CF88120D8BC460066B889 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 432CF88020D8BC460066B889 /* PBXContainerItemProxy */;
-		};
 		43A943811B926B7B0051FA24 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43A9437D1B926B7B0051FA24 /* WatchApp Extension */;
@@ -2706,25 +2699,10 @@
 			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
 			targetProxy = 43D9001221EB137A00AF44BF /* PBXContainerItemProxy */;
 		};
-		43D9001921EB207300AF44BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 43D9001821EB207300AF44BF /* PBXContainerItemProxy */;
-		};
-		43D9001B21EB209400AF44BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 43D9001C21EB209400AF44BF /* PBXContainerItemProxy */;
-		};
 		43D9003121EB236800AF44BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43D9001A21EB209400AF44BF /* LoopCore-watchOS */;
 			targetProxy = 43D9003021EB236800AF44BF /* PBXContainerItemProxy */;
-		};
-		43D9FFB821EA9C9F00AF44BF /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 432CF87720D8B8380066B889 /* Cartfile */;
-			targetProxy = 43D9FFB721EA9C9F00AF44BF /* PBXContainerItemProxy */;
 		};
 		43D9FFBA21EA9CA400AF44BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2755,6 +2733,16 @@
 			isa = PBXTargetDependency;
 			target = 4F75288A1DFE1DC600C322D6 /* LoopUI */;
 			targetProxy = 4F7528981DFE1ED800C322D6 /* PBXContainerItemProxy */;
+		};
+		A942E445225FD97F00DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
+			targetProxy = A942E444225FD97F00DD4980 /* PBXContainerItemProxy */;
+		};
+		A942E447225FD9A300DD4980 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
+			targetProxy = A942E446225FD9A300DD4980 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3321,7 +3309,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -3342,7 +3330,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -3373,10 +3361,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 56;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/Carthage/Build/watchOS",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3412,10 +3397,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 56;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/Carthage/Build/watchOS",
-					"$(inherited)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
