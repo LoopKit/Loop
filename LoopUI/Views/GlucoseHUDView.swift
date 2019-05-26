@@ -8,9 +8,14 @@
 
 import UIKit
 import HealthKit
-
+import LoopKit
+import LoopKitUI
 
 public final class GlucoseHUDView: BaseHUDView {
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 2
+    }
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
@@ -42,10 +47,9 @@ public final class GlucoseHUDView: BaseHUDView {
         glucoseLabel.textColor = tintColor
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateColor()
     }
 
     private func updateColor() {
@@ -94,12 +98,12 @@ public final class GlucoseHUDView: BaseHUDView {
         caption?.text = time
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        if let valueString = numberFormatter.string(from: NSNumber(value: glucoseQuantity)) {
+        if let valueString = numberFormatter.string(from: glucoseQuantity) {
             glucoseLabel.text = valueString
-            accessibilityStrings.append(String(format: NSLocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
+            accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
-        var unitStrings = [unit.glucoseUnitDisplayString]
+        var unitStrings = [unit.localizedShortUnitString]
 
         if let trend = sensor?.trendType {
             unitStrings.append(trend.symbol)
@@ -110,7 +114,7 @@ public final class GlucoseHUDView: BaseHUDView {
             sensorAlertState = .missing
         } else if sensor!.isStateValid == false {
             sensorAlertState = .invalid
-            accessibilityStrings.append(NSLocalizedString("Needs attention", comment: "Accessibility label component for glucose HUD describing an invalid state"))
+            accessibilityStrings.append(LocalizedString("Needs attention", comment: "Accessibility label component for glucose HUD describing an invalid state"))
         } else if sensor!.isLocal == false {
             sensorAlertState = .remote
         } else {

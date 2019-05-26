@@ -8,22 +8,15 @@
 
 import UIKit
 import HealthKit
-import InsulinKit
 import LoopKit
-import MinimedKit
-import RileyLinkBLEKit
-import RileyLinkKit
-import RileyLinkKitUI
-
-private let ConfigCellIdentifier = "ConfigTableViewCell"
-
-private let EnabledString = NSLocalizedString("Enabled", comment: "The detail text describing an enabled setting")
-private let TapToSetString = NSLocalizedString("Tap to set", comment: "The empty-state text for a configuration value")
+import LoopKitUI
+import LoopCore
+import LoopTestingKit
 
 
-final class SettingsTableViewController: UITableViewController, DailyValueScheduleTableViewControllerDelegate {
+final class SettingsTableViewController: UITableViewController {
 
-    @IBOutlet var devicesSectionTitleView: UIView!
+    @IBOutlet var devicesSectionTitleView: UIView?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,86 +24,73 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
 
-        tableView.register(RileyLinkDeviceTableViewCell.self, forCellReuseIdentifier: RileyLinkDeviceTableViewCell.className)
+        tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
+        tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
+        tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
+    }
 
-        // Register for manager notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(reloadDevices), name: .ManagerDevicesDidChange, object: dataManager.rileyLinkManager)
-
-        // Register for device notifications
-        for name in [.DeviceConnectionStateDidChange, .DeviceRSSIDidChange, .DeviceNameDidChange] as [Notification.Name] {
-            NotificationCenter.default.addObserver(self, selector: #selector(deviceDidUpdate(_:)), name: name, object: nil)
+    override func viewWillAppear(_ animated: Bool) {
+        if clearsSelectionOnViewWillAppear {
+            // Manually invoke the delegate for rows deselecting on appear
+            for indexPath in tableView.indexPathsForSelectedRows ?? [] {
+                _ = tableView(tableView, willDeselectRowAt: indexPath)
+            }
         }
 
-        reloadDevices()
+        super.viewWillAppear(animated)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-        dataManager.rileyLinkManager.setScanningEnabled(true)
-        rssiFetchTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(updateRSSI), userInfo: nil, repeats: true)
-        updateRSSI()
-
-        if case .some = dataManager.cgm, dataManager.loopManager.glucoseStore.authorizationRequired {
-            dataManager.loopManager.glucoseStore.authorize { (success, error) -> Void in
-                // Do nothing for now
-            }
+        
+        if let uploader = dataManager.remoteDataManager.nightscoutService.uploader {
+            UserDefaults.appGroup?.uploadProfile(uploader: uploader)
         }
 
         AnalyticsManager.shared.didDisplaySettingsScreen()
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-
-        dataManager.rileyLinkManager.setScanningEnabled(false)
-        rssiFetchTimer = nil
-    }
-
     var dataManager: DeviceDataManager!
 
-    fileprivate enum Section: Int, CaseCountable {
+    private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
+    private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
+
+    fileprivate enum Section: Int, CaseIterable {
         case loop = 0
-        case devices
         case pump
         case cgm
         case configuration
         case services
+        case testingPumpDataDeletion
+        case testingCGMDataDeletion
     }
 
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
-        case preferredInsulinDataSource
         case diagnostic
     }
 
     fileprivate enum PumpRow: Int, CaseCountable {
-        case pumpID = 0
-        case batteryChemistry
+        case pumpSettings = 0
     }
 
     fileprivate enum CGMRow: Int, CaseCountable {
-        case enlite = 0
-        case g4
-        case g5
-        case dexcomShare      // only displayed if g4 or g5 switched on
-        case g5TransmitterID  // only displayed if g5 switched on
+        case cgmSettings = 0
     }
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
         case suspendThreshold
-        case insulinModel
         case basalRate
+        case deliveryLimits
+        case insulinModel
         case carbRatio
         case insulinSensitivity
-        case maxBasal
-        case maxBolus
+        case overridePresets
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
         case nightscout = 0
-        case mLab
         case loggly
         case amplitude
     }
@@ -128,58 +108,65 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
+            vc.deviceManager = dataManager
             vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
 
             if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                 vc.insulinSensitivitySchedule = insulinSensitivitySchedule
             }
 
-            dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) in
-                DispatchQueue.main.async {
-                    if let unit = unit {
-                        vc.glucoseUnit = unit
-                    }
-
-                    vc.delegate = self
-                }
-            }
+            vc.delegate = self
         default:
             break
         }
     }
     
+    func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController & CompletionNotifying) {
+        var setupViewController = pumpManager.setupViewController()
+        setupViewController.setupDelegate = self
+        setupViewController.completionDelegate = self
+        setupViewController.basalSchedule = dataManager.loopManager.basalRateSchedule
+        setupViewController.maxBolusUnits = dataManager.loopManager.settings.maximumBolus
+        setupViewController.maxBasalRateUnitsPerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
+        return setupViewController
+    }
+    
     // MARK: - UITableViewDataSource
 
+    private var sections: [Section] {
+        var sections = Section.allCases
+        if !isTestingPumpManager {
+            sections.remove(.testingPumpDataDeletion)
+        }
+        if !isTestingCGMManager {
+            sections.remove(.testingCGMDataDeletion)
+        }
+        return sections
+    }
+
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.count
+        return sections.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch Section(rawValue: section)! {
+        switch sections[section] {
         case .loop:
             return LoopRow.count
         case .pump:
             return PumpRow.count
         case .cgm:
-            switch dataManager.cgm {
-            case .g4?:
-                return CGMRow.count - 1  // No Transmitter ID cell
-            case .g5?:
-                return CGMRow.count
-            default:
-                return CGMRow.count - 2  // No Share or Transmitter ID cell
-            }
+            return CGMRow.count
         case .configuration:
             return ConfigurationRow.count
-        case .devices:
-            return devices.count
         case .services:
             return ServiceRow.count
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
+            return 1
         }
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
             case .dosing:
@@ -191,113 +178,73 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
 
                 return switchCell
-            case .preferredInsulinDataSource:
-                let cell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
-
-                cell.textLabel?.text = NSLocalizedString("Preferred Data Source", comment: "The title text for the preferred insulin data source config")
-                cell.detailTextLabel?.text = String(describing: dataManager.preferredInsulinDataSource)
-
-                return cell
             case .diagnostic:
-                let cell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
+                let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
                 cell.textLabel?.text = NSLocalizedString("Issue Report", comment: "The title text for the issue report cell")
                 cell.detailTextLabel?.text = nil
+                cell.accessoryType = .disclosureIndicator
 
                 return cell
             }
         case .pump:
-            let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
             switch PumpRow(rawValue: indexPath.row)! {
-            case .pumpID:
-                configCell.textLabel?.text = NSLocalizedString("Pump ID", comment: "The title text for the pump ID config value")
-                configCell.detailTextLabel?.text = dataManager.pumpSettings?.pumpID ?? TapToSetString
-            case .batteryChemistry:
-                configCell.textLabel?.text = NSLocalizedString("Pump Battery Type", comment: "The title text for the battery type value")
-                configCell.detailTextLabel?.text = String(describing: dataManager.batteryChemistry)
+            case .pumpSettings:
+                if let pumpManager = dataManager.pumpManager {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: SettingsImageTableViewCell.className, for: indexPath)
+                    cell.imageView?.image = pumpManager.smallImage
+                    cell.textLabel?.text = pumpManager.localizedTitle
+                    cell.detailTextLabel?.text = nil
+                    return cell
+                } else {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath)
+                    cell.textLabel?.text = NSLocalizedString("Add Pump", comment: "Title text for button to set up a new pump")
+                    return cell
+                }
             }
-            return configCell
         case .cgm:
-            let row = CGMRow(rawValue: indexPath.row)!
-            switch row {
-            case .dexcomShare:
-                let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
-                let shareService = dataManager.remoteDataManager.shareService
+            if let cgmManager = dataManager.cgmManager {
+                let cgmManagerUI = cgmManager as? CGMManagerUI
 
-                configCell.textLabel?.text = shareService.title
-                configCell.detailTextLabel?.text = shareService.username ?? TapToSetString
-
-                return configCell
-            case .g5TransmitterID:
-                let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
-
-                configCell.textLabel?.text = NSLocalizedString("Transmitter ID", comment: "The title text for the Dexcom G5/G6 transmitter ID config value")
-
-                if case .g5(let transmitterID)? = dataManager.cgm {
-                    configCell.detailTextLabel?.text = transmitterID ?? TapToSetString
+                let image = cgmManagerUI?.smallImage
+                let cell = tableView.dequeueReusableCell(withIdentifier: image == nil ? SettingsTableViewCell.className : SettingsImageTableViewCell.className, for: indexPath)
+                if let image = image {
+                    cell.imageView?.image = image
                 }
-
-                return configCell
-            default:
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-                switch row {
-                case .enlite:
-                    switchCell.switch?.isOn = dataManager.cgm == .enlite
-                    switchCell.textLabel?.text = NSLocalizedString("Sof-Sensor / Enlite", comment: "The title text for the Medtronic sensor switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(enliteChanged(_:)), for: .valueChanged)
-                case .g4:
-                    switchCell.switch?.isOn = dataManager.cgm == .g4
-                    switchCell.textLabel?.text = NSLocalizedString("G4 Share Receiver", comment: "The title text for the G4 Share Receiver switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(g4Changed(_:)), for: .valueChanged)
-                case .g5:
-                    if case .g5? = dataManager.cgm {
-                        switchCell.switch?.isOn = true
-                    } else {
-                        switchCell.switch?.isOn = false
-                    }
-
-                    switchCell.textLabel?.text = NSLocalizedString("G5/G6 Transmitter", comment: "The title text for the G5/G6 Transmitter switch cell")
-                    switchCell.switch?.addTarget(self, action: #selector(g5Changed(_:)), for: .valueChanged)
-                case .dexcomShare, .g5TransmitterID:
-                    assertionFailure()
-                }
-
-                return switchCell
+                cell.textLabel?.text = cgmManager.localizedTitle
+                cell.detailTextLabel?.text = nil
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath)
+                cell.textLabel?.text = NSLocalizedString("Add CGM", comment: "Title text for button to set up a CGM")
+                return cell
             }
         case .configuration:
-            let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
+            let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
             switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .basalRate:
-                configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
-
-                if let basalRateSchedule = dataManager.loopManager.basalRateSchedule {
-                    configCell.detailTextLabel?.text = "\(basalRateSchedule.total()) U"
-                } else {
-                    configCell.detailTextLabel?.text = TapToSetString
-                }
             case .carbRatio:
                 configCell.textLabel?.text = NSLocalizedString("Carb Ratios", comment: "The title text for the carb ratio schedule")
 
                 if let carbRatioSchedule = dataManager.loopManager.carbRatioSchedule {
                     let unit = carbRatioSchedule.unit
-                    let value = valueNumberFormatter.string(from: NSNumber(value: carbRatioSchedule.averageQuantity().doubleValue(for: unit))) ?? "—"
+                    let value = valueNumberFormatter.string(from: carbRatioSchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
 
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for carb ratio average. (1: value)(2: carb unit)"), value, unit)
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .insulinSensitivity:
                 configCell.textLabel?.text = NSLocalizedString("Insulin Sensitivities", comment: "The title text for the insulin sensitivity schedule")
 
                 if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
-                    let value = valueNumberFormatter.string(from: NSNumber(value: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit))) ?? "—"
+                    let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
 
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.glucoseUnitDisplayString)
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.localizedShortUnitString
+                    )
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .glucoseTargetRange:
                 configCell.textLabel?.text = NSLocalizedString("Correction Range", comment: "The title text for the glucose target range schedule")
@@ -305,21 +252,21 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 if let glucoseTargetRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
                     let unit = glucoseTargetRangeSchedule.unit
                     let value = glucoseTargetRangeSchedule.value(at: Date())
-                    let minTarget = valueNumberFormatter.string(from: NSNumber(value: value.minValue)) ?? "—"
-                    let maxTarget = valueNumberFormatter.string(from: NSNumber(value: value.maxValue)) ?? "—"
+                    let minTarget = valueNumberFormatter.string(from: value.minValue) ?? SettingsTableViewCell.NoValueString
+                    let maxTarget = valueNumberFormatter.string(from: value.maxValue) ?? SettingsTableViewCell.NoValueString
 
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.glucoseUnitDisplayString)
+                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.localizedShortUnitString)
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .suspendThreshold:
                 configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
                 
                 if let suspendThreshold = dataManager.loopManager.settings.suspendThreshold {
-                    let value = valueNumberFormatter.string(from: NSNumber(value: suspendThreshold.value)) ?? "-"
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@", comment: "Format string for current suspend threshold. (1: value)(2: bg unit)"), value, suspendThreshold.unit.glucoseUnitDisplayString)
+                    let value = valueNumberFormatter.string(from: suspendThreshold.value, unit: suspendThreshold.unit) ?? SettingsTableViewCell.TapToSetString
+                    configCell.detailTextLabel?.text = value
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .insulinModel:
                 configCell.textLabel?.text = NSLocalizedString("Insulin Model", comment: "The title text for the insulin model setting row")
@@ -327,71 +274,78 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                 if let settings = dataManager.loopManager.insulinModelSettings {
                     configCell.detailTextLabel?.text = settings.title
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
-            case .maxBasal:
-                configCell.textLabel?.text = NSLocalizedString("Maximum Basal Rate", comment: "The title text for the maximum basal rate value")
+            case .deliveryLimits:
+                configCell.textLabel?.text = NSLocalizedString("Delivery Limits", comment: "Title text for delivery limits")
 
-                if let maxBasal = dataManager.loopManager.settings.maximumBasalRatePerHour {
-                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxBasal))!) U/hour"
+                if dataManager.loopManager.settings.maximumBolus == nil || dataManager.loopManager.settings.maximumBasalRatePerHour == nil {
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.EnabledString
                 }
-            case .maxBolus:
-                configCell.textLabel?.text = NSLocalizedString("Maximum Bolus", comment: "The title text for the maximum bolus value")
+            case .basalRate:
+                configCell.textLabel?.text = NSLocalizedString("Basal Rates", comment: "The title text for the basal rate schedule")
 
-                if let maxBolus = dataManager.loopManager.settings.maximumBolus {
-                    configCell.detailTextLabel?.text = "\(valueNumberFormatter.string(from: NSNumber(value: maxBolus))!) U"
+                if let basalRateSchedule = dataManager.loopManager.basalRateSchedule {
+                    configCell.detailTextLabel?.text = valueNumberFormatter.string(from: basalRateSchedule.total(), unit: "U")
                 } else {
-                    configCell.detailTextLabel?.text = TapToSetString
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
+            case .overridePresets:
+                configCell.textLabel?.text = NSLocalizedString("Override Presets", comment: "The title text for the override presets")
+                let maxPreviewSymbolCount = 3
+                let presetPreviewText = dataManager.loopManager.settings.overridePresets
+                    .prefix(maxPreviewSymbolCount)
+                    .map { $0.symbol }
+                    .joined(separator: " ")
+                configCell.detailTextLabel?.text = presetPreviewText
             }
 
+            configCell.accessoryType = .disclosureIndicator
             return configCell
-        case .devices:
-            let deviceCell = tableView.dequeueReusableCell(withIdentifier: RileyLinkDeviceTableViewCell.className) as! RileyLinkDeviceTableViewCell
-            let device = devices[indexPath.row]
-
-            deviceCell.configureCellWithName(device.name,
-                signal: valueNumberFormatter.decibleString(from: deviceRSSI[device.peripheralIdentifier]),
-                peripheralState: device.peripheralState
-            )
-
-            deviceCell.connectSwitch?.addTarget(self, action: #selector(deviceConnectionChanged(_:)), for: .valueChanged)
-
-            return deviceCell
         case .services:
-            let configCell = tableView.dequeueReusableCell(withIdentifier: ConfigCellIdentifier, for: indexPath)
+            let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
             switch ServiceRow(rawValue: indexPath.row)! {
             case .nightscout:
                 let nightscoutService = dataManager.remoteDataManager.nightscoutService
 
                 configCell.textLabel?.text = nightscoutService.title
-                configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? TapToSetString
-            case .mLab:
-                let mLabService = dataManager.logger.mLabService
-
-                configCell.textLabel?.text = mLabService.title
-                configCell.detailTextLabel?.text = mLabService.databaseName ?? TapToSetString
+                configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? SettingsTableViewCell.TapToSetString
             case .loggly:
                 let logglyService = dataManager.logger.logglyService
 
                 configCell.textLabel?.text = logglyService.title
-                configCell.detailTextLabel?.text = logglyService.isAuthorized ? EnabledString : TapToSetString
+                configCell.detailTextLabel?.text = logglyService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
             case .amplitude:
                 let amplitudeService = AnalyticsManager.shared.amplitudeService
 
                 configCell.textLabel?.text = amplitudeService.title
-                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? EnabledString : TapToSetString
+                configCell.detailTextLabel?.text = amplitudeService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
             }
 
+            configCell.accessoryType = .disclosureIndicator
             return configCell
+        case .testingPumpDataDeletion:
+            let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
+            cell.textLabel?.text = "Delete Pump Data"
+            cell.textLabel?.textAlignment = .center
+            cell.tintColor = .delete
+            cell.isEnabled = true
+            return cell
+        case .testingCGMDataDeletion:
+            let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
+            cell.textLabel?.text = "Delete CGM Data"
+            cell.textLabel?.textAlignment = .center
+            cell.tintColor = .delete
+            cell.isEnabled = true
+            return cell
         }
     }
 
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        switch Section(rawValue: section)! {
+        switch sections[section] {
         case .loop:
             return Bundle.main.localizedNameAndVersion
         case .pump:
@@ -400,118 +354,105 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             return NSLocalizedString("Continuous Glucose Monitor", comment: "The title of the continuous glucose monitor section in settings")
         case .configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
-        case .devices:
-            return nil
         case .services:
             return NSLocalizedString("Services", comment: "The title of the services section in settings")
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
+            return nil
         }
     }
 
     // MARK: - UITableViewDelegate
 
-    override func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-        switch Section(rawValue: indexPath.section)! {
-        case .cgm:
-            switch CGMRow(rawValue: indexPath.row)! {
-            case .dexcomShare, .g5TransmitterID:
-                return 1
-            default:
-                break
-            }
-        default:
-            break
-        }
-
-        return 0
+    override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
+        return true
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sender = tableView.cellForRow(at: indexPath)
 
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .pump:
-            let row = PumpRow(rawValue: indexPath.row)!
-            switch row {
-            case .pumpID:
-                let vc: LoopKit.TextFieldTableViewController
-                switch row {
-                case .pumpID:
-                    vc = PumpIDTableViewController(pumpID: dataManager.pumpSettings?.pumpID, region: dataManager.pumpSettings?.pumpRegion)
-                default:
-                    fatalError()
+            switch PumpRow(rawValue: indexPath.row)! {
+            case .pumpSettings:
+                if var settings = dataManager.pumpManager?.settingsViewController() {
+                    settings.completionDelegate = self
+                    present(settings, animated: true)
+                } else {
+                    // Add new pump
+                    let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
+
+                    switch pumpManagers.count {
+                    case 1:
+                        if let PumpManagerType = pumpManagers.first {
+                            let setupViewController = configuredSetupViewController(for: PumpManagerType)
+                            present(setupViewController, animated: true, completion: nil)
+                        }
+                    case let x where x > 1:
+                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (manager) in
+                            if let self = self {
+                                let setupViewController = self.configuredSetupViewController(for: manager)
+                                self.present(setupViewController, animated: true, completion: nil)
+                            }
+                        }
+
+                        alert.addCancelAction { (_) in
+                            tableView.deselectRow(at: indexPath, animated: true)
+                        }
+
+                        present(alert, animated: true, completion: nil)
+                    default:
+                        break
+                    }
                 }
-                vc.title = sender?.textLabel?.text
-                vc.indexPath = indexPath
-                vc.delegate = self
-
-                show(vc, sender: indexPath)
-            case .batteryChemistry:
-                let vc = RadioSelectionTableViewController.batteryChemistryType(dataManager.batteryChemistry)
-                vc.title = sender?.textLabel?.text
-                vc.delegate = self
-
-                show(vc, sender: sender)
             }
         case .cgm:
-            switch CGMRow(rawValue: indexPath.row)! {
-            case .dexcomShare:
-                let service = dataManager.remoteDataManager.shareService
-                let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.remoteDataManager.shareService = service
-
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+            if let cgmManager = dataManager.cgmManager as? CGMManagerUI {
+                if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                    var settings = cgmManager.settingsViewController(for: unit)
+                    settings.completionDelegate = self
+                    present(settings, animated: true)
                 }
+            } else if dataManager.cgmManager is PumpManagerUI {
+                // The pump manager is providing glucose, but allow reverting the CGM
+                let alert = UIAlertController(deleteCGMManagerHandler: { [weak self] (isDeleted) in
+                    if isDeleted {
+                        self?.dataManager.cgmManager = nil
+                    }
 
-                show(vc, sender: sender)
-            case .g5TransmitterID:
-                let vc: LoopKit.TextFieldTableViewController
-                var value: String?
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    _ = self?.tableView(tableView, willDeselectRowAt: indexPath)
+                })
+                present(alert, animated: true, completion: nil)
+            } else {
+                // Add new CGM
+                let cgmManagers = allCGMManagers.compactMap({ $0 as? CGMManagerUI.Type })
 
-                if case .g5(let transmitterID)? = dataManager.cgm {
-                    value = transmitterID
+                switch cgmManagers.count {
+                case 1:
+                    if let CGMManagerType = cgmManagers.first {
+                        setupCGMManager(CGMManagerType, indexPath: indexPath)
+                    }
+                case let x where x > 1:
+                    let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (cgmManager, pumpManager) in
+                        if let CGMManagerType = cgmManager {
+                            self?.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                        } else if let pumpManager = pumpManager {
+                            self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                        }
+                    }
+
+                    alert.addCancelAction { (_) in
+                        tableView.deselectRow(at: indexPath, animated: true)
+                    }
+
+                    present(alert, animated: true, completion: nil)
+                default:
+                    break
                 }
-
-                vc = .transmitterID(value)
-                vc.title = sender?.textLabel?.text
-                vc.indexPath = indexPath
-                vc.delegate = self
-
-                show(vc, sender: indexPath)
-            default:
-                break
             }
         case .configuration:
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
-            case .maxBasal, .maxBolus:
-                let vc: LoopKit.TextFieldTableViewController
-
-                switch row {
-                case .maxBasal:
-                    vc = .maxBasal(dataManager.loopManager.settings.maximumBasalRatePerHour)
-                case .maxBolus:
-                    vc = .maxBolus(dataManager.loopManager.settings.maximumBolus)
-                default:
-                    fatalError()
-                }
-
-                vc.title = sender?.textLabel?.text
-                vc.indexPath = indexPath
-                vc.delegate = self
-
-                show(vc, sender: indexPath)
-            case .basalRate:
-                let scheduleVC = SingleValueScheduleTableViewController()
-
-                if let profile = dataManager.loopManager.basalRateSchedule {
-                    scheduleVC.timeZone = profile.timeZone
-                    scheduleVC.scheduleItems = profile.items
-                }
-                scheduleVC.delegate = self
-                scheduleVC.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
-
-                show(scheduleVC, sender: sender)
             case .carbRatio:
                 let scheduleVC = DailyQuantityScheduleTableViewController()
 
@@ -523,6 +464,8 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
+                } else if let timeZone = dataManager.pumpManager?.status.timeZone {
+                    scheduleVC.timeZone = timeZone
                 }
 
                 show(scheduleVC, sender: sender)
@@ -539,15 +482,13 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
+                    if let timeZone = dataManager.pumpManager?.status.timeZone {
+                        scheduleVC.timeZone = timeZone
+                    }
+
+                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                        scheduleVC.unit = unit
+                        self.show(scheduleVC, sender: sender)
                     }
                 }
             case .glucoseTargetRange:
@@ -560,19 +501,17 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.overrideRanges = schedule.overrideRanges
+                    scheduleVC.preMealRange = dataManager.loopManager.settings.preMealTargetRange
 
                     show(scheduleVC, sender: sender)
                 } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                scheduleVC.unit = unit
-                                self.show(scheduleVC, sender: sender)
-                            }
-                        }
+                    if let timeZone = dataManager.pumpManager?.status.timeZone {
+                        scheduleVC.timeZone = timeZone
+                    }
+
+                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                        scheduleVC.unit = unit
+                        self.show(scheduleVC, sender: sender)
                     }
                 }
             case .suspendThreshold:
@@ -582,50 +521,60 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
                     vc.indexPath = indexPath
                     vc.title = sender?.textLabel?.text
                     self.show(vc, sender: sender)
-                } else {
-                    dataManager.loopManager.glucoseStore.preferredUnit { (unit, error) -> Void in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presentAlertController(with: error)
-                            } else if let unit = unit {
-                                let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
-                                vc.delegate = self
-                                vc.indexPath = indexPath
-                                vc.title = sender?.textLabel?.text
-                                self.show(vc, sender: sender)
-                            }
-                        }
-                    }
+                } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                    let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
+                    vc.delegate = self
+                    vc.indexPath = indexPath
+                    vc.title = sender?.textLabel?.text
+                    self.show(vc, sender: sender)
                 }
             case .insulinModel:
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
-            }
-        case .devices:
-            let device = devices[indexPath.row]
+            case .deliveryLimits:
+                let vc = DeliveryLimitSettingsTableViewController(style: .grouped)
 
-            dataManager.getStateForDevice(device) { (deviceState, pumpState, pumpSettings, pumpOps) in
-                DispatchQueue.main.async {
-                    let vc = RileyLinkDeviceTableViewController(
-                        device: device,
-                        deviceState: deviceState,
-                        pumpSettings: pumpSettings,
-                        pumpState: pumpState,
-                        pumpOps: pumpOps
-                    )
+                vc.maximumBasalRatePerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
+                vc.maximumBolus = dataManager.loopManager.settings.maximumBolus
 
-                    self.show(vc, sender: sender)
-                }
-            }
-        case .loop:
-            switch LoopRow(rawValue: indexPath.row)! {
-            case .preferredInsulinDataSource:
-                let vc = RadioSelectionTableViewController.insulinDataSource(dataManager.preferredInsulinDataSource)
                 vc.title = sender?.textLabel?.text
+                vc.delegate = self
+                vc.syncSource = dataManager.pumpManager
+
+                show(vc, sender: sender)
+            case .basalRate:
+                guard let pumpManager = dataManager.pumpManager else {
+                    // Not allowing basal schedule entry without a configured pump.
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    return
+                }
+                let vc = BasalScheduleTableViewController(allowedBasalRates: pumpManager.supportedBasalRates, maximumScheduleItemCount: pumpManager.maximumBasalScheduleEntryCount, minimumTimeInterval: pumpManager.minimumBasalScheduleEntryDuration)
+
+                if let profile = dataManager.loopManager.basalRateSchedule {
+                    vc.scheduleItems = profile.items
+                    vc.timeZone = profile.timeZone
+                } else {
+                    vc.timeZone = pumpManager.status.timeZone
+                }
+
+                vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
+                vc.delegate = self
+                vc.syncSource = pumpManager
+
+                show(vc, sender: sender)
+            case .overridePresets:
+                guard let glucoseUnit = dataManager.loopManager.glucoseStore.preferredUnit else { break }
+                let vc = OverridePresetTableViewController(
+                    glucoseUnit: glucoseUnit,
+                    presets: dataManager.loopManager.settings.overridePresets
+                )
                 vc.delegate = self
 
                 show(vc, sender: sender)
+            }
+        case .loop:
+            switch LoopRow(rawValue: indexPath.row)! {
             case .diagnostic:
-                let vc = CommandResponseViewController.generateDiagnosticReport(dataManager: dataManager)
+                let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: dataManager)
                 vc.title = sender?.textLabel?.text
 
                 show(vc, sender: sender)
@@ -637,267 +586,194 @@ final class SettingsTableViewController: UITableViewController, DailyValueSchedu
             case .nightscout:
                 let service = dataManager.remoteDataManager.nightscoutService
                 let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.remoteDataManager.nightscoutService = service
+                vc.authenticationObserver = { [weak self] (service) in
+                    self?.dataManager.remoteDataManager.nightscoutService = service
 
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
-                }
-
-                show(vc, sender: sender)
-            case .mLab:
-                let service = dataManager.logger.mLabService
-                let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.logger.mLabService = service
-
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                    self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 show(vc, sender: sender)
             case .loggly:
                 let service = dataManager.logger.logglyService
                 let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
-                    self.dataManager.logger.logglyService = service
+                vc.authenticationObserver = { [weak self] (service) in
+                    self?.dataManager.logger.logglyService = service
 
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                    self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 show(vc, sender: sender)
             case .amplitude:
                 let service = AnalyticsManager.shared.amplitudeService
                 let vc = AuthenticationViewController(authentication: service)
-                vc.authenticationObserver = { [unowned self] (service) in
+                vc.authenticationObserver = { [weak self] (service) in
                     AnalyticsManager.shared.amplitudeService = service
 
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                    self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 show(vc, sender: sender)
             }
+        case .testingPumpDataDeletion:
+            let confirmVC = UIAlertController(pumpDataDeletionHandler: dataManager.deleteTestingPumpData)
+            present(confirmVC, animated: true) {
+                tableView.deselectRow(at: indexPath, animated: true)
+            }
+        case .testingCGMDataDeletion:
+            let confirmVC = UIAlertController(cgmDataDeletionHandler: dataManager.deleteTestingCGMData)
+            present(confirmVC, animated: true) {
+                tableView.deselectRow(at: indexPath, animated: true)
+            }
         }
     }
 
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        switch Section(rawValue: section)! {
-        case .devices:
-            return devicesSectionTitleView
-        case .loop, .pump, .cgm, .configuration, .services:
-            return nil
+    override func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
+        switch sections[indexPath.section] {
+        case .loop:
+            break
+        case .pump:
+            let previousTestingPumpDataDeletionSection = sections.index(of: .testingPumpDataDeletion)
+            let wasTestingPumpManager = isTestingPumpManager
+            isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
+            if !wasTestingPumpManager, isTestingPumpManager {
+                guard let testingPumpDataDeletionSection = sections.index(of: .testingPumpDataDeletion) else {
+                    fatalError("Expected to find testing pump data deletion section with testing pump in use")
+                }
+                tableView.insertSections([testingPumpDataDeletionSection], with: .automatic)
+            } else if wasTestingPumpManager, !isTestingPumpManager {
+                guard let previousTestingPumpDataDeletionSection = previousTestingPumpDataDeletionSection else {
+                    fatalError("Expected to have had testing pump data deletion section when testing pump was in use")
+                }
+                tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
+            }
+            tableView.reloadSections([Section.pump.rawValue], with: .fade)
+            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
+        case .cgm:
+            let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
+            let wasTestingCGMManager = isTestingCGMManager
+            isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
+            if !wasTestingCGMManager, isTestingCGMManager {
+                guard let testingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion) else {
+                    fatalError("Expected to find testing CGM data deletion section with testing CGM in use")
+                }
+                tableView.insertSections([testingCGMDataDeletionSection], with: .automatic)
+            } else if wasTestingCGMManager, !isTestingCGMManager {
+                guard let previousTestingCGMDataDeletionSection = previousTestingCGMDataDeletionSection else {
+                    fatalError("Expected to have had testing CGM data deletion section when testing CGM was in use")
+                }
+                tableView.deleteSections([previousTestingCGMDataDeletionSection], with: .automatic)
+            }
+            tableView.reloadRows(at: [indexPath], with: .fade)
+        case .configuration:
+            break
+        case .services:
+            break
+        case .testingPumpDataDeletion, .testingCGMDataDeletion:
+            break
         }
-    }
 
-    // MARK: - Device mangement
+        return indexPath
+    }
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
+}
 
-    @objc private func reloadDevices() {
-        self.dataManager.rileyLinkManager.getDevices { (devices) in
-            DispatchQueue.main.async {
-                self.devices = devices
-            }
+extension SettingsTableViewController: CompletionDelegate {
+    func completionNotifyingDidComplete(_ object: CompletionNotifying) {
+        if let vc = object as? UIViewController {
+            vc.dismiss(animated: true, completion: nil)
         }
     }
+}
 
-    @objc private func deviceDidUpdate(_ note: Notification) {
-        DispatchQueue.main.async {
-            if let device = note.object as? RileyLinkDevice, let index = self.devices.index(where: { $0 === device }) {
-                if let rssi = note.userInfo?[RileyLinkDevice.notificationRSSIKey] as? Int {
-                    self.deviceRSSI[device.peripheralIdentifier] = rssi
-                }
 
-                if let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: Section.devices.rawValue)) as? RileyLinkDeviceTableViewCell {
-                    cell.configureCellWithName(device.name,
-                        signal: self.valueNumberFormatter.decibleString(from: self.deviceRSSI[device.peripheralIdentifier]),
-                        peripheralState: device.peripheralState
-                    )
-                }
-            }
+extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
+    func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController, didSetUpPumpManager pumpManager: PumpManagerUI) {
+        dataManager.pumpManager = pumpManager
+        tableView.selectRow(at: IndexPath(row: PumpRow.pumpSettings.rawValue, section: Section.pump.rawValue), animated: false, scrollPosition: .none)
+
+        if let basalRateSchedule = pumpManagerSetupViewController.basalSchedule {
+            dataManager.loopManager.basalRateSchedule = basalRateSchedule
+            tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.basalRate.rawValue]], with: .none)
+        }
+
+        if let maxBasalRateUnitsPerHour = pumpManagerSetupViewController.maxBasalRateUnitsPerHour {
+            dataManager.loopManager.settings.maximumBasalRatePerHour = maxBasalRateUnitsPerHour
+            tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
+        }
+
+        if let maxBolusUnits = pumpManagerSetupViewController.maxBolusUnits {
+            dataManager.loopManager.settings.maximumBolus = maxBolusUnits
+            tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
         }
     }
+}
 
-    private var devices: [RileyLinkDevice] = [] {
-        didSet {
-            // Assume only appends are possible when count changes for algorithmic simplicity
-            guard oldValue.count < devices.count else {
-                tableView.reloadSections(IndexSet(integer: Section.devices.rawValue), with: .fade)
-                return
-            }
 
-            tableView.beginUpdates()
-
-            let insertedPaths = (oldValue.count..<devices.count).map { (index) -> IndexPath in
-                return IndexPath(row: index, section: Section.devices.rawValue)
-            }
-            tableView.insertRows(at: insertedPaths, with: .automatic)
-
-            tableView.endUpdates()
-        }
-    }
-
-    private var deviceRSSI: [UUID: Int] = [:]
-
-    var rssiFetchTimer: Timer? {
-        willSet {
-            rssiFetchTimer?.invalidate()
-        }
-    }
-
-    @objc func updateRSSI() {
-        for device in devices {
-            device.readRSSI()
-        }
-    }
-
-    @objc private func deviceConnectionChanged(_ connectSwitch: UISwitch) {
-        let switchOrigin = connectSwitch.convert(CGPoint.zero, to: tableView)
-
-        if let indexPath = tableView.indexPathForRow(at: switchOrigin), indexPath.section == Section.devices.rawValue
-        {
-            let device = devices[indexPath.row]
-
-            if connectSwitch.isOn {
-                dataManager.connectToRileyLink(device)
-            } else {
-                dataManager.disconnectFromRileyLink(device)
-            }
-        }
-    }
-
-    // MARK: - CGM State
-
-    // MARK: Model
-
-    /// Temporarily caches the last transmitter ID so curious switch-flippers don't lose it!
-    private var g5TransmitterID: String?
-
-    @objc private func g5Changed(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG4SwitchOff()
-            setEnliteSwitchOff()
-            let shareRowExists = tableView.numberOfRows(inSection: Section.cgm.rawValue) > CGMRow.dexcomShare.rawValue
-            dataManager.cgm = .g5(transmitterID: g5TransmitterID)
-
-            var indexPaths = [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section:Section.cgm.rawValue)]
-            if !shareRowExists {
-                indexPaths.insert(IndexPath(row: CGMRow.dexcomShare.rawValue, section:Section.cgm.rawValue), at: 0)
-            }
-
-            tableView.insertRows(at: indexPaths, with: .top)
+extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
+    fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
+        if var setupViewController = CGMManagerType.setupViewController() {
+            setupViewController.setupDelegate = self
+            setupViewController.completionDelegate = self
+            present(setupViewController, animated: true, completion: nil)
         } else {
-            removeDexcomShareRow()
-            removeG5TransmitterIDRow()
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    @objc private func g4Changed(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG5SwitchOff()
-            setEnliteSwitchOff()
-            removeG5TransmitterIDRow()
-            let shareRowExists = tableView.numberOfRows(inSection: Section.cgm.rawValue) > CGMRow.dexcomShare.rawValue
-            dataManager.cgm = .g4
-
-            if !shareRowExists {
-                tableView.insertRows(at: [IndexPath(row: CGMRow.dexcomShare.rawValue, section:Section.cgm.rawValue)], with: .top)
-            }
-        } else {
-            removeDexcomShareRow()
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    @objc func enliteChanged(_ sender: UISwitch) {
-        tableView.beginUpdates()
-        if sender.isOn {
-            setG5SwitchOff()
-            setG4SwitchOff()
-            removeDexcomShareRow()
-            removeG5TransmitterIDRow()
-            dataManager.cgm = .enlite
-        } else {
-            dataManager.cgm = nil
-        }
-        tableView.endUpdates()
-    }
-
-    // MARK: Views
-
-    private func removeDexcomShareRow() {
-        switch dataManager.cgm {
-        case .g4?, .g5?:
-            tableView.deleteRows(at: [IndexPath(row: CGMRow.dexcomShare.rawValue, section: Section.cgm.rawValue)], with: .top)
-        default:
-            break;
+            completeCGMManagerSetup(CGMManagerType.init(rawState: [:]), indexPath: indexPath)
         }
     }
 
-    private func removeG5TransmitterIDRow() {
-        if case .g5(let transmitterID)? = dataManager.cgm {
-            g5TransmitterID = transmitterID
-            tableView.deleteRows(at: [IndexPath(row: CGMRow.g5TransmitterID.rawValue, section: Section.cgm.rawValue)], with: .top)
-        }
+    fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
+        dataManager.cgmManager = cgmManager
+        tableView.deselectRow(at: indexPath, animated: true)
+        _ = self.tableView(tableView, willDeselectRowAt: indexPath)
     }
 
-    private func setG5SwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g5.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
+    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+        dataManager.cgmManager = cgmManager
+        tableView.selectRow(at: IndexPath(row: CGMRow.cgmSettings.rawValue, section: Section.cgm.rawValue), animated: false, scrollPosition: .none)
+        dismiss(animated: true, completion: nil)
     }
+}
 
-    private func setG4SwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.g4.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
-    }
 
-    private func setEnliteSwitchOff() {
-        let switchCell = tableView.cellForRow(at: IndexPath(row: CGMRow.enlite.rawValue, section: Section.cgm.rawValue)) as! SwitchTableViewCell
-        switchCell.switch?.setOn(false, animated: true)
-    }
-
-    // MARK: - DailyValueScheduleTableViewControllerDelegate
-
+extension SettingsTableViewController: DailyValueScheduleTableViewControllerDelegate {
     func dailyValueScheduleTableViewControllerWillFinishUpdating(_ controller: DailyValueScheduleTableViewController) {
-        if let indexPath = tableView.indexPathForSelectedRow {
-            switch Section(rawValue: indexPath.section)! {
-            case .configuration:
-                switch ConfigurationRow(rawValue: indexPath.row)! {
-                case .basalRate:
-                    if let controller = controller as? SingleValueScheduleTableViewController {
-                        dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                        AnalyticsManager.shared.didChangeBasalRateSchedule()
-                    }
-                case .glucoseTargetRange:
-                    if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                        dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
-                        AnalyticsManager.shared.didChangeGlucoseTargetRangeSchedule()
-                    }
-                case let row:
-                    if let controller = controller as? DailyQuantityScheduleTableViewController {
-                        switch row {
-                        case .carbRatio:
-                            dataManager.loopManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                            AnalyticsManager.shared.didChangeCarbRatioSchedule()
-                        case .insulinSensitivity:
-                            dataManager.loopManager.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                            AnalyticsManager.shared.didChangeInsulinSensitivitySchedule()
-                        default:
-                            break
-                        }
+        guard let indexPath = tableView.indexPathForSelectedRow else {
+            return
+        }
+
+        switch sections[indexPath.section] {
+        case .configuration:
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .glucoseTargetRange:
+                if let controller = controller as? GlucoseRangeScheduleTableViewController {
+                    dataManager.loopManager.settings.preMealTargetRange = controller.preMealRange
+                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                }
+            case .basalRate:
+                if let controller = controller as? BasalScheduleTableViewController {
+                    dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                }
+            case let row:
+                if let controller = controller as? DailyQuantityScheduleTableViewController {
+                    switch row {
+                    case .carbRatio:
+                        dataManager.loopManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        AnalyticsManager.shared.didChangeCarbRatioSchedule()
+                    case .insulinSensitivity:
+                        dataManager.loopManager.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
+                        AnalyticsManager.shared.didChangeInsulinSensitivitySchedule()
+                    default:
+                        break
                     }
                 }
-
-                tableView.reloadRows(at: [indexPath], with: .none)
-            default:
-                break
             }
+        default:
+            break
         }
+
+        tableView.reloadRows(at: [indexPath], with: .none)
     }
 }
 
@@ -908,7 +784,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
             return
         }
 
-        switch Section(rawValue: indexPath.section)! {
+        switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .insulinModel:
@@ -927,70 +803,10 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
 }
 
 
-extension SettingsTableViewController: RadioSelectionTableViewControllerDelegate {
-    func radioSelectionTableViewControllerDidChangeSelectedIndex(_ controller: RadioSelectionTableViewController) {
-        if let indexPath = self.tableView.indexPathForSelectedRow {
-            switch Section(rawValue: indexPath.section)! {
-            case .loop:
-                switch LoopRow(rawValue: indexPath.row)! {
-                case .preferredInsulinDataSource:
-                    if let selectedIndex = controller.selectedIndex, let dataSource = InsulinDataSource(rawValue: selectedIndex) {
-                        dataManager.preferredInsulinDataSource = dataSource
-
-                        tableView.reloadRows(at: [IndexPath(row: LoopRow.preferredInsulinDataSource.rawValue, section: Section.loop.rawValue)], with: .none)
-                    }
-                default:
-                    assertionFailure()
-                }
-
-            case .pump:
-                switch PumpRow(rawValue: indexPath.row)! {
-                case .batteryChemistry:
-                    if let selectedIndex = controller.selectedIndex, let dataSource = BatteryChemistryType(rawValue: selectedIndex) {
-                        dataManager.batteryChemistry = dataSource
-
-                        tableView.reloadRows(at: [IndexPath(row: PumpRow.batteryChemistry.rawValue, section: Section.configuration.rawValue)], with: .none)
-                    }
-                default:
-                    assertionFailure()
-                }
-            default:
-                assertionFailure()
-            }
-        }
-    }
-}
-
-extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDelegate {
-    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKit.TextFieldTableViewController) {
+extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDelegate {
+    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKitUI.TextFieldTableViewController) {
         if let indexPath = controller.indexPath {
-            switch Section(rawValue: indexPath.section)! {
-            case .pump:
-                switch PumpRow(rawValue: indexPath.row)! {
-                case .pumpID:
-                    dataManager.setPumpID(controller.value)
-
-                    if  let controller = controller as? PumpIDTableViewController,
-                        let region = controller.region
-                    {
-                        dataManager.setPumpRegion(region)
-                    }
-                default:
-                    assertionFailure()
-                }
-            case .cgm:
-                switch CGMRow(rawValue: indexPath.row)! {
-                case .g5TransmitterID:
-                    var transmitterID = controller.value
-
-                    if transmitterID?.isEmpty ?? false {
-                        transmitterID = nil
-                    }
-
-                    dataManager.cgm = .g5(transmitterID: transmitterID)
-                default:
-                    assertionFailure()
-                }
+            switch sections[indexPath.section] {
             case .configuration:
                 switch ConfigurationRow(rawValue: indexPath.row)! {
                 case .suspendThreshold:
@@ -999,18 +815,6 @@ extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDeleg
                         dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.loopManager.settings.suspendThreshold = nil
-                    }
-                case .maxBasal:
-                    if let value = controller.value, let rate = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.maximumBasalRatePerHour = rate
-                    } else {
-                        dataManager.loopManager.settings.maximumBasalRatePerHour = nil
-                    }
-                case .maxBolus:
-                    if let value = controller.value, let units = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.maximumBolus = units
-                    } else {
-                        dataManager.loopManager.settings.maximumBolus = nil
                     }
                 default:
                     assertionFailure()
@@ -1023,16 +827,66 @@ extension SettingsTableViewController: LoopKit.TextFieldTableViewControllerDeleg
         tableView.reloadData()
     }
 
-    func textFieldTableViewControllerDidReturn(_ controller: LoopKit.TextFieldTableViewController) {
+    func textFieldTableViewControllerDidReturn(_ controller: LoopKitUI.TextFieldTableViewController) {
         _ = navigationController?.popViewController(animated: true)
     }
 }
 
 
-extension SettingsTableViewController: PumpIDTableViewControllerDelegate {
-    func pumpIDTableViewControllerDidChangePumpRegion(_ controller: PumpIDTableViewController) {
-        if let region = controller.region {
-            dataManager.setPumpRegion(region)
-        }
+extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerDelegate {
+    func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBasalRatePerHour(_ vc: DeliveryLimitSettingsTableViewController) {
+        dataManager.loopManager.settings.maximumBasalRatePerHour = vc.maximumBasalRatePerHour
+
+        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
+    }
+
+    func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBolus(_ vc: DeliveryLimitSettingsTableViewController) {
+        dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
+
+        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
+    }
+}
+
+
+extension SettingsTableViewController: OverridePresetTableViewControllerDelegate {
+    func overridePresetTableViewControllerDidUpdatePresets(_ vc: OverridePresetTableViewController) {
+        dataManager.loopManager.settings.overridePresets = vc.presets
+
+        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.overridePresets.rawValue]], with: .none)
+    }
+}
+
+
+private extension UIAlertController {
+    convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {
+        self.init(
+            title: nil,
+            message: "Are you sure you want to delete testing pump health data?",
+            preferredStyle: .actionSheet
+        )
+
+        addAction(UIAlertAction(
+            title: "Delete Pump Data",
+            style: .destructive,
+            handler: { _ in handler() }
+        ))
+
+        addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+    }
+
+    convenience init(cgmDataDeletionHandler handler: @escaping () -> Void) {
+        self.init(
+            title: nil,
+            message: "Are you sure you want to delete testing CGM health data?",
+            preferredStyle: .actionSheet
+        )
+
+        addAction(UIAlertAction(
+            title: "Delete CGM Data",
+            style: .destructive,
+            handler: { _ in handler() }
+        ))
+
+        addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     }
 }
