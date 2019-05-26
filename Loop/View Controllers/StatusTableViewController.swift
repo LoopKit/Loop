@@ -24,11 +24,16 @@ private extension RefreshContext {
 final class StatusTableViewController: ChartsTableViewController {
 
     private let log = OSLog(category: "StatusTableViewController")
+    private let visualEffectStatusBar = UIVisualEffectView(effect: UIBlurEffect(style: .light))
 
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // Adding a visualEffect view to prevent the StatusBar from overlaying the UITableView
+        visualEffectStatusBar.frame = UIApplication.shared.statusBarFrame
+        view.addSubview(visualEffectStatusBar)
 
         statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
         
@@ -147,7 +152,16 @@ final class StatusTableViewController: ChartsTableViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         refreshContext.update(with: .size(size))
 
+        // Only show the visualEffectStatusBar if the device is in landscape
+        visualEffectStatusBar.isHidden = UIDevice.current.orientation.isLandscape
+
         super.viewWillTransition(to: size, with: coordinator)
+    }
+
+    // MARK: - TableView
+
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        visualEffectStatusBar.transform = CGAffineTransform(translationX: 0, y: self.tableView.contentOffset.y)
     }
 
     // MARK: - State
