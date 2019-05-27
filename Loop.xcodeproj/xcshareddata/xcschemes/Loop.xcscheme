@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "0940"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -36,6 +36,16 @@
                BlueprintIdentifier = "43E2D90A1D20C581004DA55F"
                BuildableName = "LoopTests.xctest"
                BlueprintName = "LoopTests"
+               ReferencedContainer = "container:Loop.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "43E2D8D01D20BF42004DA55F"
+               BuildableName = "DoseMathTests.xctest"
+               BlueprintName = "DoseMathTests"
                ReferencedContainer = "container:Loop.xcodeproj">
             </BuildableReference>
          </TestableReference>

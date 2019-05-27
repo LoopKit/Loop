@@ -9,7 +9,7 @@
 import Foundation
 
 import UIKit
-import LoopKit
+import LoopKitUI
 import HealthKit
 
 
@@ -26,10 +26,10 @@ final class GlucoseThresholdTableViewController: TextFieldTableViewController {
         keyboardType = .decimalPad
         contextHelp = NSLocalizedString("When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour.", comment: "Explanation of suspend threshold")
         
-        unit = glucoseUnit.glucoseUnitDisplayString
+        unit = glucoseUnit.localizedShortUnitString
 
         if let threshold = threshold {
-            value = NumberFormatter.glucoseFormatter(for: glucoseUnit).string(from: NSNumber(value: threshold))
+            value = NumberFormatter.glucoseFormatter(for: glucoseUnit).string(from: threshold)
         }
 
     }

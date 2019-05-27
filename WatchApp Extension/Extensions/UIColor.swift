@@ -10,21 +10,32 @@ import UIKit
 
 
 extension UIColor {
-    @nonobjc static let tintColor = UIColor(red: 76 / 255, green: 217 / 255, blue: 100 / 255, alpha: 1)
+    static let tintColor = UIColor(red: 76 / 255, green: 217 / 255, blue: 100 / 255, alpha: 1)
 
-    @nonobjc static let carbsColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
+    static let carbsColor = UIColor(red: 99 / 255, green: 218 / 255, blue: 56 / 255, alpha: 1)
 
     // Equivalent to carbsColor with alpha 0.14 on a black background
-    @nonobjc static let darkCarbsColor = UIColor(red: 0.07, green: 0.12, blue: 0.04, alpha: 1)
+    static let darkCarbsColor = UIColor(red: 0.07, green: 0.12, blue: 0.04, alpha: 1)
 
-    @nonobjc static let workoutColor = UIColor(red: 79 / 255, green: 173 / 255, blue: 248 / 255, alpha: 1)
+    static let glucose = UIColor(red: 79 / 255, green: 173 / 255, blue: 248 / 255, alpha: 1)
+
+    // Equivalent to glucoseColor with alpha 0.14 on a black background
+    static let darkGlucose = UIColor(red: 0.02, green: 0.10, blue: 0.14, alpha: 1)
+
+    static let workoutColor = glucose
 
     // Equivalent to workoutColor with alpha 0.14 on a black background
-    @nonobjc static let darkWorkoutColor = UIColor(red: 0.02, green: 0.10, blue: 0.14, alpha: 1)
+    static let darkWorkoutColor = darkGlucose
 
-    @nonobjc static let disabledButtonColor = UIColor.gray
+    static let disabledButtonColor = UIColor.gray
 
-    @nonobjc static let darkDisabledButtonColor = UIColor.disabledButtonColor.withAlphaComponent(0.14)
+    static let darkDisabledButtonColor = UIColor.disabledButtonColor.withAlphaComponent(0.14)
+
+    static let chartLabel = HIGWhiteColor()
+
+    static let chartNowLine = HIGWhiteColor().withAlphaComponent(0.2)
+
+    static let chartPlatter = HIGWhiteColorDark()
 
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color
@@ -67,5 +78,14 @@ extension UIColor {
 
     private static func HIGGreenColorDark() -> UIColor {
         return HIGGreenColor().withAlphaComponent(0.14)
+    }
+
+    private static func HIGWhiteColor() -> UIColor {
+        return UIColor(red: 242 / 255, green: 244 / 255, blue: 1, alpha: 1)
+    }
+
+    private static func HIGWhiteColorDark() -> UIColor {
+        // Equivalent to HIGWhiteColor().withAlphaComponent(0.14) on black
+        return UIColor(red: 33 / 255, green: 34 / 255, blue: 35 / 255, alpha: 1)
     }
 }

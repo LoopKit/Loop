@@ -7,8 +7,8 @@
 //
 
 import Foundation
+import LoopKit
 import NightscoutUploadKit
-import ShareClient
 
 
 final class RemoteDataManager {
@@ -23,21 +23,9 @@ final class RemoteDataManager {
         }
     }
 
-    var shareService: ShareService {
-        didSet {
-            try! keychain.setDexcomShareUsername(shareService.username, password: shareService.password, url: shareService.url)
-        }
-    }
-
     private let keychain = KeychainManager()
 
     init() {
-        if let (username, password, url) = keychain.getDexcomShareCredentials() {
-            shareService = ShareService(username: username, password: password, url: url)
-        } else {
-            shareService = ShareService(username: nil, password: nil, url: nil)
-        }
-
         if let (siteURL, APISecret) = keychain.getNightscoutCredentials() {
             nightscoutService = NightscoutService(siteURL: siteURL, APISecret: APISecret)
             UIDevice.current.isBatteryMonitoringEnabled = true

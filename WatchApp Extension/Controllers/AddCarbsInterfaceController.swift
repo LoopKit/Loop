@@ -8,21 +8,27 @@
 
 import WatchKit
 import WatchConnectivity
+import HealthKit
+import LoopKit
+import os.log
 
 
 final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClass {
 
     private var carbValue: Int = 15 {
         didSet {
-            if carbValue < 0 {
-                carbValue = 0
-            } else if carbValue > 100 {
-                carbValue = 100
+            if carbValue < minimumCarbValue {
+                carbValue = minimumCarbValue
+            } else if carbValue > maximumCarbValue {
+                carbValue = maximumCarbValue
             }
 
             valueLabel.setText(String(carbValue))
         }
     }
+
+    private let minimumCarbValue = 0
+    private let maximumCarbValue = 100
 
     private let maximumDatePastInterval = TimeInterval(hours: 8)
     private let maximumDateFutureInterval = TimeInterval(hours: 4)
@@ -108,6 +114,12 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
+    }
+
+    override func didAppear() {
+        super.didAppear()
+
+        updateNewCarbEntryUserActivity()
 
         crownSequencer.focus()
     }
@@ -129,6 +141,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         case .date:
             date -= dateIncrement
         }
+
+        WKInterfaceDevice.current().play(.directionDown)
     }
 
     @IBAction func increment() {
@@ -138,6 +152,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         case .date:
             date += dateIncrement
         }
+
+        WKInterfaceDevice.current().play(.directionUp)
     }
 
     @IBAction func toggleInputMode() {
@@ -164,11 +180,16 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                 try WCSession.default.sendCarbEntryMessage(entry,
                     replyHandler: { (suggestion) in
                         DispatchQueue.main.async {
+                            WKInterfaceDevice.current().play(.success)
+
+                            ExtensionDelegate.shared().loopManager.addConfirmedCarbEntry(entry)
+
                             WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
                         }
                     },
                     errorHandler: { (error) in
                         DispatchQueue.main.async {
+                            WKInterfaceDevice.current().play(.failure)
                             ExtensionDelegate.shared().present(error)
                         }
                     }
@@ -197,15 +218,32 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
     func crownDidRotate(_ crownSequencer: WKCrownSequencer?, rotationalDelta: Double) {
         accumulatedRotation += rotationalDelta
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerIncrement)
-        let delta = (accumulatedRotation - remainder) / rotationsPerIncrement
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
         case .value:
-            carbValue += Int(delta)
+            carbValue += delta
         case .date:
-            date += TimeInterval(minutes: delta)
+            date += TimeInterval(minutes: Double(delta))
         }
 
         accumulatedRotation = remainder
+    }
+}
+
+extension AddCarbsInterfaceController: NSUserActivityDelegate {
+    func updateNewCarbEntryUserActivity() {
+        if #available(watchOSApplicationExtension 5.0, *) {
+            let userActivity = NSUserActivity.forDidAddCarbEntryOnWatch()
+            update(userActivity)
+        } else {
+            let userActivity = NSUserActivity.forNewCarbEntry()
+            userActivity.update(from: entry)
+            updateUserActivity(userActivity.activityType, userInfo: userActivity.userInfo, webpageURL: nil)
+        }
+    }
+
+    private var entry: NewCarbEntry {
+        return NewCarbEntry(quantity: HKQuantity(unit: .gram(), doubleValue: Double(carbValue)), startDate: date, foodType: nil, absorptionTime: nil)
     }
 }

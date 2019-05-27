@@ -23,11 +23,11 @@ extension BolusRecommendationNotice {
         switch self {
         case .glucoseBelowSuspendThreshold(minGlucose: let minGlucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-            let bgStr = glucoseFormatter.describingGlucose(minGlucose.quantity, for: unit)!
+            let bgStr = glucoseFormatter.string(from: minGlucose.quantity, unit: unit)!
             return String(format: NSLocalizedString("Predicted glucose of %1$@ is below your suspend threshold setting.", comment: "Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value)"), bgStr)
         case .currentGlucoseBelowTarget(glucose: let glucose):
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-            let bgStr = glucoseFormatter.describingGlucose(glucose.quantity, for: unit)!
+            let bgStr = glucoseFormatter.string(from: glucose.quantity, unit: unit)!
             return String(format: NSLocalizedString("Current glucose of %1$@ is below correction range.", comment: "Message when offering bolus recommendation even though bg is below range. (1: glucose value)"), bgStr)
         case .predictedGlucoseBelowTarget(minGlucose: let minGlucose):
             let timeFormatter = DateFormatter()
@@ -36,7 +36,7 @@ extension BolusRecommendationNotice {
             let time = timeFormatter.string(from: minGlucose.startDate)
 
             let glucoseFormatter = NumberFormatter.glucoseFormatter(for: unit)
-            let minBGStr = glucoseFormatter.describingGlucose(minGlucose.quantity, for: unit)!
+            let minBGStr = glucoseFormatter.string(from: minGlucose.quantity, unit: unit)!
             return String(format: NSLocalizedString("Predicted glucose at %1$@ is %2$@.", comment: "Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number)"), time, minBGStr)
 
         }

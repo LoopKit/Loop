@@ -1,0 +1,72 @@
+/* Class = "WKInterfaceButton"; title = "🌮"; ObjectID = "0fo-Z3-hTi"; */
+"0fo-Z3-hTi.title" = "🌮";
+
+/* Class = "WKInterfaceButton"; title = "Add Carbs"; ObjectID = "b6f-3I-jki"; */
+"b6f-3I-jki.title" = "Legg til karbohydrater";
+
+/* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "CWt-7U-cnK"; */
+"CWt-7U-cnK.text" = "15";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.accessibilityLabel" = "Trekk fra";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "Dh9-HV-fXy"; */
+"Dh9-HV-fXy.title" = "−";
+
+/* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
+"dPF-QZ-sh6.title" = "🍕";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.accessibilityLabel" = "Legg til";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "DZc-Gn-RLu"; */
+"DZc-Gn-RLu.title" = "+";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.accessibilityLabel" = "Legg til";
+
+/* Class = "WKInterfaceButton"; title = "+"; ObjectID = "eu3-pj-GH3"; */
+"eu3-pj-GH3.title" = "+";
+
+/* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
+"f5G-bS-9pd.text" = "Pre-måltid";
+
+/* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
+"gAn-qe-OvX.title" = "🍭";
+
+/* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.accessibilityLabel" = "Trekk fra";
+
+/* Class = "WKInterfaceButton"; title = "−"; ObjectID = "hjF-xr-cwO"; */
+"hjF-xr-cwO.title" = "−";
+
+/* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
+"hln-CI-MRP.text" = "Karbohydrater";
+
+/* Class = "WKInterfaceLabel"; text = "Bolus Failed"; ObjectID = "jj3-Gq-HBy"; */
+"jj3-Gq-HBy.text" = "Bolus feilet";
+
+/* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
+"mpK-zY-UvA.text" = "0.000";
+
+/* Class = "WKInterfaceLabel"; text = "Workout"; ObjectID = "nC0-X3-oFJ"; */
+"nC0-X3-oFJ.text" = "Trening";
+
+/* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
+"Qsq-p5-1J0.title" = "Bolus";
+
+/* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
+"rNf-Mh-tID.title" = "Loop";
+
+/* Class = "WKInterfaceLabel"; text = "UNITS"; ObjectID = "rV7-d9-n6u"; */
+"rV7-d9-n6u.text" = "ENHETER";
+
+/* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
+"smL-Rc-IZh.text" = "Bolus";
+
+/* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
+"Ury-of-vQg.text" = "10:09 AM";
+
+/* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
+"XkS-y5-khE.text" = "<body>";
+
