@@ -17,6 +17,16 @@ import os.log
 open class ChartsManager {
     private let log = OSLog(category: "ChartsManager")
 
+    private lazy var timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
+        let isAmPmTimeFormat = dateFormat.index( of: "a") != nil
+        formatter.dateFormat = isAmPmTimeFormat
+            ? "h a"
+            : "H:mm"
+        return formatter
+    }()
+
     public init(colors: ChartColorPalette, settings: ChartSettings, charts: [ChartProviding]) {
         self.colors = colors
         self.chartSettings = settings
@@ -105,7 +115,7 @@ open class ChartsManager {
     /// - Parameter date: The new candidate date
     public func updateEndDate(_ date: Date) {
         if date > endDate {
-            var components = DateComponents(minute: 0)
+            let components = DateComponents(minute: 0)
             endDate = min(
                 maxEndDate,
                 Calendar.current.nextDate(
@@ -156,13 +166,11 @@ open class ChartsManager {
 
     // MARK: - Shared Axis
 
+
     private func generateXAxisValues() {
         if let endDate = charts.compactMap({ $0.endDate }).max() {
             updateEndDate(endDate)
         }
-
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "h a"
 
         let points = [
             ChartPoint(
