@@ -29,7 +29,7 @@ public struct LoopSettings: Equatable {
 
     public var suspendThreshold: GlucoseThreshold? = nil
 
-    public var integralRetrospectiveCorrectionEnabled = true
+    public var integralRetrospectiveCorrectionEnabled = false
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
