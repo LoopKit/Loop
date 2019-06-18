@@ -78,6 +78,16 @@ extension StatusChartsManager {
             invalidateChart(atIndex: ChartIndex.glucose.rawValue)
         }
     }
+
+    var scheduleOverride: TemporaryScheduleOverride? {
+        get {
+            return glucose.scheduleOverride
+        }
+        set {
+            glucose.scheduleOverride = newValue
+            invalidateChart(atIndex: ChartIndex.glucose.rawValue)
+        }
+    }
 }
 
 extension StatusChartsManager {
