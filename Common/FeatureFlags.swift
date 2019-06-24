@@ -9,22 +9,17 @@
 import Foundation
 
 
-let FeatureFlags: FeatureFlagConfiguration = {
-    guard
-        let path = Bundle.main.path(forResource: "FeatureFlags", ofType: "plist"),
-        let data = FileManager.default.contents(atPath: path),
-        let configuration = try? PropertyListDecoder().decode(FeatureFlagConfiguration.self, from: data)
-    else {
-        return FeatureFlagConfiguration()
-    }
-
-    return configuration
-}()
+let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
 
     fileprivate init() {
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if FEATURE_OVERRIDES_DISABLED
         self.sensitivityOverridesEnabled = false
+        #else
+        self.sensitivityOverridesEnabled = true
+        #endif
     }
 }
