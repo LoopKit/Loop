@@ -175,6 +175,12 @@
 		43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */; };
 		43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */; };
 		43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
+		43C5F257222C7B7200905D10 /* TimeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C5F256222C7B7200905D10 /* TimeComponents.swift */; };
+		43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9FFA421EA9A0C00AF44BF /* AppDelegate.swift */; };
+		43C5F25A222C921B00905D10 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C5F259222C921B00905D10 /* OSLog.swift */; };
+		43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F4222266F000C62969 /* ModalDayLesson.swift */; };
+		43C728F72222700000C62969 /* DateIntervalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F62222700000C62969 /* DateIntervalEntry.swift */; };
+		43C728F9222A448700C62969 /* DayCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F8222A448700C62969 /* DayCalculator.swift */; };
 		43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43CA93361CB98079000026B5 /* MinimedKit.framework */; };
 		43CB2B2B1D924D450079823D /* WCSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CB2B2A1D924D450079823D /* WCSession.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* Data.swift */; };
@@ -196,7 +202,6 @@
 		43D9F82021EF0906000578CD /* NSNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F81F21EF0906000578CD /* NSNumber.swift */; };
 		43D9F82221EF0A7A000578CD /* QuantityRangeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F82121EF0A7A000578CD /* QuantityRangeEntry.swift */; };
 		43D9F82421EFF1AB000578CD /* LessonResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F82321EFF1AB000578CD /* LessonResultsViewController.swift */; };
-		43D9FFA521EA9A0C00AF44BF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9FFA421EA9A0C00AF44BF /* AppDelegate.swift */; };
 		43D9FFAA21EA9A0C00AF44BF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43D9FFA821EA9A0C00AF44BF /* Main.storyboard */; };
 		43D9FFAC21EA9A0F00AF44BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43D9FFAB21EA9A0F00AF44BF /* Assets.xcassets */; };
 		43D9FFAF21EA9A0F00AF44BF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43D9FFAD21EA9A0F00AF44BF /* LaunchScreen.storyboard */; };
@@ -263,6 +268,9 @@
 		43FCEEB9221BCF790013DD30 /* GlucoseChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEB8221BCF790013DD30 /* GlucoseChart.swift */; };
 		43FCEEBB22211C860013DD30 /* CarbEffectChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBA22211C860013DD30 /* CarbEffectChart.swift */; };
 		43FCEEBD22212DD50013DD30 /* PredictedGlucoseChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEBC22212DD50013DD30 /* PredictedGlucoseChart.swift */; };
+		43FCEEBE22220CE70013DD30 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
+		43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 437AFEE6203688CF008C4892 /* LoopKitUI.framework */; };
+		43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */; };
 		4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */; };
 		4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
@@ -685,6 +693,11 @@
 		43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImageTableViewCell.swift; sourceTree = "<group>"; };
 		43C3B6F620BBCAA30026CAFA /* PumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManager.swift; sourceTree = "<group>"; };
 		43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeSchedule.swift; sourceTree = "<group>"; };
+		43C5F256222C7B7200905D10 /* TimeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeComponents.swift; sourceTree = "<group>"; };
+		43C5F259222C921B00905D10 /* OSLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLog.swift; sourceTree = "<group>"; };
+		43C728F4222266F000C62969 /* ModalDayLesson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalDayLesson.swift; sourceTree = "<group>"; };
+		43C728F62222700000C62969 /* DateIntervalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateIntervalEntry.swift; sourceTree = "<group>"; };
+		43C728F8222A448700C62969 /* DayCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCalculator.swift; sourceTree = "<group>"; };
 		43C98058212A799E003B5D17 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
 		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43CB2B2A1D924D450079823D /* WCSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WCSession.swift; sourceTree = "<group>"; };
@@ -1104,9 +1117,11 @@
 				C168C40621B0D53E00ADE90E /* MinimedKit.framework in Frameworks */,
 				C168C40821B0D53E00ADE90E /* MinimedKitUI.framework in Frameworks */,
 				43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */,
+				43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */,
 				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
+				43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1117,6 +1132,7 @@
 				437AFEE8203689FE008C4892 /* LoopKit.framework in Frameworks */,
 				4FB76FB01E8C3E8000B39636 /* SwiftCharts.framework in Frameworks */,
 				43C05CBA21EBEAD8006FB252 /* LoopCore.framework in Frameworks */,
+				43FCEEBE22220CE70013DD30 /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1299,6 +1315,7 @@
 				43C05CB421EBE274006FB252 /* Date.swift */,
 				4345E3FD21F04A50009E00E5 /* DateIntervalFormatter.swift */,
 				43D9F81F21EF0906000578CD /* NSNumber.swift */,
+				43C5F259222C921B00905D10 /* OSLog.swift */,
 				43D9F81921EC593C000578CD /* UITableViewCell.swift */,
 				C1814B85225E507C008D2D8E /* Sequence.swift */,
 			);
@@ -1318,6 +1335,7 @@
 		43C05CBE21EBFF66006FB252 /* Lessons */ = {
 			isa = PBXGroup;
 			children = (
+				43C728F4222266F000C62969 /* ModalDayLesson.swift */,
 				43C05CB021EBBDB9006FB252 /* TimeInRangeLesson.swift */,
 			);
 			path = Lessons;
@@ -1330,8 +1348,17 @@
 				43C05CC921EC382B006FB252 /* NumberEntry.swift */,
 				43D9F81D21EF0609000578CD /* NumberRangeEntry.swift */,
 				43D9F82121EF0A7A000578CD /* QuantityRangeEntry.swift */,
+				43C728F62222700000C62969 /* DateIntervalEntry.swift */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		43C5F255222C7B6300905D10 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				43C5F256222C7B7200905D10 /* TimeComponents.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		43D9003A21EB281300AF44BF /* Insulin */ = {
@@ -1354,6 +1381,7 @@
 				43C05CB321EBE268006FB252 /* Extensions */,
 				43C05CBE21EBFF66006FB252 /* Lessons */,
 				43D9FFBE21EAB20B00AF44BF /* Managers */,
+				43C5F255222C7B6300905D10 /* Models */,
 				43C05CBB21EBF743006FB252 /* View Controllers */,
 				43D9FFB521EA9B0100AF44BF /* Learn.entitlements */,
 				43D9FFA821EA9A0C00AF44BF /* Main.storyboard */,
@@ -1368,6 +1396,7 @@
 			isa = PBXGroup;
 			children = (
 				43D9FFBF21EAB22E00AF44BF /* DataManager.swift */,
+				43C728F8222A448700C62969 /* DayCalculator.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2550,15 +2579,20 @@
 			files = (
 				43C05CBD21EBF77D006FB252 /* LessonsViewController.swift in Sources */,
 				43C05CB621EBE321006FB252 /* NSTimeInterval.swift in Sources */,
+				43C5F25A222C921B00905D10 /* OSLog.swift in Sources */,
 				43C05CB521EBE274006FB252 /* Date.swift in Sources */,
 				43D9F82421EFF1AB000578CD /* LessonResultsViewController.swift in Sources */,
+				43C728F9222A448700C62969 /* DayCalculator.swift in Sources */,
 				4345E3FA21F0473B009E00E5 /* TextCell.swift in Sources */,
+				43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */,
 				43D9F81821EC51CC000578CD /* DateEntry.swift in Sources */,
 				43D9FFC021EAB22E00AF44BF /* DataManager.swift in Sources */,
 				43C05CB121EBBDB9006FB252 /* TimeInRangeLesson.swift in Sources */,
+				43C728F72222700000C62969 /* DateIntervalEntry.swift in Sources */,
 				43D9F81E21EF0609000578CD /* NumberRangeEntry.swift in Sources */,
 				43C05CCA21EC382B006FB252 /* NumberEntry.swift in Sources */,
 				4345E3FE21F04A50009E00E5 /* DateIntervalFormatter.swift in Sources */,
+				43C5F257222C7B7200905D10 /* TimeComponents.swift in Sources */,
 				4345E3F821F03D2A009E00E5 /* DatesAndNumberCell.swift in Sources */,
 				43D9F82221EF0A7A000578CD /* QuantityRangeEntry.swift in Sources */,
 				43D9F81A21EC593C000578CD /* UITableViewCell.swift in Sources */,
@@ -2567,7 +2601,7 @@
 				43C05CC621EC29E7006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				43C05CC021EBFFA4006FB252 /* Lesson.swift in Sources */,
 				C1814B86225E507C008D2D8E /* Sequence.swift in Sources */,
-				43D9FFA521EA9A0C00AF44BF /* AppDelegate.swift in Sources */,
+				43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
