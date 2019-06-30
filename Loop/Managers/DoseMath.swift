@@ -131,12 +131,16 @@ extension TempBasalRecommendation {
     ///   - scheduledBasalRate: The scheduled basal rate at `date`
     ///   - lastTempBasal: The previously set temp basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
+    ///   - scheduledBasalRateMatchesPump: A flag describing whether `scheduledBasalRate` matches the scheduled basal rate of the pump.
+    ///                                    If `false` and the recommendation matches `scheduledBasalRate`, the temp will be recommended
+    ///                                    at the scheduled basal rate rather than recommending no temp.
     /// - Returns: A temp basal recommendation
     func ifNecessary(
         at date: Date,
         scheduledBasalRate: Double,
         lastTempBasal: DoseEntry?,
-        continuationInterval: TimeInterval
+        continuationInterval: TimeInterval,
+        scheduledBasalRateMatchesPump: Bool
     ) -> TempBasalRecommendation? {
         // Adjust behavior for the currently active temp basal
         if let lastTempBasal = lastTempBasal,
@@ -147,12 +151,12 @@ extension TempBasalRecommendation {
             if matchesRate(lastTempBasal.unitsPerHour),
                 lastTempBasal.endDate.timeIntervalSince(date) > continuationInterval {
                 return nil
-            } else if matchesRate(scheduledBasalRate) {
-                // If our new temp matches the scheduled rate, cancel the current temp
+            } else if matchesRate(scheduledBasalRate), scheduledBasalRateMatchesPump {
+                // If our new temp matches the scheduled rate of the pump, cancel the current temp
                 return .cancel
             }
-        } else if matchesRate(scheduledBasalRate) {
-            // If we recommend the in-progress scheduled basal rate, do nothing
+        } else if matchesRate(scheduledBasalRate), scheduledBasalRateMatchesPump {
+            // If we recommend the in-progress scheduled basal rate of the pump, do nothing
             return nil
         }
 
@@ -339,6 +343,7 @@ extension Collection where Element == GlucoseValue {
     ///   - maxBasalRate: The maximum allowed basal rate
     ///   - lastTempBasal: The previously set temp basal
     ///   - rateRounder: Closure that rounds recommendation to nearest supported rate. If nil, no rounding is performed
+    ///   - isBasalRateScheduleOverrideActive: A flag describing whether a basal rate schedule override is in progress
     ///   - duration: The duration of the temporary basal
     ///   - continuationInterval: The duration of time before an ongoing temp basal should be continued with a new command
     /// - Returns: The recommended temporary basal rate and duration
@@ -352,6 +357,7 @@ extension Collection where Element == GlucoseValue {
         maxBasalRate: Double,
         lastTempBasal: DoseEntry?,
         rateRounder: ((Double) -> Double)? = nil,
+        isBasalRateScheduleOverrideActive: Bool = false,
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11)
     ) -> TempBasalRecommendation? {
@@ -384,7 +390,8 @@ extension Collection where Element == GlucoseValue {
             at: date,
             scheduledBasalRate: scheduledBasalRate,
             lastTempBasal: lastTempBasal,
-            continuationInterval: continuationInterval
+            continuationInterval: continuationInterval,
+            scheduledBasalRateMatchesPump: !isBasalRateScheduleOverrideActive
         )
     }
 
