@@ -481,6 +481,7 @@
 			proxyType = 1;
 			remoteGlobalIDString = 432CF87720D8B8380066B889;
 			remoteInfo = Cartfile;
+		};
 		A942E444225FD97F00DD4980 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 43776F841B8022E90074EA36 /* Project object */;
@@ -2843,6 +2844,7 @@
 			isa = PBXTargetDependency;
 			target = 432CF87720D8B8380066B889 /* Cartfile */;
 			targetProxy = C110A0E9221BC29B0016560B /* PBXContainerItemProxy */;
+		};
 		A942E445225FD97F00DD4980 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 43D9FFCE21EAE05D00AF44BF /* LoopCore */;
