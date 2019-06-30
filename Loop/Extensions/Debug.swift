@@ -6,10 +6,16 @@
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
-func assertingDebugOnly(file: StaticString = #file, line: UInt = #line, _ doIt: () -> Void) {
+var debugEnabled: Bool {
     #if DEBUG || IOS_SIMULATOR
-    doIt()
+    return true
     #else
-    fatalError("\(file):\(line) should never be invoked in release builds", file: file, line: line)
+    return false
     #endif
+}
+
+func assertDebugOnly(file: StaticString = #file, line: UInt = #line) {
+    guard debugEnabled else {
+        fatalError("\(file):\(line) should never be invoked in release builds", file: file, line: line)
+    }
 }
