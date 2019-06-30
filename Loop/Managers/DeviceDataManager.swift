@@ -43,13 +43,9 @@ final class DeviceDataManager {
         }
     }
 
-<<<<<<< HEAD
     private var lastBLEDrivenUpdate = Date.distantPast
 
-    private let lockedPumpManagerStatus: Locked<PumpManagerStatus?> = Locked(nil)
-=======
     // MARK: - Pump
->>>>>>> origin/dev
 
     var pumpManager: PumpManagerUI? {
         didSet {
@@ -199,7 +195,6 @@ extension DeviceDataManager: DeviceManagerDelegate {
             trigger: trigger
         )
 
-<<<<<<< HEAD
         DispatchQueue.main.async {
             UNUserNotificationCenter.current().add(request)
         }
@@ -209,13 +204,6 @@ extension DeviceDataManager: DeviceManagerDelegate {
         DispatchQueue.main.async {
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
         }
-=======
-        UNUserNotificationCenter.current().add(request)
-    }
-
-    func clearNotification(for manager: DeviceManager, identifier: String) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
->>>>>>> origin/dev
     }
 }
 
