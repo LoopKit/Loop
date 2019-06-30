@@ -36,15 +36,6 @@ extension HKUnit {
         }
     }
 
-    /// An example value for the "ideal" target
-    var glucoseExampleTargetValue: Double {
-        if self == .milligramsPerDeciliter {
-            return 100
-        } else {
-            return 5.5
-        }
-    }
-
     /// The smallest value expected to be visible on a chart
     var chartableIncrement: Double {
         if self == .milligramsPerDeciliter {

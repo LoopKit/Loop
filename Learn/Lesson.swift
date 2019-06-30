@@ -30,6 +30,16 @@ protocol LessonSectionProviding {
     var cells: [LessonCellProviding] { get }
 }
 
+extension LessonSectionProviding {
+    var headerTitle: String? {
+        return nil
+    }
+
+    var footerTitle: String? {
+        return nil
+    }
+}
+
 
 protocol LessonCellProviding {
     func registerCell(for tableView: UITableView)

@@ -82,6 +82,7 @@ final class SettingsTableViewController: UITableViewController {
         case insulinModel
         case carbRatio
         case insulinSensitivity
+        case overridePresets
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -152,7 +153,11 @@ final class SettingsTableViewController: UITableViewController {
         case .cgm:
             return CGMRow.count
         case .configuration:
-            return ConfigurationRow.count
+            if FeatureFlags.sensitivityOverridesEnabled {
+                return ConfigurationRow.count
+            } else {
+                return ConfigurationRow.count - 1
+            }
         case .services:
             return ServiceRow.count
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
@@ -287,6 +292,14 @@ final class SettingsTableViewController: UITableViewController {
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
+            case .overridePresets:
+                configCell.textLabel?.text = NSLocalizedString("Override Presets", comment: "The title text for the override presets")
+                let maxPreviewSymbolCount = 3
+                let presetPreviewText = dataManager.loopManager.settings.overridePresets
+                    .prefix(maxPreviewSymbolCount)
+                    .map { $0.symbol }
+                    .joined(separator: " ")
+                configCell.detailTextLabel?.text = presetPreviewText
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -301,7 +314,7 @@ final class SettingsTableViewController: UITableViewController {
                 configCell.textLabel?.text = nightscoutService.title
                 configCell.detailTextLabel?.text = nightscoutService.siteURL?.absoluteString ?? SettingsTableViewCell.TapToSetString
             case .loggly:
-                let logglyService = dataManager.logger.logglyService
+                let logglyService = DiagnosticLogger.shared.logglyService
 
                 configCell.textLabel?.text = logglyService.title
                 configCell.detailTextLabel?.text = logglyService.isAuthorized ? SettingsTableViewCell.EnabledString : SettingsTableViewCell.TapToSetString
@@ -480,6 +493,9 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .glucoseTargetRange:
                 let scheduleVC = GlucoseRangeScheduleTableViewController()
+                if FeatureFlags.sensitivityOverridesEnabled {
+                    scheduleVC.overrideContexts.remove(.legacyWorkout)
+                }
 
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Correction Range", comment: "The title of the glucose target range schedule screen")
@@ -488,7 +504,8 @@ final class SettingsTableViewController: UITableViewController {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
                     scheduleVC.unit = schedule.unit
-                    scheduleVC.overrideRanges = schedule.overrideRanges
+                    scheduleVC.overrideRanges[.preMeal] = dataManager.loopManager.settings.preMealTargetRange.filter { !$0.isZero }
+                    scheduleVC.overrideRanges[.legacyWorkout] = dataManager.loopManager.settings.legacyWorkoutTargetRange.filter { !$0.isZero }
 
                     show(scheduleVC, sender: sender)
                 } else {
@@ -548,6 +565,15 @@ final class SettingsTableViewController: UITableViewController {
                 vc.syncSource = pumpManager
 
                 show(vc, sender: sender)
+            case .overridePresets:
+                guard let glucoseUnit = dataManager.loopManager.glucoseStore.preferredUnit else { break }
+                let vc = OverridePresetTableViewController(
+                    glucoseUnit: glucoseUnit,
+                    presets: dataManager.loopManager.settings.overridePresets
+                )
+                vc.delegate = self
+
+                show(vc, sender: sender)
             }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
@@ -572,10 +598,10 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             case .loggly:
-                let service = dataManager.logger.logglyService
+                let service = DiagnosticLogger.shared.logglyService
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
-                    self?.dataManager.logger.logglyService = service
+                    DiagnosticLogger.shared.logglyService = service
 
                     self?.tableView.reloadRows(at: [indexPath], with: .none)
                 }
@@ -593,12 +619,12 @@ final class SettingsTableViewController: UITableViewController {
                 show(vc, sender: sender)
             }
         case .testingPumpDataDeletion:
-            let confirmVC = UIAlertController(pumpDataDeletionHandler: dataManager.deleteTestingPumpData)
+            let confirmVC = UIAlertController(pumpDataDeletionHandler: { self.dataManager.deleteTestingPumpData() })
             present(confirmVC, animated: true) {
                 tableView.deselectRow(at: indexPath, animated: true)
             }
         case .testingCGMDataDeletion:
-            let confirmVC = UIAlertController(cgmDataDeletionHandler: dataManager.deleteTestingCGMData)
+            let confirmVC = UIAlertController(cgmDataDeletionHandler: { self.dataManager.deleteTestingCGMData() })
             present(confirmVC, animated: true) {
                 tableView.deselectRow(at: indexPath, animated: true)
             }
@@ -625,7 +651,7 @@ final class SettingsTableViewController: UITableViewController {
                 tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
             }
             tableView.reloadSections([Section.pump.rawValue], with: .fade)
-            tableView.reloadRows(at: [[Section.cgm.rawValue, CGMRow.cgmSettings.rawValue]], with: .fade)
+            tableView.reloadSections([Section.cgm.rawValue], with: .fade)
         case .cgm:
             let previousTestingCGMDataDeletionSection = sections.index(of: .testingCGMDataDeletion)
             let wasTestingCGMManager = isTestingCGMManager
@@ -726,7 +752,9 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
             switch ConfigurationRow(rawValue: indexPath.row)! {
             case .glucoseTargetRange:
                 if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone, overrideRanges: controller.overrideRanges, override: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.override)
+                    dataManager.loopManager.settings.preMealTargetRange = controller.overrideRanges[.preMeal].filter { !$0.isZero }
+                    dataManager.loopManager.settings.legacyWorkoutTargetRange = controller.overrideRanges[.legacyWorkout].filter { !$0.isZero }
+                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                 }
             case .basalRate:
                 if let controller = controller as? BasalScheduleTableViewController {
@@ -823,6 +851,16 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
     }
 }
+
+
+extension SettingsTableViewController: OverridePresetTableViewControllerDelegate {
+    func overridePresetTableViewControllerDidUpdatePresets(_ vc: OverridePresetTableViewController) {
+        dataManager.loopManager.settings.overridePresets = vc.presets
+
+        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.overridePresets.rawValue]], with: .none)
+    }
+}
+
 
 private extension UIAlertController {
     convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {

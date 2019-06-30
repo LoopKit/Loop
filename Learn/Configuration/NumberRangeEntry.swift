@@ -11,8 +11,6 @@ import UIKit
 class NumberRangeEntry: LessonSectionProviding {
     let headerTitle: String?
 
-    let footerTitle: String? = nil
-
     var cells: [LessonCellProviding] {
         return numberCells
     }

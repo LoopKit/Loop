@@ -4,8 +4,8 @@
 /* The short unit display string for decibles */
 "dB" = "dB";
 
-/* The subtitle format describing eventual glucose.  (1: localized glucose value description) (2: localized glucose units description) */
-"Eventually %1$@ %2$@" = "Eventualmente %1$@ %2$@";
+/* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
+"Eventually %1$@" = "Eventualmente %1$@";
 
 /* The short unit display string for grams */
 "g" = "g";

@@ -12,8 +12,8 @@ import HealthKit
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: Double { get }
-    var max: Double { get }
+    var min: Double { get } // milligramsPerDeciliter
+    var max: Double { get } // milligramsPerDeciliter
 
     var chartHashValue: Int { get }
 }
@@ -57,7 +57,7 @@ extension SampleValue {
 }
 
 
-extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQuantity> {
+extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRange<HKQuantity> {
     var start: Date {
         return startDate
     }
@@ -75,13 +75,29 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == Range<HKQu
     }
 }
 
+struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
+    let override: TemporaryScheduleOverride
 
-extension GlucoseRangeSchedule.Override: GlucoseChartValueHashable {
+    init?(_ override: TemporaryScheduleOverride) {
+        guard override.settings.targetRange != nil else {
+            return nil
+        }
+        self.override = override
+    }
+
+    var start: Date {
+        return override.activeInterval.start
+    }
+
+    var end: Date {
+        return override.activeInterval.end
+    }
+
     var min: Double {
-        return quantityRange.lowerBound.doubleValue(for: .milligramsPerDeciliter)
+        return override.settings.targetRange!.minValue
     }
 
     var max: Double {
-        return quantityRange.upperBound.doubleValue(for: .milligramsPerDeciliter)
+        return override.settings.targetRange!.maxValue
     }
 }

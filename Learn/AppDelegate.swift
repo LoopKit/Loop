@@ -26,7 +26,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         dataManager.authorize({
             DispatchQueue.main.async {
                 lessonsVC.lessons = [
-                    TimeInRangeLesson(dataManager: dataManager)
+                    TimeInRangeLesson(dataManager: dataManager),
+                    ModalDayLesson(dataManager: dataManager),
                 ]
             }
         })

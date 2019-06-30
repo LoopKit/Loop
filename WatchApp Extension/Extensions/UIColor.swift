@@ -22,10 +22,10 @@ extension UIColor {
     // Equivalent to glucoseColor with alpha 0.14 on a black background
     static let darkGlucose = UIColor(named: "glucose-dark")!
 
-    static let workoutColor = UIColor(named: "workout")!
+    static let overrideColor = UIColor(named: "workout")!
 
     // Equivalent to workoutColor with alpha 0.14 on a black background
-    static let darkWorkoutColor = UIColor(named: "workout-dark")!
+    static let darkOverrideColor = UIColor(named: "workout-dark")!
 
     static let disabledButtonColor = UIColor.gray
 

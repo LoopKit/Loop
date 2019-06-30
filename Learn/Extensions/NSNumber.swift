@@ -13,14 +13,3 @@ extension NSNumber: Comparable {
         return lhs.compare(rhs) == .orderedAscending
     }
 }
-
-
-extension NSNumber {
-    convenience init?(value: Double?) {
-        if let value = value {
-            self.init(value: value)
-        } else {
-            return nil
-        }
-    }
-}
