@@ -1,0 +1,17 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth används för att kommunicera med pump och CGM.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID används för att bekräfta bolusdosering.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Måltidsdata från Hälsodatabasen används för att beräkna bolus. Blodsockervärden från Hälsodatabasen används för grafisk presentaion och momentumkalkylering.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Kolhydratsinformation som anges i app och klocka lagras i Hälsodatabasen. Blodsockervärden som hämtas från CGM sparas med hög säkerhet i HealthKit.";
