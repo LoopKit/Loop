@@ -462,6 +462,17 @@ final class SettingsTableViewController: UITableViewController {
                 scheduleVC.delegate = self
                 scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
 
+
+                let unit = dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+
+                if unit == HKUnit.milligramsPerDeciliter {
+                    scheduleVC.lowThresholdWarningValue = 10
+                    scheduleVC.lowThresholdWarningMessage = NSLocalizedString("Warning: low insulin sensitivity values can be dangerous. A typical value for an adult is 50, which means 1 U of insulin is expected to lower your blood glucose by 50 mg/dL", comment: "The warning message in mg/dL shown when user enters an insulin sensitivity value below or equal to the low warning threshold")
+                } else if unit == HKUnit.millimolesPerLiter {
+                    scheduleVC.lowThresholdWarningValue = 0.55
+                    scheduleVC.lowThresholdWarningMessage = NSLocalizedString("Warning: low insulin sensitivity values can be dangerous. A typical value for an adult is 2.8, which means 1 U of insulin is expected to lower your blood glucose by 2.8 mmol/L", comment: "The warning message in mmol/L shown when user enters an insulin sensitivity value below or equal to the low warning threshold")
+                }
+
                 if let schedule = dataManager.loopManager.insulinSensitivitySchedule {
                     scheduleVC.timeZone = schedule.timeZone
                     scheduleVC.scheduleItems = schedule.items
