@@ -1,7 +1,7 @@
 /* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
 
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = "(aktivt: %@)";
+" (pending: %@)" = "(väntande: %@)";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit)
  Format string for insulin sensitivity average (1: value)(2: glucose unit) */
@@ -14,10 +14,10 @@
 "%1$@ U left" = "%1$@ enhter kvar";
 
 /* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
-"%1$@ U left: %2$@" = "%1$@ E kvarstår (%2$@ till tomt)";
+"%1$@ U left: %2$@" = "%1$@ E kvar (%2$@ till tomt)";
 
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
-"%1$@ U/hour @ %2$@" = "%1$@ E/timme @ %2$@";
+"%1$@ U/hour @ %2$@" = "%1$@ E/timme klockan %2$@";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
@@ -56,21 +56,19 @@
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
 
 /* The title of the Carbs On-Board graph */
-"Active Carbohydrates" = "Aktiva kolhydrater";
+"Active Carbohydrates" = "Kolhydrater";
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Aktiva kolhydrater: %@";
 
 /* The title of the Insulin On-Board graph */
-"Active Insulin" = "Aktivt insulin";
+"Active Insulin" = "Insulin";
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktivt insulin: %@";
 
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Lägg till kolhydrater";
-
-
 
 /* The label of the carb entry button */
 "Add Meal" = "Lägg till måltid";
@@ -115,11 +113,11 @@
 
 /* Bolus progress status
  The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Doserat: %1$@ av %2$@";
+"Bolused %1$@ of %2$@" = "Bolusdosering: %1$@ av %2$@";
 
 /* Bolus progress status
  The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Doserar: %1$@";
+"Bolusing %1$@" = "Bolus: %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Avbryt";
@@ -141,7 +139,7 @@
 "Change the pump battery immediately" = "Byt pumpbatteri omgående";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Byt pumpens reservoar";
+"Change the pump reservoir now" = "Pump är slut";
 
 /* Details for configuration error when one or more loop settings are missing */
 "Check settings" = "Kontrollera inställningar";
@@ -169,7 +167,7 @@
 "Correction Range" = "Behandlingsområde";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Nuvarande blodsockervärde är utanför behandlingsområdet (%1$@).";
+"Current glucose of %1$@ is below correction range." = "Nuvarande blodsockervärde (%1$@) är lägre än gränsvärde.";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Customer Token";
@@ -199,22 +197,22 @@
 "Enables" = "Aktivering";
 
 /* The placeholder text instructing users to enter a suspend treshold */
-"Enter suspend threshold" = "Ange område för insulin-stopp";
+"Enter suspend threshold" = "Ställ in insulin-stopp";
 
 /* The placeholder text instructing users how to enter a transmitter ID */
 "Enter the 6-digit transmitter ID" = "Ange 6-siffrigt sändar-ID";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Beräkning: %@";
+"Eventually %@" = "Prognos: %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Överskrider maximal bolus";
+"Exceeds Maximum Bolus" = "Överskrider högsta bolusvärde";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "Under: %1$@";
+"For %1$@" = "I %1$@";
 
 /* The short unit display string for grams */
 "g" = "g";
@@ -229,7 +227,7 @@
 "Glucose" = "Blodsocker";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Blodsockervärden är gamla (%1$@)";
+"Glucose data is %1$@ old" = "%1$@ sedan senaste blodsockervärde inhämtades";
 
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "Blodsockervärden saknas";
@@ -250,7 +248,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Upptaget insulin (E) × Insulinkänslighet (%1$@/E)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulindosering";
+"Insulin Delivery" = "Insulin (dosering)";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulineffekt";
@@ -270,7 +268,7 @@
 "Issue Report" = "Felrapport";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"prediction-description-retrospective-correction" = "Beräkning: %1$@\nFaktisk: %2$@ (%3$@)";
+"prediction-description-retrospective-correction" = "Prognos: %1$@\nFaktisk: %2$@ (%3$@)";
 
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Öppnar CGM-app";
@@ -285,13 +283,13 @@
 "Loop Failure" = "Loopfel";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop har inte lyckats genomföras (%@)";
+"Loop has not completed successfully in %@" = "⭕️ %@ sedan Loop kunde genomföras";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 
 /* The error message for missing data. (1: missing data details) */
-"Missing data: %1$@" = "Avsaknad av data: %1$@";
+"Missing data: %1$@" = "Saknar data: %1$@";
 
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
@@ -312,25 +310,25 @@
 "Pre-Meal Targets" = "Målvärde innan måltid";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Beräknat blodsockervärde klocna %1$@ är %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Beräknat blodsockervärde klockan %1$@ är %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Det beräknade blodsockervärdet (%1$@) är lägre än angett värde för insulin-stopp.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Det beräknade blodsockervärdet (%1$@) är lägre än värde för insulin-stopp.";
 
 /* The title of the pump section in settings */
 "Pump" = "Pump";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Pumpbatteri behöver bytas inom kort";
+"Pump Battery Low" = "⚠️ Pumpens batteri behöver bytas inom kort";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pumpdata är gammal (%1$@)";
+"Pump data is %1$@ old" = "⚠️ %1$@ sedan pumpdata inhämtades";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pumphanterare";
+"Pump Manager" = "Pumphantering";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pumpreservoaren är tom";
+"Pump Reservoir Empty" = "⚠️ Pumpen ";
 
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "Pumpreservoar behöver bytas inom kort";
