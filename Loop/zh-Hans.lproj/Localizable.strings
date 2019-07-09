@@ -216,7 +216,7 @@
 "Glucose Momentum" = "葡萄糖增量预测算法";
 
 /* The placeholder text for the nightscout site URL credential */
-"https://mysite.azurewebsites.net" = "https://mysite.azurewebsites.net";
+"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "永久";
