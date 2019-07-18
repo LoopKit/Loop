@@ -1,6 +1,6 @@
 
 github "LoopKit/LoopKit" ~> 2.2
-github "LoopKit/CGMBLEKit" == 3.0
+github "LoopKit/CGMBLEKit" ~> 3.1
 github "ps2/SwiftCharts" "hotfix-xcode10.2"
 github "LoopKit/dexcom-share-client-swift" == 1.0
 github "LoopKit/G4ShareSpy" == 1.0
