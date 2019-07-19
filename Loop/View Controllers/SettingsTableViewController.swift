@@ -239,10 +239,13 @@ final class SettingsTableViewController: UITableViewController {
 
                 if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
                     let unit = insulinSensitivitySchedule.unit
-                    let value = valueNumberFormatter.string(from: insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)) ?? SettingsTableViewCell.NoValueString
-
-                    configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ %2$@/U", comment: "Format string for insulin sensitivity average (1: value)(2: glucose unit)"), value, unit.localizedShortUnitString
-                    )
+                    // Schedule is in mg/dL or mmol/L, but we display as mg/dL/U or mmol/L/U
+                    let average = insulinSensitivitySchedule.averageQuantity().doubleValue(for: unit)
+                    let unitPerU = unit.unitDivided(by: .internationalUnit())
+                    let averageQuantity = HKQuantity(unit: unitPerU, doubleValue: average)
+                    let formatter = QuantityFormatter()
+                    formatter.setPreferredNumberFormatter(for: unit)
+                    configCell.detailTextLabel?.text = formatter.string(from: averageQuantity, for: unitPerU)
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
@@ -470,29 +473,22 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(scheduleVC, sender: sender)
             case .insulinSensitivity:
-                let scheduleVC = DailyQuantityScheduleTableViewController()
+                let unit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let allowedSensitivityValues = dataManager.loopManager.settings.allowedSensitivityValues(for: unit)
+                let scheduleVC = InsulinSensitivityScheduleViewController(allowedValues: allowedSensitivityValues, unit: unit)
 
                 scheduleVC.delegate = self
+                scheduleVC.insulinSensitivityScheduleStorageDelegate = self
                 scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
 
-                if let schedule = dataManager.loopManager.insulinSensitivitySchedule {
-                    scheduleVC.timeZone = schedule.timeZone
-                    scheduleVC.scheduleItems = schedule.items
-                    scheduleVC.unit = schedule.unit
+                scheduleVC.schedule = dataManager.loopManager.insulinSensitivitySchedule
 
-                    show(scheduleVC, sender: sender)
-                } else {
-                    if let timeZone = dataManager.pumpManager?.status.timeZone {
-                        scheduleVC.timeZone = timeZone
-                    }
-
-                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
-                        scheduleVC.unit = unit
-                        self.show(scheduleVC, sender: sender)
-                    }
-                }
+                show(scheduleVC, sender: sender)
             case .glucoseTargetRange:
-                let scheduleVC = GlucoseRangeScheduleTableViewController()
+                let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let allowedCorrectionRangeValues = dataManager.loopManager.settings.allowedCorrectionRangeValues(for: unit)
+                let scheduleVC = GlucoseRangeScheduleTableViewController(allowedValues: allowedCorrectionRangeValues, unit: unit)
+
                 if FeatureFlags.sensitivityOverridesEnabled {
                     scheduleVC.overrideContexts.remove(.legacyWorkout)
                 }
@@ -501,23 +497,13 @@ final class SettingsTableViewController: UITableViewController {
                 scheduleVC.title = NSLocalizedString("Correction Range", comment: "The title of the glucose target range schedule screen")
 
                 if let schedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
-                    scheduleVC.timeZone = schedule.timeZone
-                    scheduleVC.scheduleItems = schedule.items
-                    scheduleVC.unit = schedule.unit
-                    scheduleVC.overrideRanges[.preMeal] = dataManager.loopManager.settings.preMealTargetRange.filter { !$0.isZero }
-                    scheduleVC.overrideRanges[.legacyWorkout] = dataManager.loopManager.settings.legacyWorkoutTargetRange.filter { !$0.isZero }
-
-                    show(scheduleVC, sender: sender)
-                } else {
-                    if let timeZone = dataManager.pumpManager?.status.timeZone {
-                        scheduleVC.timeZone = timeZone
-                    }
-
-                    if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
-                        scheduleVC.unit = unit
-                        self.show(scheduleVC, sender: sender)
-                    }
+                    var overrides: [TemporaryScheduleOverride.Context: DoubleRange] = [:]
+                    overrides[.preMeal] = dataManager.loopManager.settings.preMealTargetRange.filter { !$0.isZero }
+                    overrides[.legacyWorkout] = dataManager.loopManager.settings.legacyWorkoutTargetRange.filter { !$0.isZero }
+                    scheduleVC.setSchedule(schedule, withOverrideRanges: overrides)
                 }
+
+                show(scheduleVC, sender: sender)
             case .suspendThreshold:
                 if let minBGGuard = dataManager.loopManager.settings.suspendThreshold {
                     let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnit: minBGGuard.unit)
@@ -750,12 +736,6 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
         switch sections[indexPath.section] {
         case .configuration:
             switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .glucoseTargetRange:
-                if let controller = controller as? GlucoseRangeScheduleTableViewController {
-                    dataManager.loopManager.settings.preMealTargetRange = controller.overrideRanges[.preMeal].filter { !$0.isZero }
-                    dataManager.loopManager.settings.legacyWorkoutTargetRange = controller.overrideRanges[.legacyWorkout].filter { !$0.isZero }
-                    dataManager.loopManager.settings.glucoseTargetRangeSchedule = GlucoseRangeSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                }
             case .basalRate:
                 if let controller = controller as? BasalScheduleTableViewController {
                     dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
@@ -766,9 +746,6 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
                     case .carbRatio:
                         dataManager.loopManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                         AnalyticsManager.shared.didChangeCarbRatioSchedule()
-                    case .insulinSensitivity:
-                        dataManager.loopManager.insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                        AnalyticsManager.shared.didChangeInsulinSensitivitySchedule()
                     default:
                         break
                     }
@@ -782,6 +759,24 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
     }
 }
 
+extension SettingsTableViewController: GlucoseRangeScheduleStorageDelegate {
+    func saveSchedule(for viewController: GlucoseRangeScheduleTableViewController, completion: @escaping (SaveGlucoseRangeScheduleResult) -> Void) {
+        dataManager.loopManager.settings.preMealTargetRange = viewController.overrideRanges[.preMeal].filter { !$0.isZero }
+        dataManager.loopManager.settings.legacyWorkoutTargetRange = viewController.overrideRanges[.legacyWorkout].filter { !$0.isZero }
+        dataManager.loopManager.settings.glucoseTargetRangeSchedule = viewController.schedule
+        completion(.success)
+        tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.glucoseTargetRange.rawValue, section: Section.configuration.rawValue)], with: .none)
+    }
+}
+
+extension SettingsTableViewController: InsulinSensitivityScheduleStorageDelegate {
+    func saveSchedule(_ schedule: InsulinSensitivitySchedule, for viewController: InsulinSensitivityScheduleViewController, completion: @escaping (SaveInsulinSensitivityScheduleResult) -> Void) {
+        dataManager.loopManager.insulinSensitivitySchedule = schedule
+        AnalyticsManager.shared.didChangeInsulinSensitivitySchedule()
+        completion(.success)
+        tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.insulinSensitivity.rawValue, section: Section.configuration.rawValue)], with: .none)
+    }
+}
 
 extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegate {
     func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController) {
