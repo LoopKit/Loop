@@ -57,7 +57,7 @@ class RecommendTempBasalTests: XCTestCase {
 
     fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
 
-    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
+    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseFixtureValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
         let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
 
@@ -441,7 +441,7 @@ class RecommendTempBasalTests: XCTestCase {
 
 
     func testNoInputGlucose() {
-        let glucose: [GlucoseValue] = []
+        let glucose: [GlucoseFixtureValue] = []
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -464,7 +464,7 @@ class RecommendBolusTests: XCTestCase {
 
     fileprivate let fortyIncrementsPerUnitRounder = { round($0 * 40) / 40 }
 
-    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseValue] {
+    func loadGlucoseValueFixture(_ resourceName: String) -> [GlucoseFixtureValue] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
         let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
 
@@ -823,7 +823,7 @@ class RecommendBolusTests: XCTestCase {
 
 
     func testNoInputGlucose() {
-        let glucose: [GlucoseValue] = []
+        let glucose: [GlucoseFixtureValue] = []
 
         let dose = glucose.recommendedBolus(
             to: glucoseTargetRange,
