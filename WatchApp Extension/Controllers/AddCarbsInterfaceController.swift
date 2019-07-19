@@ -188,14 +188,15 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
             do {
                 try WCSession.default.sendCarbEntryMessage(entry,
-                    replyHandler: { (suggestion) in
+                    replyHandler: { (context) in
                         DispatchQueue.main.async {
                             WKInterfaceDevice.current().play(.success)
+                            let loopManager = ExtensionDelegate.shared().loopManager
+                            loopManager.addConfirmedCarbEntry(entry.carbEntry)
+                            loopManager.updateContext(context)
 
-                            ExtensionDelegate.shared().loopManager.addConfirmedCarbEntry(entry.carbEntry)
-
-                            if let recommendedBolus = suggestion.recommendedBolus?.rawValue, recommendedBolus > 0.0 {
-                                WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: suggestion)
+                            if let units = context.recommendedBolusDose, units > 0.0 {
+                                WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: context)
                             }
                         }
                     },

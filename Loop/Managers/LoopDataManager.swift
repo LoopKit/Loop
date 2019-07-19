@@ -173,7 +173,7 @@ final class LoopDataManager {
     }
     private var retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?
 
-    fileprivate var predictedGlucose: [GlucoseValue]? {
+    fileprivate var predictedGlucose: [PredictedGlucoseValue]? {
         didSet {
             recommendedTempBasal = nil
             recommendedBolus = nil
@@ -790,7 +790,7 @@ extension LoopDataManager {
     }
 
     /// - Throws: LoopError.missingDataError
-    fileprivate func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
+    fileprivate func predictGlucose(using inputs: PredictionInputEffect) throws -> [PredictedGlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let model = insulinModelSettings?.model else {
@@ -1020,7 +1020,7 @@ protocol LoopState {
     var lastTempBasal: DoseEntry? { get }
 
     /// The calculated timeline of predicted glucose values
-    var predictedGlucose: [GlucoseValue]? { get }
+    var predictedGlucose: [PredictedGlucoseValue]? { get }
 
     /// The recommended temp basal based on predicted glucose
     var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? { get }
@@ -1074,7 +1074,7 @@ extension LoopDataManager {
             return loopDataManager.lastTempBasal
         }
 
-        var predictedGlucose: [GlucoseValue]? {
+        var predictedGlucose: [PredictedGlucoseValue]? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.predictedGlucose
         }

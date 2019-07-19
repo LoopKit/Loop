@@ -80,8 +80,6 @@
 		43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */; };
 		43511CEE220FC61700566C63 /* HUDRowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CED220FC61700566C63 /* HUDRowController.swift */; };
 		43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43523EDA1CC35083001850F1 /* RileyLinkKit.framework */; };
-		435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */; };
-		435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */; };
 		435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435CB6231F37967800C320C7 /* InsulinModelSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */; };
@@ -623,7 +621,6 @@
 		43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StandardRetrospectiveCorrection.swift; sourceTree = "<group>"; };
 		43511CED220FC61700566C63 /* HUDRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRowController.swift; sourceTree = "<group>"; };
 		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusSuggestionUserInfo.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinModelSettingsViewController.swift; sourceTree = "<group>"; };
 		435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExponentialInsulinModelPreset.swift; sourceTree = "<group>"; };
@@ -1709,7 +1706,6 @@
 		4FF4D0FB1E1834C400846527 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				435400301C9F744E00D5819C /* BolusSuggestionUserInfo.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */,
 				435400331C9F878D00D5819C /* SetBolusUserInfo.swift */,
@@ -2473,7 +2469,6 @@
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */,
 				43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */,
-				435400321C9F745500D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
 				43E2D8C81D208D5B004DA55F /* KeychainManager+Loop.swift in Sources */,
@@ -2559,7 +2554,6 @@
 				4372E488213C862B0068E043 /* SampleValue.swift in Sources */,
 				4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */,
 				4FF4D1011E18375000846527 /* WatchContext.swift in Sources */,
-				435400311C9F744E00D5819C /* BolusSuggestionUserInfo.swift in Sources */,
 				898ECA63218ABD21001E9D35 /* ComplicationChartManager.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				439A7945211FE23A0041B75F /* NSUserActivity.swift in Sources */,
