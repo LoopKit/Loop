@@ -1272,7 +1272,7 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - Testing scenarios
 
     override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
-        if debugEnabled, !deviceManager.testingScenariosManager.scenarioURLs.isEmpty {
+        if let testingScenariosManager = deviceManager.testingScenariosManager, testingScenariosManager.scenarioURLs.isEmpty {
             if motion == .motionShake {
                 presentScenarioSelector()
             }
@@ -1280,7 +1280,11 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     private func presentScenarioSelector() {
-        let vc = TestingScenariosTableViewController(scenariosManager: deviceManager.testingScenariosManager)
+        guard let testingScenariosManager = deviceManager.testingScenariosManager else {
+            return
+        }
+
+        let vc = TestingScenariosTableViewController(scenariosManager: testingScenariosManager)
         present(UINavigationController(rootViewController: vc), animated: true)
     }
 
@@ -1298,11 +1302,11 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func stepActiveScenarioForward() {
-        deviceManager.testingScenariosManager.stepActiveScenarioForward { _ in }
+        deviceManager.testingScenariosManager?.stepActiveScenarioForward { _ in }
     }
 
     @objc private func stepActiveScenarioBackward() {
-        deviceManager.testingScenariosManager.stepActiveScenarioBackward { _ in }
+        deviceManager.testingScenariosManager?.stepActiveScenarioBackward { _ in }
     }
 }
 

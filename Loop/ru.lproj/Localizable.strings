@@ -216,7 +216,7 @@
 "Glucose Momentum" = "Динамика гликемии";
 
 /* The placeholder text for the nightscout site URL credential */
-"https://mysite.azurewebsites.net" = "https://мойсайт. azurewebsites.net";
+"https://mysite.herokuapp.com" = "https://мойсайт. herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "На неопределенное время";

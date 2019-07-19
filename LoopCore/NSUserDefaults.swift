@@ -114,8 +114,7 @@ extension UserDefaults {
                     glucoseTargetRangeSchedule: glucoseTargetRangeSchedule,
                     maximumBasalRatePerHour: maximumBasalRatePerHour,
                     maximumBolus: maximumBolus,
-                    suspendThreshold: suspendThreshold,
-                    retrospectiveCorrectionEnabled: bool(forKey: "com.loudnate.Loop.RetrospectiveCorrectionEnabled")
+                    suspendThreshold: suspendThreshold
                 )
                 self.loopSettings = settings
 
