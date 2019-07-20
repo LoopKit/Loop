@@ -1,5 +1,5 @@
 github "kdisimone/LoopKit" "jojo"
-github "kdisimone/CGMBLEKit" "jojo"
+github "kdisimone/CGMBLEKit" "jojo-firefly"
 github "i-schuetz/SwiftCharts" == 0.6.5
 github "kdisimone/dexcom-share-client-swift" "jojo"
 github "kdisimone/G4ShareSpy" "jojo"
