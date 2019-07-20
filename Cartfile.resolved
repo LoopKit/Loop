@@ -1,6 +1,6 @@
 github "LoopKit/Amplitude-iOS" "2137d5fd44bf630ed33e1e72d7af6d8f8612f270"
 github "i-schuetz/SwiftCharts" "0.6.5"
-github "kdisimone/CGMBLEKit" "fcdf5e4d0ced5d1e012cd38d6f6ea883ded398af"
+github "kdisimone/CGMBLEKit" "9ffe6455cd7f9d39a3f89c34ff77f435a6f3db53"
 github "kdisimone/G4ShareSpy" "86007af69a378a3235cc67895ab913dbd495f193"
 github "kdisimone/LoopKit" "5ff82b893ec439352080d54ffaf8a4f78a964191"
 github "kdisimone/dexcom-share-client-swift" "9810c126d2dc94ae4ffdc6350dd7057e859b7ad1"
