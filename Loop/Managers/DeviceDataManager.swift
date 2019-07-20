@@ -144,14 +144,16 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
+    func enactBolus(units: Double, at startDate: Date = Date(), willRequest: ((DoseEntry) -> Void)? = nil, completion: @escaping (_ error: Error?) -> Void) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            self.loopManager.addRequestedBolus(dose, completion: nil)
+            self.loopManager.addRequestedBolus(dose, completion: {
+                willRequest?(dose)
+            })
         }) { (result) in
             switch result {
             case .failure(let error):
