@@ -187,6 +187,11 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
                 title: NSLocalizedString("Exceeds Maximum Bolus", comment: "The title of the alert describing a maximum bolus validation error"),
                 message: String(format: NSLocalizedString("The maximum bolus amount is %@ Units", comment: "Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value)"), bolusUnitsFormatter.string(from: maxBolus) ?? ""),
                 preferredStyle: .alert)
+
+            let action = UIAlertAction(title: NSLocalizedString("com.loudnate.LoopKit.errorAlertActionTitle", value: "OK", comment: "The title of the action used to dismiss an error alert"), style: .default)
+            alert.addAction(action)
+            alert.preferredAction = action
+
             present(alert, animated: true)
             return
         }

@@ -43,6 +43,8 @@ final class DeviceDataManager {
         }
     }
 
+    private var lastBLEDrivenUpdate = Date.distantPast
+
     // MARK: - Pump
 
     var pumpManager: PumpManagerUI? {
@@ -196,11 +198,15 @@ extension DeviceDataManager: DeviceManagerDelegate {
             trigger: trigger
         )
 
-        UNUserNotificationCenter.current().add(request)
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().add(request)
+        }
     }
 
     func clearNotification(for manager: DeviceManager, identifier: String) {
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+        DispatchQueue.main.async {
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
+        }
     }
 }
 
@@ -276,6 +282,13 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did fire BLE heartbeat")
+
+        let bleHeartbeatUpdateInterval = TimeInterval(minutes: 4.5)
+        guard lastBLEDrivenUpdate.timeIntervalSinceNow < -bleHeartbeatUpdateInterval else {
+            log.default("Skipping ble heartbeat")
+            return
+        }
+        lastBLEDrivenUpdate = Date()
 
         cgmManager?.fetchNewDataIfNeeded { (result) in
             if case .newData = result {
