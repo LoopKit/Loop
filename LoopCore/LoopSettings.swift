@@ -6,7 +6,7 @@
 //
 
 import LoopKit
-
+import HealthKit
 
 public struct LoopSettings: Equatable {
     public var dosingEnabled = false
@@ -46,6 +46,31 @@ public struct LoopSettings: Equatable {
     public let minimumChartWidthPerHour: CGFloat = 50
 
     public let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
+
+    // MARK - Guardrails
+
+    public func allowedSensitivityValues(for unit: HKUnit) -> [Double] {
+        switch unit {
+        case HKUnit.milligramsPerDeciliter:
+            return (10...500).map { Double($0) }
+        case HKUnit.millimolesPerLiter:
+            return (6...270).map { Double($0) / 10.0 }
+        default:
+            return []
+        }
+    }
+
+    public func allowedCorrectionRangeValues(for unit: HKUnit) -> [Double] {
+        switch unit {
+        case HKUnit.milligramsPerDeciliter:
+            return (60...180).map { Double($0) }
+        case HKUnit.millimolesPerLiter:
+            return (33...100).map { Double($0) / 10.0 }
+        default:
+            return []
+        }
+    }
+
 
     public init(
         dosingEnabled: Bool = false,
