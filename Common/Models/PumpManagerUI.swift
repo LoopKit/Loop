@@ -11,6 +11,10 @@ import LoopKit
 import LoopKitUI
 import MinimedKit
 import MinimedKitUI
+import OmniKit
+import OmniKitUI
+import MockKit
+import MockKitUI
 
 private let managersByIdentifier: [String: PumpManagerUI.Type] = allPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type

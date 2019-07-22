@@ -67,16 +67,26 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.springboard">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "43776F8B1B8022E90074EA36"
-            BuildableName = "Loop.app"
-            BlueprintName = "Loop"
+            BlueprintIdentifier = "4F70C1DB1DE8DCA7006380B7"
+            BuildableName = "Loop Status Extension.appex"
+            BlueprintName = "Loop Status Extension"
             ReferencedContainer = "container:Loop.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "4F70C1DB1DE8DCA7006380B7"
+            BuildableName = "Loop Status Extension.appex"
+            BlueprintName = "Loop Status Extension"
+            ReferencedContainer = "container:Loop.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
