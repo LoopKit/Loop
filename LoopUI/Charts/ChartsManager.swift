@@ -20,7 +20,7 @@ open class ChartsManager {
     private lazy var timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
-        let isAmPmTimeFormat = dateFormat.index( of: "a") != nil
+        let isAmPmTimeFormat = dateFormat.firstIndex(of: "a") != nil
         formatter.dateFormat = isAmPmTimeFormat
             ? "h a"
             : "H:mm"

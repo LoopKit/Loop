@@ -18,14 +18,16 @@ public class HUDView: UIView, NibLoadable {
 
     func setup() {
         stackView = (HUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIStackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(stackView)
 
         // Use AutoLayout to have the stack view fill its entire container.
-        let horizontalConstraint = NSLayoutConstraint(item: stackView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0)
-        let verticalConstraint = NSLayoutConstraint(item: stackView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: 0)
-        let widthConstraint = NSLayoutConstraint(item: stackView, attribute: .width, relatedBy: .equal, toItem: self, attribute: .width, multiplier: 1, constant: 0)
-        let heightConstraint = NSLayoutConstraint(item: stackView, attribute: .height, relatedBy: .equal, toItem: self, attribute: .height, multiplier: 1, constant: 0)
-        self.addConstraints([horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint])
+        NSLayoutConstraint.activate([
+            stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackView.widthAnchor.constraint(equalTo: widthAnchor),
+            stackView.heightAnchor.constraint(equalTo: heightAnchor),
+        ])
     }
     
     public func removePumpManagerProvidedViews() {

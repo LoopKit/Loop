@@ -225,7 +225,7 @@ final class LoopDataManager {
 
     // MARK: - Background task management
 
-    private var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
 
     private func startBackgroundTask() {
         endBackgroundTask()
@@ -235,9 +235,9 @@ final class LoopDataManager {
     }
 
     private func endBackgroundTask() {
-        if backgroundTask != UIBackgroundTaskInvalid {
+        if backgroundTask != .invalid {
             UIApplication.shared.endBackgroundTask(backgroundTask)
-            backgroundTask = UIBackgroundTaskInvalid
+            backgroundTask = .invalid
         }
     }
 }

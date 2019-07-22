@@ -659,6 +659,7 @@
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		437D9BA11D7B5203007245E8 /* Loop.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Loop.xcconfig; sourceTree = "<group>"; };
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
+		437DE503229C8375003B1074 /* copy-frameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
 		438172D81F4E9E37003C3328 /* NewPumpEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPumpEvent.swift; sourceTree = "<group>"; };
 		438849E91D297CB6003B3F23 /* NightscoutService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutService.swift; sourceTree = "<group>"; };
 		438849EB1D29EC34003B3F23 /* AmplitudeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AmplitudeService.swift; sourceTree = "<group>"; };
@@ -1049,24 +1050,24 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
-				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
-				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
-				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
-				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
-				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				434FB6461D68F1CD007B9C70 /* Amplitude.framework in Frameworks */,
-				C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */,
 				43A8EC6F210E622700A81379 /* CGMBLEKitUI.framework in Frameworks */,
 				438A95A81D8B9B24009D12E1 /* CGMBLEKit.framework in Frameworks */,
 				43C246A81D89990F0031F8D1 /* Crypto.framework in Frameworks */,
 				4D3B40041D4A9E1A00BC6334 /* G4ShareSpy.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
+				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
+				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
+				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
 				43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */,
 				43709AEA20DF3F8200F941B3 /* MinimedKitUI.framework in Frameworks */,
-				C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */,
+				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
+				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
+				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
 				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
+				C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */,
+				C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */,
 				437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */,
 				43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */,
 				C18852E22082AB1B00BECC8C /* RileyLinkKitUI.framework in Frameworks */,
@@ -1141,13 +1142,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				43D9000B21EB0BE000AF44BF /* LoopCore.framework in Frameworks */,
+				43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */,
 				43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */,
-				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
 				C110A0E7221BC2400016560B /* OmniKit.framework in Frameworks */,
 				C110A0E8221BC2430016560B /* OmniKitUI.framework in Frameworks */,
-				43FCEEC022220D1F0013DD30 /* LoopKit.framework in Frameworks */,
+				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1254,6 +1255,7 @@
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
+				437DE502229C834D003B1074 /* Scripts */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
 			);
 			sourceTree = "<group>";
@@ -1294,6 +1296,14 @@
 				43F5C2CF1B92A2ED003EB13D /* Views */,
 			);
 			path = Loop;
+			sourceTree = "<group>";
+		};
+		437DE502229C834D003B1074 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				437DE503229C8375003B1074 /* copy-frameworks.sh */,
+			);
+			path = Scripts;
 			sourceTree = "<group>";
 		};
 		43880F961D9D8052009061A8 /* ServiceAuthentication */ = {
@@ -1772,11 +1782,8 @@
 		968DCD53F724DE56FFE51920 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C1C7F1BF220D675700689850 /* OmniKit.framework */,
-				C1C7F1C0220D675700689850 /* OmniKitUI.framework */,
 				434FB6451D68F1CD007B9C70 /* Amplitude.framework */,
 				4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */,
-				438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */,
 				43A8EC6E210E622600A81379 /* CGMBLEKitUI.framework */,
 				C1E2773D224177C000354103 /* ClockKit.framework */,
 				4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */,
@@ -1785,7 +1792,6 @@
 				43D9002C21EB225D00AF44BF /* HealthKit.framework */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
 				4344628320A7A3BE00C4BE6F /* LoopKit.framework */,
-				43F78D4B1C914197002152D1 /* LoopKit.framework */,
 				437AFEE6203688CF008C4892 /* LoopKitUI.framework */,
 				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
 				43CA93361CB98079000026B5 /* MinimedKit.framework */,
@@ -1795,12 +1801,16 @@
 				892A5D2B222EF60A008961AB /* MockKitUI.framework */,
 				C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */,
 				4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */,
+				C1C7F1BF220D675700689850 /* OmniKit.framework */,
+				C1C7F1C0220D675700689850 /* OmniKitUI.framework */,
 				434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */,
 				43523EDA1CC35083001850F1 /* RileyLinkKit.framework */,
 				C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */,
 				43B371871CE597D10013C5A6 /* ShareClient.framework */,
 				4379CFEF21112CF700AADC79 /* ShareClientUI.framework */,
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
+				438A95A71D8B9B24009D12E1 /* CGMBLEKit.framework */,
+				43F78D4B1C914197002152D1 /* LoopKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2047,7 +2057,7 @@
 					};
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 1020;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2080,7 +2090,7 @@
 					};
 					43A9437D1B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1020;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2100,10 +2110,12 @@
 						};
 					};
 					43D9001A21EB209400AF44BF = {
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 					43D9FFA121EA9A0C00AF44BF = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -2116,6 +2128,7 @@
 					};
 					43D9FFCE21EAE05D00AF44BF = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 					43E2D8D01D20BF42004DA55F = {
@@ -2131,6 +2144,7 @@
 					};
 					4F70C1DB1DE8DCA7006380B7 = {
 						CreatedOnToolsVersion = 8.1;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -2140,6 +2154,7 @@
 					};
 					4F75288A1DFE1DC600C322D6 = {
 						CreatedOnToolsVersion = 8.1;
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -2384,30 +2399,10 @@
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkBLEKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Amplitude.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/NightscoutUploadKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/G4ShareSpy.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/RileyLinkKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MinimedKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClientUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopTestingKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MKRingProgressView.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n";
 		};
 		43FF3DF620A8EFE800F8E62C /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2421,13 +2416,10 @@
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/CGMBLEKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n";
 		};
 		A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3247,7 +3239,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WARNING_CFLAGS = "-Wall";
 				WATCHOS_DEPLOYMENT_TARGET = 4.1;
@@ -3312,7 +3304,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				WARNING_CFLAGS = "-Wall";
@@ -3327,7 +3319,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
@@ -3345,7 +3337,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
@@ -3362,7 +3354,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -3373,7 +3365,6 @@
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;
@@ -3386,7 +3377,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -3396,7 +3387,6 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
-				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
@@ -3408,7 +3398,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -3429,7 +3419,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -3537,7 +3527,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -3564,7 +3553,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -3710,7 +3698,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
@@ -3729,7 +3717,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
