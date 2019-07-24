@@ -83,7 +83,7 @@ public final class BasalStateView: UIView {
             animation.fromValue = shapeLayer.path ?? drawPath()
             animation.toValue = path
             animation.duration = 1
-            animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
             shapeLayer.add(animation, forKey: type(of: self).AnimationKey)
         }

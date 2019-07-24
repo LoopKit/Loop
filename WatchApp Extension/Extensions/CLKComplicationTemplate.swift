@@ -141,6 +141,8 @@ extension CLKComplicationTemplate {
             } else {
                 return nil
             }
+        @unknown default:
+            return nil
         }
     }
 }

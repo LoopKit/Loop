@@ -56,7 +56,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         navigationItem.rightBarButtonItems?.append(editButtonItem)
 
-        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.rowHeight = UITableView.automaticDimension
 
         reloadData(animated: false)
     }
@@ -432,7 +432,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         }
     }
 
-    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let status = carbStatuses[indexPath.row]
             deviceManager.loopManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in

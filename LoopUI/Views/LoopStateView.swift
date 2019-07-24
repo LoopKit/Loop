@@ -101,7 +101,7 @@ final class LoopStateView: UIView {
                     group.duration = firstDataUpdate ? 0 : 1
                     group.repeatCount = HUGE
                     group.autoreverses = true
-                    group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
+                    group.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
                     shapeLayer.add(group, forKey: type(of: self).AnimationKey)
                 } else {

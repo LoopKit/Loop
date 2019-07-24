@@ -111,12 +111,14 @@ fileprivate extension NSDirectionalEdgeInsets {
         let right: CGFloat
 
         switch WKInterfaceDevice.current().layoutDirection {
-        case .leftToRight:
-            left = leading
-            right = trailing
         case .rightToLeft:
             right = leading
             left = trailing
+        case .leftToRight:
+            fallthrough
+        @unknown default:
+            left = leading
+            right = trailing
         }
 
         return UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)

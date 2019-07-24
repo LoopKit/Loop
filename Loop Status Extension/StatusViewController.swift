@@ -100,10 +100,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         extensionContext?.widgetLargestAvailableDisplayMode = .expanded
 
         switch extensionContext?.widgetActiveDisplayMode ?? .compact {
-        case .compact:
-            glucoseChartContentView.isHidden = true
         case .expanded:
             glucoseChartContentView.isHidden = false
+        case .compact:
+            fallthrough
+        @unknown default:
+            glucoseChartContentView.isHidden = true
         }
 
         observers = [
@@ -121,10 +123,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         let compactHeight = hudView.systemLayoutSizeFitting(maxSize).height + subtitleLabel.systemLayoutSizeFitting(maxSize).height
 
         switch activeDisplayMode {
-        case .compact:
-            preferredContentSize = CGSize(width: maxSize.width, height: compactHeight)
         case .expanded:
             preferredContentSize = CGSize(width: maxSize.width, height: compactHeight + 100)
+        case .compact:
+            fallthrough
+        @unknown default:
+            preferredContentSize = CGSize(width: maxSize.width, height: compactHeight)
         }
     }
 
@@ -275,10 +279,12 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         }
 
         switch extensionContext?.widgetActiveDisplayMode ?? .compact {
-        case .compact:
-            glucoseChartContentView.isHidden = true
         case .expanded:
             glucoseChartContentView.isHidden = false
+        case .compact:
+            fallthrough
+        @unknown default:
+            glucoseChartContentView.isHidden = true
         }
 
         // Right now we always act as if there's new data.

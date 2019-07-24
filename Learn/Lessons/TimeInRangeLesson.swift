@@ -177,7 +177,6 @@ private class TimeInRangeCalculator {
                     os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))
                     completion(error)
                 case .success(let samples):
-
                     if let timeInRange = samples.proportion(where: { self.range.contains($0.quantity) }) {
                         _ = results.mutate({ (results) in
                             results[day] = timeInRange

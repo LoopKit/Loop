@@ -10,7 +10,7 @@ extension RangeReplaceableCollection where Element: Equatable {
     /// Returns `true` if the element was removed, or `false` if it is not present in the collection.
     @discardableResult
     mutating func remove(_ element: Element) -> Bool {
-        guard let index = self.index(of: element) else {
+        guard let index = self.firstIndex(of: element) else {
             return false
         }
 
