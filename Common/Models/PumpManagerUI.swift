@@ -11,19 +11,16 @@ import LoopKit
 import LoopKitUI
 import MinimedKit
 import MinimedKitUI
-
-private let managersByIdentifier: [String: PumpManagerUI.Type] = allPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
-    map[Type.managerIdentifier] = Type
-}
+import OmniKit
+import OmniKitUI
 
 typealias PumpManagerHUDViewsRawValue = [String: Any]
 
 func PumpManagerHUDViewsFromRawValue(_ rawValue: PumpManagerHUDViewsRawValue) -> [BaseHUDView]? {
     guard let rawState = rawValue["hudProviderViews"] as? HUDProvider.HUDViewsRawState,
-        let managerIdentifier = rawValue["managerIdentifier"] as? String,
-        let manager = managersByIdentifier[managerIdentifier]
-        else {
-            return nil
+        let manager = PumpManagerTypeFromRawValue(rawValue) as? PumpManagerUI.Type
+    else {
+        return nil
     }
     
     return manager.createHUDViews(rawValue: rawState)
