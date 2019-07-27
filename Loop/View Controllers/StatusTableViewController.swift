@@ -31,11 +31,8 @@ final class StatusTableViewController: ChartsTableViewController {
         super.viewDidLoad()
 
         statusCharts.glucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
-        
-        if let pumpManager = deviceManager.pumpManager {
-            self.basalDeliveryState = pumpManager.status.basalDeliveryState
-            pumpManager.addStatusObserver(self, queue: .main)
-        }
+
+        registerPumpManager()
 
         let notificationCenter = NotificationCenter.default
 
@@ -69,6 +66,7 @@ final class StatusTableViewController: ChartsTableViewController {
             },
             notificationCenter.addObserver(forName: .PumpManagerChanged, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
                 DispatchQueue.main.async {
+                    self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
                 }
             }
@@ -221,6 +219,14 @@ final class StatusTableViewController: ChartsTableViewController {
 
     override func glucoseUnitDidChange() {
         refreshContext = RefreshContext.all
+    }
+
+    private func registerPumpManager() {
+        if let pumpManager = deviceManager.pumpManager {
+            self.basalDeliveryState = pumpManager.status.basalDeliveryState
+            pumpManager.removeStatusObserver(self)
+            pumpManager.addStatusObserver(self, queue: .main)
+        }
     }
 
     private lazy var statusCharts = StatusChartsManager(colors: .default, settings: .default)
@@ -436,8 +442,12 @@ final class StatusTableViewController: ChartsTableViewController {
             if let iobValues = iobValues {
                 charts.setIOBValues(iobValues)
             }
-            if let index = charts.iob.iobPoints.closestIndex(priorTo: Date()) {
-                self.currentIOBDescription = String(describing: charts.iob.iobPoints[index].y)
+
+            // Show the larger of the value either before or after the current date
+            if let maxValue = charts.iob.iobPoints.allElementsAdjacent(to: Date()).max(by: {
+                return $0.y.scalar < $1.y.scalar
+            }) {
+                self.currentIOBDescription = String(describing: maxValue.y)
             } else {
                 self.currentIOBDescription = nil
             }
@@ -1321,6 +1331,7 @@ extension StatusTableViewController: CompletionDelegate {
 extension StatusTableViewController: PumpManagerStatusObserver {
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
         dispatchPrecondition(condition: .onQueue(.main))
+        log.default("PumpManager:%{public}@ did update status", String(describing: type(of: pumpManager)))
 
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState

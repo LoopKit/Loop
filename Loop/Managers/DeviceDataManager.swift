@@ -33,6 +33,9 @@ final class DeviceDataManager {
     /// Should be accessed only on the main queue
     private(set) var lastError: (date: Date, error: Error)?
 
+    /// The last time a BLE heartbeat was received by the pump manager
+    private var lastBLEDrivenUpdate = Date.distantPast
+
     // MARK: - CGM
 
     var cgmManager: CGMManager? {
@@ -42,8 +45,6 @@ final class DeviceDataManager {
             UserDefaults.appGroup?.cgmManager = cgmManager
         }
     }
-
-    private var lastBLEDrivenUpdate = Date.distantPast
 
     // MARK: - Pump
 
@@ -200,15 +201,11 @@ extension DeviceDataManager: DeviceManagerDelegate {
             trigger: trigger
         )
 
-        DispatchQueue.main.async {
-            UNUserNotificationCenter.current().add(request)
-        }
+        UNUserNotificationCenter.current().add(request)
     }
 
     func clearNotification(for manager: DeviceManager, identifier: String) {
-        DispatchQueue.main.async {
-            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
-        }
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
 }
 
@@ -285,9 +282,25 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did fire BLE heartbeat")
 
-        let bleHeartbeatUpdateInterval = TimeInterval(minutes: 4.5)
-        guard lastBLEDrivenUpdate.timeIntervalSinceNow < -bleHeartbeatUpdateInterval else {
-            log.default("Skipping ble heartbeat")
+        let bleHeartbeatUpdateInterval: TimeInterval
+        switch loopManager.lastLoopCompleted?.timeIntervalSinceNow {
+        case .none:
+            // If we haven't looped successfully, retry only every 5 minutes
+            bleHeartbeatUpdateInterval = .minutes(5)
+        case let interval? where interval < .minutes(-10):
+            // If we haven't looped successfully in more than 10 minutes, retry only every 5 minutes
+            bleHeartbeatUpdateInterval = .minutes(5)
+        case let interval? where interval <= .minutes(-5):
+            // If we haven't looped successfully in more than 5 minutes, retry every minute
+            bleHeartbeatUpdateInterval = .minutes(1)
+        case let interval?:
+            // If we looped successfully less than 5 minutes ago, ignore the heartbeat.
+            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last loop completed \(interval.minutes) ago")
+            return
+        }
+
+        guard lastBLEDrivenUpdate.timeIntervalSinceNow <= -bleHeartbeatUpdateInterval else {
+            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last update \(lastBLEDrivenUpdate)")
             return
         }
         lastBLEDrivenUpdate = Date()
@@ -552,6 +565,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "## DeviceDataManager",
             "* launchDate: \(launchDate)",
             "* lastError: \(String(describing: lastError))",
+            "* lastBLEDrivenUpdate: \(lastBLEDrivenUpdate)",
             "",
             cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
             "",
