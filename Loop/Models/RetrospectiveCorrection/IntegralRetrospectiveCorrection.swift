@@ -17,11 +17,12 @@ import LoopCore
     In the above summary, "discrepancy" is a difference between the actual glucose and the model predicted glucose over retrospective correction grouping interval (set to 30 min in LoopSettings), whereas "past discrepancies" refers to a timeline of discrepancies computed over retrospective correction integration interval (set to 180 min in Loop Settings).
  
  */
-class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
+class IntegralRetrospectiveCorrection: RetrospectiveCorrection {
+    let retrospectionInterval = TimeInterval(minutes: 180)
 
     /// RetrospectiveCorrection protocol variables
     /// Standard effect duration
-    let standardEffectDuration: TimeInterval
+    let effectDuration: TimeInterval
     /// Overall retrospective correction effect
     var totalGlucoseCorrectionEffect: HKQuantity?
     
@@ -33,6 +34,7 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
      - differentialGain: Differential effect gain
      - delta: Glucose sampling time interval (5 min)
      - maximumCorrectionEffectDuration: Maximum duration of the correction effect in glucose prediction
+     - retrospectiveCorrectionIntegrationInterval: Maximum duration over which to integrate retrospective correction changes
     */
     static let currentDiscrepancyGain: Double = 1.0
     static let persistentDiscrepancyGain: Double = 5.0
@@ -51,13 +53,13 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
     private let unit = HKUnit.milligramsPerDeciliter
     
     /// State variables reported in diagnostic issue report
-    private var recentDiscrepancyValues: [Double] = []
-    private var integralCorrectionEffectDuration: TimeInterval?
-    private var proportionalCorrection: Double = 0.0
-    private var integralCorrection: Double = 0.0
-    private var differentialCorrection: Double = 0.0
-    private var currentDate: Date = Date()
-    private var ircStatus: String = "-"
+    var recentDiscrepancyValues: [Double] = []
+    var integralCorrectionEffectDuration: TimeInterval?
+    var proportionalCorrection: Double = 0.0
+    var integralCorrection: Double = 0.0
+    var differentialCorrection: Double = 0.0
+    var currentDate: Date = Date()
+    var ircStatus: String = "-"
     
     /**
      Initialize integral retrospective correction settings based on current values of user settings
@@ -69,8 +71,8 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
      
      - Returns: Integral Retrospective Correction customized with controller parameters and user settings
     */
-    init(_ standardCorrectionDuration: TimeInterval) {
-        self.standardEffectDuration = standardCorrectionDuration
+    init(effectDuration: TimeInterval) {
+        self.effectDuration = effectDuration
     }
     
     /**
@@ -83,19 +85,25 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
      - Returns:
      - totalRetrospectiveCorrection: Overall glucose effect
      */
-    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect] {
+    func computeEffect(
+        startingAt startingGlucose: GlucoseValue,
+        retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?,
+        recencyInterval: TimeInterval,
+        insulinSensitivitySchedule: InsulinSensitivitySchedule?,
+        basalRateSchedule: BasalRateSchedule?,
+        glucoseCorrectionRangeSchedule: GlucoseRangeSchedule?,
+        retrospectiveCorrectionGroupingInterval: TimeInterval
+        ) -> [GlucoseEffect] {
         
         // Loop settings relevant for calculation of effect limits
-        let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
-        let insulinSensitivity = UserDefaults.appGroup?.insulinSensitivitySchedule
-        let basalRates = UserDefaults.appGroup?.basalRateSchedule
+        // let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
         currentDate = Date()
         
         // Last discrepancy should be recent, otherwise clear the effect and return
-        let glucoseDate = glucose.startDate
+        let glucoseDate = startingGlucose.startDate
         var glucoseCorrectionEffect: [GlucoseEffect] = []
         guard let currentDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed?.last,
-            glucoseDate.timeIntervalSince(currentDiscrepancy.endDate) <= settings.recencyInterval
+            glucoseDate.timeIntervalSince(currentDiscrepancy.endDate) <= recencyInterval
             else {
                 ircStatus = "discrepancy not available, effect not computed."
                 totalGlucoseCorrectionEffect = nil
@@ -107,13 +115,13 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
         let currentDiscrepancyValue = currentDiscrepancy.quantity.doubleValue(for: unit)
         var scaledCorrection = currentDiscrepancyValue
         totalGlucoseCorrectionEffect = HKQuantity(unit: unit, doubleValue: currentDiscrepancyValue)
-        integralCorrectionEffectDuration = standardEffectDuration
+        integralCorrectionEffectDuration = effectDuration
         
         // Calculate integral retrospective correction if past discrepancies over integration interval are available and if user settings are available
-        if  let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(glucoseDate.addingTimeInterval(-settings.retrospectiveCorrectionIntegrationInterval), glucoseDate),
-            let sensitivity = insulinSensitivity,
-            let basals = basalRates,
-            let correctionRange = settings.glucoseTargetRangeSchedule {
+        if  let pastDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed?.filterDateRange(glucoseDate.addingTimeInterval(-retrospectionInterval), glucoseDate),
+            let sensitivity = insulinSensitivitySchedule,
+            let basals = basalRateSchedule,
+            let glucoseCorrectionRangeSchedule = glucoseCorrectionRangeSchedule {
             
             ircStatus = "effect computed successfully."
             
@@ -125,8 +133,7 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
                 let pastDiscrepancyValue = pastDiscrepancy.quantity.doubleValue(for: unit)
                 if (pastDiscrepancyValue.sign == currentDiscrepancySign &&
                     nextDiscrepancy.endDate.timeIntervalSince(pastDiscrepancy.endDate)
-                    <= settings.recencyInterval &&
-                    abs(pastDiscrepancyValue) >= 0.1)
+                    <= recencyInterval && abs(pastDiscrepancyValue) >= 0.1)
                 {
                     recentDiscrepancyValues.append(pastDiscrepancyValue)
                     nextDiscrepancy = pastDiscrepancy
@@ -138,9 +145,9 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
      
             let currentSensitivity = sensitivity.quantity(at: glucoseDate).doubleValue(for: unit)
             let currentBasalRate = basals.value(at: glucoseDate)
-            let correctionRangeMin = correctionRange.minQuantity(at: glucoseDate).doubleValue(for: unit)
-            let correctionRangeMax = correctionRange.maxQuantity(at: glucoseDate).doubleValue(for: unit)
-            let latestGlucoseValue = glucose.quantity.doubleValue(for: unit) // most recent glucose
+            let correctionRangeMin = glucoseCorrectionRangeSchedule.minQuantity(at: glucoseDate).doubleValue(for: unit)
+            let correctionRangeMax = glucoseCorrectionRangeSchedule.maxQuantity(at: glucoseDate).doubleValue(for: unit)
+            let latestGlucoseValue = startingGlucose.quantity.doubleValue(for: unit) // most recent glucose
             
             // Safety limit for (+) integral effect. The limit is set to a larger value if the current blood glucose is further away from the correction range because we have more time available for corrections
             let glucoseError = latestGlucoseValue - correctionRangeMax
@@ -152,7 +159,7 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
             
             // Integral effect math
             integralCorrection = 0.0
-            var integralCorrectionEffectMinutes = standardEffectDuration.minutes - 2.0 * IntegralRetrospectiveCorrection.delta.minutes
+            var integralCorrectionEffectMinutes = effectDuration.minutes - 2.0 * IntegralRetrospectiveCorrection.delta.minutes
             for discrepancy in recentDiscrepancyValues {
                 integralCorrection =
                     IntegralRetrospectiveCorrection.integralForget * integralCorrection +
@@ -178,32 +185,24 @@ class IntegralRetrospectiveCorrection : RetrospectiveCorrection {
             integralCorrectionEffectDuration = TimeInterval(minutes: integralCorrectionEffectMinutes)
             
             // correction value scaled to account for extended effect duration
-            scaledCorrection = totalCorrection * standardEffectDuration.minutes / integralCorrectionEffectDuration!.minutes
+            scaledCorrection = totalCorrection * effectDuration.minutes / integralCorrectionEffectDuration!.minutes
         }
         
         let retrospectionTimeInterval = currentDiscrepancy.endDate.timeIntervalSince(currentDiscrepancy.startDate)
-        let discrepancyTime = max(retrospectionTimeInterval, settings.retrospectiveCorrectionGroupingInterval)
+        let discrepancyTime = max(retrospectionTimeInterval, retrospectiveCorrectionGroupingInterval)
         let velocity = HKQuantity(unit: unit.unitDivided(by: .second()), doubleValue: scaledCorrection / discrepancyTime)
         
         // Update array of glucose correction effects
-        glucoseCorrectionEffect = glucose.decayEffect(atRate: velocity, for: integralCorrectionEffectDuration!)
+        glucoseCorrectionEffect = startingGlucose.decayEffect(atRate: velocity, for: integralCorrectionEffectDuration!)
         
         // Return glucose correction effects
         return( glucoseCorrectionEffect )
     }
     
-}
-
-extension IntegralRetrospectiveCorrection {
-    /// Generates a diagnostic report about the current state
-    ///
-    /// - parameter completion: A closure called once the report has been generated. The closure takes a single argument of the report string.
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
-        let settings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
-        var report: [String] = [
+    var debugDescription: String {
+        let report: [String] = [
             "## IntegralRetrospectiveCorrection",
             "",
-            "Enabled: \(settings.integralRetrospectiveCorrectionEnabled)",
             "Last updated: \(currentDate)",
             "Status: \(ircStatus)",
             "currentDiscrepancyGain: \(IntegralRetrospectiveCorrection.currentDiscrepancyGain)",
@@ -220,8 +219,8 @@ extension IntegralRetrospectiveCorrection {
             "totalGlucoseCorrectionEffect: \(String(describing: totalGlucoseCorrectionEffect))",
             "integralCorrectionEffectDuration [min]: \(String(describing: integralCorrectionEffectDuration?.minutes))"
         ]
-        report.append("")
-        completion(report.joined(separator: "\n"))
+        
+        return report.joined(separator: "\n")
     }
     
 }

@@ -184,6 +184,9 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     private enum Section: Int, CaseIterable {
         case charts
         case inputs
+        case settings
+        
+        static let count = 3
     }
 
     fileprivate enum SettingsRow: Int, CaseCountable {
@@ -296,11 +299,11 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
                 // Integral retrospective correction
                 var integralEffectDisplay = "?"
                 var totalEffectDisplay = "?"
-                if let totalEffect = self.deviceManager.loopManager.totalRetrospectiveCorrection {
-                    let integralEffectValue = totalEffect.doubleValue(for: charts.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: charts.glucoseUnit)
-                    let integralEffect = HKQuantity(unit: charts.glucoseUnit, doubleValue: integralEffectValue)
-                    integralEffectDisplay = formatter.string(from: integralEffect, for: charts.glucoseUnit) ?? "?"
-                    totalEffectDisplay = formatter.string(from: totalEffect, for: charts.glucoseUnit) ?? "?"
+                if let totalEffect = self.totalRetrospectiveCorrection {
+                    let integralEffectValue = totalEffect.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit)
+                    let integralEffect = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: integralEffectValue)
+                    integralEffectDisplay = formatter.string(from: integralEffect, for: glucoseChart.glucoseUnit) ?? "?"
+                    totalEffectDisplay = formatter.string(from: totalEffect, for: glucoseChart.glucoseUnit) ?? "?"
                 }
                 let integralRetro = String(
                     format: NSLocalizedString("prediction-description-integral-retrospective-correction", comment: "Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect)"),
@@ -312,6 +315,15 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         cell.subtitleLabel?.text = subtitleText
     }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch Section(rawValue: section)! {
+        case .settings:
+            return NSLocalizedString("Algorithm Settings", comment: "The title of the section containing algorithm settings")
+        default:
+            return nil
+        }
+    }
 
     // MARK: - UITableViewDelegate
 
@@ -320,6 +332,8 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         case .charts:
             return 275
         case .inputs:
+            return 60
+        case .settings:
             return 60
         }
     }

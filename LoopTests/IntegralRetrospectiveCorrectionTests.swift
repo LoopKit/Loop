@@ -65,34 +65,13 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     let glucoseTargetFixture: HKQuantity = HKQuantity(unit: HKUnit.milligramsPerDeciliter, doubleValue: 100)
     let basalRateFixture = 0.5
     let glucoseUnit = HKUnit.milligramsPerDeciliter
-    
-    // Save settings
-    let saveInsulinSensitivity = UserDefaults.appGroup?.insulinSensitivitySchedule
-    let saveBasalRates = UserDefaults.appGroup?.basalRateSchedule
-    let saveSettings = UserDefaults.appGroup?.loopSettings
+    let recencyInterval = TimeInterval(minutes: 15)
+    let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
     
     // Initialize integral retrospective correction
-    let integralRC = IntegralRetrospectiveCorrection(TimeInterval.minutes(60.0))
+    let retrospectiveCorrection = IntegralRetrospectiveCorrection(effectDuration: TimeInterval.minutes(60.0))
     
-    /// Setup fixture settings
-    override func setUp() {
-        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
-        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
-        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))], overrideRanges: [:])
-        UserDefaults.appGroup?.insulinSensitivitySchedule = insulinSensitivity
-        UserDefaults.appGroup?.basalRateSchedule = basalRate
-        UserDefaults.appGroup?.loopSettings = LoopSettings()
-        UserDefaults.appGroup?.loopSettings?.glucoseTargetRangeSchedule = glucoseTargetRange
-    }
-
-    /// Restore settings
-    override func tearDown() {
-        UserDefaults.appGroup?.insulinSensitivitySchedule = saveInsulinSensitivity
-        UserDefaults.appGroup?.basalRateSchedule = saveBasalRates
-        UserDefaults.appGroup?.loopSettings = saveSettings
-    }
-    
-    /// Function used to load 5-min discrepancy fixtures
+    /// Load 5-min discrepancy fixtures
     private func loadGlucoseEffectFixture(_ resourceName: String) -> [GlucoseEffect] {
         let fixture: [JSONDictionary] = loadFixture(resourceName)
         let dateFormatter = ISO8601DateFormatter.localTimeDateFormatter()
@@ -139,12 +118,15 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     
     /// Real-time sampled glucose discrepancies
     func testSampledDiscrepancies() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_sampled")
-        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 150))
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
-        let totalRetrospectiveCorrection = integralRC.totalGlucoseCorrectionEffect
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
+        let totalRetrospectiveCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect
         if let totalCorrectionValue = totalRetrospectiveCorrection?.doubleValue(for: glucoseUnit) {
             XCTAssertEqual(-9.0213, totalCorrectionValue, accuracy: 0.001, "Given sampled glucose discrepancies, IRC returned unexpected total correction value")
         } else {
@@ -155,32 +137,38 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     
     /// Discrepanies are stale compared to the latest glucose
     func testStaleDiscrepancies() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_sampled")
-        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let date = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
-        let staleMinutes = (saveSettings?.recencyInterval.minutes)! + 1.0
+        let staleMinutes = recencyInterval.minutes + 1.0
         let glucoseDate = date.addingTimeInterval(.minutes(staleMinutes))
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 120))
-        _ = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
-        let totalRetrospectiveCorrection = integralRC.totalGlucoseCorrectionEffect
+        _ = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
+        let totalRetrospectiveCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect
         XCTAssertNil(totalRetrospectiveCorrection, "IRC should return nil if discrepancies are stale compared to glucose by more than recencyInterval")
     }
 
     /// Constant discrepanies, integral effect within limits
     func testConstantPositiveDiscrepancies() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_constant_positive")
-        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let retrospectionIntegrationStart = glucoseDate.addingTimeInterval(-.minutes(integrationInterval.minutes - 1.0))
         retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepanciesSummed.filterDateRange(retrospectionIntegrationStart, nil)
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 180))
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
 
         // Expected total correction based on IRC filter math
         let expectedCorrectionNormalizedValue = 1.0 - exp( -integrationInterval.minutes / correctionTimeConstant.minutes )
 
         var totalCorrectionNormalizedValue = 0.0
-        if let totalCorrection = integralRC.totalGlucoseCorrectionEffect,
+        if let totalCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect,
             let discrepancy = retrospectiveGlucoseDiscrepanciesSummed.last {
             totalCorrectionNormalizedValue = totalCorrection.doubleValue(for: glucoseUnit) / discrepancy.quantity.doubleValue(for: glucoseUnit) / persistentDiscrepancyGain
             XCTAssertEqual(totalCorrectionNormalizedValue, expectedCorrectionNormalizedValue, accuracy: 0.025, "Given constant discrepancies, IRC returned unexpected normalized correction value")
@@ -194,15 +182,18 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     
     /// Constant discrepanies, integral effect hits a safety limit
     func testConstantPositiveDiscrepanciesIntegralLimit() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_constant_positive")
-        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let retrospectionIntegrationStart = glucoseDate.addingTimeInterval(-.minutes(integrationInterval.minutes - 1.0))
         retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepanciesSummed.filterDateRange(retrospectionIntegrationStart, nil)
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 100))
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
         
-        if let totalCorrection = integralRC.totalGlucoseCorrectionEffect,
+        if let totalCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect,
             let discrepancy = retrospectiveGlucoseDiscrepanciesSummed.last {
             let totalCorrectionValue = totalCorrection.doubleValue(for: glucoseUnit)
             let discrepancyValue = discrepancy.quantity.doubleValue(for: glucoseUnit)
@@ -218,13 +209,16 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     }
     
     func testSingeNegativeDiscrepancy() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_single_same_sign")
-        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 100))
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
 
-        if let totalCorrection = integralRC.totalGlucoseCorrectionEffect,
+        if let totalCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed.last {
             let totalCorrectionValue = totalCorrection.doubleValue(for: glucoseUnit)
             let expectedTotalCorrectionValue = lastDiscrepancy.quantity.doubleValue(for: glucoseUnit)
@@ -238,22 +232,28 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     }
 
     func testEmptyDiscrepancyArray() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange] = []
         let glucoseDate = Date()
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 100))
-        let glucoseEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
-        XCTAssertEqual(glucoseEffect, [], "Given empty discrepancy array, IRC should return empty effects array")
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
+        XCTAssertEqual(glucoseCorrectionEffect, [], "Given empty discrepancy array, IRC should return empty effects array")
     }
     
     func testSingeDiscrepancy() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_sampled")
-        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 100))
         retrospectiveGlucoseDiscrepanciesSummed = [retrospectiveGlucoseDiscrepanciesSummed.last] as! [GlucoseChange]
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
 
-        if let totalCorrection = integralRC.totalGlucoseCorrectionEffect,
+        if let totalCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed.last {
             let totalCorrectionValue = totalCorrection.doubleValue(for: glucoseUnit)
             let expectedTotalCorrectionValue = lastDiscrepancy.quantity.doubleValue(for: glucoseUnit)
@@ -267,17 +267,20 @@ class IntegralRetrospectiveCorrectionTests: XCTestCase {
     }
 
     func testSingleContiguousDiscrepancy() {
+        let insulinSensitivity = InsulinSensitivitySchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: insulinSensitivityFixture.doubleValue(for: glucoseUnit))])
+        let basalRate = BasalRateSchedule(dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: basalRateFixture)])
+        let glucoseTargetRange = GlucoseRangeSchedule(unit: glucoseUnit, dailyItems: [RepeatingScheduleValue(startTime: TimeInterval(0), value: DoubleRange(minValue: glucoseTargetFixture.doubleValue(for: glucoseUnit), maxValue: glucoseTargetFixture.doubleValue(for: glucoseUnit)))])
         let retrospectiveGlucoseDiscrepancies = loadGlucoseEffectFixture("glucose_discrepancies_sampled")
-        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: (saveSettings?.retrospectiveCorrectionGroupingInterval)! * 1.01)
+        var retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: retrospectiveCorrectionGroupingInterval * 1.01)
         let glucoseDate = (retrospectiveGlucoseDiscrepanciesSummed.last?.endDate)!
         let glucose = GlucoseFixtureValue(startDate: glucoseDate, quantity: HKQuantity(unit: glucoseUnit, doubleValue: 100))
         let numberOfDiscrepancies = retrospectiveGlucoseDiscrepanciesSummed.count
         retrospectiveGlucoseDiscrepanciesSummed.remove(at: numberOfDiscrepancies - 2)
         retrospectiveGlucoseDiscrepanciesSummed.remove(at: numberOfDiscrepancies - 3)
         retrospectiveGlucoseDiscrepanciesSummed.remove(at: numberOfDiscrepancies - 4)
-        let glucoseCorrectionEffect = integralRC.updateRetrospectiveCorrectionEffect(glucose, retrospectiveGlucoseDiscrepanciesSummed)
+        let glucoseCorrectionEffect = retrospectiveCorrection.computeEffect(startingAt: glucose, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed, recencyInterval: recencyInterval, insulinSensitivitySchedule: insulinSensitivity, basalRateSchedule: basalRate, glucoseCorrectionRangeSchedule: glucoseTargetRange, retrospectiveCorrectionGroupingInterval: retrospectiveCorrectionGroupingInterval)
         
-        if let totalCorrection = integralRC.totalGlucoseCorrectionEffect,
+        if let totalCorrection = retrospectiveCorrection.totalGlucoseCorrectionEffect,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepanciesSummed.last {
             let totalCorrectionValue = totalCorrection.doubleValue(for: glucoseUnit)
             let expectedTotalCorrectionValue = lastDiscrepancy.quantity.doubleValue(for: glucoseUnit)

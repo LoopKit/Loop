@@ -14,10 +14,6 @@ extension GlucoseRangeSchedule {
         return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
     }
 
-    func minQuantity(at date: Date) -> HKQuantity {
-        return HKQuantity(unit: unit, doubleValue: value(at: date).minValue)
-    }
-
     func maxQuantity(at date: Date) -> HKQuantity {
         return HKQuantity(unit: unit, doubleValue: value(at: date).maxValue)
     }

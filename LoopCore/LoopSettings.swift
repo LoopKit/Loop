@@ -32,13 +32,11 @@ public struct LoopSettings: Equatable {
     public var suspendThreshold: GlucoseThreshold? = nil
 
     public let retrospectiveCorrectionEnabled = true
+    
     public var integralRetrospectiveCorrectionEnabled = false
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
-
-    /// The maximum duration over which to integrate retrospective correction changes
-    public let retrospectiveCorrectionIntegrationInterval = TimeInterval(minutes: 180)
 
     /// The amount of time since a given date that data should be considered valid
     public let recencyInterval = TimeInterval(minutes: 15)

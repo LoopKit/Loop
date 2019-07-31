@@ -33,10 +33,6 @@ final class LoopDataManager {
 
     private let standardCorrectionEffectDuration = TimeInterval.minutes(60.0)
 
-    private let integralRC: IntegralRetrospectiveCorrection
-
-    private let standardRC: StandardRetrospectiveCorrection
-
     private let logger: CategoryLogger
 
     // References to registered notification center observers
@@ -867,6 +863,8 @@ extension LoopDataManager {
         // Get timeline of glucose discrepancies
         retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
 
+        retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
+        
         // Calculate retrospective correction
         retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
             startingAt: glucose,
@@ -1015,27 +1013,6 @@ extension LoopDataManager {
             }
         }
     }
-}
-
-/// Describes retrospective correction interface
-protocol RetrospectiveCorrection {
-    /// Standard effect duration, nominally set to 60 min
-    var standardEffectDuration: TimeInterval { get }
-
-    /// Overall retrospective correction effect
-    var totalGlucoseCorrectionEffect: HKQuantity? { get }
-
-    /**
-     Calculates overall correction effect based on timeline of discrepancies, and updates glucoseCorrectionEffect
-
-     - Parameters:
-        - glucose: Most recent glucose
-        - retrospectiveGlucoseDiscrepanciesSummed: Timeline of past discepancies
-
-     - Returns:
-        - retrospectiveGlucoseEffect: Glucose correction effects
-     */
-    func updateRetrospectiveCorrectionEffect(_ glucose: GlucoseValue, _ retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?) -> [GlucoseEffect]
 }
 
 /// Describes a view into the loop state
@@ -1232,11 +1209,6 @@ extension LoopDataManager {
                 String(reflecting: self.retrospectiveCorrection),
                 "",
             ]
-
-            self.integralRC.generateDiagnosticReport { (report) in
-                entries.append(report)
-                entries.append("")
-            }
 
             self.glucoseStore.generateDiagnosticReport { (report) in
                 entries.append(report)
