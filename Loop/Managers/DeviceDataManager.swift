@@ -90,9 +90,19 @@ final class DeviceDataManager {
         
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
+
+        let lastTempBasal: DoseEntry?
+
+        if case .some(.tempBasal(let dose)) = pumpManager?.status.basalDeliveryState {
+            lastTempBasal = dose
+        } else {
+            lastTempBasal = nil
+        }
+
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
-            lastTempBasal: statusExtensionManager.context?.netBasal?.tempBasal
+            lastTempBasal: lastTempBasal,
+            lastPumpEventsReconciliation: pumpManager?.lastReconciliation
         )
         watchManager = WatchDataManager(deviceManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
@@ -145,16 +155,14 @@ private extension DeviceDataManager {
 
 // MARK: - Client API
 extension DeviceDataManager {
-    func enactBolus(units: Double, at startDate: Date = Date(), willRequest: ((DoseEntry) -> Void)? = nil, completion: @escaping (_ error: Error?) -> Void) {
+    func enactBolus(units: Double, at startDate: Date = Date(), completion: @escaping (_ error: Error?) -> Void) {
         guard let pumpManager = pumpManager else {
             completion(LoopError.configurationError(.pumpManager))
             return
         }
 
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            self.loopManager.addRequestedBolus(dose, completion: {
-                willRequest?(dose)
-            })
+            self.loopManager.addRequestedBolus(dose, completion: nil)
         }) { (result) in
             switch result {
             case .failure(let error):
@@ -162,7 +170,7 @@ extension DeviceDataManager {
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
                 completion(error)
             case .success(let dose):
-                self.loopManager.addConfirmedBolus(dose) {
+                self.loopManager.bolusConfirmed(dose) {
                     completion(nil)
                 }
             }
@@ -234,6 +242,7 @@ extension DeviceDataManager: CGMManagerDelegate {
                     }
                 }
 
+                self.log.default("Asserting current pump data")
                 self.pumpManager?.assertCurrentPumpData()
             }
         case .noData:
@@ -244,6 +253,7 @@ extension DeviceDataManager: CGMManagerDelegate {
             log.default("CGMManager:\(type(of: manager)) did update with error: \(error)")
 
             self.setLastError(error: error)
+            log.default("Asserting current pump data")
             pumpManager?.assertCurrentPumpData()
         }
 
@@ -295,7 +305,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             bleHeartbeatUpdateInterval = .minutes(1)
         case let interval?:
             // If we looped successfully less than 5 minutes ago, ignore the heartbeat.
-            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last loop completed \(interval.minutes) ago")
+            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last loop completed \(interval.minutes) minutes ago")
             return
         }
 
@@ -379,11 +389,11 @@ extension DeviceDataManager: PumpManagerDelegate {
         nightscoutDataManager.uploadLoopStatus(loopError: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didReadPumpEvents events: [NewPumpEvent], completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did read pump events")
 
-        loopManager.addPumpEvents(events) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: \(error)")
             }
