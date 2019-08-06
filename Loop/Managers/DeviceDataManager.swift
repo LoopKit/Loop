@@ -395,6 +395,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
 
             completion(error)
+
+            if error == nil {
+                NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
+            }
         }
     }
 
@@ -586,5 +590,6 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
+    static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 

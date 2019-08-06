@@ -69,6 +69,12 @@ final class StatusTableViewController: ChartsTableViewController {
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
                 }
+            },
+            notificationCenter.addObserver(forName: .PumpEventsAdded, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    self?.refreshContext.update(with: .insulin)
+                    self?.reloadData(animated: true)
+                }
             }
 
         ]
