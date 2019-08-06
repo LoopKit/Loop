@@ -388,6 +388,7 @@
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
 		C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1BF220D675700689850 /* OmniKit.framework */; };
 		C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1C0220D675700689850 /* OmniKitUI.framework */; };
+		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; };
 		C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
 		C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */; };
@@ -1030,6 +1031,7 @@
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
 		C1C7F1BF220D675700689850 /* OmniKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKit.framework; path = Carthage/Build/iOS/OmniKit.framework; sourceTree = "<group>"; };
 		C1C7F1C0220D675700689850 /* OmniKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKitUI.framework; path = Carthage/Build/iOS/OmniKitUI.framework; sourceTree = "<group>"; };
+		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusProgressTableViewCell.swift; sourceTree = "<group>"; };
@@ -1526,6 +1528,7 @@
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
+				C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2454,6 +2457,7 @@
 				43C05CC521EC29E3006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
+				C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */,
 				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
 				4311FB9B1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,

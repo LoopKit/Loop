@@ -145,6 +145,7 @@ final class WatchDataManager: NSObject {
 
         let glucose = loopManager.glucoseStore.latestGlucose
         let reservoir = loopManager.doseStore.lastReservoirValue
+        let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
@@ -172,12 +173,11 @@ final class WatchDataManager: NSObject {
                 updateGroup.leave()
             }
 
-            // Only set this value in the Watch context if there is a temp basal running that hasn't ended yet
-            let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideHistory?.between(start: date, end: date).first,
-                let lastTempBasal = state.lastTempBasal,
-                lastTempBasal.endDate > Date() {
-                context.lastNetTempBasalDose = lastTempBasal.unitsPerHour - scheduledBasal.value
+            if let basalDeliveryState = basalDeliveryState,
+                let basalSchedule = manager.basalRateScheduleApplyingOverrideHistory,
+                let netBasal = basalDeliveryState.getNetBasal(basalSchedule: basalSchedule, settings: manager.settings)
+            {
+                context.lastNetTempBasalDose = netBasal.rate
             }
 
             // Drop the first element in predictedGlucose because it is the current glucose

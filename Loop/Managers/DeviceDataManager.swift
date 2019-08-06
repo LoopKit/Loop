@@ -91,17 +91,9 @@ final class DeviceDataManager {
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
 
-        let lastTempBasal: DoseEntry?
-
-        if case .some(.tempBasal(let dose)) = pumpManager?.status.basalDeliveryState {
-            lastTempBasal = dose
-        } else {
-            lastTempBasal = nil
-        }
-
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
-            lastTempBasal: lastTempBasal,
+            basalDeliveryState: pumpManager?.status.basalDeliveryState,
             lastPumpEventsReconciliation: pumpManager?.lastReconciliation
         )
         watchManager = WatchDataManager(deviceManager: self)
@@ -357,6 +349,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             if let oldBatteryValue = oldStatus.pumpBatteryChargeRemaining, newBatteryValue - oldBatteryValue >= loopManager.settings.batteryReplacementDetectionThreshold {
                 AnalyticsManager.shared.pumpBatteryWasReplaced()
             }
+        }
+
+        if status.basalDeliveryState != oldStatus.basalDeliveryState {
+            loopManager.basalDeliveryState = status.basalDeliveryState
         }
 
         // Update the pump-schedule based settings

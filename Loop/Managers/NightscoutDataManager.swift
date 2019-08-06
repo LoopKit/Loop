@@ -44,7 +44,6 @@ final class NightscoutDataManager {
             let carbsOnBoard = state.carbsOnBoard
             let predictedGlucose = state.predictedGlucose
             let recommendedTempBasal = state.recommendedTempBasal
-            let lastTempBasal = state.lastTempBasal
 
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
                 let insulinOnBoard: InsulinValue?
@@ -66,7 +65,6 @@ final class NightscoutDataManager {
                     predictedGlucose: predictedGlucose,
                     recommendedTempBasal: recommendedTempBasal,
                     recommendedBolus: recommendedBolus,
-                    lastTempBasal: lastTempBasal,
                     loopError: loopError
                 )
             }
@@ -75,7 +73,15 @@ final class NightscoutDataManager {
     
     private var lastTempBasalUploaded: DoseEntry?
 
-    func uploadLoopStatus(insulinOnBoard: InsulinValue? = nil, carbsOnBoard: CarbValue? = nil, predictedGlucose: [GlucoseValue]? = nil, recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? = nil, recommendedBolus: Double? = nil, lastTempBasal: DoseEntry? = nil, loopError: Error? = nil) {
+    func uploadLoopStatus(
+        insulinOnBoard: InsulinValue? = nil,
+        carbsOnBoard: CarbValue? = nil,
+        predictedGlucose: [GlucoseValue]? = nil,
+        recommendedTempBasal: (recommendation: TempBasalRecommendation,
+        date: Date)? = nil,
+        recommendedBolus: Double? = nil,
+        loopError: Error? = nil)
+    {
 
         guard deviceManager.remoteDataManager.nightscoutService.uploader != nil else {
             return
@@ -116,7 +122,7 @@ final class NightscoutDataManager {
         }
 
         let loopEnacted: LoopEnacted?
-        if let tempBasal = lastTempBasal, lastTempBasalUploaded?.startDate != tempBasal.startDate {
+        if case .some(.tempBasal(let tempBasal)) = deviceManager.pumpManagerStatus?.basalDeliveryState, lastTempBasalUploaded?.startDate != tempBasal.startDate {
             let duration = tempBasal.endDate.timeIntervalSince(tempBasal.startDate)
             loopEnacted = LoopEnacted(rate: tempBasal.unitsPerHour, duration: duration, timestamp: tempBasal.startDate, received:
                 true)
@@ -166,7 +172,7 @@ final class NightscoutDataManager {
                 model: pumpManagerStatus.device.model,
                 iob: nil,
                 battery: battery,
-                suspended: pumpManagerStatus.basalDeliveryState == .suspended,
+                suspended: pumpManagerStatus.basalDeliveryState.suspended,
                 bolusing: bolusing,
                 reservoir: currentReservoirUnits,
                 secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())

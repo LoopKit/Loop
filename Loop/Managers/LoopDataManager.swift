@@ -44,7 +44,7 @@ final class LoopDataManager {
 
     init(
         lastLoopCompleted: Date?,
-        lastTempBasal: DoseEntry?,
+        basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
         basalRateSchedule: BasalRateSchedule? = UserDefaults.appGroup?.basalRateSchedule,
         carbRatioSchedule: CarbRatioSchedule? = UserDefaults.appGroup?.carbRatioSchedule,
         insulinModelSettings: InsulinModelSettings? = UserDefaults.appGroup?.insulinModelSettings,
@@ -55,7 +55,7 @@ final class LoopDataManager {
     ) {
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
-        self.lastTempBasal = lastTempBasal
+        self.lockedBasalDeliveryState = Locked(basalDeliveryState)
         self.settings = settings
         self.overrideHistory = overrideHistory
 
@@ -188,7 +188,17 @@ final class LoopDataManager {
 
     fileprivate var carbsOnBoard: CarbValue?
 
-    fileprivate var lastTempBasal: DoseEntry?
+    var basalDeliveryState: PumpManagerStatus.BasalDeliveryState? {
+        get {
+            return lockedBasalDeliveryState.value
+        }
+        set {
+            self.logger.debug("Updating basalDeliveryState to \(String(describing: newValue))")
+            lockedBasalDeliveryState.value = newValue
+        }
+    }
+    private let lockedBasalDeliveryState: Locked<PumpManagerStatus.BasalDeliveryState?>
+
     fileprivate var lastRequestedBolus: DoseEntry?
 
     /// The last date at which a loop completed, from prediction to dose (if dosing is enabled)
@@ -768,7 +778,7 @@ extension LoopDataManager {
         let pendingTempBasalInsulin: Double
         let date = Date()
 
-        if let lastTempBasal = lastTempBasal, lastTempBasal.endDate > date {
+        if let basalDeliveryState = basalDeliveryState, case .tempBasal(let lastTempBasal) = basalDeliveryState, lastTempBasal.endDate > date {
             let normalBasalRate = basalRates.value(at: date)
             let remainingTime = lastTempBasal.endDate.timeIntervalSince(date)
             let remainingUnits = (lastTempBasal.unitsPerHour - normalBasalRate) * remainingTime.hours
@@ -932,6 +942,14 @@ extension LoopDataManager {
         let rateRounder = { (_ rate: Double) in
             return self.delegate?.loopDataManager(self, roundBasalRate: rate) ?? rate
         }
+
+        let lastTempBasal: DoseEntry?
+
+        if case .some(.tempBasal(let dose)) = basalDeliveryState {
+            lastTempBasal = dose
+        } else {
+            lastTempBasal = nil
+        }
         
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
@@ -946,6 +964,8 @@ extension LoopDataManager {
         )
         
         if let temp = tempBasal {
+            self.logger.default("Current basal state: \(String(describing: basalDeliveryState))")
+            self.logger.default("Recommending temp basal: \(temp) at \(startDate)")
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
             recommendedTempBasal = nil
@@ -986,10 +1006,8 @@ extension LoopDataManager {
         delegate?.loopDataManager(self, didRecommendBasalChange: recommendedTempBasal) { (result) in
             self.dataAccessQueue.async {
                 switch result {
-                case .success(let basal):
-                    self.lastTempBasal = basal
+                case .success:
                     self.recommendedTempBasal = nil
-
                     completion(nil)
                 case .failure(let error):
                     completion(error)
@@ -1010,9 +1028,6 @@ protocol LoopState {
 
     /// A timeline of average velocity of glucose change counteracting predicted insulin effects
     var insulinCounteractionEffects: [GlucoseEffectVelocity] { get }
-
-    /// The last set temp basal
-    var lastTempBasal: DoseEntry? { get }
 
     /// The calculated timeline of predicted glucose values
     var predictedGlucose: [PredictedGlucoseValue]? { get }
@@ -1062,11 +1077,6 @@ extension LoopDataManager {
         var insulinCounteractionEffects: [GlucoseEffectVelocity] {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return loopDataManager.insulinCounteractionEffects
-        }
-
-        var lastTempBasal: DoseEntry? {
-            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
-            return loopDataManager.lastTempBasal
         }
 
         var predictedGlucose: [PredictedGlucoseValue]? {
@@ -1183,7 +1193,7 @@ extension LoopDataManager {
                 "recommendedBolus: \(String(describing: state.recommendedBolus))",
                 "lastBolus: \(String(describing: manager.lastRequestedBolus))",
                 "lastLoopCompleted: \(String(describing: manager.lastLoopCompleted))",
-                "lastTempBasal: \(String(describing: state.lastTempBasal))",
+                "basalDeliveryState: \(String(describing: manager.basalDeliveryState))",
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",
                 "",
