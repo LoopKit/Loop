@@ -133,7 +133,7 @@ public extension DoseChart {
         for entry in doseEntries {
             let time = entry.endDate.timeIntervalSince(entry.startDate)
 
-            if entry.type == .bolus && entry.netBasalUnits > 0 && time < .minutes(10) {
+            if entry.type == .bolus && entry.netBasalUnits > 0 {
                 let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
                 let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
 
