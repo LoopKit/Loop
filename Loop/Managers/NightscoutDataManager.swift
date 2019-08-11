@@ -172,7 +172,7 @@ final class NightscoutDataManager {
                 model: pumpManagerStatus.device.model,
                 iob: nil,
                 battery: battery,
-                suspended: pumpManagerStatus.basalDeliveryState.suspended,
+                suspended: pumpManagerStatus.basalDeliveryState.isSuspended,
                 bolusing: bolusing,
                 reservoir: currentReservoirUnits,
                 secondsFromGMT: pumpManagerStatus.timeZone.secondsFromGMT())
