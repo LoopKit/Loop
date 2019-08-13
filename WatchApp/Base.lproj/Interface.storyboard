@@ -414,7 +414,6 @@
                                             </separator>
                                         </items>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
                                     </group>
                                     <connections>
                                         <outlet property="bottomSeparator" destination="VV1-lG-fC0" id="T5d-VF-GlT"/>
