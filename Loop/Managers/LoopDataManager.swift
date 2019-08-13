@@ -115,6 +115,19 @@ final class LoopDataManager {
 
                     self.notify(forChange: .glucose)
                 }
+            },
+            NotificationCenter.default.addObserver(
+                forName: nil,
+                object: doseStore,
+                queue: OperationQueue.main
+            ) { (note) in
+                self.dataAccessQueue.async {
+                    self.logger.default("Received notification of dosing changing")
+
+                    self.insulinEffect = nil
+
+                    self.notify(forChange: .bolus)
+                }
             }
         ]
     }
@@ -507,6 +520,7 @@ extension LoopDataManager {
     ///   - dose: The DoseEntry representing the requested bolus
     func addRequestedBolus(_ dose: DoseEntry, completion: (() -> Void)?) {
         dataAccessQueue.async {
+            self.logger.debug("addRequestedBolus")
             self.lastRequestedBolus = dose
             self.notify(forChange: .bolus)
 
@@ -517,9 +531,27 @@ extension LoopDataManager {
     /// Notifies the manager that the bolus is confirmed, but not fully delivered.
     ///
     /// - Parameters:
-    ///   - dose: The DoseEntry representing the confirmed bolus
+    ///   - dose: The DoseEntry representing the confirmed bolus.
     func bolusConfirmed(_ dose: DoseEntry, completion: (() -> Void)?) {
         self.dataAccessQueue.async {
+            self.logger.debug("bolusConfirmed")
+            self.lastRequestedBolus = nil
+            self.recommendedBolus = nil
+            self.recommendedTempBasal = nil
+            self.insulinEffect = nil
+            self.notify(forChange: .bolus)
+
+            completion?()
+        }
+    }
+
+    /// Notifies the manager that the bolus failed.
+    ///
+    /// - Parameters:
+    ///   - dose: The DoseEntry representing the confirmed bolus.
+    func bolusRequestFailed(_ error: Error, completion: (() -> Void)?) {
+        self.dataAccessQueue.async {
+            self.logger.debug("bolusRequestFailed")
             self.lastRequestedBolus = nil
             self.insulinEffect = nil
             self.notify(forChange: .bolus)
@@ -527,6 +559,7 @@ extension LoopDataManager {
             completion?()
         }
     }
+
 
     /// Adds and stores new pump events
     ///
@@ -539,7 +572,6 @@ extension LoopDataManager {
             self.dataAccessQueue.async {
                 if error == nil {
                     self.insulinEffect = nil
-                    self.lastRequestedBolus = nil
                 }
                 completion(error)
             }
@@ -563,11 +595,6 @@ extension LoopDataManager {
             } else if let newValue = newValue {
                 self.dataAccessQueue.async {
                     self.insulinEffect = nil
-                    // Expire any bolus values now represented in the insulin data
-                    // TODO: Ask pumpManager if dose represented in data
-                    if areStoredValuesContinuous, let bolusEndDate = self.lastRequestedBolus?.endDate, bolusEndDate < Date() {
-                        self.lastRequestedBolus = nil
-                    }
 
                     if let newDoseStartDate = previousValue?.startDate {
                         // Prune back any counteraction effects for recomputation, after the effect delay
@@ -671,6 +698,7 @@ extension LoopDataManager {
         }
 
         if insulinEffect == nil {
+            self.logger.debug("Recomputing insulin effects")
             updateGroup.enter()
             doseStore.getGlucoseEffects(start: nextEffectDate) { (result) -> Void in
                 switch result {
@@ -788,7 +816,7 @@ extension LoopDataManager {
             pendingTempBasalInsulin = 0
         }
 
-        let pendingBolusAmount: Double = lastRequestedBolus?.units ?? 0
+        let pendingBolusAmount: Double = lastRequestedBolus?.programmedUnits ?? 0
 
         // All outstanding potential insulin delivery
         return pendingTempBasalInsulin + pendingBolusAmount
@@ -881,6 +909,8 @@ extension LoopDataManager {
     private func updatePredictedGlucoseAndRecommendedBasalAndBolus() throws {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
+        self.logger.debug("Recomputing prediction and recommendations.")
+
         guard let glucose = glucoseStore.latestGlucose else {
             self.predictedGlucose = nil
             throw LoopError.missingDataError(.glucose)
@@ -934,8 +964,7 @@ extension LoopDataManager {
             // Don't recommend changes if a bolus was just requested.
             // Sending additional pump commands is not going to be
             // successful in any case.
-            recommendedBolus = nil
-            recommendedTempBasal = nil
+            self.logger.debug("Not generating recommendations because bolus request is in progress.")
             return
         }
 
@@ -987,6 +1016,7 @@ extension LoopDataManager {
             volumeRounder: volumeRounder
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
+        self.logger.debug("Recommending bolus: \(String(describing: recommendedBolus))")
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
@@ -1086,11 +1116,17 @@ extension LoopDataManager {
 
         var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            guard loopDataManager.lastRequestedBolus == nil else {
+                return nil
+            }
             return loopDataManager.recommendedTempBasal
         }
         
         var recommendedBolus: (recommendation: BolusRecommendation, date: Date)? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
+            guard loopDataManager.lastRequestedBolus == nil else {
+                return nil
+            }
             return loopDataManager.recommendedBolus
         }
 
@@ -1121,6 +1157,7 @@ extension LoopDataManager {
             var updateError: Error?
 
             do {
+                self.logger.debug("getLoopState: update()")
                 try self.update()
             } catch let error {
                 updateError = error

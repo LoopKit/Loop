@@ -135,7 +135,7 @@ public extension DoseChart {
 
             if entry.type == .bolus && entry.netBasalUnits > 0 {
                 let x = ChartAxisValueDate(date: entry.startDate, formatter: dateFormatter)
-                let y = ChartAxisValueDoubleLog(actualDouble: entry.units, unitString: "U", formatter: doseFormatter)
+                let y = ChartAxisValueDoubleLog(actualDouble: entry.unitsInDeliverableIncrements, unitString: "U", formatter: doseFormatter)
 
                 let point = ChartPoint(x: x, y: y)
                 bolusDosePoints.append(point)

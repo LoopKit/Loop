@@ -848,7 +848,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 case .bolusing(let dose):
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
                     progressCell.selectionStyle = .none
-                    progressCell.totalUnits = dose.units
+                    progressCell.totalUnits = dose.programmedUnits
                     progressCell.tintColor = .doseTintColor
                     progressCell.unit = HKUnit.internationalUnit()
                     progressCell.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits

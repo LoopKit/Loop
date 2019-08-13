@@ -153,14 +153,17 @@ extension DeviceDataManager {
             return
         }
 
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            self.loopManager.addRequestedBolus(dose, completion: nil)
+            // No longer used...
         }) { (result) in
             switch result {
             case .failure(let error):
                 self.log.error(error)
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
-                completion(error)
+                self.loopManager.bolusRequestFailed(error) {
+                    completion(error)
+                }
             case .success(let dose):
                 self.loopManager.bolusConfirmed(dose) {
                     completion(nil)
