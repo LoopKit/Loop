@@ -10,6 +10,7 @@ import CGMBLEKit
 import G4ShareSpy
 import ShareClient
 import MockKit
+import SpikeClient
 
 
 let allCGMManagers: [CGMManager.Type] = [
@@ -18,6 +19,7 @@ let allCGMManagers: [CGMManager.Type] = [
     G4CGMManager.self,
     ShareClientManager.self,
     MockCGMManager.self,
+    SpikeClientManager.self,
 ]
 
 
