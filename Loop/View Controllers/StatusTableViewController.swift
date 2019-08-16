@@ -69,6 +69,12 @@ final class StatusTableViewController: ChartsTableViewController {
                     self?.registerPumpManager()
                     self?.configurePumpManagerHUDViews()
                 }
+            },
+            notificationCenter.addObserver(forName: .PumpEventsAdded, object: deviceManager, queue: nil) { [weak self] (notification: Notification) in
+                DispatchQueue.main.async {
+                    self?.refreshContext.update(with: .insulin)
+                    self?.reloadData(animated: true)
+                }
             }
 
         ]
@@ -192,10 +198,12 @@ final class StatusTableViewController: ChartsTableViewController {
         deviceManager.pumpManagerHUDProvider?.visible = active && onscreen
     }
     
-    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active {
+    public var basalDeliveryState: PumpManagerStatus.BasalDeliveryState = .active(Date()) {
         didSet {
             if oldValue != basalDeliveryState {
+                log.debug("New basalDeliveryState: %@", String(describing: basalDeliveryState))
                 refreshContext.update(with: .status)
+                self.reloadData(animated: true)
             }
         }
     }
@@ -296,6 +304,7 @@ final class StatusTableViewController: ChartsTableViewController {
         var totalDelivery: Double?
         var cobValues: [CarbValue]?
         let startDate = charts.startDate
+        let basalDeliveryState = self.basalDeliveryState
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
@@ -308,21 +317,17 @@ final class StatusTableViewController: ChartsTableViewController {
             }
 
             /// Update the status HUDs immediately
-            let netBasal: NetBasal?
             let lastLoopCompleted = manager.lastLoopCompleted
             let lastLoopError = state.error
 
             // Net basal rate HUD
-            let date = state.lastTempBasal?.startDate ?? Date()
-            if let scheduledBasal = manager.basalRateScheduleApplyingOverrideHistory?.between(start: date, end: date).first {
-                netBasal = NetBasal(
-                    lastTempBasal: state.lastTempBasal,
-                    maxBasal: manager.settings.maximumBasalRatePerHour,
-                    scheduledBasal: scheduledBasal
-                )
+            let netBasal: NetBasal?
+            if let basalSchedule = manager.basalRateScheduleApplyingOverrideHistory {
+                netBasal = basalDeliveryState.getNetBasal(basalSchedule: basalSchedule, settings: manager.settings)
             } else {
                 netBasal = nil
             }
+            self.log.debug("Update net basal to %{public}@", String(describing: netBasal))
 
             DispatchQueue.main.async {
                 self.hudView?.loopCompletionHUD.dosingEnabled = manager.settings.dosingEnabled
@@ -551,6 +556,7 @@ final class StatusTableViewController: ChartsTableViewController {
         case hidden
         case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
         case scheduleOverrideEnabled(TemporaryScheduleOverride)
+        case enactingTempbasal
         case enactingBolus
         case bolusing(dose: DoseEntry)
         case cancelingBolus
@@ -575,7 +581,9 @@ final class StatusTableViewController: ChartsTableViewController {
             statusRowMode = .enactingBolus
         } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
-        } else if self.basalDeliveryState == .suspended {
+        } else if case .initiatingTempBasal = basalDeliveryState {
+            statusRowMode = .enactingTempbasal
+        } else if case .suspended = basalDeliveryState {
             statusRowMode = .pumpSuspended(resuming: false)
         } else if self.basalDeliveryState == .resuming {
             statusRowMode = .pumpSuspended(resuming: true)
@@ -840,10 +848,19 @@ final class StatusTableViewController: ChartsTableViewController {
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
                     return cell
+                case .enactingTempbasal:
+                    let cell = getTitleSubtitleCell()
+                    cell.titleLabel.text = NSLocalizedString("Enacting Temp Basal", comment: "The title of the cell indicating a temp basal is being enacted")
+                    cell.subtitleLabel.text = nil
+
+                    let indicatorView = UIActivityIndicatorView(style: .gray)
+                    indicatorView.startAnimating()
+                    cell.accessoryView = indicatorView
+                    return cell
                 case .bolusing(let dose):
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
                     progressCell.selectionStyle = .none
-                    progressCell.totalUnits = dose.units
+                    progressCell.totalUnits = dose.programmedUnits
                     progressCell.tintColor = .doseTintColor
                     progressCell.unit = HKUnit.internationalUnit()
                     progressCell.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
@@ -988,6 +1005,9 @@ final class StatusTableViewController: ChartsTableViewController {
                                 }
                             } else {
                                 self.updateHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
+                                self.refreshContext.update(with: .insulin)
+                                self.log.debug("[reloadData] after manually resuming suspend")
+                                self.reloadData()
                             }
                         }
                     }

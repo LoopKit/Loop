@@ -23,6 +23,8 @@ extension BolusViewController {
                 bolusRecommendation = state.recommendedBolus?.recommendation
             }
 
+            print("BolusViewController: recommendation = \(String(describing: bolusRecommendation))")
+
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
                 let activeInsulin: Double?
 
