@@ -60,9 +60,9 @@ extension ChartPoint {
         guard let targetRange = override.settings.targetRange else {
             return []
         }
-        let quantityRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: targetRange.minValue)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: targetRange.maxValue)
+        
         return pointsForGlucoseRangeScheduleOverride(
-            range: quantityRange.doubleRangeWithMinimumIncrement(in: unit),
+            range: targetRange.doubleRangeWithMinimumIncrement(in: unit),
             activeInterval: override.activeInterval,
             unit: unit,
             xAxisValues: xAxisValues,

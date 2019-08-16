@@ -77,12 +77,14 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRang
 
 struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
     let override: TemporaryScheduleOverride
+    let unit: HKUnit
 
-    init?(_ override: TemporaryScheduleOverride) {
+    init?(_ override: TemporaryScheduleOverride, unit: HKUnit) {
         guard override.settings.targetRange != nil else {
             return nil
         }
         self.override = override
+        self.unit = unit
     }
 
     var start: Date {
@@ -94,10 +96,10 @@ struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
     }
 
     var min: Double {
-        return override.settings.targetRange!.minValue
+        return override.settings.targetRange!.lowerBound.doubleValue(for: unit)
     }
 
     var max: Double {
-        return override.settings.targetRange!.maxValue
+        return override.settings.targetRange!.upperBound.doubleValue(for: unit)
     }
 }
