@@ -27,8 +27,8 @@ extension PersistedPumpEvent {
                 timestamp: dose.startDate,
                 enteredBy: source,
                 bolusType: duration > 0 ? .Square : .Normal,
-                amount: dose.units,
-                programmed: dose.units,  // Persisted pump events are always completed
+                amount: dose.deliveredUnits ?? dose.programmedUnits,
+                programmed: dose.programmedUnits,  // Persisted pump events are always completed
                 unabsorbed: 0,  // The pump's reported IOB isn't relevant, nor stored
                 duration: duration,
                 carbs: 0,
