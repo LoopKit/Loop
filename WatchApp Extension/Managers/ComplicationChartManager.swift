@@ -119,7 +119,7 @@ final class ComplicationChartManager {
     private func drawOverridesIfNeeded(in context: CGContext, using scaler: GlucoseChartScaler) {
         guard
             let override = data?.activeScheduleOverride,
-            let overrideHashable = TemporaryScheduleOverrideHashable(override)
+            let overrideHashable = TemporaryScheduleOverrideHashable(override, unit: unit)
         else {
             return
         }
