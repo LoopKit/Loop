@@ -10,28 +10,126 @@ import Foundation
 import NightscoutUploadKit
 import HealthKit
 import LoopKit
+import os.log
 
 
 final class NightscoutDataManager {
 
     unowned let deviceManager: DeviceDataManager
+
+    private let log = OSLog(category: "NightscoutDataManager")
     
     // Last time we uploaded device status
     var lastDeviceStatusUpload: Date?
 
+    // Last time we uploaded settings
+    var lastSettingsUpload: Date = .distantPast
+
+    // Last time settings were updated
+    var lastSettingsUpdate: Date = .distantPast
+
     init(deviceDataManager: DeviceDataManager) {
         self.deviceManager = deviceDataManager
 
+        NotificationCenter.default.addObserver(self, selector: #selector(loopCompleted(_:)), name: .LoopCompleted, object: deviceDataManager.loopManager)
         NotificationCenter.default.addObserver(self, selector: #selector(loopDataUpdated(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
-    
+
+
     @objc func loopDataUpdated(_ note: Notification) {
         guard
-            deviceManager.remoteDataManager.nightscoutService.uploader != nil,
             let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
-            case .tempBasal = context
-        else {
+            case .preferences = context
+            else {
+                return
+        }
+
+        lastSettingsUpdate = Date()
+        uploadSettings()
+    }
+
+    private func uploadSettings() {
+        guard
+            let uploader = deviceManager.remoteDataManager.nightscoutService.uploader,
+            let settings = UserDefaults.appGroup?.loopSettings,
+            let basalRateSchedule = UserDefaults.appGroup?.basalRateSchedule,
+            let insulinModelSettings = UserDefaults.appGroup?.insulinModelSettings,
+            let carbRatioSchedule = UserDefaults.appGroup?.carbRatioSchedule,
+            let insulinSensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule,
+            let preferredUnit = settings.glucoseUnit,
+            let correctionSchedule = settings.glucoseTargetRangeSchedule else
+        {
+            log.default("Not uploading due to incomplete configuration")
+            return
+        }
+
+        let targetLowItems = correctionSchedule.items.map { (item) -> ProfileSet.ScheduleItem in
+            return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value.minValue)
+        }
+
+        let targetHighItems = correctionSchedule.items.map { (item) -> ProfileSet.ScheduleItem in
+            return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value.maxValue)
+        }
+
+        let nsScheduledOverride = settings.scheduleOverride?.nsScheduleOverride(for: preferredUnit)
+
+        let nsPreMealTargetRange: ClosedRange<Double>?
+        if let preMealTargetRange = settings.preMealTargetRange {
+            nsPreMealTargetRange = ClosedRange(uncheckedBounds: (
+                lower: preMealTargetRange.minValue,
+                upper: preMealTargetRange.maxValue))
+        } else {
+            nsPreMealTargetRange = nil
+        }
+
+        let nsLoopSettings = NightscoutUploadKit.LoopSettings(
+            dosingEnabled: settings.dosingEnabled,
+            overridePresets: settings.overridePresets.map { $0.nsScheduleOverride(for: preferredUnit) },
+            scheduleOverride: nsScheduledOverride,
+            minimumBGGuard: settings.suspendThreshold?.quantity.doubleValue(for: preferredUnit),
+            preMealTargetRange: nsPreMealTargetRange,
+            maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+            maximumBolus: settings.maximumBolus)
+
+        let profile = ProfileSet.Profile(
+            timezone: basalRateSchedule.timeZone,
+            dia: insulinModelSettings.model.effectDuration,
+            sensitivity: insulinSensitivitySchedule.items.scheduleItems(),
+            carbratio: carbRatioSchedule.items.scheduleItems(),
+            basal: basalRateSchedule.items.scheduleItems(),
+            targetLow: targetLowItems,
+            targetHigh: targetHighItems,
+            units: correctionSchedule.unit.shortLocalizedUnitString())
+
+        let store: [String: ProfileSet.Profile] = [
+            "Default": profile
+        ]
+
+        let profileSet = ProfileSet(
+            startDate: Date(),
+            units: preferredUnit.shortLocalizedUnitString(),
+            enteredBy: "Loop",
+            defaultProfile: "Default",
+            store: store,
+            settings: nsLoopSettings)
+
+        log.default("Uploading profile")
+
+        uploader.uploadProfile(profileSet: profileSet) { (result) in
+            switch(result) {
+            case .failure(let error):
+                self.log.error("Settings upload failed: %{public}@", String(describing: error))
+            case .success:
+                DispatchQueue.main.async {
+                    self.lastSettingsUpload = Date()
+                }
+            }
+        }
+    }
+
+    @objc func loopCompleted(_ note: Notification) {
+        guard deviceManager.remoteDataManager.nightscoutService.uploader != nil else {
             return
         }
 
@@ -67,6 +165,10 @@ final class NightscoutDataManager {
                     recommendedBolus: recommendedBolus,
                     loopError: loopError
                 )
+
+                if self.lastSettingsUpdate > self.lastSettingsUpload {
+                    self.uploadSettings()
+                }
             }
         }
     }
@@ -179,9 +281,9 @@ final class NightscoutDataManager {
         } else {
             pumpStatus = nil
         }
-        
-        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus())
 
+        log.default("Uploading loop status")
+        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus())
     }
     
     private func getUploaderStatus() -> UploaderStatus {
@@ -195,10 +297,6 @@ final class NightscoutDataManager {
             battery = nil
         }
         return UploaderStatus(name: uploaderDevice.name, timestamp: Date(), battery: battery)
-    }
-
-    func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, deviceName: String?, firmwareVersion: String?) {
-        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, uploaderStatus: nil)
     }
 
     private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?) {
@@ -254,6 +352,88 @@ final class NightscoutDataManager {
                 device: device
             )
         }
+    }
+}
+
+private extension Array where Element == RepeatingScheduleValue<Double> {
+    func scheduleItems() -> [ProfileSet.ScheduleItem] {
+        return map { (item) -> ProfileSet.ScheduleItem in
+            return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value)
+        }
+    }
+}
+
+private extension LoopKit.TemporaryScheduleOverride {
+    func nsScheduleOverride(for unit: HKUnit) -> NightscoutUploadKit.TemporaryScheduleOverride {
+        let nsTargetRange: ClosedRange<Double>?
+        if let targetRange = settings.targetRange {
+            nsTargetRange = ClosedRange(uncheckedBounds: (
+                lower: targetRange.lowerBound.doubleValue(for: unit),
+                upper: targetRange.upperBound.doubleValue(for: unit)))
+        } else {
+            nsTargetRange = nil
+        }
+
+        let nsDuration: TimeInterval
+        switch duration {
+        case .finite(let interval):
+            nsDuration = interval
+        case .indefinite:
+            nsDuration = 0
+        }
+
+        let name: String?
+        let symbol: String?
+
+        switch context {
+        case .custom:
+            name = nil
+            symbol = nil
+        case .legacyWorkout:
+            name = "Workout"
+            symbol = nil
+        case .preMeal:
+            name = "PreMeal"
+            symbol = nil
+        case .preset(let preset):
+            name = preset.name
+            symbol = preset.symbol
+        }
+
+        return NightscoutUploadKit.TemporaryScheduleOverride(
+            targetRange: nsTargetRange,
+            insulinNeedsScaleFactor: settings.insulinNeedsScaleFactor,
+            symbol: symbol,
+            duration: nsDuration,
+            name: name)
+    }
+}
+
+private extension LoopKit.TemporaryScheduleOverridePreset {
+    func nsScheduleOverride(for unit: HKUnit) -> NightscoutUploadKit.TemporaryScheduleOverride {
+        let nsTargetRange: ClosedRange<Double>?
+        if let targetRange = settings.targetRange {
+            nsTargetRange = ClosedRange(uncheckedBounds: (
+                lower: targetRange.lowerBound.doubleValue(for: unit),
+                upper: targetRange.upperBound.doubleValue(for: unit)))
+        } else {
+            nsTargetRange = nil
+        }
+
+        let nsDuration: TimeInterval
+        switch duration {
+        case .finite(let interval):
+            nsDuration = interval
+        case .indefinite:
+            nsDuration = 0
+        }
+
+        return NightscoutUploadKit.TemporaryScheduleOverride(
+            targetRange: nsTargetRange,
+            insulinNeedsScaleFactor: settings.insulinNeedsScaleFactor,
+            symbol: self.symbol,
+            duration: nsDuration,
+            name: self.name)
     }
 }
 
