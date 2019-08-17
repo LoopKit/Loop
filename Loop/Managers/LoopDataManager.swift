@@ -137,6 +137,9 @@ final class LoopDataManager {
     /// These are not thread-safe.
     var settings: LoopSettings {
         didSet {
+            guard settings != oldValue else {
+                return
+            }
             if settings.scheduleOverride != oldValue.scheduleOverride {
                 overrideHistory.recordOverride(settings.scheduleOverride)
 
@@ -225,6 +228,7 @@ final class LoopDataManager {
             NotificationManager.clearLoopNotRunningNotifications()
             NotificationManager.scheduleLoopNotRunningNotifications()
             AnalyticsManager.shared.loopDidSucceed()
+            NotificationCenter.default.post(name: .LoopCompleted, object: self)
         }
     }
     private let lockedLastLoopCompleted: Locked<Date?>
@@ -1262,11 +1266,10 @@ extension LoopDataManager {
 
 
 extension Notification.Name {
-    static let LoopDataUpdated = Notification.Name(rawValue: "com.loudnate.Naterade.notification.LoopDataUpdated")
-
-    static let LoopRunning = Notification.Name(rawValue: "com.loudnate.Naterade.notification.LoopRunning")
+    static let LoopDataUpdated = Notification.Name(rawValue: "com.loopkit.Loop.LoopDataUpdated")
+    static let LoopRunning = Notification.Name(rawValue: "com.loopkit.Loop.LoopRunning")
+    static let LoopCompleted = Notification.Name(rawValue: "com.loopkit.Loop.LoopCompleted")
 }
-
 
 protocol LoopDataManagerDelegate: class {
 
