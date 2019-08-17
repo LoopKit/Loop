@@ -250,6 +250,9 @@
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "prediction-description-retrospective-correction" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
 
+/* Format string describing integral retrospective correction. (1: Integral glucose effect)(2: Total glucose effect) */
+"prediction-description-integral-retrospective-correction" = "Integral effect: %1$@\nTotal glucose effect: %2$@";
+
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Launches CGM app";
 
