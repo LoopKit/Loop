@@ -86,7 +86,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         var pickerValue = 0
 
         if let context = context as? WatchContext, let recommendedBolus = context.recommendedBolusDose {
-            pickerValue = pickerValueFromBolusValue(recommendedBolus * 0.75)
+            pickerValue = pickerValueFromBolusValue(recommendedBolus * 1.0)
 
             if let valueString = formatter.string(from: recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
