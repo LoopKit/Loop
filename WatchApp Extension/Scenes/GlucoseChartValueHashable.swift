@@ -96,10 +96,10 @@ struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
     }
 
     var min: Double {
-        return override.settings.targetRange!.lowerBound.doubleValue(for: unit)
+        return override.settings.targetRange!.lowerBound.doubleValue(for: .milligramsPerDeciliter)
     }
 
     var max: Double {
-        return override.settings.targetRange!.upperBound.doubleValue(for: unit)
+        return override.settings.targetRange!.upperBound.doubleValue(for: .milligramsPerDeciliter)
     }
 }
