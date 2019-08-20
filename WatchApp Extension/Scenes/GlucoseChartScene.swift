@@ -250,7 +250,7 @@ class GlucoseChartScene: SKScene {
         // Make temporary overrides visually match what we do in the Loop app. This means that we have
         // one darker box which represents the duration of the override, but we have a second lighter box which
         // extends to the end of the visible window.
-        if let range = activeOverride, let rangeHashable = TemporaryScheduleOverrideHashable(range, unit: unit) {
+        if let range = activeOverride, let rangeHashable = TemporaryScheduleOverrideHashable(range) {
             let (sprite1, created) = getSprite(forHash: rangeHashable.chartHashValue)
             sprite1.color = UIColor.glucose.withAlphaComponent(0.4)
             sprite1.zPosition = NodePlane.overrideRanges.zPosition
@@ -260,7 +260,7 @@ class GlucoseChartScene: SKScene {
             if rangeHashable.end < spannedInterval.end {
                 let extendedDuration = spannedInterval.end.timeIntervalSince(rangeHashable.start)
                 let extendedRange = TemporaryScheduleOverride(context: rangeHashable.override.context, settings: rangeHashable.override.settings, startDate: rangeHashable.start, duration: .finite(extendedDuration))
-                let extendedRangeHashable = TemporaryScheduleOverrideHashable(extendedRange, unit: unit)! // Target range already known to be non-nil
+                let extendedRangeHashable = TemporaryScheduleOverrideHashable(extendedRange)! // Target range already known to be non-nil
                 let (sprite2, created) = getSprite(forHash: extendedRangeHashable.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)
                 sprite2.zPosition = NodePlane.overrideRanges.zPosition
