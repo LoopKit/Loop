@@ -13,7 +13,7 @@ protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
     var min: HKQuantity { get }
-    var max: HKQuantity { get } // milligramsPerDeciliter
+    var max: HKQuantity { get }
 
     var chartHashValue: Int { get }
 }
