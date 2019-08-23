@@ -11,10 +11,9 @@
 MAIN_APP_BUNDLE_IDENTIFIER = com.${DEVELOPMENT_TEAM}.loopkit
 MAIN_APP_DISPLAY_NAME = Loop
 
-APPICON_NAME = AppIcon
+LOOP_MARKETING_VERSION = 1.10.0
 
-// Exclude additional assets by default, and let other configurations that provide them add the file back in
-EXCLUDED_SOURCE_FILE_NAMES = AdditionalAssets.xcassets
+APPICON_NAME = AppIcon
 
 // Optional workspace configuration overrides
 #include? "../LoopConfigOverride.xcconfig"

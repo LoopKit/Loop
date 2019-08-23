@@ -47,10 +47,6 @@ public struct LoopSettings: Equatable {
 
     public let statusChartMinimumHistoryDisplay: TimeInterval = .hours(1)
 
-    public var glucoseUnit: HKUnit? {
-        return glucoseTargetRangeSchedule?.unit
-    }
-
     // MARK - Guardrails
 
     public func allowedSensitivityValues(for unit: HKUnit) -> [Double] {
