@@ -12,7 +12,7 @@ import LoopKitUI
 import MinimedKit
 import MinimedKitUI
 
-private let managersByIdentifier: [String: PumpManagerUI.Type] = allPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
+private let managersByIdentifier: [String: PumpManagerUI.Type] = staticPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
 }
 
