@@ -61,7 +61,7 @@ final class DeviceDataManager {
 
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
 
-            UserDefaults.appGroup?.pumpManager = pumpManager
+            UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
         }
     }
 
@@ -75,16 +75,27 @@ final class DeviceDataManager {
 
     private var statusExtensionManager: StatusExtensionDataManager!
 
+    // MARK: - Plugins
+
+    private var pluginManager: PluginManager
+
     // MARK: - Initialization
+
 
     private(set) var loopManager: LoopDataManager!
 
     init() {
-        pumpManager = UserDefaults.appGroup?.pumpManager as? PumpManagerUI
+        pluginManager = PluginManager()
+
+        if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
+            pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
+        } else {
+            pumpManager = nil
+        }
 
         if let cgmManager = UserDefaults.appGroup?.cgmManager {
             self.cgmManager = cgmManager
-        } else if UserDefaults.appGroup?.isCGMManagerValidPumpManager == true {
+        } else if isCGMManagerValidPumpManager {
             self.cgmManager = pumpManager as? CGMManager
         }
         
@@ -110,6 +121,41 @@ final class DeviceDataManager {
         setupPump()
         setupCGM()
     }
+
+    var isCGMManagerValidPumpManager: Bool {
+        guard let rawValue = UserDefaults.appGroup?.cgmManagerState else {
+            return false
+        }
+
+        return pumpManagerTypeFromRawValue(rawValue) != nil
+    }
+
+    var availablePumpManagers: [AvailableDevice] {
+        return pluginManager.availablePumpManagers + availableStaticPumpManagers
+    }
+
+    public func pumpManagerTypeByIdentifier(_ identifier: String) -> PumpManagerUI.Type? {
+        return pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] as? PumpManagerUI.Type
+    }
+
+    private func pumpManagerTypeFromRawValue(_ rawValue: [String: Any]) -> PumpManager.Type? {
+        guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
+            return nil
+        }
+
+        return pumpManagerTypeByIdentifier(managerIdentifier)
+    }
+
+    func pumpManagerFromRawValue(_ rawValue: [String: Any]) -> PumpManagerUI? {
+        guard let rawState = rawValue["state"] as? PumpManager.RawStateValue,
+            let Manager = pumpManagerTypeFromRawValue(rawValue)
+            else {
+                return nil
+        }
+
+        return Manager.init(rawState: rawState) as? PumpManagerUI
+    }
+
 }
 
 private extension DeviceDataManager {
@@ -280,7 +326,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did update state")
 
-        UserDefaults.appGroup?.pumpManager = pumpManager
+        UserDefaults.appGroup?.pumpManagerRawValue = pumpManager.rawValue
     }
 
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {

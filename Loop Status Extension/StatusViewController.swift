@@ -80,6 +80,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         basalProfile: defaults?.basalRateSchedule,
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
     )
+    
+    private var pluginManager = PluginManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -193,7 +195,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             let hudViews: [BaseHUDView]
 
             if let hudViewsContext = context.pumpManagerHUDViewsContext,
-                let contextHUDViews = hudViewsContext.hudViews
+                let contextHUDViews = PumpManagerHUDViewsFromRawValue(hudViewsContext.pumpManagerHUDViewsRawValue, pluginManager: self.pluginManager)
             {
                 hudViews = contextHUDViews
             } else {
