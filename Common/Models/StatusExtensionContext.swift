@@ -157,10 +157,6 @@ struct PumpManagerHUDViewsContext: RawRepresentable {
 
     let pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue
 
-    var hudViews: [BaseHUDView]? {
-        return PumpManagerHUDViewsFromRawValue(pumpManagerHUDViewsRawValue)
-    }
-
     init(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue) {
         self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
     }
