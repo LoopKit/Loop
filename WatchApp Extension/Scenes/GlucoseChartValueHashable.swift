@@ -22,9 +22,10 @@ extension GlucoseChartValueHashable {
     var chartHashValue: Int {
         var hashValue = start.timeIntervalSinceReferenceDate.hashValue
         hashValue ^= end.timeIntervalSince(start).hashValue
-        hashValue ^= min.hashValue
+        // HKQuantity.hashValue returns 0, so we need to convert
+        hashValue ^= min.doubleValue(for: .milligramsPerDeciliter).hashValue
         if min != max {
-            hashValue ^= max.hashValue
+            hashValue ^= max.doubleValue(for: .milligramsPerDeciliter).hashValue
         }
         return hashValue
     }
