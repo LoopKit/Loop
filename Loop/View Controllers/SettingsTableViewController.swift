@@ -382,17 +382,18 @@ final class SettingsTableViewController: UITableViewController {
                     present(settings, animated: true)
                 } else {
                     // Add new pump
-                    let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
+                    let pumpManagers = dataManager.availablePumpManagers
 
                     switch pumpManagers.count {
                     case 1:
-                        if let PumpManagerType = pumpManagers.first {
+                        if let pumpManager = pumpManagers.first, let PumpManagerType = dataManager.pumpManagerTypeByIdentifier(pumpManager.identifier) {
+
                             let setupViewController = configuredSetupViewController(for: PumpManagerType)
                             present(setupViewController, animated: true, completion: nil)
                         }
                     case let x where x > 1:
-                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (manager) in
-                            if let self = self {
+                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (identifier) in
+                            if let self = self, let manager = self.dataManager.pumpManagerTypeByIdentifier(identifier) {
                                 let setupViewController = self.configuredSetupViewController(for: manager)
                                 self.present(setupViewController, animated: true, completion: nil)
                             }

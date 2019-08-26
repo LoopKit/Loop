@@ -51,19 +51,19 @@ extension UIAlertController {
     ///   - cgmManagers: An array of PumpManagers
     ///   - selectionHandler: A closure to execute when a manager is selected
     ///   - manager: The selected manager
-    internal convenience init(pumpManagers: [PumpManagerUI.Type], selectionHandler: @escaping (_ manager: PumpManagerUI.Type) -> Void) {
+    internal convenience init(pumpManagers: [AvailableDevice], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add Pump", comment: "Action sheet title selecting Pump"),
             message: nil,
             preferredStyle: .actionSheet
         )
 
-        for manager in pumpManagers {
+        for device in pumpManagers {
             addAction(UIAlertAction(
-                title: manager.localizedTitle,
+                title: device.localizedTitle,
                 style: .default,
                 handler: { (_) in
-                    selectionHandler(manager)
+                    selectionHandler(device.identifier)
                 }
             ))
         }

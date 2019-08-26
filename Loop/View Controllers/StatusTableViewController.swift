@@ -556,7 +556,6 @@ final class StatusTableViewController: ChartsTableViewController {
         case hidden
         case recommendedTempBasal(tempBasal: TempBasalRecommendation, at: Date, enacting: Bool)
         case scheduleOverrideEnabled(TemporaryScheduleOverride)
-        case enactingTempbasal
         case enactingBolus
         case bolusing(dose: DoseEntry)
         case cancelingBolus
@@ -581,8 +580,6 @@ final class StatusTableViewController: ChartsTableViewController {
             statusRowMode = .enactingBolus
         } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
-        } else if case .initiatingTempBasal = basalDeliveryState {
-            statusRowMode = .enactingTempbasal
         } else if case .suspended = basalDeliveryState {
             statusRowMode = .pumpSuspended(resuming: false)
         } else if self.basalDeliveryState == .resuming {
@@ -842,15 +839,6 @@ final class StatusTableViewController: ChartsTableViewController {
                 case .enactingBolus:
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")
-                    cell.subtitleLabel.text = nil
-
-                    let indicatorView = UIActivityIndicatorView(style: .gray)
-                    indicatorView.startAnimating()
-                    cell.accessoryView = indicatorView
-                    return cell
-                case .enactingTempbasal:
-                    let cell = getTitleSubtitleCell()
-                    cell.titleLabel.text = NSLocalizedString("Enacting Temp Basal", comment: "The title of the cell indicating a temp basal is being enacted")
                     cell.subtitleLabel.text = nil
 
                     let indicatorView = UIActivityIndicatorView(style: .gray)

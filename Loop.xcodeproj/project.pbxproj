@@ -102,7 +102,6 @@
 		4374B5F0209D857E00D17AA8 /* OSLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4374B5EE209D84BE00D17AA8 /* OSLog.swift */; };
 		43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43776F8F1B8022E90074EA36 /* AppDelegate.swift */; };
 		43776F971B8022E90074EA36 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43776F951B8022E90074EA36 /* Main.storyboard */; };
-		43776F991B8022E90074EA36 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* Assets.xcassets */; };
 		43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */; };
 		43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */; };
 		43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
@@ -349,7 +348,6 @@
 		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
 		892FB4CD22040104005293EC /* OverridePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CC22040104005293EC /* OverridePresetRow.swift */; };
 		892FB4CF220402C0005293EC /* OverrideSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CE220402C0005293EC /* OverrideSelectionController.swift */; };
-		894F71E21FFEC4D8007D365C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* Assets.xcassets */; };
 		895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */; };
 		898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */; };
 		898ECA61218ABD17001E9D35 /* GlucoseChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */; };
@@ -369,10 +367,13 @@
 		C110A0E7221BC2400016560B /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1BF220D675700689850 /* OmniKit.framework */; };
 		C110A0E8221BC2430016560B /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1C0220D675700689850 /* OmniKitUI.framework */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
+		C125F31B22FE7CE200FD0545 /* copy-frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */; };
 		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
+		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
+		C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
 		C17824A31E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */; };
@@ -380,16 +381,14 @@
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C18852E22082AB1B00BECC8C /* RileyLinkKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */; };
-		C189E6BC22B82908005904DA /* AdditionalAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */; };
-		C189E6BD22B8291F005904DA /* AdditionalAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */; };
-		C189E6C022B829C6005904DA /* AdditionalAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */; };
-		C189E6C122B82BE4005904DA /* AdditionalAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
 		C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1BF220D675700689850 /* OmniKit.framework */; };
 		C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1C0220D675700689850 /* OmniKitUI.framework */; };
+		C1D1405922FB69CC00DA6242 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */; };
+		C1D1405F22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; };
 		C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
@@ -649,14 +648,13 @@
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		43776F981B8022E90074EA36 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		43776F981B8022E90074EA36 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NewCarbEntryIntent+Loop.swift"; sourceTree = "<group>"; };
 		43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "INRelevantShortcutStore+Loop.swift"; sourceTree = "<group>"; };
 		43785E9A2120E7060057DED1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
 		43785E9F2122774A0057DED1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Intents.strings; sourceTree = "<group>"; };
 		43785EA12122774B0057DED1 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Intents.strings; sourceTree = "<group>"; };
-		43785EA32122774B0057DED1 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
 		4379CFEF21112CF700AADC79 /* ShareClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ShareClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		437AFEE6203688CF008C4892 /* LoopKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCompletionHUDView.swift; sourceTree = "<group>"; };
@@ -1005,7 +1003,7 @@
 		892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeReplaceableCollection.swift; sourceTree = "<group>"; };
 		892FB4CC22040104005293EC /* OverridePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetRow.swift; sourceTree = "<group>"; };
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
-		894F71E11FFEC4D8007D365C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverrideSelectionViewController.swift; sourceTree = "<group>"; };
 		898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartScaler.swift; sourceTree = "<group>"; };
 		898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartData.swift; sourceTree = "<group>"; };
@@ -1022,19 +1020,33 @@
 		89E267FE229267DF00A3F2AF /* Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
+		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
+		C12CB9AC23106A3C00F84978 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
+		C12CB9AE23106A5C00F84978 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Intents.strings; sourceTree = "<group>"; };
+		C12CB9B023106A5F00F84978 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Intents.strings; sourceTree = "<group>"; };
+		C12CB9B223106A6000F84978 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Intents.strings"; sourceTree = "<group>"; };
+		C12CB9B423106A6100F84978 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Intents.strings; sourceTree = "<group>"; };
+		C12CB9B623106A6200F84978 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Intents.strings; sourceTree = "<group>"; };
+		C12CB9B823106A6300F84978 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
+		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
 		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = AdditionalAssets.xcassets; path = ../../AdditionalAssets.xcassets; sourceTree = "<group>"; };
+		C18A491222FCC22800FDA733 /* build-derived-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-assets.sh"; sourceTree = "<group>"; };
+		C18A491322FCC22900FDA733 /* make_scenario.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = make_scenario.py; sourceTree = "<group>"; };
+		C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-watch-assets.sh"; sourceTree = "<group>"; };
+		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
 		C1C7F1BF220D675700689850 /* OmniKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKit.framework; path = Carthage/Build/iOS/OmniKit.framework; sourceTree = "<group>"; };
 		C1C7F1C0220D675700689850 /* OmniKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKitUI.framework; path = Carthage/Build/iOS/OmniKitUI.framework; sourceTree = "<group>"; };
+		C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedWatchAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1251,6 +1263,7 @@
 		43776F831B8022E90074EA36 = {
 			isa = PBXGroup;
 			children = (
+				C18A491122FCC20B00FDA733 /* Scripts */,
 				4FF4D0FA1E1834BD00846527 /* Common */,
 				43776F8E1B8022E90074EA36 /* Loop */,
 				4F70C1DF1DE8DCA7006380B7 /* Loop Status Extension */,
@@ -1288,13 +1301,14 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
+				C16DA84022E8E104008624C2 /* Plugins */,
 				7D7076651FE06EE4004AC8EA /* Localizable.strings */,
 				7D7076511FE06EE1004AC8EA /* InfoPlist.strings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
-				43776F981B8022E90074EA36 /* Assets.xcassets */,
-				C189E6BA22B81E7A005904DA /* AdditionalAssets.xcassets */,
+				43776F981B8022E90074EA36 /* DefaultAssets.xcassets */,
+				C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
 				43E344A01B9E144300C85C07 /* Extensions */,
@@ -1328,7 +1342,8 @@
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
 			isa = PBXGroup;
 			children = (
-				894F71E11FFEC4D8007D365C /* Assets.xcassets */,
+				894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */,
+				C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */,
 				C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */,
 				43F5C2D61B92A4DC003EB13D /* Info.plist */,
 				43A943741B926B7B0051FA24 /* Interface.storyboard */,
@@ -1826,6 +1841,26 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		C16DA84022E8E104008624C2 /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				C16DA84122E8E112008624C2 /* LoopPlugins.swift */,
+			);
+			path = Plugins;
+			sourceTree = "<group>";
+		};
+		C18A491122FCC20B00FDA733 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
+				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
+				C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */,
+				C18A491522FCC22900FDA733 /* copy-plugins.sh */,
+				C18A491322FCC22900FDA733 /* make_scenario.py */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1860,12 +1895,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43776FB61B8022E90074EA36 /* Build configuration list for PBXNativeTarget "Loop" */;
 			buildPhases = (
+				C1D1405722FB66DF00DA6242 /* Build Derived Assets */,
 				43776F881B8022E90074EA36 /* Sources */,
 				43776F891B8022E90074EA36 /* Frameworks */,
 				43776F8A1B8022E90074EA36 /* Resources */,
 				43A9439C1B926B7B0051FA24 /* Embed Watch Content */,
 				43A943AE1B928D400051FA24 /* Embed Frameworks */,
 				43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */,
+				C16DA84322E8E5FF008624C2 /* Copy Plugins */,
 				4F70C1EC1DE8DCA8006380B7 /* Embed App Extensions */,
 			);
 			buildRules = (
@@ -1885,6 +1922,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43A943991B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp" */;
 			buildPhases = (
+				C1D1406222FB7ED200DA6242 /* Build Derived Watch Assets */,
 				43A943701B926B7B0051FA24 /* Resources */,
 				43A943981B926B7B0051FA24 /* Embed App Extensions */,
 				43105EF81BADC8F9009CD81E /* Frameworks */,
@@ -2212,11 +2250,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1D1405922FB69CC00DA6242 /* DerivedAssets.xcassets in Resources */,
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
 				7D70764F1FE06EE1004AC8EA /* InfoPlist.strings in Resources */,
-				43776F991B8022E90074EA36 /* Assets.xcassets in Resources */,
-				C189E6BD22B8291F005904DA /* AdditionalAssets.xcassets in Resources */,
+				C125F31B22FE7CE200FD0545 /* copy-frameworks.sh in Resources */,
 				7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 			);
@@ -2226,9 +2264,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1D1405F22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets in Resources */,
 				C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */,
-				C189E6C122B82BE4005904DA /* AdditionalAssets.xcassets in Resources */,
-				894F71E21FFEC4D8007D365C /* Assets.xcassets in Resources */,
 				43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2240,7 +2277,6 @@
 				7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */,
 				7D70763A1FE06EDF004AC8EA /* InfoPlist.strings in Resources */,
 				7D70763F1FE06EDF004AC8EA /* ckcomplication.strings in Resources */,
-				C189E6C022B829C6005904DA /* AdditionalAssets.xcassets in Resources */,
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2319,7 +2355,6 @@
 				4F2C15971E09E94E00E160D4 /* HUDAssets.xcassets in Resources */,
 				7D70764A1FE06EE1004AC8EA /* Localizable.strings in Resources */,
 				7D7076451FE06EE0004AC8EA /* InfoPlist.strings in Resources */,
-				C189E6BC22B82908005904DA /* AdditionalAssets.xcassets in Resources */,
 				4F2C15951E09BF3C00E160D4 /* HUDView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2371,13 +2406,10 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n\n";
 		};
 		43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2453,6 +2485,60 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+		};
+		C16DA84322E8E5FF008624C2 /* Copy Plugins */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Plugins";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SRCROOT}/Scripts/copy-plugins.sh\n";
+		};
+		C1D1405722FB66DF00DA6242 /* Build Derived Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Derived Assets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SRCROOT}/Scripts/build-derived-assets.sh\n";
+		};
+		C1D1406222FB7ED200DA6242 /* Build Derived Watch Assets */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Derived Watch Assets";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SRCROOT}/Scripts/build-derived-watch-assets.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2534,6 +2620,7 @@
 				4344628F20A7ADD500C4BE6F /* UserDefaults+CGM.swift in Sources */,
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
+				C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */,
 				43D2E8231F00425400AE5CBF /* BolusViewController+LoopDataManager.swift in Sources */,
 				430B29952041F5CB00BA9F93 /* LoopSettings+Loop.swift in Sources */,
 				43785E932120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift in Sources */,
@@ -2735,6 +2822,7 @@
 				43BFF0CD1E466C8400FF19A9 /* StateColorPalette.swift in Sources */,
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */,
+				C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
 				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 			);
@@ -2893,8 +2981,14 @@
 				43785E9A2120E7060057DED1 /* Base */,
 				43785E9F2122774A0057DED1 /* es */,
 				43785EA12122774B0057DED1 /* ru */,
-				43785EA32122774B0057DED1 /* it */,
 				43C98058212A799E003B5D17 /* en */,
+				C12CB9AC23106A3C00F84978 /* it */,
+				C12CB9AE23106A5C00F84978 /* fr */,
+				C12CB9B023106A5F00F84978 /* de */,
+				C12CB9B223106A6000F84978 /* zh-Hans */,
+				C12CB9B423106A6100F84978 /* nl */,
+				C12CB9B623106A6200F84978 /* nb */,
+				C12CB9B823106A6300F84978 /* pl */,
 			);
 			name = Intents.intentdefinition;
 			sourceTree = "<group>";
@@ -3242,7 +3336,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LOCALIZED_STRING_MACRO_NAMES = (
 					NSLocalizedString,
 					CFLocalizedString,
@@ -3308,7 +3402,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LOCALIZED_STRING_MACRO_NAMES = (
 					NSLocalizedString,
 					CFLocalizedString,
@@ -3334,6 +3428,7 @@
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
@@ -3352,6 +3447,7 @@
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
@@ -3713,6 +3809,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
@@ -3732,6 +3829,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
