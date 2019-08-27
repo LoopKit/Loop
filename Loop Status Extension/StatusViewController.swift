@@ -81,7 +81,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
     )
     
-    private var pluginManager = PluginManager()
+    private var pluginManager: PluginManager = {
+        let containingAppFrameworksURL = Bundle.main.privateFrameworksURL?.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Frameworks")
+        return PluginManager(pluginsURL: containingAppFrameworksURL)
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
