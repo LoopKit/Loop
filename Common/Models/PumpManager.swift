@@ -7,8 +7,6 @@
 
 import Foundation
 import LoopKit
-import MinimedKit
-import OmniKit
 import MockKit
 
 public struct AvailableDevice {
@@ -18,9 +16,7 @@ public struct AvailableDevice {
 
 
 let staticPumpManagers: [PumpManager.Type] = [
-    MinimedPumpManager.self,
     MockPumpManager.self,
-    OmnipodPumpManager.self,
 ]
 
 let staticPumpManagersByIdentifier: [String: PumpManager.Type] = staticPumpManagers.reduce(into: [:]) { (map, Type) in

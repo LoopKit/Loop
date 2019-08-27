@@ -81,14 +81,12 @@
 		43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CDF21FD80E400566C63 /* RetrospectiveCorrection.swift */; };
 		43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */; };
 		43511CEE220FC61700566C63 /* HUDRowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CED220FC61700566C63 /* HUDRowController.swift */; };
-		43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43523EDA1CC35083001850F1 /* RileyLinkKit.framework */; };
 		435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435CB6231F37967800C320C7 /* InsulinModelSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */; };
 		436961911F19D11E00447E89 /* ChartPointsContextFillLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */; };
 		436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A0DA41D236A2A00104B24 /* LoopError.swift */; };
 		436D9BF81F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */; };
-		43709AEA20DF3F8200F941B3 /* MinimedKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43709AE920DF3F8200F941B3 /* MinimedKitUI.framework */; };
 		4372E484213A63FB0068E043 /* ChartHUDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */; };
 		4372E487213C86240068E043 /* SampleValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4372E486213C86240068E043 /* SampleValue.swift */; };
 		4372E488213C862B0068E043 /* SampleValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4372E486213C86240068E043 /* SampleValue.swift */; };
@@ -106,7 +104,6 @@
 		43785E972120E4500057DED1 /* INRelevantShortcutStore+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */; };
 		43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 43785E9B2120E7060057DED1 /* Intents.intentdefinition */; };
 		4379CFF021112CF700AADC79 /* ShareClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4379CFEF21112CF700AADC79 /* ShareClientUI.framework */; };
-		437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */; };
 		437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */; };
 		437AFEE8203689FE008C4892 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
@@ -179,7 +176,6 @@
 		43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F4222266F000C62969 /* ModalDayLesson.swift */; };
 		43C728F72222700000C62969 /* DateIntervalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F62222700000C62969 /* DateIntervalEntry.swift */; };
 		43C728F9222A448700C62969 /* DayCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C728F8222A448700C62969 /* DayCalculator.swift */; };
-		43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43CA93361CB98079000026B5 /* MinimedKit.framework */; };
 		43CB2B2B1D924D450079823D /* WCSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CB2B2A1D924D450079823D /* WCSession.swift */; };
 		43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CE7CDD1CA8B63E003CC1B0 /* Data.swift */; };
 		43CEE6E61E56AFD400CB9116 /* NightscoutUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */; };
@@ -364,8 +360,6 @@
 		89E26800229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
-		C110A0E7221BC2400016560B /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1BF220D675700689850 /* OmniKit.framework */; };
-		C110A0E8221BC2430016560B /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1C0220D675700689850 /* OmniKitUI.framework */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C125F31B22FE7CE200FD0545 /* copy-frameworks.sh in Resources */ = {isa = PBXBuildFile; fileRef = C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */; };
 		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
@@ -380,13 +374,10 @@
 		C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
-		C18852E22082AB1B00BECC8C /* RileyLinkKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
-		C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1BF220D675700689850 /* OmniKit.framework */; };
-		C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1C7F1C0220D675700689850 /* OmniKitUI.framework */; };
 		C1D1405922FB69CC00DA6242 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */; };
 		C1D1405F22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
@@ -620,7 +611,6 @@
 		4345E40521F68E18009E00E5 /* CarbEntryListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryListController.swift; sourceTree = "<group>"; };
 		4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ChartTableViewCell.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SwiftCharts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		434F54561D287FDB002A9274 /* NibLoadable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NibLoadable.swift; sourceTree = "<group>"; };
 		434FB6451D68F1CD007B9C70 /* Amplitude.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplitude.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifiableClass.swift; sourceTree = "<group>"; };
@@ -628,7 +618,6 @@
 		43511CDF21FD80E400566C63 /* RetrospectiveCorrection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetrospectiveCorrection.swift; sourceTree = "<group>"; };
 		43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StandardRetrospectiveCorrection.swift; sourceTree = "<group>"; };
 		43511CED220FC61700566C63 /* HUDRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRowController.swift; sourceTree = "<group>"; };
-		43523EDA1CC35083001850F1 /* RileyLinkKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinModelSettingsViewController.swift; sourceTree = "<group>"; };
 		435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExponentialInsulinModelPreset.swift; sourceTree = "<group>"; };
@@ -638,7 +627,6 @@
 		4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsContextFillLayer.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
 		436D9BF71F6F4EA100CFA75F /* recommended_temp_start_low_end_just_above_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommended_temp_start_low_end_just_above_range.json; sourceTree = "<group>"; };
-		43709AE920DF3F8200F941B3 /* MinimedKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MinimedKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4372E486213C86240068E043 /* SampleValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleValue.swift; sourceTree = "<group>"; };
 		4372E48A213CB5F00068E043 /* Double.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Double.swift; sourceTree = "<group>"; };
 		4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsUserInfo.swift; sourceTree = "<group>"; };
@@ -719,7 +707,6 @@
 		43C728F62222700000C62969 /* DateIntervalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateIntervalEntry.swift; sourceTree = "<group>"; };
 		43C728F8222A448700C62969 /* DayCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCalculator.swift; sourceTree = "<group>"; };
 		43C98058212A799E003B5D17 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
-		43CA93361CB98079000026B5 /* MinimedKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MinimedKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43CB2B2A1D924D450079823D /* WCSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WCSession.swift; sourceTree = "<group>"; };
 		43CE7CDD1CA8B63E003CC1B0 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
 		43CEE6E51E56AFD400CB9116 /* NightscoutUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutUploader.swift; sourceTree = "<group>"; };
@@ -1036,15 +1023,12 @@
 		C17824A21E19EAB600D9D25C /* recommend_temp_basal_start_very_low_end_high.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_start_very_low_end_high.json; sourceTree = "<group>"; };
 		C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BolusRecommendation.swift; sourceTree = "<group>"; };
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
-		C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RileyLinkKitUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C18A491222FCC22800FDA733 /* build-derived-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-assets.sh"; sourceTree = "<group>"; };
 		C18A491322FCC22900FDA733 /* make_scenario.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = make_scenario.py; sourceTree = "<group>"; };
 		C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-watch-assets.sh"; sourceTree = "<group>"; };
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
-		C1C7F1BF220D675700689850 /* OmniKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKit.framework; path = Carthage/Build/iOS/OmniKit.framework; sourceTree = "<group>"; };
-		C1C7F1C0220D675700689850 /* OmniKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OmniKitUI.framework; path = Carthage/Build/iOS/OmniKitUI.framework; sourceTree = "<group>"; };
 		C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedWatchAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
@@ -1080,17 +1064,10 @@
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
 				892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */,
 				4F7528941DFE1E9500C322D6 /* LoopUI.framework in Frameworks */,
-				43CA93371CB98079000026B5 /* MinimedKit.framework in Frameworks */,
-				43709AEA20DF3F8200F941B3 /* MinimedKitUI.framework in Frameworks */,
 				C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */,
 				892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */,
 				892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */,
 				C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */,
-				C1C7F1C1220D675800689850 /* OmniKit.framework in Frameworks */,
-				C1C7F1C2220D675800689850 /* OmniKitUI.framework in Frameworks */,
-				437AFEE42035252A008C4892 /* RileyLinkBLEKit.framework in Frameworks */,
-				43523EDB1CC35083001850F1 /* RileyLinkKit.framework in Frameworks */,
-				C18852E22082AB1B00BECC8C /* RileyLinkKitUI.framework in Frameworks */,
 				43B371881CE597D10013C5A6 /* ShareClient.framework in Frameworks */,
 				4F08DE9B1E7BC4ED006741EA /* SwiftCharts.framework in Frameworks */,
 				4379CFF021112CF700AADC79 /* ShareClientUI.framework in Frameworks */,
@@ -1166,8 +1143,6 @@
 				43FCEEBF22220CF30013DD30 /* LoopKitUI.framework in Frameworks */,
 				4F7528951DFE1E9B00C322D6 /* LoopUI.framework in Frameworks */,
 				437AFEE520352591008C4892 /* NotificationCenter.framework in Frameworks */,
-				C110A0E7221BC2400016560B /* OmniKit.framework in Frameworks */,
-				C110A0E8221BC2430016560B /* OmniKitUI.framework in Frameworks */,
 				C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1820,18 +1795,11 @@
 				4344628320A7A3BE00C4BE6F /* LoopKit.framework */,
 				437AFEE6203688CF008C4892 /* LoopKitUI.framework */,
 				892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */,
-				43CA93361CB98079000026B5 /* MinimedKit.framework */,
-				43709AE920DF3F8200F941B3 /* MinimedKitUI.framework */,
 				C1E2774722433D7A00354103 /* MKRingProgressView.framework */,
 				892A5D29222EF60A008961AB /* MockKit.framework */,
 				892A5D2B222EF60A008961AB /* MockKitUI.framework */,
 				C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */,
 				4F70C1DD1DE8DCA7006380B7 /* NotificationCenter.framework */,
-				C1C7F1BF220D675700689850 /* OmniKit.framework */,
-				C1C7F1C0220D675700689850 /* OmniKitUI.framework */,
-				434AB0B11CBB4C3300422F4A /* RileyLinkBLEKit.framework */,
-				43523EDA1CC35083001850F1 /* RileyLinkKit.framework */,
-				C18852E12082AB1A00BECC8C /* RileyLinkKitUI.framework */,
 				43B371871CE597D10013C5A6 /* ShareClient.framework */,
 				4379CFEF21112CF700AADC79 /* ShareClientUI.framework */,
 				4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */,
@@ -1902,7 +1870,7 @@
 				43A9439C1B926B7B0051FA24 /* Embed Watch Content */,
 				43A943AE1B928D400051FA24 /* Embed Frameworks */,
 				43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */,
-				C16DA84322E8E5FF008624C2 /* Copy Plugins */,
+				C16DA84322E8E5FF008624C2 /* Install Plugins */,
 				4F70C1EC1DE8DCA8006380B7 /* Embed App Extensions */,
 			);
 			buildRules = (
@@ -2420,19 +2388,12 @@
 				"$(BUILT_PRODUCTS_DIR)/CGMBLEKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework",
-				"$(BUILT_PRODUCTS_DIR)/MinimedKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/RileyLinkBLEKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/RileyLinkKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/Amplitude.framework",
 				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework",
 				"$(BUILT_PRODUCTS_DIR)/NightscoutUploadKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/Crypto.framework",
 				"$(BUILT_PRODUCTS_DIR)/G4ShareSpy.framework",
-				"$(BUILT_PRODUCTS_DIR)/RileyLinkKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/OmniKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/OmniKitUI.framework",
 				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework",
-				"$(BUILT_PRODUCTS_DIR)/MinimedKitUI.framework",
 				"$(BUILT_PRODUCTS_DIR)/CGMBLEKitUI.framework",
 				"$(BUILT_PRODUCTS_DIR)/ShareClientUI.framework",
 				"$(BUILT_PRODUCTS_DIR)/LoopTestingKit.framework",
@@ -2484,9 +2445,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "CARTHAGE_BUILD_DIR=\"${SRCROOT}/Carthage/Build\"\nif [ -n \"${IPHONEOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/iOS\"\nelif [ -n \"${WATCHOS_DEPLOYMENT_TARGET}\" ]; then\n    CARTHAGE_BUILD_DIR=\"${CARTHAGE_BUILD_DIR}/watchOS\"\nelse\n    echo \"ERROR: Unexpected deployment target type\"\n    exit 1\nfi\n\nfor SCRIPT_INPUT_FILE in ${!SCRIPT_INPUT_FILE_*}; do\n    CARTHAGE_BUILD_FILE=\"${!SCRIPT_INPUT_FILE/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}\"\n    if [ -e \"${CARTHAGE_BUILD_FILE}\" ]; then\n        if [ -e \"${SCRIPT_INPUT_FILE}\" ]; then\n            echo \"ERROR: Duplicate frameworks found at:\"\n            echo \"  ${SCRIPT_INPUT_FILE}\"\n            echo \"  ${CARTHAGE_BUILD_FILE}\"\n            exit 1\n        fi\n        echo \"Substituting \\\"${CARTHAGE_BUILD_FILE}\\\" for \\\"${!SCRIPT_INPUT_FILE}\\\"\"\n        export ${SCRIPT_INPUT_FILE}=\"${CARTHAGE_BUILD_FILE}\"\n    fi\ndone\n\necho \"Copy Frameworks with Carthage\"\ncarthage copy-frameworks\n";
+			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n\n";
 		};
-		C16DA84322E8E5FF008624C2 /* Copy Plugins */ = {
+		C16DA84322E8E5FF008624C2 /* Install Plugins */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2495,7 +2456,7 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy Plugins";
+			name = "Install Plugins";
 			outputFileListPaths = (
 			);
 			outputPaths = (
