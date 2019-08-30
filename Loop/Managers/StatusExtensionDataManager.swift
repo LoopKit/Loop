@@ -17,8 +17,12 @@ final class StatusExtensionDataManager {
     init(deviceDataManager: DeviceDataManager) {
         self.deviceManager = deviceDataManager
 
-        NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
-        NotificationCenter.default.addObserver(self, selector: #selector(update(_:)), name: .PumpManagerChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .PumpManagerChanged, object: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.update()
+        }
     }
 
     fileprivate var defaults: UserDefaults? {
@@ -29,7 +33,11 @@ final class StatusExtensionDataManager {
         return defaults?.statusExtensionContext
     }
 
-    @objc private func update(_ notification: Notification) {
+    @objc private func notificationReceived(_ notification: Notification) {
+        update()
+    }
+    
+    private func update() {
         guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
             return
         }
@@ -69,11 +77,11 @@ final class StatusExtensionDataManager {
 
                 let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
             #else
-                guard state.error == nil else {
-                    // TODO: unclear how to handle the error here properly.
-                    completionHandler(nil)
-                    return
-                }
+//                guard state.error == nil else {
+//                    // TODO: unclear how to handle the error here properly.
+//                    completionHandler(nil)
+//                    return
+//                }
                 let lastLoopCompleted = manager.lastLoopCompleted
             #endif
 
