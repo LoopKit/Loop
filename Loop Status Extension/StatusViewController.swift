@@ -91,9 +91,15 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         super.viewDidLoad()
 
         subtitleLabel.isHidden = true
-        subtitleLabel.textColor = .subtitleLabelColor
+        if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
+            subtitleLabel.textColor = .secondaryLabel
+            insulinLabel.textColor = .secondaryLabel
+        } else {
+            subtitleLabel.textColor = .subtitleLabelColor
+            insulinLabel.textColor = .subtitleLabelColor
+        }
+
         insulinLabel.isHidden = true
-        insulinLabel.textColor = .subtitleLabelColor
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
