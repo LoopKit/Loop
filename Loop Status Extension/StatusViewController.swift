@@ -48,7 +48,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 settings.labelsToAxisSpacingX = 6
                 settings.clipInnerFrame = false
                 return settings
-            }()
+            }(),
+            traitCollection: traitCollection
         )
 
         charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
@@ -144,6 +145,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             (UIViewControllerTransitionCoordinatorContext) -> Void in
             self.glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode != .expanded
         })
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        charts.traitCollection = traitCollection
     }
     
     @objc private func openLoopApp(_: Any) {

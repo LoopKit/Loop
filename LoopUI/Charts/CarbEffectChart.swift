@@ -47,7 +47,7 @@ extension CarbEffectChart {
         carbEffectChartCache = nil
     }
 
-    public func generate(withFrame frame: CGRect, xAxisModel: ChartAxisModel, xAxisValues: [ChartAxisValue], axisLabelSettings: ChartLabelSettings, guideLinesLayerSettings: ChartGuideLinesLayerSettings, colors: ChartColorPalette, chartSettings: ChartSettings, labelsWidthY: CGFloat, gestureRecognizer: UIGestureRecognizer?) -> Chart
+    public func generate(withFrame frame: CGRect, xAxisModel: ChartAxisModel, xAxisValues: [ChartAxisValue], axisLabelSettings: ChartLabelSettings, guideLinesLayerSettings: ChartGuideLinesLayerSettings, colors: ChartColorPalette, chartSettings: ChartSettings, labelsWidthY: CGFloat, gestureRecognizer: UIGestureRecognizer?, traitCollection: UITraitCollection) -> Chart
     {
         /// The minimum range to display for carb effect values.
         let carbEffectDisplayRangePoints: [ChartPoint] = [0, glucoseUnit.chartableIncrement].map {
@@ -74,6 +74,19 @@ extension CarbEffectChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         let carbFillColor = UIColor.COBTintColor.withAlphaComponent(0.8)
+        let carbBlendMode: CGBlendMode
+        if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                carbBlendMode = .plusLighter
+            case .light, .unspecified:
+                carbBlendMode = .plusDarker
+            @unknown default:
+                carbBlendMode = .plusDarker
+            }
+        } else {
+            carbBlendMode = .colorBurn
+        }
 
         // Carb effect
         let effectsLayer = ChartPointsFillsLayer(
@@ -81,7 +94,7 @@ extension CarbEffectChart {
             yAxis: yAxisLayer.axis,
             fills: [
                 ChartPointsFill(chartPoints: carbEffectPoints, fillColor: UIColor.secondaryLabelColor.withAlphaComponent(0.5)),
-                ChartPointsFill(chartPoints: insulinCounteractionEffectPoints, fillColor: carbFillColor, blendMode: .colorBurn)
+                ChartPointsFill(chartPoints: insulinCounteractionEffectPoints, fillColor: carbFillColor, blendMode: carbBlendMode)
             ]
         )
 
