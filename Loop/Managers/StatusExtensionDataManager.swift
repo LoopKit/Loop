@@ -19,7 +19,8 @@ final class StatusExtensionDataManager {
 
         NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
         NotificationCenter.default.addObserver(self, selector: #selector(notificationReceived(_:)), name: .PumpManagerChanged, object: nil)
-        
+       
+        // Wait until LoopDataManager has had a chance to initialize itself
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.update()
         }
@@ -77,11 +78,6 @@ final class StatusExtensionDataManager {
 
                 let lastLoopCompleted = Date(timeIntervalSinceNow: -TimeInterval(minutes: 0))
             #else
-//                guard state.error == nil else {
-//                    // TODO: unclear how to handle the error here properly.
-//                    completionHandler(nil)
-//                    return
-//                }
                 let lastLoopCompleted = manager.lastLoopCompleted
             #endif
 
