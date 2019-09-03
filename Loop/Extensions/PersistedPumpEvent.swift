@@ -47,6 +47,7 @@ extension PersistedPumpEvent {
                 rate: dose.unitsPerHour,
                 absolute: dose.unitsPerHour,
                 duration: Int(dose.endDate.timeIntervalSince(dose.startDate).minutes),
+                amount: dose.deliveredUnits,
                 id: dose.syncIdentifier
             )
         }
