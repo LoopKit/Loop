@@ -46,7 +46,7 @@ extension PersistedPumpEvent {
                 temp: .Absolute,  // DoseEntry only supports .absolute types
                 rate: dose.unitsPerHour,
                 absolute: dose.unitsPerHour,
-                duration: Int(dose.endDate.timeIntervalSince(dose.startDate).minutes),
+                duration: dose.endDate.timeIntervalSince(dose.startDate),
                 id: dose.syncIdentifier
             )
         }
