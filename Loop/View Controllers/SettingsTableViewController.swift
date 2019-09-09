@@ -438,10 +438,12 @@ final class SettingsTableViewController: UITableViewController {
                     }
                 case let x where x > 1:
                     let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (identifier, pumpManager) in
-                        if let self = self, let CGMManagerType = self.dataManager.cgmManagerTypeByIdentifier(identifier) {
-                            self.setupCGMManager(CGMManagerType, indexPath: indexPath)
-                        } else if let pumpManager = pumpManager {
-                            self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                        if let self = self {
+                            if let cgmManagerIdentifier = identifier, let CGMManagerType = self.dataManager.cgmManagerTypeByIdentifier(cgmManagerIdentifier) {
+                                self.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                            } else if let pumpManager = pumpManager {
+                                self.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                            }
                         }
                     }
 
