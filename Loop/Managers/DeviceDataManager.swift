@@ -39,7 +39,6 @@ final class DeviceDataManager {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
-            UserDefaults.appGroup?.cgmManager = cgmManager
             UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
         }
     }
@@ -93,8 +92,6 @@ final class DeviceDataManager {
 
         if let cgmManagerRawValue = UserDefaults.appGroup?.cgmManagerRawValue {
             cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
-        } else if let cgmManager = UserDefaults.appGroup?.cgmManager {
-            self.cgmManager = cgmManager
         } else if isCGMManagerValidPumpManager {
             self.cgmManager = pumpManager as? CGMManager
         }
@@ -324,9 +321,14 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManagerDidUpdateState(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
-        UserDefaults.appGroup?.cgmManager = manager
         UserDefaults.appGroup?.cgmManagerRawValue = manager.rawValue
     }
+    
+    func credentialStoragePrefix(for manager: CGMManager) -> String {
+        // return string unique to this instance of the CGMManager
+        return UUID().uuidString
+    }
+
 }
 
 
