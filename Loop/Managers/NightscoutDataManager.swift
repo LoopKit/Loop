@@ -301,22 +301,7 @@ final class NightscoutDataManager {
                 duration = round(endDate.timeIntervalSince(Date()))
                 
             }
-            let name : String?
-            
-            switch override.context {
-            case .preMeal:
-                name = "preMeal"
-            case .custom:
-                name = "Custom"
-            case .preset(let preset):
-                name = preset.name
-            case .legacyWorkout:
-                name = "Workout"
-            }
-            
-            
-            overrideStatus = NightscoutUploadKit.OverrideStatus(name: name, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
-            
+            overrideStatus = NightscoutUploadKit.OverrideStatus(name: override.context.name, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
         }
         
         else
@@ -432,27 +417,36 @@ private extension LoopKit.TemporaryScheduleOverride {
         let name: String?
         let symbol: String?
 
-        switch context {
-        case .custom:
-            name = nil
-            symbol = nil
-        case .legacyWorkout:
-            name = "Workout"
-            symbol = nil
-        case .preMeal:
-            name = "PreMeal"
-            symbol = nil
-        case .preset(let preset):
-            name = preset.name
-            symbol = preset.symbol
-        }
-
         return NightscoutUploadKit.TemporaryScheduleOverride(
             targetRange: nsTargetRange,
             insulinNeedsScaleFactor: settings.insulinNeedsScaleFactor,
-            symbol: symbol,
+            symbol: context.symbol,
             duration: nsDuration,
-            name: name)
+            name: context.name)
+    }
+}
+
+private extension LoopKit.TemporaryScheduleOverride.Context {
+    var name: String? {
+        switch self {
+        case .custom:
+            return nil
+        case .legacyWorkout:
+            return NSLocalizedString("Workout", comment: "Name uploaded to Nightscout for legacy workout override")
+        case .preMeal:
+            return NSLocalizedString("Pre-Meal", comment: "Name uploaded to Nightscout for Pre-Meal override")
+        case .preset(let preset):
+            return preset.name
+        }
+    }
+    
+    var symbol: String? {
+        switch self {
+        case .preset(let preset):
+            return preset.symbol
+        default:
+            return nil
+        }
     }
 }
 

@@ -52,7 +52,6 @@
 		432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432E73CA1D24B3D6009AD15D /* RemoteDataManager.swift */; };
 		433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */; };
 		4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4341F4EA1EDB92AC001C936B /* LogglyService.swift */; };
-		43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */; };
 		4344628220A7A37F00C4BE6F /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */; };
 		4344628520A7A3BE00C4BE6F /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
 		4344628620A7A3BE00C4BE6F /* CGMBLEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */; };
@@ -594,7 +593,6 @@
 		4337615E1D52F487004A3647 /* GlucoseHUDView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseHUDView.swift; sourceTree = "<group>"; };
 		433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandResponseViewController.swift; sourceTree = "<group>"; };
 		4341F4EA1EDB92AC001C936B /* LogglyService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogglyService.swift; sourceTree = "<group>"; };
-		43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StatusExtensionContext+LoopKit.swift"; sourceTree = "<group>"; };
 		4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/CoreBluetooth.framework; sourceTree = DEVELOPER_DIR; };
 		4344628320A7A3BE00C4BE6F /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4344628420A7A3BE00C4BE6F /* CGMBLEKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CGMBLEKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1223,7 +1221,6 @@
 				430B29942041F5CB00BA9F93 /* LoopSettings+Loop.swift */,
 				4F526D601DF8D9A900A04910 /* NetBasal.swift */,
 				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
-				43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
 			);
 			path = Models;
@@ -2500,7 +2497,6 @@
 			files = (
 				C17824A51E1AD4D100D9D25C /* BolusRecommendation.swift in Sources */,
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
-				43441A9C1EDB34810087958C /* StatusExtensionContext+LoopKit.swift in Sources */,
 				43C05CC521EC29E3006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
 				4315D28A1CA5F45E00589052 /* DiagnosticLogger+LoopKit.swift in Sources */,
