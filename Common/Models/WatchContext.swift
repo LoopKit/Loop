@@ -40,8 +40,7 @@ final class WatchContext: RawRepresentable {
 
     var cgmManagerState: CGMManager.RawStateValue?
 
-    init() {
-    }
+    init() {}
 
     required init?(rawValue: RawValue) {
         guard rawValue["v"] as? Int == version else {
