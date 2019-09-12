@@ -429,19 +429,21 @@ final class SettingsTableViewController: UITableViewController {
                 present(alert, animated: true, completion: nil)
             } else {
                 // Add new CGM
-                let cgmManagers = allCGMManagers.compactMap({ $0 as? CGMManagerUI.Type })
+                let cgmManagers = dataManager.availableCGMManagers
 
                 switch cgmManagers.count {
                 case 1:
-                    if let CGMManagerType = cgmManagers.first {
+                    if let cgmManager = cgmManagers.first, let CGMManagerType = dataManager.cgmManagerTypeByIdentifier(cgmManager.identifier) {
                         setupCGMManager(CGMManagerType, indexPath: indexPath)
                     }
                 case let x where x > 1:
-                    let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (cgmManager, pumpManager) in
-                        if let CGMManagerType = cgmManager {
-                            self?.setupCGMManager(CGMManagerType, indexPath: indexPath)
-                        } else if let pumpManager = pumpManager {
-                            self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                    let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (identifier, pumpManager) in
+                        if let self = self {
+                            if let cgmManagerIdentifier = identifier, let CGMManagerType = self.dataManager.cgmManagerTypeByIdentifier(cgmManagerIdentifier) {
+                                self.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                            } else if let pumpManager = pumpManager {
+                                self.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                            }
                         }
                     }
 

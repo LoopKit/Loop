@@ -39,7 +39,7 @@ final class DeviceDataManager {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
-            UserDefaults.appGroup?.cgmManager = cgmManager
+            UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
         }
     }
 
@@ -90,12 +90,12 @@ final class DeviceDataManager {
             pumpManager = nil
         }
 
-        if let cgmManager = UserDefaults.appGroup?.cgmManager {
-            self.cgmManager = cgmManager
+        if let cgmManagerRawValue = UserDefaults.appGroup?.cgmManagerRawValue {
+            cgmManager = cgmManagerFromRawValue(cgmManagerRawValue)
         } else if isCGMManagerValidPumpManager {
             self.cgmManager = pumpManager as? CGMManager
         }
-        
+            
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
         loopManager = LoopDataManager(
@@ -146,6 +146,32 @@ final class DeviceDataManager {
         }
 
         return Manager.init(rawState: rawState) as? PumpManagerUI
+    }
+    
+    var availableCGMManagers: [AvailableDevice] {
+        return pluginManager.availableCGMManagers + availableStaticCGMManagers
+    }
+    
+    public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
+        return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
+    }
+    
+    private func cgmManagerTypeFromRawValue(_ rawValue: [String: Any]) -> CGMManager.Type? {
+        guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
+            return nil
+        }
+        
+        return cgmManagerTypeByIdentifier(managerIdentifier)
+    }
+    
+    func cgmManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManagerUI? {
+        guard let rawState = rawValue["state"] as? CGMManager.RawStateValue,
+            let Manager = cgmManagerTypeFromRawValue(rawValue)
+            else {
+                return nil
+        }
+        
+        return Manager.init(rawState: rawState) as? CGMManagerUI
     }
 
 }
@@ -295,8 +321,14 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManagerDidUpdateState(_ manager: CGMManager) {
         dispatchPrecondition(condition: .onQueue(queue))
-        UserDefaults.appGroup?.cgmManager = manager
+        UserDefaults.appGroup?.cgmManagerRawValue = manager.rawValue
     }
+    
+    func credentialStoragePrefix(for manager: CGMManager) -> String {
+        // return string unique to this instance of the CGMManager
+        return UUID().uuidString
+    }
+
 }
 
 

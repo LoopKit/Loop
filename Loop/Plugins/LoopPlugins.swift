@@ -64,7 +64,42 @@ class PluginManager {
             }
 
             return AvailableDevice(identifier: identifier, localizedTitle: title)
-
+        })
+    }
+    
+    func getCGMManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
+        for bundle in pluginBundles {
+            if let name = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String, name == identifier {
+                do {
+                    try bundle.loadAndReturnError()
+                    
+                    if let principalClass = bundle.principalClass as? NSObject.Type {
+                        
+                        if let plugin = principalClass.init() as? LoopUIPlugin {
+                            return plugin.cgmManagerType
+                        } else {
+                            fatalError("PrincipalClass does not conform to LoopUIPlugin")
+                        }
+                        
+                    } else {
+                        fatalError("PrincipalClass not found")
+                    }
+                } catch let error {
+                    print(error)
+                }
+            }
+        }
+        return nil
+    }
+    
+    var availableCGMManagers: [AvailableDevice] {
+        return pluginBundles.compactMap({ (bundle) -> AvailableDevice? in
+            guard let title = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerDisplayName.rawValue) as? String,
+                let identifier = bundle.object(forInfoDictionaryKey: LoopPluginBundleKey.cgmManagerIdentifier.rawValue) as? String else {
+                    return nil
+            }
+            
+            return AvailableDevice(identifier: identifier, localizedTitle: title)
         })
     }
 }
