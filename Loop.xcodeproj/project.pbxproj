@@ -380,6 +380,7 @@
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
 		C1D1405F22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */; };
+		C1D197FF232CF92D0096D646 /* capture-build-details.sh in Resources */ = {isa = PBXBuildFile; fileRef = C1D197FE232CF92D0096D646 /* capture-build-details.sh */; };
 		C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */; };
 		C1E2773E224177C000354103 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2773D224177C000354103 /* ClockKit.framework */; };
 		C1E2774822433D7A00354103 /* MKRingProgressView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1E2774722433D7A00354103 /* MKRingProgressView.framework */; };
@@ -1031,6 +1032,7 @@
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
 		C1D1405822FB69CC00DA6242 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1D1405E22FB7ADF00DA6242 /* DerivedWatchAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedWatchAssets.xcassets; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1D197FE232CF92D0096D646 /* capture-build-details.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
 		C1E2773D224177C000354103 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C1E2774722433D7A00354103 /* MKRingProgressView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = MKRingProgressView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1818,6 +1820,7 @@
 		C18A491122FCC20B00FDA733 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
+				C1D197FE232CF92D0096D646 /* capture-build-details.sh */,
 				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
 				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
 				C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */,
@@ -1869,6 +1872,7 @@
 				43A943AE1B928D400051FA24 /* Embed Frameworks */,
 				43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */,
 				C16DA84322E8E5FF008624C2 /* Install Plugins */,
+				C1D19800232CFA2A0096D646 /* Capture Build Details */,
 				4F70C1EC1DE8DCA8006380B7 /* Embed App Extensions */,
 			);
 			buildRules = (
@@ -2221,6 +2225,7 @@
 				7D70764F1FE06EE1004AC8EA /* InfoPlist.strings in Resources */,
 				C125F31B22FE7CE200FD0545 /* copy-frameworks.sh in Resources */,
 				7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */,
+				C1D197FF232CF92D0096D646 /* capture-build-details.sh in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
 				C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */,
 			);
@@ -2496,6 +2501,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "${SRCROOT}/Scripts/build-derived-watch-assets.sh\n";
+		};
+		C1D19800232CFA2A0096D646 /* Capture Build Details */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Capture Build Details";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "${SRCROOT}/Scripts/capture-build-details.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
