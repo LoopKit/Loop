@@ -19,6 +19,11 @@ fi
 
 for COUNTER in $(seq 0 $(($SCRIPT_INPUT_FILE_COUNT - 1))); do
     SCRIPT_INPUT_VAR="SCRIPT_INPUT_FILE_${COUNTER}"
+    if [ -f "${!SCRIPT_INPUT_VAR}" ]; then
+      echo "Stripping binary file from framework path for ${!SCRIPT_INPUT_VAR}"
+      export ${SCRIPT_INPUT_VAR}=$(dirname "${!SCRIPT_INPUT_VAR}")
+    fi
+
     CARTHAGE_BUILD_FILE="${!SCRIPT_INPUT_VAR/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}"
     if [ -e "${CARTHAGE_BUILD_FILE}" ]; then
         echo "Substituting \"${CARTHAGE_BUILD_FILE}\" for \"${!SCRIPT_INPUT_VAR}\""
