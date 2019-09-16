@@ -93,6 +93,10 @@ final class StatusTableViewController: ChartsTableViewController {
         toolbarItems![0].tintColor = UIColor.COBTintColor
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].tintColor = UIColor.doseTintColor
+
+        if #available(iOS 13.0, *) {
+            toolbarItems![8].image = UIImage(systemName: "gear")
+        }
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
         toolbarItems![8].tintColor = UIColor.secondaryLabelColor
 
@@ -237,7 +241,7 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    private lazy var statusCharts = StatusChartsManager(colors: .default, settings: .default)
+    private lazy var statusCharts = StatusChartsManager(colors: .default, settings: .default, traitCollection: self.traitCollection)
 
     override func createChartsManager() -> ChartsManager {
         return statusCharts
@@ -644,7 +648,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 } else if let cell = tableView.cellForRow(at: statusIndexPath) {
                     // If only the enacting state changed, update the activity indicator
                     if isEnacting {
-                        let indicatorView = UIActivityIndicatorView(style: .gray)
+                        let indicatorView = UIActivityIndicatorView(style: .default)
                         indicatorView.startAnimating()
                         cell.accessoryView = indicatorView
                     } else {
@@ -805,7 +809,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     cell.selectionStyle = .default
 
                     if enacting {
-                        let indicatorView = UIActivityIndicatorView(style: .gray)
+                        let indicatorView = UIActivityIndicatorView(style: .default)
                         indicatorView.startAnimating()
                         cell.accessoryView = indicatorView
                     } else {
@@ -829,19 +833,21 @@ final class StatusTableViewController: ChartsTableViewController {
                             let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
                             cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
                         case .indefinite:
-                            cell.subtitleLabel.text?.removeAll()
+                            cell.subtitleLabel.text = nil
                         }
                     } else {
                         let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
                         cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
                     }
+
+                    cell.accessoryView = nil
                     return cell
                 case .enactingBolus:
                     let cell = getTitleSubtitleCell()
                     cell.titleLabel.text = NSLocalizedString("Starting Bolus", comment: "The title of the cell indicating a bolus is being sent")
                     cell.subtitleLabel.text = nil
 
-                    let indicatorView = UIActivityIndicatorView(style: .gray)
+                    let indicatorView = UIActivityIndicatorView(style: .default)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
                     return cell
@@ -858,7 +864,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     cell.titleLabel.text = NSLocalizedString("Canceling Bolus", comment: "The title of the cell indicating a bolus is being canceled")
                     cell.subtitleLabel.text = nil
 
-                    let indicatorView = UIActivityIndicatorView(style: .gray)
+                    let indicatorView = UIActivityIndicatorView(style: .default)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
                     return cell
@@ -867,11 +873,12 @@ final class StatusTableViewController: ChartsTableViewController {
                     cell.titleLabel.text = NSLocalizedString("Pump Suspended", comment: "The title of the cell indicating the pump is suspended")
 
                     if resuming {
-                        let indicatorView = UIActivityIndicatorView(style: .gray)
+                        let indicatorView = UIActivityIndicatorView(style: .default)
                         indicatorView.startAnimating()
                         cell.accessoryView = indicatorView
-                        cell.subtitleLabel.text = ""
+                        cell.subtitleLabel.text = nil
                     } else {
+                        cell.accessoryView = nil
                         cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
                     }
                     cell.selectionStyle = .default
@@ -1330,8 +1337,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
 extension StatusTableViewController: CompletionDelegate {
     func completionNotifyingDidComplete(_ object: CompletionNotifying) {
-        if let vc = object as? UIViewController {
-            vc.dismiss(animated: true, completion: nil)
+        if let vc = object as? UIViewController, presentedViewController === vc {
+            dismiss(animated: true, completion: nil)
         }
     }
 }

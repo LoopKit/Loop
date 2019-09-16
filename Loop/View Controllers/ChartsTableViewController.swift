@@ -132,6 +132,12 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
         reloadData(animated: false)
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        charts.traitCollection = traitCollection
+    }
+
     deinit {
         for observer in notificationObservers {
             NotificationCenter.default.removeObserver(observer)
