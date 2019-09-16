@@ -674,6 +674,11 @@ extension DeviceDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             Bundle.main.localizedNameAndVersion,
+            "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
+            "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+            "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
+            "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
+            "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
             "",
             "## DeviceDataManager",
             "* launchDate: \(launchDate)",

@@ -92,7 +92,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
     private let carbEffectChart = CarbEffectChart()
 
     override func createChartsManager() -> ChartsManager {
-        return ChartsManager(colors: .default, settings: .default, charts: [carbEffectChart])
+        return ChartsManager(colors: .default, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
@@ -354,7 +354,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                     if absorption.isActive {
                         cell.observedValueTextColor = UIColor.COBTintColor
                     } else if 0.9 <= observedProgress && observedProgress <= 1.1 {
-                        cell.observedValueTextColor = UIColor.HIGGrayColor()
+                        cell.observedValueTextColor = UIColor.systemGray
                     } else {
                         cell.observedValueTextColor = UIColor.agingColor
                     }
@@ -368,7 +368,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 if absorption.isActive {
                     cell.observedDateTextColor = UIColor.COBTintColor
                 } else {
-                    cell.observedDateTextColor = UIColor.HIGGrayColor()
+                    cell.observedDateTextColor = UIColor.systemGray
 
                     if let absorptionTime = status.entry.absorptionTime {
                         let durationProgress = absorption.estimatedDate.duration / absorptionTime

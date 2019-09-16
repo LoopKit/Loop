@@ -88,7 +88,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     let glucoseChart = PredictedGlucoseChart()
 
     override func createChartsManager() -> ChartsManager {
-        return ChartsManager(colors: .default, settings: .default, charts: [glucoseChart])
+        return ChartsManager(colors: .default, settings: .default, charts: [glucoseChart], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
