@@ -24,7 +24,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
 
         glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
@@ -68,6 +68,8 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
     private var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
 
+    private var totalRetrospectiveCorrection: HKQuantity?
+
     private var refreshContext = RefreshContext.all
 
     private var chartStartDate: Date {
@@ -105,6 +107,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         let reloadGroup = DispatchGroup()
         var glucoseValues: [StoredGlucoseSample]?
+        var totalRetrospectiveCorrection: HKQuantity?
 
         if self.refreshContext.remove(.glucose) != nil {
             reloadGroup.enter()
@@ -119,6 +122,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
+            totalRetrospectiveCorrection = state.totalRetrospectiveCorrection
             self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucose ?? [])
 
             do {
@@ -148,6 +152,10 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             }
             self.charts.invalidateChart(atIndex: 0)
 
+            if let totalRetrospectiveCorrection = totalRetrospectiveCorrection {
+                self.totalRetrospectiveCorrection = totalRetrospectiveCorrection
+            }
+
             self.charts.prerender()
 
             self.tableView.beginUpdates()
@@ -173,12 +181,9 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
     // MARK: - UITableViewDataSource
 
-    private enum Section: Int {
+    private enum Section: Int, CaseIterable {
         case charts
         case inputs
-        case settings
-
-        static let count = 3
     }
 
     private var eventualGlucoseDescription: String?
@@ -188,7 +193,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
     private var selectedInputs = PredictionInputEffect.all
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return Section.count
+        return Section.allCases.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -197,8 +202,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             return 1
         case .inputs:
             return availableInputs.count
-        case .settings:
-            return 1
         }
     }
 
@@ -221,17 +224,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         case .inputs:
             let cell = tableView.dequeueReusableCell(withIdentifier: PredictionInputEffectTableViewCell.className, for: indexPath) as! PredictionInputEffectTableViewCell
             self.tableView(tableView, updateTextFor: cell, at: indexPath)
-            return cell
-        case .settings:
-            let cell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
-
-            cell.titleLabel?.text = NSLocalizedString("Enable Retrospective Correction", comment: "Title of the switch which toggles retrospective correction effects")
-            cell.subtitleLabel?.text = NSLocalizedString("This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model.", comment: "The description of the switch which toggles retrospective correction effects")
-            cell.`switch`?.isOn = deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
-            cell.`switch`?.addTarget(self, action: #selector(retrospectiveCorrectionSwitchChanged(_:)), for: .valueChanged)
-
-            cell.contentView.layoutMargins.left = tableView.separatorInset.left
-
             return cell
         }
     }
@@ -257,7 +249,6 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         cell.titleLabel?.text = input.localizedTitle
         cell.accessoryType = selectedInputs.contains(input) ? .checkmark : .none
-        cell.enabled = input != .retrospection || deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
 
         var subtitleText = input.localizedDescription(forGlucoseUnit: glucoseChart.glucoseUnit) ?? ""
 
@@ -270,26 +261,18 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             let predicted = HKQuantity(unit: glucoseChart.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: glucoseChart.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: glucoseChart.glucoseUnit))
             var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0, for: glucoseChart.glucoseUnit) ?? "?" }
             formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
-            values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?" )
+            values.append(formatter.string(from: lastDiscrepancy.quantity, for: glucoseChart.glucoseUnit) ?? "?")
 
             let retro = String(
                 format: NSLocalizedString("prediction-description-retrospective-correction", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
 
+            // Standard retrospective correction
             subtitleText = String(format: "%@\n%@", subtitleText, retro)
         }
 
         cell.subtitleLabel?.text = subtitleText
-    }
-
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        switch Section(rawValue: section)! {
-        case .settings:
-            return NSLocalizedString("Algorithm Settings", comment: "The title of the section containing algorithm settings")
-        default:
-            return nil
-        }
     }
 
     // MARK: - UITableViewDelegate
@@ -298,7 +281,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             return 275
-        case .inputs, .settings:
+        case .inputs:
             return 60
         }
     }
@@ -319,17 +302,5 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         refreshContext.update(with: .status)
         reloadData()
-    }
-
-    // MARK: - Actions
-
-    @objc private func retrospectiveCorrectionSwitchChanged(_ sender: UISwitch) {
-        deviceManager.loopManager.settings.retrospectiveCorrectionEnabled = sender.isOn
-
-        if  let row = availableInputs.index(where: { $0 == .retrospection }),
-            let cell = tableView.cellForRow(at: IndexPath(row: row, section: Section.inputs.rawValue)) as? PredictionInputEffectTableViewCell
-        {
-            cell.enabled = self.deviceManager.loopManager.settings.retrospectiveCorrectionEnabled
-        }
     }
 }

@@ -128,17 +128,21 @@ final class ActionHUDController: HUDInterfaceController {
         settings.scheduleOverride = override
         let userInfo = LoopSettingsUserInfo(settings: settings)
         do {
-            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { error in
+            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
                 DispatchQueue.main.async {
                     self.pendingMessageResponses -= 1
-                    if let error = error {
+
+                    switch result {
+                    case .success(let context):
+                        if self.pendingMessageResponses == 0 {
+                            self.loopManager.settings.scheduleOverride = override
+                        }
+
+                        ExtensionDelegate.shared().loopManager.updateContext(context)
+                    case .failure(let error):
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
                             self.updateForOverrideContext(self.loopManager.settings.scheduleOverride?.context)
-                        }
-                    } else {
-                        if self.pendingMessageResponses == 0 {
-                            self.loopManager.settings.scheduleOverride = override
                         }
                     }
                 }

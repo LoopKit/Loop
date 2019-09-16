@@ -17,7 +17,7 @@ struct NetBasalContext {
     let rate: Double
     let percentage: Double
     let start: Date
-    let end: Date
+    let end: Date?
 }
 
 struct SensorDisplayableContext: SensorDisplayable {
@@ -56,20 +56,20 @@ extension NetBasalContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     var rawValue: RawValue {
-        return [
+        var value: RawValue = [
             "rate": rate,
             "percentage": percentage,
-            "start": start,
-            "end": end
+            "start": start
         ]
+        value["end"] = end
+        return value
     }
 
     init?(rawValue: RawValue) {
         guard
             let rate       = rawValue["rate"] as? Double,
             let percentage = rawValue["percentage"] as? Double,
-            let start      = rawValue["start"] as? Date,
-            let end        = rawValue["end"] as? Date
+            let start      = rawValue["start"] as? Date
         else {
             return nil
         }
@@ -77,7 +77,7 @@ extension NetBasalContext: RawRepresentable {
         self.rate = rate
         self.percentage = percentage
         self.start = start
-        self.end = end
+        self.end = rawValue["end"] as? Date
     }
 }
 
@@ -156,10 +156,6 @@ struct PumpManagerHUDViewsContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     let pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue
-
-    var hudViews: [BaseHUDView]? {
-        return PumpManagerHUDViewsFromRawValue(pumpManagerHUDViewsRawValue)
-    }
 
     init(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue) {
         self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue

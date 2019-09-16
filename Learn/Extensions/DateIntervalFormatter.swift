@@ -9,7 +9,7 @@ import Foundation
 
 
 extension DateIntervalFormatter {
-    convenience init(dateStyle: DateIntervalFormatter.Style, timeStyle: DateIntervalFormatter.Style) {
+    convenience init(dateStyle: DateIntervalFormatter.Style = .none, timeStyle: DateIntervalFormatter.Style = .none) {
         self.init()
         self.dateStyle = dateStyle
         self.timeStyle = timeStyle

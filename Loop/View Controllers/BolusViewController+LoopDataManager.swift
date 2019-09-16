@@ -22,7 +22,7 @@ extension BolusViewController {
             } else {
                 bolusRecommendation = state.recommendedBolus?.recommendation
             }
-
+            
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
                 let activeInsulin: Double?
 

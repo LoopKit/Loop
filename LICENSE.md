@@ -41,7 +41,7 @@ Copyright (c) 2015 Nathan Racklyeft
 Copyright (c) 2016 LoopKit Authors
 
 ## RileyLinkKit.framework
-*Including MinimedKit.framework, NightscoutUploadKit.framework, and RileyLinkBLEKit.framework*
+*Including MinimedKit.framework, NightscoutUploadKit.framework, OmniKit.framework, and RileyLinkBLEKit.framework*
 
 Copyright (c) 2015 Pete Schwamb
 

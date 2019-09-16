@@ -79,8 +79,8 @@ extension PredictedGlucoseChart {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
 
             if let override = scheduleOverride, override.isActive() || override.startDate > Date() {
-                targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues, extendEndDateToChart: true)
-                targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: schedule.unit, xAxisValues: xAxisValues)
+                targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
+                targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues)
             } else {
                 targetOverridePoints = []
                 targetOverrideDurationPoints = []

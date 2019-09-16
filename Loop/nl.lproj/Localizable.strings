@@ -215,9 +215,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glucose momentum";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.azurewebsites.net" = "https://mijnsite.azurewebsites.net";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Oneindig";
 

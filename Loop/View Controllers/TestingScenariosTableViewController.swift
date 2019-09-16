@@ -56,7 +56,7 @@ final class TestingScenariosTableViewController: RadioSelectionTableViewControll
         contextHelp = "The scenarios directory location is available in the debug output of the Xcode console."
 
         if let activeScenarioURL = scenariosManager.activeScenarioURL {
-            selectedIndex = scenarioURLs.index(of: activeScenarioURL)
+            selectedIndex = scenarioURLs.firstIndex(of: activeScenarioURL)
         }
 
         updateLoadButtonEnabled()

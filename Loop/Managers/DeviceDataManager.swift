@@ -27,11 +27,14 @@ final class DeviceDataManager {
 
     private var nightscoutDataManager: NightscoutDataManager!
 
-    private(set) var testingScenariosManager: TestingScenariosManager!
+    private(set) var testingScenariosManager: TestingScenariosManager?
 
     /// The last error recorded by a device manager
     /// Should be accessed only on the main queue
     private(set) var lastError: (date: Date, error: Error)?
+
+    /// The last time a BLE heartbeat was received by the pump manager
+    private var lastBLEDrivenUpdate = Date.distantPast
 
     // MARK: - CGM
 
@@ -98,13 +101,18 @@ final class DeviceDataManager {
             
         remoteDataManager.delegate = self
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
+
         loopManager = LoopDataManager(
             lastLoopCompleted: statusExtensionManager.context?.lastLoopCompleted,
-            lastTempBasal: statusExtensionManager.context?.netBasal?.tempBasal
+            basalDeliveryState: pumpManager?.status.basalDeliveryState,
+            lastPumpEventsReconciliation: pumpManager?.lastReconciliation
         )
         watchManager = WatchDataManager(deviceManager: self)
         nightscoutDataManager = NightscoutDataManager(deviceDataManager: self)
-        testingScenariosManager = LocalTestingScenariosManager(deviceManager: self)
+
+        if debugEnabled {
+            testingScenariosManager = LocalTestingScenariosManager(deviceManager: self)
+        }
 
         loopManager.delegate = self
         loopManager.carbStore.syncDelegate = remoteDataManager.nightscoutService.uploader
@@ -217,16 +225,19 @@ extension DeviceDataManager {
             return
         }
 
+        self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
         pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            self.loopManager.addRequestedBolus(dose, completion: nil)
+            // No longer used...
         }) { (result) in
             switch result {
             case .failure(let error):
                 self.log.error(error)
                 NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
-                completion(error)
+                self.loopManager.bolusRequestFailed(error) {
+                    completion(error)
+                }
             case .success(let dose):
-                self.loopManager.addConfirmedBolus(dose) {
+                self.loopManager.bolusConfirmed(dose) {
                     completion(nil)
                 }
             }
@@ -298,6 +309,7 @@ extension DeviceDataManager: CGMManagerDelegate {
                     }
                 }
 
+                self.log.default("Asserting current pump data")
                 self.pumpManager?.assertCurrentPumpData()
             }
         case .noData:
@@ -308,6 +320,7 @@ extension DeviceDataManager: CGMManagerDelegate {
             log.default("CGMManager:\(type(of: manager)) did update with error: \(error)")
 
             self.setLastError(error: error)
+            log.default("Asserting current pump data")
             pumpManager?.assertCurrentPumpData()
         }
 
@@ -351,6 +364,29 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerBLEHeartbeatDidFire(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did fire BLE heartbeat")
+
+        let bleHeartbeatUpdateInterval: TimeInterval
+        switch loopManager.lastLoopCompleted?.timeIntervalSinceNow {
+        case .none:
+            // If we haven't looped successfully, retry only every 5 minutes
+            bleHeartbeatUpdateInterval = .minutes(5)
+        case let interval? where interval < .minutes(-10):
+            // If we haven't looped successfully in more than 10 minutes, retry only every 5 minutes
+            bleHeartbeatUpdateInterval = .minutes(5)
+        case let interval? where interval <= .minutes(-5):
+            // If we haven't looped successfully in more than 5 minutes, retry every minute
+            bleHeartbeatUpdateInterval = .minutes(1)
+        case let interval?:
+            // If we looped successfully less than 5 minutes ago, ignore the heartbeat.
+            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last loop completed \(interval.minutes) minutes ago")
+            return
+        }
+
+        guard lastBLEDrivenUpdate.timeIntervalSinceNow <= -bleHeartbeatUpdateInterval else {
+            log.default("PumpManager:\(type(of: pumpManager)) ignoring heartbeat. Last update \(lastBLEDrivenUpdate)")
+            return
+        }
+        lastBLEDrivenUpdate = Date()
 
         cgmManager?.fetchNewDataIfNeeded { (result) in
             if case .newData = result {
@@ -396,6 +432,10 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
 
+        if status.basalDeliveryState != oldStatus.basalDeliveryState {
+            loopManager.basalDeliveryState = status.basalDeliveryState
+        }
+
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
     }
@@ -426,16 +466,20 @@ extension DeviceDataManager: PumpManagerDelegate {
         nightscoutDataManager.uploadLoopStatus(loopError: error)
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didReadPumpEvents events: [NewPumpEvent], completion: @escaping (_ error: Error?) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did read pump events")
 
-        loopManager.addPumpEvents(events) { (error) in
+        loopManager.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
             if let error = error {
                 self.log.error("Failed to addPumpEvents to DoseStore: \(error)")
             }
 
             completion(error)
+
+            if error == nil {
+                NotificationCenter.default.post(name: .PumpEventsAdded, object: self, userInfo: nil)
+            }
         }
     }
 
@@ -612,6 +656,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "## DeviceDataManager",
             "* launchDate: \(launchDate)",
             "* lastError: \(String(describing: lastError))",
+            "* lastBLEDrivenUpdate: \(lastBLEDrivenUpdate)",
             "",
             cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
             "",
@@ -626,5 +671,6 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
+    static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 

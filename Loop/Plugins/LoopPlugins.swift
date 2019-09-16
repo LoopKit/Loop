@@ -13,10 +13,10 @@ import LoopKitUI
 class PluginManager {
     private let pluginBundles: [Bundle]
 
-    public init() {
+    public init(pluginsURL: URL? = Bundle.main.privateFrameworksURL) {
         var bundles = [Bundle]()
 
-        if let pluginsURL = Bundle.main.privateFrameworksURL {
+        if let pluginsURL = pluginsURL {
             do {
                 for pluginURL in try FileManager.default.contentsOfDirectory(at: pluginsURL, includingPropertiesForKeys: nil).filter{$0.path.hasSuffix(".framework")} {
                     if let bundle = Bundle(url: pluginURL), bundle.isLoopPlugin {

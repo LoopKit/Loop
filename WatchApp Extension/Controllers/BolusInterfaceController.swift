@@ -82,21 +82,13 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
 
-        var maxBolusValue: Double = 15
+        let maxBolusValue: Double = ExtensionDelegate.shared().loopManager.settings.maximumBolus ?? 10
         var pickerValue = 0
 
-        if let context = context as? BolusSuggestionUserInfo {
-            let recommendedBolus = context.recommendedBolus ?? 0
-
-            if let maxBolus = context.maxBolus {
-                maxBolusValue = maxBolus
-            } else if recommendedBolus > 0 {
-                maxBolusValue = recommendedBolus
-            }
-
+        if let context = context as? WatchContext, let recommendedBolus = context.recommendedBolusDose {
             pickerValue = pickerValueFromBolusValue(recommendedBolus * 0.75)
 
-            if let recommendedBolus = context.recommendedBolus, let valueString = formatter.string(from: recommendedBolus) {
+            if let valueString = formatter.string(from: recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
         }

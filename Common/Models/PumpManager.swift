@@ -7,9 +7,7 @@
 
 import Foundation
 import LoopKit
-import MinimedKit
 import MockKit
-
 
 public struct AvailableDevice {
     let identifier: String
@@ -18,7 +16,6 @@ public struct AvailableDevice {
 
 
 let staticPumpManagers: [PumpManager.Type] = [
-    MinimedPumpManager.self,
     MockPumpManager.self,
 ]
 

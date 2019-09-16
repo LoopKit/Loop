@@ -21,12 +21,6 @@ for COUNTER in $(seq 0 $(($SCRIPT_INPUT_FILE_COUNT - 1))); do
     SCRIPT_INPUT_VAR="SCRIPT_INPUT_FILE_${COUNTER}"
     CARTHAGE_BUILD_FILE="${!SCRIPT_INPUT_VAR/${BUILT_PRODUCTS_DIR}/${CARTHAGE_BUILD_DIR}}"
     if [ -e "${CARTHAGE_BUILD_FILE}" ]; then
-        if [ -e "${!SCRIPT_INPUT_VAR}" ]; then
-            echo "ERROR: Duplicate frameworks found at:"
-            echo "  ${!SCRIPT_INPUT_VAR}"
-            echo "  ${CARTHAGE_BUILD_FILE}"
-            exit 1
-        fi
         echo "Substituting \"${CARTHAGE_BUILD_FILE}\" for \"${!SCRIPT_INPUT_VAR}\""
         export ${SCRIPT_INPUT_VAR}="${CARTHAGE_BUILD_FILE}"
     elif [ -e "${!SCRIPT_INPUT_VAR}" ]; then

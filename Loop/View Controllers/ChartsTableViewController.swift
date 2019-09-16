@@ -54,7 +54,7 @@ extension RefreshContext: Hashable {
 extension Set where Element == RefreshContext {
     /// Returns the size value in the set if one exists
     var newSize: CGSize? {
-        guard let index = index(of: .size(.zero)),
+        guard let index = firstIndex(of: .size(.zero)),
             case .size(let size) = self[index] else
         {
             return nil
@@ -90,10 +90,10 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
 
         let notificationCenter = NotificationCenter.default
         notificationObservers += [
-            notificationCenter.addObserver(forName: .UIApplicationDidEnterBackground, object: UIApplication.shared, queue: .main) { [weak self] _ in
+            notificationCenter.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: UIApplication.shared, queue: .main) { [weak self] _ in
                 self?.active = false
             },
-            notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive, object: UIApplication.shared, queue: .main) { [weak self] _ in
+            notificationCenter.addObserver(forName: UIApplication.didBecomeActiveNotification, object: UIApplication.shared, queue: .main) { [weak self] _ in
                 self?.active = true
             }
         ]
@@ -176,7 +176,7 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
             return UIApplication.shared.applicationState == .active
         }
         set {
-            log.debug("[reloadData] for app change to active: %d", active)
+            log.debug("[reloadData] for app change to active: %d, applicationState: %d", newValue, active)
             reloadData()
         }
     }
@@ -230,6 +230,8 @@ class ChartsTableViewController: UITableViewController, UIGestureRecognizerDeleg
                     row.subtitleLabel?.alpha = alpha
                 })
             }
+        @unknown default:
+            break
         }
     }
 }
