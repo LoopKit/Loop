@@ -429,7 +429,7 @@ final class SettingsTableViewController: UITableViewController {
                 switch cgmManagers.count {
                 case 1:
                     if let cgmManager = cgmManagers.first, let CGMManagerType = dataManager.cgmManagerTypeByIdentifier(cgmManager.identifier) {
-                        setupCGMManager(CGMManagerType, indexPath: indexPath)
+                        setupCGMManager(CGMManagerType)
                     }
 
                     tableView.deselectRow(at: indexPath, animated: true)
@@ -437,9 +437,9 @@ final class SettingsTableViewController: UITableViewController {
                     let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (identifier, pumpManager) in
                         if let self = self {
                             if let cgmManagerIdentifier = identifier, let CGMManagerType = self.dataManager.cgmManagerTypeByIdentifier(cgmManagerIdentifier) {
-                                self.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                                self.setupCGMManager(CGMManagerType)
                             } else if let pumpManager = pumpManager {
-                                self.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                                self.completeCGMManagerSetup(pumpManager)
                             }
                         }
 
