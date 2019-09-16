@@ -2453,7 +2453,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework",
+				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework/LoopKit",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputFileListPaths = (
