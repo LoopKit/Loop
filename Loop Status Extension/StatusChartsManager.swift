@@ -8,11 +8,12 @@
 import Foundation
 import LoopUI
 import SwiftCharts
+import UIKit
 
 class StatusChartsManager: ChartsManager {
     let predictedGlucose = PredictedGlucoseChart()
 
-    init(colors: ChartColorPalette, settings: ChartSettings) {
-        super.init(colors: colors, settings: settings, charts: [predictedGlucose])
+    init(colors: ChartColorPalette, settings: ChartSettings, traitCollection: UITraitCollection) {
+        super.init(colors: colors, settings: settings, charts: [predictedGlucose], traitCollection: traitCollection)
     }
 }

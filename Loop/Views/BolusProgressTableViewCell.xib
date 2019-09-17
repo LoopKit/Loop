@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14854.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14806.4"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -15,19 +14,19 @@
             <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" tableViewCell="SGJ-NB-QMk" id="jGE-di-Djd">
-                <rect key="frame" x="0.0" y="0.0" width="416" height="53.5"/>
+                <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fv9-ct-CxM" userLabel="Background View">
-                        <rect key="frame" x="0.0" y="0.0" width="416" height="53.5"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                     </view>
                     <view contentMode="scaleToFill" horizontalHuggingPriority="251" placeholderIntrinsicWidth="332" placeholderIntrinsicHeight="32" translatesAutoresizingMaskIntoConstraints="NO" id="UrG-Ab-ud4" customClass="MKRingProgressView">
-                        <rect key="frame" x="364" y="11" width="32" height="32"/>
+                        <rect key="frame" x="369" y="11" width="32" height="32"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ACq-Bw-sij" userLabel="Square">
                                 <rect key="frame" x="11" y="11" width="10" height="10"/>
-                                <color key="backgroundColor" red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="backgroundColor" name="insulin"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="ACq-Bw-sij" secondAttribute="height" multiplier="1:1" id="KcF-0P-bM6"/>
                                 </constraints>
@@ -48,10 +47,10 @@
                                 <real key="value" value="17"/>
                             </userDefinedRuntimeAttribute>
                             <userDefinedRuntimeAttribute type="color" keyPath="startColor">
-                                <color key="value" red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="value" name="insulin"/>
                             </userDefinedRuntimeAttribute>
                             <userDefinedRuntimeAttribute type="color" keyPath="endColor">
-                                <color key="value" red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="value" name="insulin"/>
                             </userDefinedRuntimeAttribute>
                             <userDefinedRuntimeAttribute type="number" keyPath="shadowOpacity">
                                 <real key="value" value="0.0"/>
@@ -59,7 +58,7 @@
                         </userDefinedRuntimeAttributes>
                     </view>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Bolusing" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xSg-dV-gfs">
-                        <rect key="frame" x="20" y="16" width="344" height="21.5"/>
+                        <rect key="frame" x="15" y="16" width="354" height="22"/>
                         <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -89,4 +88,9 @@
             <point key="canvasLocation" x="-113.59999999999999" y="58.47076461769116"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <namedColor name="insulin">
+            <color red="1" green="0.58399999141693115" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
 </document>

@@ -27,8 +27,8 @@ function copy_plugins {
       fi
       for framework_path in "${f}"/Frameworks/*.framework; do
         framework=$(basename "$framework_path")
-        echo Copying "$framework_path/." to "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${framework}"
-        cp -a "$framework_path/." "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/${framework}"
+        echo "Copying plugin's framework $framework_path to ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
+        cp -a "$framework_path" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/."
         plugin_path="$(readlink "$f" || echo "$f")"
         if [ "$EXPANDED_CODE_SIGN_IDENTITY" != "-" ] && [ "$EXPANDED_CODE_SIGN_IDENTITY" != "" ]; then
           echo "Signing $framework for $plugin with $EXPANDED_CODE_SIGN_IDENTITY_NAME"
