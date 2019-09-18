@@ -974,6 +974,9 @@
 		7D4C91072331E13D003F5248 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7D4C91092331E16C003F5248 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7D4C910C2331E16C003F5248 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D4C91462331F794003F5248 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7D4C91472331F794003F5248 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		7D4C91482331F794003F5248 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Main.strings; sourceTree = "<group>"; };
 		7D68AAA91FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		7D68AAAA1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Main.strings; sourceTree = "<group>"; };
 		7D68AAAB1FE2DB0A00522C49 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/MainInterface.strings; sourceTree = "<group>"; };
@@ -3047,6 +3050,7 @@
 			children = (
 				43D9FFA921EA9A0C00AF44BF /* Base */,
 				7D4C90F92331E13A003F5248 /* sv */,
+				7D4C91482331F794003F5248 /* nl */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -3099,6 +3103,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D4C91092331E16C003F5248 /* sv */,
+				7D4C91462331F794003F5248 /* nl */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -3107,6 +3112,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D4C910C2331E16C003F5248 /* sv */,
+				7D4C91472331F794003F5248 /* nl */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

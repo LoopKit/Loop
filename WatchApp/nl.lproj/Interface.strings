@@ -7,6 +7,9 @@
 /* Class = "WKInterfaceLabel"; text = "15"; ObjectID = "CWt-7U-cnK"; */
 "CWt-7U-cnK.text" = "15";
 
+/* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
+"dea-qG-va8.text" = "Totaal koolhydraten";
+
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
 "Dh9-HV-fXy.accessibilityLabel" = "Aftrekken";
 
@@ -15,6 +18,9 @@
 
 /* Class = "WKInterfaceButton"; title = "🍕"; ObjectID = "dPF-QZ-sh6"; */
 "dPF-QZ-sh6.title" = "🍕";
+
+/* Class = "WKInterfaceMenuItem"; title = "2 hours"; ObjectID = "dPh-7b-Tfv"; */
+"dPh-7b-Tfv.title" = "2 uur";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Add"; ObjectID = "DZc-Gn-RLu"; */
 "DZc-Gn-RLu.accessibilityLabel" = "Toevoegen";
@@ -30,6 +36,9 @@
 
 /* Class = "WKInterfaceLabel"; text = "Pre-Meal"; ObjectID = "f5G-bS-9pd"; */
 "f5G-bS-9pd.text" = "Voor de maaltijd";
+
+/* Class = "WKInterfaceMenuItem"; title = "3 hours"; ObjectID = "fR1-7h-SNe"; */
+"fR1-7h-SNe.title" = "3 uur";
 
 /* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
 "gAn-qe-OvX.title" = "🍭";
@@ -49,7 +58,10 @@
 /* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
 "mpK-zY-UvA.text" = "0.000";
 
-/* Class = "WKInterfaceLabel"; text = "Workout"; ObjectID = "nC0-X3-oFJ"; */
+/* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
+"MZU-QV-PtZ.text" = "TITEL";
+
+/* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
 "nC0-X3-oFJ.text" = "Training";
 
 /* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
@@ -64,9 +76,21 @@
 /* Class = "WKInterfaceLabel"; text = "Bolus"; ObjectID = "smL-Rc-IZh"; */
 "smL-Rc-IZh.text" = "Bolus";
 
+/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
+"T4U-wP-dSW.text" = "Label";
+
 /* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
 "Ury-of-vQg.text" = "10:09 AM";
 
+/* Class = "WKInterfaceMenuItem"; title = "1 hour"; ObjectID = "vL1-NA-WZ1"; */
+"vL1-NA-WZ1.title" = "1 uur";
+
 /* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
 "XkS-y5-khE.text" = "<body>";
+
+/* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
+"ycL-5X-a05.text" = "Actieve koolhydraten";
+
+/* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
+"zO8-x6-bZd.text" = "Label";
 

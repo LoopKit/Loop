@@ -1,0 +1,3 @@
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Maaltijd data van de Health database wordt gebruikt om de effecten op glucose te bepalen.Glucose data vanuit de Health database worden gebruikt voor het berekenen en weergeven van het momentum ";
+
