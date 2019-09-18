@@ -1,0 +1,3 @@
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Måltidsdata från Hälsodatabasen används för att bestämma effekten på blodglukos. Blodglukosvärden från Hälsodatabasen används i diagram och för beräkning av förändring.";
+
