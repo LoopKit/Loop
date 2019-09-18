@@ -567,6 +567,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02DD47002332BC28006FB374 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		02DD47012332BC28006FB374 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -3104,6 +3106,7 @@
 			children = (
 				7D4C91092331E16C003F5248 /* sv */,
 				7D4C91462331F794003F5248 /* nl */,
+				02DD47002332BC28006FB374 /* de */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -3113,6 +3116,7 @@
 			children = (
 				7D4C910C2331E16C003F5248 /* sv */,
 				7D4C91472331F794003F5248 /* nl */,
+				02DD47012332BC28006FB374 /* de */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
