@@ -1,0 +1,3 @@
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Mahlzeit-Daten aus der HealthKit-Datenbank werden verwendet, um Blutzuckereffekte zu bestimmen. Blutzuckerdaten aus der HealthKit-Datenbank werden für die Grafik- und Impulsberechnung verwendet.";
+

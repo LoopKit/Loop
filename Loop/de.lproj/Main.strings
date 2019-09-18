@@ -2,7 +2,7 @@
 "3kU-n2-fha.title" = "Status";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3,5 IE/h @ 12:12 PM";
+"5gz-kZ-iF1.text" = "3,5 IE/Std. @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
 "5oA-6d-ZTL.text" = "Bolus";
@@ -24,9 +24,6 @@
 
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
 "aiu-ZA-zVa.title" = "Bolus";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "B9F-K3-7RI"; */
-"B9F-K3-7RI.text" = "Titel";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Beschriftung";

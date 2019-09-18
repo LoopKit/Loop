@@ -1,3 +1,12 @@
+/* HUD row title for COB */
+"Active Carbs" = "Aktive Kohlenhydrate";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Aktives Insulin";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "KH-Eintrag hinzufügen";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus fehlgeschlagen";
 
@@ -21,16 +30,28 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "mmol/L";
 
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Nettobasalrate";
+
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Override";
+
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Empfohlen: %@ E";
 
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Reservoirvolumen";
+
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Senden fehlgeschlagen";
 
 /* The short unit display string for international units of insulin */
-"U" = "E";
+"U" = "IE";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "IE/Std.";
 

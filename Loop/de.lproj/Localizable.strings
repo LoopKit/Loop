@@ -1,5 +1,5 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = " (stehen aus: %@)";
+" (pending: %@)" = "(stehen aus: %@)";
 
 /* Formats absorbed carb value */
 "%@ absorbed" = "%@ absorbiert";
@@ -68,14 +68,14 @@
 "Add Carb Entry" = "KH-Eintrag hinzufügen";
 
 /* Action sheet title selecting CGM
- Title text for button to set up a CGM */
+   Title text for button to set up a CGM */
 "Add CGM" = "CGM hinzufügen";
 
 /* The label of the carb entry button */
 "Add Meal" = "Mahlzeit hinzufügen";
 
 /* Action sheet title selecting Pump
- Title text for button to set up a new pump */
+   Title text for button to set up a new pump */
 "Add Pump" = "Pumpe hinzufügen";
 
 /* The title of the section containing algorithm settings */
@@ -106,11 +106,11 @@
 "Basal Rate Schedule" = "Basalraten-Zeitplan";
 
 /* The title of the basal rate profile screen
- The title text for the basal rate schedule */
+   The title text for the basal rate schedule */
 "Basal Rates" = "Basalraten";
 
 /* The label of the bolus entry button
- The notification title for a bolus failure */
+   The notification title for a bolus failure */
 "Bolus" = "Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
@@ -129,7 +129,7 @@
 "Carb effects" = "Kohlenhydrat-Wirkungen";
 
 /* The title of the carb ratios schedule screen
- The title text for the carb ratio schedule */
+   The title text for the carb ratio schedule */
 "Carb Ratios" = "Kohlenhydratfaktoren";
 
 /* Title of the prediction input effect for carbohydrates */
@@ -166,7 +166,7 @@
 "Continuous Glucose Monitor" = "Kontinuierliche Glukosemessung";
 
 /* The title of the glucose target range schedule screen
- The title text for the glucose target range schedule */
+   The title text for the glucose target range schedule */
 "Correction Range" = "Korrekturbereich";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
@@ -203,7 +203,7 @@
 "Enter suspend threshold" = "Grenzwert für Hypo-Abschaltung eingeben";
 
 /* The placeholder text instructing users how to enter a transmitter ID */
-"Enter the 6-digit transmitter ID" = "Geben Sie die 6-stellige Sender-ID ein";
+"Enter the 6-digit transmitter ID" = "Geben Sie die 6-stellige Transmitter-ID ein";
 
 /* The alert title for an error while canceling a bolus */
 "Error Canceling Bolus" = "Fehler beim Abbrechen des Bolus";
@@ -263,11 +263,11 @@
 "Insulin effects" = "Insulinwirkungen";
 
 /* Details for configuration error when insulin model is missing
- The title text for the insulin model setting row */
+   The title text for the insulin model setting row */
 "Insulin Model" = "Insulin-Modell";
 
 /* The title of the insulin sensitivities schedule screen
- The title text for the insulin sensitivity schedule */
+   The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Insulinempfindlichkeit";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -399,6 +399,9 @@
 /* The title text in settings */
 "Suspend Threshold" = "Wert für die Hypo-Abschaltung";
 
+/* The subtitle of the cell displaying an action to resume insulin delivery */
+"Tap to Resume" = "Drücke um fortzufahren";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Das herkömmliche von Loop verwendete Modell, welches die Anpassung der Wirkungsdauer ermöglicht.";
 
@@ -407,9 +410,6 @@
 
 /* Instructions on where to find the transmitter ID */
 "The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "Die Transmitter-ID finden Sie auf der Rückseite des Geräts, auf der Seite der Verpackung, in der es geliefert wurde, und in den Einstellungsmenüs des G5/G6-Empfängers sowie der Dexcom-App.";
-
-/* The description of the switch which toggles retrospective correction effects */
-"This will more aggressively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Erhöht oder verringert die Insulinabgabe stärker, wenn der Glukoseverlauf nicht mit dem Kohlenhydrat- und Insulinmodell übereinstimmt.";
 
 /* The short unit display string for international units of insulin */
 "U" = "IE";
@@ -428,3 +428,4 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Zielbereich für Sport";
+
