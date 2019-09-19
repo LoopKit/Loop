@@ -68,14 +68,14 @@
 "Add Carb Entry" = "Khai báo khối lượng Carb";
 
 /* Action sheet title selecting CGM
- Title text for button to set up a CGM */
+   Title text for button to set up a CGM */
 "Add CGM" = "Khai báo CGM";
 
 /* The label of the carb entry button */
 "Add Meal" = "Khai báo bữa ăn";
 
 /* Action sheet title selecting Pump
- Title text for button to set up a new pump */
+   Title text for button to set up a new pump */
 "Add Pump" = "Khai báo bơm";
 
 /* The title of the section containing algorithm settings */
@@ -106,11 +106,11 @@
 "Basal Rate Schedule" = "Lịch biểu tiêm liều basal";
 
 /* The title of the basal rate profile screen
- The title text for the basal rate schedule */
+   The title text for the basal rate schedule */
 "Basal Rates" = "Basal Rates";
 
 /* The label of the bolus entry button
- The notification title for a bolus failure */
+   The notification title for a bolus failure */
 "Bolus" = "Liều Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
@@ -129,7 +129,7 @@
 "Carb effects" = "các tác động của Carb";
 
 /* The title of the carb ratios schedule screen
- The title text for the carb ratio schedule */
+   The title text for the carb ratio schedule */
 "Carb Ratios" = "Tỷ lệ Carb";
 
 /* Title of the prediction input effect for carbohydrates */
@@ -166,11 +166,14 @@
 "Continuous Glucose Monitor" = "Kiểm soát đường huyết liên tục";
 
 /* The title of the glucose target range schedule screen
- The title text for the glucose target range schedule */
+   The title text for the glucose target range schedule */
 "Correction Range" = "Phạm vi Điều chỉnh";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = " Chỉ số glucose hiện tại %1$@ nằm dưới Phạm vi Điều chỉnh.";
+
+/* The title of the cell indicating a generic temporary override is enabled */
+"Custom Override" = "Thói quen chồng liều";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Customer Token";
@@ -218,7 +221,7 @@
 "Fiasp" = "Fiasp";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "For %1$@";
+"For %1$@" = "Cho %1$@";
 
 /* The short unit display string for grams */
 "g" = "g";
@@ -260,11 +263,11 @@
 "Insulin effects" = "Tác dụng của insulin";
 
 /* Details for configuration error when insulin model is missing
- The title text for the insulin model setting row */
+   The title text for the insulin model setting row */
 "Insulin Model" = "Chủng loại Insulin";
 
 /* The title of the insulin sensitivities schedule screen
- The title text for the insulin sensitivity schedule */
+   The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Độ nhạy của Insulin";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -428,3 +431,4 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Mục tiêu tập luyện";
+

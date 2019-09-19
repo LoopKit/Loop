@@ -13,7 +13,7 @@
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ U";
 
-/* The short unit display string for milligrams of glucose per decliter */
+/* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
 
 /* The short unit display string for millimoles of glucose per liter */
@@ -24,3 +24,4 @@
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
