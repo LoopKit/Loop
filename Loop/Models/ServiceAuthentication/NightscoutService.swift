@@ -55,7 +55,10 @@ class NightscoutService: ServiceAuthenticationUI {
     }
 
     var siteURL: URL? {
-        if let URLString = credentialValues[0], !URLString.isEmpty {
+        if var URLString = credentialValues[0], !URLString.isEmpty {
+            while URLString.last == "/" {
+                URLString.remove(at: URLString.index(before: URLString.endIndex))
+            }
             return URL(string: URLString)
         }
 
