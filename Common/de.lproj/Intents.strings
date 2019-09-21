@@ -1,6 +1,8 @@
-"80eo5o" = "Add Carb Entry";
+/* INIntentTitle */
+"80eo5o" = "KH-Eintrag hinzufügen";
 
-"OcNxIj" = "Add Carb Entry";
+/* INIntentParameterCombinationTitle */
+"OcNxIj" = "KH-Eintrag hinzufügen";
 
-"yc02Yq" = "Add a carb entry to Loop";
-
+/* INIntentDescription */
+"yc02Yq" = "Fügen Sie einen KH-Eintrag zu Loop hinzu.";

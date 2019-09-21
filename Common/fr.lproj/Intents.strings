@@ -1,6 +1,8 @@
-"80eo5o" = "Add Carb Entry";
+/* INIntentTitle */
+"80eo5o" = "Ajouter des glucides";
 
-"OcNxIj" = "Add Carb Entry";
+/* INIntentParameterCombinationTitle */
+"OcNxIj" = "Ajouter des glucides";
 
-"yc02Yq" = "Add a carb entry to Loop";
-
+/* INIntentDescription */
+"yc02Yq" = "Ajouter des glucides à Loop";
