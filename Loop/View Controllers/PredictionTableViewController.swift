@@ -26,6 +26,8 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.cellLayoutMarginsFollowReadableWidth = true
+        
+        tableView.register(SwitchTableViewCell.self, forCellReuseIdentifier: SwitchTableViewCell.className)
 
         glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
 
@@ -237,19 +239,19 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
             self.tableView(tableView, updateTextFor: cell, at: indexPath)
             return cell
         case .settings:
-            let cell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+            let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
             switch SettingsRow(rawValue: indexPath.row)! {
             case .integralRetrospectiveCorrection:
-                cell.titleLabel?.text = NSLocalizedString("Integral Retrospective Correction", comment: "Title of the switch which toggles integral retrospective correction effects")
-                cell.subtitleLabel?.text = NSLocalizedString("Respond more aggressively to persistent discrepancies between observed glucose movement and predictions based on carbohydrate and insulin models.", comment: "The description of the switch which toggles integral retrospective correction effects")
-                cell.`switch`?.isOn = deviceManager.loopManager.settings.integralRetrospectiveCorrectionEnabled
-                cell.`switch`?.addTarget(self, action: #selector(integralRetrospectiveCorrectionSwitchChanged(_:)), for: .valueChanged)
+                switchCell.textLabel?.text = NSLocalizedString("Integral Retrospective Correction", comment: "Title of the switch which toggles integral retrospective correction effects")
+                // switchCell.detailTextLabel?.text = NSLocalizedString("Respond more aggressively to persistent discrepancies between observed glucose movement and predictions based on carbohydrate and insulin models.", comment: "The description of the switch which toggles integral retrospective correction effects")
+                switchCell.switch?.isOn = deviceManager.loopManager.settings.integralRetrospectiveCorrectionEnabled
+                switchCell.switch?.addTarget(self, action: #selector(integralRetrospectiveCorrectionSwitchChanged(_:)), for: .valueChanged)
 
-                cell.contentView.layoutMargins.left = tableView.separatorInset.left
+                switchCell.contentView.layoutMargins.left = tableView.separatorInset.left
             }
 
-            return cell
+            return switchCell
         }
     }
 
