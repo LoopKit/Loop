@@ -358,6 +358,11 @@
 		89E267FD2292456700A3F2AF /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FB2292456700A3F2AF /* FeatureFlags.swift */; };
 		89E267FF229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
 		89E26800229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
+		9E0F6349218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */; };
+		9E575201217D87E7002D167B /* IntegralRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E575200217D87E7002D167B /* IntegralRetrospectiveCorrection.swift */; };
+		9E604099218F8850003D93A9 /* glucose_discrepancies_constant_positive.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */; };
+		9E60409B218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json in Resources */ = {isa = PBXBuildFile; fileRef = 9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */; };
+		9EAFDFEE218E6CBC0016F9ED /* glucose_discrepancies_sampled.json in Resources */ = {isa = PBXBuildFile; fileRef = 9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
@@ -1004,6 +1009,11 @@
 		89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTestingScenariosManager.swift; sourceTree = "<group>"; };
 		89E267FB2292456700A3F2AF /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		89E267FE229267DF00A3F2AF /* Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
+		9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrectionTests.swift; sourceTree = "<group>"; };
+		9E575200217D87E7002D167B /* IntegralRetrospectiveCorrection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegralRetrospectiveCorrection.swift; sourceTree = "<group>"; };
+		9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_constant_positive.json; sourceTree = "<group>"; };
+		9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_single_same_sign.json; sourceTree = "<group>"; };
+		9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = glucose_discrepancies_sampled.json; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
@@ -1212,6 +1222,7 @@
 			children = (
 				43511CDF21FD80E400566C63 /* RetrospectiveCorrection.swift */,
 				43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */,
+				9E575200217D87E7002D167B /* IntegralRetrospectiveCorrection.swift */,
 			);
 			path = RetrospectiveCorrection;
 			sourceTree = "<group>";
@@ -1596,9 +1607,11 @@
 		43F78D2C1C8FC58F002152D1 /* LoopTests */ = {
 			isa = PBXGroup;
 			children = (
+				9E0F634A218D4DC8006E5D21 /* Fixtures */,
 				43E2D90F1D20C581004DA55F /* Info.plist */,
 				7D2366E421250E0A0028B67D /* InfoPlist.strings */,
 				43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */,
+				9E0F6348218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift */,
 			);
 			path = LoopTests;
 			sourceTree = "<group>";
@@ -1826,6 +1839,16 @@
 				C18A491322FCC22900FDA733 /* make_scenario.py */,
 			);
 			path = Scripts;
+			sourceTree = "<group>";
+		};
+		9E0F634A218D4DC8006E5D21 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				9EAFDFED218E6CBB0016F9ED /* glucose_discrepancies_sampled.json */,
+				9E604098218F8850003D93A9 /* glucose_discrepancies_constant_positive.json */,
+				9E60409A218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2301,7 +2324,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9E60409B218FFF75003D93A9 /* glucose_discrepancies_single_same_sign.json in Resources */,
 				7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */,
+				9E604099218F8850003D93A9 /* glucose_discrepancies_constant_positive.json in Resources */,
+				9EAFDFEE218E6CBC0016F9ED /* glucose_discrepancies_sampled.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2558,6 +2584,7 @@
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
+				9E575201217D87E7002D167B /* IntegralRetrospectiveCorrection.swift in Sources */,
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
 				4341F4EB1EDB92AC001C936B /* LogglyService.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
@@ -2802,6 +2829,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */,
+				9E0F6349218D4AC1006E5D21 /* IntegralRetrospectiveCorrectionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3475,6 +3503,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
 			name = Debug;
 		};
@@ -3497,6 +3526,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
 			name = Release;
 		};
@@ -3518,6 +3548,7 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
 			name = Debug;
 		};
@@ -3539,6 +3570,7 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
 			name = Release;
 		};
