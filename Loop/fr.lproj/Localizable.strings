@@ -215,7 +215,7 @@
 "Glucose data not available" = "Les données de glucose ne sont pas disponibles";
 
 /* Title of the prediction input effect for glucose momentum */
-"Glucose Momentum" = "Momentum de glucose"
+"Glucose Momentum" = "Momentum de glucose";
 
 /* The placeholder text for the nightscout site URL credential */
 "https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";

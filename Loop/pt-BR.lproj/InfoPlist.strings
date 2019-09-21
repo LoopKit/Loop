@@ -2,7 +2,7 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth é utilizado para comunicação com a bomba de insulina e os dispositivos de monitoramento de glicose";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth é utilizado para comunicação com a bomba de insulina e os dispositivos de monitoramento de glicose.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth é utilizado para comunicação com a bomba de insulina e os dispositivos de monitoramento de glicose.";
