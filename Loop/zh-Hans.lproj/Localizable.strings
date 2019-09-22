@@ -372,6 +372,9 @@
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "大剂量输注最大限制为%@单位";
 
+/* The short unit display string for international units of insulin */
+"U" = "U";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "until %@";
 

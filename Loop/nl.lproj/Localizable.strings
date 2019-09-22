@@ -371,6 +371,9 @@
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "De maximale bolushoeveelheid is %@ Eenheden";
 
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
 /* The format for the description of a temporary override end date */
 "until %@" = "Tot %@";
 
