@@ -673,15 +673,13 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) recommends loop")
+        // update BG correction range overrides via NS
+        // this call may be more appropriate somewhere
+        let allowremoteTempTargets : Bool = true
+        if allowremoteTempTargets == true {self.setNStemp()}
+
         loopManager.loop()
     }
-    
-    //////
-           // update BG correction range overrides via NS
-           // this call may be more appropriate somewhere
-           let allowremoteTempTargets : Bool = true
-           if allowremoteTempTargets == true {self.setNStemp()}
-           /////
 
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
