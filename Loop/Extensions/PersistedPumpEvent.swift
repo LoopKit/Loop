@@ -26,7 +26,7 @@ extension PersistedPumpEvent {
             return BolusNightscoutTreatment(
                 timestamp: dose.startDate,
                 enteredBy: source,
-                bolusType: duration > 0 ? .Square : .Normal,
+                bolusType: .Normal,
                 amount: dose.deliveredUnits ?? dose.programmedUnits,
                 programmed: dose.programmedUnits,  // Persisted pump events are always completed
                 unabsorbed: 0,  // The pump's reported IOB isn't relevant, nor stored
