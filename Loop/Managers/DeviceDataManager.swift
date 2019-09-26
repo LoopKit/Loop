@@ -579,7 +579,12 @@ extension DeviceDataManager: PumpManagerDelegate {
                         //set the override
                         presets[index].settings.insulinNeedsScaleFactor = multiplier
                         presets[index].duration = .finite(.seconds(duration_seconds))
-                        presets[index].settings.targetRange = DoubleRange(minValue: lowerTarget.doubleValue(for: userUnit!), maxValue: upperTarget.doubleValue(for: userUnit!))
+                        presets[index].settings.targetRange = ClosedRange<HKQuantity>(
+                            uncheckedBounds: (
+                                lower: lowerTarget,
+                                upper: upperTarget
+                            )
+                        )
                         self.loopManager.settings.overridePresets = presets
                         let enactOverride = presets[index].createOverride()
                         //let enactOverride = presets[index].createOverride(beginningAt: cdates.max()!)
@@ -597,13 +602,18 @@ extension DeviceDataManager: PumpManagerDelegate {
                     let activeDate = startDate! + duration
 
                     if self.doubleIsEqual(presets[index].settings.basalRateMultiplier!, multiplier, 0.01) == false ||
-                        self.doubleIsEqual((currentRange?.maxValue ?? 0), upperTarget.doubleValue(for: userUnit!), 1.0) == false ||
-                        self.doubleIsEqual((currentRange?.minValue ?? 0), lowerTarget.doubleValue(for: userUnit!), 1.0) == false ||
+                        self.doubleIsEqual((currentRange?.upperBound.doubleValue(for: userUnit!) ?? 0), upperTarget.doubleValue(for: userUnit!), 1.0) == false ||
+                        self.doubleIsEqual((currentRange?.lowerBound.doubleValue(for: userUnit!) ?? 0), lowerTarget.doubleValue(for: userUnit!), 1.0) == false ||
                         abs(activeDate.timeIntervalSince(endlastTemp)) > TimeInterval(.minutes(2)) {
                         //set the override
                         presets[index].settings.insulinNeedsScaleFactor = multiplier
                         presets[index].duration = .finite(.seconds(duration_seconds))
-                        presets[index].settings.targetRange = DoubleRange(minValue: lowerTarget.doubleValue(for: userUnit!), maxValue: upperTarget.doubleValue(for: userUnit!))
+                        presets[index].settings.targetRange = ClosedRange<HKQuantity>(
+                            uncheckedBounds: (
+                                lower: lowerTarget,
+                                upper: upperTarget
+                            )
+                        )
                         self.loopManager.settings.overridePresets = presets
                         let enactOverride = presets[index].createOverride()
                         //let enactOverride = presets[index].createOverride(beginningAt: cdates.max()!)
@@ -673,15 +683,13 @@ extension DeviceDataManager: PumpManagerDelegate {
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) recommends loop")
+        // update BG correction range overrides via NS
+        // this call may be more appropriate somewhere
+        let allowremoteTempTargets : Bool = true
+        if allowremoteTempTargets == true {self.setNStemp()}
+
         loopManager.loop()
     }
-    
-    //////
-           // update BG correction range overrides via NS
-           // this call may be more appropriate somewhere
-           let allowremoteTempTargets : Bool = true
-           if allowremoteTempTargets == true {self.setNStemp()}
-           /////
 
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
