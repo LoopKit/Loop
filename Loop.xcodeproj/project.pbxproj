@@ -367,6 +367,7 @@
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
+		C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165B8CD23302C5D0004112E /* RemoteCommand.swift */; };
 		C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
 		C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */; };
@@ -1016,6 +1017,7 @@
 		C12CB9B823106A6300F84978 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
+		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
 		C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseThresholdTableViewController.swift; sourceTree = "<group>"; };
@@ -1229,6 +1231,7 @@
 				438D42F81D7C88BC003244B0 /* PredictionInputEffect.swift */,
 				43441A9B1EDB34810087958C /* StatusExtensionContext+LoopKit.swift */,
 				4328E0311CFC068900E199AA /* WatchContext+LoopKit.swift */,
+				C165B8CD23302C5D0004112E /* RemoteCommand.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2591,6 +2594,7 @@
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
+				C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */,
 				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				438172D91F4E9E37003C3328 /* NewPumpEvent.swift in Sources */,
 				4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */,
@@ -3626,7 +3630,7 @@
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Learn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -3654,7 +3658,7 @@
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = UY678SP37Q;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Learn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;

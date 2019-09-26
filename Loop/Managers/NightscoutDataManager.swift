@@ -50,9 +50,10 @@ final class NightscoutDataManager {
     }
 
     private func uploadSettings() {
+        let settings = deviceManager.loopManager.settings
+        
         guard
             let uploader = deviceManager.remoteDataManager.nightscoutService.uploader,
-            let settings = UserDefaults.appGroup?.loopSettings,
             let basalRateSchedule = UserDefaults.appGroup?.basalRateSchedule,
             let insulinModelSettings = UserDefaults.appGroup?.insulinModelSettings,
             let carbRatioSchedule = UserDefaults.appGroup?.carbRatioSchedule,
@@ -63,6 +64,9 @@ final class NightscoutDataManager {
             log.default("Not uploading due to incomplete configuration")
             return
         }
+        
+        
+        print("******************* Upload settings ****************")
 
         let targetLowItems = correctionSchedule.items.map { (item) -> ProfileSet.ScheduleItem in
             return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value.minValue)
@@ -90,7 +94,9 @@ final class NightscoutDataManager {
             minimumBGGuard: settings.suspendThreshold?.quantity.doubleValue(for: preferredUnit),
             preMealTargetRange: nsPreMealTargetRange,
             maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
-            maximumBolus: settings.maximumBolus)
+            maximumBolus: settings.maximumBolus,
+            deviceToken: settings.deviceToken,
+            bundleIdentifier: Bundle.main.bundleIdentifier)
 
         let profile = ProfileSet.Profile(
             timezone: basalRateSchedule.timeZone,

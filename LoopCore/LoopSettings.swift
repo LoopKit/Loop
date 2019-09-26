@@ -50,7 +50,11 @@ public struct LoopSettings: Equatable {
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
-
+    
+    // MARK - Push Notifications
+    
+    public var deviceToken: Data?
+    
     // MARK - Guardrails
 
     public func allowedSensitivityValues(for unit: HKUnit) -> [Double] {

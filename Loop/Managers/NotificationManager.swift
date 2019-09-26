@@ -44,9 +44,21 @@ struct NotificationManager {
         let center = UNUserNotificationCenter.current()
 
         center.delegate = delegate
-        center.requestAuthorization(options: [.badge, .sound, .alert], completionHandler: { _, _ in })
+        center.requestAuthorization(options: [.badge, .sound, .alert]) { (granted, error) in
+            print("Permission granted: \(granted)")
+            guard granted else { return }
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                print("Notification settings: \(settings)")
+                guard settings.authorizationStatus == .authorized else { return }
+                DispatchQueue.main.async {
+                    print("Registering for remote notifications")
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
         center.setNotificationCategories(notificationCategories)
     }
+    
 
     // MARK: - Notifications
 
@@ -226,4 +238,6 @@ struct NotificationManager {
     static func clearPumpReservoirNotification() {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [LoopNotificationCategory.pumpReservoirLow.rawValue])
     }
+    
+    // Push Notifications
 }
