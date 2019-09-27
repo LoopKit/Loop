@@ -7,6 +7,14 @@
 
 date
 
+if [ -s $HOME/.bash_profile ]; then
+    echo "Found bash profile"
+    source $HOME/.bash_profile
+elif [ -s $HOME/.bashrc ]; then
+    echo "Found bashrc"
+    source $HOME/.bashrc
+fi
+
 CARTHAGE_BUILD_DIR="${SRCROOT}/Carthage/Build"
 if [ -n "${IPHONEOS_DEPLOYMENT_TARGET}" ]; then
     CARTHAGE_BUILD_DIR="${CARTHAGE_BUILD_DIR}/iOS"

@@ -2341,7 +2341,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping carthage dependencies\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n    /usr/local/bin/carthage bootstrap --project-directory \"$SRCROOT\" --cache-builds\nfi\n";
+			shellScript = "if [ -s $HOME/.bash_profile ]; then\n    echo \"Found bash profile\"\n    source $HOME/.bash_profile\nelif [ -s $HOME/.bashrc ]; then\n    echo \"Found bashrc\"\n    source $HOME/.bashrc\nfi    \n\nif [ -f $PROJECT_DIR/.gitmodules ]; then\n    echo \"Skipping checkout due to presence of .gitmodules file\"\n    if [ $ACTION = \"install\" ]; then\n        echo \"You're installing: Make sure to keep all submodules up-to-date and run carthage build after changes.\"\n    fi\nelse\n    echo \"Bootstrapping carthage dependencies\"\n    unset LLVM_TARGET_TRIPLE_SUFFIX\n    if [ $(which carthage) ]; then\n        carthage bootstrap --project-directory \"$SRCROOT\" --cache-builds\n    else\n        /usr/local/bin/carthage bootstrap --project-directory \"$SRCROOT\" --cache-builds\nfi\n";
 		};
 		432CF88220D8BCD90066B889 /* Homebrew & Carthage Setup */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2355,7 +2355,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if ! [ -x \"$(command -v brew)\" ]; then\n    # Install Homebrew\n    ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\nfi\n\nif brew ls carthage > /dev/null; then\n    brew upgrade carthage || echo \"Continuing…\"\nelse\n    brew install carthage\nfi\n";
+			shellScript = "source ~/.bash_profile\n\nif ! [ -x \"$(command -v brew)\" ]; then\n    # Install Homebrew\n    ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\nfi\n\nif brew ls carthage > /dev/null; then\n    brew upgrade carthage || echo \"Continuing…\"\nelse\n    brew install carthage\nfi\n";
 		};
 		43D9FFE221EAE40600AF44BF /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3426,7 +3426,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -3445,7 +3445,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -3463,7 +3463,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -3486,7 +3486,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -3507,7 +3507,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -3528,7 +3528,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -3808,7 +3808,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -3830,7 +3830,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H47AW5H5FK;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
