@@ -649,9 +649,9 @@ extension Notification.Name {
 
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
-    func handleRemoteNotification(_ aps: [String: AnyObject]) {
+    func handleRemoteNotification(_ notification: [String: AnyObject]) {
         
-        if let command = RemoteCommand(aps: aps, allowedPresets: loopManager.settings.overridePresets) {
+        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
             switch command {
             case .temporaryScheduleOverride(let override):
                 log.default("Enacting remote temporary override: \(override)")
@@ -661,7 +661,7 @@ extension DeviceDataManager {
                 loopManager.settings.scheduleOverride = nil
             }
         } else {
-            log.info("Unhandled remote notification: \(aps)")
+            log.info("Unhandled remote notification: \(notification)")
         }
     }
 }

@@ -24,17 +24,17 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    init?(aps: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
-        if let overrideEnactName = aps["override-name"] as? String,
+    init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
+        if let overrideEnactName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideEnactName })
         {
             let start = Date()
             var override = preset.createOverride(beginningAt: start)
-            if let overrideDurationMinutes = aps["override-duration-minutes"] as? Double {
+            if let overrideDurationMinutes = notification["override-duration-minutes"] as? Double {
                 override.duration = .finite(TimeInterval(minutes: overrideDurationMinutes))
             }
             self = .temporaryScheduleOverride(override)
-        } else if let _ = aps["cancel-temporary-override"] as? String {
+        } else if let _ = notification["cancel-temporary-override"] as? String {
             self = .cancelTemporaryOverride
         }
         else {
