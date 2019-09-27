@@ -65,9 +65,6 @@ final class NightscoutDataManager {
             return
         }
         
-        
-        print("******************* Upload settings ****************")
-
         let targetLowItems = correctionSchedule.items.map { (item) -> ProfileSet.ScheduleItem in
             return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value.minValue)
         }
