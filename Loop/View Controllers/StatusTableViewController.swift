@@ -1131,6 +1131,31 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
         }
+
+        carbVC.FPCaloriesRatio = deviceManager.loopManager.settings.fpuRatio ?? 150.0
+        carbVC.onsetDelay = deviceManager.loopManager.settings.fpuDelay ?? 60.0
+
+        // RSS - Repeat for the fat and protein portion...
+        guard let updatedFPEntry = carbVC.updatedFPCarbEntry else {
+            return
+        }
+
+        deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedFPEntry) { (result) -> Void in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // Never give bolus for fat and protein.
+                    print("Not recommending bolus for fat or protein.")
+                case .failure(let error):
+                    // Ignore bolus wizard errors
+                    if error is CarbStore.CarbStoreError {
+                        self.present(UIAlertController(with: error), animated: true)
+                    } else {
+                        self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
+                    }
+                }
+            }
+        }
     }
 
     @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {

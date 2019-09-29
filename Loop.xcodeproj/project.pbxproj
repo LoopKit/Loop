@@ -324,6 +324,10 @@
 		4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434F54561D287FDB002A9274 /* NibLoadable.swift */; };
 		4FF4D1001E18374700846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
 		4FF4D1011E18375000846527 /* WatchContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF4D0FF1E18374700846527 /* WatchContext.swift */; };
+		54AC91642301FBB50023369D /* FPURatio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AC91622301FBB40023369D /* FPURatio.swift */; };
+		54AC91652301FBB50023369D /* FPUDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AC91632301FBB40023369D /* FPUDelay.swift */; };
+		54AC91682301FC670023369D /* FPUDelayTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AC91662301FC670023369D /* FPUDelayTableViewController.swift */; };
+		54AC91692301FC670023369D /* FPURatioTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AC91672301FC670023369D /* FPURatioTableViewController.swift */; };
 		7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D23667C21250C7E0028B67D /* LocalizedString.swift */; };
 		7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D2366E421250E0A0028B67D /* InfoPlist.strings */; };
 		7D7076351FE06EDE004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076371FE06EDE004AC8EA /* Localizable.strings */; };
@@ -821,6 +825,10 @@
 		4FDDD23620DC51DF00D04B16 /* LoopDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManager.swift; sourceTree = "<group>"; };
 		4FF4D0FF1E18374700846527 /* WatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WatchContext.swift; sourceTree = "<group>"; };
 		4FFEDFBE20E5CF22000BFC58 /* ChartHUDController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartHUDController.swift; sourceTree = "<group>"; };
+		54AC91622301FBB40023369D /* FPURatio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FPURatio.swift; sourceTree = "<group>"; };
+		54AC91632301FBB40023369D /* FPUDelay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FPUDelay.swift; sourceTree = "<group>"; };
+		54AC91662301FC670023369D /* FPUDelayTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FPUDelayTableViewController.swift; sourceTree = "<group>"; };
+		54AC91672301FC670023369D /* FPURatioTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FPURatioTableViewController.swift; sourceTree = "<group>"; };
 		7D199D92212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		7D199D93212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Main.strings; sourceTree = "<group>"; };
 		7D199D94212A067600241026 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/MainInterface.strings; sourceTree = "<group>"; };
@@ -1461,6 +1469,8 @@
 			children = (
 				43D9003A21EB281300AF44BF /* Insulin */,
 				43DE92581C5479E4001FFDE1 /* CarbEntryUserInfo.swift */,
+				54AC91632301FBB40023369D /* FPUDelay.swift */,
+				54AC91622301FBB40023369D /* FPURatio.swift */,
 				430B298D2041F56500BA9F93 /* GlucoseThreshold.swift */,
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
@@ -1548,6 +1558,8 @@
 				4315D2861CA5CC3B00589052 /* CarbEntryEditTableViewController.swift */,
 				43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */,
 				43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */,
+				54AC91662301FC670023369D /* FPUDelayTableViewController.swift */,
+				54AC91672301FC670023369D /* FPURatioTableViewController.swift */,
 				433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */,
 				C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
@@ -2598,6 +2610,7 @@
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
+				54AC91682301FC670023369D /* FPUDelayTableViewController.swift in Sources */,
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */,
 				43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */,
@@ -2633,6 +2646,7 @@
 				89E267FF229267DF00A3F2AF /* Optional.swift in Sources */,
 				43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
+				54AC91692301FC670023369D /* FPURatioTableViewController.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43DAD00020A2736F000F8529 /* PersistedPumpEvent.swift in Sources */,
 				438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */,
@@ -2798,11 +2812,13 @@
 				4345E3F521F036FC009E00E5 /* Result.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA821EB2B26006FB252 /* PersistenceController.swift in Sources */,
+				54AC91652301FBB50023369D /* FPUDelay.swift in Sources */,
 				431EA87321EB29160076EC1A /* InsulinModelSettings.swift in Sources */,
 				43D9FFF921EAF34800AF44BF /* GlucoseThreshold.swift in Sources */,
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
 				43D9FFF521EAF27200AF44BF /* LoopSettings.swift in Sources */,
 				431EA87521EB291B0076EC1A /* WalshInsulinModel.swift in Sources */,
+				54AC91642301FBB50023369D /* FPURatio.swift in Sources */,
 				431EA87121EB29120076EC1A /* ExponentialInsulinModelPreset.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
