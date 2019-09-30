@@ -26,10 +26,10 @@ enum RemoteCommand {
 extension RemoteCommand {
     init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
         if let overrideEnactName = notification["override-name"] as? String,
-            let preset = allowedPresets.first(where: { $0.name == overrideEnactName })
+            let preset = allowedPresets.first(where: { $0.name == overrideEnactName }),
+            let remoteAddress = notification["remote-address"] as? String
         {
-            let start = Date()
-            var override = preset.createOverride(beginningAt: start)
+            var override = preset.createOverride(enactTrigger: .remote(remoteAddress))
             if let overrideDurationMinutes = notification["override-duration-minutes"] as? Double {
                 override.duration = .finite(TimeInterval(minutes: overrideDurationMinutes))
             }
