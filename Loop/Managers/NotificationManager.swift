@@ -235,6 +235,4 @@ struct NotificationManager {
     static func clearPumpReservoirNotification() {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [LoopNotificationCategory.pumpReservoirLow.rawValue])
     }
-    
-    // Push Notifications
 }
