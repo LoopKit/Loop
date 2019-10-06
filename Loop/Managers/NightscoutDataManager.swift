@@ -553,11 +553,12 @@ private extension OverrideTreatment {
             enteredBy = "Loop"
         }
         
-        let duration: TimeInterval
-        if case .indefinite = override.duration {
-            duration = 0
-        } else {
-            duration = override.duration.timeInterval
+        let duration: OverrideTreatment.Duration
+        switch override.duration {
+        case .finite(let time):
+            duration = .finite(time)
+        case .indefinite:
+            duration = .indefinite
         }
         
         self.init(startDate: override.startDate, enderedBy: enteredBy, reason: reason, duration: duration, correctionRange: nsTargetRange, insulinNeedsScaleFactor: override.settings.insulinNeedsScaleFactor, remoteAddress:remoteAddress, id: override.syncIdentifier.uuidString)
