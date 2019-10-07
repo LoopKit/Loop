@@ -91,6 +91,18 @@ public struct LoopSettings: Equatable {
     }
 }
 
+extension LoopSettings: Settings {
+
+    public var insulinModel: InsulinModel? { return UserDefaults.appGroup?.insulinModelSettings?.model }
+
+    public var basalRateSchedule: BasalRateSchedule? { return UserDefaults.appGroup?.basalRateSchedule }
+
+    public var insulinSensitivitySchedule: InsulinSensitivitySchedule? { return UserDefaults.appGroup?.insulinSensitivitySchedule }
+
+    public var carbRatioSchedule: CarbRatioSchedule? { return UserDefaults.appGroup?.carbRatioSchedule }
+
+}
+
 extension LoopSettings {
     public var glucoseTargetRangeScheduleApplyingOverrideIfActive: GlucoseRangeSchedule? {
         if let override = scheduleOverride, override.isActive() {

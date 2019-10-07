@@ -1,44 +1,34 @@
 //
-//  AnalyticsManager.swift
-//  Naterade
+//  AnalyticsServicesManager.swift
+//  Loop
 //
 //  Created by Nathan Racklyeft on 4/28/16.
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
 import Foundation
-import Amplitude
 import LoopKit
 import LoopCore
 
+final class AnalyticsServicesManager {
 
-final class AnalyticsManager: IdentifiableClass {
+    private lazy var log = DiagnosticLog(category: "AnalyticsServicesManager")
 
-    var amplitudeService: AmplitudeService {
-        didSet {
-            try! KeychainManager().setAmplitudeAPIKey(amplitudeService.APIKey)
-        }
+    private var analyticsServices: [AnalyticsService]!
+
+    init(servicesManager: ServicesManager) {
+        self.analyticsServices = filter(services: servicesManager.services)
+        
+        servicesManager.addObserver(self)
     }
 
-    init() {
-        if let APIKey = KeychainManager().getAmplitudeAPIKey() {
-            amplitudeService = AmplitudeService(APIKey: APIKey)
-        } else {
-            amplitudeService = AmplitudeService(APIKey: nil)
-        }
-
-        logger = DiagnosticLogger.shared.forCategory(type(of: self).className)
+    private func filter(services: [Service]) -> [AnalyticsService] {
+        return services.compactMap({ $0 as? AnalyticsService })
     }
-
-    static let shared = AnalyticsManager()
-
-    // MARK: - Helpers
-
-    private var logger: CategoryLogger?
 
     private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
-        logger?.debug("\(name) \(properties ?? [:])")
-        amplitudeService.client?.logEvent(name, withEventProperties: properties, outOfSession: outOfSession)
+        log.debug("%{public}@ %{public}@", name, String(describing: properties))
+        analyticsServices.forEach { $0.recordAnalyticsEvent(name, withProperties: properties, outOfSession: outOfSession) }
     }
 
     // MARK: - UIApplicationDelegate
@@ -71,7 +61,7 @@ final class AnalyticsManager: IdentifiableClass {
         logEvent("Pump time change", withProperties: ["value": drift], outOfSession: true)
     }
 
-    func punpTimeZoneDidChange() {
+    func pumpTimeZoneDidChange() {
         logEvent("Pump time zone change", outOfSession: true)
     }
 
@@ -122,7 +112,7 @@ final class AnalyticsManager: IdentifiableClass {
 
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
-                self.punpTimeZoneDidChange()
+                self.pumpTimeZoneDidChange()
             } else if newValue.scheduleOverride != oldValue.scheduleOverride {
                 logEvent("Temporary schedule override change", outOfSession: true)
             } else {
@@ -130,7 +120,6 @@ final class AnalyticsManager: IdentifiableClass {
             }
         }
     }
-
 
     // MARK: - Loop Events
 
@@ -157,4 +146,13 @@ final class AnalyticsManager: IdentifiableClass {
     func loopDidError() {
         logEvent("Loop error", outOfSession: true)
     }
+
+}
+
+extension AnalyticsServicesManager: ServicesManagerObserver {
+
+    func servicesManagerDidUpdate(services: [Service]) {
+        analyticsServices = filter(services: services)
+    }
+    
 }

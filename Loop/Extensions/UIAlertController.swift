@@ -125,6 +125,30 @@ extension UIAlertController {
         }
     }
 
+    /// Initializes an action sheet-styled controller for selecting a service UI.
+    ///
+    /// - Parameters:
+    ///   - serviceUITypes: An array of service UI types.
+    ///   - selectionHandler: A closure to execute when a service UI is selected.
+    ///   - service: The selected service UI type.
+    internal convenience init(serviceUITypes: [ServiceUI.Type], selectionHandler: @escaping (_ serviceUIType: ServiceUI.Type) -> Void) {
+        self.init(
+            title: NSLocalizedString("Add Service", comment: "Action sheet title selecting service"),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+
+        for serviceUIType in serviceUITypes {
+            addAction(UIAlertAction(
+                title: serviceUIType.localizedTitle,
+                style: .default,
+                handler: { (_) in
+                    selectionHandler(serviceUIType)
+                }
+            ))
+        }
+    }
+
     internal func addCancelAction(handler: ((UIAlertAction) -> Void)? = nil) {
         let cancel = NSLocalizedString("Cancel", comment: "The title of the cancel action in an action sheet")
         addAction(UIAlertAction(title: cancel, style: .cancel, handler: handler))

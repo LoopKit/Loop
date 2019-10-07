@@ -39,8 +39,6 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
         bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: amount) ?? "0")
 
         bolusAmountTextField.becomeFirstResponder()
-
-        AnalyticsManager.shared.didDisplayBolusScreen()
     }
 
     func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String

@@ -73,20 +73,20 @@
 /* Title text for button to set up a new pump */
 "Add Pump" = "Add Pump";
 
+/* Title text for button to set up a service */
+"Add Service" = "Add Service";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algorithm Settings";
 
-/* The title of the Amplitude service */
-"Amplitude" = "Amplitude";
-
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "An adjustment to the adult model based on empirical effects in children.";
-
-/* The title of the amplitude API key credential */
-"API Key" = "API Key";
-
-/* The title of the nightscout API secret credential */
-"API Secret" = "API Secret";
 
 /* Format fragment for a specific time */
 "at %@" = "at %@";
@@ -155,9 +155,6 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = " Current glucose of %1$@ is below correction range.";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Customer Token";
-
 /* The short unit display string for decibles */
 "dB" = "dB";
 
@@ -215,9 +212,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glucose Momentum";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Indefinitely";
 
@@ -256,9 +250,6 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Loading...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop Failure";
 
@@ -279,9 +270,6 @@
 
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Needs Attention";
-
-/* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";
@@ -348,9 +336,6 @@
 
 /* Format fragment for a start time */
 "since %@" = "since %@";
-
-/* The title of the nightscout site URL credential */
-"Site URL" = "Site URL";
 
 /* The title text for the Medtronic sensor switch cell */
 "Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";

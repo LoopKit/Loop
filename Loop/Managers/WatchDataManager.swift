@@ -15,11 +15,12 @@ import LoopCore
 
 final class WatchDataManager: NSObject {
 
-    unowned let deviceManager: DeviceDataManager
+    private unowned let deviceManager: DeviceDataManager
+    private unowned let analyticsServicesManager: AnalyticsServicesManager
 
-    init(deviceManager: DeviceDataManager) {
+    init(deviceManager: DeviceDataManager, analyticsServicesManager: AnalyticsServicesManager) {
         self.deviceManager = deviceManager
-        self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
+        self.analyticsServicesManager = analyticsServicesManager
 
         super.init()
 
@@ -29,7 +30,7 @@ final class WatchDataManager: NSObject {
         watchSession?.activate()
     }
 
-    private let log: CategoryLogger
+    private let log = DiagnosticLog(category: "WatchDataManager")
 
     private var watchSession: WCSession? = {
         if WCSession.isSupported() {
@@ -135,7 +136,7 @@ final class WatchDataManager: NSObject {
                 log.default("updateApplicationContext")
                 try session.updateApplicationContext(context.rawValue)
             } catch let error {
-                log.error(error)
+                log.error("%{public}@", String(describing: error))
             }
         }
     }
@@ -195,15 +196,15 @@ final class WatchDataManager: NSObject {
             deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { (result) in
                 switch result {
                 case .success:
-                    AnalyticsManager.shared.didAddCarbsFromWatch()
+                    self.analyticsServicesManager.didAddCarbsFromWatch()
                     completionHandler?(nil)
                 case .failure(let error):
-                    self.log.error(error)
+                    self.log.error("%{public}@", String(describing: error))
                     completionHandler?(error)
                 }
             }
         } else {
-            log.error("Could not add carb entry from unknown message: \(message)")
+            log.error("Could not add carb entry from unknown message: %{public}@", String(describing: message))
             completionHandler?(nil)
         }
     }
@@ -225,7 +226,7 @@ extension WatchDataManager: WCSessionDelegate {
             if let bolus = SetBolusUserInfo(rawValue: message as SetBolusUserInfo.RawValue) {
                 self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                     if error == nil {
-                        AnalyticsManager.shared.didSetBolusFromWatch(bolus.value)
+                        self.analyticsServicesManager.didSetBolusFromWatch(bolus.value)
                     }
 
                     // When we've successfully started the bolus, send a new context with our new prediction
@@ -272,7 +273,7 @@ extension WatchDataManager: WCSessionDelegate {
         switch activationState {
         case .activated:
             if let error = error {
-                log.error(error)
+                log.error("%{public}@", String(describing: error))
             } else {
                 sendSettingsIfNeeded()
                 sendWatchContextIfNeeded()
@@ -286,7 +287,7 @@ extension WatchDataManager: WCSessionDelegate {
 
     func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
         if let error = error {
-            log.error(error)
+            log.error("%{public}@", String(describing: error))
 
             // This might be useless, as userInfoTransfer.userInfo seems to be nil when error is non-nil.
             switch userInfoTransfer.userInfo["name"] as? String {

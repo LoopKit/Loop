@@ -31,7 +31,9 @@ final class LoopDataManager {
 
     weak var delegate: LoopDataManagerDelegate?
 
-    private let logger: CategoryLogger
+    private let logger = DiagnosticLog(category: "LoopDataManager")
+
+    private let analyticsServicesManager: AnalyticsServicesManager
 
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
@@ -51,9 +53,10 @@ final class LoopDataManager {
         insulinSensitivitySchedule: InsulinSensitivitySchedule? = UserDefaults.appGroup?.insulinSensitivitySchedule,
         settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
         overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup?.overrideHistory ?? .init(),
-        lastPumpEventsReconciliation: Date?
+        lastPumpEventsReconciliation: Date?,
+        analyticsServicesManager: AnalyticsServicesManager
     ) {
-        self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
+        self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lockedBasalDeliveryState = Locked(basalDeliveryState)
         self.settings = settings
@@ -150,7 +153,7 @@ final class LoopDataManager {
             }
             UserDefaults.appGroup?.loopSettings = settings
             notify(forChange: .preferences)
-            AnalyticsManager.shared.didChangeLoopSettings(from: oldValue, to: settings)
+            analyticsServicesManager.didChangeLoopSettings(from: oldValue, to: settings)
         }
     }
 
@@ -209,7 +212,7 @@ final class LoopDataManager {
             return lockedBasalDeliveryState.value
         }
         set {
-            self.logger.debug("Updating basalDeliveryState to \(String(describing: newValue))")
+            self.logger.debug("Updating basalDeliveryState to %{public}@", String(describing: newValue))
             lockedBasalDeliveryState.value = newValue
         }
     }
@@ -227,7 +230,7 @@ final class LoopDataManager {
 
             NotificationManager.clearLoopNotRunningNotifications()
             NotificationManager.scheduleLoopNotRunningNotifications()
-            AnalyticsManager.shared.loopDidSucceed()
+            analyticsServicesManager.loopDidSucceed()
             NotificationCenter.default.post(name: .LoopCompleted, object: self)
         }
     }
@@ -236,7 +239,7 @@ final class LoopDataManager {
     fileprivate var lastLoopError: Error? {
         didSet {
             if lastLoopError != nil {
-                AnalyticsManager.shared.loopDidError()
+                analyticsServicesManager.loopDidError()
             }
         }
     }
@@ -304,7 +307,7 @@ extension LoopDataManager {
             notify(forChange: .preferences)
 
             if let newValue = newValue, let oldValue = doseStore.basalProfile, newValue.items != oldValue.items {
-                AnalyticsManager.shared.didChangeBasalRateSchedule()
+                analyticsServicesManager.didChangeBasalRateSchedule()
             }
         }
     }
@@ -357,7 +360,7 @@ extension LoopDataManager {
                 self.notify(forChange: .preferences)
             }
 
-            AnalyticsManager.shared.didChangeInsulinModel()
+            analyticsServicesManager.didChangeInsulinModel()
         }
     }
 
@@ -394,17 +397,17 @@ extension LoopDataManager {
     /// - Parameter timeZone: The time zone
     func setScheduleTimeZone(_ timeZone: TimeZone) {
         if timeZone != basalRateSchedule?.timeZone {
-            AnalyticsManager.shared.punpTimeZoneDidChange()
+            analyticsServicesManager.pumpTimeZoneDidChange()
             basalRateSchedule?.timeZone = timeZone
         }
 
         if timeZone != carbRatioSchedule?.timeZone {
-            AnalyticsManager.shared.punpTimeZoneDidChange()
+            analyticsServicesManager.pumpTimeZoneDidChange()
             carbRatioSchedule?.timeZone = timeZone
         }
 
         if timeZone != insulinSensitivitySchedule?.timeZone {
-            AnalyticsManager.shared.punpTimeZoneDidChange()
+            analyticsServicesManager.pumpTimeZoneDidChange()
             insulinSensitivitySchedule?.timeZone = timeZone
         }
 
@@ -644,7 +647,7 @@ extension LoopDataManager {
                         self.lastLoopError = error
 
                         if let error = error {
-                            self.logger.error(error)
+                            self.logger.error("%{public}@", String(describing: error))
                         } else {
                             self.lastLoopCompleted = Date()
                         }
@@ -707,7 +710,7 @@ extension LoopDataManager {
             doseStore.getGlucoseEffects(start: nextEffectDate) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.error(error)
+                    self.logger.error("%{public}@", String(describing: error))
                     self.insulinEffect = nil
                 case .success(let effects):
                     self.insulinEffect = effects
@@ -721,7 +724,7 @@ extension LoopDataManager {
 
         if nextEffectDate < lastGlucoseDate, let insulinEffect = insulinEffect {
             updateGroup.enter()
-            self.logger.debug("Fetching counteraction effects after \(nextEffectDate)")
+            self.logger.debug("Fetching counteraction effects after %{public}@", String(describing: nextEffectDate))
             glucoseStore.getCounteractionEffects(start: nextEffectDate, to: insulinEffect) { (velocities) in
                 self.insulinCounteractionEffects.append(contentsOf: velocities)
                 self.insulinCounteractionEffects = self.insulinCounteractionEffects.filterDateRange(earliestEffectDate, nil)
@@ -740,7 +743,7 @@ extension LoopDataManager {
             ) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.error(error)
+                    self.logger.error("%{public}@", String(describing: error))
                     self.carbEffect = nil
                 case .success(let effects):
                     self.carbEffect = effects
@@ -770,7 +773,7 @@ extension LoopDataManager {
             do {
                 try updateRetrospectiveGlucoseEffect()
             } catch let error {
-                logger.error(error)
+                logger.error("%{public}@", String(describing: error))
             }
         }
 
@@ -778,7 +781,7 @@ extension LoopDataManager {
             do {
                 try updatePredictedGlucoseAndRecommendedBasalAndBolus()
             } catch let error {
-                logger.error(error)
+                logger.error("%{public}@", String(describing: error))
 
                 throw error
             }
@@ -997,8 +1000,8 @@ extension LoopDataManager {
         )
         
         if let temp = tempBasal {
-            self.logger.default("Current basal state: \(String(describing: basalDeliveryState))")
-            self.logger.default("Recommending temp basal: \(temp) at \(startDate)")
+            self.logger.default("Current basal state: %{public}@", String(describing: basalDeliveryState))
+            self.logger.default("Recommending temp basal: %{public}@ at %{public}@", String(describing: temp), String(describing: startDate))
             recommendedTempBasal = (recommendation: temp, date: startDate)
         } else {
             recommendedTempBasal = nil
@@ -1020,7 +1023,7 @@ extension LoopDataManager {
             volumeRounder: volumeRounder
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
-        self.logger.debug("Recommending bolus: \(String(describing: recommendedBolus))")
+        self.logger.debug("Recommending bolus: %{public}@", String(describing: recommendedBolus))
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
