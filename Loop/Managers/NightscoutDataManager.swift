@@ -50,6 +50,35 @@ final class NightscoutDataManager {
 
         lastSettingsUpdate = Date()
         uploadSettings()
+        uploadOverridesUpdates()
+    }
+    
+    private func uploadOverridesUpdates() {
+        guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
+            return
+        }
+        
+        let (overrides, deletedOverrides, newAnchor) = deviceManager.loopManager.overrideHistory.queryByAnchor(overrideHistoryQueryAnchor)
+        
+        let updates = overrides.map { OverrideTreatment(override: $0) }
+        
+        let deletions = deletedOverrides.map { $0.syncIdentifier.uuidString }
+        uploader.deleteTreatmentsByClientId(deletions, completionHandler: { (error) in
+            if let error = error {
+                self.log.error("Overrides deletions failed to delete %{public}@: %{public}@", String(describing: deletions), String(describing: error))
+            } else {
+                self.log.debug("Deleted ids: %@", deletions)
+                uploader.upload(updates) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failed to upload overrides %{public}@: %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}), String(describing: error))
+                    case .success:
+                        self.log.error("Uploaded overrides %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}))
+                        self.overrideHistoryQueryAnchor = newAnchor
+                    }
+                }
+            }
+        })
     }
 
     private func uploadSettings() {
@@ -132,31 +161,6 @@ final class NightscoutDataManager {
                 }
             }
         }
-        
-        // Upload overrides
-        let (overrides, deletedOverrides, newAnchor) = deviceManager.loopManager.overrideHistory.queryByAnchor(overrideHistoryQueryAnchor)
-        
-        let updates = overrides.map { OverrideTreatment(override: $0) }
-        
-        let deletions = deletedOverrides.map { $0.syncIdentifier.uuidString }
-        uploader.deleteTreatmentsByClientId(deletions, completionHandler: { (error) in
-            if let error = error {
-                self.log.error("Overrides deletions failed to delete %{public}@: %{public}@", String(describing: deletions), String(describing: error))
-            } else {
-                self.log.debug("Deleted ids: %@", deletions)
-            }
-        })
-        uploader.upload(updates) { (result) in
-            switch result {
-            case .failure(let error):
-                self.log.error("Failed to upload overrides %{public}@: %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}), String(describing: error))
-            case .success:
-                // Should join this result with deletion result before updating anchor
-                self.log.error("Uploaded overrides %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}))
-                self.overrideHistoryQueryAnchor = newAnchor
-            }
-        }
-        
     }
 
     @objc func loopCompleted(_ note: Notification) {
@@ -201,6 +205,8 @@ final class NightscoutDataManager {
                 if self.lastSettingsUpdate > self.lastSettingsUpload {
                     self.uploadSettings()
                 }
+                
+                self.uploadOverridesUpdates()
             }
         }
     }
@@ -357,7 +363,6 @@ final class NightscoutDataManager {
         }
         log.default("Uploading loop status")
         upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus(), overrideStatus: overrideStatus)
-
     }
     
     private func getUploaderStatus() -> UploaderStatus {
