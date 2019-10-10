@@ -67,7 +67,9 @@ final class NightscoutDataManager {
             if let error = error {
                 self.log.error("Overrides deletions failed to delete %{public}@: %{public}@", String(describing: deletions), String(describing: error))
             } else {
-                self.log.debug("Deleted ids: %@", deletions)
+                if deletions.count > 0 {
+                    self.log.debug("Deleted ids: %@", deletions)
+                }
                 uploader.upload(updates) { (result) in
                     switch result {
                     case .failure(let error):
