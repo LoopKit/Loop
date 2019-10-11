@@ -75,7 +75,7 @@ final class NightscoutDataManager {
                     case .failure(let error):
                         self.log.error("Failed to upload overrides %{public}@: %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}), String(describing: error))
                     case .success:
-                        self.log.error("Uploaded overrides %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}))
+                        self.log.debug("Uploaded overrides %@", String(describing: updates.map {$0.dictionaryRepresentation}))
                         self.overrideHistoryQueryAnchor = newAnchor
                     }
                 }
