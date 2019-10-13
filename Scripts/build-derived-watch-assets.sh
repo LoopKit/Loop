@@ -5,15 +5,13 @@
 #
 #  Copyright © 2019 LoopKit Authors. All rights reserved.
 
-echo "Building WatchDerivedAssets.xcassets"
+echo "Building DerivedAssets.xcassets for Watch App"
 
-watch_output="${BUILT_PRODUCTS_DIR}/DerivedWatchAssets.xcassets"
-cp -a "${PROJECT_DIR}/WatchApp/DefaultAssets.xcassets/." "$watch_output"
+watch_output="${PROJECT_DIR}/WatchApp/DerivedAssets.xcassets"
 
-
-watch_override="${PROJECT_DIR}/../WatchAssetOverrides.xcassets/."
+watch_override="${PROJECT_DIR}/../AdditionalWatchAssets.xcassets/."
 
 if [ -d $watch_override ]; then
-   echo "Adding asset overrides to DerivedWatchAssets.xcassets"
+   echo "Adding asset overrides to WatchApp/DerivedAssets.xcassets"
    cp -a "$watch_override" "$watch_output"
 fi
