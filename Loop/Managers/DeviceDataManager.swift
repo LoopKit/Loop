@@ -653,3 +653,21 @@ extension Notification.Name {
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 
+// MARK: - Remote Notification Handling
+extension DeviceDataManager {
+    func handleRemoteNotification(_ notification: [String: AnyObject]) {
+        
+        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
+            switch command {
+            case .temporaryScheduleOverride(let override):
+                log.default("Enacting remote temporary override: \(override)")
+                loopManager.settings.scheduleOverride = override
+            case .cancelTemporaryOverride:
+                log.default("Canceling temporary override from remote command")
+                loopManager.settings.scheduleOverride = nil
+            }
+        } else {
+            log.info("Unhandled remote notification: \(notification)")
+        }
+    }
+}
