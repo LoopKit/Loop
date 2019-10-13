@@ -54,7 +54,11 @@ public struct LoopSettings: Equatable {
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
-
+    
+    // MARK - Push Notifications
+    
+    public var deviceToken: Data?
+    
     // MARK - Guardrails
 
     public func allowedSensitivityValues(for unit: HKUnit) -> [Double] {
@@ -136,7 +140,9 @@ extension LoopSettings {
             context: .preMeal,
             settings: TemporaryScheduleOverrideSettings(unit: unit, targetRange: premealTargetRange),
             startDate: date,
-            duration: .finite(duration)
+            duration: .finite(duration),
+            enactTrigger: .local,
+            syncIdentifier: UUID()
         )
     }
 
@@ -152,7 +158,9 @@ extension LoopSettings {
             context: .legacyWorkout,
             settings: TemporaryScheduleOverrideSettings(unit: unit, targetRange: legacyWorkoutTargetRange),
             startDate: date,
-            duration: duration.isInfinite ? .indefinite : .finite(duration)
+            duration: duration.isInfinite ? .indefinite : .finite(duration),
+            enactTrigger: .local,
+            syncIdentifier: UUID()
         )
     }
 
