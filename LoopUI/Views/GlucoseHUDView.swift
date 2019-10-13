@@ -96,16 +96,22 @@ public final class GlucoseHUDView: BaseHUDView {
 
         let time = timeFormatter.string(from: glucoseStartDate)
         caption?.text = time
+        
+        let sensorDataCurrent = glucoseStartDate.timeIntervalSinceNow > TimeInterval(minutes: -15)
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: glucoseQuantity) {
-            glucoseLabel.text = valueString
+            if sensorDataCurrent {
+                glucoseLabel.text = valueString
+            } else {
+                glucoseLabel.text = "-"
+            }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
         var unitStrings = [unit.localizedShortUnitString]
 
-        if let trend = sensor?.trendType {
+        if let trend = sensor?.trendType, sensorDataCurrent {
             unitStrings.append(trend.symbol)
             accessibilityStrings.append(trend.localizedDescription)
         }
