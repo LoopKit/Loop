@@ -41,6 +41,10 @@ public struct LoopSettings: Equatable {
 
     public let batteryReplacementDetectionThreshold = 0.5
 
+    public let defaultWatchCarbPickerValue = 15 // grams
+
+    public let defaultWatchBolusPickerValue = 1.0 // %
+
     // MARK - Display settings
 
     public let minimumChartWidthPerHour: CGFloat = 50
