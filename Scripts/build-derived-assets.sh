@@ -8,10 +8,9 @@
 
 echo "Building DerivedAssets.xcassets"
 
-output="${BUILT_PRODUCTS_DIR}/DerivedAssets.xcassets"
-cp -a "${PROJECT_DIR}/Loop/DefaultAssets.xcassets/." "$output"
+output="${PROJECT_DIR}/Loop/DerivedAssets.xcassets"
 
-override="${PROJECT_DIR}/../AssetOverrides.xcassets/."
+override="${PROJECT_DIR}/../AdditionalAssets.xcassets/."
 
 if [ -d $override ]; then
    echo "Adding asset overrides to DerivedAssets.xcassets"
