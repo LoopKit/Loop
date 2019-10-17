@@ -18,7 +18,7 @@ final class NightscoutDataManager {
     unowned let deviceManager: DeviceDataManager
 
     private let log = OSLog(category: "NightscoutDataManager")
-    
+
     // Last time we uploaded device status
     var lastDeviceStatusUpload: Date?
 
@@ -27,6 +27,9 @@ final class NightscoutDataManager {
 
     // Last time settings were updated
     var lastSettingsUpdate: Date = .distantPast
+    
+    // Override history query anchor
+    var overrideHistoryQueryAnchor: TemporaryScheduleOverrideHistory.QueryAnchor?
 
     init(deviceDataManager: DeviceDataManager) {
         self.deviceManager = deviceDataManager
@@ -47,12 +50,44 @@ final class NightscoutDataManager {
 
         lastSettingsUpdate = Date()
         uploadSettings()
+        uploadOverridesUpdates()
+    }
+    
+    private func uploadOverridesUpdates() {
+        guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
+            return
+        }
+        
+        let (overrides, deletedOverrides, newAnchor) = deviceManager.loopManager.overrideHistory.queryByAnchor(overrideHistoryQueryAnchor)
+        
+        let updates = overrides.map { OverrideTreatment(override: $0) }
+        
+        let deletions = deletedOverrides.map { $0.syncIdentifier.uuidString }
+        uploader.deleteTreatmentsByClientId(deletions, completionHandler: { (error) in
+            if let error = error {
+                self.log.error("Overrides deletions failed to delete %{public}@: %{public}@", String(describing: deletions), String(describing: error))
+            } else {
+                if deletions.count > 0 {
+                    self.log.debug("Deleted ids: %@", deletions)
+                }
+                uploader.upload(updates) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("Failed to upload overrides %{public}@: %{public}@", String(describing: updates.map {$0.dictionaryRepresentation}), String(describing: error))
+                    case .success:
+                        self.log.debug("Uploaded overrides %@", String(describing: updates.map {$0.dictionaryRepresentation}))
+                        self.overrideHistoryQueryAnchor = newAnchor
+                    }
+                }
+            }
+        })
     }
 
     private func uploadSettings() {
+        let settings = deviceManager.loopManager.settings
+        
         guard
             let uploader = deviceManager.remoteDataManager.nightscoutService.uploader,
-            let settings = UserDefaults.appGroup?.loopSettings,
             let basalRateSchedule = UserDefaults.appGroup?.basalRateSchedule,
             let insulinModelSettings = UserDefaults.appGroup?.insulinModelSettings,
             let carbRatioSchedule = UserDefaults.appGroup?.carbRatioSchedule,
@@ -63,7 +98,7 @@ final class NightscoutDataManager {
             log.default("Not uploading due to incomplete configuration")
             return
         }
-
+        
         let targetLowItems = correctionSchedule.items.map { (item) -> ProfileSet.ScheduleItem in
             return ProfileSet.ScheduleItem(offset: item.startTime, value: item.value.minValue)
         }
@@ -90,7 +125,9 @@ final class NightscoutDataManager {
             minimumBGGuard: settings.suspendThreshold?.quantity.doubleValue(for: preferredUnit),
             preMealTargetRange: nsPreMealTargetRange,
             maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
-            maximumBolus: settings.maximumBolus)
+            maximumBolus: settings.maximumBolus,
+            deviceToken: settings.deviceToken,
+            bundleIdentifier: Bundle.main.bundleIdentifier)
 
         let profile = ProfileSet.Profile(
             timezone: basalRateSchedule.timeZone,
@@ -136,6 +173,7 @@ final class NightscoutDataManager {
         deviceManager.loopManager.getLoopState { (manager, state) in
             var loopError = state.error
             let recommendedBolus: Double?
+            
 
             recommendedBolus = state.recommendedBolus?.recommendation.amount
 
@@ -169,6 +207,8 @@ final class NightscoutDataManager {
                 if self.lastSettingsUpdate > self.lastSettingsUpload {
                     self.uploadSettings()
                 }
+                
+                self.uploadOverridesUpdates()
             }
         }
     }
@@ -179,8 +219,7 @@ final class NightscoutDataManager {
         insulinOnBoard: InsulinValue? = nil,
         carbsOnBoard: CarbValue? = nil,
         predictedGlucose: [GlucoseValue]? = nil,
-        recommendedTempBasal: (recommendation: TempBasalRecommendation,
-        date: Date)? = nil,
+        recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)? = nil,
         recommendedBolus: Double? = nil,
         loopError: Error? = nil)
     {
@@ -236,10 +275,10 @@ final class NightscoutDataManager {
         let loopName = Bundle.main.bundleDisplayName
         let loopVersion = Bundle.main.shortVersionString
 
+        //this is the only pill that has the option to modify the text
+        //to do that pass a different name value instead of loopName
         let loopStatus = LoopStatus(name: loopName, version: loopVersion, timestamp: statusTime, iob: iob, cob: cob, predicted: predicted, recommendedTempBasal: recommended, recommendedBolus: recommendedBolus, enacted: loopEnacted, failureReason: loopError)
-       
-        
-        
+
         let pumpStatus: NightscoutUploadKit.PumpStatus?
         
         if let pumpManagerStatus = deviceManager.pumpManagerStatus
@@ -281,9 +320,51 @@ final class NightscoutDataManager {
         } else {
             pumpStatus = nil
         }
-
+        
+        //add overrideStatus
+        let overrideStatus: NightscoutUploadKit.OverrideStatus?
+        let settings = deviceManager.loopManager.settings
+        let unit: HKUnit = settings.glucoseTargetRangeSchedule?.unit ?? HKUnit.milligramsPerDeciliter
+        if let override = settings.scheduleOverride, override.isActive(),
+            let range = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive?.value(at: Date()) {
+            let lowerTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.minValue)
+            let upperTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.maxValue)
+            let correctionRange = CorrectionRange(minValue: lowerTarget, maxValue: upperTarget)
+            let endDate = override.endDate
+            let duration : TimeInterval?
+            if override.duration == .indefinite {
+                duration = nil
+            }
+            else
+            {
+                duration = round(endDate.timeIntervalSince(Date()))
+                
+            }
+            let name : String?
+            
+            switch override.context {
+            case .preMeal:
+                name = "preMeal"
+            case .custom:
+                name = "Custom"
+            case .preset(let preset):
+                name = preset.name
+            case .legacyWorkout:
+                name = "Workout"
+            }
+            
+            
+            overrideStatus = NightscoutUploadKit.OverrideStatus(name: name, timestamp: Date(), active: true, currentCorrectionRange: correctionRange, duration: duration, multiplier: override.settings.insulinNeedsScaleFactor)
+            
+        }
+        
+        else
+        
+        {
+            overrideStatus = NightscoutUploadKit.OverrideStatus(timestamp: Date(), active: false)
+        }
         log.default("Uploading loop status")
-        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus())
+        upload(pumpStatus: pumpStatus, loopStatus: loopStatus, deviceName: nil, firmwareVersion: nil, uploaderStatus: getUploaderStatus(), overrideStatus: overrideStatus)
     }
     
     private func getUploaderStatus() -> UploaderStatus {
@@ -299,7 +380,11 @@ final class NightscoutDataManager {
         return UploaderStatus(name: uploaderDevice.name, timestamp: Date(), battery: battery)
     }
 
-    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?) {
+    func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, deviceName: String?, firmwareVersion: String?) {
+        upload(pumpStatus: pumpStatus, loopStatus: nil, deviceName: deviceName, firmwareVersion: firmwareVersion, uploaderStatus: nil, overrideStatus: nil)
+    }
+
+    private func upload(pumpStatus: NightscoutUploadKit.PumpStatus?, loopStatus: LoopStatus?, deviceName: String?, firmwareVersion: String?, uploaderStatus: UploaderStatus?, overrideStatus: OverrideStatus?) {
 
         guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
             return
@@ -315,7 +400,7 @@ final class NightscoutDataManager {
         let uploaderDevice = UIDevice.current
 
         // Build DeviceStatus
-        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: nil)
+        let deviceStatus = DeviceStatus(device: "loop://\(uploaderDevice.name)", timestamp: Date(), pumpStatus: pumpStatus, uploaderStatus: uploaderStatus, loopStatus: loopStatus, radioAdapter: nil, overrideStatus: overrideStatus)
 
         self.lastDeviceStatusUpload = Date()
         uploader.uploadDeviceStatus(deviceStatus)
@@ -363,15 +448,16 @@ private extension Array where Element == RepeatingScheduleValue<Double> {
     }
 }
 
+// Likely this will be deprecated, in favor of override history uploading to NS treatments
 private extension LoopKit.TemporaryScheduleOverride {
     func nsScheduleOverride(for unit: HKUnit) -> NightscoutUploadKit.TemporaryScheduleOverride {
-        let nsTargetRange: ClosedRange<Double>?
+        let nsCorrectionRange: ClosedRange<Double>?
         if let targetRange = settings.targetRange {
-            nsTargetRange = ClosedRange(uncheckedBounds: (
+            nsCorrectionRange = ClosedRange(uncheckedBounds: (
                 lower: targetRange.lowerBound.doubleValue(for: unit),
                 upper: targetRange.upperBound.doubleValue(for: unit)))
         } else {
-            nsTargetRange = nil
+            nsCorrectionRange = nil
         }
 
         let nsDuration: TimeInterval
@@ -401,23 +487,23 @@ private extension LoopKit.TemporaryScheduleOverride {
         }
 
         return NightscoutUploadKit.TemporaryScheduleOverride(
-            targetRange: nsTargetRange,
+            duration: nsDuration,
+            targetRange: nsCorrectionRange,
             insulinNeedsScaleFactor: settings.insulinNeedsScaleFactor,
             symbol: symbol,
-            duration: nsDuration,
             name: name)
     }
 }
 
 private extension LoopKit.TemporaryScheduleOverridePreset {
     func nsScheduleOverride(for unit: HKUnit) -> NightscoutUploadKit.TemporaryScheduleOverride {
-        let nsTargetRange: ClosedRange<Double>?
+        let nsCorrectionRange: ClosedRange<Double>?
         if let targetRange = settings.targetRange {
-            nsTargetRange = ClosedRange(uncheckedBounds: (
+            nsCorrectionRange = ClosedRange(uncheckedBounds: (
                 lower: targetRange.lowerBound.doubleValue(for: unit),
                 upper: targetRange.upperBound.doubleValue(for: unit)))
         } else {
-            nsTargetRange = nil
+            nsCorrectionRange = nil
         }
 
         let nsDuration: TimeInterval
@@ -429,11 +515,59 @@ private extension LoopKit.TemporaryScheduleOverridePreset {
         }
 
         return NightscoutUploadKit.TemporaryScheduleOverride(
-            targetRange: nsTargetRange,
+            duration: nsDuration,
+            targetRange: nsCorrectionRange,
             insulinNeedsScaleFactor: settings.insulinNeedsScaleFactor,
             symbol: self.symbol,
-            duration: nsDuration,
             name: self.name)
     }
 }
 
+private extension OverrideTreatment {
+    convenience init(override: LoopKit.TemporaryScheduleOverride) {
+        
+        // NS Treatments should be in mg/dL
+        let unit: HKUnit = .milligramsPerDeciliter
+        
+        let nsTargetRange: ClosedRange<Double>?
+        if let targetRange = override.settings.targetRange {
+            nsTargetRange = ClosedRange(uncheckedBounds: (
+                lower: targetRange.lowerBound.doubleValue(for: unit),
+                upper: targetRange.upperBound.doubleValue(for: unit)))
+        } else {
+            nsTargetRange = nil
+        }
+        
+        let reason: String
+        switch override.context {
+        case .custom:
+            reason = NSLocalizedString("Custom Override", comment: "Name of custom override")
+        case .legacyWorkout:
+            reason = NSLocalizedString("Workout", comment: "Name of legacy workout override")
+        case .preMeal:
+            reason = NSLocalizedString("Pre-Meal", comment: "Name of pre-meal workout override")
+        case .preset(let preset):
+            reason = preset.symbol + " " + preset.name
+        }
+        
+        let remoteAddress: String?
+        let enteredBy: String
+        if case .remote(let address) = override.enactTrigger {
+            remoteAddress = address
+            enteredBy = "Loop (via remote command)"
+        } else {
+            remoteAddress = nil
+            enteredBy = "Loop"
+        }
+        
+        let duration: OverrideTreatment.Duration
+        switch override.duration {
+        case .finite(let time):
+            duration = .finite(time)
+        case .indefinite:
+            duration = .indefinite
+        }
+        
+        self.init(startDate: override.startDate, enteredBy: enteredBy, reason: reason, duration: duration, correctionRange: nsTargetRange, insulinNeedsScaleFactor: override.settings.insulinNeedsScaleFactor, remoteAddress:remoteAddress, id: override.syncIdentifier.uuidString)
+    }
+}

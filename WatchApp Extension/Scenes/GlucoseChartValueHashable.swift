@@ -12,8 +12,8 @@ import HealthKit
 protocol GlucoseChartValueHashable {
     var start: Date { get }
     var end: Date { get }
-    var min: Double { get } // milligramsPerDeciliter
-    var max: Double { get } // milligramsPerDeciliter
+    var min: HKQuantity { get }
+    var max: HKQuantity { get }
 
     var chartHashValue: Int { get }
 }
@@ -22,9 +22,10 @@ extension GlucoseChartValueHashable {
     var chartHashValue: Int {
         var hashValue = start.timeIntervalSinceReferenceDate.hashValue
         hashValue ^= end.timeIntervalSince(start).hashValue
-        hashValue ^= min.hashValue
+        // HKQuantity.hashValue returns 0, so we need to convert
+        hashValue ^= min.doubleValue(for: .milligramsPerDeciliter).hashValue
         if min != max {
-            hashValue ^= max.hashValue
+            hashValue ^= max.doubleValue(for: .milligramsPerDeciliter).hashValue
         }
         return hashValue
     }
@@ -66,25 +67,23 @@ extension AbsoluteScheduleValue: GlucoseChartValueHashable where T == ClosedRang
         return endDate
     }
 
-    var min: Double {
-        return value.lowerBound.doubleValue(for: .milligramsPerDeciliter)
+    var min: HKQuantity {
+        return value.lowerBound
     }
 
-    var max: Double {
-        return value.upperBound.doubleValue(for: .milligramsPerDeciliter)
+    var max: HKQuantity {
+        return value.upperBound
     }
 }
 
 struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
     let override: TemporaryScheduleOverride
-    let unit: HKUnit
 
-    init?(_ override: TemporaryScheduleOverride, unit: HKUnit) {
+    init?(_ override: TemporaryScheduleOverride) {
         guard override.settings.targetRange != nil else {
             return nil
         }
         self.override = override
-        self.unit = unit
     }
 
     var start: Date {
@@ -95,11 +94,11 @@ struct TemporaryScheduleOverrideHashable: GlucoseChartValueHashable {
         return override.activeInterval.end
     }
 
-    var min: Double {
-        return override.settings.targetRange!.lowerBound.doubleValue(for: unit)
+    var min: HKQuantity {
+        return override.settings.targetRange!.lowerBound
     }
 
-    var max: Double {
-        return override.settings.targetRange!.upperBound.doubleValue(for: unit)
+    var max: HKQuantity {
+        return override.settings.targetRange!.upperBound
     }
 }

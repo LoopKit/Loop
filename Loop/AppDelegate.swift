@@ -25,15 +25,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        window?.tintColor = UIColor.tintColor
-
         NotificationManager.authorize(delegate: self)
-
+        
         log.info(#function)
 
         AnalyticsManager.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         rootViewController.rootViewController.deviceManager = deviceManager
+        
+        let notificationOption = launchOptions?[.remoteNotification]
+        
+        if let notification = notificationOption as? [String: AnyObject] {
+            deviceManager.handleRemoteNotification(notification)
+        }
 
         return true
     }
@@ -76,6 +80,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return false
         }
     }
+    
+    // MARK: - Remote notifications
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
+        let token = tokenParts.joined()
+        log.default("RemoteNotifications device token: \(token)")
+        deviceManager.loopManager.settings.deviceToken = deviceToken
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        log.error("Failed to register: \(error)")
+    }
+    
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        guard let notification = userInfo as? [String: AnyObject] else {
+            completionHandler(.failed)
+            return
+        }
+      
+        deviceManager.handleRemoteNotification(notification)
+        completionHandler(.noData)
+    }
+
 }
 
 
@@ -104,4 +134,5 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.badge, .sound, .alert])
     }
+    
 }

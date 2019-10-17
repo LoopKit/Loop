@@ -54,9 +54,8 @@ public class BolusProgressTableViewCell: UITableViewCell {
         super.awakeFromNib()
 
         gradient.frame = bounds
-        gradient.colors = [UIColor.white.cgColor, UIColor.cellBackgroundColor.cgColor]
         backgroundView?.layer.insertSublayer(gradient, at: 0)
-        updateProgressColor()
+        updateColors()
     }
 
     override public func layoutSubviews() {
@@ -67,13 +66,23 @@ public class BolusProgressTableViewCell: UITableViewCell {
 
     public override func tintColorDidChange() {
         super.tintColorDidChange()
-        updateProgressColor()
+        updateColors()
     }
 
-    private func updateProgressColor() {
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        updateColors()
+    }
+
+    private func updateColors() {
         progressIndicator.startColor = tintColor
         progressIndicator.endColor = tintColor
         stopSquare.backgroundColor = tintColor
+        gradient.colors = [
+            UIColor.cellBackgroundColor.withAlphaComponent(0).cgColor,
+            UIColor.cellBackgroundColor.cgColor
+        ]
     }
 
     private func updateProgress() {

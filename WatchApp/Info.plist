@@ -17,11 +17,15 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.10.0dev</string>
+	<string>$(LOOP_MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.loopkit.Loop.AddCarbEntryOnWatch</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -31,9 +35,5 @@
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
 	<key>WKWatchKitApp</key>
 	<true/>
-	<key>NSUserActivityTypes</key>
-	<array>
-		<string>com.loopkit.Loop.AddCarbEntryOnWatch</string>
-	</array>
 </dict>
 </plist>

@@ -14,25 +14,13 @@ extension UserDefaults {
         case pumpManagerState = "com.loopkit.Loop.PumpManagerState"
     }
 
-    var pumpManager: PumpManager? {
+    var pumpManagerRawValue: [String: Any]? {
         get {
-            guard let rawValue = dictionary(forKey: Key.pumpManagerState.rawValue) else {
-                return nil
-            }
-
-            return PumpManagerFromRawValue(rawValue)
+            return dictionary(forKey: Key.pumpManagerState.rawValue)
         }
         set {
-            set(newValue?.rawValue, forKey: Key.pumpManagerState.rawValue)
+            set(newValue, forKey: Key.pumpManagerState.rawValue)
         }
-    }
-
-    var isCGMManagerValidPumpManager: Bool {
-        guard let rawValue = cgmManagerState else {
-            return false
-        }
-
-        return PumpManagerTypeFromRawValue(rawValue) != nil
     }
 
     var cgmManager: CGMManager? {

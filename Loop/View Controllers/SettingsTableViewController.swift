@@ -26,18 +26,8 @@ final class SettingsTableViewController: UITableViewController {
 
         tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
         tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
+        tableView.register(SwitchTableViewCell.self, forCellReuseIdentifier: SwitchTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        if clearsSelectionOnViewWillAppear {
-            // Manually invoke the delegate for rows deselecting on appear
-            for indexPath in tableView.indexPathsForSelectedRows ?? [] {
-                _ = tableView(tableView, willDeselectRowAt: indexPath)
-            }
-        }
-
-        super.viewWillAppear(animated)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -172,6 +162,7 @@ final class SettingsTableViewController: UITableViewController {
             case .dosing:
                 let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
 
+                switchCell.selectionStyle = .none
                 switchCell.switch?.isOn = dataManager.loopManager.settings.dosingEnabled
                 switchCell.textLabel?.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
@@ -380,21 +371,25 @@ final class SettingsTableViewController: UITableViewController {
                 if var settings = dataManager.pumpManager?.settingsViewController() {
                     settings.completionDelegate = self
                     present(settings, animated: true)
+                    tableView.deselectRow(at: indexPath, animated: true)
                 } else {
                     // Add new pump
-                    let pumpManagers = allPumpManagers.compactMap({ $0 as? PumpManagerUI.Type })
+                    let pumpManagers = dataManager.availablePumpManagers
 
                     switch pumpManagers.count {
                     case 1:
-                        if let PumpManagerType = pumpManagers.first {
+                        if let pumpManager = pumpManagers.first, let PumpManagerType = dataManager.pumpManagerTypeByIdentifier(pumpManager.identifier) {
+
                             let setupViewController = configuredSetupViewController(for: PumpManagerType)
                             present(setupViewController, animated: true, completion: nil)
                         }
+                        tableView.deselectRow(at: indexPath, animated: true)
                     case let x where x > 1:
-                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (manager) in
-                            if let self = self {
+                        let alert = UIAlertController(pumpManagers: pumpManagers) { [weak self] (identifier) in
+                            if let self = self, let manager = self.dataManager.pumpManagerTypeByIdentifier(identifier) {
                                 let setupViewController = self.configuredSetupViewController(for: manager)
                                 self.present(setupViewController, animated: true, completion: nil)
+                                self.tableView.deselectRow(at: indexPath, animated: true)
                             }
                         }
 
@@ -414,6 +409,7 @@ final class SettingsTableViewController: UITableViewController {
                     var settings = cgmManager.settingsViewController(for: unit)
                     settings.completionDelegate = self
                     present(settings, animated: true)
+                    tableView.deselectRow(at: indexPath, animated: true)
                 }
             } else if dataManager.cgmManager is PumpManagerUI {
                 // The pump manager is providing glucose, but allow reverting the CGM
@@ -423,7 +419,7 @@ final class SettingsTableViewController: UITableViewController {
                     }
 
                     tableView.deselectRow(at: indexPath, animated: true)
-                    _ = self?.tableView(tableView, willDeselectRowAt: indexPath)
+                    self?.updateCGMManagerRows()
                 })
                 present(alert, animated: true, completion: nil)
             } else {
@@ -433,15 +429,19 @@ final class SettingsTableViewController: UITableViewController {
                 switch cgmManagers.count {
                 case 1:
                     if let CGMManagerType = cgmManagers.first {
-                        setupCGMManager(CGMManagerType, indexPath: indexPath)
+                        setupCGMManager(CGMManagerType)
                     }
+
+                    tableView.deselectRow(at: indexPath, animated: true)
                 case let x where x > 1:
                     let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: dataManager.pumpManager as? CGMManager) { [weak self] (cgmManager, pumpManager) in
                         if let CGMManagerType = cgmManager {
-                            self?.setupCGMManager(CGMManagerType, indexPath: indexPath)
+                            self?.setupCGMManager(CGMManagerType)
                         } else if let pumpManager = pumpManager {
-                            self?.completeCGMManagerSetup(pumpManager, indexPath: indexPath)
+                            self?.completeCGMManagerSetup(pumpManager)
                         }
+
+                        tableView.deselectRow(at: indexPath, animated: true)
                     }
 
                     alert.addCancelAction { (_) in
@@ -617,64 +617,71 @@ final class SettingsTableViewController: UITableViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, willDeselectRowAt indexPath: IndexPath) -> IndexPath? {
-        switch sections[indexPath.section] {
-        case .loop:
-            break
-        case .pump:
-            let previousTestingPumpDataDeletionSection = sections.firstIndex(of: .testingPumpDataDeletion)
-            let wasTestingPumpManager = isTestingPumpManager
-            isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
-            if !wasTestingPumpManager, isTestingPumpManager {
-                guard let testingPumpDataDeletionSection = sections.firstIndex(of: .testingPumpDataDeletion) else {
-                    fatalError("Expected to find testing pump data deletion section with testing pump in use")
-                }
-                tableView.insertSections([testingPumpDataDeletionSection], with: .automatic)
-            } else if wasTestingPumpManager, !isTestingPumpManager {
-                guard let previousTestingPumpDataDeletionSection = previousTestingPumpDataDeletionSection else {
-                    fatalError("Expected to have had testing pump data deletion section when testing pump was in use")
-                }
-                tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
-            }
-            tableView.reloadSections([Section.pump.rawValue], with: .fade)
-            tableView.reloadSections([Section.cgm.rawValue], with: .fade)
-        case .cgm:
-            let previousTestingCGMDataDeletionSection = sections.firstIndex(of: .testingCGMDataDeletion)
-            let wasTestingCGMManager = isTestingCGMManager
-            isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
-            if !wasTestingCGMManager, isTestingCGMManager {
-                guard let testingCGMDataDeletionSection = sections.firstIndex(of: .testingCGMDataDeletion) else {
-                    fatalError("Expected to find testing CGM data deletion section with testing CGM in use")
-                }
-                tableView.insertSections([testingCGMDataDeletionSection], with: .automatic)
-            } else if wasTestingCGMManager, !isTestingCGMManager {
-                guard let previousTestingCGMDataDeletionSection = previousTestingCGMDataDeletionSection else {
-                    fatalError("Expected to have had testing CGM data deletion section when testing CGM was in use")
-                }
-                tableView.deleteSections([previousTestingCGMDataDeletionSection], with: .automatic)
-            }
-            tableView.reloadRows(at: [indexPath], with: .fade)
-        case .configuration:
-            break
-        case .services:
-            break
-        case .testingPumpDataDeletion, .testingCGMDataDeletion:
-            break
-        }
-
-        return indexPath
-    }
-
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
 }
 
+// MARK: - DeviceManager view controller delegation
+
 extension SettingsTableViewController: CompletionDelegate {
     func completionNotifyingDidComplete(_ object: CompletionNotifying) {
-        if let vc = object as? UIViewController {
-            vc.dismiss(animated: true, completion: nil)
+        if let vc = object as? UIViewController, presentedViewController === vc {
+            dismiss(animated: true, completion: nil)
+
+            updateSelectedDeviceManagerRows()
         }
+    }
+
+    private func updateSelectedDeviceManagerRows() {
+        updatePumpManagerRows()
+        updateCGMManagerRows()
+    }
+
+    private func updatePumpManagerRows() {
+        tableView.beginUpdates()
+
+        let previousTestingPumpDataDeletionSection = sections.firstIndex(of: .testingPumpDataDeletion)
+        let wasTestingPumpManager = isTestingPumpManager
+        isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
+        if !wasTestingPumpManager, isTestingPumpManager {
+            guard let testingPumpDataDeletionSection = sections.firstIndex(of: .testingPumpDataDeletion) else {
+                fatalError("Expected to find testing pump data deletion section with testing pump in use")
+            }
+            tableView.insertSections([testingPumpDataDeletionSection], with: .automatic)
+        } else if wasTestingPumpManager, !isTestingPumpManager {
+            guard let previousTestingPumpDataDeletionSection = previousTestingPumpDataDeletionSection else {
+                fatalError("Expected to have had testing pump data deletion section when testing pump was in use")
+            }
+            tableView.deleteSections([previousTestingPumpDataDeletionSection], with: .automatic)
+        }
+
+
+        tableView.reloadSections([Section.pump.rawValue], with: .fade)
+        tableView.reloadSections([Section.cgm.rawValue], with: .fade)
+        tableView.endUpdates()
+    }
+
+    private func updateCGMManagerRows() {
+        tableView.beginUpdates()
+
+        let previousTestingCGMDataDeletionSection = sections.firstIndex(of: .testingCGMDataDeletion)
+        let wasTestingCGMManager = isTestingCGMManager
+        isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
+        if !wasTestingCGMManager, isTestingCGMManager {
+            guard let testingCGMDataDeletionSection = sections.firstIndex(of: .testingCGMDataDeletion) else {
+                fatalError("Expected to find testing CGM data deletion section with testing CGM in use")
+            }
+            tableView.insertSections([testingCGMDataDeletionSection], with: .automatic)
+        } else if wasTestingCGMManager, !isTestingCGMManager {
+            guard let previousTestingCGMDataDeletionSection = previousTestingCGMDataDeletionSection else {
+                fatalError("Expected to have had testing CGM data deletion section when testing CGM was in use")
+            }
+            tableView.deleteSections([previousTestingCGMDataDeletionSection], with: .automatic)
+        }
+
+        tableView.reloadSections([Section.cgm.rawValue], with: .fade)
+        tableView.endUpdates()
     }
 }
 
@@ -682,7 +689,6 @@ extension SettingsTableViewController: CompletionDelegate {
 extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
     func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController, didSetUpPumpManager pumpManager: PumpManagerUI) {
         dataManager.pumpManager = pumpManager
-        tableView.selectRow(at: IndexPath(row: PumpRow.pumpSettings.rawValue, section: Section.pump.rawValue), animated: false, scrollPosition: .none)
 
         if let basalRateSchedule = pumpManagerSetupViewController.basalSchedule {
             dataManager.loopManager.basalRateSchedule = basalRateSchedule
@@ -703,26 +709,24 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
 
 
 extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
-    fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type, indexPath: IndexPath) {
+    fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type) {
         if var setupViewController = CGMManagerType.setupViewController() {
             setupViewController.setupDelegate = self
             setupViewController.completionDelegate = self
             present(setupViewController, animated: true, completion: nil)
         } else {
-            completeCGMManagerSetup(CGMManagerType.init(rawState: [:]), indexPath: indexPath)
+            completeCGMManagerSetup(CGMManagerType.init(rawState: [:]))
         }
     }
 
-    fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?, indexPath: IndexPath) {
+    fileprivate func completeCGMManagerSetup(_ cgmManager: CGMManager?) {
         dataManager.cgmManager = cgmManager
-        tableView.deselectRow(at: indexPath, animated: true)
-        _ = self.tableView(tableView, willDeselectRowAt: indexPath)
+
+        updateSelectedDeviceManagerRows()
     }
 
     func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
-        dataManager.cgmManager = cgmManager
-        tableView.selectRow(at: IndexPath(row: CGMRow.cgmSettings.rawValue, section: Section.cgm.rawValue), animated: false, scrollPosition: .none)
-        dismiss(animated: true, completion: nil)
+        completeCGMManagerSetup(cgmManager)
     }
 }
 

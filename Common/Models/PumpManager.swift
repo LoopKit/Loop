@@ -7,37 +7,24 @@
 
 import Foundation
 import LoopKit
-import MinimedKit
-import OmniKit
 import MockKit
 
+public struct AvailableDevice {
+    let identifier: String
+    let localizedTitle: String
+}
 
-let allPumpManagers: [PumpManager.Type] = [
-    OmnipodPumpManager.self,
-    MinimedPumpManager.self,
+
+let staticPumpManagers: [PumpManager.Type] = [
     MockPumpManager.self,
 ]
 
-private let managersByIdentifier: [String: PumpManager.Type] = allPumpManagers.reduce(into: [:]) { (map, Type) in
+let staticPumpManagersByIdentifier: [String: PumpManager.Type] = staticPumpManagers.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
 }
 
-func PumpManagerTypeFromRawValue(_ rawValue: [String: Any]) -> PumpManager.Type? {
-    guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
-        return nil
-    }
-
-    return managersByIdentifier[managerIdentifier]
-}
-
-func PumpManagerFromRawValue(_ rawValue: [String: Any]) -> PumpManager? {
-    guard let rawState = rawValue["state"] as? PumpManager.RawStateValue,
-        let Manager = PumpManagerTypeFromRawValue(rawValue)
-    else {
-        return nil
-    }
-
-    return Manager.init(rawState: rawState)
+let availableStaticPumpManagers = staticPumpManagers.map { (Type) -> AvailableDevice in
+    return AvailableDevice(identifier: Type.managerIdentifier, localizedTitle: Type.localizedTitle)
 }
 
 extension PumpManager {
