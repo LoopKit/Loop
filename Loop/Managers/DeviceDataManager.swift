@@ -259,6 +259,10 @@ extension DeviceDataManager {
     func updatePumpManagerBLEHeartbeatPreference() {
         pumpManager?.setMustProvideBLEHeartbeat(pumpManagerMustProvideBLEHeartbeat)
     }
+    
+    func acknowledgeCGMAlert(alertID: Int) {
+        cgmManager?.acknowledgeAlert(alertID: alertID)
+    }
 }
 
 // MARK: - DeviceManagerDelegate

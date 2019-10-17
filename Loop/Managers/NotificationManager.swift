@@ -14,11 +14,7 @@ struct NotificationManager {
 
     enum Action: String {
         case retryBolus
-    }
-
-    enum UserInfoKey: String {
-        case bolusAmount
-        case bolusStartDate
+        case acknowledgeCGMAlert
     }
 
     private static var notificationCategories: Set<UNNotificationCategory> {
@@ -36,15 +32,34 @@ struct NotificationManager {
             intentIdentifiers: [],
             options: []
         ))
+        
+        let acknowledgeCGMAlertAction = UNNotificationAction(
+            identifier: Action.acknowledgeCGMAlert.rawValue,
+            title: NSLocalizedString("OK", comment: "The title of the notification action to acknowledge a cgm alert"),
+            options: []
+        )
+        
+        categories.append(UNNotificationCategory(
+            identifier: LoopNotificationCategory.cgmAlert.rawValue,
+            actions: [acknowledgeCGMAlertAction],
+            intentIdentifiers: [],
+            options: []
+        ))
 
         return Set(categories)
     }
 
     static func authorize(delegate: UNUserNotificationCenterDelegate) {
+        var authOptions: UNAuthorizationOptions
+        if #available(iOS 12.0, *) {
+            authOptions = [.alert, .badge, .sound, .criticalAlert]
+        } else {
+            authOptions = [.alert, .badge, .sound]
+        }
+        
         let center = UNUserNotificationCenter.current()
-
         center.delegate = delegate
-        center.requestAuthorization(options: [.badge, .sound, .alert], completionHandler: { _, _ in })
+        center.requestAuthorization(options: authOptions, completionHandler: { _, _ in })
         center.setNotificationCategories(notificationCategories)
     }
 
@@ -85,8 +100,8 @@ struct NotificationManager {
         }
 
         notification.userInfo = [
-            UserInfoKey.bolusAmount.rawValue: units,
-            UserInfoKey.bolusStartDate.rawValue: startDate
+            LoopNotificationUserInfoKey.rawValue: units,
+            LoopNotificationUserInfoKey.rawValue: startDate
         ]
 
         let request = UNNotificationRequest(
