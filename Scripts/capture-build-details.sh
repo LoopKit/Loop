@@ -6,7 +6,7 @@
 #  Copyright © 2019 LoopKit Authors. All rights reserved.
 
 echo "Gathering build details in ${SRCROOT}"
-cd ${SRCROOT}
+cd "${SRCROOT}"
 
 plist="${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
 
