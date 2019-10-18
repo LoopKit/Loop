@@ -44,9 +44,18 @@ struct NotificationManager {
         let center = UNUserNotificationCenter.current()
 
         center.delegate = delegate
-        center.requestAuthorization(options: [.badge, .sound, .alert], completionHandler: { _, _ in })
+        center.requestAuthorization(options: [.badge, .sound, .alert]) { (granted, error) in
+            guard granted else { return }
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                guard settings.authorizationStatus == .authorized else { return }
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
         center.setNotificationCategories(notificationCategories)
     }
+    
 
     // MARK: - Notifications
 
