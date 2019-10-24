@@ -33,8 +33,6 @@ final class LoopDataManager {
 
     private let logger: CategoryLogger
 
-    private var lastMicroBolusDate = Date(timeIntervalSinceNow: -(2 * 60)) // 2 minutes ago
-
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
 
@@ -655,7 +653,23 @@ extension LoopDataManager {
                         if let error = error {
                             self.logger.error(error)
                         } else {
-                            self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
+                            if self.settings.microbolusesEnabled {
+                                self.calculateAndEnactMicroBolusIfNeeded { error in
+                                    if let error = error {
+                                        self.lastLoopError = error
+                                        self.logger.error(error)
+                                    } else {
+                                        self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
+                                    }
+
+                                    self.logger.default("Loop ended")
+                                    self.notify(forChange: .tempBasal)
+
+                                    return
+                                }
+                            } else {
+                                self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
+                            }
                         }
                         self.logger.default("Loop ended")
                         self.notify(forChange: .tempBasal)
@@ -1030,31 +1044,41 @@ extension LoopDataManager {
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
         self.logger.debug("Recommending bolus: \(String(describing: recommendedBolus))")
-
-        calculateAndEnactMicroBolusIfNeeded()
     }
 
-    private func calculateAndEnactMicroBolusIfNeeded() {
+    /// *This method should only be called from the `dataAccessQueue`*
+    private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ error: Error?) -> Void) {
+        dispatchPrecondition(condition: .onQueue(dataAccessQueue))
+
         guard settings.dosingEnabled && settings.microbolusesEnabled else {
             logger.debug("Closed loop or microboluses disabled. Cancel microbolus calculation.")
+            completion(nil)
             return
         }
 
         let startDate = Date()
 
-        guard startDate.timeIntervalSince(lastMicroBolusDate) >= 3 * 60 else {
-            logger.debug("Last microbolus enacted less then 3 min ago. Cancel calculation")
+        guard let recommendedBolus = recommendedBolus else {
+            logger.debug("No recommended bolus. Cancel microbolus calculation.")
+            completion(nil)
             return
         }
 
-        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate)
-        else {
+        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            completion(LoopError.recommendationExpired(date: recommendedBolus.date))
+            return
+        }
+
+        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate) else {
             logger.debug("Basal rates not configured. Cancel microbolus calculation.")
+            completion(nil)
             return
         }
 
-        guard let insulinReq = recommendedBolus?.recommendation.amount, insulinReq > 0 else {
+        let insulinReq = recommendedBolus.recommendation.amount
+        guard insulinReq > 0 else {
             logger.debug("No microbolus needed.")
+            completion(nil)
             return
         }
 
@@ -1068,14 +1092,13 @@ extension LoopDataManager {
         let recomendation = (amount: microBolus, date: startDate)
         logger.debug("Enact microbolus: \(String(describing: recommendedBolus))")
 
-        lastMicroBolusDate = startDate
-        dataAccessQueue.async {
-            self.delegate?.loopDataManager(self, didRecommendMicroBolus: recomendation) { [weak self] error in
-                if let error = error {
-                    self?.logger.debug("Microbolus failed: \(error.localizedDescription)")
-                } else {
-                    self?.logger.debug("Microbolus enacted")
-                }
+        self.delegate?.loopDataManager(self, didRecommendMicroBolus: recomendation) { [weak self] error in
+            if let error = error {
+                self?.logger.debug("Microbolus failed: \(error.localizedDescription)")
+                completion(error)
+            } else {
+                self?.logger.debug("Microbolus enacted")
+                completion(nil)
             }
         }
     }
