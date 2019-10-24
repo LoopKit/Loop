@@ -11,6 +11,10 @@ import HealthKit
 public struct LoopSettings: Equatable {
     public var dosingEnabled = false
 
+    public var microbolusesEnabled = false
+
+    public var microbolusesSize = 30.0
+
     public let dynamicCarbAbsorptionEnabled = true
 
     public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .hours(2), medium: .hours(3), slow: .hours(4))
@@ -192,6 +196,14 @@ extension LoopSettings: RawRepresentable {
             self.dosingEnabled = dosingEnabled
         }
 
+        if let microbolusesEnabled = rawValue["microbolusesEnabled"] as? Bool {
+            self.microbolusesEnabled = microbolusesEnabled
+        }
+
+        if let microbolusesSize = rawValue["microbolusesSize"] as? Double {
+            self.microbolusesSize = microbolusesSize
+        }
+
         if let glucoseRangeScheduleRawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
             self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: glucoseRangeScheduleRawValue)
 
@@ -235,7 +247,9 @@ extension LoopSettings: RawRepresentable {
         var raw: RawValue = [
             "version": LoopSettings.version,
             "dosingEnabled": dosingEnabled,
-            "overridePresets": overridePresets.map { $0.rawValue }
+            "overridePresets": overridePresets.map { $0.rawValue },
+            "microbolusesEnabled": microbolusesEnabled,
+            "microbolusesSize": microbolusesSize
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue

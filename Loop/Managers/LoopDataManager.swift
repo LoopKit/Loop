@@ -1035,6 +1035,11 @@ extension LoopDataManager {
     }
 
     private func calculateAndEnactMicroBolusIfNeeded() {
+        guard settings.dosingEnabled && settings.microbolusesEnabled else {
+            logger.debug("Closed loop or microboluses disabled. Cancel micro bolus calculation.")
+            return
+        }
+
         let startDate = Date()
 
         guard let lastDate = lastMicroBolusDate, startDate.timeIntervalSince(lastDate) > 3 * 60 else {
@@ -1053,8 +1058,7 @@ extension LoopDataManager {
             return
         }
 
-        let maxMicroBolusInBasalMinutes = 150.0
-        let maxMicroBolus = currentBasalRate * maxMicroBolusInBasalMinutes / 60
+        let maxMicroBolus = currentBasalRate * settings.microbolusesSize / 60
 
         let volumeRounder = { (_ units: Double) in
             self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units

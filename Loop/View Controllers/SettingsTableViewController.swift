@@ -53,6 +53,7 @@ final class SettingsTableViewController: UITableViewController {
 
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
+        case microbolus
         case diagnostic
     }
 
@@ -73,6 +74,7 @@ final class SettingsTableViewController: UITableViewController {
         case carbRatio
         case insulinSensitivity
         case overridePresets
+        case microbolusSize
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -167,6 +169,16 @@ final class SettingsTableViewController: UITableViewController {
                 switchCell.textLabel?.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
                 switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
+
+                return switchCell
+            case .microbolus:
+                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+
+                switchCell.selectionStyle = .none
+                switchCell.switch?.isOn = dataManager.loopManager.settings.microbolusesEnabled
+                switchCell.textLabel?.text = NSLocalizedString("Microboluses", comment: "The title text for the microboluses enabled switch cell")
+
+                switchCell.switch?.addTarget(self, action: #selector(microbolusEnabledChanged(_:)), for: .valueChanged)
 
                 return switchCell
             case .diagnostic:
@@ -294,6 +306,11 @@ final class SettingsTableViewController: UITableViewController {
                     .map { $0.symbol }
                     .joined(separator: " ")
                 configCell.detailTextLabel?.text = presetPreviewText
+            case .microbolusSize:
+                configCell.textLabel?.text = NSLocalizedString("Microbolus size", comment: "The title text for the microboluses size")
+
+                let value = valueNumberFormatter.string(from: dataManager.loopManager.settings.microbolusesSize)
+                configCell.detailTextLabel?.text = value.map { $0 + " Basal minutes"}
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -560,6 +577,16 @@ final class SettingsTableViewController: UITableViewController {
                 vc.delegate = self
 
                 show(vc, sender: sender)
+            case .microbolusSize:
+                let vc = TextFieldTableViewController()
+                vc.delegate = self
+                vc.indexPath = indexPath
+                vc.title = sender?.textLabel?.text
+                vc.value = String(describing: dataManager.loopManager.settings.microbolusesSize)
+                vc.keyboardType = .decimalPad
+                vc.contextHelp = NSLocalizedString("This is the maximum minutes of basal that can be delivered as a single Microbolus with uncovered COB. This gives the ability to make Microboluses more aggressive if you choose. It is recommended that the value is set to start at 30, in line with the default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes. It is not recommended to set this value higher than 90 mins, as this may affect the ability for the algorithm to safely zero temp. It is also recommended that pushover is used when setting the value to be greater than default, so that alerts are generated for any predicted lows or highs.", comment: "Explanation of microboluses")
+
+                show(vc, sender: sender)
             }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
@@ -568,7 +595,7 @@ final class SettingsTableViewController: UITableViewController {
                 vc.title = sender?.textLabel?.text
 
                 show(vc, sender: sender)
-            case .dosing:
+            case .dosing, .microbolus:
                 break
             }
         case .services:
@@ -619,6 +646,10 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
+    }
+
+    @objc private func microbolusEnabledChanged(_ sender: UISwitch) {
+        dataManager.loopManager.settings.microbolusesEnabled = sender.isOn
     }
 }
 
@@ -819,6 +850,10 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
                         dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.loopManager.settings.suspendThreshold = nil
+                    }
+                case .microbolusSize:
+                    if let value = controller.value, let size = valueNumberFormatter.number(from: value)?.doubleValue {
+                        dataManager.loopManager.settings.microbolusesSize = size
                     }
                 default:
                     assertionFailure()
