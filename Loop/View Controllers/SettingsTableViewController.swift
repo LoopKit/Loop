@@ -584,7 +584,7 @@ final class SettingsTableViewController: UITableViewController {
                 vc.title = sender?.textLabel?.text
                 vc.value = String(describing: dataManager.loopManager.settings.microbolusesSize)
                 vc.keyboardType = .decimalPad
-                vc.contextHelp = NSLocalizedString("This is the maximum minutes of basal that can be delivered as a single Microbolus with uncovered COB. This gives the ability to make Microboluses more aggressive if you choose. It is recommended that the value is set to start at 30, in line with the default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes. It is not recommended to set this value higher than 90 mins, as this may affect the ability for the algorithm to safely zero temp. It is also recommended that pushover is used when setting the value to be greater than default, so that alerts are generated for any predicted lows or highs.", comment: "Explanation of microboluses")
+                vc.contextHelp = NSLocalizedString("This is the maximum minutes of basal that can be delivered as a single Microbolus with uncovered COB. This gives the ability to make Microboluses more aggressive if you choose. It is recommended that the value is set to start at 30, in line with the default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.", comment: "Explanation of microboluses")
 
                 show(vc, sender: sender)
             }
