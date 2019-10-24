@@ -33,7 +33,7 @@ final class LoopDataManager {
 
     private let logger: CategoryLogger
 
-    private var lastMicroBolusDate: Date? = Date()
+    private var lastMicroBolusDate = Date(timeIntervalSinceNow: -(2 * 60)) // 2 minutes ago
 
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
@@ -1036,20 +1036,20 @@ extension LoopDataManager {
 
     private func calculateAndEnactMicroBolusIfNeeded() {
         guard settings.dosingEnabled && settings.microbolusesEnabled else {
-            logger.debug("Closed loop or microboluses disabled. Cancel micro bolus calculation.")
+            logger.debug("Closed loop or microboluses disabled. Cancel microbolus calculation.")
             return
         }
 
         let startDate = Date()
 
-        guard let lastDate = lastMicroBolusDate, startDate.timeIntervalSince(lastDate) > 3 * 60 else {
+        guard startDate.timeIntervalSince(lastMicroBolusDate) >= 3 * 60 else {
             logger.debug("Last microbolus enacted less then 3 min ago. Cancel calculation")
             return
         }
 
         guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate)
         else {
-            logger.debug("Basal rates not configured. Cancel micro bolus calculation.")
+            logger.debug("Basal rates not configured. Cancel microbolus calculation.")
             return
         }
 
@@ -1066,15 +1066,15 @@ extension LoopDataManager {
 
         let microBolus = volumeRounder(min(insulinReq / 2, maxMicroBolus))
         let recomendation = (amount: microBolus, date: startDate)
-        logger.debug("Enact micro bolus: \(String(describing: recommendedBolus))")
+        logger.debug("Enact microbolus: \(String(describing: recommendedBolus))")
 
         lastMicroBolusDate = startDate
         dataAccessQueue.async {
             self.delegate?.loopDataManager(self, didRecommendMicroBolus: recomendation) { [weak self] error in
                 if let error = error {
-                    self?.logger.debug("Micro bolus failed: \(error.localizedDescription)")
+                    self?.logger.debug("Microbolus failed: \(error.localizedDescription)")
                 } else {
-                    self?.logger.debug("Micro bolus enacted")
+                    self?.logger.debug("Microbolus enacted")
                 }
             }
         }
