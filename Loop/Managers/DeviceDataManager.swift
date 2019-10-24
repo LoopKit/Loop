@@ -618,6 +618,13 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             }
         )
     }
+
+    func loopDataManager(_ manager: LoopDataManager, didRecommendMicroBolus bolus: (amount: Double, date: Date), completion: @escaping (_ error: Error?) -> Void) -> Void {
+        enactBolus(
+            units: bolus.amount,
+            at: bolus.date,
+            completion: completion)
+    }
 }
 
 

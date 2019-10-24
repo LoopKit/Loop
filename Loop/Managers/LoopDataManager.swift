@@ -33,6 +33,8 @@ final class LoopDataManager {
 
     private let logger: CategoryLogger
 
+    private var lastMicroBolusDate: Date? = Date()
+
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
 
@@ -1028,6 +1030,50 @@ extension LoopDataManager {
         )
         recommendedBolus = (recommendation: recommendation, date: startDate)
         self.logger.debug("Recommending bolus: \(String(describing: recommendedBolus))")
+
+        calculateAndEnactMicroBolusIfNeeded()
+    }
+
+    private func calculateAndEnactMicroBolusIfNeeded() {
+        let startDate = Date()
+
+        guard let lastDate = lastMicroBolusDate, startDate.timeIntervalSince(lastDate) > 3 * 60 else {
+            logger.debug("Last microbolus enacted less then 3 min ago. Cancel calculation")
+            return
+        }
+
+        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate)
+        else {
+            logger.debug("Basal rates not configured. Cancel micro bolus calculation.")
+            return
+        }
+
+        guard let insulinReq = recommendedBolus?.recommendation.amount, insulinReq > 0 else {
+            logger.debug("No microbolus needed.")
+            return
+        }
+
+        let maxMicroBolusInBasalMinutes = 150.0
+        let maxMicroBolus = currentBasalRate * maxMicroBolusInBasalMinutes / 60
+
+        let volumeRounder = { (_ units: Double) in
+            self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+        }
+
+        let microBolus = volumeRounder(min(insulinReq / 2, maxMicroBolus))
+        let recomendation = (amount: microBolus, date: startDate)
+        logger.debug("Enact micro bolus: \(String(describing: recommendedBolus))")
+
+        lastMicroBolusDate = startDate
+        dataAccessQueue.async {
+            self.delegate?.loopDataManager(self, didRecommendMicroBolus: recomendation) { [weak self] error in
+                if let error = error {
+                    self?.logger.debug("Micro bolus failed: \(error.localizedDescription)")
+                } else {
+                    self?.logger.debug("Micro bolus enacted")
+                }
+            }
+        }
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
@@ -1302,6 +1348,14 @@ protocol LoopDataManagerDelegate: class {
     ///   - units: The recommended bolus in U
     /// - Returns: a supported bolus volume in U. The volume returned should not be larger than the passed in rate.
     func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
+
+    /// Informs the delegate that a micro bolus is recommended
+    ///
+    /// - Parameters:
+    ///   - manager: The manager
+    ///   - bolus: The new recommended micro bolus
+    ///   - completion: A closure called once on completion
+    func loopDataManager(_ manager: LoopDataManager, didRecommendMicroBolus bolus: (amount: Double, date: Date), completion: @escaping (_ error: Error?) -> Void) -> Void
 }
 
 private extension TemporaryScheduleOverride {
