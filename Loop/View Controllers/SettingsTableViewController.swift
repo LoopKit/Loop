@@ -307,10 +307,10 @@ final class SettingsTableViewController: UITableViewController {
                     .joined(separator: " ")
                 configCell.detailTextLabel?.text = presetPreviewText
             case .microbolusSize:
-                configCell.textLabel?.text = NSLocalizedString("Microbolus size", comment: "The title text for the microboluses size")
+                configCell.textLabel?.text = NSLocalizedString("Max Microbolus Size", comment: "The title text for the maximum microboluses size")
 
                 let value = valueNumberFormatter.string(from: dataManager.loopManager.settings.microbolusesSize)
-                configCell.detailTextLabel?.text = value.map { $0 + " Basal minutes"}
+                configCell.detailTextLabel?.text = value.map { $0 + " Basal Minutes"}
             }
 
             configCell.accessoryType = .disclosureIndicator
