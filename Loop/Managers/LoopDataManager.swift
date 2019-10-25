@@ -10,6 +10,7 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopCore
+import Combine
 
 
 final class LoopDataManager {
@@ -32,6 +33,8 @@ final class LoopDataManager {
     weak var delegate: LoopDataManagerDelegate?
 
     private let logger: CategoryLogger
+
+    private var loopSubscription: AnyCancellable?
 
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
@@ -636,57 +639,77 @@ extension LoopDataManager {
     /// Executes an analysis of the current data, and recommends an adjustment to the current
     /// temporary basal rate.
     func loop() {
-        self.dataAccessQueue.async {
-            self.logger.default("Loop running")
-            NotificationCenter.default.post(name: .LoopRunning, object: self)
-
-            self.lastLoopError = nil
-            let startDate = Date()
-
-            do {
-                try self.update()
-
-                if self.settings.dosingEnabled {
-                    self.setRecommendedTempBasal { (error) -> Void in
-                        self.lastLoopError = error
-
-                        if let error = error {
-                            self.logger.error(error)
-                        } else {
-                            if self.settings.microbolusesEnabled {
-                                self.calculateAndEnactMicroBolusIfNeeded { error in
-                                    if let error = error {
-                                        self.lastLoopError = error
-                                        self.logger.error(error)
-                                    } else {
-                                        self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
-                                    }
-
-                                    self.logger.default("Loop ended")
-                                    self.notify(forChange: .tempBasal)
-
-                                    return
-                                }
-                            } else {
-                                self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
-                            }
-                        }
-                        self.logger.default("Loop ended")
-                        self.notify(forChange: .tempBasal)
-                    }
-
-                    // Delay the notification until we know the result of the temp basal
-                    return
-                } else {
-                    self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
+        let updatePublisher = Deferred {
+            Future<(), Error> { promise in
+                do {
+                    try self.update()
+                    promise(.success(()))
+                } catch let error {
+                    promise(.failure(error))
                 }
-            } catch let error {
-                self.lastLoopError = error
             }
-
-            self.logger.default("Loop ended")
-            self.notify(forChange: .tempBasal)
         }
+        .subscribe(on: dataAccessQueue)
+        .eraseToAnyPublisher()
+
+        let enactBolusPuiblisher = Deferred {
+            Future<Bool, Error> { promise in
+                guard self.settings.dosingEnabled, self.settings.microbolusesEnabled else {
+                    return promise(.success(false))
+                }
+                self.calculateAndEnactMicroBolusIfNeeded { enacted, error in
+                    if let error = error {
+                        promise(.failure(error))
+                    }
+                    promise(.success(enacted))
+                }
+            }
+        }
+        .subscribe(on: dataAccessQueue)
+        .eraseToAnyPublisher()
+
+        let setBasalPublisher = Deferred {
+            Future<(), Error> { promise in
+                guard self.settings.dosingEnabled else {
+                    return promise(.success(()))
+                }
+
+                self.setRecommendedTempBasal { error in
+                    if let error = error {
+                        promise(.failure(error))
+                    }
+                    promise(.success(()))
+                }
+
+            }
+        }
+        .subscribe(on: dataAccessQueue)
+        .eraseToAnyPublisher()
+
+        logger.default("Loop running")
+        NotificationCenter.default.post(name: .LoopRunning, object: self)
+
+        loopSubscription?.cancel()
+
+        let startDate = Date()
+        loopSubscription = updatePublisher
+            .flatMap { _ in setBasalPublisher }
+            .flatMap { _ in enactBolusPuiblisher }
+            .receive(on: dataAccessQueue)
+        .sink(
+            receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
+                case let .failure(error):
+                    self.lastLoopError = nil
+                    self.logger.error(error)
+                }
+                self.logger.default("Loop ended")
+                self.notify(forChange: .tempBasal)
+        },
+            receiveValue: { _ in }
+        )
     }
 
     /// - Throws:
@@ -1047,12 +1070,12 @@ extension LoopDataManager {
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ error: Error?) -> Void) {
+    private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ enacted: Bool, _ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard settings.dosingEnabled && settings.microbolusesEnabled else {
             logger.debug("Closed loop or microboluses disabled. Cancel microbolus calculation.")
-            completion(nil)
+            completion(false, nil)
             return
         }
 
@@ -1060,25 +1083,25 @@ extension LoopDataManager {
 
         guard let recommendedBolus = recommendedBolus else {
             logger.debug("No recommended bolus. Cancel microbolus calculation.")
-            completion(nil)
+            completion(false, nil)
             return
         }
 
         guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
-            completion(LoopError.recommendationExpired(date: recommendedBolus.date))
+            completion(false, LoopError.recommendationExpired(date: recommendedBolus.date))
             return
         }
 
         guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate) else {
             logger.debug("Basal rates not configured. Cancel microbolus calculation.")
-            completion(nil)
+            completion(false, nil)
             return
         }
 
         let insulinReq = recommendedBolus.recommendation.amount
         guard insulinReq > 0 else {
             logger.debug("No microbolus needed.")
-            completion(nil)
+            completion(false, nil)
             return
         }
 
@@ -1095,10 +1118,10 @@ extension LoopDataManager {
         self.delegate?.loopDataManager(self, didRecommendMicroBolus: recomendation) { [weak self] error in
             if let error = error {
                 self?.logger.debug("Microbolus failed: \(error.localizedDescription)")
-                completion(error)
+                completion(false, error)
             } else {
                 self?.logger.debug("Microbolus enacted")
-                completion(nil)
+                completion(true, nil)
             }
         }
     }
