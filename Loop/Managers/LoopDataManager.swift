@@ -1073,7 +1073,7 @@ extension LoopDataManager {
     private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ enacted: Bool, _ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard settings.dosingEnabled && settings.microbolusesEnabled else {
+        guard settings.isMicrobolusesActive else {
             logger.debug("Closed loop or microboluses disabled. Cancel microbolus calculation.")
             completion(false, nil)
             return

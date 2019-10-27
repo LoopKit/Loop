@@ -216,7 +216,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                             loopManager.addConfirmedCarbEntry(entry.carbEntry)
                             loopManager.updateContext(context)
 
-                            if let units = context.recommendedBolusDose, units > 0.0 {
+                            let isMicrobolusesActive = context.isMicrobolusesActive ?? false
+                            if let units = context.recommendedBolusDose, units > 0.0, !isMicrobolusesActive {
                                 WKExtension.shared().rootInterfaceController?.presentController(withName: BolusInterfaceController.className, context: context)
                             }
                         }

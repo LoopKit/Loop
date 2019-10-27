@@ -58,7 +58,9 @@ public struct LoopSettings: Equatable {
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
-    
+
+    public var isMicrobolusesActive: Bool { microbolusesEnabled && dosingEnabled }
+
     // MARK - Push Notifications
     
     public var deviceToken: Data?
