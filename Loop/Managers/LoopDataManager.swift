@@ -135,7 +135,7 @@ final class LoopDataManager {
                 queue: OperationQueue.main
             ) { (note) in
                 self.dataAccessQueue.async {
-                    self.logger.default("Received notification of cached dosing changing")
+                    self.logger.default("Received notification of insulin delivery store cache changing")
 
                     self.insulinEffect = nil
 
