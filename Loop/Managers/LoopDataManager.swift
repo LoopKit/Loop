@@ -700,9 +700,10 @@ extension LoopDataManager {
             receiveCompletion: { completion in
                 switch completion {
                 case .finished:
+                    self.lastLoopError = nil
                     self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
                 case let .failure(error):
-                    self.lastLoopError = nil
+                    self.lastLoopError = error
                     self.logger.error(error)
                 }
                 self.logger.default("Loop ended")
@@ -1112,6 +1113,12 @@ extension LoopDataManager {
         }
 
         let microBolus = volumeRounder(min(insulinReq / 2, maxMicroBolus))
+        guard microBolus > 0 else {
+            logger.debug("No microbolus needed.")
+            completion(false, nil)
+            return
+        }
+
         let recomendation = (amount: microBolus, date: startDate)
         logger.debug("Enact microbolus: \(String(describing: recommendedBolus))")
 
