@@ -654,7 +654,7 @@ extension LoopDataManager {
 
         let enactBolusPuiblisher = Deferred {
             Future<Bool, Error> { promise in
-                guard self.settings.dosingEnabled, self.settings.microbolusesEnabled else {
+                guard self.settings.isMicrobolusesActive else {
                     return promise(.success(false))
                 }
                 self.calculateAndEnactMicroBolusIfNeeded { enacted, error in
