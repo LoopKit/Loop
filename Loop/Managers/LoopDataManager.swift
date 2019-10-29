@@ -652,7 +652,7 @@ extension LoopDataManager {
         .subscribe(on: dataAccessQueue)
         .eraseToAnyPublisher()
 
-        let enactBolusPuiblisher = Deferred {
+        let enactBolusPublisher = Deferred {
             Future<Bool, Error> { promise in
                 guard self.settings.isMicrobolusesActive else {
                     return promise(.success(false))
@@ -694,7 +694,7 @@ extension LoopDataManager {
         let startDate = Date()
         loopSubscription = updatePublisher
             .flatMap { _ in setBasalPublisher }
-            .flatMap { _ in enactBolusPuiblisher }
+            .flatMap { _ in enactBolusPublisher }
             .receive(on: dataAccessQueue)
         .sink(
             receiveCompletion: { completion in
