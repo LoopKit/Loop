@@ -176,6 +176,7 @@ final class SettingsTableViewController: UITableViewController {
 
                 switchCell.selectionStyle = .none
                 switchCell.switch?.isOn = dataManager.loopManager.settings.microbolusesEnabled
+                switchCell.switch?.isEnabled = dataManager.loopManager.settings.dosingEnabled
                 switchCell.textLabel?.text = NSLocalizedString("Microboluses", comment: "The title text for the microboluses enabled switch cell")
 
                 switchCell.switch?.addTarget(self, action: #selector(microbolusEnabledChanged(_:)), for: .valueChanged)
@@ -646,6 +647,14 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
+        dataManager.loopManager.settings.microbolusesEnabled =
+            dataManager.loopManager.settings.microbolusesEnabled && sender.isOn
+
+        tableView.reloadRows(
+            at: [
+                IndexPath(row: LoopRow.microbolus.rawValue, section: Section.loop.rawValue)
+            ],
+            with: .automatic)
     }
 
     @objc private func microbolusEnabledChanged(_ sender: UISwitch) {
