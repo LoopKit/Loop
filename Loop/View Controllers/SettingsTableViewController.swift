@@ -12,7 +12,7 @@ import LoopKit
 import LoopKitUI
 import LoopCore
 import LoopTestingKit
-
+import Combine
 
 final class SettingsTableViewController: UITableViewController {
 
@@ -74,7 +74,6 @@ final class SettingsTableViewController: UITableViewController {
         case carbRatio
         case insulinSensitivity
         case overridePresets
-        case microbolusSize
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -92,6 +91,8 @@ final class SettingsTableViewController: UITableViewController {
 
         return formatter
     }()
+
+    private var microbolusCancelable: AnyCancellable?
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
@@ -172,16 +173,23 @@ final class SettingsTableViewController: UITableViewController {
 
                 return switchCell
             case .microbolus:
-                let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+                let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
-                switchCell.selectionStyle = .none
-                switchCell.switch?.isOn = dataManager.loopManager.settings.microbolusesEnabled
-                switchCell.switch?.isEnabled = dataManager.loopManager.settings.dosingEnabled
-                switchCell.textLabel?.text = NSLocalizedString("Microboluses", comment: "The title text for the microboluses enabled switch cell")
+                cell.textLabel?.text = NSLocalizedString("Microboluses", comment: "The title text for the Microboluses cell")
+                let settings = dataManager.loopManager.settings
+                cell.detailTextLabel?.text = {
+                    guard settings.isMicrobolusesActive else {
+                        return "Disabled"
+                    }
+                    guard settings.microbolusesWithoutCarbsEnabled else {
+                        return "With COB"
+                    }
+                    return "Always"
+                }()
+                cell.accessoryType = .disclosureIndicator
 
-                switchCell.switch?.addTarget(self, action: #selector(microbolusEnabledChanged(_:)), for: .valueChanged)
+                return cell
 
-                return switchCell
             case .diagnostic:
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
@@ -307,11 +315,6 @@ final class SettingsTableViewController: UITableViewController {
                     .map { $0.symbol }
                     .joined(separator: " ")
                 configCell.detailTextLabel?.text = presetPreviewText
-            case .microbolusSize:
-                configCell.textLabel?.text = NSLocalizedString("Max Microbolus Size", comment: "The title text for the maximum microboluses size")
-
-                let value = valueNumberFormatter.string(from: dataManager.loopManager.settings.microbolusesSize)
-                configCell.detailTextLabel?.text = value.map { $0 + " Basal Minutes"}
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -578,16 +581,6 @@ final class SettingsTableViewController: UITableViewController {
                 vc.delegate = self
 
                 show(vc, sender: sender)
-            case .microbolusSize:
-                let vc = TextFieldTableViewController()
-                vc.delegate = self
-                vc.indexPath = indexPath
-                vc.title = sender?.textLabel?.text
-                vc.value = String(describing: dataManager.loopManager.settings.microbolusesSize)
-                vc.keyboardType = .decimalPad
-                vc.contextHelp = NSLocalizedString("This is the maximum minutes of basal that can be delivered as a single Microbolus with uncovered COB. This gives the ability to make Microboluses more aggressive if you choose. It is recommended that the value is set to start at 30, in line with the default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.", comment: "Explanation of microboluses")
-
-                show(vc, sender: sender)
             }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
@@ -596,7 +589,35 @@ final class SettingsTableViewController: UITableViewController {
                 vc.title = sender?.textLabel?.text
 
                 show(vc, sender: sender)
-            case .dosing, .microbolus:
+            case .microbolus:
+                var settings = dataManager.loopManager.settings
+                guard settings.dosingEnabled else { break }
+
+                let viewModel = MicrobolusView.ViewModel(
+                    microbolusesWithCOB: settings.microbolusesEnabled,
+                    withCOBValue: settings.microbolusesSize,
+                    microbolusesWithoutCOB: settings.microbolusesWithoutCarbsEnabled,
+                    withoutCOBValue: settings.microbolusesWithoutCarbsSize
+                )
+
+                microbolusCancelable = viewModel.publisher()
+                    .sink { [weak self] enabled, size, enabedWithoutCOB, sizeWithoutCOB in
+                        settings.microbolusesEnabled = enabled
+                        settings.microbolusesSize = size
+                        settings.microbolusesWithoutCarbsEnabled = enabedWithoutCOB
+                        settings.microbolusesWithoutCarbsSize = sizeWithoutCOB
+
+                        self?.dataManager.loopManager.settings = settings
+                        self?.tableView.reloadRows(at: [indexPath], with: .none)
+                }
+
+                let vc = MicrobolusViewController(viewModel: viewModel)
+                vc.onDeinit = {
+                    self.microbolusCancelable?.cancel()
+                }
+
+                show(vc, sender: sender)
+            case .dosing:
                 break
             }
         case .services:
@@ -647,18 +668,13 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
-        dataManager.loopManager.settings.microbolusesEnabled =
-            dataManager.loopManager.settings.microbolusesEnabled && sender.isOn
 
         tableView.reloadRows(
             at: [
                 IndexPath(row: LoopRow.microbolus.rawValue, section: Section.loop.rawValue)
             ],
-            with: .automatic)
-    }
-
-    @objc private func microbolusEnabledChanged(_ sender: UISwitch) {
-        dataManager.loopManager.settings.microbolusesEnabled = sender.isOn
+            with: .none
+        )
     }
 }
 
@@ -859,10 +875,6 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
                         dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
                     } else {
                         dataManager.loopManager.settings.suspendThreshold = nil
-                    }
-                case .microbolusSize:
-                    if let value = controller.value, let size = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.microbolusesSize = size
                     }
                 default:
                     assertionFailure()

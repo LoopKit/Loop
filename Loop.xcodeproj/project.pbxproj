@@ -24,6 +24,8 @@
 /* Begin PBXBuildFile section */
 		3858986B235E0DE200919FD4 /* NightscoutAPIClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38589861235E0A4200919FD4 /* NightscoutAPIClient.framework */; };
 		3858986D235E0DEA00919FD4 /* NightscoutAPIClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38589864235E0A4C00919FD4 /* NightscoutAPIClientUI.framework */; };
+		38BE6D8D236C8A110074CF11 /* MicrobolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BE6D8C236C8A110074CF11 /* MicrobolusViewController.swift */; };
+		38CE2218236B134F00DFE990 /* MicrobolusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CE2217236B134F00DFE990 /* MicrobolusView.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
 		4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */; };
@@ -240,7 +242,6 @@
 		43E2D8F41D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8E91D20C0DB004DA55F /* recommend_temp_basal_start_high_end_low.json */; };
 		43E2D8F51D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EA1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_high.json */; };
 		43E2D8F61D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = 43E2D8EB1D20C0DB004DA55F /* recommend_temp_basal_start_low_end_in_range.json */; };
-		43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */; };
 		43E2D9191D222759004DA55F /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
 		43E3449F1B9D68E900C85C07 /* StatusTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */; };
 		43E93FB51E4675E800EAB8DB /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
@@ -575,6 +576,8 @@
 /* Begin PBXFileReference section */
 		38589861235E0A4200919FD4 /* NightscoutAPIClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38589864235E0A4C00919FD4 /* NightscoutAPIClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		38BE6D8C236C8A110074CF11 /* MicrobolusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrobolusViewController.swift; sourceTree = "<group>"; };
+		38CE2217236B134F00DFE990 /* MicrobolusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrobolusView.swift; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
 		430B29892041F54A00BA9F93 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
@@ -1566,6 +1569,7 @@
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
 				89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */,
+				38BE6D8C236C8A110074CF11 /* MicrobolusViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -1585,6 +1589,7 @@
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
+				38CE2217236B134F00DFE990 /* MicrobolusView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2599,6 +2604,7 @@
 				43B260491ED248FB008CAA77 /* CarbEntryTableViewCell.swift in Sources */,
 				4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */,
 				43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */,
+				38CE2218236B134F00DFE990 /* MicrobolusView.swift in Sources */,
 				C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */,
 				43FCEEA9221A615B0013DD30 /* StatusChartsManager.swift in Sources */,
 				43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */,
@@ -2659,6 +2665,7 @@
 				89ADE13B226BFA0F0067222B /* TestingScenariosManager.swift in Sources */,
 				4F7E8ACB20E2ACB500AEA65E /* WatchPredictedGlucose.swift in Sources */,
 				436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */,
+				38BE6D8D236C8A110074CF11 /* MicrobolusViewController.swift in Sources */,
 				4F11D3C220DD80B3006E072C /* WatchHistoricalGlucose.swift in Sources */,
 				435CB6231F37967800C320C7 /* InsulinModelSettingsViewController.swift in Sources */,
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
@@ -2833,7 +2840,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

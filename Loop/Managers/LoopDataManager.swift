@@ -1106,6 +1106,13 @@ extension LoopDataManager {
             return
         }
 
+        let cob = carbsOnBoard?.quantity.doubleValue(for: .gram()) ?? 0
+        guard cob != 0 || settings.microbolusesWithoutCarbsEnabled else {
+            logger.debug("Microboluses without COB disabled.")
+            completion(false, nil)
+            return
+        }
+
         let maxMicroBolus = currentBasalRate * settings.microbolusesSize / 60
 
         let volumeRounder = { (_ units: Double) in
