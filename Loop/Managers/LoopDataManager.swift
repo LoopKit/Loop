@@ -1119,7 +1119,7 @@ extension LoopDataManager {
             return
         }
 
-        let controlDate = glucose.startDate.addingTimeInterval(.minutes(15))
+        let controlDate = glucose.startDate.addingTimeInterval(.minutes(15 + 1)) // extra 1 min to find
         var controlGlucoseQuantity: HKQuantity?
 
         for prediction in predictedGlucose {
@@ -1130,13 +1130,23 @@ extension LoopDataManager {
             break
         }
 
-        guard let futureQuantity = controlGlucoseQuantity, futureQuantity >= glucose.quantity else {
+        let lowTrend = controlGlucoseQuantity.map { $0 < glucose.quantity } ?? true
+
+        let safityCheck = !(lowTrend && settings.microbolusesSafeMode)
+        guard safityCheck else {
             logger.debug("Control glucose is lower then current. Microbolus is not allowed.")
             completion(false, nil)
             return
         }
 
-        let maxBasalMinutes = cob > 0 ? settings.microbolusesSize : settings.microbolusesWithoutCarbsSize
+        let maxBasalMinutes: Double = {
+            switch (cob > 0, lowTrend) {
+            case (true, false): return settings.microbolusesSize
+            case (false, false): return settings.microbolusesWithoutCarbsSize
+            default: return 30
+            }
+        }()
+
         let maxMicroBolus = currentBasalRate * maxBasalMinutes / 60
 
         let volumeRounder = { (_ units: Double) in

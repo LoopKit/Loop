@@ -10,45 +10,59 @@ import SwiftUI
 import Combine
 
 struct MicrobolusView: View {
+    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Bool)
+
     final class ViewModel: ObservableObject {
         @Published var microbolusesWithCOB: Bool
         @Published var withCOBValue: Double
         @Published var microbolusesWithoutCOB: Bool
         @Published var withoutCOBValue: Double
+        @Published var safeMode: Bool
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
 
         fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 }
 
-        private var cancelable: AnyCancellable!
+        private var cancellable: AnyCancellable!
 
-        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double) {
+        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Bool) {
             self.microbolusesWithCOB = microbolusesWithCOB
             self.withCOBValue = withCOBValue
             self.microbolusesWithoutCOB = microbolusesWithoutCOB
             self.withoutCOBValue = withoutCOBValue
+            self.safeMode = safeMode
 
             pickerWithCOBIndex = values.firstIndex(of: Int(withCOBValue)) ?? 0
             pickerWithoutCOBIndex = values.firstIndex(of: Int(withoutCOBValue)) ?? 0
 
-            let withCOBCancelable = $pickerWithCOBIndex
+            let withCOBCancellable = $pickerWithCOBIndex
                 .map { Double(self.values[$0]) }
                 .sink { self.withCOBValue = $0 }
 
-            let withoutCOBCancelable = $pickerWithoutCOBIndex
+            let withoutCOBCancellable = $pickerWithoutCOBIndex
                 .map { Double(self.values[$0]) }
                 .sink { self.withoutCOBValue = $0 }
 
-            cancelable = AnyCancellable {
-                withCOBCancelable.cancel()
-                withoutCOBCancelable.cancel()
+            cancellable = AnyCancellable {
+                withCOBCancellable.cancel()
+                withoutCOBCancellable.cancel()
             }
         }
 
-        func publisher() -> AnyPublisher<(Bool, Double, Bool, Double), Never> {
-            Publishers.CombineLatest4($microbolusesWithCOB, $withCOBValue, $microbolusesWithoutCOB, $withoutCOBValue)
-                .eraseToAnyPublisher()
+        func changes() -> AnyPublisher<Result, Never> {
+            // Publishers.CombineLatest5
+            Publishers.CombineLatest(
+                Publishers.CombineLatest4(
+                    $microbolusesWithCOB,
+                    $withCOBValue,
+                    $microbolusesWithoutCOB,
+                    $withoutCOBValue
+                ),
+                $safeMode
+            )
+            .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1) }
+            .eraseToAnyPublisher()
         }
     }
 
@@ -86,6 +100,13 @@ struct MicrobolusView: View {
             }
 
             if viewModel.microbolusesWithCOB {
+                Section(footer:
+                    Text("If enabled and the predicted glucose after 15 minutes is less than the current glucose, Microboluses is not allowed. If disabled, the Maximum Microbolus Size is limited to 30 basal minutes in this case.")
+                ) {
+                    Toggle (isOn: $viewModel.safeMode) {
+                        Text("Safe Mode")
+                    }
+                }
 
                 Section(footer:
                     Text("This is the maximum minutes of basal that can be delivered as a single Microbolus without COB.")
@@ -106,14 +127,20 @@ struct MicrobolusView: View {
     }
 }
 
+#if DEBUG
+
 struct MicrobolusView_Previews: PreviewProvider {
     static var previews: some View {
         MicrobolusView(viewModel: .init(
-            microbolusesWithCOB: false,
+            microbolusesWithCOB: true,
             withCOBValue: 30,
             microbolusesWithoutCOB: false,
-            withoutCOBValue: 30)
+            withoutCOBValue: 30,
+            safeMode: true
+            )
         )
             .environment(\.colorScheme, .dark)
     }
 }
+
+#endif

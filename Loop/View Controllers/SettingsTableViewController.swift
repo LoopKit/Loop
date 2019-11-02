@@ -92,7 +92,7 @@ final class SettingsTableViewController: UITableViewController {
         return formatter
     }()
 
-    private var microbolusCancelable: AnyCancellable?
+    private var microbolusCancellable: AnyCancellable?
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
@@ -597,15 +597,17 @@ final class SettingsTableViewController: UITableViewController {
                     microbolusesWithCOB: settings.microbolusesEnabled,
                     withCOBValue: settings.microbolusesSize,
                     microbolusesWithoutCOB: settings.microbolusesWithoutCarbsEnabled,
-                    withoutCOBValue: settings.microbolusesWithoutCarbsSize
+                    withoutCOBValue: settings.microbolusesWithoutCarbsSize,
+                    safeMode: settings.microbolusesSafeMode
                 )
 
-                microbolusCancelable = viewModel.publisher()
-                    .sink { [weak self] enabled, size, enabedWithoutCOB, sizeWithoutCOB in
-                        settings.microbolusesEnabled = enabled
-                        settings.microbolusesSize = size
-                        settings.microbolusesWithoutCarbsEnabled = enabedWithoutCOB
-                        settings.microbolusesWithoutCarbsSize = sizeWithoutCOB
+                microbolusCancellable = viewModel.changes()
+                    .sink { [weak self] result in
+                        settings.microbolusesEnabled = result.microbolusesWithCOB
+                        settings.microbolusesSize = result.withCOBValue
+                        settings.microbolusesWithoutCarbsEnabled = result.microbolusesWithoutCOB
+                        settings.microbolusesWithoutCarbsSize = result.withoutCOBValue
+                        settings.microbolusesSafeMode = result.safeMode
 
                         self?.dataManager.loopManager.settings = settings
                         self?.tableView.reloadRows(at: [indexPath], with: .none)
@@ -613,7 +615,7 @@ final class SettingsTableViewController: UITableViewController {
 
                 let vc = MicrobolusViewController(viewModel: viewModel)
                 vc.onDeinit = {
-                    self.microbolusCancelable?.cancel()
+                    self.microbolusCancellable?.cancel()
                 }
 
                 show(vc, sender: sender)
