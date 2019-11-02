@@ -1113,6 +1113,29 @@ extension LoopDataManager {
             return
         }
 
+        guard let glucose = self.glucoseStore.latestGlucose, let predictedGlucose = predictedGlucose else {
+            logger.debug("Glucose data not found.")
+            completion(false, nil)
+            return
+        }
+
+        let controlDate = glucose.startDate.addingTimeInterval(.minutes(15))
+        var controlGlucoseQuantity: HKQuantity?
+
+        for prediction in predictedGlucose {
+            if prediction.startDate <= controlDate {
+                controlGlucoseQuantity = prediction.quantity
+                continue
+            }
+            break
+        }
+
+        guard let futureQuantity = controlGlucoseQuantity, futureQuantity >= glucose.quantity else {
+            logger.debug("Control glucose is lower then current. Microbolus is not allowed.")
+            completion(false, nil)
+            return
+        }
+
         let maxBasalMinutes = cob > 0 ? settings.microbolusesSize : settings.microbolusesWithoutCarbsSize
         let maxMicroBolus = currentBasalRate * maxBasalMinutes / 60
 
