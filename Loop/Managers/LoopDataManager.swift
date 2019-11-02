@@ -1113,7 +1113,8 @@ extension LoopDataManager {
             return
         }
 
-        let maxMicroBolus = currentBasalRate * settings.microbolusesSize / 60
+        let maxBasalMinutes = cob > 0 ? settings.microbolusesSize : settings.microbolusesWithoutCarbsSize
+        let maxMicroBolus = currentBasalRate * maxBasalMinutes / 60
 
         let volumeRounder = { (_ units: Double) in
             self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
