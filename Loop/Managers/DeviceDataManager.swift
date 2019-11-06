@@ -19,14 +19,10 @@ final class DeviceDataManager {
 
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
-    let servicesManager: ServicesManager
-
-    let analyticsServicesManager: AnalyticsServicesManager
+    let pluginManager: PluginManager
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
-
-    var remoteDataServicesManager: RemoteDataServicesManager!
 
     private(set) var testingScenariosManager: TestingScenariosManager?
 
@@ -66,6 +62,14 @@ final class DeviceDataManager {
         }
     }
 
+    private(set) var servicesManager: ServicesManager!
+
+    var analyticsServicesManager: AnalyticsServicesManager { return servicesManager.analyticsServicesManager }
+
+    var loggingServicesManager: LoggingServicesManager { return servicesManager.loggingServicesManager }
+
+    var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
+
     private(set) var pumpManagerHUDProvider: HUDProvider?
 
     // MARK: - WatchKit
@@ -76,20 +80,13 @@ final class DeviceDataManager {
 
     private var statusExtensionManager: StatusExtensionDataManager!
 
-    // MARK: - Plugins
-
-    private var pluginManager: PluginManager
-
     // MARK: - Initialization
 
 
     private(set) var loopManager: LoopDataManager!
 
-    init(servicesManager: ServicesManager, analyticsServicesManager: AnalyticsServicesManager) {
-        self.servicesManager = servicesManager
-        self.analyticsServicesManager = analyticsServicesManager
-
-        pluginManager = PluginManager()
+    init(pluginManager: PluginManager) {
+        self.pluginManager = pluginManager
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -103,7 +100,8 @@ final class DeviceDataManager {
             self.cgmManager = pumpManager as? CGMManager
         }
 
-        remoteDataServicesManager = RemoteDataServicesManager(servicesManager: servicesManager, deviceDataManager: self)
+        servicesManager = ServicesManager(pluginManager: pluginManager, deviceDataManager: self)
+
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
 
         loopManager = LoopDataManager(
@@ -112,7 +110,7 @@ final class DeviceDataManager {
             lastPumpEventsReconciliation: pumpManager?.lastReconciliation,
             analyticsServicesManager: analyticsServicesManager
         )
-        watchManager = WatchDataManager(deviceManager: self, analyticsServicesManager: analyticsServicesManager)
+        watchManager = WatchDataManager(deviceManager: self)
 
         if debugEnabled {
             testingScenariosManager = LocalTestingScenariosManager(deviceManager: self)
@@ -159,30 +157,30 @@ final class DeviceDataManager {
 
         return Manager.init(rawState: rawState) as? PumpManagerUI
     }
-    
+
     var availableCGMManagers: [AvailableDevice] {
         return pluginManager.availableCGMManagers + availableStaticCGMManagers
     }
-    
+
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
         return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
     }
-    
+
     private func cgmManagerTypeFromRawValue(_ rawValue: [String: Any]) -> CGMManager.Type? {
         guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
             return nil
         }
-        
+
         return cgmManagerTypeByIdentifier(managerIdentifier)
     }
-    
+
     func cgmManagerFromRawValue(_ rawValue: [String: Any]) -> CGMManagerUI? {
         guard let rawState = rawValue["state"] as? CGMManager.RawStateValue,
             let Manager = cgmManagerTypeFromRawValue(rawValue)
             else {
                 return nil
         }
-        
+
         return Manager.init(rawState: rawState) as? CGMManagerUI
     }
 
@@ -333,7 +331,7 @@ extension DeviceDataManager: CGMManagerDelegate {
         dispatchPrecondition(condition: .onQueue(queue))
         UserDefaults.appGroup?.cgmManagerRawValue = manager.rawValue
     }
-    
+
     func credentialStoragePrefix(for manager: CGMManager) -> String {
         // return string unique to this instance of the CGMManager
         return UUID().uuidString
@@ -517,7 +515,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             }
         }
     }
-    
+
     func pumpManagerRecommendsLoop(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ recommends loop", String(describing: type(of: pumpManager)))
@@ -598,7 +596,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         guard let pumpManager = pumpManager else {
             return unitsPerHour
         }
-        
+
         return pumpManager.roundToSupportedBasalRate(unitsPerHour: unitsPerHour)
     }
 
@@ -669,4 +667,3 @@ extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
-

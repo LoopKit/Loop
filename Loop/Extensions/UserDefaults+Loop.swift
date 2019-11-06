@@ -45,13 +45,4 @@ extension UserDefaults {
             cgmManagerState = newValue?.rawValue
         }
     }
-
-    var services: [Service] {
-        get {
-            return servicesState.compactMap { ServiceFromRawValue($0) }
-        }
-        set {
-            servicesState = newValue.compactMap{ $0.rawValue }
-        }
-    }
 }

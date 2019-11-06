@@ -100,7 +100,7 @@ final class SettingsTableViewController: UITableViewController {
             break
         }
     }
-    
+
     func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController & CompletionNotifying) {
         var setupViewController = pumpManager.setupViewController()
         setupViewController.setupDelegate = self
@@ -110,7 +110,7 @@ final class SettingsTableViewController: UITableViewController {
         setupViewController.maxBasalRateUnitsPerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
         return setupViewController
     }
-    
+
     // MARK: - UITableViewDataSource
 
     private var sections: [Section] {
@@ -143,7 +143,7 @@ final class SettingsTableViewController: UITableViewController {
                 return ConfigurationRow.count - 1
             }
         case .services:
-            return min(servicesSorted.count + 1, serviceTypes.count)
+            return min(activeServices.count + 1, availableServices.count)
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
             return 1
         }
@@ -249,7 +249,7 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .suspendThreshold:
                 configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
-                
+
                 if let suspendThreshold = dataManager.loopManager.settings.suspendThreshold {
                     let value = valueNumberFormatter.string(from: suspendThreshold.value, unit: suspendThreshold.unit) ?? SettingsTableViewCell.TapToSetString
                     configCell.detailTextLabel?.text = value
@@ -293,8 +293,8 @@ final class SettingsTableViewController: UITableViewController {
             configCell.accessoryType = .disclosureIndicator
             return configCell
         case .services:
-            if indexPath.row < servicesSorted.count {
-                let service = servicesSorted[indexPath.row]
+            if indexPath.row < activeServices.count {
+                let service = activeServices[indexPath.row]
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
                 cell.textLabel?.text = service.localizedTitle
                 cell.detailTextLabel?.text = nil
@@ -557,27 +557,24 @@ final class SettingsTableViewController: UITableViewController {
                 break
             }
         case .services:
-            if indexPath.row < servicesSorted.count {
-                if let serviceUI = servicesSorted[indexPath.row] as? ServiceUI {
+            if indexPath.row < activeServices.count {
+                if let serviceUI = activeServices[indexPath.row] as? ServiceUI {
                     var settings = serviceUI.settingsViewController()
-                    settings.serviceSetupDelegate = self
+                    settings.serviceSettingsDelegate = self
                     settings.completionDelegate = self
                     present(settings, animated: true)
                 }
                 tableView.deselectRow(at: indexPath, animated: true)
             } else {
-                let serviceUITypes = serviceTypesAvailable.compactMap({ $0 as? ServiceUI.Type })
-                if serviceUITypes.count > 0 {
-                    let alert = UIAlertController(serviceUITypes: serviceUITypes) { [weak self] (serviceUIType) in
-                        self?.setupService(serviceUIType, indexPath: indexPath)
-                    }
-
-                    alert.addCancelAction { (_) in
-                        tableView.deselectRow(at: indexPath, animated: true)
-                    }
-
-                    present(alert, animated: true, completion: nil)
+                let alert = UIAlertController(services: inactiveServices) { [weak self] (identifier) in
+                    self?.setupService(withIdentifier: identifier)
                 }
+
+                alert.addCancelAction { (_) in
+                    tableView.deselectRow(at: indexPath, animated: true)
+                }
+
+                present(alert, animated: true, completion: nil)
             }
         case .testingPumpDataDeletion:
             let confirmVC = UIAlertController(pumpDataDeletionHandler: { self.dataManager.deleteTestingPumpData() })
@@ -720,36 +717,44 @@ extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
     }
 }
 
-extension SettingsTableViewController: ServiceSetupDelegate {
-    fileprivate var serviceTypesAvailable: [Service.Type] {
-        return serviceTypes.filter { serviceType in !dataManager.servicesManager.services.contains { type(of: $0) == serviceType } }
+extension SettingsTableViewController {
+    fileprivate var availableServices: [AvailableService] {
+        return dataManager.servicesManager.availableServices
     }
 
-    fileprivate var servicesSorted: [Service] {
-        return serviceTypes.compactMap { serviceType in dataManager.servicesManager.services.first { type(of: $0) == serviceType } }
+    fileprivate var activeServices: [Service] {
+        return dataManager.servicesManager.activeServices.sorted { $0.localizedTitle < $1.localizedTitle }
     }
 
-    fileprivate func setupService(_ serviceUIType: ServiceUI.Type, indexPath: IndexPath) {
+    fileprivate var inactiveServices: [AvailableService] {
+        return availableServices.filter { availableService in !dataManager.servicesManager.activeServices.contains { type(of: $0).serviceIdentifier == availableService.identifier } }
+    }
+
+    fileprivate func setupService(withIdentifier identifier: String) {
+        guard let serviceUIType = dataManager.servicesManager.serviceUITypeByIdentifier(identifier) else {
+            return
+        }
+
         if var setupViewController = serviceUIType.setupViewController() {
             setupViewController.serviceSetupDelegate = self
             setupViewController.completionDelegate = self
             present(setupViewController, animated: true, completion: nil)
         } else if let service = serviceUIType.init(rawState: [:]) {
-            dataManager.servicesManager.services.append(service)
+            dataManager.servicesManager.addActiveService(service)
             updateSelectedServicesRows()
         }
     }
+}
 
+extension SettingsTableViewController: ServiceSetupDelegate {
     func serviceSetupNotifying(_ object: ServiceSetupNotifying, didCreateService service: Service) {
-        dataManager.servicesManager.services.append(service)
+        dataManager.servicesManager.addActiveService(service)
     }
+}
 
-    func serviceSetupNotifying(_ object: ServiceSetupNotifying, didUpdateService service: Service) {
-        dataManager.servicesManager.services = dataManager.servicesManager.services
-    }
-
-    func serviceSetupNotifying(_ object: ServiceSetupNotifying, didDeleteService service: Service) {
-        dataManager.servicesManager.services.removeAll { type(of: $0) == type(of: service) }
+extension SettingsTableViewController: ServiceSettingsDelegate {
+    func serviceSettingsNotifying(_ object: ServiceSettingsNotifying, didDeleteService service: Service) {
+        dataManager.servicesManager.removeActiveService(service)
     }
 }
 

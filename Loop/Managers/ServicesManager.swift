@@ -7,54 +7,117 @@
 //
 
 import LoopKit
-
-protocol ServicesManagerObserver {
-
-    /// The service manager update the list of available services.
-    ///
-    /// - Parameter services: The list of available services
-    func servicesManagerDidUpdate(services: [Service])
-
-}
+import LoopKitUI
 
 class ServicesManager {
 
-    private let queue = DispatchQueue(label: "com.loopkit.ServicesManagerQueue", qos: .utility)
+    private let pluginManager: PluginManager
 
-    private let lock = UnfairLock()
+    let analyticsServicesManager: AnalyticsServicesManager
 
-    private var observers = WeakSet<ServicesManagerObserver>()
+    let loggingServicesManager: LoggingServicesManager
 
-    var services: [Service] {
-        didSet {
-            dispatchPrecondition(condition: .onQueue(.main))
-            UserDefaults.appGroup?.services = services
-            notifyObservers()
+    let remoteDataServicesManager: RemoteDataServicesManager
+
+    private var services = [Service]()
+
+    private let servicesLock = UnfairLock()
+
+    init(pluginManager: PluginManager, deviceDataManager: DeviceDataManager) {
+        self.pluginManager = pluginManager
+
+        self.analyticsServicesManager = AnalyticsServicesManager()
+        self.loggingServicesManager = LoggingServicesManager()
+        self.remoteDataServicesManager = RemoteDataServicesManager(deviceDataManager: deviceDataManager)
+
+        restoreState()
+    }
+
+    public var availableServices: [AvailableService] {
+        return pluginManager.availableServices + availableStaticServices
+    }
+
+    func serviceUITypeByIdentifier(_ identifier: String) -> ServiceUI.Type? {
+        return pluginManager.getServiceTypeByIdentifier(identifier) ?? staticServicesByIdentifier[identifier] as? ServiceUI.Type
+    }
+
+    private func serviceTypeFromRawValue(_ rawValue: Service.RawStateValue) -> Service.Type? {
+        guard let identifier = rawValue["serviceIdentifier"] as? String else {
+            return nil
+        }
+
+        return serviceUITypeByIdentifier(identifier)
+    }
+
+    private func serviceFromRawValue(_ rawValue: Service.RawStateValue) -> Service? {
+        guard let serviceType = serviceTypeFromRawValue(rawValue),
+            let rawState = rawValue["state"] as? Service.RawStateValue else {
+            return nil
+        }
+
+        return serviceType.init(rawState: rawState)
+    }
+
+    public var activeServices: [Service] {
+        return servicesLock.withLock { services }
+    }
+
+    public func addActiveService(_ service: Service) {
+        servicesLock.withLock {
+            service.serviceDelegate = self
+            services.append(service)
+
+            if let analyticsService = service as? AnalyticsService {
+                analyticsServicesManager.addService(analyticsService)
+            }
+            if let loggingService = service as? LoggingService {
+                loggingServicesManager.addService(loggingService)
+            }
+            if let remoteDataService = service as? RemoteDataService {
+                remoteDataServicesManager.addService(remoteDataService)
+            }
+
+            saveState()
         }
     }
 
-    init() {
-        self.services = UserDefaults.appGroup?.services ?? []
-    }
+    public func removeActiveService(_ service: Service) {
+        servicesLock.withLock {
+            if let remoteDataService = service as? RemoteDataService {
+                remoteDataServicesManager.removeService(remoteDataService)
+            }
+            if let loggingService = service as? LoggingService {
+                loggingServicesManager.removeService(loggingService)
+            }
+            if let analyticsService = service as? AnalyticsService {
+                analyticsServicesManager.removeService(analyticsService)
+            }
 
-    public func addObserver(_ observer: ServicesManagerObserver) {
-        lock.withLock {
-            observers.insert(observer)
-            return
+            services.removeAll { $0.serviceIdentifier == service.serviceIdentifier }
+            service.serviceDelegate = nil
+
+            saveState()
         }
     }
 
-    public func removeObserver(_ observer: ServicesManagerObserver) {
-        lock.withLock {
-            observers.remove(observer)
-            return
-        }
+    private func saveState() {
+        UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
     }
 
-    private func notifyObservers() {
-        for observer in lock.withLock({ observers }) {
-            observer.servicesManagerDidUpdate(services: services)
-        }
+    private func restoreState() {
+        services = UserDefaults.appGroup?.servicesState.compactMap { rawValue in
+            let service = serviceFromRawValue(rawValue)
+            service?.serviceDelegate = self
+            return service
+        } ?? []
+    }
+
+}
+
+extension ServicesManager: ServiceDelegate {
+
+    func serviceDidUpdateState(_ service: Service) {
+        saveState()
     }
 
 }

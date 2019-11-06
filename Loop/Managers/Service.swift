@@ -8,39 +8,30 @@
 
 import LoopKit
 import MockKit
-import AmplitudeServiceKit
-import LogglyServiceKit
-import NightscoutServiceKit
 
-/// The order here specifies the order in the service selection popup
 #if DEBUG
-let serviceTypes: [Service.Type] = [
-    NightscoutService.self,
-    LogglyService.self,
-    AmplitudeService.self,
-    MockService.self,
-]
+let staticServices: [Service.Type] = [MockService.self]
 #else
-let serviceTypes: [Service.Type] = [
-    NightscoutService.self,
-    LogglyService.self,
-    AmplitudeService.self,
-]
+let staticServices: [Service.Type] = []
 #endif
 
-private let serviceTypesByIdentifier: [String: Service.Type] = serviceTypes.reduce(into: [:]) { (map, Type) in
+let staticServicesByIdentifier: [String: Service.Type] = staticServices.reduce(into: [:]) { (map, Type) in
     map[Type.serviceIdentifier] = Type
+}
+
+let availableStaticServices = staticServices.map { (Type) -> AvailableService in
+    return AvailableService(identifier: Type.serviceIdentifier, localizedTitle: Type.localizedTitle)
 }
 
 func ServiceFromRawValue(_ rawValue: [String: Any]) -> Service? {
     guard let serviceIdentifier = rawValue["serviceIdentifier"] as? String,
         let rawState = rawValue["state"] as? Service.RawStateValue,
-        let serviceType = serviceTypesByIdentifier[serviceIdentifier]
+        let ServiceType = staticServicesByIdentifier[serviceIdentifier]
     else {
         return nil
     }
 
-    return serviceType.init(rawState: rawState)
+    return ServiceType.init(rawState: rawState)
 }
 
 extension Service {

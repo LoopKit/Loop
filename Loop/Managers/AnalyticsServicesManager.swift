@@ -14,16 +14,16 @@ final class AnalyticsServicesManager {
 
     private lazy var log = DiagnosticLog(category: "AnalyticsServicesManager")
 
-    private var analyticsServices: [AnalyticsService]!
+    private var analyticsServices = [AnalyticsService]()
 
-    init(servicesManager: ServicesManager) {
-        self.analyticsServices = filter(services: servicesManager.services)
-        
-        servicesManager.addObserver(self)
+    init() {}
+
+    func addService(_ analyticsService: AnalyticsService) {
+        analyticsServices.append(analyticsService)
     }
 
-    private func filter(services: [Service]) -> [AnalyticsService] {
-        return services.compactMap({ $0 as? AnalyticsService })
+    func removeService(_ analyticsService: AnalyticsService) {
+        analyticsServices.removeAll { $0.serviceIdentifier == analyticsService.serviceIdentifier }
     }
 
     private func logEvent(_ name: String, withProperties properties: [AnyHashable: Any]? = nil, outOfSession: Bool = false) {
@@ -147,12 +147,4 @@ final class AnalyticsServicesManager {
         logEvent("Loop error", outOfSession: true)
     }
 
-}
-
-extension AnalyticsServicesManager: ServicesManagerObserver {
-
-    func servicesManagerDidUpdate(services: [Service]) {
-        analyticsServices = filter(services: services)
-    }
-    
 }

@@ -13,29 +13,25 @@ final class RemoteDataServicesManager: CarbStoreSyncDelegate {
 
     private unowned let deviceDataManager: DeviceDataManager
 
-    private var remoteDataServices: [RemoteDataService]!
+    private var remoteDataServices = [RemoteDataService]()
 
     private var lastSettingsUpdate: Date = .distantPast
 
     private let log = DiagnosticLog(category: "RemoteDataServicesManager")
 
-    init(servicesManager: ServicesManager, deviceDataManager: DeviceDataManager) {
+    init(deviceDataManager: DeviceDataManager) {
         self.deviceDataManager = deviceDataManager
-        self.remoteDataServices = filter(services: servicesManager.services)
-
-        servicesManager.addObserver(self)
 
         NotificationCenter.default.addObserver(self, selector: #selector(loopCompleted(_:)), name: .LoopCompleted, object: deviceDataManager.loopManager)
         NotificationCenter.default.addObserver(self, selector: #selector(loopDataUpdated(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
     }
 
-    private func filter(services: [Service]) -> [RemoteDataService] {
-        return services.compactMap({ (service) in
-            guard let remoteDataService = service as? RemoteDataService else {
-                return nil
-            }
-            return remoteDataService
-        })
+    func addService(_ remoteDataService: RemoteDataService) {
+        remoteDataServices.append(remoteDataService)
+    }
+
+    func removeService(_ remoteDataService: RemoteDataService) {
+        remoteDataServices.removeAll { $0.serviceIdentifier == remoteDataService.serviceIdentifier }
     }
 
     @objc func loopDataUpdated(_ note: Notification) {
@@ -49,7 +45,7 @@ final class RemoteDataServicesManager: CarbStoreSyncDelegate {
         }
 
         lastSettingsUpdate = Date()
-        
+
         uploadSettings()
     }
 
@@ -169,14 +165,6 @@ final class RemoteDataServicesManager: CarbStoreSyncDelegate {
 
     func carbStore(_ carbStore: CarbStore, hasDeletedEntries entries: [DeletedCarbEntry], completion: @escaping (_ entries: [DeletedCarbEntry]) -> Void) {
         delete(carbEntries: entries, completion: completion)
-    }
-
-}
-
-extension RemoteDataServicesManager: ServicesManagerObserver {
-
-    func servicesManagerDidUpdate(services: [Service]) {
-        remoteDataServices = filter(services: services)
     }
 
 }
