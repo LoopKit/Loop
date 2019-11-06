@@ -71,7 +71,8 @@ final class LoopDataManager {
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
-            overrideHistory: overrideHistory
+            overrideHistory: overrideHistory,
+            carbAbsorptionModel: settings.carbAbsorptionModel
         )
 
         doseStore = DoseStore(
@@ -457,6 +458,10 @@ extension LoopDataManager {
 
             completion()
         }
+    }
+
+    func changeCarbAbsorptionModel(_ model: CarbAbsorptionModel) {
+
     }
 }
 

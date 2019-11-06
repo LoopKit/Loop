@@ -21,6 +21,8 @@ public struct LoopSettings: Equatable {
 
     public var microbolusesSafeMode = true
 
+    public var carbAbsorptionModel: CarbAbsorptionModel = .linear
+
     public let dynamicCarbAbsorptionEnabled = true
 
     public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .hours(2), medium: .hours(3), slow: .hours(4))
@@ -224,6 +226,11 @@ extension LoopSettings: RawRepresentable {
             self.microbolusesSafeMode = microbolusesSafeMode
         }
 
+        if let carbAbsorptionModelRaw = rawValue["carbAbsorptionModel"] as? CarbAbsorptionModel.RawValue,
+            let carbAbsorptionModel = CarbAbsorptionModel(rawValue: carbAbsorptionModelRaw) {
+            self.carbAbsorptionModel = carbAbsorptionModel
+        }
+
         if let glucoseRangeScheduleRawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
             self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: glucoseRangeScheduleRawValue)
 
@@ -272,7 +279,8 @@ extension LoopSettings: RawRepresentable {
             "microbolusesSize": microbolusesSize,
             "microbolusesWithoutCarbsEnabled": microbolusesWithoutCarbsEnabled,
             "microbolusesWithoutCarbsSize": microbolusesWithoutCarbsSize,
-            "microbolusesSafeMode": microbolusesSafeMode
+            "microbolusesSafeMode": microbolusesSafeMode,
+            "carbAbsorptionModel": carbAbsorptionModel.rawValue
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
@@ -285,4 +293,31 @@ extension LoopSettings: RawRepresentable {
 
         return raw
     }
+}
+
+extension CarbAbsorptionModel: RawRepresentable {
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "linear":
+            self = .linear
+        case "nonlinear":
+            self = .nonlinear
+        case "adaptiveRateNonlinear":
+            self = .adaptiveRateNonlinear
+        default:
+            return nil
+        }
+    }
+
+    public var rawValue: String {
+        switch self {
+        case .linear:
+            return "linear"
+        case .nonlinear:
+            return "nonlinear"
+        case .adaptiveRateNonlinear:
+            return "adaptiveRateNonlinear"
+        }
+    }
+
 }

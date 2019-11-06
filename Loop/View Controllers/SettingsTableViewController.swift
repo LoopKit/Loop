@@ -74,6 +74,7 @@ final class SettingsTableViewController: UITableViewController {
         case carbRatio
         case insulinSensitivity
         case overridePresets
+        case carbAbsorptionModel
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -93,6 +94,7 @@ final class SettingsTableViewController: UITableViewController {
     }()
 
     private var microbolusCancellable: AnyCancellable?
+    private var carbAbsorptionModelCancellable: AnyCancellable?
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
@@ -315,6 +317,9 @@ final class SettingsTableViewController: UITableViewController {
                     .map { $0.symbol }
                     .joined(separator: " ")
                 configCell.detailTextLabel?.text = presetPreviewText
+            case .carbAbsorptionModel:
+                configCell.textLabel?.text = NSLocalizedString("Carb Absorption Model", comment: "The title text for the Carb Absorption Model")
+                configCell.detailTextLabel?.text = ""
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -579,6 +584,24 @@ final class SettingsTableViewController: UITableViewController {
                     presets: dataManager.loopManager.settings.overridePresets
                 )
                 vc.delegate = self
+
+                show(vc, sender: sender)
+            case .carbAbsorptionModel:
+                let viewModel = CarbAbsorptionModelView.ViewModel(model: .linear)
+                var settings = dataManager.loopManager.settings
+
+                carbAbsorptionModelCancellable = viewModel.$model
+                    .sink { [weak self] model in
+                        settings.carbAbsorptionModel = model
+                        self?.dataManager.loopManager.changeCarbAbsorptionModel(model)
+                        self?.dataManager.loopManager.settings = settings
+                        self?.tableView.reloadRows(at: [indexPath], with: .none)
+                    }
+
+                let vc = CarbAbsorptionModelViewController(viewModel: viewModel)
+                vc.onDeinit = {
+                    self.carbAbsorptionModelCancellable?.cancel()
+                }
 
                 show(vc, sender: sender)
             }
