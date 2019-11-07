@@ -22,6 +22,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		3804343D23747354004BAB52 /* Microbolus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3804343C23747354004BAB52 /* Microbolus.swift */; };
+		3804343E237474AE004BAB52 /* Microbolus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3804343C23747354004BAB52 /* Microbolus.swift */; };
 		3858986B235E0DE200919FD4 /* NightscoutAPIClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38589861235E0A4200919FD4 /* NightscoutAPIClient.framework */; };
 		3858986D235E0DEA00919FD4 /* NightscoutAPIClientUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38589864235E0A4C00919FD4 /* NightscoutAPIClientUI.framework */; };
 		38BE6D8D236C8A110074CF11 /* MicrobolusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BE6D8C236C8A110074CF11 /* MicrobolusViewController.swift */; };
@@ -574,6 +576,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3804343C23747354004BAB52 /* Microbolus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Microbolus.swift; sourceTree = "<group>"; };
 		38589861235E0A4200919FD4 /* NightscoutAPIClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38589864235E0A4C00919FD4 /* NightscoutAPIClientUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutAPIClientUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38BE6D8C236C8A110074CF11 /* MicrobolusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrobolusViewController.swift; sourceTree = "<group>"; };
@@ -1481,6 +1484,7 @@
 				43D848AF1E7DCBE100DADCBC /* Result.swift */,
 				43D9FFD121EAE05D00AF44BF /* LoopCore.h */,
 				43D9FFD221EAE05D00AF44BF /* Info.plist */,
+				3804343C23747354004BAB52 /* Microbolus.swift */,
 			);
 			path = LoopCore;
 			sourceTree = "<group>";
@@ -2754,6 +2758,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3804343E237474AE004BAB52 /* Microbolus.swift in Sources */,
 				43C05CB821EBEA54006FB252 /* HKUnit.swift in Sources */,
 				4345E3F421F036FC009E00E5 /* Result.swift in Sources */,
 				43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */,
@@ -2806,6 +2811,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3804343D23747354004BAB52 /* Microbolus.swift in Sources */,
 				43C05CB921EBEA54006FB252 /* HKUnit.swift in Sources */,
 				4345E3F521F036FC009E00E5 /* Result.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
@@ -3351,7 +3357,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 031119a;
+				CURRENT_PROJECT_VERSION = 071119a;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -3423,7 +3429,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 031119a;
+				CURRENT_PROJECT_VERSION = 071119a;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

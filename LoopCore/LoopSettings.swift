@@ -19,7 +19,7 @@ public struct LoopSettings: Equatable {
 
     public var microbolusesWithoutCarbsSize = 30.0
 
-    public var microbolusesSafeMode = true
+    public var microbolusesSafeMode: Microbolus.SafeMode = .enabled
 
     public let dynamicCarbAbsorptionEnabled = true
 
@@ -220,7 +220,8 @@ extension LoopSettings: RawRepresentable {
             self.microbolusesWithoutCarbsSize = microbolusesWithoutCarbsSize
         }
 
-        if let microbolusesSafeMode = rawValue["microbolusesSafeMode"] as? Bool {
+        if let microbolusesSafeModeRaw = rawValue["microbolusesSafeMode"] as? Int,
+            let microbolusesSafeMode = Microbolus.SafeMode(rawValue: microbolusesSafeModeRaw) {
             self.microbolusesSafeMode = microbolusesSafeMode
         }
 
@@ -272,7 +273,7 @@ extension LoopSettings: RawRepresentable {
             "microbolusesSize": microbolusesSize,
             "microbolusesWithoutCarbsEnabled": microbolusesWithoutCarbsEnabled,
             "microbolusesWithoutCarbsSize": microbolusesWithoutCarbsSize,
-            "microbolusesSafeMode": microbolusesSafeMode
+            "microbolusesSafeMode": microbolusesSafeMode.rawValue
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue

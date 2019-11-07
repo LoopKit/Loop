@@ -8,16 +8,17 @@
 
 import SwiftUI
 import Combine
+import LoopCore
 
 struct MicrobolusView: View {
-    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Bool)
+    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode)
 
     final class ViewModel: ObservableObject {
         @Published var microbolusesWithCOB: Bool
         @Published var withCOBValue: Double
         @Published var microbolusesWithoutCOB: Bool
         @Published var withoutCOBValue: Double
-        @Published var safeMode: Bool
+        @Published var safeMode: Microbolus.SafeMode
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
@@ -26,7 +27,7 @@ struct MicrobolusView: View {
 
         private var cancellable: AnyCancellable!
 
-        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Bool) {
+        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode) {
             self.microbolusesWithCOB = microbolusesWithCOB
             self.withCOBValue = withCOBValue
             self.microbolusesWithoutCOB = microbolusesWithoutCOB
@@ -101,14 +102,6 @@ struct MicrobolusView: View {
 
             if viewModel.microbolusesWithCOB {
                 Section(footer:
-                    Text("If enabled and the predicted glucose after 15 minutes is less than the current glucose, Microboluses is not allowed. If disabled, the Maximum Microbolus Size is limited to 30 basal minutes in this case.")
-                ) {
-                    Toggle (isOn: $viewModel.safeMode) {
-                        Text("Safe Mode")
-                    }
-                }
-
-                Section(footer:
                     Text("This is the maximum minutes of basal that can be delivered as a single Microbolus without COB.")
                 ) {
                     Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
@@ -120,6 +113,17 @@ struct MicrobolusView: View {
                         }
                     }
                 }
+
+                Section(header: Text("Safe Mode").font(.headline), footer:
+                    Text("• If Enabled and the predicted glucose after 15 minutes is less than the current glucose, Microboluses is not allowed.\n• If Limited and the predicted glucose after 15 minutes is less than the current glucose, the Maximum Microbolus Size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
+                ) {
+                    Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
+                        ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
+                            Text("\(value.displayName)").tag(value)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                }
             }
 
         }
@@ -127,7 +131,18 @@ struct MicrobolusView: View {
     }
 }
 
-#if DEBUG
+private extension Microbolus.SafeMode {
+    var displayName: String {
+        switch self {
+        case .enabled:
+            return "Enabled"
+        case .limited:
+            return "Limited"
+        case .disabled:
+            return "Disabled"
+        }
+    }
+}
 
 struct MicrobolusView_Previews: PreviewProvider {
     static var previews: some View {
@@ -136,11 +151,9 @@ struct MicrobolusView_Previews: PreviewProvider {
             withCOBValue: 30,
             microbolusesWithoutCOB: false,
             withoutCOBValue: 30,
-            safeMode: true
+            safeMode: .enabled
             )
         )
             .environment(\.colorScheme, .dark)
     }
 }
-
-#endif

@@ -1133,7 +1133,7 @@ extension LoopDataManager {
 
         let lowTrend = controlGlucoseQuantity.map { $0 < glucose.quantity } ?? true
 
-        let safityCheck = !(lowTrend && settings.microbolusesSafeMode)
+        let safityCheck = !(lowTrend && settings.microbolusesSafeMode == .enabled)
         guard safityCheck else {
             logger.debug("Control glucose is lower then current. Microbolus is not allowed.")
             completion(false, nil)
@@ -1141,10 +1141,13 @@ extension LoopDataManager {
         }
 
         let maxBasalMinutes: Double = {
-            switch (cob > 0, lowTrend) {
-            case (true, false): return settings.microbolusesSize
-            case (false, false): return settings.microbolusesWithoutCarbsSize
-            default: return 30
+            switch (cob > 0, lowTrend, settings.microbolusesSafeMode == .disabled) {
+            case (true, false, _), (true, true, true):
+                return settings.microbolusesSize
+            case (false, false, _), (false, true, true):
+                return settings.microbolusesWithoutCarbsSize
+            default:
+                return 30
             }
         }()
 
