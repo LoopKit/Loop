@@ -118,7 +118,7 @@ final class ChartHUDController: HUDInterfaceController, WKCrownDelegate {
         super.willActivate()
 
         observers = [
-            NotificationCenter.default.addObserver(forName: .GlucoseSamplesDidChange, object: loopManager.glucoseStore, queue: nil) { [weak self] (note) in
+            NotificationCenter.default.addObserver(forName: GlucoseStore.glucoseSamplesDidChange, object: loopManager.glucoseStore, queue: nil) { [weak self] (note) in
                 self?.log.default("Received GlucoseSamplesDidChange notification: %{public}@. Updating chart", String(describing: note.userInfo ?? [:]))
 
                 DispatchQueue.main.async {
