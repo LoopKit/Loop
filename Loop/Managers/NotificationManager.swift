@@ -100,8 +100,8 @@ struct NotificationManager {
         }
 
         notification.userInfo = [
-            LoopNotificationUserInfoKey.rawValue: units,
-            LoopNotificationUserInfoKey.rawValue: startDate
+            LoopNotificationUserInfoKey.bolusAmount.rawValue: units,
+            LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate
         ]
 
         let request = UNNotificationRequest(
