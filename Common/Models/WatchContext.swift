@@ -8,22 +8,24 @@
 
 import Foundation
 import HealthKit
+import LoopKit
+
 
 final class WatchContext: NSObject, RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 3
+    private let version = 4
 
     var preferredGlucoseUnit: HKUnit?
-    var maxBolus: Double?
 
     var glucose: HKQuantity?
     var glucoseTrendRawValue: Int?
-    var eventualGlucose: HKQuantity?
     var glucoseDate: Date?
 
-    var glucoseRangeScheduleOverride: GlucoseRangeScheduleOverrideUserInfo?
-    var configuredOverrideContexts: [GlucoseRangeScheduleOverrideUserInfo.Context] = []
+    var predictedGlucose: WatchPredictedGlucose?
+    var eventualGlucose: HKQuantity? {
+        return predictedGlucose?.values.last?.quantity
+    }
 
     var loopLastRunDate: Date?
     var lastNetTempBasalDose: Double?
@@ -33,16 +35,16 @@ final class WatchContext: NSObject, RawRepresentable {
     var bolusSuggestion: BolusSuggestionUserInfo? {
         guard let recommended = recommendedBolusDose else { return nil }
 
-        return BolusSuggestionUserInfo(recommendedBolus: recommended, maxBolus: maxBolus)
+        return BolusSuggestionUserInfo(recommendedBolus: recommended)
     }
 
-    var COB: Double?
-    var IOB: Double?
+    var cob: Double?
+    var iob: Double?
     var reservoir: Double?
     var reservoirPercentage: Double?
     var batteryPercentage: Double?
 
-    var cgm: CGM?
+    var cgmManagerState: CGMManager.RawStateValue?
 
     override init() {
         super.init()
@@ -56,32 +58,16 @@ final class WatchContext: NSObject, RawRepresentable {
         }
 
         if let unitString = rawValue["gu"] as? String {
-            let unit = HKUnit(from: unitString)
-            preferredGlucoseUnit = unit
+            preferredGlucoseUnit = HKUnit(from: unitString)
         }
-
+        let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
         if let glucoseValue = rawValue["gv"] as? Double {
-            glucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
-        }
-
-        if let glucoseValue = rawValue["egv"] as? Double {
-            eventualGlucose = HKQuantity(unit: preferredGlucoseUnit ?? .milligramsPerDeciliter, doubleValue: glucoseValue)
+            glucose = HKQuantity(unit: unit, doubleValue: glucoseValue)
         }
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
-
-        if let overrideUserInfoRawValue = rawValue["grsoc"] as? GlucoseRangeScheduleOverrideUserInfo.RawValue,
-            let overrideUserInfo = GlucoseRangeScheduleOverrideUserInfo(rawValue: overrideUserInfoRawValue)
-        {
-            glucoseRangeScheduleOverride = overrideUserInfo
-        }
-
-        if let configuredOverrideContextsRawValues = rawValue["coc"] as? [GlucoseRangeScheduleOverrideUserInfo.Context.RawValue] {
-            configuredOverrideContexts = configuredOverrideContextsRawValues.compactMap(GlucoseRangeScheduleOverrideUserInfo.Context.init(rawValue:))
-        }
-
-        IOB = rawValue["iob"] as? Double
+        iob = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
         reservoirPercentage = rawValue["rp"] as? Double
         batteryPercentage = rawValue["bp"] as? Double
@@ -90,11 +76,12 @@ final class WatchContext: NSObject, RawRepresentable {
         lastNetTempBasalDose = rawValue["ba"] as? Double
         lastNetTempBasalDate = rawValue["bad"] as? Date
         recommendedBolusDose = rawValue["rbo"] as? Double
-        COB = rawValue["cob"] as? Double
-        maxBolus = rawValue["mb"] as? Double
+        cob = rawValue["cob"] as? Double
 
-        if let cgmRawValue = rawValue["cgm"] as? CGM.RawValue {
-            cgm = CGM(rawValue: cgmRawValue)
+        cgmManagerState = rawValue["cgmManagerState"] as? CGMManager.RawStateValue
+
+        if let rawValue = rawValue["pg"] as? WatchPredictedGlucose.RawValue {
+            predictedGlucose = WatchPredictedGlucose(rawValue: rawValue)
         }
     }
 
@@ -107,26 +94,35 @@ final class WatchContext: NSObject, RawRepresentable {
         raw["bad"] = lastNetTempBasalDate
         raw["bp"] = batteryPercentage
 
-        raw["cgm"] = cgm?.rawValue
+        raw["cgmManagerState"] = cgmManagerState
 
-        raw["cob"] = COB
+        raw["cob"] = cob
 
         let unit = preferredGlucoseUnit ?? .milligramsPerDeciliter
-        raw["egv"] = eventualGlucose?.doubleValue(for: unit)
         raw["gu"] = preferredGlucoseUnit?.unitString
         raw["gv"] = glucose?.doubleValue(for: unit)
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
-        raw["grsoc"] = glucoseRangeScheduleOverride?.rawValue
-        raw["coc"] = configuredOverrideContexts.map { $0.rawValue }
-        raw["iob"] = IOB
+        raw["iob"] = iob
         raw["ld"] = loopLastRunDate
-        raw["mb"] = maxBolus
         raw["r"] = reservoir
         raw["rbo"] = recommendedBolusDose
         raw["rp"] = reservoirPercentage
 
+        raw["pg"] = predictedGlucose?.rawValue
+
         return raw
+    }
+}
+
+
+extension WatchContext {
+    func shouldReplace(_ other: WatchContext) -> Bool {
+        if let date = self.glucoseDate, let otherDate = other.glucoseDate {
+            return date >= otherDate
+        } else {
+            return true
+        }
     }
 }

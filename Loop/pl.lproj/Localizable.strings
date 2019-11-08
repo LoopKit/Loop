@@ -67,9 +67,6 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktywna Insulina: %@";
 
-/* The title of the button to add the credentials for a service */
-"Add Account" = "Dodaj konto";
-
 /* The label of the carb entry button */
 "Add Meal" = "Dodaj posiłek";
 
@@ -170,9 +167,6 @@
 /* Title text for delivery limits */
 "Delivery Limits" = "Limit podaży";
 
-/* The title of the Dexcom Share service */
-"Dexcom Share" = "Dexcom Share";
-
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Wyłącza";
 
@@ -215,9 +209,6 @@
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "Dane o glukozie są nieaktualne od %1$@";
 
-/* Error description for unreliable state */
-"Glucose data is unavailable" = "Dane o glukozie są niedostępne";
-
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "Dane o glukozie są niedostępne";
 
@@ -256,9 +247,6 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Zgłaszanie błędów";
 
-/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
-"Last comparison: %1$@ → %2$@ vs %3$@" = "Ostatnie porównanie: %1$@ → %2$@ vs %3$@";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Uruchamia aplikację CGM";
 
@@ -273,9 +261,6 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop nie działał poprawnie przez %@";
-
-/* The description of a low G5/G6 transmitter battery with a leading space */
-"Low Battery" = "Słaba bateria";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -297,15 +282,6 @@
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Brak podłączonych urządzeń lub awaria podczas połączenia urządzenia";
-
-/* Sensor state description for the valid state */
-"OK" = "OK";
-
-/* Outside US share server option title */
-"Outside US" = "Poza USA";
-
-/* The title of the Dexcom share password credential */
-"Password" = "Hasło";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Poziom przed posiłkiem";
@@ -349,9 +325,6 @@
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Rekomendowany bolus: %@ jednostek";
 
-/* The default placeholder string for a credential */
-"Required" = "Wymagane";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Zbiornik";
 
@@ -360,24 +333,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Ponów";
-
-/* The description of sensor calibration state when sensor calibration is ok. */
-"Sensor calibration is OK" = "Kalibracja sensora powiodła się";
-
-/* The description of sensor calibration state when raw value is unknown. (1: missing data details) */
-"Sensor is in unknown state %1$d" = "Sensor jest w nieznanym stanie %1$d";
-
-/* The description of sensor calibration state when sensor sensor is stopped. */
-"Sensor is stopped" = "Sensor jest wstrzymany";
-
-/* The description of sensor calibration state when sensor sensor is warming up. */
-"Sensor is warming up" = "Sensor jest w trakcie uruchamiania";
-
-/* The description of sensor calibration state when sensor needs calibration. */
-"Sensor needs calibration" = "Sensor wymaga kalibracji";
-
-/* The title of the Dexcom share server URL credential */
-"Server" = "Serwer";
 
 /* The title of the services section in settings */
 "Services" = "Usługi";
@@ -415,23 +370,11 @@
 /* The description of the switch which toggles retrospective correction effects */
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Spowoduje to bardziej agresywny wzrost lub spadek w podaży dawki podstawowej, gdy zmiany poziomu glukozy nie odpowiadają zastosowanym modelom absorpcji węglowodanów i aktywności insuliny.";
 
-/* The title text for the Dexcom G5/G6 transmitter ID config value */
-"Transmitter ID" = "ID transmitera";
-
 /* The short unit display string for international units of insulin */
 "U" = "J";
 
-/* U.S. share server option title */
-"US" = "USA";
-
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Użyj zakresu glukozy dla wysiłku fizycznego";
-
-/* The title of the Dexcom share username credential */
-"Username" = "Nazwa użytkownika";
-
-/* Label indicating validation is occurring */
-"Verifying" = "Weryfikuję";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";

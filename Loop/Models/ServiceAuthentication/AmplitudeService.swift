@@ -8,21 +8,28 @@
 
 import Foundation
 import Amplitude
+import LoopKit
+import LoopKitUI
 
 
-class AmplitudeService: ServiceAuthentication {
-    var credentials: [ServiceCredential]
+class AmplitudeService: ServiceAuthenticationUI {
+    var credentialValues: [String?]
+
+    var credentialFormFields: [ServiceCredential]
 
     let title: String = NSLocalizedString("Amplitude", comment: "The title of the Amplitude service")
 
     init(APIKey: String?) {
-        credentials = [
+        credentialValues = [
+            APIKey
+        ]
+
+        credentialFormFields = [
             ServiceCredential(
                 title: NSLocalizedString("API Key", comment: "The title of the amplitude API key credential"),
                 placeholder: nil,
                 isSecret: false,
-                keyboardType: .asciiCapable,
-                value: APIKey
+                keyboardType: .asciiCapable
             )
         ]
 
@@ -32,7 +39,7 @@ class AmplitudeService: ServiceAuthentication {
     var client: Amplitude?
 
     var APIKey: String? {
-        return credentials[0].value
+        return credentialValues[0]
     }
 
     var isAuthorized: Bool = true
@@ -54,7 +61,6 @@ class AmplitudeService: ServiceAuthentication {
     }
 
     func reset() {
-        credentials[0].reset()
         isAuthorized = false
         client = nil
     }

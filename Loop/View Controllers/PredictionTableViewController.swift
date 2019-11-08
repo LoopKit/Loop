@@ -67,7 +67,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
 
     // MARK: - State
 
-    private var retrospectivePredictedGlucose: [GlucoseValue]?
+    private var retrospectiveGlucoseDiscrepancies: [GlucoseChange]?
 
     private var refreshContext = RefreshContext.all
 
@@ -113,7 +113,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         _ = self.refreshContext.remove(.status)
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) in
-            self.retrospectivePredictedGlucose = state.retrospectivePredictedGlucose
+            self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
             self.charts.setPredictedGlucoseValues(state.predictedGlucose ?? [])
 
             do {
@@ -238,7 +238,7 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         if let eventualGlucose = eventualGlucoseDescription {
             cell.titleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
         } else {
-            cell.titleLabel?.text = "–"
+            cell.titleLabel?.text = SettingsTableViewCell.NoValueString
         }
     }
 
@@ -256,15 +256,18 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         var subtitleText = input.localizedDescription(forGlucoseUnit: charts.glucoseUnit) ?? ""
 
         if input == .retrospection,
-            let startGlucose = retrospectivePredictedGlucose?.first,
-            let endGlucose = retrospectivePredictedGlucose?.last,
+            let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
             let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
         {
-            let formatter = NumberFormatter.glucoseFormatter(for: charts.glucoseUnit)
-            let values = [startGlucose, endGlucose, currentGlucose].map { formatter.string(from: $0.quantity.doubleValue(for: charts.glucoseUnit)) ?? "?" }
+            let formatter = QuantityFormatter()
+            formatter.setPreferredNumberFormatter(for: charts.glucoseUnit)
+            let predicted = HKQuantity(unit: charts.glucoseUnit, doubleValue: currentGlucose.quantity.doubleValue(for: charts.glucoseUnit) - lastDiscrepancy.quantity.doubleValue(for: charts.glucoseUnit))
+            var values = [predicted, currentGlucose.quantity].map { formatter.string(from: $0, for: charts.glucoseUnit) ?? "?" }
+            formatter.numberFormatter.positivePrefix = formatter.numberFormatter.plusSign
+            values.append(formatter.string(from: lastDiscrepancy.quantity, for: charts.glucoseUnit) ?? "?" )
 
             let retro = String(
-                format: NSLocalizedString("Last comparison: %1$@ → %2$@ vs %3$@", comment: "Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose)"),
+                format: NSLocalizedString("prediction-description-retrospective-correction", comment: "Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference)"),
                 values[0], values[1], values[2]
             )
 

@@ -67,9 +67,6 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "活性胰岛素: %@";
 
-/* The title of the button to add the credentials for a service */
-"Add Account" = "添加账户";
-
 /* The label of the carb entry button */
 "Add Meal" = "添加用餐信息";
 
@@ -170,9 +167,6 @@
 /* Title text for delivery limits */
 "Delivery Limits" = "输注限制";
 
-/* The title of the Dexcom Share service */
-"Dexcom Share" = "德康远程";
-
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "禁用";
 
@@ -215,9 +209,6 @@
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "葡萄糖%1$@分钟未更新";
 
-/* Error description for unreliable state */
-"Glucose data is unavailable" = "葡萄糖数据不可用";
-
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "血糖数据不可用";
 
@@ -256,9 +247,6 @@
 /* The title text for the issue report cell */
 "Issue Report" = "反馈问题";
 
-/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
-"Last comparison: %1$@ → %2$@ vs %3$@" = "的最后一次对比: %1$@ → %2$@ vs %3$@";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "启动CGM软件";
 
@@ -273,9 +261,6 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop运行异常 %@";
-
-/* The description of a low G5/G6 transmitter battery with a leading space */
-"Low Battery" = "电量低";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "毫克/分升";
@@ -297,15 +282,6 @@
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "没有连接的设备，或设备连接期间发生故障";
-
-/* Sensor state description for the valid state */
-"OK" = "好";
-
-/* Outside US share server option title */
-"Outside US" = "非美国地区";
-
-/* The title of the Dexcom share password credential */
-"Password" = "密码";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "餐前目标";
@@ -349,9 +325,6 @@
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "推荐大剂量：%@单位";
 
-/* The default placeholder string for a credential */
-"Required" = "需要";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "储药器";
 
@@ -360,24 +333,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "重试";
-
-/* The description of sensor calibration state when sensor calibration is ok. */
-"Sensor calibration is OK" = "传感器校准成功";
-
-/* The description of sensor calibration state when raw value is unknown. (1: missing data details) */
-"Sensor is in unknown state %1$d" = "传感器处于未知状态 %1$d";
-
-/* The description of sensor calibration state when sensor sensor is stopped. */
-"Sensor is stopped" = "传感器停止";
-
-/* The description of sensor calibration state when sensor sensor is warming up. */
-"Sensor is warming up" = "传感器在启动中";
-
-/* The description of sensor calibration state when sensor needs calibration. */
-"Sensor needs calibration" = "传感器需要校准";
-
-/* The title of the Dexcom share server URL credential */
-"Server" = "服务器";
 
 /* The title of the services section in settings */
 "Services" = "服务";
@@ -415,23 +370,11 @@
 /* The description of the switch which toggles retrospective correction effects */
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "当葡萄糖与碳水化合物和基于胰岛素的模型不匹配时，这将更积极地增加或减少基础递送。";
 
-/* The title text for the Dexcom G5/G6 transmitter ID config value */
-"Transmitter ID" = "发射器编号";
-
 /* The short unit display string for international units of insulin */
 "U" = "单位";
 
-/* U.S. share server option title */
-"US" = "美国";
-
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "使用运动状态的血糖目标";
-
-/* The title of the Dexcom share username credential */
-"Username" = "用户名";
-
-/* Label indicating validation is occurring */
-"Verifying" = "验证";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";

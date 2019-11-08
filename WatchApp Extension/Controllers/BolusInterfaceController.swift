@@ -85,7 +85,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
         var pickerValue = 0
 
         if let context = context as? BolusSuggestionUserInfo {
-            let recommendedBolus = context.recommendedBolus
+            let recommendedBolus = context.recommendedBolus ?? 0
 
             if let maxBolus = context.maxBolus {
                 maxBolusValue = maxBolus
@@ -95,7 +95,7 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
             pickerValue = pickerValueFromBolusValue(recommendedBolus * 0.75)
 
-            if let valueString = formatter.string(from: recommendedBolus) {
+            if let recommendedBolus = context.recommendedBolus, let valueString = formatter.string(from: recommendedBolus) {
                 recommendedValueLabel.setText(String(format: NSLocalizedString("Rec: %@ U", comment: "The label and value showing the recommended bolus"), valueString).localizedUppercase)
             }
         }
@@ -109,6 +109,10 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
+    }
+
+    override func didAppear() {
+        super.didAppear()
 
         crownSequencer.focus()
     }
@@ -122,10 +126,14 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
     @IBAction func decrement() {
         pickerValue -= 10
+
+        WKInterfaceDevice.current().play(.directionDown)
     }
 
     @IBAction func increment() {
         pickerValue += 10
+
+        WKInterfaceDevice.current().play(.directionUp)
     }
 
     @IBAction func deliver() {
@@ -137,7 +145,11 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
             do {
                 try WCSession.default.sendBolusMessage(bolus) { (error) in
                     DispatchQueue.main.async {
-                        ExtensionDelegate.shared().present(error)
+                        if let error = error {
+                            ExtensionDelegate.shared().present(error)
+                        } else {
+                            ExtensionDelegate.shared().loopManager.addConfirmedBolus(bolus)
+                        }
                     }
                 }
             } catch {
@@ -166,7 +178,10 @@ extension BolusInterfaceController: WKCrownDelegate {
         accumulatedRotation += rotationalDelta
 
         let remainder = accumulatedRotation.truncatingRemainder(dividingBy: rotationsPerValue)
-        pickerValue += Int((accumulatedRotation - remainder) / rotationsPerValue)
+        let delta = Int((accumulatedRotation - remainder) / rotationsPerValue)
+
+        pickerValue += delta
+
         accumulatedRotation = remainder
     }
 }

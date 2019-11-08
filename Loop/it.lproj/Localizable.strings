@@ -67,9 +67,6 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Insulina Attiva: %@";
 
-/* The title of the button to add the credentials for a service */
-"Add Account" = "Aggiungi Account";
-
 /* The label of the carb entry button */
 "Add Meal" = "Aggiungi Pasto";
 
@@ -170,9 +167,6 @@
 /* Title text for delivery limits */
 "Delivery Limits" = "Limiti Erogazione";
 
-/* The title of the Dexcom Share service */
-"Dexcom Share" = "Dexcom Share";
-
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Disabilitato";
 
@@ -215,9 +209,6 @@
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
 "Glucose data is %1$@ old" = "L'ultimo valore glicemico e' di %1$@ fa";
 
-/* Error description for unreliable state */
-"Glucose data is unavailable" = "I dati sulla glicemia non sono disponibili";
-
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "I dati sulla glicemia non sono disponibili";
 
@@ -256,9 +247,6 @@
 /* The title text for the issue report cell */
 "Issue Report" = "Segnalazione";
 
-/* Format string describing retrospective glucose prediction comparison. (1: Previous glucose)(2: Predicted glucose)(3: Actual glucose) */
-"Last comparison: %1$@ → %2$@ vs %3$@" = "Ultimo confronto: %1$@ → %2$@ vs %3$@";
-
 /* Glucose HUD accessibility hint */
 "Launches CGM app" = "Avvia CGM app";
 
@@ -273,9 +261,6 @@
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop non completato con successo da %@";
-
-/* The description of a low G5/G6 transmitter battery with a leading space */
-"Low Battery" = "Batteria Bassa";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -297,15 +282,6 @@
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Nessun dispositivo connesso o mancanza di segnale durante la connessione del dispositivo";
-
-/* Sensor state description for the valid state */
-"OK" = "OK";
-
-/* Outside US share server option title */
-"Outside US" = "Fuori USA";
-
-/* The title of the Dexcom share password credential */
-"Password" = "Password";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Obiettivo pre-pasto";
@@ -349,9 +325,6 @@
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Bolo Consigliato: %@ Unità";
 
-/* The default placeholder string for a credential */
-"Required" = "Necessario";
-
 /* Details for missing data error when reservoir data is missing */
 "Reservoir" = "Serbatoio";
 
@@ -360,24 +333,6 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Riprovare";
-
-/* The description of sensor calibration state when sensor calibration is ok. */
-"Sensor calibration is OK" = "La calibrazione del sensore e' valida";
-
-/* The description of sensor calibration state when raw value is unknown. (1: missing data details) */
-"Sensor is in unknown state %1$d" = "Il sensore presenta stato sconosciuto %1$d";
-
-/* The description of sensor calibration state when sensor sensor is stopped. */
-"Sensor is stopped" = "Il sensore e' spento";
-
-/* The description of sensor calibration state when sensor sensor is warming up. */
-"Sensor is warming up" = "Il sensore e' in fase di avvio";
-
-/* The description of sensor calibration state when sensor needs calibration. */
-"Sensor needs calibration" = "Il sensore necessita di calibrazione";
-
-/* The title of the Dexcom share server URL credential */
-"Server" = "Server";
 
 /* The title of the services section in settings */
 "Services" = "Servizi";
@@ -415,23 +370,11 @@
 /* The description of the switch which toggles retrospective correction effects */
 "This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "Questa impostazione rendera' piu' aggressiva l'erogazione o il blocco delle basali quando l'andamento glicemico non corrisponde al numero di carboidrati attivi e all'insulina attiva.";
 
-/* The title text for the Dexcom G5/G6 transmitter ID config value */
-"Transmitter ID" = "ID Trasmettitore";
-
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
-/* U.S. share server option title */
-"US" = "USA";
-
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Utilizza i target glicemici personalizzati per l'attivita' sportiva";
-
-/* The title of the Dexcom share username credential */
-"Username" = "Nome Utente";
-
-/* Label indicating validation is occurring */
-"Verifying" = "Sto verificando";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh"; 
