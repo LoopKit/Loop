@@ -81,13 +81,13 @@ struct MicrobolusView: View {
                         .foregroundColor(.orange)
                         .padding(.trailing)
 
-                    Text("Caution! Microboluses has the potential to reduce the safety effects of other mitigations, like max temp basal rate. Please be careful!\nThe actual size of the microbolus is always limited to half the recommended bolus.")
+                    Text("Caution! Microboluses have potential to reduce the safety effects of other mitigations like max temp basal rate. Please be careful!\nThe actual size of a microbolus is always limited to half the recommended bolus.")
                         .font(.caption)
                 }
 
             }
             Section(footer:
-                Text("This is the maximum minutes of basal that can be delivered as a single Microbolus with uncovered COB. This gives the ability to make Microboluses more aggressive if you choose. It is recommended that the value is set to start at 30, in line with the default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.")
+                Text("This is the maximum minutes of basal that can be delivered as a single microbolus with uncovered COB. This allows you to make microboluses behave more aggressively. It is recommended that this value is set to start at 30, in line with default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.")
             ) {
                 Toggle (isOn: $viewModel.microbolusesWithCOB) {
                     Text("Enable With Carbs")
@@ -102,7 +102,7 @@ struct MicrobolusView: View {
 
             if viewModel.microbolusesWithCOB {
                 Section(footer:
-                    Text("This is the maximum minutes of basal that can be delivered as a single Microbolus without COB.")
+                    Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
                 ) {
                     Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
                         Text("Enable Without Carbs")
@@ -115,7 +115,7 @@ struct MicrobolusView: View {
                 }
 
                 Section(header: Text("Safe Mode").font(.headline), footer:
-                    Text("• If Enabled and the predicted glucose after 15 minutes is less than the current glucose, Microboluses is not allowed.\n• If Limited and the predicted glucose after 15 minutes is less than the current glucose, the Maximum Microbolus Size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
+                    Text("• If Enabled and predicted glucose in 15 minutes is lower than current glucose, microboluses are not allowed.\n• If Limited and the predicted glucose in 15 minutes is lower than current glucose, the maximum microbolus size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
                 ) {
                     Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
                         ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
