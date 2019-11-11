@@ -11,7 +11,7 @@ import Combine
 import LoopCore
 
 struct MicrobolusView: View {
-    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode)
+    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double)
 
     final class ViewModel: ObservableObject {
         @Published var microbolusesWithCOB: Bool
@@ -19,23 +19,29 @@ struct MicrobolusView: View {
         @Published var microbolusesWithoutCOB: Bool
         @Published var withoutCOBValue: Double
         @Published var safeMode: Microbolus.SafeMode
+        @Published var microbolusesMinimumBolusSize: Double
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
+        @Published fileprivate var pickerMinimumBolusSizeIndex: Int
 
         fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 }
+        // @ToDo: Should be able to get the to limit from the settings but for now defult to a low value
+        fileprivate let minimumBolusSizeValues = stride(from: 0.0, to: 0.51, by: 0.05).map { $0 }
 
         private var cancellable: AnyCancellable!
 
-        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode) {
+        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double) {
             self.microbolusesWithCOB = microbolusesWithCOB
             self.withCOBValue = withCOBValue
             self.microbolusesWithoutCOB = microbolusesWithoutCOB
             self.withoutCOBValue = withoutCOBValue
             self.safeMode = safeMode
+            self.microbolusesMinimumBolusSize = microbolusesMinimumBolusSize
 
             pickerWithCOBIndex = values.firstIndex(of: Int(withCOBValue)) ?? 0
             pickerWithoutCOBIndex = values.firstIndex(of: Int(withoutCOBValue)) ?? 0
+            pickerMinimumBolusSizeIndex = minimumBolusSizeValues.firstIndex(of: Double(microbolusesMinimumBolusSize)) ?? 0
 
             let withCOBCancellable = $pickerWithCOBIndex
                 .map { Double(self.values[$0]) }
@@ -45,24 +51,30 @@ struct MicrobolusView: View {
                 .map { Double(self.values[$0]) }
                 .sink { self.withoutCOBValue = $0 }
 
+            let microbolusesMinimumBolusSizeCancellable = $pickerMinimumBolusSizeIndex
+                .map { Double(self.minimumBolusSizeValues[$0]) }
+                .sink { self.microbolusesMinimumBolusSize = $0 }
+
             cancellable = AnyCancellable {
                 withCOBCancellable.cancel()
                 withoutCOBCancellable.cancel()
+                microbolusesMinimumBolusSizeCancellable.cancel()
             }
         }
 
         func changes() -> AnyPublisher<Result, Never> {
             // Publishers.CombineLatest5
-            Publishers.CombineLatest(
+            Publishers.CombineLatest3(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
                     $withCOBValue,
                     $microbolusesWithoutCOB,
                     $withoutCOBValue
                 ),
-                $safeMode
+                $safeMode,
+                $microbolusesMinimumBolusSize
             )
-            .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1) }
+            .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1, $0.2) }
             .eraseToAnyPublisher()
         }
     }
@@ -101,6 +113,15 @@ struct MicrobolusView: View {
             }
 
             if viewModel.microbolusesWithCOB {
+                Section(footer:
+                    Text("This is the minimum Microbolus size in units that will be delivered. Only if the Microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
+                ) {
+                    Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
+                        ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
+                        }
+                    }
+                }
+
                 Section(footer:
                     Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
                 ) {
@@ -151,7 +172,8 @@ struct MicrobolusView_Previews: PreviewProvider {
             withCOBValue: 30,
             microbolusesWithoutCOB: false,
             withoutCOBValue: 30,
-            safeMode: .enabled
+            safeMode: .enabled,
+            microbolusesMinimumBolusSize: 0.0
             )
         )
             .environment(\.colorScheme, .dark)

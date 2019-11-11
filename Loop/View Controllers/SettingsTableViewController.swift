@@ -598,7 +598,8 @@ final class SettingsTableViewController: UITableViewController {
                     withCOBValue: settings.microbolusesSize,
                     microbolusesWithoutCOB: settings.microbolusesWithoutCarbsEnabled,
                     withoutCOBValue: settings.microbolusesWithoutCarbsSize,
-                    safeMode: settings.microbolusesSafeMode
+                    safeMode: settings.microbolusesSafeMode,
+                    microbolusesMinimumBolusSize: settings.microbolusesMinimumBolusSize
                 )
 
                 microbolusCancellable = viewModel.changes()
@@ -608,6 +609,7 @@ final class SettingsTableViewController: UITableViewController {
                         settings.microbolusesWithoutCarbsEnabled = result.microbolusesWithoutCOB
                         settings.microbolusesWithoutCarbsSize = result.withoutCOBValue
                         settings.microbolusesSafeMode = result.safeMode
+                        settings.microbolusesMinimumBolusSize = result.microbolusesMinimumBolusSize
 
                         self?.dataManager.loopManager.settings = settings
                         self?.tableView.reloadRows(at: [indexPath], with: .none)

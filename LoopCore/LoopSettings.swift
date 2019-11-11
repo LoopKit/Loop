@@ -21,6 +21,8 @@ public struct LoopSettings: Equatable {
 
     public var microbolusesSafeMode: Microbolus.SafeMode = .enabled
 
+    public var microbolusesMinimumBolusSize = 0.0
+
     public let dynamicCarbAbsorptionEnabled = true
 
     public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .hours(2), medium: .hours(3), slow: .hours(4))
@@ -225,6 +227,10 @@ extension LoopSettings: RawRepresentable {
             self.microbolusesSafeMode = microbolusesSafeMode
         }
 
+        if let microbolusesMinimumBolusSize = rawValue["microbolusesMinimumBolusSize"] as? Double {
+            self.microbolusesMinimumBolusSize = microbolusesMinimumBolusSize
+        }
+
         if let glucoseRangeScheduleRawValue = rawValue["glucoseTargetRangeSchedule"] as? GlucoseRangeSchedule.RawValue {
             self.glucoseTargetRangeSchedule = GlucoseRangeSchedule(rawValue: glucoseRangeScheduleRawValue)
 
@@ -273,7 +279,8 @@ extension LoopSettings: RawRepresentable {
             "microbolusesSize": microbolusesSize,
             "microbolusesWithoutCarbsEnabled": microbolusesWithoutCarbsEnabled,
             "microbolusesWithoutCarbsSize": microbolusesWithoutCarbsSize,
-            "microbolusesSafeMode": microbolusesSafeMode.rawValue
+            "microbolusesSafeMode": microbolusesSafeMode.rawValue,
+            "microbolusesMinimumBolusSize": microbolusesMinimumBolusSize
         ]
 
         raw["glucoseTargetRangeSchedule"] = glucoseTargetRangeSchedule?.rawValue
