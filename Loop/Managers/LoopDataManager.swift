@@ -95,7 +95,7 @@ final class LoopDataManager {
         // Observe changes
         notificationObservers = [
             NotificationCenter.default.addObserver(
-                forName: CarbStore.carbEntriesDidUpdate,
+                forName: .CarbEntriesDidUpdate,
                 object: carbStore,
                 queue: nil
             ) { (note) -> Void in
@@ -108,7 +108,7 @@ final class LoopDataManager {
                 }
             },
             NotificationCenter.default.addObserver(
-                forName: GlucoseStore.glucoseSamplesDidChange,
+                forName: .GlucoseSamplesDidChange,
                 object: glucoseStore,
                 queue: nil
             ) { (note) in
