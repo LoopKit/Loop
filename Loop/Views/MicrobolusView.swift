@@ -11,7 +11,7 @@ import Combine
 import LoopCore
 
 struct MicrobolusView: View {
-    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double)
+    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double, openBolusScreen: Bool)
 
     final class ViewModel: ObservableObject {
         @Published var microbolusesWithCOB: Bool
@@ -20,6 +20,7 @@ struct MicrobolusView: View {
         @Published var withoutCOBValue: Double
         @Published var safeMode: Microbolus.SafeMode
         @Published var microbolusesMinimumBolusSize: Double
+        @Published var openBolusScreen: Bool
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
@@ -31,13 +32,14 @@ struct MicrobolusView: View {
 
         private var cancellable: AnyCancellable!
 
-        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double) {
+        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double, openBolusScreen: Bool) {
             self.microbolusesWithCOB = microbolusesWithCOB
             self.withCOBValue = withCOBValue
             self.microbolusesWithoutCOB = microbolusesWithoutCOB
             self.withoutCOBValue = withoutCOBValue
             self.safeMode = safeMode
             self.microbolusesMinimumBolusSize = microbolusesMinimumBolusSize
+            self.openBolusScreen = openBolusScreen
 
             pickerWithCOBIndex = values.firstIndex(of: Int(withCOBValue)) ?? 0
             pickerWithoutCOBIndex = values.firstIndex(of: Int(withoutCOBValue)) ?? 0
@@ -63,8 +65,7 @@ struct MicrobolusView: View {
         }
 
         func changes() -> AnyPublisher<Result, Never> {
-            // Publishers.CombineLatest5
-            Publishers.CombineLatest3(
+            Publishers.CombineLatest4(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
                     $withCOBValue,
@@ -72,10 +73,11 @@ struct MicrobolusView: View {
                     $withoutCOBValue
                 ),
                 $safeMode,
-                $microbolusesMinimumBolusSize
+                $microbolusesMinimumBolusSize,
+                $openBolusScreen
             )
-            .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1, $0.2) }
-            .eraseToAnyPublisher()
+                .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1, $0.2, $0.3) }
+                .eraseToAnyPublisher()
         }
     }
 
@@ -112,38 +114,39 @@ struct MicrobolusView: View {
                 }
             }
 
-            if viewModel.microbolusesWithCOB {
-                Section(footer:
-                    Text("This is the minimum Microbolus size in units that will be delivered. Only if the Microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
-                ) {
-                    Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
-                        ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
-                        }
+            Section(footer:
+                Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
+            ) {
+                Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
+                    Text("Enable Without Carbs")
+                }
+                Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
+                    ForEach(0 ..< viewModel.values.count) { index in
+                        Text("\(self.viewModel.values[index])").tag(index)
                     }
                 }
+            }
 
-                Section(footer:
-                    Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
-                ) {
-                    Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
-                        Text("Enable Without Carbs")
-                    }
-                    Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
-                        ForEach(0 ..< viewModel.values.count) { index in
-                            Text("\(self.viewModel.values[index])").tag(index)
-                        }
+            Section(header: Text("Safe Mode").font(.headline), footer:
+                Text("• If Enabled and predicted glucose in 15 minutes is lower than current glucose, microboluses are not allowed.\n• If Limited and the predicted glucose in 15 minutes is lower than current glucose, the maximum microbolus size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
+            ) {
+                Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
+                    ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
+                        Text("\(value.displayName)").tag(value)
                     }
                 }
+                .pickerStyle(SegmentedPickerStyle())
+            }
 
-                Section(header: Text("Safe Mode").font(.headline), footer:
-                    Text("• If Enabled and predicted glucose in 15 minutes is lower than current glucose, microboluses are not allowed.\n• If Limited and the predicted glucose in 15 minutes is lower than current glucose, the maximum microbolus size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
-                ) {
-                    Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
-                        ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
-                            Text("\(value.displayName)").tag(value)
-                        }
+            Section(header: Text("Other Options").font(.headline), footer:
+                Text("This is the minimum microbolus size in units that will be delivered. Only if the microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
+            ) {
+                Toggle (isOn: $viewModel.openBolusScreen) {
+                    Text("Open Bolus screen after Carbs")
+                }
+                Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
+                    ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                 }
             }
 
@@ -173,9 +176,11 @@ struct MicrobolusView_Previews: PreviewProvider {
             microbolusesWithoutCOB: false,
             withoutCOBValue: 30,
             safeMode: .enabled,
-            microbolusesMinimumBolusSize: 0.0
+            microbolusesMinimumBolusSize: 0.0,
+            openBolusScreen: false
             )
         )
             .environment(\.colorScheme, .dark)
+            .previewLayout(.sizeThatFits)
     }
 }

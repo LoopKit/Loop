@@ -178,13 +178,15 @@ final class SettingsTableViewController: UITableViewController {
                 cell.textLabel?.text = NSLocalizedString("Microboluses", comment: "The title text for the Microboluses cell")
                 let settings = dataManager.loopManager.settings
                 cell.detailTextLabel?.text = {
-                    guard settings.isMicrobolusesActive else {
+                    guard settings.dosingEnabled else {
                         return "Disabled"
                     }
-                    guard settings.microbolusesWithoutCarbsEnabled else {
-                        return "With COB"
+                    switch (settings.microbolusesWithoutCarbsEnabled, settings.microbolusesEnabled) {
+                    case (true, true): return "Always"
+                    case (false, true): return "With Carbs"
+                    case (true, false): return "Without Carbs"
+                    default: return "Disabled"
                     }
-                    return "Always"
                 }()
                 cell.accessoryType = .disclosureIndicator
 
@@ -599,7 +601,8 @@ final class SettingsTableViewController: UITableViewController {
                     microbolusesWithoutCOB: settings.microbolusesWithoutCarbsEnabled,
                     withoutCOBValue: settings.microbolusesWithoutCarbsSize,
                     safeMode: settings.microbolusesSafeMode,
-                    microbolusesMinimumBolusSize: settings.microbolusesMinimumBolusSize
+                    microbolusesMinimumBolusSize: settings.microbolusesMinimumBolusSize,
+                    openBolusScreen: settings.microbolusesOpenBolusScreen
                 )
 
                 microbolusCancellable = viewModel.changes()
@@ -610,6 +613,7 @@ final class SettingsTableViewController: UITableViewController {
                         settings.microbolusesWithoutCarbsSize = result.withoutCOBValue
                         settings.microbolusesSafeMode = result.safeMode
                         settings.microbolusesMinimumBolusSize = result.microbolusesMinimumBolusSize
+                        settings.microbolusesOpenBolusScreen = result.openBolusScreen
 
                         self?.dataManager.loopManager.settings = settings
                         self?.tableView.reloadRows(at: [indexPath], with: .none)

@@ -655,9 +655,6 @@ extension LoopDataManager {
 
         let enactBolusPublisher = Deferred {
             Future<Bool, Error> { promise in
-                guard self.settings.isMicrobolusesActive else {
-                    return promise(.success(false))
-                }
                 self.calculateAndEnactMicroBolusIfNeeded { enacted, error in
                     if let error = error {
                         promise(.failure(error))
@@ -1075,8 +1072,17 @@ extension LoopDataManager {
     private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ enacted: Bool, _ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
-        guard settings.isMicrobolusesActive else {
-            logger.debug("Closed loop or microboluses disabled. Cancel microbolus calculation.")
+        guard settings.dosingEnabled else {
+            logger.debug("Closed loop disabled. Cancel microbolus calculation.")
+            completion(false, nil)
+            return
+        }
+
+        let cob = carbsOnBoard?.quantity.doubleValue(for: .gram()) ?? 0
+        let cobChek = (cob > 0 && settings.microbolusesEnabled) || (cob == 0 && settings.microbolusesWithoutCarbsEnabled)
+
+        guard cobChek else {
+            logger.debug("Microboluses disabled.")
             completion(false, nil)
             return
         }
@@ -1103,13 +1109,6 @@ extension LoopDataManager {
         let insulinReq = recommendedBolus.recommendation.amount
         guard insulinReq > 0 else {
             logger.debug("No microbolus needed.")
-            completion(false, nil)
-            return
-        }
-
-        let cob = carbsOnBoard?.quantity.doubleValue(for: .gram()) ?? 0
-        guard cob != 0 || settings.microbolusesWithoutCarbsEnabled else {
-            logger.debug("Microboluses without COB disabled.")
             completion(false, nil)
             return
         }
