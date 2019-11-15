@@ -1,4 +1,4 @@
-github "dm61/LoopKit" "nonlinear-carb-model"
+github "LoopKit/LoopKit" "dev"
 github "LoopKit/CGMBLEKit" "dev"
 github "i-schuetz/SwiftCharts" == 0.6.5
 github "LoopKit/dexcom-share-client-swift" "dev"
