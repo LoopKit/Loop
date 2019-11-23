@@ -2395,7 +2395,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n\n";
+			shellScript = "\"${SRCROOT}/Scripts/copy-frameworks.sh\"\n\n";
 		};
 		43EDDBEF1C361BCE007D89B5 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2439,7 +2439,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/copy-frameworks.sh\"\n";
 		};
 		43FF3DF620A8EFE800F8E62C /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2459,7 +2459,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/copy-frameworks.sh\"\n";
 		};
 		A942E448225FD9D500DD4980 /* Copy Frameworks with Carthage */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2479,7 +2479,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/copy-frameworks.sh\n\n";
+			shellScript = "\"${SRCROOT}/Scripts/copy-frameworks.sh\"\n\n";
 		};
 		C16DA84322E8E5FF008624C2 /* Install Plugins */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2497,7 +2497,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/copy-plugins.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/copy-plugins.sh\"\n";
 		};
 		C1D1405722FB66DF00DA6242 /* Build Derived Assets */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2515,7 +2515,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/build-derived-assets.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\"\n";
 		};
 		C1D1406222FB7ED200DA6242 /* Build Derived Watch Assets */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2533,7 +2533,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/build-derived-watch-assets.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/build-derived-watch-assets.sh\"\n";
 		};
 		C1D19800232CFA2A0096D646 /* Capture Build Details */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2551,7 +2551,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "${SRCROOT}/Scripts/capture-build-details.sh\n";
+			shellScript = "\"${SRCROOT}/Scripts/capture-build-details.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
