@@ -1130,6 +1130,18 @@ extension LoopDataManager {
             break
         }
 
+        guard let threshold = settings.suspendThreshold, glucose.quantity > threshold.quantity else {
+            logger.debug("Current glucose is below the suspend threshold.")
+            completion(false, nil)
+            return
+        }
+
+        guard recommendedBolus.recommendation.notice == nil else {
+            logger.debug("Recommendation notice: \(recommendedBolus.recommendation.notice!)")
+            completion(false, nil)
+            return
+        }
+
         let lowTrend = controlGlucoseQuantity.map { $0 < glucose.quantity } ?? true
 
         let safetyCheck = !(lowTrend && settings.microbolusesSafeMode == .enabled)
