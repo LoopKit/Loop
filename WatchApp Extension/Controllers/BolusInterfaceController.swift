@@ -190,6 +190,9 @@ final class BolusInterfaceController: WKInterfaceController, IdentifiableClass {
 
 fileprivate let rotationsPerValue: Double = 1/24
 
+// less than one rotation is easier to physically execute, but has higher potential for false positives
+fileprivate let bolusConfirmationRotationThreshold: Double = 1.0
+
 private extension BolusInterfaceController {
     @IBAction func decrement() {
         guard case .picker = state else {
@@ -308,7 +311,7 @@ extension BolusInterfaceController {
         bolusConfirmationScene.setProgress(CGFloat(abs(accumulatedRotation)))
 
         // Indicate to the user that they've hit the threshold
-        if abs(previousAccumulatedRotation) < 1.0 && abs(accumulatedRotation) >= 1.0 {
+        if abs(previousAccumulatedRotation) < bolusConfirmationRotationThreshold && abs(accumulatedRotation) >= bolusConfirmationRotationThreshold {
             WKInterfaceDevice.current().play(.success)
         }
     }
@@ -356,8 +359,8 @@ extension BolusInterfaceController: WKCrownDelegate {
             return
         }
 
-        // If we've completed a full rotation, animate and dismiss
-        if abs(accumulatedRotation) >= 1 {
+        // If we've completed the minimum rotations, animate and dismiss
+        if abs(accumulatedRotation) >= bolusConfirmationRotationThreshold {
             completeBolusConfirmation()
         } else {
             scheduleBolusConfirmationReset()
