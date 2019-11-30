@@ -11,8 +11,6 @@ import Combine
 import LoopCore
 
 struct MicrobolusView: View {
-    typealias Result = (microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double, openBolusScreen: Bool)
-
     final class ViewModel: ObservableObject {
         @Published var microbolusesWithCOB: Bool
         @Published var withCOBValue: Double
@@ -64,7 +62,7 @@ struct MicrobolusView: View {
             }
         }
 
-        func changes() -> AnyPublisher<Result, Never> {
+        func changes() -> AnyPublisher<Microbolus.Settings, Never> {
             Publishers.CombineLatest4(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
@@ -76,7 +74,17 @@ struct MicrobolusView: View {
                 $microbolusesMinimumBolusSize,
                 $openBolusScreen
             )
-                .map { ($0.0.0, $0.0.1, $0.0.2, $0.0.3, $0.1, $0.2, $0.3) }
+                .map {
+                    Microbolus.Settings(
+                        enabled: $0.0.0,
+                        size: $0.0.1,
+                        enabledWithoutCarbs: $0.0.2,
+                        sizeWithoutCarb: $0.0.3,
+                        safeMode: $0.1,
+                        minimumBolusSize: $0.2,
+                        shouldOpenBolusScreen: $0.3
+                    )
+                }
                 .eraseToAnyPublisher()
         }
     }

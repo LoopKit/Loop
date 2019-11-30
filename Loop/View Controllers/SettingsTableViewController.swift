@@ -181,7 +181,7 @@ final class SettingsTableViewController: UITableViewController {
                     guard settings.dosingEnabled else {
                         return "Disabled"
                     }
-                    switch (settings.microbolusesWithoutCarbsEnabled, settings.microbolusesEnabled) {
+                    switch (settings.microbolusSettings.enabledWithoutCarbs, settings.microbolusSettings.enabled) {
                     case (true, true): return "Always"
                     case (false, true): return "With Carbs"
                     case (true, false): return "Without Carbs"
@@ -596,27 +596,21 @@ final class SettingsTableViewController: UITableViewController {
                 guard settings.dosingEnabled else { break }
 
                 let viewModel = MicrobolusView.ViewModel(
-                    microbolusesWithCOB: settings.microbolusesEnabled,
-                    withCOBValue: settings.microbolusesSize,
-                    microbolusesWithoutCOB: settings.microbolusesWithoutCarbsEnabled,
-                    withoutCOBValue: settings.microbolusesWithoutCarbsSize,
-                    safeMode: settings.microbolusesSafeMode,
-                    microbolusesMinimumBolusSize: settings.microbolusesMinimumBolusSize,
-                    openBolusScreen: settings.microbolusesOpenBolusScreen
+                    microbolusesWithCOB: settings.microbolusSettings.enabled,
+                    withCOBValue: settings.microbolusSettings.size,
+                    microbolusesWithoutCOB: settings.microbolusSettings.enabledWithoutCarbs,
+                    withoutCOBValue: settings.microbolusSettings.sizeWithoutCarbs,
+                    safeMode: settings.microbolusSettings.safeMode,
+                    microbolusesMinimumBolusSize: settings.microbolusSettings.minimumBolusSize,
+                    openBolusScreen: settings.microbolusSettings.shouldOpenBolusScreen
                 )
 
                 microbolusCancellable = viewModel.changes()
                     .sink { [weak self] result in
-                        settings.microbolusesEnabled = result.microbolusesWithCOB
-                        settings.microbolusesSize = result.withCOBValue
-                        settings.microbolusesWithoutCarbsEnabled = result.microbolusesWithoutCOB
-                        settings.microbolusesWithoutCarbsSize = result.withoutCOBValue
-                        settings.microbolusesSafeMode = result.safeMode
-                        settings.microbolusesMinimumBolusSize = result.microbolusesMinimumBolusSize
-                        settings.microbolusesOpenBolusScreen = result.openBolusScreen
-
-                        self?.dataManager.loopManager.settings = settings
-                        self?.tableView.reloadRows(at: [indexPath], with: .none)
+                        guard let self = self else { return }
+                        settings.microbolusSettings = result
+                        self.dataManager.loopManager.settings = settings
+                        self.tableView.reloadRows(at: [indexPath], with: .none)
                 }
 
                 let vc = MicrobolusViewController(viewModel: viewModel)
