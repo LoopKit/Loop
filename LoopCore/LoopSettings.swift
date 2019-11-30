@@ -47,6 +47,8 @@ public struct LoopSettings: Equatable {
 
     public let retrospectiveCorrectionEnabled = true
 
+    public var notOpenBolusScreen: Bool { dosingEnabled && microbolusesEnabled && !microbolusesOpenBolusScreen }
+
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 

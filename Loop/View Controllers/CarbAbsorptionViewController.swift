@@ -532,10 +532,13 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
         }
+
+        let notOpenBolusScreen = deviceManager.loopManager.settings.notOpenBolusScreen
         deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry, replacing: editVC.originalCarbEntry) { (result) in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let recommendation):
+                    guard !notOpenBolusScreen else { return }
                     if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
                         self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
                     }
