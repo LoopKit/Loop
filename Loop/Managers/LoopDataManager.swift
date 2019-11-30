@@ -1136,12 +1136,6 @@ extension LoopDataManager {
             return
         }
 
-        guard recommendedBolus.recommendation.notice == nil else {
-            logger.debug("Recommendation notice: \(recommendedBolus.recommendation.notice!)")
-            completion(false, nil)
-            return
-        }
-
         let lowTrend = controlGlucoseQuantity.map { $0 < glucose.quantity } ?? true
 
         let safetyCheck = !(lowTrend && settings.microbolusesSafeMode == .enabled)
@@ -1151,16 +1145,28 @@ extension LoopDataManager {
             return
         }
 
-        let maxBasalMinutes: Double = {
+        let minSize = 30.0
+
+        var maxBasalMinutes: Double = {
             switch (cob > 0, lowTrend, settings.microbolusesSafeMode == .disabled) {
             case (true, false, _), (true, true, true):
                 return settings.microbolusesSize
             case (false, false, _), (false, true, true):
                 return settings.microbolusesWithoutCarbsSize
             default:
-                return 30
+                return minSize
             }
         }()
+
+        switch recommendedBolus.recommendation.notice {
+        case .glucoseBelowSuspendThreshold, .predictedGlucoseBelowTarget:
+            logger.debug("Microbolus canceled by recommendation notice: \(recommendedBolus.recommendation.notice!)")
+            completion(false, nil)
+            return
+        case .currentGlucoseBelowTarget:
+            maxBasalMinutes = minSize
+        case .none: break
+        }
 
         let maxMicroBolus = currentBasalRate * maxBasalMinutes / 60
 
