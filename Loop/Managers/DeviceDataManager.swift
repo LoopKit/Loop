@@ -161,27 +161,27 @@ final class DeviceDataManager {
     private func processCGMResult(_ manager: CGMManager, result: CGMResult) {
         switch result {
         case .newData(let values):
-            log.default("CGMManager:\(type(of: manager)) did update with \(values.count) values")
-            
+            log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
+
             loopManager.addGlucose(values) { result in
                 if manager.shouldSyncToRemoteService {
                     switch result {
                     case .success(let values):
-                        self.nightscoutDataManager.uploadGlucose(values, sensorState: manager.sensorState)
+                        self.remoteDataServicesManager.upload(glucoseValues: values, sensorState: manager.sensorState)
                     case .failure:
                         break
                     }
                 }
-                
+
                 self.log.default("Asserting current pump data")
                 self.pumpManager?.assertCurrentPumpData()
             }
         case .noData:
-            log.default("CGMManager:\(type(of: manager)) did update with no data")
+            log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
             
             pumpManager?.assertCurrentPumpData()
         case .error(let error):
-            log.default("CGMManager:\(type(of: manager)) did update with error: \(error)")
+            log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
             
             self.setLastError(error: error)
             log.default("Asserting current pump data")
@@ -383,11 +383,7 @@ extension DeviceDataManager: PumpManagerDelegate {
             bleHeartbeatUpdateInterval = .minutes(1)
         case let interval?:
             // If we looped successfully less than 5 minutes ago, ignore the heartbeat.
-<<<<<<< HEAD
             log.default("PumpManager:%{public}@ ignoring heartbeat. Last loop completed %{public}@ minutes ago", String(describing: type(of: pumpManager)), String(describing: interval.minutes))
-=======
-            log.default("PumpManager:\(type(of: pumpManager)) ignoring pumpManager heartbeat. Last loop completed \(-interval.minutes) minutes ago")
->>>>>>> origin/dev
             return
         }
 
@@ -689,14 +685,14 @@ extension DeviceDataManager {
         if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
             switch command {
             case .temporaryScheduleOverride(let override):
-                log.default("Enacting remote temporary override: \(override)")
+                log.default("Enacting remote temporary override: %{public}@", String(describing: override))
                 loopManager.settings.scheduleOverride = override
             case .cancelTemporaryOverride:
                 log.default("Canceling temporary override from remote command")
                 loopManager.settings.scheduleOverride = nil
             }
         } else {
-            log.info("Unhandled remote notification: \(notification)")
+            log.info("Unhandled remote notification: %{public}@", String(describing: notification))
         }
     }
 }

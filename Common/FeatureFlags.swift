@@ -13,6 +13,7 @@ let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
     let sensitivityOverridesEnabled: Bool
+    let nonlinearCarbModelEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -20,6 +21,13 @@ struct FeatureFlagConfiguration: Decodable {
         self.sensitivityOverridesEnabled = false
         #else
         self.sensitivityOverridesEnabled = true
+        #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if NONLINEAR_CARB_MODEL_DISABLED
+        self.nonlinearCarbModelEnabled = false
+        #else
+        self.nonlinearCarbModelEnabled = true
         #endif
     }
 }

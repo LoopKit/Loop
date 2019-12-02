@@ -71,7 +71,8 @@ final class LoopDataManager {
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
-            overrideHistory: overrideHistory
+            overrideHistory: overrideHistory,
+            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear
         )
 
         doseStore = DoseStore(
@@ -274,7 +275,7 @@ final class LoopDataManager {
         lastLoopCompleted = date
         NotificationManager.clearLoopNotRunningNotifications()
         NotificationManager.scheduleLoopNotRunningNotifications()
-        AnalyticsManager.shared.loopDidSucceed(duration)
+        analyticsServicesManager.loopDidSucceed(duration)
         NotificationCenter.default.post(name: .LoopCompleted, object: self)
 
     }

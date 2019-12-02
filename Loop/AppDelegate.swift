@@ -90,12 +90,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
-        log.default("RemoteNotifications device token: \(token)")
+        log.default("RemoteNotifications device token: %{public}@", token)
         deviceManager.loopManager.settings.deviceToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        log.error("Failed to register: \(error)")
+        log.error("Failed to register: %{public}@", String(describing: error))
     }
     
     func application(_ application: UIApplication,
