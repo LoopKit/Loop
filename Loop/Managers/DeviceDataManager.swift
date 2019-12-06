@@ -281,6 +281,10 @@ extension DeviceDataManager: DeviceManagerDelegate {
     func clearNotification(for manager: DeviceManager, identifier: String) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
+    
+    func removeNotificationRequests(for manager: DeviceManager, identifiers: [String]) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
 }
 
 // MARK: - CGMManagerDelegate
