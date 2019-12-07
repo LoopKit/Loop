@@ -39,11 +39,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             deviceManager.handleRemoteNotification(notification)
         }
 
-        NotificationCenter.default.addObserver(
-            forName: UIApplication.protectedDataDidBecomeAvailableNotification,
-            object: nil,
-            queue: nil) { _ in UserDefaults.resetStandardUserDefaults() }
-
         return true
     }
 
