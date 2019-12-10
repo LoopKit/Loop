@@ -221,8 +221,6 @@ final class LoopDataManager {
 
     fileprivate var lastRequestedBolus: DoseEntry?
     
-    private var lastLoopStarted: Date?
-
     /// The last date at which a loop completed, from prediction to dose (if dosing is enabled)
     var lastLoopCompleted: Date? {
         get {

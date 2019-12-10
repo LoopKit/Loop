@@ -243,9 +243,9 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
 
 
 extension ExtensionDelegate {
-    static let didBecomeActiveNotification = Notification.Name("ExtensionDelegate.didBecomeActive")
+    static let didBecomeActiveNotification = Notification.Name("com.loopkit.Loop.LoopWatch.didBecomeActive")
 
-    static let willResignActiveNotification = Notification.Name("ExtensionDelegate.willResignActive")
+    static let willResignActiveNotification = Notification.Name("com.loopkit.Loop.LoopWatch.willResignActive")
 
     /// Global shortcut to present an alert for a specific error out-of-context with a specific interface controller.
     ///
