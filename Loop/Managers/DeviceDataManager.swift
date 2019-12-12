@@ -657,6 +657,9 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
             "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
             "",
+            "## FeatureFlags",
+            "\(FeatureFlags)",
+            "",
             "## DeviceDataManager",
             "* launchDate: \(launchDate)",
             "* lastError: \(String(describing: lastError))",
@@ -680,19 +683,20 @@ extension Notification.Name {
 
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
-    func handleRemoteNotification(_ notification: [String: AnyObject]) {
-        
-        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
-            switch command {
-            case .temporaryScheduleOverride(let override):
-                log.default("Enacting remote temporary override: %{public}@", String(describing: override))
-                loopManager.settings.scheduleOverride = override
-            case .cancelTemporaryOverride:
-                log.default("Canceling temporary override from remote command")
-                loopManager.settings.scheduleOverride = nil
+    func handleRemoteNotification(_ notification: [String: AnyObject]) {        
+        if FeatureFlags.remoteOverridesEnabled {
+            if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
+                switch command {
+                case .temporaryScheduleOverride(let override):
+                    log.default("Enacting remote temporary override: %{public}@", String(describing: override))
+                    loopManager.settings.scheduleOverride = override
+                case .cancelTemporaryOverride:
+                    log.default("Canceling temporary override from remote command")
+                    loopManager.settings.scheduleOverride = nil
+                }
+            } else {
+                log.info("Unhandled remote notification: %{public}@", String(describing: notification))
             }
-        } else {
-            log.info("Unhandled remote notification: %{public}@", String(describing: notification))
         }
     }
 }
