@@ -217,7 +217,39 @@ final class DeviceDataManager {
 
         return Manager.init(rawState: rawState) as? CGMManagerUI
     }
-
+    
+    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
+        self.loopManager.generateDiagnosticReport { (loopReport) in
+            let report = [
+                Bundle.main.localizedNameAndVersion,
+                "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
+                "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+                "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
+                "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
+                "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+                "",
+                "## FeatureFlags",
+                "\(FeatureFlags)",
+                "",
+                "## DeviceDataManager",
+                "* launchDate: \(self.launchDate)",
+                "* lastError: \(String(describing: self.lastError))",
+                "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
+                "",
+                self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
+                "",
+                self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
+                "",
+                String(reflecting: self.watchManager!),
+                "",
+                String(reflecting: self.statusExtensionManager!),
+                "",
+                loopReport,
+            ].joined(separator: "\n")
+            
+            completion(report)
+        }
+    }
 }
 
 private extension DeviceDataManager {
@@ -646,37 +678,6 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                 }
             }
         )
-    }
-}
-
-
-// MARK: - CustomDebugStringConvertible
-extension DeviceDataManager: CustomDebugStringConvertible {
-    var debugDescription: String {
-        return [
-            Bundle.main.localizedNameAndVersion,
-            "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
-            "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
-            "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
-            "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
-            "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-            "",
-            "## FeatureFlags",
-            "\(FeatureFlags)",
-            "",
-            "## DeviceDataManager",
-            "* launchDate: \(launchDate)",
-            "* lastError: \(String(describing: lastError))",
-            "* lastBLEDrivenUpdate: \(lastBLEDrivenUpdate)",
-            "",
-            cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
-            "",
-            pumpManager != nil ? String(reflecting: pumpManager!) : "pumpManager: nil",
-            "",
-            String(reflecting: watchManager!),
-            "",
-            String(reflecting: statusExtensionManager!),
-        ].joined(separator: "\n")
     }
 }
 
