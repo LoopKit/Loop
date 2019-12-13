@@ -259,7 +259,14 @@ class GlucoseChartScene: SKScene {
 
             if rangeHashable.end < spannedInterval.end {
                 let extendedDuration = spannedInterval.end.timeIntervalSince(rangeHashable.start)
-                let extendedRange = TemporaryScheduleOverride(context: rangeHashable.override.context, settings: rangeHashable.override.settings, startDate: rangeHashable.start, duration: .finite(extendedDuration))
+                let extendedRange = TemporaryScheduleOverride(
+                    context: rangeHashable.override.context,
+                    settings: rangeHashable.override.settings,
+                    startDate: rangeHashable.start,
+                    duration: .finite(extendedDuration),
+                    enactTrigger: .local,
+                    syncIdentifier: UUID()
+                )
                 let extendedRangeHashable = TemporaryScheduleOverrideHashable(extendedRange)! // Target range already known to be non-nil
                 let (sprite2, created) = getSprite(forHash: extendedRangeHashable.chartHashValue)
                 sprite2.color = UIColor.glucose.withAlphaComponent(0.25)

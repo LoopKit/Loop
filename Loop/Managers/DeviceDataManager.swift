@@ -30,7 +30,7 @@ final class DeviceDataManager {
     /// Should be accessed only on the main queue
     private(set) var lastError: (date: Date, error: Error)?
 
-    /// The last time a BLE heartbeat was received by the pump manager
+    /// The last time a BLE heartbeat was received and acted upon.
     private var lastBLEDrivenUpdate = Date.distantPast
 
     // MARK: - CGM
@@ -157,6 +157,40 @@ final class DeviceDataManager {
 
         return Manager.init(rawState: rawState) as? PumpManagerUI
     }
+    
+    private func processCGMResult(_ manager: CGMManager, result: CGMResult) {
+        switch result {
+        case .newData(let values):
+            log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
+
+            loopManager.addGlucose(values) { result in
+                if manager.shouldSyncToRemoteService {
+                    switch result {
+                    case .success(let values):
+                        self.remoteDataServicesManager.upload(glucoseValues: values, sensorState: manager.sensorState)
+                    case .failure:
+                        break
+                    }
+                }
+
+                self.log.default("Asserting current pump data")
+                self.pumpManager?.assertCurrentPumpData()
+            }
+        case .noData:
+            log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
+            
+            pumpManager?.assertCurrentPumpData()
+        case .error(let error):
+            log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
+            
+            self.setLastError(error: error)
+            log.default("Asserting current pump data")
+            pumpManager?.assertCurrentPumpData()
+        }
+        
+        updatePumpManagerBLEHeartbeatPreference()
+    }
+
 
     var availableCGMManagers: [AvailableDevice] {
         return pluginManager.availableCGMManagers + availableStaticCGMManagers
@@ -298,36 +332,8 @@ extension DeviceDataManager: CGMManagerDelegate {
 
     func cgmManager(_ manager: CGMManager, didUpdateWith result: CGMResult) {
         dispatchPrecondition(condition: .onQueue(queue))
-        switch result {
-        case .newData(let values):
-            log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
-
-            loopManager.addGlucose(values) { result in
-                if manager.shouldSyncToRemoteService {
-                    switch result {
-                    case .success(let values):
-                        self.remoteDataServicesManager.upload(glucoseValues: values, sensorState: manager.sensorState)
-                    case .failure:
-                        break
-                    }
-                }
-
-                self.log.default("Asserting current pump data")
-                self.pumpManager?.assertCurrentPumpData()
-            }
-        case .noData:
-            log.default("CGMManager:%{public}@ did update with no data", String(describing: type(of: manager)))
-
-            pumpManager?.assertCurrentPumpData()
-        case .error(let error):
-            log.default("CGMManager:%{public}@ did update with error: %{public}@", String(describing: type(of: manager)), String(describing: error))
-
-            self.setLastError(error: error)
-            log.default("Asserting current pump data")
-            pumpManager?.assertCurrentPumpData()
-        }
-
-        updatePumpManagerBLEHeartbeatPreference()
+        lastBLEDrivenUpdate = Date()
+        processCGMResult(manager, result: result);
     }
 
     func startDateToFilterNewData(for manager: CGMManager) -> Date? {
@@ -398,7 +404,7 @@ extension DeviceDataManager: PumpManagerDelegate {
 
             if let manager = self.cgmManager {
                 self.queue.async {
-                    self.cgmManager(manager, didUpdateWith: result)
+                    self.processCGMResult(manager, result: result)
                 }
             }
         }
@@ -655,6 +661,9 @@ extension DeviceDataManager: CustomDebugStringConvertible {
             "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
             "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
             "",
+            "## FeatureFlags",
+            "\(FeatureFlags)",
+            "",
             "## DeviceDataManager",
             "* launchDate: \(launchDate)",
             "* lastError: \(String(describing: lastError))",
@@ -674,4 +683,24 @@ extension DeviceDataManager: CustomDebugStringConvertible {
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
+}
+
+// MARK: - Remote Notification Handling
+extension DeviceDataManager {
+    func handleRemoteNotification(_ notification: [String: AnyObject]) {        
+        if FeatureFlags.remoteOverridesEnabled {
+            if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets) {
+                switch command {
+                case .temporaryScheduleOverride(let override):
+                    log.default("Enacting remote temporary override: %{public}@", String(describing: override))
+                    loopManager.settings.scheduleOverride = override
+                case .cancelTemporaryOverride:
+                    log.default("Canceling temporary override from remote command")
+                    loopManager.settings.scheduleOverride = nil
+                }
+            } else {
+                log.info("Unhandled remote notification: %{public}@", String(describing: notification))
+            }
+        }
+    }
 }

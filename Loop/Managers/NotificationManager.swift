@@ -50,18 +50,31 @@ struct NotificationManager {
     }
 
     static func authorize(delegate: UNUserNotificationCenterDelegate) {
-        var authOptions: UNAuthorizationOptions
-        if #available(iOS 12.0, *) {
-            authOptions = [.alert, .badge, .sound, .criticalAlert]
-        } else {
-            authOptions = [.alert, .badge, .sound]
+        var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+            authOptions.insert(.criticalAlert)
         }
         
         let center = UNUserNotificationCenter.current()
         center.delegate = delegate
-        center.requestAuthorization(options: authOptions, completionHandler: { _, _ in })
+        center.requestAuthorization(options: authOptions) { (granted, error) in
+            guard granted else {
+                return
+            }
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                guard settings.authorizationStatus == .authorized else {
+                    return
+                }
+                if FeatureFlags.remoteOverridesEnabled {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
+                }
+            }
+        }
         center.setNotificationCategories(notificationCategories)
     }
+    
 
     // MARK: - Notifications
 
