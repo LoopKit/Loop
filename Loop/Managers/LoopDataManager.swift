@@ -1078,6 +1078,8 @@ extension LoopDataManager {
             return
         }
 
+        let overrideLowerBound = settings.scheduleOverride?.settings.targetRange?.lowerBound //HKQuantity
+
         guard let bolusState = delegate?.bolusState, case .none = bolusState else {
             logger.debug("Already bolusing. Cancel microbolus calculation.")
             completion(false, nil)

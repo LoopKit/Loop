@@ -29,6 +29,8 @@ public enum Microbolus {
         public var safeMode: SafeMode
         public var minimumBolusSize: Double
         public var shouldOpenBolusScreen: Bool
+        public var disableByOverride: Bool
+        public var overrideLowerBound: Double
 
         public init(
             enabled: Bool = false,
@@ -37,7 +39,9 @@ public enum Microbolus {
             sizeWithoutCarb: Double = 30,
             safeMode: SafeMode = .enabled,
             minimumBolusSize: Double = 0,
-            shouldOpenBolusScreen: Bool = false
+            shouldOpenBolusScreen: Bool = false,
+            disableByOverride: Bool = false,
+            overrideLowerBound: Double = 0
         ) {
             self.enabled = enabled
             self.size = size
@@ -46,6 +50,8 @@ public enum Microbolus {
             self.safeMode = safeMode
             self.minimumBolusSize = minimumBolusSize
             self.shouldOpenBolusScreen = shouldOpenBolusScreen
+            self.disableByOverride = disableByOverride
+            self.overrideLowerBound = overrideLowerBound
         }
 
         public init?(rawValue: [String : Any]) {
@@ -79,6 +85,14 @@ public enum Microbolus {
             if let shouldOpenBolusScreen = rawValue["shouldOpenBolusScreen"] as? Bool {
                 self.shouldOpenBolusScreen = shouldOpenBolusScreen
             }
+
+            if let disableByOverride = rawValue["disableByOverride"] as? Bool {
+                self.disableByOverride = disableByOverride
+            }
+
+            if let overrideLowerBound = rawValue["overrideLowerBound"] as? Double {
+                self.overrideLowerBound = overrideLowerBound
+            }
         }
 
         public var rawValue: [String : Any] {
@@ -89,7 +103,9 @@ public enum Microbolus {
                 "sizeWithoutCarbs": sizeWithoutCarbs,
                 "safeMode": safeMode.rawValue,
                 "minimumBolusSize": minimumBolusSize,
-                "shouldOpenBolusScreen": shouldOpenBolusScreen
+                "shouldOpenBolusScreen": shouldOpenBolusScreen,
+                "disableByOverride": disableByOverride,
+                "overrideLowerBound": overrideLowerBound
             ]
         }
     }

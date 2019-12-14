@@ -9,6 +9,8 @@
 import SwiftUI
 import Combine
 import LoopCore
+import LoopKit
+import HealthKit
 
 struct MicrobolusView: View {
     final class ViewModel: ObservableObject {
@@ -19,6 +21,8 @@ struct MicrobolusView: View {
         @Published var safeMode: Microbolus.SafeMode
         @Published var microbolusesMinimumBolusSize: Double
         @Published var openBolusScreen: Bool
+        @Published var disableByOverride: Bool
+        @Published var lowerBound: Double
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
@@ -29,19 +33,25 @@ struct MicrobolusView: View {
         fileprivate let minimumBolusSizeValues = stride(from: 0.0, to: 0.51, by: 0.05).map { $0 }
 
         private var cancellable: AnyCancellable!
+        fileprivate let formatter = QuantityFormatter()
+        fileprivate let unit: HKUnit
 
-        init(microbolusesWithCOB: Bool, withCOBValue: Double, microbolusesWithoutCOB: Bool, withoutCOBValue: Double, safeMode: Microbolus.SafeMode, microbolusesMinimumBolusSize: Double, openBolusScreen: Bool) {
-            self.microbolusesWithCOB = microbolusesWithCOB
-            self.withCOBValue = withCOBValue
-            self.microbolusesWithoutCOB = microbolusesWithoutCOB
-            self.withoutCOBValue = withoutCOBValue
-            self.safeMode = safeMode
-            self.microbolusesMinimumBolusSize = microbolusesMinimumBolusSize
-            self.openBolusScreen = openBolusScreen
+        init(settings: Microbolus.Settings, glucoseUnit: HKUnit) {
+            self.microbolusesWithCOB = settings.enabled
+            self.withCOBValue = settings.size
+            self.microbolusesWithoutCOB = settings.enabledWithoutCarbs
+            self.withoutCOBValue = settings.sizeWithoutCarbs
+            self.safeMode = settings.safeMode
+            self.microbolusesMinimumBolusSize = settings.minimumBolusSize
+            self.openBolusScreen = settings.shouldOpenBolusScreen
+            self.disableByOverride = settings.disableByOverride
+            self.lowerBound = settings.overrideLowerBound
+            self.unit = glucoseUnit
+            formatter.setPreferredNumberFormatter(for: glucoseUnit)
 
-            pickerWithCOBIndex = values.firstIndex(of: Int(withCOBValue)) ?? 0
-            pickerWithoutCOBIndex = values.firstIndex(of: Int(withoutCOBValue)) ?? 0
-            pickerMinimumBolusSizeIndex = minimumBolusSizeValues.firstIndex(of: Double(microbolusesMinimumBolusSize)) ?? 0
+            pickerWithCOBIndex = values.firstIndex(of: Int(settings.size)) ?? 0
+            pickerWithoutCOBIndex = values.firstIndex(of: Int(settings.sizeWithoutCarbs)) ?? 0
+            pickerMinimumBolusSizeIndex = minimumBolusSizeValues.firstIndex(of: Double(settings.minimumBolusSize)) ?? 0
 
             let withCOBCancellable = $pickerWithCOBIndex
                 .map { Double(self.values[$0]) }
@@ -63,16 +73,20 @@ struct MicrobolusView: View {
         }
 
         func changes() -> AnyPublisher<Microbolus.Settings, Never> {
-            Publishers.CombineLatest4(
+            Publishers.CombineLatest3(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
                     $withCOBValue,
                     $microbolusesWithoutCOB,
                     $withoutCOBValue
                 ),
-                $safeMode,
-                $microbolusesMinimumBolusSize,
-                $openBolusScreen
+                Publishers.CombineLatest4(
+                    $safeMode,
+                    $microbolusesMinimumBolusSize,
+                    $openBolusScreen,
+                    $disableByOverride
+                ),
+                $lowerBound
             )
                 .map {
                     Microbolus.Settings(
@@ -80,9 +94,11 @@ struct MicrobolusView: View {
                         size: $0.0.1,
                         enabledWithoutCarbs: $0.0.2,
                         sizeWithoutCarb: $0.0.3,
-                        safeMode: $0.1,
-                        minimumBolusSize: $0.2,
-                        shouldOpenBolusScreen: $0.3
+                        safeMode: $0.1.0,
+                        minimumBolusSize: $0.1.1,
+                        shouldOpenBolusScreen: $0.1.2,
+                        disableByOverride: $0.1.3,
+                        overrideLowerBound: $0.2
                     )
                 }
                 .eraseToAnyPublisher()
@@ -90,6 +106,7 @@ struct MicrobolusView: View {
     }
 
     @ObservedObject var viewModel: ViewModel
+    @ObservedObject private var keyboard = KeyboardResponder()
 
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -152,6 +169,28 @@ struct MicrobolusView: View {
                 Toggle (isOn: $viewModel.openBolusScreen) {
                     Text("Open Bolus screen after Carbs")
                 }
+
+                Toggle (isOn: $viewModel.disableByOverride) {
+                    Text("Disable microboluses by override ")
+                }
+
+                if viewModel.disableByOverride {
+                    Text("Blablabla")
+                    .font(.caption)
+                    
+                    HStack {
+                        Text("Lower bound")
+
+                        TextField("0", value: $viewModel.lowerBound, formatter: viewModel.formatter.numberFormatter, onEditingChanged: { changed in
+
+                        }) { self.dismissKeyboard() }
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+
+                        Text(viewModel.unit.localizedShortUnitString)
+                    }
+                }
+
                 Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
                     ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
                     }
@@ -160,6 +199,11 @@ struct MicrobolusView: View {
 
         }
         .navigationBarTitle("Microboluses")
+        .padding(.bottom, keyboard.currentHeight)
+        .animation(.easeOut(duration: 0.16))
+        .onTapGesture {
+            self.dismissKeyboard()
+        }
     }
 }
 
@@ -179,16 +223,50 @@ private extension Microbolus.SafeMode {
 struct MicrobolusView_Previews: PreviewProvider {
     static var previews: some View {
         MicrobolusView(viewModel: .init(
-            microbolusesWithCOB: true,
-            withCOBValue: 30,
-            microbolusesWithoutCOB: false,
-            withoutCOBValue: 30,
-            safeMode: .enabled,
-            microbolusesMinimumBolusSize: 0.0,
-            openBolusScreen: false
+            settings: Microbolus.Settings(),
+            glucoseUnit: HKUnit(from: "mmol/L")
             )
         )
             .environment(\.colorScheme, .dark)
             .previewLayout(.sizeThatFits)
+    }
+}
+
+// MARK: - Helpers
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+extension View {
+    func dismissKeyboard() {
+        UIApplication.shared.endEditing()
+    }
+}
+
+final class KeyboardResponder: ObservableObject {
+    private var notificationCenter: NotificationCenter
+    @Published private(set) var currentHeight: CGFloat = 0
+
+    init(center: NotificationCenter = .default) {
+        notificationCenter = center
+        notificationCenter.addObserver(self, selector: #selector(keyBoardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(keyBoardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    deinit {
+        notificationCenter.removeObserver(self)
+    }
+
+    @objc func keyBoardWillShow(notification: Notification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            currentHeight = keyboardSize.height
+        }
+    }
+
+    @objc func keyBoardWillHide(notification: Notification) {
+        currentHeight = 0
     }
 }

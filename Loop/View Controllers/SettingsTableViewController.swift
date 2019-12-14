@@ -593,16 +593,13 @@ final class SettingsTableViewController: UITableViewController {
                 show(vc, sender: sender)
             case .microbolus:
                 var settings = dataManager.loopManager.settings
-                guard settings.dosingEnabled else { break }
+                guard settings.dosingEnabled,
+                    let unit = dataManager.loopManager.glucoseStore.preferredUnit
+                else { break }
 
                 let viewModel = MicrobolusView.ViewModel(
-                    microbolusesWithCOB: settings.microbolusSettings.enabled,
-                    withCOBValue: settings.microbolusSettings.size,
-                    microbolusesWithoutCOB: settings.microbolusSettings.enabledWithoutCarbs,
-                    withoutCOBValue: settings.microbolusSettings.sizeWithoutCarbs,
-                    safeMode: settings.microbolusSettings.safeMode,
-                    microbolusesMinimumBolusSize: settings.microbolusSettings.minimumBolusSize,
-                    openBolusScreen: settings.microbolusSettings.shouldOpenBolusScreen
+                    settings: settings.microbolusSettings,
+                    glucoseUnit: unit
                 )
 
                 microbolusCancellable = viewModel.changes()
