@@ -171,24 +171,23 @@ struct MicrobolusView: View {
                 }
 
                 Toggle (isOn: $viewModel.disableByOverride) {
-                    Text("Disable microboluses by override ")
+                    Text("Disable MB by temporary overrides")
                 }
 
                 if viewModel.disableByOverride {
-                    Text("Blablabla")
-                    .font(.caption)
-                    
-                    HStack {
-                        Text("Lower bound")
+                    VStack(alignment: .leading) {
+                        Text("If the lower bound is greater or equal than").font(.caption)
+                        HStack {
+                            TextField("0", value: $viewModel.lowerBound, formatter: viewModel.formatter.numberFormatter, onEditingChanged: { changed in
 
-                        TextField("0", value: $viewModel.lowerBound, formatter: viewModel.formatter.numberFormatter, onEditingChanged: { changed in
+                            }) { self.dismissKeyboard() }
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
 
-                        }) { self.dismissKeyboard() }
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-
-                        Text(viewModel.unit.localizedShortUnitString)
+                            Text(viewModel.unit.localizedShortUnitString)
+                        }
                     }
+
                 }
 
                 Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
