@@ -22,7 +22,7 @@ struct MicrobolusView: View {
         @Published var microbolusesMinimumBolusSize: Double
         @Published var openBolusScreen: Bool
         @Published var disableByOverride: Bool
-        @Published var lowerBound: Double
+        @Published var lowerBound: String
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
@@ -33,7 +33,13 @@ struct MicrobolusView: View {
         fileprivate let minimumBolusSizeValues = stride(from: 0.0, to: 0.51, by: 0.05).map { $0 }
 
         private var cancellable: AnyCancellable!
-        fileprivate let formatter = QuantityFormatter()
+        fileprivate let formatter: NumberFormatter = {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.maximumFractionDigits = 1
+            return formatter
+        }()
+
         fileprivate let unit: HKUnit
 
         init(settings: Microbolus.Settings, glucoseUnit: HKUnit) {
@@ -45,9 +51,8 @@ struct MicrobolusView: View {
             self.microbolusesMinimumBolusSize = settings.minimumBolusSize
             self.openBolusScreen = settings.shouldOpenBolusScreen
             self.disableByOverride = settings.disableByOverride
-            self.lowerBound = settings.overrideLowerBound
+            self.lowerBound = formatter.string(from: settings.overrideLowerBound) ?? ""
             self.unit = glucoseUnit
-            formatter.setPreferredNumberFormatter(for: glucoseUnit)
 
             pickerWithCOBIndex = values.firstIndex(of: Int(settings.size)) ?? 0
             pickerWithoutCOBIndex = values.firstIndex(of: Int(settings.sizeWithoutCarbs)) ?? 0
@@ -61,9 +66,10 @@ struct MicrobolusView: View {
                 .map { Double(self.values[$0]) }
                 .sink { self.withoutCOBValue = $0 }
 
+
             let microbolusesMinimumBolusSizeCancellable = $pickerMinimumBolusSizeIndex
-                .map { Double(self.minimumBolusSizeValues[$0]) }
-                .sink { self.microbolusesMinimumBolusSize = $0 }
+            .map { Double(self.minimumBolusSizeValues[$0]) }
+            .sink { self.microbolusesMinimumBolusSize = $0 }
 
             cancellable = AnyCancellable {
                 withCOBCancellable.cancel()
@@ -73,7 +79,10 @@ struct MicrobolusView: View {
         }
 
         func changes() -> AnyPublisher<Microbolus.Settings, Never> {
-            Publishers.CombineLatest3(
+            let lowerBoundPublisher = $lowerBound
+                .map { value -> Double in self.formatter.number(from: value)?.doubleValue ?? 0 }
+
+            return Publishers.CombineLatest3(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
                     $withCOBValue,
@@ -86,7 +95,7 @@ struct MicrobolusView: View {
                     $openBolusScreen,
                     $disableByOverride
                 ),
-                $lowerBound
+                lowerBoundPublisher
             )
                 .map {
                     Microbolus.Settings(
@@ -163,31 +172,30 @@ struct MicrobolusView: View {
                 .pickerStyle(SegmentedPickerStyle())
             }
 
+            Section(header: Text("Temporary overrides").font(.headline)) {
+                Toggle (isOn: $viewModel.disableByOverride) {
+                    Text("Disable MB by enabling temporary override")
+                }
+
+                VStack(alignment: .leading) {
+                    Text("If the override's target range starts at the given value or more").font(.caption)
+                    HStack {
+                        TextField("0", text: $viewModel.lowerBound, onEditingChanged: { changed in
+
+                        }) { self.dismissKeyboard() }
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+
+                        Text(viewModel.unit.localizedShortUnitString)
+                    }
+                }
+            }
+
             Section(header: Text("Other Options").font(.headline), footer:
                 Text("This is the minimum microbolus size in units that will be delivered. Only if the microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
             ) {
                 Toggle (isOn: $viewModel.openBolusScreen) {
                     Text("Open Bolus screen after Carbs")
-                }
-
-                Toggle (isOn: $viewModel.disableByOverride) {
-                    Text("Disable MB by temporary overrides")
-                }
-
-                if viewModel.disableByOverride {
-                    VStack(alignment: .leading) {
-                        Text("If the lower bound is greater or equal than").font(.caption)
-                        HStack {
-                            TextField("0", value: $viewModel.lowerBound, formatter: viewModel.formatter.numberFormatter, onEditingChanged: { changed in
-
-                            }) { self.dismissKeyboard() }
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-
-                            Text(viewModel.unit.localizedShortUnitString)
-                        }
-                    }
-
                 }
 
                 Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
@@ -199,7 +207,6 @@ struct MicrobolusView: View {
         }
         .navigationBarTitle("Microboluses")
         .padding(.bottom, keyboard.currentHeight)
-        .animation(.easeOut(duration: 0.16))
         .onTapGesture {
             self.dismissKeyboard()
         }
