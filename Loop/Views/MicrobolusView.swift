@@ -207,9 +207,6 @@ struct MicrobolusView: View {
         }
         .navigationBarTitle("Microboluses")
         .padding(.bottom, keyboard.currentHeight)
-        .onTapGesture {
-            self.dismissKeyboard()
-        }
     }
 }
 
