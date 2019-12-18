@@ -72,7 +72,7 @@ final class LoopDataManager {
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             overrideHistory: overrideHistory,
-            carbAbsorptionModel: .adaptiveRateNonlinear
+            carbAbsorptionModel: settings.carbAbsorptionModel
         )
 
         doseStore = DoseStore(
