@@ -8,7 +8,6 @@
 
 import WatchKit
 import WatchConnectivity
-import CGMBLEKit
 import LoopKit
 import HealthKit
 import SpriteKit
