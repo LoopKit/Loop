@@ -178,12 +178,6 @@ extension LoopSettings {
             scheduleOverride = nil
         }
     }
-
-    public var carbAbsorptionModel: CarbAbsorptionModel {
-        UserDefaults.standard.bool(forKey: "adaptiveRateNonlinear_enabled")
-            ? .adaptiveRateNonlinear
-            : .nonlinear
-    }
 }
 
 extension LoopSettings: RawRepresentable {
