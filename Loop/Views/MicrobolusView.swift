@@ -18,6 +18,7 @@ struct MicrobolusView: View {
         @Published var withCOBValue: Double
         @Published var microbolusesWithoutCOB: Bool
         @Published var withoutCOBValue: Double
+        @Published var partialApplication: Double
         @Published var safeMode: Microbolus.SafeMode
         @Published var microbolusesMinimumBolusSize: Double
         @Published var openBolusScreen: Bool
@@ -27,10 +28,12 @@ struct MicrobolusView: View {
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
         @Published fileprivate var pickerMinimumBolusSizeIndex: Int
+        @Published fileprivate var partialApplicationIndex: Int
 
         fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 }
         // @ToDo: Should be able to get the to limit from the settings but for now defult to a low value
         fileprivate let minimumBolusSizeValues = stride(from: 0.0, to: 0.51, by: 0.05).map { $0 }
+        fileprivate let partialApplicationValues = stride(from: 0.1, to: 1.01, by: 0.1).map { $0 }
 
         private var cancellable: AnyCancellable!
         fileprivate let formatter: NumberFormatter = {
@@ -47,6 +50,7 @@ struct MicrobolusView: View {
             self.withCOBValue = settings.size
             self.microbolusesWithoutCOB = settings.enabledWithoutCarbs
             self.withoutCOBValue = settings.sizeWithoutCarbs
+            self.partialApplication = settings.partialApplication
             self.safeMode = settings.safeMode
             self.microbolusesMinimumBolusSize = settings.minimumBolusSize
             self.openBolusScreen = settings.shouldOpenBolusScreen
@@ -57,6 +61,7 @@ struct MicrobolusView: View {
             pickerWithCOBIndex = values.firstIndex(of: Int(settings.size)) ?? 0
             pickerWithoutCOBIndex = values.firstIndex(of: Int(settings.sizeWithoutCarbs)) ?? 0
             pickerMinimumBolusSizeIndex = minimumBolusSizeValues.firstIndex(of: Double(settings.minimumBolusSize)) ?? 0
+            partialApplicationIndex = partialApplicationValues.firstIndex(of: Double(settings.partialApplication)) ?? 0
 
             let withCOBCancellable = $pickerWithCOBIndex
                 .map { Double(self.values[$0]) }
@@ -71,10 +76,15 @@ struct MicrobolusView: View {
             .map { Double(self.minimumBolusSizeValues[$0]) }
             .sink { self.microbolusesMinimumBolusSize = $0 }
 
+            let partialApplicationCancellable = $partialApplicationIndex
+            .map { Double(self.partialApplicationValues[$0]) }
+            .sink { self.partialApplication = $0 }
+
             cancellable = AnyCancellable {
                 withCOBCancellable.cancel()
                 withoutCOBCancellable.cancel()
                 microbolusesMinimumBolusSizeCancellable.cancel()
+                partialApplicationCancellable.cancel()
             }
         }
 
@@ -82,7 +92,7 @@ struct MicrobolusView: View {
             let lowerBoundPublisher = $lowerBound
                 .map { value -> Double in self.formatter.number(from: value)?.doubleValue ?? 0 }
 
-            return Publishers.CombineLatest3(
+            return Publishers.CombineLatest4(
                 Publishers.CombineLatest4(
                     $microbolusesWithCOB,
                     $withCOBValue,
@@ -90,11 +100,12 @@ struct MicrobolusView: View {
                     $withoutCOBValue
                 ),
                 Publishers.CombineLatest4(
+                    $partialApplication,
                     $safeMode,
                     $microbolusesMinimumBolusSize,
-                    $openBolusScreen,
-                    $disableByOverride
+                    $openBolusScreen
                 ),
+                $disableByOverride,
                 lowerBoundPublisher
             )
                 .map {
@@ -103,11 +114,12 @@ struct MicrobolusView: View {
                         size: $0.0.1,
                         enabledWithoutCarbs: $0.0.2,
                         sizeWithoutCarb: $0.0.3,
-                        safeMode: $0.1.0,
-                        minimumBolusSize: $0.1.1,
-                        shouldOpenBolusScreen: $0.1.2,
-                        disableByOverride: $0.1.3,
-                        overrideLowerBound: $0.2
+                        partialApplication: $0.1.0,
+                        safeMode: $0.1.1,
+                        minimumBolusSize: $0.1.2,
+                        shouldOpenBolusScreen: $0.1.3,
+                        disableByOverride: $0.2,
+                        overrideLowerBound: $0.3
                     )
                 }
                 .eraseToAnyPublisher()
@@ -129,7 +141,7 @@ struct MicrobolusView: View {
                         .foregroundColor(.orange)
                         .padding(.trailing)
 
-                    Text("Caution! Microboluses have potential to reduce the safety effects of other mitigations like max temp basal rate. Please be careful!\nThe actual size of a microbolus is always limited to half the recommended bolus.")
+                    Text("Caution! Microboluses have potential to reduce the safety effects of other mitigations like max temp basal rate. Please be careful!\nThe actual size of a microbolus is always limited to the partial application of recommended bolus.")
                         .font(.caption)
                 }
 
@@ -157,6 +169,16 @@ struct MicrobolusView: View {
                 Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
                     ForEach(0 ..< viewModel.values.count) { index in
                         Text("\(self.viewModel.values[index])").tag(index)
+                    }
+                }
+            }
+
+            Section(footer:
+                Text("What part of the recommended bolus will be applied automatically.")
+            ) {
+                Picker(selection: $viewModel.partialApplicationIndex, label: Text("Partial Application")) {
+                    ForEach(0 ..< viewModel.partialApplicationValues.count) { index in
+                        Text(String(format: "%.0f %%", self.viewModel.partialApplicationValues[index] * 100)).tag(index)
                     }
                 }
             }
@@ -231,7 +253,7 @@ struct MicrobolusView_Previews: PreviewProvider {
             )
         )
             .environment(\.colorScheme, .dark)
-            .previewLayout(.sizeThatFits)
+            .previewLayout(.fixed(width: 375, height: 1000))
     }
 }
 
