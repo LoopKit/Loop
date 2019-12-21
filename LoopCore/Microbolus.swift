@@ -26,6 +26,7 @@ public enum Microbolus {
         public var size: Double
         public var enabledWithoutCarbs: Bool
         public var sizeWithoutCarbs: Double
+        public var partialApplication: Double
         public var safeMode: SafeMode
         public var minimumBolusSize: Double
         public var shouldOpenBolusScreen: Bool
@@ -37,6 +38,7 @@ public enum Microbolus {
             size: Double = 30,
             enabledWithoutCarbs: Bool = false,
             sizeWithoutCarb: Double = 30,
+            partialApplication: Double = 0.5,
             safeMode: SafeMode = .enabled,
             minimumBolusSize: Double = 0,
             shouldOpenBolusScreen: Bool = false,
@@ -47,6 +49,7 @@ public enum Microbolus {
             self.size = size
             self.enabledWithoutCarbs = enabledWithoutCarbs
             self.sizeWithoutCarbs = sizeWithoutCarb
+            self.partialApplication = partialApplication
             self.safeMode = safeMode
             self.minimumBolusSize = minimumBolusSize
             self.shouldOpenBolusScreen = shouldOpenBolusScreen
@@ -71,6 +74,10 @@ public enum Microbolus {
 
             if let sizeWithoutCarb = rawValue["sizeWithoutCarbs"] as? Double {
                 self.sizeWithoutCarbs = sizeWithoutCarb
+            }
+
+            if let partialApplication = rawValue["partialApplication"] as? Double {
+                self.partialApplication = partialApplication
             }
 
             if let safeModeRaw = rawValue["safeMode"] as? Int,
@@ -102,6 +109,7 @@ public enum Microbolus {
                 "enabledWithoutCarbs": enabledWithoutCarbs,
                 "sizeWithoutCarbs": sizeWithoutCarbs,
                 "safeMode": safeMode.rawValue,
+                "partialApplication": partialApplication,
                 "minimumBolusSize": minimumBolusSize,
                 "shouldOpenBolusScreen": shouldOpenBolusScreen,
                 "disableByOverride": disableByOverride,

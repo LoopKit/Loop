@@ -1192,7 +1192,7 @@ extension LoopDataManager {
             self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
         }
 
-        let microBolus = volumeRounder(min(insulinReq / 2, maxMicroBolus))
+        let microBolus = volumeRounder(min(insulinReq * settings.microbolusSettings.partialApplication, maxMicroBolus))
         guard microBolus > 0 else {
             logger.debug("No microbolus needed.")
             completion(false, nil)
