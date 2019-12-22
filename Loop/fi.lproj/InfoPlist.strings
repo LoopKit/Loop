@@ -15,3 +15,4 @@
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Appin ja kellon kautta tallennetut hiilihydraattitiedot tallennetaan Terveys-appiin. Glukoosiseurannan kautta saadut glukoositiedot tallennetaan turvallisesti HealthKitiin.";
+

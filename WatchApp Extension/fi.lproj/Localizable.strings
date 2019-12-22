@@ -4,6 +4,9 @@
 /* HUD row title for IOB */
 "Active Insulin" = "Aktiivinen insuliini";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Lisää hiilihydraatteja";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus epäonnistui";
 
@@ -19,7 +22,7 @@
 "Net Basal Rate" = "Nettobasaali";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Override";
+"Override" = "Tilapäisas";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Suosit: %@ U";
@@ -36,3 +39,4 @@
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Liikunta";
+
