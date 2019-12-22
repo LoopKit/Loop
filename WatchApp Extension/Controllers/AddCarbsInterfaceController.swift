@@ -93,14 +93,14 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
     private enum InputMode {
-        case value
+        case carbs
         case date
     }
 
-    private var inputMode: InputMode = .value {
+    private var inputMode: InputMode = .carbs {
         didSet {
             switch inputMode {
-            case .value:
+            case .carbs:
                 valueLabel.setTextColor(UIColor.carbsColor)
                 dateLabel.setTextColor(UIColor.lightGray)
             case .date:
@@ -165,7 +165,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBAction func decrement() {
         switch inputMode {
-        case .value:
+        case .carbs:
             carbValue -= valueIncrement
         case .date:
             date -= dateIncrement
@@ -176,7 +176,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBAction func increment() {
         switch inputMode {
-        case .value:
+        case .carbs:
             carbValue += valueIncrement
         case .date:
             date += dateIncrement
@@ -185,8 +185,16 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         WKInterfaceDevice.current().play(.directionUp)
     }
 
+    @IBAction func setToCarbInput(){
+        inputMode = .carbs
+    }
+    
+    @IBAction func setToDateInput(){
+        inputMode = .date
+    }
+    
     @IBAction func toggleInputMode() {
-        inputMode = (inputMode == .value) ? .date : .value
+        inputMode = (inputMode == .carbs) ? .date : .carbs
     }
 
     @IBAction func setAbsorptionTimeFast() {
@@ -255,7 +263,7 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
-        case .value:
+        case .carbs:
             carbValue += delta
         case .date:
             date += TimeInterval(minutes: Double(delta))
