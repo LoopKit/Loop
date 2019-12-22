@@ -17,11 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-<<<<<<< HEAD
 	<string>$(LOOP_MARKETING_VERSION)</string>
-=======
-	<string>1.9.6</string>
->>>>>>> 5df0b4c1110b99947461e6b5047930b18582128d
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>

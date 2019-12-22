@@ -1,17 +1,7 @@
 github "LoopKit/Amplitude-iOS" "2137d5fd44bf630ed33e1e72d7af6d8f8612f270"
-<<<<<<< HEAD
-github "LoopKit/CGMBLEKit" "fe92d93c24d18ff9755ff027e9b036d3769a8a0a"
-github "LoopKit/G4ShareSpy" "f6ae0cf1753131135f26046ddf07e096da884b84"
-github "LoopKit/LoopKit" "b47d60e6ed202ca30e4adc63c6d237ac100e72b4"
-github "LoopKit/MKRingProgressView" "f548a5c64832be2d37d7c91b5800e284887a2a0a"
-github "LoopKit/dexcom-share-client-swift" "cdbb1cd19cf54b37add6d6c25300445a6abe24da"
-github "i-schuetz/SwiftCharts" "0.6.5"
-github "ps2/rileylink_ios" "43789bd2d25e8ce32a0ccae31a4b85f419eb8aa9"
-=======
 github "LoopKit/CGMBLEKit" "v3.1"
 github "LoopKit/G4ShareSpy" "v1.0"
 github "LoopKit/LoopKit" "v2.2.2"
 github "LoopKit/dexcom-share-client-swift" "v1.0"
 github "ps2/SwiftCharts" "cc8c401171d5ccb638ec6c87f6c410ee31fa774d"
 github "ps2/rileylink_ios" "v2.1.1"
->>>>>>> 5df0b4c1110b99947461e6b5047930b18582128d
