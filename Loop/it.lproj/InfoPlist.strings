@@ -2,7 +2,7 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Il Bluetooth viene utilizzato per comunicare con il microinfusore e i dispositivi CGM.";
