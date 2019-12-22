@@ -19,7 +19,11 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
+<<<<<<< HEAD
 	<string>$(LOOP_MARKETING_VERSION)</string>
+=======
+	<string>1.9.6</string>
+>>>>>>> 5df0b4c1110b99947461e6b5047930b18582128d
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>MainAppBundleIdentifier</key>
