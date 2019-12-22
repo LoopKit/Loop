@@ -44,7 +44,7 @@
                                                             <color key="textColor" name="carbs"/>
                                                             <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
                                                         </label>
-                                                        <label width="65" height="18" alignment="center" verticalAlignment="bottom" text="10:09 AM" id="Ury-of-vQg">
+                                                        <label alignment="center" verticalAlignment="bottom" text="10:09 AM" id="Ury-of-vQg">
                                                             <gestureRecognizers>
                                                                 <tapGestureRecognizer id="gDO-JQ-DPC">
                                                                     <connections>
