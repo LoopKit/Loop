@@ -11,7 +11,7 @@
 "CWt-7U-cnK.text" = "15";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "TOTAL CARBS";
+"dea-qG-va8.text" = "カーボ合計";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
 "Dh9-HV-fXy.accessibilityLabel" = "消去";
@@ -23,7 +23,7 @@
 "dPF-QZ-sh6.title" = "🍕";
 
 /* Class = "WKInterfaceMenuItem"; title = "2 hours"; ObjectID = "dPh-7b-Tfv"; */
-"dPh-7b-Tfv.title" = "2 hours";
+"dPh-7b-Tfv.title" = "2時間";
 
 /* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "Dt1-kz-jMZ"; */
 "Dt1-kz-jMZ.text" = "---";
@@ -44,7 +44,7 @@
 "f5G-bS-9pd.text" = "食前";
 
 /* Class = "WKInterfaceMenuItem"; title = "3 hours"; ObjectID = "fR1-7h-SNe"; */
-"fR1-7h-SNe.title" = "3 hours";
+"fR1-7h-SNe.title" = "3時間";
 
 /* Class = "WKInterfaceButton"; title = "🍭"; ObjectID = "gAn-qe-OvX"; */
 "gAn-qe-OvX.title" = "🍭";
@@ -65,7 +65,7 @@
 "jj3-Gq-HBy.text" = "ボーラス不成功";
 
 /* Class = "WKInterfaceLabel"; text = "Running"; ObjectID = "JXa-s1-PJx"; */
-"JXa-s1-PJx.text" = "Running";
+"JXa-s1-PJx.text" = "動作中";
 
 /* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "Mhe-aR-kQQ"; */
 "Mhe-aR-kQQ.text" = "—";
@@ -77,7 +77,7 @@
 "MZU-QV-PtZ.text" = "タイトル";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Override";
+"nC0-X3-oFJ.text" = "オーバーライド";
 
 /* Class = "WKInterfaceButton"; title = "Bolus"; ObjectID = "Qsq-p5-1J0"; */
 "Qsq-p5-1J0.title" = "ボーラス";
@@ -92,7 +92,7 @@
 "smL-Rc-IZh.text" = "ボーラス";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
+"T4U-wP-dSW.text" = "ラベル";
 
 /* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
 "Ury-of-vQg.text" = "10:09 AM";
@@ -104,7 +104,7 @@
 "v5b-sO-bb8.title" = "ループ";
 
 /* Class = "WKInterfaceMenuItem"; title = "1 hour"; ObjectID = "vL1-NA-WZ1"; */
-"vL1-NA-WZ1.title" = "1 hour";
+"vL1-NA-WZ1.title" = "1時間";
 
 /* Class = "WKInterfaceLabel"; text = "<body>"; ObjectID = "XkS-y5-khE"; */
 "XkS-y5-khE.text" = "<body>";
@@ -116,4 +116,5 @@
 "yl8-ZP-c3l.text" = "---";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Label";
+"zO8-x6-bZd.text" = "ラベル";
+

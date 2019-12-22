@@ -1,32 +1,33 @@
 /* Lesson subtitle */
-"Computes the percentage of glucose measurements within a specified range" = "Computes the percentage of glucose measurements within a specified range";
+"Computes the percentage of glucose measurements within a specified range" = "指定範囲内の測定値の割合を算出";
 
 /* Title of the button to begin lesson execution */
-"Continue" = "Continue";
+"Continue" = "次へ";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maximum";
+"Maximum" = "最大";
 
 /* Placeholder for lower range entry */
-"Minimum" = "Minimum";
+"Minimum" = "最小";
 
 /* Lesson title */
 "Modal Day" = "Modal Day";
 
 /* Lesson result text for no data */
-"No data available" = "No data available";
+"No data available" = "データがありません";
 
 /* Section title for glucose range */
-"Range" = "Range";
+"Range" = "範囲";
 
 /* Title of config entry */
-"Start Date" = "Start Date";
+"Start Date" = "開始日";
 
 /* Lesson title */
-"Time in Range" = "Time in Range";
+"Time in Range" = "タイムインレンジ";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Visualizes the most frequent glucose values by time of day";
+"Visualizes the most frequent glucose values by time of day" = "頻度の高い測定値を時間ごとに表示";
 
 /* Unit string for a count of calendar weeks */
-"Weeks" = "Weeks";
+"Weeks" = "週";
+

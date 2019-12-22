@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (保留中: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ 吸収済";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "計 %@ 単位";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ 吸収済";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "計 %@ 単位";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15分 グルコース回帰係数 (b₁)、30分退化適用";
@@ -64,15 +64,18 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "残存インスリン: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "カーボを追加";
+
 /* Action sheet title selecting CGM
- Title text for button to set up a CGM */
-"Add CGM" = "Add CGM";
+   Title text for button to set up a CGM */
+"Add CGM" = "CGMを追加";
 
 /* The label of the carb entry button */
 "Add Meal" = "食事を追加";
 
 /* Action sheet title selecting Pump
- Title text for button to set up a new pump */
+   Title text for button to set up a new pump */
 "Add Pump" = "ポンプを追加";
 
 /* The title of the Amplitude service */
@@ -88,7 +91,7 @@
 "API Secret" = "API シークレット";
 
 /* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Are you sure you want to delete this CGM?";
+"Are you sure you want to delete this CGM?" = "このCGMを削除しますか?";
 
 /* Format fragment for a specific time */
 "at %@" = "%@ 時点";
@@ -100,30 +103,30 @@
 "Basal Rate Schedule" = "基礎レートスケジュール";
 
 /* The title of the basal rate profile screen
- The title text for the basal rate schedule */
+   The title text for the basal rate schedule */
 "Basal Rates" = "基礎レート";
 
 /* The label of the bolus entry button
- The notification title for a bolus failure */
+   The notification title for a bolus failure */
 "Bolus" = "ボーラス";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Bolused %1$@ of %2$@";
+"Bolused %1$@ of %2$@" = "%2$@ のうち %1$@ ボーラス済";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Bolusing %1$@";
+"Bolusing %1$@" = "%1$@ ボーラス中";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "取消";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Canceling Bolus";
+"Canceling Bolus" = "ボーラスをキャンセルします";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "糖質効果";
 
 /* The title of the carb ratios schedule screen
- The title text for the carb ratio schedule */
+   The title text for the carb ratio schedule */
 "Carb Ratios" = "糖質比";
 
 /* Title of the prediction input effect for carbohydrates */
@@ -163,20 +166,20 @@
 "Continuous Glucose Monitor" = "CGM";
 
 /* The title of the glucose target range schedule screen
- The title text for the glucose target range schedule */
+   The title text for the glucose target range schedule */
 "Correction Range" = "補正範囲";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "現在の血糖値は %1$@ で補正範囲を下回っています。";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Custom Override";
+"Custom Override" = "カスタムオーバーライド";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "カスタマートークン";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
+"Delete CGM" = "CGMを削除";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "注入限度";
@@ -191,10 +194,10 @@
 "Enter suspend threshold" = "一時停止値を入力";
 
 /* The alert title for an error while canceling a bolus */
-"Error Canceling Bolus" = "Error Canceling Bolus";
+"Error Canceling Bolus" = "ボーラスのキャンセルにエラー";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Error Resuming";
+"Error Resuming" = "再開エラー";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "予想 %@";
@@ -236,11 +239,11 @@
 "Insulin effects" = "インスリン効果";
 
 /* Details for configuration error when insulin model is missing
- The title text for the insulin model setting row */
+   The title text for the insulin model setting row */
 "Insulin Model" = "インスリンモデル";
 
 /* The title of the insulin sensitivities schedule screen
- The title text for the insulin sensitivity schedule */
+   The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "インスリン効果値";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
@@ -307,7 +310,7 @@
 "Pump Reservoir Low" = "ポンプのリザーバが低です";
 
 /* The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "Pump Suspended";
+"Pump Suspended" = "ポンプ一時停止中";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "超速攻型 - 大人";
@@ -325,10 +328,10 @@
 "Recommended Bolus: %@ Units" = "推奨ボーラス: %@ 単位";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservoir";
+"Reservoir" = "リザーバ";
 
 /* Title of the prediction input effect for retrospective correction */
-"Retrospective Correction" = "Retrospective Correction";
+"Retrospective Correction" = "レトロ補正";
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "やり直す";
@@ -349,7 +352,7 @@
 "Site URL" = "アドレス";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "starting at %@";
+"starting at %@" = "%@から開始";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "ボーラス注入を開始";
@@ -358,7 +361,7 @@
 "Suspend Threshold" = "一時停止値";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tap to Resume";
+"Tap to Resume" = "タップして再開する";
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "ループのレガシーモデルで、作用期間をカスタマイズできます。";
@@ -370,7 +373,7 @@
 "U" = "U";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "until %@";
+"until %@" = "%@まで";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "運動時ターゲットを使用";
