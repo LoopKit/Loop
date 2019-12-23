@@ -21,7 +21,7 @@
                                             <items>
                                                 <group width="0.20000000000000001" height="1" alignment="left" verticalAlignment="center" radius="11" id="J90-Xm-Znp">
                                                     <items>
-                                                        <button width="28" height="1" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="Dh9-HV-fXy">
+                                                        <button width="1" height="1" alignment="left" verticalAlignment="center" accessibilityLabel="Subtract" title="−" id="Dh9-HV-fXy">
                                                             <color key="titleColor" name="carbs"/>
                                                             <color key="backgroundColor" name="carbs-dark"/>
                                                             <fontDescription key="font" type="system" weight="semibold" pointSize="20"/>
