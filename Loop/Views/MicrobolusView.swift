@@ -135,9 +135,9 @@ struct MicrobolusView: View {
     var body: some View {
         Form {
             topSection
+            partialApplicationSection
             withCobSection
             withoutCobSection
-            partialApplicationSection
             safeModeSection
             temporaryOverridesSection
             otherOptionsSection

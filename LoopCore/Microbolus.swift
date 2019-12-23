@@ -38,7 +38,7 @@ public enum Microbolus {
             size: Double = 30,
             enabledWithoutCarbs: Bool = false,
             sizeWithoutCarb: Double = 30,
-            partialApplication: Double = 0.5,
+            partialApplication: Double = 0.3,
             safeMode: SafeMode = .enabled,
             minimumBolusSize: Double = 0,
             shouldOpenBolusScreen: Bool = false,
