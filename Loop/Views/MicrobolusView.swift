@@ -127,7 +127,6 @@ struct MicrobolusView: View {
     }
 
     @ObservedObject var viewModel: ViewModel
-    @ObservedObject private var keyboard = KeyboardResponder()
 
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -202,9 +201,7 @@ struct MicrobolusView: View {
                 VStack(alignment: .leading) {
                     Text("If the override's target range starts at the given value or more").font(.caption)
                     HStack {
-                        TextField("0", text: $viewModel.lowerBound, onEditingChanged: { changed in
-
-                        }) { self.dismissKeyboard() }
+                        TextField("0", text: $viewModel.lowerBound)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
 
@@ -228,7 +225,7 @@ struct MicrobolusView: View {
 
         }
         .navigationBarTitle("Microboluses")
-        .padding(.bottom, keyboard.currentHeight)
+        .modifier(AdaptsToSoftwareKeyboard())
     }
 }
 
@@ -259,39 +256,33 @@ struct MicrobolusView_Previews: PreviewProvider {
 
 // MARK: - Helpers
 
-extension UIApplication {
-    func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-}
+struct AdaptsToSoftwareKeyboard: ViewModifier {
+    @State var currentHeight: CGFloat = 0
 
-extension View {
-    func dismissKeyboard() {
-        UIApplication.shared.endEditing()
-    }
-}
-
-final class KeyboardResponder: ObservableObject {
-    private var notificationCenter: NotificationCenter
-    @Published private(set) var currentHeight: CGFloat = 0
-
-    init(center: NotificationCenter = .default) {
-        notificationCenter = center
-        notificationCenter.addObserver(self, selector: #selector(keyBoardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(keyBoardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    func body(content: Content) -> some View {
+        content
+            .padding(.bottom, currentHeight).animation(.easeOut(duration: 0.25))
+            .edgesIgnoringSafeArea(currentHeight == 0 ? Edge.Set() : .bottom)
+            .onAppear(perform: subscribeToKeyboardChanges)
     }
 
-    deinit {
-        notificationCenter.removeObserver(self)
-    }
+    private let keyboardHeightOnOpening = NotificationCenter.default
+        .publisher(for: UIResponder.keyboardWillShowNotification)
+        .map { $0.userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! CGRect }
+        .map { $0.height }
 
-    @objc func keyBoardWillShow(notification: Notification) {
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            currentHeight = keyboardSize.height
+
+    private let keyboardHeightOnHiding = NotificationCenter.default
+        .publisher(for: UIResponder.keyboardWillHideNotification)
+        .map {_ in return CGFloat(0) }
+
+    private func subscribeToKeyboardChanges() {
+        _ = Publishers.Merge(keyboardHeightOnOpening, keyboardHeightOnHiding)
+            .subscribe(on: DispatchQueue.main)
+            .sink { height in
+                if self.currentHeight == 0 || height == 0 {
+                    self.currentHeight = height
+                }
         }
-    }
-
-    @objc func keyBoardWillHide(notification: Notification) {
-        currentHeight = 0
     }
 }
