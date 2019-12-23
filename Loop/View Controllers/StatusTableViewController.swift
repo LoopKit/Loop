@@ -1300,7 +1300,7 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - Testing scenarios
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        if let testingScenariosManager = deviceManager.testingScenariosManager, testingScenariosManager.scenarioURLs.isEmpty {
+        if let testingScenariosManager = deviceManager.testingScenariosManager, !testingScenariosManager.scenarioURLs.isEmpty {
             if motion == .motionShake {
                 presentScenarioSelector()
             }
@@ -1373,6 +1373,10 @@ extension StatusTableViewController: DoseProgressObserver {
 }
 
 extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didUpdatePresets presets: [TemporaryScheduleOverridePreset]) {
+        deviceManager.loopManager.settings.overridePresets = presets
+    }
+
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
         deviceManager.loopManager.settings.scheduleOverride = override
     }

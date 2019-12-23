@@ -73,7 +73,6 @@ final class SettingsTableViewController: UITableViewController {
         case insulinModel
         case carbRatio
         case insulinSensitivity
-        case overridePresets
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -146,11 +145,7 @@ final class SettingsTableViewController: UITableViewController {
         case .cgm:
             return CGMRow.count
         case .configuration:
-            if FeatureFlags.sensitivityOverridesEnabled {
-                return ConfigurationRow.count
-            } else {
-                return ConfigurationRow.count - 1
-            }
+            return ConfigurationRow.count
         case .services:
             return ServiceRow.count
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
@@ -309,14 +304,6 @@ final class SettingsTableViewController: UITableViewController {
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
-            case .overridePresets:
-                configCell.textLabel?.text = NSLocalizedString("Override Presets", comment: "The title text for the override presets")
-                let maxPreviewSymbolCount = 3
-                let presetPreviewText = dataManager.loopManager.settings.overridePresets
-                    .prefix(maxPreviewSymbolCount)
-                    .map { $0.symbol }
-                    .joined(separator: " ")
-                configCell.detailTextLabel?.text = presetPreviewText
             }
 
             configCell.accessoryType = .disclosureIndicator
@@ -572,15 +559,6 @@ final class SettingsTableViewController: UITableViewController {
                 vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
                 vc.delegate = self
                 vc.syncSource = pumpManager
-
-                show(vc, sender: sender)
-            case .overridePresets:
-                guard let glucoseUnit = dataManager.loopManager.glucoseStore.preferredUnit else { break }
-                let vc = OverridePresetTableViewController(
-                    glucoseUnit: glucoseUnit,
-                    presets: dataManager.loopManager.settings.overridePresets
-                )
-                vc.delegate = self
 
                 show(vc, sender: sender)
             }
@@ -903,15 +881,6 @@ extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerD
         dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
 
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
-    }
-}
-
-
-extension SettingsTableViewController: OverridePresetTableViewControllerDelegate {
-    func overridePresetTableViewControllerDidUpdatePresets(_ vc: OverridePresetTableViewController) {
-        dataManager.loopManager.settings.overridePresets = vc.presets
-
-        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.overridePresets.rawValue]], with: .none)
     }
 }
 
