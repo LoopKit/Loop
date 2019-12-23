@@ -30,10 +30,10 @@ struct MicrobolusView: View {
         @Published fileprivate var pickerMinimumBolusSizeIndex: Int
         @Published fileprivate var partialApplicationIndex: Int
 
-        fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 }
+        fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 } + [1440] // + 1 day
         // @ToDo: Should be able to get the to limit from the settings but for now defult to a low value
         fileprivate let minimumBolusSizeValues = stride(from: 0.0, to: 0.51, by: 0.05).map { $0 }
-        fileprivate let partialApplicationValues = stride(from: 0.1, to: 1.01, by: 0.1).map { $0 }
+        fileprivate let partialApplicationValues = stride(from: 0.1, to: 1.01, by: 0.05).map { $0 }
 
         private var cancellable: AnyCancellable!
         fileprivate let formatter: NumberFormatter = {
@@ -134,13 +134,13 @@ struct MicrobolusView: View {
 
     var body: some View {
         Form {
-            self.topSection
-            self.withCobSection
-            self.withoutCobSection
-            self.partialApplicationSection
-            self.safeModeSection
-            self.temporaryOverridesSection
-            self.otherOptionsSection
+            topSection
+            partialApplicationSection
+            withCobSection
+            withoutCobSection
+            safeModeSection
+            temporaryOverridesSection
+            otherOptionsSection
         }
         .navigationBarTitle("Microboluses")
         .modifier(AdaptsToSoftwareKeyboard())
@@ -170,7 +170,11 @@ struct MicrobolusView: View {
 
             Picker(selection: $viewModel.pickerWithCOBIndex, label: Text("Maximum Size")) {
                 ForEach(0 ..< viewModel.values.count) { index in
-                    Text("\(self.viewModel.values[index])").tag(index)
+                    if index == self.viewModel.values.count - 1 {
+                        Text("Not limited").tag(index)
+                    } else {
+                        Text("\(self.viewModel.values[index])").tag(index)
+                    }
                 }
             }
         }
@@ -185,7 +189,11 @@ struct MicrobolusView: View {
             }
             Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
                 ForEach(0 ..< viewModel.values.count) { index in
-                    Text("\(self.viewModel.values[index])").tag(index)
+                    if index == self.viewModel.values.count - 1 {
+                        Text("Not limited").tag(index)
+                    } else {
+                        Text("\(self.viewModel.values[index])").tag(index)
+                    }
                 }
             }
         }
