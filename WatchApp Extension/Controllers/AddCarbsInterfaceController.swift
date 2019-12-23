@@ -93,14 +93,14 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     @IBOutlet weak var absorptionButtonC: WKInterfaceButton!
 
     private enum InputMode {
-        case carbs
+        case value
         case date
     }
 
-    private var inputMode: InputMode = .carbs {
+    private var inputMode: InputMode = .value {
         didSet {
             switch inputMode {
-            case .carbs:
+            case .value:
                 valueLabel.setTextColor(UIColor.carbsColor)
                 dateLabel.setTextColor(UIColor.lightGray)
             case .date:
@@ -165,7 +165,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBAction func decrement() {
         switch inputMode {
-        case .carbs:
+        case .value:
             carbValue -= valueIncrement
         case .date:
             date -= dateIncrement
@@ -176,7 +176,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
 
     @IBAction func increment() {
         switch inputMode {
-        case .carbs:
+        case .value:
             carbValue += valueIncrement
         case .date:
             date += dateIncrement
@@ -186,7 +186,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     }
 
     @IBAction func setToCarbInput(){
-        inputMode = .carbs
+        inputMode = .value
     }
     
     @IBAction func setToDateInput(){
@@ -259,7 +259,7 @@ extension AddCarbsInterfaceController: WKCrownDelegate {
         let delta = Int((accumulatedRotation - remainder) / rotationsPerIncrement)
 
         switch inputMode {
-        case .carbs:
+        case .value:
             carbValue += delta
         case .date:
             date += TimeInterval(minutes: Double(delta))
