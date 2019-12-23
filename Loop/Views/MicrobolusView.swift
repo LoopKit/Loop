@@ -134,98 +134,121 @@ struct MicrobolusView: View {
 
     var body: some View {
         Form {
-            Section {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                        .padding(.trailing)
-
-                    Text("Caution! Microboluses have potential to reduce the safety effects of other mitigations like max temp basal rate. Please be careful!\nThe actual size of a microbolus is always limited to the partial application of recommended bolus.")
-                        .font(.caption)
-                }
-
-            }
-            Section(footer:
-                Text("This is the maximum minutes of basal that can be delivered as a single microbolus with uncovered COB. This allows you to make microboluses behave more aggressively. It is recommended that this value is set to start at 30, in line with default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.")
-            ) {
-                Toggle (isOn: $viewModel.microbolusesWithCOB) {
-                    Text("Enable With Carbs")
-                }
-
-                Picker(selection: $viewModel.pickerWithCOBIndex, label: Text("Maximum Size")) {
-                    ForEach(0 ..< viewModel.values.count) { index in
-                        Text("\(self.viewModel.values[index])").tag(index)
-                    }
-                }
-            }
-
-            Section(footer:
-                Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
-            ) {
-                Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
-                    Text("Enable Without Carbs")
-                }
-                Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
-                    ForEach(0 ..< viewModel.values.count) { index in
-                        Text("\(self.viewModel.values[index])").tag(index)
-                    }
-                }
-            }
-
-            Section(footer:
-                Text("What part of the recommended bolus will be applied automatically.")
-            ) {
-                Picker(selection: $viewModel.partialApplicationIndex, label: Text("Partial Application")) {
-                    ForEach(0 ..< viewModel.partialApplicationValues.count) { index in
-                        Text(String(format: "%.0f %%", self.viewModel.partialApplicationValues[index] * 100)).tag(index)
-                    }
-                }
-            }
-
-            Section(header: Text("Safe Mode").font(.headline), footer:
-                Text("• If Enabled and predicted glucose in 15 minutes is lower than current glucose, microboluses are not allowed.\n• If Limited and the predicted glucose in 15 minutes is lower than current glucose, the maximum microbolus size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
-            ) {
-                Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
-                    ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
-                        Text("\(value.displayName)").tag(value)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-            }
-
-            Section(header: Text("Temporary overrides").font(.headline)) {
-                Toggle (isOn: $viewModel.disableByOverride) {
-                    Text("Disable MB by enabling temporary override")
-                }
-
-                VStack(alignment: .leading) {
-                    Text("If the override's target range starts at the given value or more").font(.caption)
-                    HStack {
-                        TextField("0", text: $viewModel.lowerBound)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-
-                        Text(viewModel.unit.localizedShortUnitString)
-                    }
-                }
-            }
-
-            Section(header: Text("Other Options").font(.headline), footer:
-                Text("This is the minimum microbolus size in units that will be delivered. Only if the microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
-            ) {
-                Toggle (isOn: $viewModel.openBolusScreen) {
-                    Text("Open Bolus screen after Carbs")
-                }
-
-                Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
-                    ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
-                    }
-                }
-            }
-
+            self.topSection
+            self.withCobSection
+            self.withoutCobSection
+            self.partialApplicationSection
+            self.safeModeSection
+            self.temporaryOverridesSection
+            self.otherOptionsSection
         }
         .navigationBarTitle("Microboluses")
         .modifier(AdaptsToSoftwareKeyboard())
+    }
+
+    private var topSection: some View {
+        Section {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                    .padding(.trailing)
+
+                Text("Caution! Microboluses have potential to reduce the safety effects of other mitigations like max temp basal rate. Please be careful!\nThe actual size of a microbolus is always limited to the partial application of recommended bolus.")
+                    .font(.caption)
+            }
+
+        }
+    }
+
+    private var withCobSection: some View {
+        Section(footer:
+            Text("This is the maximum minutes of basal that can be delivered as a single microbolus with uncovered COB. This allows you to make microboluses behave more aggressively. It is recommended that this value is set to start at 30, in line with default, and if you choose to increase this value, do so in no more than 15 minute increments, keeping a close eye on the effects of the changes.")
+        ) {
+            Toggle (isOn: $viewModel.microbolusesWithCOB) {
+                Text("Enable With Carbs")
+            }
+
+            Picker(selection: $viewModel.pickerWithCOBIndex, label: Text("Maximum Size")) {
+                ForEach(0 ..< viewModel.values.count) { index in
+                    Text("\(self.viewModel.values[index])").tag(index)
+                }
+            }
+        }
+    }
+
+    private var withoutCobSection: some View {
+        Section(footer:
+            Text("This is the maximum minutes of basal that can be delivered as a single microbolus without COB.")
+        ) {
+            Toggle (isOn: $viewModel.microbolusesWithoutCOB) {
+                Text("Enable Without Carbs")
+            }
+            Picker(selection: $viewModel.pickerWithoutCOBIndex, label: Text("Maximum Size")) {
+                ForEach(0 ..< viewModel.values.count) { index in
+                    Text("\(self.viewModel.values[index])").tag(index)
+                }
+            }
+        }
+    }
+
+    private var partialApplicationSection: some View {
+        Section(footer:
+            Text("What part of the recommended bolus will be applied automatically.")
+        ) {
+            Picker(selection: $viewModel.partialApplicationIndex, label: Text("Partial Application")) {
+                ForEach(0 ..< viewModel.partialApplicationValues.count) { index in
+                    Text(String(format: "%.0f %%", self.viewModel.partialApplicationValues[index] * 100)).tag(index)
+                }
+            }
+        }
+    }
+
+    private var safeModeSection: some View {
+        Section(header: Text("Safe Mode").font(.headline), footer:
+            Text("• If Enabled and predicted glucose in 15 minutes is lower than current glucose, microboluses are not allowed.\n• If Limited and the predicted glucose in 15 minutes is lower than current glucose, the maximum microbolus size is limited to 30 basal minutes.\n• If Disabled, there are no restrictions.")
+        ) {
+            Picker(selection: $viewModel.safeMode, label: Text("Safe Mode")) {
+                ForEach(Microbolus.SafeMode.allCases, id: \.self) { value in
+                    Text("\(value.displayName)").tag(value)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+        }
+    }
+
+
+    private var temporaryOverridesSection: some View {
+        Section(header: Text("Temporary overrides").font(.headline)) {
+            Toggle (isOn: $viewModel.disableByOverride) {
+                Text("Disable MB by enabling temporary override")
+            }
+
+            VStack(alignment: .leading) {
+                Text("If the override's target range starts at the given value or more").font(.caption)
+                HStack {
+                    TextField("0", text: $viewModel.lowerBound)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+
+                    Text(viewModel.unit.localizedShortUnitString)
+                }
+            }
+        }
+    }
+
+    private var otherOptionsSection: some View {
+        Section(header: Text("Other Options").font(.headline), footer:
+            Text("This is the minimum microbolus size in units that will be delivered. Only if the microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
+        ) {
+            Toggle (isOn: $viewModel.openBolusScreen) {
+                Text("Open Bolus screen after Carbs")
+            }
+
+            Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
+                ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
+                }
+            }
+        }
     }
 }
 
@@ -250,7 +273,7 @@ struct MicrobolusView_Previews: PreviewProvider {
             )
         )
             .environment(\.colorScheme, .dark)
-            .previewLayout(.fixed(width: 375, height: 1000))
+            .previewLayout(.fixed(width: 375, height: 1300))
     }
 }
 
