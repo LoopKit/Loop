@@ -12,6 +12,10 @@ import WatchConnectivity
 import LoopKit
 import LoopCore
 
+enum SleepStoreResult<T> {
+    case success(T)
+    case failure(Error)
+}
 
 final class WatchDataManager: NSObject {
 
@@ -29,7 +33,23 @@ final class WatchDataManager: NSObject {
         watchSession?.activate()
     }
 
+    let healthStore = HKHealthStore()
     private let log: CategoryLogger
+    
+    func authorize(_ completion: @escaping () -> Void) {
+        let typestoRead = Set([
+            HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
+        ])
+        
+        healthStore.requestAuthorization(toShare: typestoRead, read: typestoRead) { (success, error) in
+            if success {
+                self.log.default("Asked about sleep data access")
+            }
+
+            completion()
+        }
+    }
+    
 
     private var watchSession: WCSession? = {
         if WCSession.isSupported() {
@@ -40,6 +60,9 @@ final class WatchDataManager: NSObject {
     }()
 
     private var lastSentSettings: LoopSettings?
+    
+    private var lastBedtimeUpdate: Date?
+    public var bedtime: Int?
 
     @objc private func updateWatch(_ notification: Notification) {
         guard
@@ -48,6 +71,7 @@ final class WatchDataManager: NSObject {
         else {
             return
         }
+        
 
         switch updateContext {
         case .glucose, .tempBasal:
@@ -57,12 +81,34 @@ final class WatchDataManager: NSObject {
         default:
             break
         }
+        
+        guard
+            let lastUpdateInterval = lastBedtimeUpdate?.timeIntervalSince(Date()), lastUpdateInterval < TimeInterval(hours: 24)
+        else {
+            let monthsToGoBack = -6
+            let start = Calendar.current.date(byAdding: .month, value: monthsToGoBack, to: Date())!
+            
+            getSleepStartTime(start: start) {
+                (result) in
+                
+                switch result {
+                    case .success(let secondsToBedtime):
+                        self.bedtime = secondsToBedtime
+                    case .failure:
+                        return
+                }
+            }
+            
+            lastBedtimeUpdate = Date()
+            return
+        }
     }
 
     private var lastComplicationContext: WatchContext?
 
     private let minTrendDrift: Double = 20
     private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
+    
 
     private func sendSettingsIfNeeded() {
         let settings = deviceManager.loopManager.settings
@@ -189,7 +235,7 @@ final class WatchDataManager: NSObject {
             completion(context)
         }
     }
-
+    
     private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ error: Error?) -> Void)? = nil) {
         if let carbEntry = CarbEntryUserInfo(rawValue: message)?.carbEntry {
             deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { (result) in
@@ -317,6 +363,7 @@ extension WatchDataManager: WCSessionDelegate {
 
 
 extension WatchDataManager {
+    
     override var debugDescription: String {
         var items = [
             "## WatchDataManager",
@@ -333,6 +380,42 @@ extension WatchDataManager {
         }
 
         return items.joined(separator: "\n")
+    }
+    
+    func getSleepStartTime(start: Date, end: Date? = nil, sampleLimit: Int = 30, _ completion: @escaping (_ result: SleepStoreResult<Int>) -> Void) {
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+        
+        getSleepStartTime(matching: predicate, sampleLimit: sampleLimit, completion)
+    }
+    
+    private func getSleepStartTime(matching predicate: NSPredicate, sampleLimit: Int, _ completion: @escaping (_ result: SleepStoreResult<Int>) -> Void) {
+        let sleepType = HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
+        // get more-recent values first
+        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        
+        let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortDescriptor]) { (query, samples, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else if let samples = samples as? [HKCategorySample] {
+                let average = samples.reduce(0, {$0 + $1.startDate.secondsFromMidnight()}) / samples.count
+                completion(.success(average))
+            } else {
+                assertionFailure("Unknown return configuration from query \(query)")
+            }
+        }
+
+        healthStore.execute(query)
+    }
+
+}
+
+extension Date {
+    func secondsFromMidnight() -> Int {
+        let calendar = Calendar.current
+        let dateComponents = calendar.dateComponents([.hour, .minute, .second], from: self)
+        let dateSeconds = dateComponents.hour! * 3600 + dateComponents.minute! * 60 + dateComponents.second!
+
+        return dateSeconds
     }
 }
 
@@ -354,17 +437,18 @@ extension WCSession {
             "* watchDirectoryURL: \(watchDirectoryURL?.absoluteString ?? "nil")",
         ].joined(separator: "\n")
     }
-
+    
     fileprivate var complicationUserInfoTransferInterval: TimeInterval {
         let now = Date()
-        let timeUntilMidnight: TimeInterval
-
+        let timeUntilRefresh: TimeInterval
+        
         if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
-            timeUntilMidnight = midnight.timeIntervalSince(now)
+            timeUntilRefresh = midnight.timeIntervalSince(now)
         } else {
-            timeUntilMidnight = .hours(24)
+            timeUntilRefresh = .hours(24)
         }
 
-        return timeUntilMidnight / Double(remainingComplicationUserInfoTransfers + 1)
+        return timeUntilRefresh / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }
+
