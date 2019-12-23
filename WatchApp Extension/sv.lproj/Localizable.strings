@@ -4,6 +4,9 @@
 /* HUD row title for IOB */
 "Active Insulin" = "Aktivt insulin";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Lägg till kolhydrater";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus misslyckades";
 
@@ -31,8 +34,12 @@
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Skicka misslyckades";
 
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
 /* The short unit display string for international units of insulin delivery per hour */
 "U/hr" = "E/h";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Träning";
+

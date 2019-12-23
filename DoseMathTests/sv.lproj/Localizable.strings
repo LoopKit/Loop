@@ -23,4 +23,5 @@
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
 
 /* The short unit display string for international units of insulin */
-"U" = "U";
+"U" = "E";
+

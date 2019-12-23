@@ -2,10 +2,10 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth används för att kommunicera med insulinpump och kontinuerlig glukosmätare.";
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth används för att kommunicera med insulinpumpen och kontinuerlig glukosmätare.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth används för att kommunicera med insulinpump och kontinuerlig glukosmätare.";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth används för att kommunicera med insulinpumpen och kontinuerlig glukosmätare.";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID avänds för att godkänna bolus.";

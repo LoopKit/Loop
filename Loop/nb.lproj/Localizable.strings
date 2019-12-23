@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (Gjenstår: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ absorbert";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ E totalt";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/E";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbert";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ E totalt";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minutters glukose-regresjonskoeffisient (b1), fortsatt med henfall over 30 minutter.";
@@ -64,6 +64,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktivt insulin: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Legg til oppføring med karbohydrater";
+
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
 "Add CGM" = "Legg til CGM";
@@ -71,7 +74,8 @@
 /* The label of the carb entry button */
 "Add Meal" = "Legg til måltid";
 
-/* Title text for button to set up a new pump */
+/* Action sheet title selecting Pump
+   Title text for button to set up a new pump */
 "Add Pump" = "Legg til pumpe";
 
 /* The title of the Amplitude service */
@@ -175,7 +179,7 @@
 "Customer Token" = "Customer Token";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
+"Delete CGM" = "Slett CGM";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Leveringsgrense";
@@ -195,7 +199,7 @@
 /* The alert title for a resume error */
 "Error Resuming" = "Kunne ikke gjenoppta";
 
-/* The subtitle format describing eventual glucose. (1: localized glucose value description) *//* The subtitle format describing eventual glucose. (1: localized glucose value description) */
+/* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Omsider %@";
 
 /* The title of the alert describing a maximum bolus validation error */
@@ -205,7 +209,7 @@
 "Fiasp" = "Fiasp";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "For %1$@";
+"For %1$@" = "Til %1$@";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glukose";
@@ -388,3 +392,4 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Treningsmål";
+

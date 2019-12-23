@@ -1,5 +1,5 @@
 /* Lesson subtitle */
-"Computes the percentage of glucose measurements within a specified range" = "Berekend het percentage glucosemetingen in een specifiek bereik";
+"Computes the percentage of glucose measurements within a specified range" = "Berekent het percentage glucosemetingen in een specifiek bereik";
 
 /* Title of the button to begin lesson execution */
 "Continue" = "Ga verder";
@@ -26,7 +26,8 @@
 "Time in Range" = "Tijd in bereik";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment";
+"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Weken";
+

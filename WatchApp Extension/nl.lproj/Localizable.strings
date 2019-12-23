@@ -4,6 +4,9 @@
 /* HUD row title for IOB */
 "Active Insulin" = "Actieve insuline";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Voeg koolhydraten toe";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus mislukt";
 
@@ -16,7 +19,7 @@
 "Make sure your iPhone is nearby and try again" = "Zorg dat je iPhone in de buurt is en probeer opnieuw";
 
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Basaal hoeveelheid";
+"Net Basal Rate" = "Netto basaalsnelheid";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Aangepast programma";
@@ -31,8 +34,12 @@
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Versturen mislukt";
 
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
 /* The short unit display string for international units of insulin delivery per hour */
 "U/hr" = "E/uur";
 
 /* The text for the Watch button for enabling workout mode */
-"Workout" = "Workout";
+"Workout" = "Training";
+

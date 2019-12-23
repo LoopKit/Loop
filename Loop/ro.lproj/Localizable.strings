@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (urmează a fi administrate: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ absorbiți";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U total";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbiți";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U total";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "coeficient de regresie glicemică pe 15 min (b₁), continuat cu o diminuare pe 30 min.";
@@ -63,6 +63,9 @@
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Insulină activă: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Adăugare carbohidrați";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -170,7 +173,7 @@
 "Current glucose of %1$@ is below correction range." = " Glicemia curentă de %1$@ se situează sub intervalul țintă de corecție.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Custom Override";
+"Custom Override" = "Înlocuire";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Customer Token";
@@ -212,180 +215,181 @@
 "Glucose" = "Glicemie";
 
 /* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
-"Glucose data is %1$@ old" = "Glucose data is %1$@ old";
+"Glucose data is %1$@ old" = "Datele despre glicemie au o vechime de %1$@";
 
 /* Description of error when glucose data is missing */
-"Glucose data not available" = "Glucose data not available";
+"Glucose data not available" = "Nu sunt disponibile date despre glicemie";
 
 /* Title of the prediction input effect for glucose momentum */
-"Glucose Momentum" = "Glucose Momentum";
+"Glucose Momentum" = "Momentum glicemie";
 
 /* The placeholder text for the nightscout site URL credential */
 "https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
-"Indefinitely" = "Indefinitely";
+"Indefinitely" = "Nedeterminat";
 
 /* Title of the prediction input effect for insulin */
-"Insulin" = "Insulin";
+"Insulin" = "Insulină";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulină absorbită (U) × factor de sensibilitate la insulină (%1$@/U)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Delivery";
+"Insulin Delivery" = "Administrare insulină";
 
 /* Details for missing data error when insulin effects are missing */
-"Insulin effects" = "Insulin effects";
+"Insulin effects" = "Efecte insulină";
 
 /* Details for configuration error when insulin model is missing
    The title text for the insulin model setting row */
-"Insulin Model" = "Insulin Model";
+"Insulin Model" = "Model insulină";
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulin Sensitivities";
+"Insulin Sensitivities" = "Sensibilitate insulină";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
-"Invalid data: %1$@" = "Invalid data: %1$@";
+"Invalid data: %1$@" = "Date invalide: %1$@";
 
 /* The title text for the issue report cell */
-"Issue Report" = "Issue Report";
+"Issue Report" = "Raportare probleme";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Launches CGM app";
+"Launches CGM app" = "Lansează aplicația CGM";
 
 /* The loading message for the diagnostic report screen */
-"Loading..." = "Loading...";
+"Loading..." = "Se încarcă...";
 
 /* The title of the loggly service */
 "Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "Loop Failure";
+"Loop Failure" = "Eșec Loop";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop has not completed successfully in %@";
+"Loop has not completed successfully in %@" = "Loop nu a rulat cu succes timp de %@";
 
 /* The error message for missing data. (1: missing data details) */
-"Missing data: %1$@" = "Missing data: %1$@";
+"Missing data: %1$@" = "Date lipsă: %1$@";
 
 /* Details for missing data error when momentum effects are missing */
-"Momentum effects" = "Momentum effects";
+"Momentum effects" = "Efecte momentum";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";
+"No connected devices, or failure during device connection" = "Nu este conectat niciun dispozitiv sau s-a produs o eroare la conectare";
 
 /* The title text for the override presets */
-"Override Presets" = "Override Presets";
+"Override Presets" = "Presetări de înlocuire";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Pre-Meal Targets";
+"Pre-Meal Targets" = "Ținte preprandiale";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Glicemia prognozată pentru %1$@ este %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Glicemia prognozată de %1$@ se situează sub limita de suspendare configurată";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Prognozată: %1$@\nActuală: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
-"Pump" = "Pump";
+"Pump" = "Pompă";
 
 /* The notification title for a low pump battery */
-"Pump Battery Low" = "Pump Battery Low";
+"Pump Battery Low" = "Nivel scăzut baterie pompă";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pump data is %1$@ old";
+"Pump data is %1$@ old" = "Datele din pompă sunt vechi de %1$@";
 
 /* Details for configuration error when pump manager is missing */
-"Pump Manager" = "Pump Manager";
+"Pump Manager" = "Manager pompă";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pump Reservoir Empty";
+"Pump Reservoir Empty" = "Rezervor pompă gol";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Pump Reservoir Low";
+"Pump Reservoir Low" = "Nivel scăzut rezervor pompă";
 
 /* The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "Pump Suspended";
+"Pump Suspended" = "Pompă suspendată";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Rapid-Acting – Adults";
+"Rapid-Acting – Adults" = "Rapid-Acting – Adulți";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Rapid-Acting – Children";
+"Rapid-Acting – Children" = "Rapid-Acting – Copii";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Recommendation expired: %1$@ old";
+"Recommendation expired: %1$@ old" = "Recomandare expirată: acum %1$@";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Recommended Basal";
+"Recommended Basal" = "Bazal recomandat";
 
 /* Accessibility hint describing recommended bolus units */
-"Recommended Bolus: %@ Units" = "Recommended Bolus: %@ Units";
+"Recommended Bolus: %@ Units" = "Bolus recomandat: %@ unități";
 
 /* Details for missing data error when reservoir data is missing */
-"Reservoir" = "Reservoir";
+"Reservoir" = "Rezervor";
 
 /* Title of the prediction input effect for retrospective correction */
-"Retrospective Correction" = "Retrospective Correction";
+"Retrospective Correction" = "Corecție retrospectivă";
 
 /* The title of the notification action to retry a bolus command */
-"Retry" = "Retry";
+"Retry" = "Reîncearcă";
 
 /* The title of the services section in settings */
-"Services" = "Services";
+"Services" = "Servicii";
 
 /* The label of the settings button */
-"Settings" = "Settings";
+"Settings" = "Setări";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Shows last loop error";
+"Shows last loop error" = "Afișează ultima eroare de loop";
 
 /* Format fragment for a start time */
-"since %@" = "since %@";
+"since %@" = "de la %@";
 
 /* The title of the nightscout site URL credential */
 "Site URL" = "Site URL";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "starting at %@";
+"starting at %@" = "începând de la %@";
 
 /* The title of the cell indicating a bolus is being sent */
-"Starting Bolus" = "Starting Bolus";
+"Starting Bolus" = "Start Bolus";
 
 /* The title text in settings */
-"Suspend Threshold" = "Suspend Threshold";
+"Suspend Threshold" = "Limită suspendare";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tap to Resume";
+"Tap to Resume" = "Apăsați pentru a relua";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "The legacy model used by Loop, allowing customization of action duration.";
+"The legacy model used by Loop, allowing customization of action duration." = "Modelul învechit utilizat de Loop, permite personalizarea duratei de acțiune.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "The maximum bolus amount is %@ Units";
+"The maximum bolus amount is %@ Units" = "Cantitatea maximă de bolus este de %@ unități";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "until %@";
+"until %@" = "până la %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Use Workout Glucose Targets";
+"Use Workout Glucose Targets" = "Folosește țintele glicemice de activitate sportivă";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "În momentul în care glicemia actuală sau cea prognozată se situează sub limita de suspendare, Loop nu va recomanda un bolus și va recomanda întotdeauna o rată bazală temporară de 0 unități pe ora.";
 
 /* The label of the workout mode toggle button */
-"Workout Targets" = "Workout Targets";
+"Workout Targets" = "Ținte de activitate sportivă";
+

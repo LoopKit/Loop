@@ -26,7 +26,8 @@
 "Time in Range" = "Tid inom målvärde";
 
 /* Lesson subtitle */
-"Visualizes the most frequent glucose values by time of day" = "Visar dem mest frekventa glukosvärdena under tid på dagen";
+"Visualizes the most frequent glucose values by time of day" = "Visar de vanligaste glukosvärdena under olika tider på dagen";
 
 /* Unit string for a count of calendar weeks */
 "Weeks" = "Veckor";
+

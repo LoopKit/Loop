@@ -1,3 +1,9 @@
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "%@ geleden";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ E";
+
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ at %2$@";
 
@@ -6,12 +12,6 @@
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
-
-/* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "%@ geleden";
-
-/* The format string describing the basal rate. */
-"%@ U" = "%@ E";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Gesloten loop";
@@ -25,8 +25,12 @@
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Open loop";
 
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
 /* Accessibility value for an unknown value */
 "Unknown" = "Onbekend";
 
 /* Acessibility label describing completion HUD waiting for first run */
 "Waiting for first run" = "Wachten op eerste run";
+

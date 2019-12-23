@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (đang chờ xử lý: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ được hấp thụ";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U Tổng cộng";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ được hấp thụ";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Tổng cộng";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 phút hồi quy glucose (b₁), tiếp tục phân rã trên 30 phút.";
@@ -63,6 +63,9 @@
 
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Lượng Insulin còn hoạt động: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Khai báo khối lượng Carb";
 
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
@@ -170,7 +173,7 @@
 "Current glucose of %1$@ is below correction range." = " Chỉ số glucose hiện tại %1$@ nằm dưới Phạm vi Điều chỉnh.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Custom Override";
+"Custom Override" = "Chồng liều";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Customer Token";
@@ -187,7 +190,7 @@
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Cho phép";
 
-/* The placeholder text instructing users to enter a suspend threshold */
+/* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Nhập ngưỡng tạm dừng";
 
 /* The alert title for an error while canceling a bolus */
@@ -389,3 +392,4 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Mục tiêu tập luyện";
+

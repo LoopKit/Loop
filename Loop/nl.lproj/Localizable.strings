@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (Wachten: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ opgenomen";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ E totaal";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/E";
 
@@ -19,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ opgenomen";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ E totaal";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minuten glucose regressie coëficient (b1), continue zonder afbouw over 30 min";
@@ -64,6 +64,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Actieve insuline: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Voeg koolhydraten toe";
+
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
 "Add CGM" = "Voeg CGM toe";
@@ -71,7 +74,8 @@
 /* The label of the carb entry button */
 "Add Meal" = "Voeg maaltijd toe";
 
-/* Title text for button to set up a new pump */
+/* Action sheet title selecting Pump
+   Title text for button to set up a new pump */
 "Add Pump" = "Voeg pomp toe";
 
 /* The title of the Amplitude service */
@@ -107,16 +111,16 @@
 "Bolus" = "Bolus";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Bolused %1$@ of %2$@";
+"Bolused %1$@ of %2$@" = "Bolused %1$@ van %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Bolusing %1$@";
+"Bolusing %1$@" = "Geef bolus %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Annuleer";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Cancelling Bolus";
+"Canceling Bolus" = "Annuleer Bolus";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Koolhydraten impact";
@@ -190,10 +194,10 @@
 "Enter suspend threshold" = "Voer drempel voor onderbreking insuline in";
 
 /* The alert title for an error while canceling a bolus */
-"Error Canceling Bolus" = "Error Canceling Bolus";
+"Error Canceling Bolus" = "Fout bij annuleren van bolus";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Error vervolgen";
+"Error Resuming" = "Fout bij vervolgen";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Uiteindelijk %@";
@@ -291,7 +295,7 @@
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Verwachte glucose van %1$@ is lager dan de onderbroken insuline drempel instelling.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Voorspeld: %1$@\nHuidig: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Voorspeld: %1$@\nActueel: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
 "Pump" = "Pomp";
@@ -375,7 +379,7 @@
 "U" = "E";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "Tot %@";
+"until %@" = "tot %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Gebruik training glucose doelen";
