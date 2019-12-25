@@ -118,3 +118,24 @@ public enum Microbolus {
         }
     }
 }
+
+public extension Microbolus {
+    struct Event {
+        public let date: Date
+        public let recommendedAmount: Double
+        public let amount: Double
+        public let reason: String?
+
+        public static func canceled(date: Date, recommended: Double, reason: String) -> Event {
+            Event(date: date, recommendedAmount: recommended, amount: 0, reason: reason)
+        }
+
+        public static func failed(date: Date, recommended: Double, error: Error) -> Event {
+            Event(date: date, recommendedAmount: recommended, amount: 0, reason: "Failed with error: \(error.localizedDescription)")
+        }
+
+        public static func succeeded(date: Date, recommended: Double, amount: Double) -> Event {
+            Event(date: date, recommendedAmount: recommended, amount: amount, reason: nil)
+        }
+    }
+}
