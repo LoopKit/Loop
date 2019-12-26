@@ -577,7 +577,8 @@ final class SettingsTableViewController: UITableViewController {
 
                 let viewModel = MicrobolusView.ViewModel(
                     settings: settings.microbolusSettings,
-                    glucoseUnit: unit
+                    glucoseUnit: unit,
+                    eventPublisher: dataManager.loopManager.lastMicrobolusEvent.eraseToAnyPublisher()
                 )
 
                 microbolusCancellable = viewModel.changes()

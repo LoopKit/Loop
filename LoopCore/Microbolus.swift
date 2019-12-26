@@ -137,5 +137,17 @@ public extension Microbolus {
         public static func succeeded(date: Date, recommended: Double, amount: Double) -> Event {
             Event(date: date, recommendedAmount: recommended, amount: amount, reason: nil)
         }
+
+        public var description: String {
+            let timeFormatter = DateFormatter()
+            timeFormatter.timeStyle = .short
+            let percentFormatter = NumberFormatter()
+            percentFormatter.maximumFractionDigits = 2
+            percentFormatter.numberStyle = .percent
+            let percent = amount/recommendedAmount
+            return "At \(timeFormatter.string(from: date)): enacted \(amount) of \(recommendedAmount), \(percentFormatter.string(for: percent) ?? "0%") " 
+            + (reason ?? "")
+        }
+
     }
 }

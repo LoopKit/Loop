@@ -14,21 +14,22 @@ import HealthKit
 
 struct MicrobolusView: View {
     final class ViewModel: ObservableObject {
-        @Published var microbolusesWithCOB: Bool
-        @Published var withCOBValue: Double
-        @Published var microbolusesWithoutCOB: Bool
-        @Published var withoutCOBValue: Double
-        @Published var partialApplication: Double
-        @Published var safeMode: Microbolus.SafeMode
-        @Published var microbolusesMinimumBolusSize: Double
-        @Published var openBolusScreen: Bool
-        @Published var disableByOverride: Bool
-        @Published var lowerBound: String
+        @Published fileprivate var microbolusesWithCOB: Bool
+        @Published fileprivate var withCOBValue: Double
+        @Published fileprivate var microbolusesWithoutCOB: Bool
+        @Published fileprivate var withoutCOBValue: Double
+        @Published fileprivate var partialApplication: Double
+        @Published fileprivate var safeMode: Microbolus.SafeMode
+        @Published fileprivate var microbolusesMinimumBolusSize: Double
+        @Published fileprivate var openBolusScreen: Bool
+        @Published fileprivate var disableByOverride: Bool
+        @Published fileprivate var lowerBound: String
 
         @Published fileprivate var pickerWithCOBIndex: Int
         @Published fileprivate var pickerWithoutCOBIndex: Int
         @Published fileprivate var pickerMinimumBolusSizeIndex: Int
         @Published fileprivate var partialApplicationIndex: Int
+        @Published fileprivate var event: String? = nil
 
         fileprivate let values = stride(from: 30, to: 301, by: 5).map { $0 } + [1440] // + 1 day
         // @ToDo: Should be able to get the to limit from the settings but for now defult to a low value
@@ -45,7 +46,7 @@ struct MicrobolusView: View {
 
         fileprivate let unit: HKUnit
 
-        init(settings: Microbolus.Settings, glucoseUnit: HKUnit) {
+        init(settings: Microbolus.Settings, glucoseUnit: HKUnit, eventPublisher: AnyPublisher<Microbolus.Event?, Never>? = nil) {
             self.microbolusesWithCOB = settings.enabled
             self.withCOBValue = settings.size
             self.microbolusesWithoutCOB = settings.enabledWithoutCarbs
@@ -73,18 +74,25 @@ struct MicrobolusView: View {
 
 
             let microbolusesMinimumBolusSizeCancellable = $pickerMinimumBolusSizeIndex
-            .map { Double(self.minimumBolusSizeValues[$0]) }
-            .sink { self.microbolusesMinimumBolusSize = $0 }
+                .map { Double(self.minimumBolusSizeValues[$0]) }
+                .sink { self.microbolusesMinimumBolusSize = $0 }
 
             let partialApplicationCancellable = $partialApplicationIndex
-            .map { Double(self.partialApplicationValues[$0]) }
-            .sink { self.partialApplication = $0 }
+                .map { Double(self.partialApplicationValues[$0]) }
+                .sink { self.partialApplication = $0 }
+
+            let lastEventCancellable = eventPublisher?
+                .map { $0?.description }
+                .receive(on: DispatchQueue.main)
+                .sink { self.event = $0 }
+
 
             cancellable = AnyCancellable {
                 withCOBCancellable.cancel()
                 withoutCOBCancellable.cancel()
                 microbolusesMinimumBolusSizeCancellable.cancel()
                 partialApplicationCancellable.cancel()
+                lastEventCancellable?.cancel()
             }
         }
 
@@ -141,6 +149,9 @@ struct MicrobolusView: View {
             safeModeSection
             temporaryOverridesSection
             otherOptionsSection
+            if viewModel.event != nil {
+                lastEventSection
+            }
         }
         .navigationBarTitle("Microboluses")
         .modifier(AdaptsToSoftwareKeyboard())
@@ -256,6 +267,12 @@ struct MicrobolusView: View {
                 ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
                 }
             }
+        }
+    }
+
+    private var lastEventSection: some View {
+        Section(header: Text("Last Event").font(.headline)) {
+            Text(viewModel.event ?? "No event")
         }
     }
 }

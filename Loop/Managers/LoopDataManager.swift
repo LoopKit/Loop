@@ -36,6 +36,8 @@ final class LoopDataManager {
 
     private var loopSubscription: AnyCancellable?
 
+    let lastMicrobolusEvent = CurrentValueSubject<Microbolus.Event?, Never>(nil)
+
     // References to registered notification center observers
     private var notificationObservers: [Any] = []
 
@@ -653,7 +655,7 @@ extension LoopDataManager {
         .eraseToAnyPublisher()
 
         let enactBolusPublisher = Deferred {
-            Future<Microbolus.Event, Error> { promise in
+            Future<Microbolus.Event?, Error> { promise in
                 self.calculateAndEnactMicroBolusIfNeeded { event, error in
                     if let error = error {
                         promise(.failure(error))
@@ -694,7 +696,8 @@ extension LoopDataManager {
             .flatMap { _ in enactBolusPublisher }
             .receive(on: dataAccessQueue)
         .sink(
-            receiveCompletion: { completion in
+            receiveCompletion: { [weak self] completion in
+                guard let self = self else { return }
                 switch completion {
                 case .finished:
                     self.lastLoopError = nil
@@ -705,8 +708,11 @@ extension LoopDataManager {
                 }
                 self.logger.default("Loop ended")
                 self.notify(forChange: .tempBasal)
-        },
-            receiveValue: { _ in }
+            },
+            receiveValue: { [weak self] event in
+                guard let event = event else { return }
+                self?.lastMicrobolusEvent.send(event)
+            }
         )
     }
 
@@ -1068,28 +1074,55 @@ extension LoopDataManager {
     }
 
     /// *This method should only be called from the `dataAccessQueue`*
-    private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ event: Microbolus.Event, _ error: Error?) -> Void) {
+    private func calculateAndEnactMicroBolusIfNeeded(_ completion: @escaping (_ event: Microbolus.Event?, _ error: Error?) -> Void) {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         let startDate = Date()
 
+        guard settings.dosingEnabled else {
+            logger.debug("Closed loop is disabled. Cancel microbolus calculation.")
+            completion(nil, nil)
+            return
+        }
+
         guard let recommendedBolus = recommendedBolus else {
             logger.debug("No recommended bolus. Cancel microbolus calculation.")
-            completion(.canceled(date: startDate, recommended: 0, reason: "No recommended bolus."), nil)
+            completion(nil, nil)
             return
         }
 
         let insulinReq = recommendedBolus.recommendation.amount
 
-        guard insulinReq > 0 else {
-            logger.debug("No microbolus needed.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "No microbolus needed."), nil)
+        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            logger.debug("Bolus recommendation expired.")
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Bolus recommendation expired."), nil)
             return
         }
 
-        guard settings.dosingEnabled else {
-            logger.debug("Closed loop is disabled. Cancel microbolus calculation.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Closed loop is disabled"), nil)
+        guard insulinReq > 0 else {
+            logger.debug("No microbolus needed.")
+            completion(nil, nil)
+            return
+        }
+
+        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate) else {
+            logger.debug("Basal rates not configured. Cancel microbolus calculation.")
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Basal rates not configured."), nil)
+            return
+        }
+
+        guard let glucose = self.glucoseStore.latestGlucose, let predictedGlucose = predictedGlucose else {
+            logger.debug("Glucose data not found.")
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Glucose data not found."), nil)
+            return
+        }
+
+        let cob = carbsOnBoard?.quantity.doubleValue(for: .gram()) ?? 0
+        let cobChek = (cob > 0 && settings.microbolusSettings.enabled) || (cob == 0 && settings.microbolusSettings.enabledWithoutCarbs)
+
+        guard cobChek else {
+            logger.debug("Microboluses disabled.")
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Microboluses disabled. COB = \(cob)"), nil)
             return
         }
 
@@ -1107,33 +1140,6 @@ extension LoopDataManager {
         guard let bolusState = delegate?.bolusState, case .none = bolusState else {
             logger.debug("Already bolusing. Cancel microbolus calculation.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Already bolusing."), nil)
-            return
-        }
-
-        let cob = carbsOnBoard?.quantity.doubleValue(for: .gram()) ?? 0
-        let cobChek = (cob > 0 && settings.microbolusSettings.enabled) || (cob == 0 && settings.microbolusSettings.enabledWithoutCarbs)
-
-        guard cobChek else {
-            logger.debug("Microboluses disabled.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Microboluses disabled. COB = \(cob)"), nil)
-            return
-        }
-
-        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
-            logger.debug("Bolus recommendation expired.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Bolus recommendation expired."), nil)
-            return
-        }
-
-        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate) else {
-            logger.debug("Basal rates not configured. Cancel microbolus calculation.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Basal rates not configured."), nil)
-            return
-        }
-
-        guard let glucose = self.glucoseStore.latestGlucose, let predictedGlucose = predictedGlucose else {
-            logger.debug("Glucose data not found.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Glucose data not found."), nil)
             return
         }
 
