@@ -66,7 +66,7 @@ final class BolusViewController: UITableViewController, IdentifiableClass, UITex
 
     var glucoseUnit: HKUnit = .milligramsPerDeciliter
 
-    var bolusRecommendation: BolusRecommendation? = nil {
+    var bolusRecommendation: ManualBolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)

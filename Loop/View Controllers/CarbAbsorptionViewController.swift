@@ -497,7 +497,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         switch targetViewController {
         case let vc as BolusViewController:
             vc.configureWithLoopManager(self.deviceManager.loopManager,
-                recommendation: sender as? BolusRecommendation,
+                recommendation: sender as? ManualBolusRecommendation,
                 glucoseUnit: self.carbEffectChart.glucoseUnit
             )
         case let vc as CarbEntryEditViewController:

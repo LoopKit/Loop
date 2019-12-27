@@ -10,12 +10,12 @@ import HealthKit
 
 
 extension BolusViewController {
-    func configureWithLoopManager(_ manager: LoopDataManager, recommendation: BolusRecommendation?, glucoseUnit: HKUnit) {
+    func configureWithLoopManager(_ manager: LoopDataManager, recommendation: ManualBolusRecommendation?, glucoseUnit: HKUnit) {
         manager.getLoopState { (manager, state) in
             let maximumBolus = manager.settings.maximumBolus
 
             let activeCarbohydrates = state.carbsOnBoard?.quantity.doubleValue(for: .gram())
-            let bolusRecommendation: BolusRecommendation?
+            let bolusRecommendation: ManualBolusRecommendation?
 
             if let recommendation = recommendation {
                 bolusRecommendation = recommendation

@@ -119,6 +119,25 @@ class RecommendTempBasalTests: XCTestCase {
 
         XCTAssertNil(dose)
     }
+    
+//    func testNoChangeAutomaticBolusing() {
+//        let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
+//
+//        let dose = glucose.recommendedAutomaticDose(
+//            to: glucoseTargetRange,
+//            at: glucose.first!.startDate,
+//            suspendThreshold: suspendThreshold.quantity,
+//            sensitivity: insulinSensitivitySchedule,
+//            model: insulinModel,
+//            basalRates: basalRateSchedule,
+//            maxAutomaticBolus: 5,
+//            lastTempBasal: nil
+//        )
+//        glucose.recommendedAutomaticDose(
+//
+//        XCTAssertNil(dose)
+//    }
+
 
     func testNoChangeOverrideActive() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
@@ -513,7 +532,7 @@ class RecommendBolusTests: XCTestCase {
     func testNoChange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_no_change_glucose")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -529,7 +548,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartHighEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_in_range")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -545,7 +564,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartLowEndInRange() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_in_range")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -561,7 +580,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartHighEndLow() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_high_end_low")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -577,7 +596,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartLowEndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -601,7 +620,7 @@ class RecommendBolusTests: XCTestCase {
         // 60 - 200 mg/dL
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 70),
@@ -624,7 +643,7 @@ class RecommendBolusTests: XCTestCase {
         // 60 - 200 mg/dL
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: nil,  // Expected to default to 90
@@ -646,7 +665,7 @@ class RecommendBolusTests: XCTestCase {
     func testDroppingBelowRangeThenRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_dropping_then_rising")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -665,7 +684,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartLowEndHighWithPendingBolus() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_low_end_high")
         
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -682,7 +701,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartVeryLowEndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_start_very_low_end_high")
         
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -698,7 +717,7 @@ class RecommendBolusTests: XCTestCase {
     func testFlatAndHigh() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_flat_and_high")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -714,7 +733,7 @@ class RecommendBolusTests: XCTestCase {
     func testHighAndFalling() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -730,7 +749,7 @@ class RecommendBolusTests: XCTestCase {
     func testInRangeAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_in_range_and_rising")
 
-        var dose = glucose.recommendedBolus(
+        var dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -744,7 +763,7 @@ class RecommendBolusTests: XCTestCase {
 
         // Less existing temp
 
-        dose = glucose.recommendedBolus(
+        dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -760,7 +779,7 @@ class RecommendBolusTests: XCTestCase {
     func testStartLowEndJustAboveRange() {
         let glucose = loadGlucoseValueFixture("recommended_temp_start_low_end_just_above_range")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 0),
@@ -777,7 +796,7 @@ class RecommendBolusTests: XCTestCase {
     func testHighAndRising() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_rising")
 
-        var dose = glucose.recommendedBolus(
+        var dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -792,7 +811,7 @@ class RecommendBolusTests: XCTestCase {
         // Use mmol sensitivity value
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiter, dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
 
-        dose = glucose.recommendedBolus(
+        dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -808,7 +827,7 @@ class RecommendBolusTests: XCTestCase {
     func testRiseAfterDIA() {
         let glucose = loadGlucoseValueFixture("far_future_high_bg_forecast")
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
@@ -825,7 +844,7 @@ class RecommendBolusTests: XCTestCase {
     func testNoInputGlucose() {
         let glucose: [GlucoseFixtureValue] = []
 
-        let dose = glucose.recommendedBolus(
+        let dose = glucose.recommendedManualBolus(
             to: glucoseTargetRange,
             suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
