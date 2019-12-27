@@ -27,10 +27,11 @@ open class ChartsManager {
         return formatter
     }()
 
-    public init(colors: ChartColorPalette, settings: ChartSettings, charts: [ChartProviding]) {
+    public init(colors: ChartColorPalette, settings: ChartSettings, charts: [ChartProviding], traitCollection: UITraitCollection) {
         self.colors = colors
         self.chartSettings = settings
         self.charts = charts
+        self.traitCollection = traitCollection
         self.chartsCache = Array(repeating: nil, count: charts.count)
 
         axisLabelSettings = ChartLabelSettings(
@@ -61,6 +62,10 @@ open class ChartsManager {
     private let guideLinesLayerSettings: ChartGuideLinesLayerSettings
 
     public var gestureRecognizer: UIGestureRecognizer?
+
+    // MARK: - UITraitEnvironment
+
+    public var traitCollection: UITraitCollection
 
     public func didReceiveMemoryWarning() {
         log.info("Purging chart data in response to memory warning")
@@ -154,7 +159,7 @@ open class ChartsManager {
         }
 
         if chartsCache[index] == nil, let xAxisModel = xAxisModel, let xAxisValues = xAxisValues {
-            chartsCache[index] = charts[index].generate(withFrame: frame, xAxisModel: xAxisModel, xAxisValues: xAxisValues, axisLabelSettings: axisLabelSettings, guideLinesLayerSettings: guideLinesLayerSettings, colors: colors, chartSettings: chartSettings, labelsWidthY: labelsWidthY, gestureRecognizer: gestureRecognizer)
+            chartsCache[index] = charts[index].generate(withFrame: frame, xAxisModel: xAxisModel, xAxisValues: xAxisValues, axisLabelSettings: axisLabelSettings, guideLinesLayerSettings: guideLinesLayerSettings, colors: colors, chartSettings: chartSettings, labelsWidthY: labelsWidthY, gestureRecognizer: gestureRecognizer, traitCollection: traitCollection)
         }
 
         return chartsCache[index]
@@ -165,7 +170,6 @@ open class ChartsManager {
     }
 
     // MARK: - Shared Axis
-
 
     private func generateXAxisValues() {
         if let endDate = charts.compactMap({ $0.endDate }).max() {
@@ -237,7 +241,8 @@ public protocol ChartProviding {
         colors: ChartColorPalette,
         chartSettings: ChartSettings,
         labelsWidthY: CGFloat,
-        gestureRecognizer: UIGestureRecognizer?
+        gestureRecognizer: UIGestureRecognizer?,
+        traitCollection: UITraitCollection
     ) -> Chart
 }
 

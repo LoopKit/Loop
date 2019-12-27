@@ -48,7 +48,8 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 settings.labelsToAxisSpacingX = 6
                 settings.clipInnerFrame = false
                 return settings
-            }()
+            }(),
+            traitCollection: traitCollection
         )
 
         charts.predictedGlucose.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
@@ -90,9 +91,15 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         super.viewDidLoad()
 
         subtitleLabel.isHidden = true
-        subtitleLabel.textColor = .subtitleLabelColor
+        if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
+            subtitleLabel.textColor = .secondaryLabel
+            insulinLabel.textColor = .secondaryLabel
+        } else {
+            subtitleLabel.textColor = .subtitleLabelColor
+            insulinLabel.textColor = .subtitleLabelColor
+        }
+
         insulinLabel.isHidden = true
-        insulinLabel.textColor = .subtitleLabelColor
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
@@ -144,6 +151,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             (UIViewControllerTransitionCoordinatorContext) -> Void in
             self.glucoseChartContentView.isHidden = self.extensionContext?.widgetActiveDisplayMode != .expanded
         })
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        charts.traitCollection = traitCollection
     }
     
     @objc private func openLoopApp(_: Any) {

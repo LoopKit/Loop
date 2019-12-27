@@ -22,7 +22,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         case slow
     }
 
-    private var carbValue: Int = 15 {
+    private var carbValue: Int = 0 {
         didSet {
             if carbValue < minimumCarbValue {
                 carbValue = minimumCarbValue
@@ -30,7 +30,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
                 carbValue = maximumCarbValue
             }
 
-            valueLabel.setText(String(carbValue))
+            valueLabel.setLargeBoldRoundedText(String(carbValue))
         }
     }
 
@@ -110,6 +110,14 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         }
     }
 
+    private var willDeactivateObserver: AnyObject? {
+        didSet {
+            if let oldValue = oldValue {
+                NotificationCenter.default.removeObserver(oldValue)
+            }
+        }
+    }
+
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
@@ -119,6 +127,7 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         date = Date()
         absorptionTimeType = .medium
         defaultAbsorptionTimes = ExtensionDelegate.shared().loopManager.carbStore.defaultAbsorptionTimes
+        carbValue = ExtensionDelegate.shared().loopManager.settings.defaultWatchCarbPickerValue
     }
 
     override func willActivate() {
@@ -132,11 +141,21 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         updateNewCarbEntryUserActivity()
 
         crownSequencer.focus()
+
+        // If the screen turns off, the screen should be dismissed for safety reasons
+        willDeactivateObserver = NotificationCenter.default.addObserver(forName: ExtensionDelegate.willResignActiveNotification, object: ExtensionDelegate.shared(), queue: nil, using: { [weak self] (_) in
+            if let self = self {
+                WKInterfaceDevice.current().play(.failure)
+                self.dismiss()
+            }
+        })
     }
 
     override func didDeactivate() {
         // This method is called when watch view controller is no longer visible
         super.didDeactivate()
+
+        willDeactivateObserver = nil
     }
 
     // MARK: - Actions
@@ -183,6 +202,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
     }
 
     @IBAction func save() {
+        willDeactivateObserver = nil
+
         if carbValue > 0 {
             let entry = CarbEntryUserInfo(carbEntry: self.entry)
 

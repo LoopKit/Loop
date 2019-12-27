@@ -36,7 +36,7 @@ class NightscoutService: ServiceAuthenticationUI {
             ServiceCredential(
                 title: NSLocalizedString("API Secret", comment: "The title of the nightscout API secret credential"),
                 placeholder: nil,
-                isSecret: false,
+                isSecret: true,
                 keyboardType: .asciiCapable
             )
         ]
