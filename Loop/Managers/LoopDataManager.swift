@@ -91,7 +91,7 @@ final class LoopDataManager {
         // Observe changes
         notificationObservers = [
             NotificationCenter.default.addObserver(
-                forName: .CarbEntriesDidUpdate,
+                forName: CarbStore.carbEntriesDidUpdate,
                 object: carbStore,
                 queue: nil
             ) { (note) -> Void in
@@ -104,7 +104,7 @@ final class LoopDataManager {
                 }
             },
             NotificationCenter.default.addObserver(
-                forName: .GlucoseSamplesDidChange,
+                forName: GlucoseStore.glucoseSamplesDidChange,
                 object: glucoseStore,
                 queue: nil
             ) { (note) in
@@ -216,6 +216,8 @@ final class LoopDataManager {
     private let lockedBasalDeliveryState: Locked<PumpManagerStatus.BasalDeliveryState?>
 
     fileprivate var lastRequestedBolus: DoseEntry?
+    
+    private var lastLoopStarted: Date?
 
     /// The last date at which a loop completed, from prediction to dose (if dosing is enabled)
     var lastLoopCompleted: Date? {
@@ -224,11 +226,6 @@ final class LoopDataManager {
         }
         set {
             lockedLastLoopCompleted.value = newValue
-
-            NotificationManager.clearLoopNotRunningNotifications()
-            NotificationManager.scheduleLoopNotRunningNotifications()
-            AnalyticsManager.shared.loopDidSucceed()
-            NotificationCenter.default.post(name: .LoopCompleted, object: self)
         }
     }
     private let lockedLastLoopCompleted: Locked<Date?>
@@ -654,6 +651,7 @@ extension LoopDataManager {
             NotificationCenter.default.post(name: .LoopRunning, object: self)
 
             self.lastLoopError = nil
+            let startDate = Date()
 
             do {
                 try self.update()
@@ -665,7 +663,7 @@ extension LoopDataManager {
                         if let error = error {
                             self.logger.error(error)
                         } else {
-                            self.lastLoopCompleted = Date()
+                            self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
                         }
                         self.logger.default("Loop ended")
                         self.notify(forChange: .tempBasal)
@@ -674,7 +672,7 @@ extension LoopDataManager {
                     // Delay the notification until we know the result of the temp basal
                     return
                 } else {
-                    self.lastLoopCompleted = Date()
+                    self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
                 }
             } catch let error {
                 self.lastLoopError = error

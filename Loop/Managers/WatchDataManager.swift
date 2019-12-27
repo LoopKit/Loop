@@ -33,7 +33,6 @@ final class WatchDataManager: NSObject {
         watchSession?.activate()
     }
 
-    let healthStore = HKHealthStore()
     private let log: CategoryLogger
 
     private var watchSession: WCSession? = {
@@ -46,19 +45,22 @@ final class WatchDataManager: NSObject {
 
     private var lastSentSettings: LoopSettings?
     
-    private var lastBedtimeUpdate: Date?
+    let healthStore = HKHealthStore()
+    private var lastBedtimeUpdate: Date = Calendar.current.date(byAdding: .hour, value: -25, to: Date())!
     private var bedtime: TimeInterval?
     
     private func updateBedtime() {
+        let lastUpdateInterval = Date().timeIntervalSince(lastBedtimeUpdate)
         guard
-            let lastUpdateInterval = lastBedtimeUpdate?.timeIntervalSince(Date()), lastUpdateInterval < TimeInterval(hours: 24)
+            lastUpdateInterval < TimeInterval(hours: 24)
         else {
+            // only look at samples within the past 6 months
             let monthsToGoBack = -6
             let start = Calendar.current.date(byAdding: .month, value: monthsToGoBack, to: Date())!
             
             getSleepStartTime(start: start) {
                 (result) in
-                
+
                 switch result {
                     case .success(let secondsToBedtime):
                         self.bedtime = TimeInterval(secondsToBedtime)
@@ -79,7 +81,6 @@ final class WatchDataManager: NSObject {
         else {
             return
         }
-        
 
         switch updateContext {
         case .glucose, .tempBasal:
@@ -95,7 +96,6 @@ final class WatchDataManager: NSObject {
 
     private let minTrendDrift: Double = 20
     private lazy var minTrendUnit = HKUnit.milligramsPerDeciliter
-    
 
     private func sendSettingsIfNeeded() {
         let settings = deviceManager.loopManager.settings
@@ -144,10 +144,9 @@ final class WatchDataManager: NSObject {
             session.activate()
             return
         }
-        
-        updateBedtime()
 
         let complicationShouldUpdate: Bool
+        updateBedtime()
 
         if let lastContext = lastComplicationContext,
             let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
@@ -224,7 +223,7 @@ final class WatchDataManager: NSObject {
             completion(context)
         }
     }
-    
+
     private func addCarbEntryFromWatchMessage(_ message: [String: Any], completionHandler: ((_ error: Error?) -> Void)? = nil) {
         if let carbEntry = CarbEntryUserInfo(rawValue: message)?.carbEntry {
             deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { (result) in
@@ -352,14 +351,13 @@ extension WatchDataManager: WCSessionDelegate {
 
 
 extension WatchDataManager {
-    
     override var debugDescription: String {
         var items = [
             "## WatchDataManager",
             "lastSentSettings: \(String(describing: lastSentSettings))",
             "lastComplicationContext: \(String(describing: lastComplicationContext))",
-            "bedtime: \(String(describing: bedtime))",
-            "* complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: nil).minutes ?? 0)) min"
+            "bedtime: at around \(round((bedtime?.hours ?? 0) * 100) / 100) o'clock",
+            "complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: bedtime).minutes ?? 0)) min"
         ]
 
         if let session = watchSession {
@@ -385,6 +383,7 @@ extension WatchDataManager {
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
         
         let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortDescriptor]) { (query, samples, error) in
+
             if let error = error {
                 completion(.failure(error))
             } else if let samples = samples as? [HKCategorySample] {
@@ -431,8 +430,7 @@ extension WCSession {
     fileprivate func complicationUserInfoTransferInterval(bedtime: TimeInterval?) -> TimeInterval {
         let now = Date()
         let timeUntilRefresh: TimeInterval
-        
-        // TODO: this is a really convoluted structure
+
         if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
             // we can have a more frequent refresh rate if we only refresh when it's likely the user is awake (based on HealthKit sleep data)
             if let bedTime = bedtime {
@@ -447,7 +445,7 @@ extension WCSession {
         } else {
             timeUntilRefresh = .hours(24)
         }
-
+        
         return timeUntilRefresh / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }
