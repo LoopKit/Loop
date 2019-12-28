@@ -101,6 +101,7 @@ final class LoopDataManager {
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
+                    self.recentCarbEntries = nil
                     self.notify(forChange: .carbs)
                 }
             },
@@ -198,6 +199,8 @@ final class LoopDataManager {
             recommendedBolus = nil
         }
     }
+
+    private var recentCarbEntries: [StoredCarbEntry]?
 
     fileprivate var recommendedTempBasal: (recommendation: TempBasalRecommendation, date: Date)?
 
@@ -750,8 +753,10 @@ extension LoopDataManager {
                 case .failure(let error):
                     self.logger.error(error)
                     self.carbEffect = nil
-                case .success(let effects):
+                    self.recentCarbEntries = nil
+                case .success(let (samples, effects)):
                     self.carbEffect = effects
+                    self.recentCarbEntries = samples
                 }
 
                 updateGroup.leave()
@@ -835,7 +840,7 @@ extension LoopDataManager {
     }
 
     /// - Throws: LoopError.missingDataError
-    fileprivate func predictGlucose(using inputs: PredictionInputEffect) throws -> [PredictedGlucoseValue] {
+    fileprivate func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry? = nil, potentialCarbEntry: NewCarbEntry? = nil, replacingCarbEntry replacedCarbEntry: StoredCarbEntry? = nil) throws -> [PredictedGlucoseValue] {
         dispatchPrecondition(condition: .onQueue(dataAccessQueue))
 
         guard let model = insulinModelSettings?.model else {
@@ -850,11 +855,58 @@ extension LoopDataManager {
         var effects: [[GlucoseEffect]] = []
 
         if inputs.contains(.carbs), let carbEffect = self.carbEffect {
-            effects.append(carbEffect)
+            if let potentialCarbEntry = potentialCarbEntry, var recentEntries = recentCarbEntries {
+                if let replacedCarbEntry = replacedCarbEntry, let index = recentEntries.firstIndex(of: replacedCarbEntry) {
+                    recentEntries.remove(at: index)
+                }
+
+                let lastGlucoseDate = glucose.startDate
+                let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
+
+                if potentialCarbEntry.startDate > lastGlucoseDate, replacedCarbEntry == nil {
+                    // The potential carb effect is independent and can be summed with the existing effect
+                    effects.append(carbEffect)
+                    let potentialCarbEffect = try carbStore.glucoseEffects(
+                        of: [potentialCarbEntry],
+                        startingAt: retrospectiveStart,
+                        effectVelocities: nil // ICE is irrelevant for future entries
+                    )
+
+                    effects.append(potentialCarbEffect)
+                } else {
+                    // If the entry is in the past or an entry is replaced, DCA effects must be recomputed
+                    var entries = recentEntries.map { NewCarbEntry(quantity: $0.quantity, startDate: $0.startDate, foodType: nil, absorptionTime: $0.absorptionTime) }
+                    entries.append(potentialCarbEntry)
+                    entries.sort(by: { $0.startDate > $1.startDate })
+
+                    let potentialCarbEffect = try carbStore.glucoseEffects(
+                        of: entries,
+                        startingAt: retrospectiveStart,
+                        effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+                    )
+
+                    effects.append(potentialCarbEffect)
+                }
+            } else {
+                effects.append(carbEffect)
+            }
         }
 
         if inputs.contains(.insulin), let insulinEffect = self.insulinEffect {
             effects.append(insulinEffect)
+
+            if let potentialBolus = potentialBolus {
+                guard let sensitivity = insulinSensitivityScheduleApplyingOverrideHistory else {
+                    throw LoopError.configurationError(.generalSettings)
+                }
+
+                let earliestEffectDate = Date(timeIntervalSinceNow: .hours(-24))
+                let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
+                let bolusEffect = [potentialBolus]
+                    .glucoseEffects(insulinModel: model, insulinSensitivity: sensitivity)
+                    .filterDateRange(nextEffectDate, nil)
+                effects.append(bolusEffect)
+            }
         }
 
         if inputs.contains(.momentum), let momentumEffect = self.glucoseMomentumEffect {
@@ -875,6 +927,89 @@ extension LoopDataManager {
         }
 
         return prediction
+    }
+
+    /// - Throws: LoopError.missingDataError
+    fileprivate func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample]) throws -> BolusRecommendation? {
+        guard let glucose = glucoseStore.latestGlucose else {
+            throw LoopError.missingDataError(.glucose)
+        }
+
+        let pumpStatusDate = doseStore.lastAddedPumpData
+
+        let startDate = Date()
+
+        guard startDate.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
+            throw LoopError.glucoseTooOld(date: glucose.startDate)
+        }
+
+        guard startDate.timeIntervalSince(pumpStatusDate) <= settings.recencyInterval else {
+            throw LoopError.pumpDataTooOld(date: pumpStatusDate)
+        }
+
+        guard glucoseMomentumEffect != nil else {
+            throw LoopError.missingDataError(.momentumEffect)
+        }
+
+        guard carbEffect != nil else {
+            throw LoopError.missingDataError(.carbEffect)
+        }
+
+        guard insulinEffect != nil else {
+            throw LoopError.missingDataError(.insulinEffect)
+        }
+
+        guard
+            let glucoseTargetRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+            let insulinSensitivity = insulinSensitivityScheduleApplyingOverrideHistory,
+            let maxBolus = settings.maximumBolus,
+            let model = insulinModelSettings?.model
+        else {
+            throw LoopError.configurationError(.generalSettings)
+        }
+
+        guard lastRequestedBolus == nil
+        else {
+            // Don't recommend changes if a bolus was just requested.
+            // Sending additional pump commands is not going to be
+            // successful in any case.
+            return nil
+        }
+
+        let pendingInsulin = try self.getPendingInsulin()
+
+        let volumeRounder = { (_ units: Double) in
+            return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
+        }
+
+        return predictedGlucose.recommendedBolus(
+            to: glucoseTargetRange,
+            suspendThreshold: settings.suspendThreshold?.quantity,
+            sensitivity: insulinSensitivity,
+            model: model,
+            pendingInsulin: pendingInsulin,
+            maxBolus: maxBolus,
+            volumeRounder: volumeRounder
+        )
+    }
+
+    fileprivate func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue? {
+        var recentEntries = recentCarbEntries ?? []
+        if let replacedCarbEntry = replacedCarbEntry, let index = recentEntries.firstIndex(of: replacedCarbEntry) {
+            recentEntries.remove(at: index)
+        }
+
+        var entries = recentEntries.map { NewCarbEntry(quantity: $0.quantity, startDate: $0.startDate, foodType: nil, absorptionTime: $0.absorptionTime) }
+        if let potentialCarbEntry = potentialCarbEntry {
+            entries.append(potentialCarbEntry)
+            entries.sort(by: { $0.startDate > $1.startDate })
+        }
+
+        return try? carbStore.carbsOnBoard(
+            from: entries,
+            at: Date(),
+            effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
+        )
     }
 
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
@@ -1092,9 +1227,37 @@ protocol LoopState {
     /// This method is intended for visualization purposes only, not dosing calculation. No validation of input data is done.
     ///
     /// - Parameter inputs: The effect inputs to include
+    /// - Parameter potentialBolus: A bolus under consideration for which to include effects in the prediction
+    /// - Parameter potentialCarbEntry: A carb entry under consideration for which to include effects in the prediction
+    /// - Parameter replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
     /// - Returns: An timeline of predicted glucose values
     /// - Throws: LoopError.missingDataError if prediction cannot be computed
-    func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue]
+    func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> [PredictedGlucoseValue]
+
+    /// Computes the recommended bolus for correcting a glucose prediction
+    /// - Parameter predictedGlucose: A timeline of predicted glucose values
+    /// - Returns: A bolus recommendation, or `nil` if not applicable
+    /// - Throws: LoopError.missingDataError if recommendation cannot be computed
+    func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample]) throws -> BolusRecommendation?
+
+    /// Computes the carbs on board, taking into account an unstored carb entry
+    /// - Parameters:
+    ///   - potentialCarbEntry: An unstored carb entry under consideration
+    ///   - replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
+    func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue?
+}
+
+extension LoopState {
+    /// Calculates a new prediction from the current data using the specified effect inputs
+    ///
+    /// This method is intended for visualization purposes only, not dosing calculation. No validation of input data is done.
+    ///
+    /// - Parameter inputs: The effect inputs to include
+    /// - Returns: An timeline of predicted glucose values
+    /// - Throws: LoopError.missingDataError if prediction cannot be computed
+    func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
+        try predictGlucose(using: inputs, potentialBolus: nil, potentialCarbEntry: nil, replacingCarbEntry: nil)
+    }
 }
 
 
@@ -1154,8 +1317,16 @@ extension LoopDataManager {
             return loopDataManager.retrospectiveCorrection.totalGlucoseCorrectionEffect
         }
 
-        func predictGlucose(using inputs: PredictionInputEffect) throws -> [GlucoseValue] {
-            return try loopDataManager.predictGlucose(using: inputs)
+        func predictGlucose(using inputs: PredictionInputEffect, potentialBolus: DoseEntry?, potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> [PredictedGlucoseValue] {
+            return try loopDataManager.predictGlucose(using: inputs, potentialBolus: potentialBolus, potentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry)
+        }
+
+        func recommendBolus<Sample: GlucoseValue>(forPrediction predictedGlucose: [Sample]) throws -> BolusRecommendation? {
+            return try loopDataManager.recommendBolus(forPrediction: predictedGlucose)
+        }
+
+        func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue? {
+            return loopDataManager.computeCarbsOnBoard(potentialCarbEntry: potentialCarbEntry, replacing: replacedCarbEntry)
         }
     }
 
