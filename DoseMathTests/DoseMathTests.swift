@@ -170,11 +170,12 @@ class RecommendTempBasalTests: XCTestCase {
             basalRates: basalRateSchedule,
             maxAutomaticBolus: 5,
             partialApplicationFactor: 0.5,
-            lastTempBasal: nil
+            lastTempBasal: nil,
+            isBasalRateScheduleOverrideActive: true
         )
                 
-        XCTAssertEqual(0.8, dose!.bolusUnits, accuracy: 1.0 / 40.0)
-        XCTAssertNil(dose!.basalAdjustment)
+        XCTAssertEqual(0.8, dose!.basalAdjustment!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(TimeInterval(minutes: 30), dose!.basalAdjustment!.duration)
     }
 
     func testStartHighEndInRange() {
