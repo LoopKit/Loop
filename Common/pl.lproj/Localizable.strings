@@ -2,7 +2,7 @@
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Add Carb Entry";
+"Add Carb Entry" = "Dodaj pozycję dla węglowodanów";
 
 /* The short unit display string for decibles */
 "dB" = "dB";

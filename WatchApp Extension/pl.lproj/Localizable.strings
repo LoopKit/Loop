@@ -1,8 +1,8 @@
 /* HUD row title for COB */
-"Active Carbs" = "Active Carbs";
+"Active Carbs" = "Aktywne węglowodany";
 
 /* HUD row title for IOB */
-"Active Insulin" = "Active Insulin";
+"Active Insulin" = "Aktywna insulina";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Podanie bolusa nie powiodło się";
@@ -16,23 +16,23 @@
 "Make sure your iPhone is nearby and try again" = "Upewnij się, że Twój iPhone jest w pobliżu i spróbuj ponownie";
 
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Net Basal Rate";
+"Net Basal Rate" = "Dawka podstawowa netto";
 
 /* The text for the Watch button for enabling a temporary override */
-"Override" = "Override";
+"Override" = "Pominięcie";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Rekomendowane: %@ J";
 
 /* HUD row title for remaining reservoir volume */
-"Reservoir Volume" = "Reservoir Volume";
+"Reservoir Volume" = "Objętość w zbiorniku";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Wysyłanie nie powiodło się";
 
 /* The short unit display string for international units of insulin delivery per hour */
-"U/hr" = "U/hr";
+"U/hr" = "J/godz.";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Wysiłek fizyczny";

@@ -44,10 +44,10 @@
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 minutowe porównanie przewidywania stężenia glukozy w stosunku do rzeczywistego, kontynuowane z rozkładem przez 60 min.";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "Model oparty na opublikowanej absorpcji insulin Humalog, Novolog/Novorapid i Apidra u dorosłych.";
+"A model based on the published absorption of Fiasp insulin." = "Model oparty na opublikowanej absorpcji insulin Fiasp.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Model oparty na opublikowanej absorpcji insulin Humalog, Novolog/Novorapid i Apidra u dorosłych.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
@@ -64,9 +64,12 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Aktywna Insulina: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Dodaj pozycję dla węglowodanów";
+
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
-"Add CGM" = "Add CGM";
+"Add CGM" = "Dodaj CGM";
 
 /* The label of the carb entry button */
 "Add Meal" = "Dodaj posiłek";
@@ -87,7 +90,7 @@
 "API Secret" = "API Secret";
 
 /* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Are you sure you want to delete this CGM?";
+"Are you sure you want to delete this CGM?" = "Czy na pewno chcesz usunąć ten CGM?";
 
 /* Format fragment for a specific time */
 "at %@" = "o %@";
@@ -104,19 +107,19 @@
 
 /* The label of the bolus entry button
    The notification title for a bolus failure */
-"Bolus" = "Bolus";
+"Bolus" = "Bolusa";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Bolused %1$@ of %2$@";
+"Bolused %1$@ of %2$@" = "Zbolusowano %1$@ of %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Bolusing %1$@";
+"Bolusing %1$@" = "Bolusowanie %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Anuluj";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Canceling Bolus";
+"Canceling Bolus" = "Anulowanie bolusa";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "wpływ węglowodanów";
@@ -169,13 +172,13 @@
 "Current glucose of %1$@ is below correction range." = "Poziom glukozy %1$@ jest poniżej wartości korekcji.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Custom Override";
+"Custom Override" = "Pominięcie niestandardowe";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token użytkownika";
 
 /* Button title to delete CGM */
-"Delete CGM" = "Delete CGM";
+"Delete CGM" = "Usuń CGM";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Limit podaży";
@@ -190,10 +193,10 @@
 "Enter suspend threshold" = "Wprowadź próg zawieszenia pompy";
 
 /* The alert title for an error while canceling a bolus */
-"Error Canceling Bolus" = "Error Canceling Bolus";
+"Error Canceling Bolus" = "Błąd anulowania bolusa";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Error Resuming";
+"Error Resuming" = "Błąd wznawiania";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "docelowo %@";
@@ -279,7 +282,7 @@
 "No connected devices, or failure during device connection" = "Brak podłączonych urządzeń lub awaria podczas połączenia urządzenia";
 
 /* The title text for the override presets */
-"Override Presets" = "Override Presets";
+"Override Presets" = "Wstępne ustawienia pominięcia";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Poziom przed posiłkiem";
@@ -291,7 +294,7 @@
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Przewidywany poziom cukru %1$@ jest poniżej progu zawieszenia.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Przewidywana: %1$@\Rzeczywista: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
 "Pump" = "Pompa";
@@ -363,7 +366,7 @@
 "Suspend Threshold" = "Próg zawieszenia pompy";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tap to Resume";
+"Tap to Resume" = "Dotknij, aby wznowić";
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Model umożliwiający dostosowanie czasu działania insuliny.";
@@ -375,7 +378,7 @@
 "U" = "J";
 
 /* The format for the description of a temporary override end date */
-"until %@" = "until %@";
+"until %@" = "do %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "Użyj zakresu glukozy dla wysiłku fizycznego";
