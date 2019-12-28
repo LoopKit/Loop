@@ -71,6 +71,8 @@ public struct LoopSettings: Equatable {
     public let defaultWatchCarbPickerValue = 15 // grams
 
     public let defaultWatchBolusPickerValue = 1.0 // %
+    
+    public let bolusPartialApplicationFactor = 0.4 // %
 
     // MARK - Display settings
 
