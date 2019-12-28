@@ -61,6 +61,9 @@ final class WatchDataManager: NSObject {
             getSleepStartTime(start: start) {
                 (result) in
 
+                // update when we last checked the bedtime
+                self.lastBedtimeUpdate = Date()
+                
                 switch result {
                     case .success(let bedtime):
                         self.bedtime = bedtime
@@ -69,8 +72,6 @@ final class WatchDataManager: NSObject {
                 }
             }
             
-            // update when we last checked the bedtime
-            lastBedtimeUpdate = Date()
             return
         }
     }
