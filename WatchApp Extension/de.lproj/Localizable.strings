@@ -1,36 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "Active Carbs";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Active Insulin";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus fehlgeschlagen";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The action button title to dismiss an error message */
 "Dismiss" = "Verwerfen";
-
-/* The short unit display string for grams */
-"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Stellen Sie sicher, dass Ihr iPhone in der Nähe ist, und versuchen Sie es erneut.";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Net Basal Rate";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Override";
 
 /* The label and value showing the recommended bolus */
-"Rec: %@ U" = "Empfohlen: %@ E";
+"Rec: %@ U" = "Empfohlen: %@ IE";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Reservoir Volume";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Senden fehlgeschlagen";
 
 /* The short unit display string for international units of insulin */
-"U" = "E";
+"U" = "IE";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "IE/Std.";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Training";
 

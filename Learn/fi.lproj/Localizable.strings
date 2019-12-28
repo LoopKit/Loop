@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Laskee glukoosimittausten prosenttimäärän määritellyllä alueella";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Jatka";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maksimi";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimi";
+
+/* Lesson title */
+"Modal Day" = "Tyypillinen päivä";
+
+/* Lesson result text for no data */
+"No data available" = "Tietoja ei saatavilla";
+
+/* Section title for glucose range */
+"Range" = "Alue";
+
+/* Title of config entry */
+"Start Date" = "Aloitusaika";
+
+/* Lesson title */
+"Time in Range" = "Aika tavoitealueella";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Näyttää yleisimmät glukoosiarvot vuorokaudenajan mukaan";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Viikkoa";
+
