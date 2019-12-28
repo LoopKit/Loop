@@ -999,14 +999,14 @@ extension LoopDataManager {
             let volumeRounder = { (_ units: Double) in
                 return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
             }
-
+            
             dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                 to: glucoseTargetRange,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
                 model: model,
                 basalRates: basalRates,
-                maxAutomaticBolus: settings.maximumBolus * settings.bolusPartialApplicationFactor,
+                maxAutomaticBolus: maxBolus * settings.bolusPartialApplicationFactor,
                 partialApplicationFactor: settings.bolusPartialApplicationFactor,
                 lastTempBasal: lastTempBasal,
                 volumeRounder: volumeRounder,
