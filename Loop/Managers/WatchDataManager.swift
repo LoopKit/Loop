@@ -47,7 +47,7 @@ final class WatchDataManager: NSObject {
     
     let healthStore = HKHealthStore()
     private var lastBedtimeUpdate: Date = Calendar.current.date(byAdding: .hour, value: -25, to: Date())!
-    private var bedtime: TimeInterval?
+    private var bedtime: Date?
     
     private func updateBedtime() {
         let lastUpdateInterval = Date().timeIntervalSince(lastBedtimeUpdate)
@@ -62,13 +62,14 @@ final class WatchDataManager: NSObject {
                 (result) in
 
                 switch result {
-                    case .success(let secondsToBedtime):
-                        self.bedtime = TimeInterval(secondsToBedtime)
+                    case .success(let bedtime):
+                        self.bedtime = bedtime
                     case .failure:
                         return
                 }
             }
             
+            // update when we last checked the bedtime
             lastBedtimeUpdate = Date()
             return
         }
@@ -356,7 +357,7 @@ extension WatchDataManager {
             "## WatchDataManager",
             "lastSentSettings: \(String(describing: lastSentSettings))",
             "lastComplicationContext: \(String(describing: lastComplicationContext))",
-            "bedtime: at around \(round((bedtime?.hours ?? 0) * 100) / 100) o'clock",
+            "bedtime: \(String(describing: bedtime))",
             "complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: bedtime).minutes ?? 0)) min"
         ]
 
@@ -371,13 +372,13 @@ extension WatchDataManager {
         return items.joined(separator: "\n")
     }
     
-    private func getSleepStartTime(start: Date, end: Date? = nil, sampleLimit: Int = 30, _ completion: @escaping (_ result: SleepStoreResult<Int>) -> Void) {
+    private func getSleepStartTime(start: Date, end: Date? = nil, sampleLimit: Int = 30, _ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
         
         getSleepStartTime(matching: predicate, sampleLimit: sampleLimit, completion)
     }
     
-    private func getSleepStartTime(matching predicate: NSPredicate, sampleLimit: Int, _ completion: @escaping (_ result: SleepStoreResult<Int>) -> Void) {
+    private func getSleepStartTime(matching predicate: NSPredicate, sampleLimit: Int, _ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
         let sleepType = HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
         // get more-recent values first
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
@@ -387,8 +388,18 @@ extension WatchDataManager {
             if let error = error {
                 completion(.failure(error))
             } else if let samples = samples as? [HKCategorySample] {
+                // find the average hour and minute components from the sleep start times
                 let average = samples.reduce(0, {$0 + $1.startDate.secondsFromMidnight()}) / samples.count
-                completion(.success(average))
+                let averageHour = average / 3600
+                let averageMinute = average % 3600 / 60
+                
+                // find the next time that the user will go to bed, based on the averages we've computed
+                if let time = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: averageHour, minute: averageMinute), matchingPolicy: .nextTime) {
+                    print("Bedtime:", time)
+                    completion(.success(time))
+                } else {
+                    completion(.failure(NSError()))
+                }
             } else {
                 assertionFailure("Unknown return configuration from query \(query)")
             }
@@ -427,15 +438,14 @@ extension WCSession {
         ].joined(separator: "\n")
     }
     
-    fileprivate func complicationUserInfoTransferInterval(bedtime: TimeInterval?) -> TimeInterval {
+    fileprivate func complicationUserInfoTransferInterval(bedtime: Date?) -> TimeInterval {
         let now = Date()
         let timeUntilRefresh: TimeInterval
 
         if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
             // we can have a more frequent refresh rate if we only refresh when it's likely the user is awake (based on HealthKit sleep data)
-            if let bedTime = bedtime {
-                let bedtimeToday = Calendar.current.startOfDay(for: now).addingTimeInterval(bedTime)
-                let timeUntilBedtime = bedtimeToday.timeIntervalSince(now)
+            if let nextBedtime = bedtime {
+                let timeUntilBedtime = nextBedtime.timeIntervalSince(now)
                 timeUntilRefresh = timeUntilBedtime > TimeInterval(0) ? timeUntilBedtime : midnight.timeIntervalSince(now)
             }
             // otherwise, since (in most cases) the complications allowance refreshes at midnight, base it on the time remaining until midnight
