@@ -992,12 +992,10 @@ extension LoopDataManager {
             lastTempBasal = nil
         }
         
-        let automaticBolusingEnabled = true
-        
         let dosingRecommendation: AutomaticDoseRecommendation?
         
-        if automaticBolusingEnabled {
-            
+        switch settings.dosingStrategy {
+        case .automaticBolus:
             let volumeRounder = { (_ units: Double) in
                 return self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
             }
@@ -1015,7 +1013,7 @@ extension LoopDataManager {
                 rateRounder: rateRounder,
                 isBasalRateScheduleOverrideActive: settings.scheduleOverride?.isBasalRateScheduleOverriden(at: startDate) == true
             )
-        } else {
+        case .tempBasalOnly:
             let temp = predictedGlucose.recommendedTempBasal(
                 to: glucoseTargetRange,
                 suspendThreshold: settings.suspendThreshold?.quantity,

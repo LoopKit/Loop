@@ -8,6 +8,31 @@
 import LoopKit
 import HealthKit
 
+public enum DosingStrategy: Int, CaseIterable {
+    case tempBasalOnly
+    case automaticBolus
+}
+
+public extension DosingStrategy {
+    var title: String {
+        switch self {
+        case .tempBasalOnly:
+            return NSLocalizedString("Temp Basal Only", comment: "Title string for temp basal only dosing strategy")
+        case .automaticBolus:
+            return NSLocalizedString("Automatic Bolus", comment: "Title string for automatic bolus dosing strategy")
+        }
+    }
+    
+    var subtitle: String {
+        switch self {
+        case .tempBasalOnly:
+            return NSLocalizedString("Loop will dose via temp basals, limited by your max temp basal setting.", comment: "Description string for temp basal only dosing strategy")
+        case .automaticBolus:
+            return NSLocalizedString("Loop will automatically bolus when bg is predicted to be higher than target range, and will use temp basals when bg is predicted to be lower than target range.", comment: "Description string for automatic bolus dosing strategy")
+        }
+    }
+}
+
 public struct LoopSettings: Equatable {
     public var dosingEnabled = false
 
@@ -32,6 +57,8 @@ public struct LoopSettings: Equatable {
     public var suspendThreshold: GlucoseThreshold? = nil
 
     public let retrospectiveCorrectionEnabled = true
+    
+    public var dosingStrategy: DosingStrategy = .tempBasalOnly
 
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
@@ -229,6 +256,12 @@ extension LoopSettings: RawRepresentable {
         if let rawThreshold = rawValue["minimumBGGuard"] as? GlucoseThreshold.RawValue {
             self.suspendThreshold = GlucoseThreshold(rawValue: rawThreshold)
         }
+        
+        if let rawDosingStrategy = rawValue["dosingStrategy"] as? DosingStrategy.RawValue,
+            let dosingStrategy = DosingStrategy(rawValue: rawDosingStrategy) {
+            self.dosingStrategy = dosingStrategy
+        }
+
     }
 
     public var rawValue: RawValue {
@@ -245,6 +278,7 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBasalRatePerHour"] = maximumBasalRatePerHour
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
+        raw["dosingStrategy"] = dosingStrategy.rawValue
 
         return raw
     }
