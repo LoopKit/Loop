@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină, precum și cu dispozitivele de monitorizare glicemică continuă";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth este folosit pentru a comunica cu pompa de insulină, precum și cu dispozitivele de monitorizare glicemică continuă.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID este folosit la autentificarea pentru bolus.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Informațiile despre nutriție din baza de date Sănătate sunt folosite pentru a determina efectele glucozei. Informațiile despre glucoză din baza de date Sănătate sunt folosite pentru construirea de grafice și calcule de trend/momentum.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Carbohidrații introduși în aplicație și pe ceas sunt stocați în baza de date Sănătate. Glicemiile din GCM sunt stocate în mod confidențial în HealthKit.";
+
