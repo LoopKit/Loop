@@ -479,12 +479,16 @@ extension Collection where Element: GlucoseValue {
         
         switch correction {
         case .aboveRange(min: _, correcting: _, minTarget: _, units: _):
+            var bolusAmount = correction?.asBolus(partialApplicationFactor: partialApplicationFactor, volumeRounder: volumeRounder) ?? 0
+            bolusAmount = Swift.min(maxAutomaticBolus, bolusAmount)
             var basalAdjustment: TempBasalRecommendation? = nil
             if lastTempBasal != nil {
                 basalAdjustment = .cancel
+            } else if (bolusAmount == 0) {
+                return nil
             }
-            let bolusAmount = correction?.asBolus(partialApplicationFactor: partialApplicationFactor, volumeRounder: volumeRounder) ?? 0
-            return AutomaticDoseRecommendation(basalAdjustment: basalAdjustment, bolusUnits: Swift.min(maxAutomaticBolus, bolusAmount))
+            
+            return AutomaticDoseRecommendation(basalAdjustment: basalAdjustment, bolusUnits: bolusAmount)
             
         case .entirelyBelowRange(correcting: _, minTarget: _, units: _):
             let basalAdjustment = calculateTempAdjustment()
