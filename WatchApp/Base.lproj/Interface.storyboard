@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15505" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="15702" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38"/>
     <dependencies>
         <deployment identifier="watchOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="15501"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
@@ -34,28 +34,21 @@
                                                 <group width="0.59999999999999998" alignment="center" layout="vertical" id="wUB-2J-16F">
                                                     <items>
                                                         <label alignment="center" text="--" id="CWt-7U-cnK">
-                                                            <gestureRecognizers>
-                                                                <tapGestureRecognizer id="NY9-w1-fRT">
-                                                                    <connections>
-                                                                        <action selector="setToCarbInput" destination="zh0-gB-D44" id="yLS-US-Q9w"/>
-                                                                    </connections>
-                                                                </tapGestureRecognizer>
-                                                            </gestureRecognizers>
                                                             <color key="textColor" name="carbs"/>
                                                             <fontDescription key="font" style="UICTFontTextStyleTitle1"/>
                                                         </label>
                                                         <label alignment="center" verticalAlignment="bottom" text="10:09 AM" id="Ury-of-vQg">
-                                                            <gestureRecognizers>
-                                                                <tapGestureRecognizer id="gDO-JQ-DPC">
-                                                                    <connections>
-                                                                        <action selector="setToDateInput" destination="zh0-gB-D44" id="rSI-W4-mY3"/>
-                                                                    </connections>
-                                                                </tapGestureRecognizer>
-                                                            </gestureRecognizers>
                                                             <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                                             <fontDescription key="font" type="system" pointSize="15"/>
                                                         </label>
                                                     </items>
+                                                    <gestureRecognizers>
+                                                        <tapGestureRecognizer id="gDO-JQ-DPC">
+                                                            <connections>
+                                                                <action selector="toggleInputMode" destination="zh0-gB-D44" id="oii-FS-z42"/>
+                                                            </connections>
+                                                        </tapGestureRecognizer>
+                                                    </gestureRecognizers>
                                                 </group>
                                                 <group width="0.20000000000000001" height="1" alignment="right" verticalAlignment="center" radius="11" id="6ip-X6-F2J">
                                                     <items>

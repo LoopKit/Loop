@@ -185,12 +185,8 @@ final class AddCarbsInterfaceController: WKInterfaceController, IdentifiableClas
         WKInterfaceDevice.current().play(.directionUp)
     }
 
-    @IBAction func setToCarbInput(){
-        inputMode = .value
-    }
-    
-    @IBAction func setToDateInput(){
-        inputMode = .date
+    @IBAction func toggleInputMode() {
+        inputMode = (inputMode == .value) ? .date : .value
     }
     
     @IBAction func setAbsorptionTimeFast() {
