@@ -396,7 +396,6 @@ extension WatchDataManager {
                 
                 // find the next time that the user will go to bed, based on the averages we've computed
                 if let time = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: averageHour, minute: averageMinute), matchingPolicy: .nextTime) {
-                    print("Bedtime:", time)
                     completion(.success(time))
                 } else {
                     completion(.failure(NSError()))
