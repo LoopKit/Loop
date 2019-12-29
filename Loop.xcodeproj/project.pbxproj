@@ -337,7 +337,6 @@
 		7D7076591FE06EE2004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D70765B1FE06EE2004AC8EA /* Localizable.strings */; };
 		7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076601FE06EE3004AC8EA /* Localizable.strings */; };
 		7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D7076651FE06EE4004AC8EA /* Localizable.strings */; };
-		7D9BEEE52335A6B3005DCFD6 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D9BEEE72335A6B3005DCFD6 /* Localizable.strings */; };
 		7D9BEEF32335CF8D005DCFD6 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7D9BEEF52335CF8D005DCFD6 /* Localizable.strings */; };
 		892A5D2A222EF60A008961AB /* MockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D29222EF60A008961AB /* MockKit.framework */; };
 		892A5D2C222EF60A008961AB /* MockKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D2B222EF60A008961AB /* MockKitUI.framework */; };
@@ -2337,7 +2336,6 @@
 			files = (
 				7D9BEEF32335CF8D005DCFD6 /* Localizable.strings in Resources */,
 				43D9FFAF21EA9A0F00AF44BF /* LaunchScreen.storyboard in Resources */,
-				7D9BEEE52335A6B3005DCFD6 /* Localizable.strings in Resources */,
 				43D9FFAC21EA9A0F00AF44BF /* Assets.xcassets in Resources */,
 				43D9FFAA21EA9A0C00AF44BF /* Main.storyboard in Resources */,
 			);
