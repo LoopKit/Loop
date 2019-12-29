@@ -151,18 +151,40 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     var glucoseUnit: HKUnit = .milligramsPerDeciliter
 
+    private var computedInitialBolusRecommendation = false
+
     var bolusRecommendation: BolusRecommendation? = nil {
         didSet {
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)
+
             updateNotice()
             let wasNoticeRowHidden = oldValue?.notice == nil
             let isNoticeRowHidden = bolusRecommendation?.notice == nil
             if wasNoticeRowHidden != isNoticeRowHidden {
                 tableView.reloadRows(at: [IndexPath(row: Row.notice.rawValue, section: 0)], with: .automatic)
             }
+
             if let pendingInsulin = bolusRecommendation?.pendingInsulin {
                 self.pendingInsulin = pendingInsulin
+            }
+
+            if computedInitialBolusRecommendation,
+                bolusRecommendation?.amount != oldValue?.amount,
+                bolusAmountTextField.text?.isEmpty == false
+            {
+                bolusAmountTextField.text?.removeAll()
+
+                let alert = UIAlertController(
+                    title: NSLocalizedString("Bolus Recommendation Updated", comment: "Alert title for an updated bolus recommendation"),
+                    message: NSLocalizedString("The bolus recommendation has updated. Please reconfirm the bolus amount.", comment: "Alert message for an updated bolus recommendation"),
+                    preferredStyle: .alert
+                )
+
+                let acknowledgeChange = UIAlertAction(title: NSLocalizedString("OK", comment: "Button text to acknowledge an updated bolus recommendation alert"), style: .default) { _ in }
+                alert.addAction(acknowledgeChange)
+
+                present(alert, animated: true)
             }
         }
     }
@@ -313,6 +335,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                     self.activeInsulin = activeInsulin
                     self.activeCarbohydrates = activeCarbohydrates
                     self.bolusRecommendation = bolusRecommendation
+                    self.computedInitialBolusRecommendation = true
                 }
 
                 reloadGroup.leave()
