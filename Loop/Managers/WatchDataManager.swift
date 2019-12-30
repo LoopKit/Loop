@@ -12,17 +12,16 @@ import WatchConnectivity
 import LoopKit
 import LoopCore
 
-enum SleepStoreResult<T> {
-    case success(T)
-    case failure(Error)
-}
-
 final class WatchDataManager: NSObject {
 
     unowned let deviceManager: DeviceDataManager
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
+        self.healthStore = deviceManager.loopManager.glucoseStore.healthStore
+        self.sleepStore = SleepStore (healthStore: healthStore)
+        self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
+        self.bedtime = UserDefaults.appGroup?.bedtime
         self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
 
         super.init()
@@ -45,34 +44,49 @@ final class WatchDataManager: NSObject {
 
     private var lastSentSettings: LoopSettings?
     
-    let healthStore = HKHealthStore()
-    private var lastBedtimeUpdate: Date = Calendar.current.date(byAdding: .hour, value: -25, to: Date())!
-    private var bedtime: Date?
+    let healthStore: HKHealthStore
+    let sleepStore: SleepStore
     
-    private func updateBedtime() {
-        let lastUpdateInterval = Date().timeIntervalSince(lastBedtimeUpdate)
-        guard
-            lastUpdateInterval < TimeInterval(hours: 24)
-        else {
-            // only look at samples within the past 6 months
-            let monthsToGoBack = -6
-            let start = Calendar.current.date(byAdding: .month, value: monthsToGoBack, to: Date())!
-            
-            getSleepStartTime(start: start) {
-                (result) in
-
-                // update when we last checked the bedtime
-                self.lastBedtimeUpdate = Date()
+    var lastBedtimeQuery: Date {
+        didSet {
+            UserDefaults.appGroup?.lastBedtimeQuery = lastBedtimeQuery
+        }
+    }
+    
+    var bedtime: Date? {
+        didSet {
+            UserDefaults.appGroup?.bedtime = bedtime
+        }
+    }
+    
+    private func updateBedtimeIfNeeded() {
+        let now = Date()
+        let lastUpdateInterval = now.timeIntervalSince(lastBedtimeQuery)
+        let calendar = Calendar.current
+        
+        guard lastUpdateInterval >= TimeInterval(hours: 24) else {
+            // increment the bedtime by 1 day if it's before the current time, but we don't need to make another HealthKit query yet
+            if let bedtime = bedtime, bedtime < now {
+                let hourComponent = calendar.component(.hour, from: bedtime)
+                let minuteComponent = calendar.component(.minute, from: bedtime)
                 
-                switch result {
-                    case .success(let bedtime):
-                        self.bedtime = bedtime
-                    case .failure:
-                        return
+                if let newBedtime = calendar.nextDate(after: now, matching: DateComponents(hour: hourComponent, minute: minuteComponent), matchingPolicy: .nextTime) {
+                    self.bedtime = newBedtime
                 }
             }
-            
+
             return
+        }
+
+        sleepStore.getAverageSleepStartTime() {
+            (result) in
+            self.lastBedtimeQuery = now
+            switch result {
+                case .success(let bedtime):
+                    self.bedtime = bedtime
+                case .failure:
+                    self.bedtime = nil
+            }
         }
     }
 
@@ -148,7 +162,7 @@ final class WatchDataManager: NSObject {
         }
 
         let complicationShouldUpdate: Bool
-        updateBedtime()
+        updateBedtimeIfNeeded()
 
         if let lastContext = lastComplicationContext,
             let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
@@ -358,6 +372,7 @@ extension WatchDataManager {
             "## WatchDataManager",
             "lastSentSettings: \(String(describing: lastSentSettings))",
             "lastComplicationContext: \(String(describing: lastComplicationContext))",
+            "lastBedtimeQuery: \(String(describing: lastBedtimeQuery))",
             "bedtime: \(String(describing: bedtime))",
             "complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: bedtime).minutes ?? 0)) min"
         ]
@@ -372,54 +387,8 @@ extension WatchDataManager {
 
         return items.joined(separator: "\n")
     }
-    
-    private func getSleepStartTime(start: Date, end: Date? = nil, sampleLimit: Int = 30, _ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
-        
-        getSleepStartTime(matching: predicate, sampleLimit: sampleLimit, completion)
-    }
-    
-    private func getSleepStartTime(matching predicate: NSPredicate, sampleLimit: Int, _ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
-        let sleepType = HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
-        // get more-recent values first
-        let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-        
-        let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortDescriptor]) { (query, samples, error) in
-
-            if let error = error {
-                completion(.failure(error))
-            } else if let samples = samples as? [HKCategorySample] {
-                // find the average hour and minute components from the sleep start times
-                let average = samples.reduce(0, {$0 + $1.startDate.secondsFromMidnight()}) / samples.count
-                let averageHour = average / 3600
-                let averageMinute = average % 3600 / 60
-                
-                // find the next time that the user will go to bed, based on the averages we've computed
-                if let time = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: averageHour, minute: averageMinute), matchingPolicy: .nextTime) {
-                    completion(.success(time))
-                } else {
-                    completion(.failure(NSError()))
-                }
-            } else {
-                assertionFailure("Unknown return configuration from query \(query)")
-            }
-        }
-
-        healthStore.execute(query)
-    }
 
 }
-
-extension Date {
-    fileprivate func secondsFromMidnight() -> Int {
-        let calendar = Calendar.current
-        let dateComponents = calendar.dateComponents([.hour, .minute, .second], from: self)
-        let dateSeconds = dateComponents.hour! * 3600 + dateComponents.minute! * 60 + dateComponents.second!
-
-        return dateSeconds
-    }
-}
-
 
 extension WCSession {
     open override var debugDescription: String {
