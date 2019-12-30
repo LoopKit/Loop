@@ -1,36 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "活性碳水化合物";
+
+/* HUD row title for IOB */
+"Active Insulin" = "活性胰岛素";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "添加碳水化合物";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "大剂量输注失败";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The action button title to dismiss an error message */
 "Dismiss" = "忽略";
-
-/* The short unit display string for grams */
-"g" = "克";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "请确保苹果手机接近设备并重试";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "毫克/分升";
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "净基础率";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "毫摩尔/升";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "覆盖";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "推荐: %@ 单位";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "储药器容量";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "发送失败";
 
-/* The short unit display string for international units of insulin */
-"U" = "单位";
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/小时";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "运动";
 

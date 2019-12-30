@@ -1,3 +1,0 @@
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-
