@@ -710,8 +710,9 @@ extension LoopDataManager {
                 self.notify(forChange: .tempBasal)
             },
             receiveValue: { [weak self] event in
-                guard let event = event else { return }
-                self?.lastMicrobolusEvent.send(event)
+                guard let event = event, let self = self else { return }
+                self.lastMicrobolusEvent.send(event)
+                self.logger.debug("Microbolus event. \(event.description)")
             }
         )
     }
@@ -1093,27 +1094,29 @@ extension LoopDataManager {
 
         let insulinReq = recommendedBolus.recommendation.amount
 
-        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
-            logger.debug("Bolus recommendation expired.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Bolus recommendation expired."), nil)
-            return
-        }
-
         guard insulinReq > 0 else {
             logger.debug("No microbolus needed.")
             completion(nil, nil)
             return
         }
 
-        guard let currentBasalRate = basalRateScheduleApplyingOverrideHistory?.value(at: startDate) else {
-            logger.debug("Basal rates not configured. Cancel microbolus calculation.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Basal rates not configured."), nil)
+        guard abs(recommendedBolus.date.timeIntervalSinceNow) < TimeInterval(minutes: 5) else {
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Bolus recommendation expired."), nil)
             return
         }
 
-        guard let glucose = self.glucoseStore.latestGlucose, let predictedGlucose = predictedGlucose else {
-            logger.debug("Glucose data not found.")
+        guard let glucose = self.glucoseStore.latestGlucose,
+            let predictedGlucose = predictedGlucose,
+            let unit = glucoseStore.preferredUnit,
+            let glucoseTargetRange = settings.glucoseTargetRangeScheduleApplyingOverrideIfActive else {
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Glucose data not found."), nil)
+            return
+        }
+
+        let glucoseBelowRange = predictedGlucose.first { $0.quantity.doubleValue(for: unit) < glucoseTargetRange.value(at: $0.startDate).minValue }
+
+        guard glucoseBelowRange == nil else {
+            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Glucose is below target at \(glucoseBelowRange!.startDate)"), nil)
             return
         }
 
@@ -1121,92 +1124,47 @@ extension LoopDataManager {
         let cobChek = (cob > 0 && settings.microbolusSettings.enabled) || (cob == 0 && settings.microbolusSettings.enabledWithoutCarbs)
 
         guard cobChek else {
-            logger.debug("Microboluses disabled.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Microboluses disabled. COB = \(cob)"), nil)
             return
         }
 
         if settings.microbolusSettings.disableByOverride,
-            let unit = glucoseStore.preferredUnit,
             let override = settings.scheduleOverride,
             !override.hasFinished(),
             let overrideLowerBound = override.settings.targetRange?.lowerBound,
             overrideLowerBound >= HKQuantity(unit: unit, doubleValue: settings.microbolusSettings.overrideLowerBound) {
-            logger.debug("Cancel microbolus by temporary override.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Canceled by temporary override."), nil)
             return
         }
 
         guard let bolusState = delegate?.bolusState, case .none = bolusState else {
-            logger.debug("Already bolusing. Cancel microbolus calculation.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Already bolusing."), nil)
             return
         }
 
-        let controlDate = glucose.startDate.addingTimeInterval(.minutes(15 + 1)) // extra 1 min to find
-        var controlGlucoseQuantity: HKQuantity?
-
-        for prediction in predictedGlucose {
-            if prediction.startDate <= controlDate {
-                controlGlucoseQuantity = prediction.quantity
-                continue
-            }
-            break
-        }
-
         guard let threshold = settings.suspendThreshold, glucose.quantity > threshold.quantity else {
-            logger.debug("Current glucose is below the suspend threshold.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Current glucose is below the suspend threshold."), nil)
             return
         }
 
-        let lowTrend = controlGlucoseQuantity.map { $0 < glucose.quantity } ?? true
-
-        let safetyCheck = !(lowTrend && settings.microbolusSettings.safeMode == .enabled)
-        guard safetyCheck else {
-            logger.debug("Control glucose is lower then current. Microbolus is not allowed.")
-            completion(.canceled(date: startDate, recommended: insulinReq, reason: "Control glucose is lower then current."), nil)
-            return
-        }
-
-        let minSize = 30.0
-
-        var maxBasalMinutes: Double = {
-            switch (cob > 0, lowTrend, settings.microbolusSettings.safeMode == .disabled) {
-            case (true, false, _), (true, true, true):
-                return settings.microbolusSettings.size
-            case (false, false, _), (false, true, true):
-                return settings.microbolusSettings.sizeWithoutCarbs
-            default:
-                return minSize
-            }
-        }()
-
         switch recommendedBolus.recommendation.notice {
-        case .glucoseBelowSuspendThreshold, .predictedGlucoseBelowTarget:
-            let notice = "Microbolus canceled by recommendation notice: \(recommendedBolus.recommendation.notice!)"
-            logger.debug(notice)
+        case let .some(notice):
+            let notice = "Microbolus canceled by recommendation notice: \(notice.description(using: unit))"
             completion(.canceled(date: startDate, recommended: insulinReq, reason: notice), nil)
             return
-        case .currentGlucoseBelowTarget:
-            maxBasalMinutes = minSize
         case .none: break
         }
-
-        let maxMicroBolus = currentBasalRate * maxBasalMinutes / 60
 
         let volumeRounder = { (_ units: Double) in
             self.delegate?.loopDataManager(self, roundBolusVolume: units) ?? units
         }
 
-        let microBolus = volumeRounder(min(insulinReq * settings.microbolusSettings.partialApplication, maxMicroBolus))
+        let microBolus = volumeRounder(insulinReq * settings.microbolusSettings.partialApplication)
         guard microBolus > 0 else {
-            logger.debug("Microbolus < then supported volume.")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Microbolus < then supported volume."), nil)
             return
         }
         guard microBolus >= settings.microbolusSettings.minimumBolusSize else {
-            logger.debug("Microbolus will not be enacted due to it being lower than the configured minimum bolus size. (\(String(describing: microBolus)) vs \(String(describing: settings.microbolusSettings.minimumBolusSize)))")
             completion(.canceled(date: startDate, recommended: insulinReq, reason: "Microbolus < then minimum bolus size."), nil)
             return
         }
@@ -1214,12 +1172,10 @@ extension LoopDataManager {
         let recommendation = (amount: microBolus, date: startDate)
         logger.debug("Enact microbolus: \(String(describing: microBolus))")
 
-        self.delegate?.loopDataManager(self, didRecommendMicroBolus: recommendation) { [weak self] error in
+        self.delegate?.loopDataManager(self, didRecommendMicroBolus: recommendation) { error in
             if let error = error {
-                self?.logger.debug("Microbolus failed: \(error.localizedDescription)")
                 completion(.failed(date: startDate, recommended: insulinReq, error: error), error)
             } else {
-                self?.logger.debug("Microbolus enacted")
                 completion(.succeeded(date: startDate, recommended: insulinReq, amount: microBolus), nil)
             }
         }

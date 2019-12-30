@@ -9,25 +9,12 @@
 import Foundation
 
 public enum Microbolus {
-    public enum SafeMode: Int, CaseIterable {
-        case enabled
-        case limited
-        case disabled
-
-        public static var allCases: [SafeMode] {
-            [.enabled, .limited, .disabled]
-        }
-    }
-
     public struct Settings: Equatable, RawRepresentable {
         public typealias RawValue = [String: Any]
 
         public var enabled: Bool
-        public var size: Double
         public var enabledWithoutCarbs: Bool
-        public var sizeWithoutCarbs: Double
         public var partialApplication: Double
-        public var safeMode: SafeMode
         public var minimumBolusSize: Double
         public var shouldOpenBolusScreen: Bool
         public var disableByOverride: Bool
@@ -35,22 +22,16 @@ public enum Microbolus {
 
         public init(
             enabled: Bool = false,
-            size: Double = 30,
             enabledWithoutCarbs: Bool = false,
-            sizeWithoutCarb: Double = 30,
             partialApplication: Double = 0.3,
-            safeMode: SafeMode = .enabled,
             minimumBolusSize: Double = 0,
             shouldOpenBolusScreen: Bool = false,
             disableByOverride: Bool = false,
             overrideLowerBound: Double = 0
         ) {
             self.enabled = enabled
-            self.size = size
             self.enabledWithoutCarbs = enabledWithoutCarbs
-            self.sizeWithoutCarbs = sizeWithoutCarb
             self.partialApplication = partialApplication
-            self.safeMode = safeMode
             self.minimumBolusSize = minimumBolusSize
             self.shouldOpenBolusScreen = shouldOpenBolusScreen
             self.disableByOverride = disableByOverride
@@ -64,25 +45,12 @@ public enum Microbolus {
                 self.enabled = enabled
             }
 
-            if let size = rawValue["size"] as? Double {
-                self.size = size
-            }
-
             if let enabledWithoutCarbs = rawValue["enabledWithoutCarbs"] as? Bool {
                 self.enabledWithoutCarbs = enabledWithoutCarbs
             }
 
-            if let sizeWithoutCarb = rawValue["sizeWithoutCarbs"] as? Double {
-                self.sizeWithoutCarbs = sizeWithoutCarb
-            }
-
             if let partialApplication = rawValue["partialApplication"] as? Double {
                 self.partialApplication = partialApplication
-            }
-
-            if let safeModeRaw = rawValue["safeMode"] as? Int,
-                let safeMode = Microbolus.SafeMode(rawValue: safeModeRaw) {
-                self.safeMode = safeMode
             }
 
             if let minimumBolusSize = rawValue["minimumBolusSize"] as? Double {
@@ -105,10 +73,7 @@ public enum Microbolus {
         public var rawValue: [String : Any] {
             [
                 "enabled": enabled,
-                "size": size,
                 "enabledWithoutCarbs": enabledWithoutCarbs,
-                "sizeWithoutCarbs": sizeWithoutCarbs,
-                "safeMode": safeMode.rawValue,
                 "partialApplication": partialApplication,
                 "minimumBolusSize": minimumBolusSize,
                 "shouldOpenBolusScreen": shouldOpenBolusScreen,
@@ -145,7 +110,7 @@ public extension Microbolus {
             percentFormatter.maximumFractionDigits = 2
             percentFormatter.numberStyle = .percent
             let percent = amount/recommendedAmount
-            return "At \(timeFormatter.string(from: date)): enacted \(amount) of \(recommendedAmount), \(percentFormatter.string(for: percent) ?? "0%") " 
+            return "At \(timeFormatter.string(from: date)): enacted \(amount) (\(percentFormatter.string(for: percent) ?? "0 %")) of recommended \(recommendedAmount). " 
             + (reason ?? "")
         }
 
