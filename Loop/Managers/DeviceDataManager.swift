@@ -663,6 +663,7 @@ extension DeviceDataManager: CustomDebugStringConvertible {
     var debugDescription: String {
         return [
             Bundle.main.localizedNameAndVersion,
+            "* bundleIdentifier: \(Bundle.main.bundleIdentifier ?? "N/A")",
             "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
             "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
             "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
