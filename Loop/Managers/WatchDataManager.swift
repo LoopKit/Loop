@@ -18,8 +18,7 @@ final class WatchDataManager: NSObject {
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
-        self.healthStore = deviceManager.loopManager.glucoseStore.healthStore
-        self.sleepStore = SleepStore (healthStore: healthStore)
+        self.sleepStore = SleepStore (healthStore: deviceManager.loopManager.glucoseStore.healthStore)
         self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
         self.bedtime = UserDefaults.appGroup?.bedtime
         self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
@@ -43,8 +42,7 @@ final class WatchDataManager: NSObject {
     }()
 
     private var lastSentSettings: LoopSettings?
-    
-    let healthStore: HKHealthStore
+
     let sleepStore: SleepStore
     
     var lastBedtimeQuery: Date {
@@ -70,17 +68,19 @@ final class WatchDataManager: NSObject {
                 let hourComponent = calendar.component(.hour, from: bedtime)
                 let minuteComponent = calendar.component(.minute, from: bedtime)
                 
-                if let newBedtime = calendar.nextDate(after: now, matching: DateComponents(hour: hourComponent, minute: minuteComponent), matchingPolicy: .nextTime) {
+                if let newBedtime = calendar.nextDate(after: now, matching: DateComponents(hour: hourComponent, minute: minuteComponent), matchingPolicy: .nextTime), newBedtime.timeIntervalSinceNow <= .hours(24) {
                     self.bedtime = newBedtime
                 }
             }
-
+            
             return
         }
 
         sleepStore.getAverageSleepStartTime() {
             (result) in
+
             self.lastBedtimeQuery = now
+            
             switch result {
                 case .success(let bedtime):
                     self.bedtime = bedtime
@@ -415,7 +415,8 @@ extension WCSession {
             // we can have a more frequent refresh rate if we only refresh when it's likely the user is awake (based on HealthKit sleep data)
             if let nextBedtime = bedtime {
                 let timeUntilBedtime = nextBedtime.timeIntervalSince(now)
-                timeUntilRefresh = timeUntilBedtime > TimeInterval(0) ? timeUntilBedtime : midnight.timeIntervalSince(now)
+                // if bedtime is before the current time or more than 24 hours away, use midnight instead
+                timeUntilRefresh = (0..<TimeInterval(hours: 24)).contains(timeUntilBedtime) ? timeUntilBedtime : midnight.timeIntervalSince(now)
             }
             // otherwise, since (in most cases) the complications allowance refreshes at midnight, base it on the time remaining until midnight
             else {

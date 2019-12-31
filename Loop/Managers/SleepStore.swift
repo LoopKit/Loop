@@ -11,7 +11,7 @@ import HealthKit
 
 enum SleepStoreResult<T> {
     case success(T)
-    case failure(Error)
+    case failure(SleepStoreError)
 }
 
 enum SleepStoreError: Error {
@@ -20,32 +20,16 @@ enum SleepStoreError: Error {
     case noSleepDataAvailable
 }
 
-extension SleepStoreError: LocalizedError {
-    public var localizedDescription: String {
-        switch self {
-        case .noMatchingBedtime:
-            return NSLocalizedString("Could not find a matching bedtime", comment: "")
-        case .unknownReturnConfiguration:
-            return NSLocalizedString("Unknown return configuration from query", comment: "")
-        case .noSleepDataAvailable:
-            return NSLocalizedString("No sleep data available", comment: "")
-        }
-    }
-}
-
 class SleepStore {
     var healthStore: HKHealthStore
-    var sampleLimit: Int
     
     public init(
-        healthStore: HKHealthStore,
-        sampleLimit: Int = 30
+        healthStore: HKHealthStore
     ) {
         self.healthStore = healthStore
-        self.sampleLimit = sampleLimit
     }
     
-    func getAverageSleepStartTime(_ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
+    func getAverageSleepStartTime(sampleLimit: Int = 30, _ completion: @escaping (_ result: SleepStoreResult<Date>) -> Void) {
         let inBedPredicate = HKQuery.predicateForCategorySamples(
             with: .equalTo,
             value: HKCategoryValueSleepAnalysis.inBed.rawValue
@@ -65,7 +49,7 @@ class SleepStore {
                 switch error {
                 case SleepStoreError.noSleepDataAvailable:
                     // if there were no .inBed samples, check if there are any .asleep samples that could be used to estimate bedtime
-                    self.getAverageSleepStartTime(matching: asleepPredicate, sampleLimit: self.sampleLimit, completion)
+                    self.getAverageSleepStartTime(matching: asleepPredicate, sampleLimit: sampleLimit, completion)
                 default:
                     // otherwise, call completion
                     completion(result)
@@ -84,7 +68,7 @@ class SleepStore {
         let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortByDate]) { (query, samples, error) in
 
             if let error = error {
-                completion(.failure(error))
+                completion(.failure(error as! SleepStoreError))
             } else if let samples = samples as? [HKCategorySample] {
                 guard !samples.isEmpty else {
                     completion(.failure(SleepStoreError.noSleepDataAvailable))
@@ -92,7 +76,15 @@ class SleepStore {
                 }
                 
                 // find the average hour and minute components from the sleep start times
-                let average = samples.reduce(0, {$0 + $1.startDate.timeOfDayInSeconds()}) / samples.count
+                let average = samples.reduce(0, {
+                    if let metadata = $1.metadata, let timezone = metadata[HKMetadataKeyTimeZone] {
+                        return $0 + $1.startDate.timeOfDayInSeconds(sampleTimeZone:  NSTimeZone(name: timezone as! String)! as TimeZone)
+                    } else {
+                        // default to the current timezone if the sample does not contain one in its metadata
+                        return $0 + $1.startDate.timeOfDayInSeconds(sampleTimeZone: Calendar.current.timeZone)
+                    }
+                }) / samples.count
+                
                 let averageHour = average / 3600
                 let averageMinute = average % 3600 / 60
                 
@@ -111,8 +103,10 @@ class SleepStore {
 }
 
 extension Date {
-    fileprivate func timeOfDayInSeconds() -> Int {
-        let calendar = Calendar.current
+    fileprivate func timeOfDayInSeconds(sampleTimeZone: TimeZone) -> Int {
+        var calendar = Calendar.current
+        calendar.timeZone = sampleTimeZone
+        
         let dateComponents = calendar.dateComponents([.hour, .minute, .second], from: self)
         let dateSeconds = dateComponents.hour! * 3600 + dateComponents.minute! * 60 + dateComponents.second!
 
