@@ -1,0 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "残存糖質";
+
+/* HUD row title for IOB */
+"Active Insulin" = "残存インスリン";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "カーボを追加";
+
+/* The title of the alert controller displayed after a bolus attempt fails */
+"Bolus Failed" = "ボーラス不成功";
+
+/* The action button title to dismiss an error message */
+"Dismiss" = "閉じる";
+
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
+"Make sure your iPhone is nearby and try again" = "iPhone が近くにあることを確認して、再実行してください";
+
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "正味基礎インスリン";
+
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "オーバーライド";
+
+/* The label and value showing the recommended bolus */
+"Rec: %@ U" = "推奨: %@ U";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "リザーバ残量";
+
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
+"Send Failed" = "送信に失敗";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/時";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "運動";
+

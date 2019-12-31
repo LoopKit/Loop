@@ -2,10 +2,7 @@
 "%@ ago" = "vor %@";
 
 /* The format string describing the basal rate. */
-"%@ U" = "%@ E";
-
-/* Format string for reservoir volume. (1: The localized volume) */
-"%@U" = "%@E";
+"%@ U" = "%@ IE";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%1$@ in %2$@";
@@ -13,26 +10,14 @@
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ Einheiten pro Stunde in %2$@";
 
-/* Accessibility format string for (1: localized volume)(2: time) */
-"%1$@ units remaining at %2$@" = "%1$@ verbleibende Einheiten in %2$@";
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/min";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "Geschlossener Loop";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
-/* The short unit display string for grams */
-"g" = "g";
-
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop lief seit %@";
-
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Erfordert Aufmerksamkeit";
@@ -40,11 +25,8 @@
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Offener Loop";
 
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
 /* The short unit display string for international units of insulin */
-"U" = "E";
+"U" = "IE";
 
 /* Accessibility value for an unknown value */
 "Unknown" = "Unbekannt";

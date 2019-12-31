@@ -1,6 +1,0 @@
-/* Bundle display name */
-"CFBundleDisplayName" = "LoopUI";
-
-/* Bundle name */
-"CFBundleName" = "$(PRODUCT_NAME)";
-

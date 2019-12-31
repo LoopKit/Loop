@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth được sử dụng để liên lạc với máy bơm insulin và các thiết bị theo dõi đường huyết liên tục/CGM.";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth được sử dụng để liên lạc với máy bơm insulin và các thiết bị theo dõi đường huyết liên tục/CGM.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID được sử dụng để xác thực liều insulin cho các bữa ăn.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Thông số bữa ăn từ app Health được sử dụng để xác định tác động của glucose. Thông số glucose từ app Health được sử dụng cho các tính toán vẽ đồ thị và chuyển động của đường huyết.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Dữ liệu Carbohydrate của bữa ăn được nhập trên phần mềm và trên đồng hồ thông minh sẽ được lưu trữ tại app Health. Các thông số glucose được lấy từ thiết bị theo dõi đường huyết liên tục/CGM sẽ được lưu trữ an toàn trong HealthKit.";
+
