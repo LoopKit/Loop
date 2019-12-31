@@ -806,19 +806,20 @@ final class StatusTableViewController: ChartsTableViewController {
 
                     //cell.titleLabel.text = NSLocalizedString("Recommended Dose", comment: "The title of the cell displaying a recommended dose")
                     
-                    var text: String = ""
+                    var text: String
 
-                    if dose.bolusUnits > 0, let bolusUnitsStr = quantityFormatter.string(from: HKQuantity(unit: .internationalUnit(), doubleValue: dose.bolusUnits), for: .internationalUnit()) {
-                        text += String(format: NSLocalizedString("%1$@ ", comment: "The format for recommended bolus string.  (1: localized bolus volume)" ), bolusUnitsStr)
-                    }
-
-                    if let basalAdjustment = dose.basalAdjustment {
-                        text += String(format: NSLocalizedString("%1$@ U/hour", comment: "The format for recommended temp basal rate and time. (1: localized rate number)"), NumberFormatter.localizedString(from: NSNumber(value: basalAdjustment.unitsPerHour), number: .decimal))
+                    if let basalAdjustment = dose.basalAdjustment, dose.bolusUnits == 0 {
+                        cell.titleLabel.text = NSLocalizedString("Recommended Basal", comment: "The title of the cell displaying a recommended temp basal value")
+                        text = String(format: NSLocalizedString("%1$@ U/hour", comment: "The format for recommended temp basal rate and time. (1: localized rate number)"), NumberFormatter.localizedString(from: NSNumber(value: basalAdjustment.unitsPerHour), number: .decimal))
+                    } else {
+                        let bolusUnitsStr = quantityFormatter.string(from: HKQuantity(unit: .internationalUnit(), doubleValue: dose.bolusUnits), for: .internationalUnit()) ?? ""
+                        cell.titleLabel.text = NSLocalizedString("Recommended Auto-Bolus", comment: "The title of the cell displaying a recommended automatic bolus value")
+                        text = String(format: NSLocalizedString("%1$@ ", comment: "The format for recommended bolus string.  (1: localized bolus volume)" ), bolusUnitsStr)
                     }
                     text += String(format: NSLocalizedString(" @ %1$@", comment: "The format for dose recommendation time. (1: localized time)"), timeFormatter.string(from: date))
                     
-                    cell.textLabel?.text = text
-                   
+                    cell.subtitleLabel.text = text
+
                     cell.selectionStyle = .default
 
                     if enacting {
