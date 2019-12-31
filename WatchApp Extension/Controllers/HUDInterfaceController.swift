@@ -83,13 +83,7 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     @IBAction func setBolus() {
-        var context = loopManager.activeContext?.bolusSuggestion ?? BolusSuggestionUserInfo(recommendedBolus: nil)
-
-        if context.maxBolus == nil {
-            context.maxBolus = loopManager.settings.maximumBolus
-        }
-
-        presentController(withName: BolusInterfaceController.className, context: context)
+        presentController(withName: BolusInterfaceController.className, context: loopManager.activeContext)
     }
 
 }

@@ -6,6 +6,7 @@
 //
 
 import LoopUI
+import LoopKitUI
 
 extension StateColorPalette {
     static let loopStatus = StateColorPalette(unknown: .unknownColor, normal: .freshColor, warning: .agingColor, error: .staleColor)

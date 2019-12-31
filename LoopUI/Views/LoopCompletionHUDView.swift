@@ -7,10 +7,15 @@
 //
 
 import UIKit
+import LoopKitUI
 
 public final class LoopCompletionHUDView: BaseHUDView {
 
     @IBOutlet private weak var loopStateView: LoopStateView!
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 1
+    }
 
     enum Freshness {
         case fresh
@@ -64,10 +69,9 @@ public final class LoopCompletionHUDView: BaseHUDView {
         }
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateTintColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateTintColor()
     }
 
     private func updateTintColor() {
@@ -100,7 +104,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         )
         updateTimer = timer
 
-        RunLoop.main.add(timer, forMode: .defaultRunLoopMode)
+        RunLoop.main.add(timer, forMode: .default)
     }
 
     private var updateTimer: Timer? {

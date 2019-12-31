@@ -26,13 +26,14 @@ extension PersistedPumpEvent {
             return BolusNightscoutTreatment(
                 timestamp: dose.startDate,
                 enteredBy: source,
-                bolusType: duration > 0 ? .Square : .Normal,
-                amount: dose.units,
-                programmed: dose.units,  // Persisted pump events are always completed
+                bolusType: .Normal,
+                amount: dose.deliveredUnits ?? dose.programmedUnits,
+                programmed: dose.programmedUnits,  // Persisted pump events are always completed
                 unabsorbed: 0,  // The pump's reported IOB isn't relevant, nor stored
                 duration: duration,
                 carbs: 0,
-                ratio: 0
+                ratio: 0,
+                id: dose.syncIdentifier
             )
         case .resume:
             return PumpResumeTreatment(timestamp: dose.startDate, enteredBy: source)
@@ -45,7 +46,9 @@ extension PersistedPumpEvent {
                 temp: .Absolute,  // DoseEntry only supports .absolute types
                 rate: dose.unitsPerHour,
                 absolute: dose.unitsPerHour,
-                duration: Int(dose.endDate.timeIntervalSince(dose.startDate).minutes)
+                duration: dose.endDate.timeIntervalSince(dose.startDate),
+                amount: dose.deliveredUnits,
+                id: dose.syncIdentifier
             )
         }
     }

@@ -204,6 +204,8 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
             } else {
                 return nil
             }
+        @unknown default:
+            return nil
         }
     }
 }

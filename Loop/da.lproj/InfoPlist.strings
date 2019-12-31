@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulin pumpe og din glukose monitor.";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth bliver brugt til at kommunikere med din insulin pumpe og din glukose monitor.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID bliver brugt til at godkende en insulin bolus.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Måltidsdata fra Apple Sundhed bliver brugt til at glukosens effekt på dit blodsukker. Glukose data fra Apple Sundhed bliver brugt til at danne grafer og udregninger.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Kulhydrater indtastet i appen og på uret gemmes i Apple Sundhedsdatabasen. Glukosedata hentet fra CGM gemmes sikkert i SundhedsKit.";
+

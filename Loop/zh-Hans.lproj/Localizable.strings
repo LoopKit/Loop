@@ -1,10 +1,22 @@
-/* Created with Localizable Strings Merge, the swiss-army knife for iOS and OS X localization. */
-
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
-" (pending: %@)" = "(待执行: %@)";
+" (pending: %@)" = " (待执行: %@)";
 
-/* Format string for carb ratio average. (1: value)(2: carb unit)
-   Format string for insulin sensitivity average (1: value)(2: glucose unit) */
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ 已吸收";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ 单位 总量";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/单位";
 
 /* Formats (1: carb start time) and (2: carb absorption duration) */
@@ -22,23 +34,8 @@
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
-/* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/分钟";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ 已吸收";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ 单位 总量";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15分钟葡萄糖回归系数（b1），持续30分钟衰减";
@@ -67,14 +64,19 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "活性胰岛素: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "添加碳水化合物";
+
+/* Action sheet title selecting CGM
+   Title text for button to set up a CGM */
+"Add CGM" = "添加CGM";
+
 /* The label of the carb entry button */
 "Add Meal" = "添加用餐信息";
 
-/* Title text for button to set up a new pump */
+/* Action sheet title selecting Pump
+   Title text for button to set up a new pump */
 "Add Pump" = "添加泵";
-
-/* The title of the section containing algorithm settings */
-"Algorithm Settings" = "算法设置";
 
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
@@ -87,6 +89,9 @@
 
 /* The title of the nightscout API secret credential */
 "API Secret" = "API密码";
+
+/* Confirmation message for deleting a CGM */
+"Are you sure you want to delete this CGM?" = "确定要删除该CGM数据源？";
 
 /* Format fragment for a specific time */
 "at %@" = "%@分钟内";
@@ -105,8 +110,17 @@
    The notification title for a bolus failure */
 "Bolus" = "大剂量";
 
+/* The format string for bolus progress. (1: delivered volume)(2: total volume) */
+"Bolused %1$@ of %2$@" = "大剂量已输注%1$@ of %2$@";
+
+/* The format string for bolus in progress showing total volume. (1: total volume) */
+"Bolusing %1$@" = "%1$@大剂量注射中";
+
 /* The title of the cancel action in an action sheet */
 "Cancel" = "取消";
+
+/* The title of the cell indicating a bolus is being canceled */
+"Canceling Bolus" = "取消大剂量";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "碳水效果";
@@ -139,6 +153,9 @@
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "开启闭环";
 
+/* The title of the action used to dismiss an error alert */
+"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+
 /* The title of the configuration section in settings */
 "Configuration" = "配置";
 
@@ -155,14 +172,14 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "当前葡萄糖%1$@低于修正范围";
 
+/* The title of the cell indicating a generic temporary override is enabled */
+"Custom Override" = "自定义覆盖";
+
 /* The title of the Loggly customer token credential */
 "Customer Token" = "用户Token";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
-/* The title of the button to remove the credentials for a service */
-"Delete Account" = "删除账户";
+/* Button title to delete CGM */
+"Delete CGM" = "删除CGM数据源";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "输注限制";
@@ -170,17 +187,17 @@
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "禁用";
 
-/* Title of the switch which toggles retrospective correction effects */
-"Enable Retrospective Correction" = "启用回溯修正算法";
-
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "启用";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "输入暂停阈值";
 
-/* The placeholder text instructing users how to enter a transmitter ID */
-"Enter the 6-digit transmitter ID" = "输入6位数的发射器编号";
+/* The alert title for an error while canceling a bolus */
+"Error Canceling Bolus" = "无法取消大剂量";
+
+/* The alert title for a resume error */
+"Error Resuming" = "无法恢复输注";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "最终 %@";
@@ -193,15 +210,6 @@
 
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "对于 %1$@";
-
-/* The short unit display string for grams */
-"g" = "克";
-
-/* The title text for the G4 Share Receiver switch cell */
-"G4 Share Receiver" = "带有蓝牙功能G4接收器";
-
-/* The title text for the G5/G6 Transmitter switch cell */
-"G5/G6 Transmitter" = "G5/G6发射器";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "葡萄糖";
@@ -216,7 +224,7 @@
 "Glucose Momentum" = "葡萄糖增量预测算法";
 
 /* The placeholder text for the nightscout site URL credential */
-"https://mysite.azurewebsites.net" = "https://mysite.azurewebsites.net";
+"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "永久";
@@ -262,26 +270,20 @@
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop运行异常 %@";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "毫克/分升";
-
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "数据缺失: %1$@";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "毫摩尔/升";
-
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "葡萄糖动量效应";
-
-/* Sensor state description for the non-valid state */
-"Needs Attention" = "请注意";
 
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "没有连接的设备，或设备连接期间发生故障";
+
+/* The title text for the override presets */
+"Override Presets" = "覆盖预设置";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "餐前目标";
@@ -291,6 +293,9 @@
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "预测葡萄糖%1$@低于您的暂停阈值设置";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "预测值: %1$@\n实际值: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
 "Pump" = "胰岛素泵";
@@ -309,6 +314,9 @@
 
 /* The notification title for a low pump reservoir */
 "Pump Reservoir Low" = "药量低";
+
+/* The title of the cell indicating the pump is suspended */
+"Pump Suspended" = "泵已暂停输注";
 
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "速效胰岛素 - 成人模型";
@@ -349,8 +357,8 @@
 /* The title of the nightscout site URL credential */
 "Site URL" = "网址";
 
-/* The title text for the Medtronic sensor switch cell */
-"Sof-Sensor / Enlite" = "Sof-Sensor / Enlite";
+/* The format for the description of a temporary override start date */
+"starting at %@" = "开始于 %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "开始输注大剂量";
@@ -358,20 +366,20 @@
 /* The title text in settings */
 "Suspend Threshold" = "暂停阈值";
 
+/* The subtitle of the cell displaying an action to resume insulin delivery */
+"Tap to Resume" = "点击恢复输注";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Loop使用的默认模型参数，您可以自行修改胰岛素代谢时间。";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "大剂量输注最大限制为%@单位";
 
-/* Instructions on where to find the transmitter ID */
-"The transmitter ID can be found printed on the back of the device, on the side of the box it came in, and from within the settings menus of the receiver and mobile app." = "G5发射器编号可以在发射器背部，或者发射器包盒、以及接收器找找到";
-
-/* The description of the switch which toggles retrospective correction effects */
-"This will more aggresively increase or decrease basal delivery when glucose movement doesn't match the carbohydrate and insulin-based model." = "当葡萄糖与碳水化合物和基于胰岛素的模型不匹配时，这将更积极地增加或减少基础递送。";
-
 /* The short unit display string for international units of insulin */
-"U" = "单位";
+"U" = "U";
+
+/* The format for the description of a temporary override end date */
+"until %@" = "直到 %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
 "Use Workout Glucose Targets" = "使用运动状态的血糖目标";

@@ -78,7 +78,7 @@
 "aCb-Qs-bpu.text" = "Szczegóły";
 
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
-"aiu-ZA-zVa.title" = "Bolus";
+"aiu-ZA-zVa.title" = "Bolusa";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Etykieta";
@@ -117,7 +117,7 @@
 "m9c-SQ-djE.text" = "Kliknij, aby ustawić";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Units";
+"mVz-dr-xLU.accessibilityLabel" = "Jednostki";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
 "mVz-dr-xLU.text" = "J";

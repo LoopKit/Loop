@@ -11,7 +11,7 @@ import HealthKit
 import LoopKit
 
 
-final class WatchContext: NSObject, RawRepresentable {
+final class WatchContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
     private let version = 4
@@ -32,12 +32,6 @@ final class WatchContext: NSObject, RawRepresentable {
     var lastNetTempBasalDate: Date?
     var recommendedBolusDose: Double?
 
-    var bolusSuggestion: BolusSuggestionUserInfo? {
-        guard let recommended = recommendedBolusDose else { return nil }
-
-        return BolusSuggestionUserInfo(recommendedBolus: recommended)
-    }
-
     var cob: Double?
     var iob: Double?
     var reservoir: Double?
@@ -46,13 +40,10 @@ final class WatchContext: NSObject, RawRepresentable {
 
     var cgmManagerState: CGMManager.RawStateValue?
 
-    override init() {
-        super.init()
+    init() {
     }
 
     required init?(rawValue: RawValue) {
-        super.init()
-
         guard rawValue["v"] as? Int == version else {
             return nil
         }

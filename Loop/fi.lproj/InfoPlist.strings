@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetoothin avulla kommunikoidaan insuliinipumpun ja glukoosinseurantalaitteen kanssa.";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "Bluetoothin avulla kommunikoidaan insuliinipumpun ja glukoosinseurantalaitteen kanssa.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "Face ID:tä käytetään vahvistamiseen annettaessa bolusta.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "Terveys-appin ateriatietoja käytetään glukoosivaikutusten määrittämiseen. Terveys-appin glukoositietoja käytetään graafeissa ja  laskelmissa.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "Appin ja kellon kautta tallennetut hiilihydraattitiedot tallennetaan Terveys-appiin. Glukoosiseurannan kautta saadut glukoositiedot tallennetaan turvallisesti HealthKitiin.";
+

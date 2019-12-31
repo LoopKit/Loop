@@ -1,0 +1,57 @@
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Voeg koolhydraten toe";
+
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Berekent het percentage glucosemetingen in een specifiek bereik";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Ga verder";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
+
+/* Lesson title */
+"Modal Day" = "Modale dag";
+
+/* Lesson result text for no data */
+"No data available" = "Geen data beschikbaar";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Section title for glucose range */
+"Range" = "Bereik";
+
+/* Title of config entry */
+"Start Date" = "Start datum";
+
+/* Lesson title */
+"Time in Range" = "Tijd binnen bereik";
+
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag ";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Weken";
+
