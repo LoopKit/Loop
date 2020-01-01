@@ -9,9 +9,13 @@
 import UIKit
 import HealthKit
 import LoopKit
-
+import LoopKitUI
 
 public final class GlucoseHUDView: BaseHUDView {
+    
+    override public var orderPriority: HUDViewOrderPriority {
+        return 2
+    }
 
     @IBOutlet private weak var unitLabel: UILabel! {
         didSet {
@@ -43,10 +47,9 @@ public final class GlucoseHUDView: BaseHUDView {
         glucoseLabel.textColor = tintColor
     }
 
-    public var stateColors: StateColorPalette? {
-        didSet {
-            updateColor()
-        }
+    override public func stateColorsDidUpdate() {
+        super.stateColorsDidUpdate()
+        updateColor()
     }
 
     private func updateColor() {
@@ -93,16 +96,22 @@ public final class GlucoseHUDView: BaseHUDView {
 
         let time = timeFormatter.string(from: glucoseStartDate)
         caption?.text = time
+        
+        let sensorDataCurrent = glucoseStartDate.timeIntervalSinceNow > TimeInterval(minutes: -15)
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: glucoseQuantity) {
-            glucoseLabel.text = valueString
+            if sensorDataCurrent {
+                glucoseLabel.text = valueString
+            } else {
+                glucoseLabel.text = "-"
+            }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
         var unitStrings = [unit.localizedShortUnitString]
 
-        if let trend = sensor?.trendType {
+        if let trend = sensor?.trendType, sensorDataCurrent {
             unitStrings.append(trend.symbol)
             accessibilityStrings.append(trend.localizedDescription)
         }
@@ -122,12 +131,6 @@ public final class GlucoseHUDView: BaseHUDView {
         accessibilityValue = accessibilityStrings.joined(separator: ", ")
     }
 
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-
-        return formatter
-    }()
+    private lazy var timeFormatter = DateFormatter(timeStyle: .short)
 
 }

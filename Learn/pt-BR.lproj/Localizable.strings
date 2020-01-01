@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Calcula a porcentagem de medições de glicose dentro de um intervalo especificado";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Continuar";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Máximo";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Mínimo";
+
+/* Lesson title */
+"Modal Day" = "Dia Modal";
+
+/* Lesson result text for no data */
+"No data available" = "Não há dados disponíveis";
+
+/* Section title for glucose range */
+"Range" = "Variação";
+
+/* Title of config entry */
+"Start Date" = "Data de Início";
+
+/* Lesson title */
+"Time in Range" = "Tempo na Meta";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visualiza os valores de glicose mais frequentes por hora do dia";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Semanas";
+

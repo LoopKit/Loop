@@ -7,16 +7,18 @@
 	<key>INIntentDefinitionModelVersion</key>
 	<string>1.0</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>17G65</string>
+	<string>18G87</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>10L232m</string>
+	<string>10G8</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>10.0</string>
+	<string>10.3</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
 			<key>INIntentCategory</key>
 			<string>create</string>
+			<key>INIntentDescription</key>
+			<string>Add a carb entry to Loop</string>
 			<key>INIntentDescriptionID</key>
 			<string>yc02Yq</string>
 			<key>INIntentLastParameterTag</key>

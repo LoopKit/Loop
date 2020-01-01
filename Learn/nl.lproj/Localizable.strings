@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Berekent het percentage glucosemetingen in een specifiek bereik";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Ga verder";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* Lesson title */
+"Modal Day" = "Model dag";
+
+/* Lesson result text for no data */
+"No data available" = "Geen data aanwezig";
+
+/* Section title for glucose range */
+"Range" = "Bereik";
+
+/* Title of config entry */
+"Start Date" = "Start datum";
+
+/* Lesson title */
+"Time in Range" = "Tijd in bereik";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Geeft de meest voorkomende glucose waardes weer per moment van de dag";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Weken";
+

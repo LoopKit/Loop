@@ -8,26 +8,26 @@
 import UIKit
 import HealthKit
 import Intents
-import os.log
-
+import LoopCore
 import LoopKit
 import LoopKitUI
+import LoopUI
+import os.log
 
 
 private extension RefreshContext {
-    static let all: Set<RefreshContext> = [.glucose, .carbs, .targets, .status]
+    static let all: Set<RefreshContext> = [.glucose, .carbs, .status]
 }
 
 
 final class CarbAbsorptionViewController: ChartsTableViewController, IdentifiableClass {
 
+    private let log = OSLog(category: "StatusTableViewController")
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        charts.glucoseDisplayRange = (
-            min: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100),
-            max: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
-        )
+        carbEffectChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
 
         let notificationCenter = NotificationCenter.default
 
@@ -36,8 +36,6 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
-                    case .preferences?:
-                        self?.refreshContext.update(with: .targets)
                     case .carbs?:
                         self?.refreshContext.formUnion([.carbs, .glucose])
                     case .glucose?:
@@ -58,7 +56,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         navigationItem.rightBarButtonItems?.append(editButtonItem)
 
-        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.rowHeight = UITableView.automaticDimension
 
         reloadData(animated: false)
     }
@@ -90,6 +88,12 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
     private var carbTotal: CarbValue?
 
     // MARK: - Data loading
+
+    private let carbEffectChart = CarbEffectChart()
+
+    override func createChartsManager() -> ChartsManager {
+        return ChartsManager(colors: .default, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
+    }
 
     override func glucoseUnitDidChange() {
         refreshContext = RefreshContext.all
@@ -129,22 +133,23 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         var carbStatuses: [CarbStatus<StoredCarbEntry>]?
         var carbsOnBoard: CarbValue?
         var carbTotal: CarbValue?
+        var insulinCounteractionEffects: [GlucoseEffectVelocity]?
 
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
         deviceManager.loopManager.getLoopState { (manager, state) in
             if shouldUpdateGlucose || shouldUpdateCarbs {
-                let insulinCounteractionEffects = state.insulinCounteractionEffects
-                self.charts.setInsulinCounteractionEffects(state.insulinCounteractionEffects.filterDateRange(chartStartDate, nil))
+                let allInsulinCounteractionEffects = state.insulinCounteractionEffects
+                insulinCounteractionEffects = allInsulinCounteractionEffects.filterDateRange(chartStartDate, nil)
 
                 reloadGroup.enter()
-                manager.carbStore.getCarbStatus(start: listStart, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                manager.carbStore.getCarbStatus(start: listStart, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success(let status):
                         carbStatuses = status
                         carbsOnBoard = status.getClampedCarbsOnBoard()
                     case .failure(let error):
-                        self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                        self.log.error("CarbStore failed to get carbStatus: %{public}@", String(describing: error))
                         retryContext.update(with: .carbs)
                     }
 
@@ -158,15 +163,11 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         carbEffects = effects
                     case .failure(let error):
                         carbEffects = []
-                        self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                        self.log.error("CarbStore failed to get glucoseEffects: %{public}@", String(describing: error))
                         retryContext.update(with: .carbs)
                     }
                     reloadGroup.leave()
                 }
-            }
-
-            if currentContext.contains(.targets) {
-                self.charts.targetGlucoseSchedule = manager.settings.glucoseTargetRangeSchedule
             }
 
             reloadGroup.leave()
@@ -179,7 +180,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 case .success(let total):
                     carbTotal = total
                 case .failure(let error):
-                    self.deviceManager.logger.addError(error, fromSource: "CarbStore")
+                    self.log.error("CarbStore failed to get total carbs: %{public}@", String(describing: error))
                     retryContext.update(with: .carbs)
                 }
 
@@ -189,7 +190,13 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
         reloadGroup.notify(queue: .main) {
             if let carbEffects = carbEffects {
-                self.charts.setCarbEffects(carbEffects)
+                self.carbEffectChart.setCarbEffects(carbEffects)
+                self.charts.invalidateChart(atIndex: 0)
+            }
+
+            if let insulinCounteractionEffects = insulinCounteractionEffects {
+                self.carbEffectChart.setInsulinCounteractionEffects(insulinCounteractionEffects)
+                self.charts.invalidateChart(atIndex: 0)
             }
 
             self.charts.prerender()
@@ -287,7 +294,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
             switch ChartRow(rawValue: indexPath.row)! {
             case .carbEffect:
                 cell.chartContentView.chartGenerator = { [weak self] (frame) in
-                    return self?.charts.carbEffectChartWithFrame(frame)?.view
+                    return self?.charts.chart(atIndex: 0, frame: frame)?.view
                 }
             }
 
@@ -347,7 +354,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                     if absorption.isActive {
                         cell.observedValueTextColor = UIColor.COBTintColor
                     } else if 0.9 <= observedProgress && observedProgress <= 1.1 {
-                        cell.observedValueTextColor = UIColor.HIGGrayColor()
+                        cell.observedValueTextColor = UIColor.systemGray
                     } else {
                         cell.observedValueTextColor = UIColor.agingColor
                     }
@@ -361,7 +368,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 if absorption.isActive {
                     cell.observedDateTextColor = UIColor.COBTintColor
                 } else {
-                    cell.observedDateTextColor = UIColor.HIGGrayColor()
+                    cell.observedDateTextColor = UIColor.systemGray
 
                     if let absorptionTime = status.entry.absorptionTime {
                         let durationProgress = absorption.estimatedDate.duration / absorptionTime
@@ -425,7 +432,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         }
     }
 
-    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let status = carbStatuses[indexPath.row]
             deviceManager.loopManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in
@@ -436,7 +443,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         break  // Notification will trigger update
                     case .failure(let error):
                         self.refreshContext.update(with: .carbs)
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     }
                 }
             }
@@ -491,7 +498,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         case let vc as BolusViewController:
             vc.configureWithLoopManager(self.deviceManager.loopManager,
                 recommendation: sender as? BolusRecommendation,
-                glucoseUnit: self.charts.glucoseUnit
+                glucoseUnit: self.carbEffectChart.glucoseUnit
             )
         case let vc as CarbEntryEditViewController:
             if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
@@ -535,7 +542,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 case .failure(let error):
                     // Ignore bolus wizard errors
                     if error is CarbStore.CarbStoreError {
-                        self.presentAlertController(with: error)
+                        self.present(UIAlertController(with: error), animated: true)
                     }
                 }
             }

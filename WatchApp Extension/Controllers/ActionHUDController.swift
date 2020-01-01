@@ -9,19 +9,30 @@
 import WatchKit
 import WatchConnectivity
 import LoopKit
+import LoopCore
 
 
 final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var preMealButton: WKInterfaceButton!
     @IBOutlet var preMealButtonImage: WKInterfaceImage!
     @IBOutlet var preMealButtonBackground: WKInterfaceGroup!
-    @IBOutlet var workoutButton: WKInterfaceButton!
-    @IBOutlet var workoutButtonImage: WKInterfaceImage!
-    @IBOutlet var workoutButtonBackground: WKInterfaceGroup!
+    @IBOutlet var overrideButton: WKInterfaceButton!
+    @IBOutlet var overrideButtonImage: WKInterfaceImage!
+    @IBOutlet var overrideButtonBackground: WKInterfaceGroup!
 
     private lazy var preMealButtonGroup = ButtonGroup(button: preMealButton, image: preMealButtonImage, background: preMealButtonBackground, onBackgroundColor: .carbsColor, offBackgroundColor: .darkCarbsColor)
 
-    private lazy var workoutButtonGroup = ButtonGroup(button: workoutButton, image: workoutButtonImage, background: workoutButtonBackground, onBackgroundColor: .workoutColor, offBackgroundColor: .darkWorkoutColor)
+    private lazy var overrideButtonGroup = ButtonGroup(button: overrideButton, image: overrideButtonImage, background: overrideButtonBackground, onBackgroundColor: .overrideColor, offBackgroundColor: .darkOverrideColor)
+
+    @IBOutlet var overrideButtonLabel: WKInterfaceLabel! {
+        didSet {
+            if FeatureFlags.sensitivityOverridesEnabled {
+                overrideButtonLabel.setText(NSLocalizedString("Override", comment: "The text for the Watch button for enabling a temporary override"))
+            } else {
+                overrideButtonLabel.setText(NSLocalizedString("Workout", comment: "The text for the Watch button for enabling workout mode"))
+            }
+        }
+    }
 
     override func willActivate() {
         super.willActivate()
@@ -33,105 +44,105 @@ final class ActionHUDController: HUDInterfaceController {
             updateUserActivity(userActivity.activityType, userInfo: userActivity.userInfo, webpageURL: nil)
         }
     }
+
     override func update() {
         super.update()
 
-        let schedule = loopManager.settings.glucoseTargetRangeSchedule
-        let activeOverrideContext: GlucoseRangeSchedule.Override.Context?
-        if let glucoseRangeScheduleOverride = schedule?.override, glucoseRangeScheduleOverride.isActive()
-        {
-            activeOverrideContext = glucoseRangeScheduleOverride.context
+        let activeOverrideContext: TemporaryScheduleOverride.Context?
+        if let override = loopManager.settings.scheduleOverride, override.isActive() {
+            activeOverrideContext = override.context
         } else {
             activeOverrideContext = nil
         }
+
         updateForOverrideContext(activeOverrideContext)
 
-        for overrideContext in GlucoseRangeSchedule.Override.Context.all {
-            let contextButtonGroup = buttonGroup(for: overrideContext)
-            if schedule == nil || !(schedule!.configuredOverrideContexts.contains(overrideContext)) {
-                contextButtonGroup.state = .disabled
-            } else if contextButtonGroup.state == .disabled {
-                contextButtonGroup.state = .off
-            }
+        if loopManager.settings.preMealTargetRange == nil {
+            preMealButtonGroup.state = .disabled
+        } else if preMealButtonGroup.state == .disabled {
+            preMealButtonGroup.state = .off
+        }
+
+        if !canEnableOverride {
+            overrideButtonGroup.state = .disabled
+        } else if overrideButtonGroup.state == .disabled {
+            overrideButtonGroup.state = .off
         }
     }
 
-    private func updateForOverrideContext(_ context: GlucoseRangeSchedule.Override.Context?) {
+    private var canEnableOverride: Bool {
+        if FeatureFlags.sensitivityOverridesEnabled {
+            return !loopManager.settings.overridePresets.isEmpty
+        } else {
+            return loopManager.settings.legacyWorkoutTargetRange != nil
+        }
+    }
+
+    private func updateForOverrideContext(_ context: TemporaryScheduleOverride.Context?) {
         switch context {
-        case .preMeal?:
-            preMealButtonGroup.state = .on
-            workoutButtonGroup.turnOff()
-        case .workout?:
-            preMealButtonGroup.turnOff()
-            workoutButtonGroup.state = .on
         case nil:
             preMealButtonGroup.turnOff()
-            workoutButtonGroup.turnOff()
-        }
-    }
-
-    private func buttonGroup(for overrideContext: GlucoseRangeSchedule.Override.Context) -> ButtonGroup {
-        switch overrideContext {
-        case .preMeal:
-            return preMealButtonGroup
-        case .workout:
-            return workoutButtonGroup
+            overrideButtonGroup.turnOff()
+        case .preMeal?:
+            preMealButtonGroup.state = .on
+            overrideButtonGroup.turnOff()
+        case .legacyWorkout?, .preset?, .custom?:
+            preMealButtonGroup.turnOff()
+            overrideButtonGroup.state = .on
         }
     }
 
     // MARK: - Menu Items
 
     @IBAction func togglePreMealMode() {
-        guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
-            return
-        }
+        let override: TemporaryScheduleOverride?
         if preMealButtonGroup.state == .on {
-            glucoseTargetRangeSchedule.clearOverride()
+            override = nil
         } else {
-            guard glucoseTargetRangeSchedule.setOverride(.preMeal, until: Date(timeIntervalSinceNow: .hours(1))) else {
-                return
-            }
+            override = loopManager.settings.preMealOverride(for: .hours(1))
         }
 
-        sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
+        sendOverride(override)
     }
 
-    @IBAction func toggleWorkoutMode() {
-        guard var glucoseTargetRangeSchedule = loopManager.settings.glucoseTargetRangeSchedule else {
-            return
-        }
-        if workoutButtonGroup.state == .on {
-            glucoseTargetRangeSchedule.clearOverride()
+    @IBAction func toggleOverride() {
+        if overrideButtonGroup.state == .on {
+            sendOverride(nil)
         } else {
-            guard glucoseTargetRangeSchedule.setOverride(.workout, until: .distantFuture) else {
-                return
+            if FeatureFlags.sensitivityOverridesEnabled {
+                presentController(withName: OverrideSelectionController.className, context: self as OverrideSelectionControllerDelegate)
+            } else {
+                let override = loopManager.settings.legacyWorkoutOverride(for: .infinity)
+                sendOverride(override)
             }
         }
-
-        sendGlucoseRangeSchedule(glucoseTargetRangeSchedule)
     }
 
     private var pendingMessageResponses = 0
 
-    private func sendGlucoseRangeSchedule(_ schedule: GlucoseRangeSchedule) {
-        updateForOverrideContext(schedule.override?.context)
+    private func sendOverride(_ override: TemporaryScheduleOverride?) {
+        updateForOverrideContext(override?.context)
         pendingMessageResponses += 1
-        do {
-            var settings = LoopSettings()
-            settings.glucoseTargetRangeSchedule = schedule
-            let userInfo = LoopSettingsUserInfo(settings: settings)
 
-            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (error) in
+        var settings = LoopSettings()
+        settings.scheduleOverride = override
+        let userInfo = LoopSettingsUserInfo(settings: settings)
+        do {
+            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
                 DispatchQueue.main.async {
                     self.pendingMessageResponses -= 1
-                    if let error = error {
+
+                    switch result {
+                    case .success(let context):
+                        if self.pendingMessageResponses == 0 {
+                            self.loopManager.settings.scheduleOverride = override
+                        }
+
+                        ExtensionDelegate.shared().loopManager.updateContext(context)
+                    case .failure(let error):
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
-                            self.updateForOverrideContext(self.loopManager.settings.glucoseTargetRangeSchedule?.override?.context)
-                        }
-                    } else {
-                        if self.pendingMessageResponses == 0 {
-                            self.loopManager.settings.glucoseTargetRangeSchedule = schedule
+                            self.updateForOverrideContext(self.loopManager.settings.scheduleOverride?.context)
                         }
                     }
                 }
@@ -139,19 +150,21 @@ final class ActionHUDController: HUDInterfaceController {
         } catch {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
-                updateForOverrideContext(self.loopManager.settings.glucoseTargetRangeSchedule?.override?.context)
+                updateForOverrideContext(loopManager.settings.scheduleOverride?.context)
             }
             presentAlert(
                 withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
                 message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
                 preferredStyle: .alert,
-                actions: [WKAlertAction.dismissAction()]
+                actions: [.dismissAction()]
             )
         }
     }
 }
 
-
-extension GlucoseRangeSchedule.Override.Context {
-    static let all: [GlucoseRangeSchedule.Override.Context] = [.preMeal, .workout]
+extension ActionHUDController: OverrideSelectionControllerDelegate {
+    func overrideSelectionController(_ controller: OverrideSelectionController, didSelectPreset preset: TemporaryScheduleOverridePreset) {
+        let override = preset.createOverride(enactTrigger: .local)
+        sendOverride(override)
+    }
 }

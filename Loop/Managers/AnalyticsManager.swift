@@ -9,6 +9,7 @@
 import Foundation
 import Amplitude
 import LoopKit
+import LoopCore
 
 
 final class AnalyticsManager: IdentifiableClass {
@@ -122,8 +123,8 @@ final class AnalyticsManager: IdentifiableClass {
         if newValue.glucoseTargetRangeSchedule != oldValue.glucoseTargetRangeSchedule {
             if newValue.glucoseTargetRangeSchedule?.timeZone != oldValue.glucoseTargetRangeSchedule?.timeZone {
                 self.punpTimeZoneDidChange()
-            } else if newValue.glucoseTargetRangeSchedule?.override != oldValue.glucoseTargetRangeSchedule?.override {
-                logEvent("Glucose target range override change", outOfSession: true)
+            } else if newValue.scheduleOverride != oldValue.scheduleOverride {
+                logEvent("Temporary schedule override change", outOfSession: true)
             } else {
                 logEvent("Glucose target range change")
             }
@@ -133,7 +134,7 @@ final class AnalyticsManager: IdentifiableClass {
 
     // MARK: - Loop Events
 
-    func didAddCarbsFromWatch(_ carbs: Double) {
+    func didAddCarbsFromWatch() {
         logEvent("Carb entry created", withProperties: ["source" : "Watch"], outOfSession: true)
     }
 
@@ -149,8 +150,8 @@ final class AnalyticsManager: IdentifiableClass {
         logEvent("CGM Fetch", outOfSession: true)
     }
 
-    func loopDidSucceed() {
-        logEvent("Loop success", outOfSession: true)
+    func loopDidSucceed(_ duration: TimeInterval) {
+        logEvent("Loop success", withProperties: ["duration": duration], outOfSession: true)
     }
 
     func loopDidError() {

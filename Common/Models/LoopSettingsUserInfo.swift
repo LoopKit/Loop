@@ -5,6 +5,8 @@
 //  Copyright © 2018 LoopKit Authors. All rights reserved.
 //
 
+import LoopCore
+
 
 struct LoopSettingsUserInfo {
     let settings: LoopSettings
