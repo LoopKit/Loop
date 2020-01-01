@@ -34,12 +34,13 @@ extension InsulinCorrection {
     
     fileprivate func asBolus(
         partialApplicationFactor: Double,
+        maxBolusUnits: Double,
         volumeRounder: ((Double) -> Double)?
     ) -> Double {
         
         let partialDose = units * partialApplicationFactor
         
-        return volumeRounder?(partialDose) ?? partialDose
+        return Swift.min(Swift.max(0, volumeRounder?(partialDose) ?? partialDose),maxBolusUnits)
     }
 
 
@@ -409,7 +410,7 @@ extension Collection where Element: GlucoseValue {
         )
     }
     
-    /// Recommends a dose suitable for automatic enactment. Primarily uses boluses for high corrections, and temp basals for low corrections.
+    /// Recommends a dose suitable for automatic enactment. Uses boluses for high corrections, and temp basals for low corrections.
     ///
     /// Returns nil if the normal scheduled basal, or active temporary basal, is sufficient.
     ///
@@ -443,72 +444,50 @@ extension Collection where Element: GlucoseValue {
         duration: TimeInterval = .minutes(30),
         continuationInterval: TimeInterval = .minutes(11)
     ) -> AutomaticDoseRecommendation? {
-        let correction = self.insulinCorrection(
+        guard let correction = self.insulinCorrection(
             to: correctionRange,
             at: date,
             suspendThreshold: suspendThreshold ?? correctionRange.quantityRange(at: date).lowerBound,
             sensitivity: sensitivity.quantity(at: date),
             model: model
-        )
+        ) else {
+            return nil
+        }
         
         let scheduledBasalRate = basalRates.value(at: date)
         var maxAutomaticBolus = maxAutomaticBolus
 
-        if case .aboveRange(min: let min, correcting: _, minTarget: let doseThreshold, units: _)? = correction,
+        if case .aboveRange(min: let min, correcting: _, minTarget: let doseThreshold, units: _) = correction,
             min.quantity < doseThreshold
         {
             maxAutomaticBolus = 0
         }
         
-        let calculateTempAdjustment = { () -> TempBasalRecommendation? in
-            let temp = correction?.asTempBasal(
-                scheduledBasalRate: scheduledBasalRate,
-                maxBasalRate: scheduledBasalRate,
-                duration: duration,
-                rateRounder: rateRounder
-            )
+        var temp: TempBasalRecommendation? = correction.asTempBasal(
+            scheduledBasalRate: scheduledBasalRate,
+            maxBasalRate: scheduledBasalRate,
+            duration: duration,
+            rateRounder: rateRounder
+        )
 
-            return temp?.ifNecessary(
-                at: date,
-                scheduledBasalRate: scheduledBasalRate,
-                lastTempBasal: lastTempBasal,
-                continuationInterval: continuationInterval,
-                scheduledBasalRateMatchesPump: !isBasalRateScheduleOverrideActive
-            )
+        temp = temp?.ifNecessary(
+            at: date,
+            scheduledBasalRate: scheduledBasalRate,
+            lastTempBasal: lastTempBasal,
+            continuationInterval: continuationInterval,
+            scheduledBasalRateMatchesPump: !isBasalRateScheduleOverrideActive
+        )
+        
+        let bolusUnits = correction.asBolus(
+            partialApplicationFactor: partialApplicationFactor,
+            maxBolusUnits: maxAutomaticBolus,
+            volumeRounder: volumeRounder
+        )
+
+        if temp != nil || bolusUnits > 0 {
+            return AutomaticDoseRecommendation(basalAdjustment: temp, bolusUnits: bolusUnits)
         }
         
-        switch correction {
-        case .aboveRange(min: _, correcting: _, minTarget: _, units: _):
-            var bolusAmount = correction?.asBolus(partialApplicationFactor: partialApplicationFactor, volumeRounder: volumeRounder) ?? 0
-            bolusAmount = Swift.min(maxAutomaticBolus, bolusAmount)
-            var basalAdjustment: TempBasalRecommendation? = nil
-            if lastTempBasal != nil {
-                basalAdjustment = .cancel
-            } else if (bolusAmount == 0) {
-                return nil
-            }
-            
-            return AutomaticDoseRecommendation(basalAdjustment: basalAdjustment, bolusUnits: bolusAmount)
-            
-        case .entirelyBelowRange(correcting: _, minTarget: _, units: _):
-            let basalAdjustment = calculateTempAdjustment()
-            return AutomaticDoseRecommendation(basalAdjustment: basalAdjustment, bolusUnits: 0)
-    
-        case .suspend(min: _):
-            return AutomaticDoseRecommendation(basalAdjustment: TempBasalRecommendation(unitsPerHour: 0, duration: duration), bolusUnits: 0)
-            
-        case .inRange:
-            if isBasalRateScheduleOverrideActive {
-                let basalAdjustment = calculateTempAdjustment()
-                return AutomaticDoseRecommendation(basalAdjustment: basalAdjustment, bolusUnits: 0)
-            } else if lastTempBasal != nil {
-                return AutomaticDoseRecommendation(basalAdjustment: .cancel, bolusUnits: 0)
-            }
-            
-        default:
-            break
-            
-        }
         return nil
     }
 
