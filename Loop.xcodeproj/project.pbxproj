@@ -1692,6 +1692,7 @@
 		43757D131C06F26C00910CB9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				2984BA8B23AC4BA300FE5EB6 /* Tuning.swift */,
 				43511CDD21FD80AD00566C63 /* RetrospectiveCorrection */,
 				A9FB75F0252BE320004C7D3F /* BolusDosingDecision.swift */,
 				C17824A41E1AD4D100D9D25C /* ManualBolusRecommendation.swift */,
@@ -3410,6 +3411,7 @@
 				E95D380324EADF36005E2F50 /* CarbStoreProtocol.swift in Sources */,
 				E98A55ED24EDD6380008715D /* SettingsStoreProtocol.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
+				29BA0ABD23B07A84008512B1 /* Tuner.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,
 				43776F901B8022E90074EA36 /* AppDelegate.swift in Sources */,

@@ -668,7 +668,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VQT-96-wh7" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="840" y="1168"/>
+            <point key="canvasLocation" x="324" y="1210"/>
         </scene>
         <!--Root Navigation Controller-->
         <scene sceneID="II9-on-wj3">
