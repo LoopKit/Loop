@@ -17,7 +17,7 @@
 "Closed loop" = "Loop fermée";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
-"Loop ran %@ ago" = "Loop a roulé il y a %@";
+"Loop ran %@ ago" = "Loop s'est mis à jour il y a %@";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Nécessite de l'attention";

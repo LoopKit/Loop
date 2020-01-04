@@ -5,7 +5,7 @@
 "Active Insulin" = "Insuline active";
 
 /* The title of the alert controller displayed after a bolus attempt fails */
-"Bolus Failed" = "Bolus Échoué";
+"Bolus Failed" = "Bolus échoué";
 
 /* The action button title to dismiss an error message */
 "Dismiss" = "Rejeter";
