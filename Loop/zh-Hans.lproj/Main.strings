@@ -25,9 +25,6 @@
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
 "aiu-ZA-zVa.title" = "大剂量";
 
-/* Class = "UILabel"; text = "Title"; ObjectID = "B9F-K3-7RI"; */
-"B9F-K3-7RI.text" = "标题";
-
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "标签";
 

@@ -1,36 +1,39 @@
+/* HUD row title for COB */
+"Active Carbs" = "Glucides actifs";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Insuline active";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Bolus Échoué";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The action button title to dismiss an error message */
 "Dismiss" = "Rejeter";
-
-/* The short unit display string for grams */
-"g" = "g";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Assurez-vous que votre iPhone est à proximité et réessayez";
 
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Débit de basale net";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Surcharge";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Rec: %@ U";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Volume du réservoir";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Echec de l'envoi";
 
-/* The short unit display string for international units of insulin */
-"U" = "U";
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/h";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Sport";
 
