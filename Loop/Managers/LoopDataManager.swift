@@ -673,7 +673,8 @@ extension LoopDataManager {
                     return promise(.success(()))
                 }
 
-                self.setRecommendedTempBasal { error in
+                self.setRecommendedTempBasal { [weak self] error in
+                    self?.notify(forChange: .tempBasal)
                     if let error = error {
                         promise(.failure(error))
                     }
@@ -707,7 +708,6 @@ extension LoopDataManager {
                     self.logger.error(error)
                 }
                 self.logger.default("Loop ended")
-                self.notify(forChange: .tempBasal)
             },
             receiveValue: { [weak self] event in
                 guard let event = event, let self = self else { return }
