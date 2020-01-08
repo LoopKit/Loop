@@ -125,12 +125,12 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     private var lastContentHeight: CGFloat = 0
 
     override func createChartsManager() -> ChartsManager {
-        // TODO: implement chart in this controller
+        // Consider including a chart on this screen to demonstrate how absorption time affects prediction
         ChartsManager(colors: .default, settings: .default, charts: [], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
-        // TODO: implement chart in this controller
+        // Consider including a chart on this screen to demonstrate how absorption time affects prediction
     }
 
     override func viewDidLoad() {
