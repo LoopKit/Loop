@@ -852,6 +852,7 @@ extension LoopDataManager {
         }
 
         var momentum: [GlucoseEffect] = []
+        var retrospectiveGlucoseEffect = self.retrospectiveGlucoseEffect
         var effects: [[GlucoseEffect]] = []
 
         if inputs.contains(.carbs), let carbEffect = self.carbEffect {
@@ -874,7 +875,7 @@ extension LoopDataManager {
 
                     effects.append(potentialCarbEffect)
                 } else {
-                    // If the entry is in the past or an entry is replaced, DCA effects must be recomputed
+                    // If the entry is in the past or an entry is replaced, DCA and RC effects must be recomputed
                     var entries = recentEntries.map { NewCarbEntry(quantity: $0.quantity, startDate: $0.startDate, foodType: nil, absorptionTime: $0.absorptionTime) }
                     entries.append(potentialCarbEntry)
                     entries.sort(by: { $0.startDate > $1.startDate })
@@ -886,6 +887,8 @@ extension LoopDataManager {
                     )
 
                     effects.append(potentialCarbEffect)
+
+                    retrospectiveGlucoseEffect = computeRetrospectiveGlucoseEffect(startingAt: glucose, carbEffects: potentialCarbEffect)
                 }
             } else {
                 effects.append(carbEffect)
@@ -914,7 +917,7 @@ extension LoopDataManager {
         }
 
         if inputs.contains(.retrospection) {
-            effects.append(self.retrospectiveGlucoseEffect)
+            effects.append(retrospectiveGlucoseEffect)
         }
 
         var prediction = LoopMath.predictGlucose(startingAt: glucose, momentum: momentum, effects: effects)
@@ -1036,6 +1039,20 @@ extension LoopDataManager {
 
         // Calculate retrospective correction
         retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
+            startingAt: glucose,
+            retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
+            recencyInterval: settings.recencyInterval,
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            basalRateSchedule: basalRateSchedule,
+            glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
+            retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval
+        )
+    }
+
+    private func computeRetrospectiveGlucoseEffect(startingAt glucose: GlucoseValue, carbEffects: [GlucoseEffect]) -> [GlucoseEffect] {
+        let retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * 1.01)
+        return retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
             recencyInterval: settings.recencyInterval,
