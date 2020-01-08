@@ -1002,6 +1002,7 @@ extension LoopDataManager {
             
             dosingRecommendation = predictedGlucose.recommendedAutomaticDose(
                 to: glucoseTargetRange,
+                at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
                 model: model,
@@ -1016,6 +1017,7 @@ extension LoopDataManager {
         case .tempBasalOnly:
             let temp = predictedGlucose.recommendedTempBasal(
                 to: glucoseTargetRange,
+                at: predictedGlucose[0].startDate,
                 suspendThreshold: settings.suspendThreshold?.quantity,
                 sensitivity: insulinSensitivity,
                 model: model,
@@ -1044,6 +1046,7 @@ extension LoopDataManager {
 
         let recommendation = predictedGlucose.recommendedManualBolus(
             to: glucoseTargetRange,
+            at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
