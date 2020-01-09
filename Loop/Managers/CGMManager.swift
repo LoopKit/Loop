@@ -6,26 +6,12 @@
 //
 
 import LoopKit
-import CGMBLEKit
-import G4ShareSpy
-import ShareClient
 import MockKit
 
 #if DEBUG
-let staticCGMManagers: [CGMManager.Type] = [
-    G6CGMManager.self,
-    G5CGMManager.self,
-    G4CGMManager.self,
-    ShareClientManager.self,
-    MockCGMManager.self,
-]
+let staticCGMManagers: [CGMManager.Type] = [MockCGMManager.self]
 #else
-let staticCGMManagers: [CGMManager.Type] = [
-    G6CGMManager.self,
-    G5CGMManager.self,
-    G4CGMManager.self,
-    ShareClientManager.self,
-]
+let staticCGMManagers: [CGMManager.Type] = []
 #endif
 
 let staticCGMManagersByIdentifier: [String: CGMManager.Type] = staticCGMManagers.reduce(into: [:]) { (map, Type) in
