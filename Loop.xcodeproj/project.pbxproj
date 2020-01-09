@@ -2370,7 +2370,6 @@
 				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework/SwiftCharts",
 				"$(BUILT_PRODUCTS_DIR)/Crypto.framework/Crypto",
 				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework/LoopKitUI",
-				"$(BUILT_PRODUCTS_DIR)/ShareClientUI.framework/ShareClientUI",
 				"$(BUILT_PRODUCTS_DIR)/LoopTestingKit.framework/LoopTestingKit",
 				"$(BUILT_PRODUCTS_DIR)/MockKit.framework/MockKit",
 				"$(BUILT_PRODUCTS_DIR)/MockKitUI.framework/MockKitUI",
@@ -2398,12 +2397,10 @@
 			);
 			inputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework/LoopKit",
-				"$(BUILT_PRODUCTS_DIR)/ShareClient.framework/ShareClient",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ShareClient.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
