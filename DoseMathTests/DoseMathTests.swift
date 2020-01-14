@@ -347,7 +347,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqual(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.450, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -588,7 +588,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
 
-        XCTAssertEqual(1.575, dose.amount)
+        XCTAssertEqual(1.625, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
             XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter), 60)
@@ -657,7 +657,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
         
-        XCTAssertEqual(1.4, dose.amount)
+        XCTAssertEqual(1.575, dose.amount)
         XCTAssertEqual(BolusRecommendationNotice.predictedGlucoseBelowTarget(minGlucose: glucose[1]), dose.notice!)
     }
 
@@ -676,7 +676,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
         
-        XCTAssertEqual(0.575, dose.amount)
+        XCTAssertEqual(0.625, dose.amount)
     }
 
     func testStartVeryLowEndHigh() {
@@ -708,7 +708,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.575, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.625, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndFalling() {
@@ -787,7 +787,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.25, dose.amount)
+        XCTAssertEqual(1.30, dose.amount, accuracy: 1.0 / 40.0)
 
         // Use mmol sensitivity value
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiter, dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
@@ -802,7 +802,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.25, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.30, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testRiseAfterDIA() {
