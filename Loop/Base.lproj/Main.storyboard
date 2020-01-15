@@ -752,8 +752,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="250"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Carb &amp; Bolus Forecast" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UfT-7J-tt4">
-                                                    <rect key="frame" x="16" y="11" width="163" height="18"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UfT-7J-tt4">
+                                                    <rect key="frame" x="16" y="11" width="0.0" height="0.0"/>
                                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
@@ -765,10 +765,10 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qaB-0q-V2d" customClass="ChartContainerView" customModule="LoopUI">
-                                                    <rect key="frame" x="0.0" y="29" width="375" height="182.5"/>
+                                                    <rect key="frame" x="0.0" y="11" width="375" height="231"/>
                                                 </view>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalCompressionResistancePriority="749" text="Glucose prediction reflects your carb and bolus entries. Change either input to see the prediction update." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Efb-G2-aDe">
-                                                    <rect key="frame" x="16" y="215.5" width="343" height="30.5"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalCompressionResistancePriority="749" text="" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Efb-G2-aDe">
+                                                    <rect key="frame" x="16" y="246" width="343" height="0.0"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                                     <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -818,44 +818,8 @@
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" cocoaTouchSystemColor="tableCellGroupedBackgroundColor"/>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="57" id="LZi-Cn-JOA">
-                                        <rect key="frame" x="0.0" y="357" width="375" height="57"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="LZi-Cn-JOA" id="H41-1O-Omj">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="57"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Active Insulin: 1.5U" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="viU-7a-kbI">
-                                                    <rect key="frame" x="16" y="31" width="343" height="17"/>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1" horizontalCompressionResistancePriority="1" verticalCompressionResistancePriority="751" text="Active Carbohydrates: 40g" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hHZ-uY-aKw">
-                                                    <rect key="frame" x="16" y="8" width="343" height="18"/>
-                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstAttribute="trailingMargin" secondItem="viU-7a-kbI" secondAttribute="trailing" id="3Eq-R0-wx1"/>
-                                                <constraint firstItem="hHZ-uY-aKw" firstAttribute="top" secondItem="H41-1O-Omj" secondAttribute="top" constant="8" id="AYO-zj-vrp"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="hHZ-uY-aKw" secondAttribute="trailing" id="FPb-g8-nuO"/>
-                                                <constraint firstAttribute="bottom" secondItem="viU-7a-kbI" secondAttribute="bottom" constant="9" id="LUI-En-3yl"/>
-                                                <constraint firstItem="viU-7a-kbI" firstAttribute="top" secondItem="hHZ-uY-aKw" secondAttribute="bottom" constant="5" id="Sy3-fi-d1W"/>
-                                                <constraint firstItem="viU-7a-kbI" firstAttribute="leading" secondItem="H41-1O-Omj" secondAttribute="leadingMargin" id="UIG-aL-Equ"/>
-                                                <constraint firstItem="hHZ-uY-aKw" firstAttribute="leading" secondItem="H41-1O-Omj" secondAttribute="leadingMargin" id="xhZ-kU-qcE"/>
-                                            </constraints>
-                                        </tableViewCellContentView>
-                                        <color key="backgroundColor" cocoaTouchSystemColor="tableCellGroupedBackgroundColor"/>
-                                        <accessibility key="accessibilityConfiguration">
-                                            <accessibilityTraits key="traits" none="YES"/>
-                                            <bool key="isElement" value="YES"/>
-                                        </accessibility>
-                                    </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="DoN-m5-O7j">
-                                        <rect key="frame" x="0.0" y="414" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="357" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="DoN-m5-O7j" id="3OB-7U-Jvb">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -901,7 +865,7 @@
                                         </accessibility>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="us0-UE-Wqz">
-                                        <rect key="frame" x="0.0" y="458" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="401" width="375" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="us0-UE-Wqz" id="2fI-OE-GLU">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -962,8 +926,6 @@
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
-                        <outlet property="activeCarbohydratesLabel" destination="hHZ-uY-aKw" id="J7b-nB-xF0"/>
-                        <outlet property="activeInsulinLabel" destination="viU-7a-kbI" id="Fkm-TK-rze"/>
                         <outlet property="bolusAmountTextField" destination="7LT-50-ZzK" id="qb4-wc-9ib"/>
                         <outlet property="noticeLabel" destination="k0g-P7-OVN" id="Geb-fw-665"/>
                         <outlet property="recommendedBolusAmountLabel" destination="5QS-Yf-Pua" id="0J3-We-D2X"/>

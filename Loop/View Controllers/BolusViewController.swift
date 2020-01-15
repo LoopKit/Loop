@@ -24,7 +24,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case carbEntry = 0
         case chart
         case notice
-        case active
         case recommended
         case entry
     }
@@ -97,24 +96,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         super.viewWillTransition(to: size, with: coordinator)
     }
 
-    func generateActiveInsulinDescription(activeInsulin: Double?, pendingInsulin: Double?) -> String {
-        let iobStr: String
-        if let iob = activeInsulin, let valueStr = insulinFormatter.string(from: iob)
-        {
-            iobStr = valueStr + " U"
-        } else {
-            iobStr = "-"
-        }
-
-        var rval = String(format: NSLocalizedString("Active Insulin: %@", comment: "The string format describing active insulin. (1: localized insulin value description)"), iobStr)
-
-        if let pending = pendingInsulin, pending > 0, let pendingStr = insulinFormatter.string(from: pending)
-        {
-            rval += String(format: NSLocalizedString(" (pending: %@)", comment: "The string format appended to active insulin that describes pending insulin. (1: pending insulin)"), pendingStr + " U")
-        }
-        return rval
-    }
-
     // MARK: - State
 
     enum Configuration {
@@ -123,7 +104,16 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case updatedCarbEntry(from: StoredCarbEntry, to: NewCarbEntry)
     }
 
-    var configuration: Configuration = .manualCorrection
+    var configuration: Configuration = .manualCorrection {
+        didSet {
+            switch configuration {
+            case .manualCorrection:
+                title = NSLocalizedString("Bolus", comment: "Title text for bolus screen (manual correction)")
+            case .newCarbEntry, .updatedCarbEntry:
+                title = NSLocalizedString("Meal Bolus", comment: "Title text for bolus screen following a carb entry")
+            }
+        }
+    }
 
     var originalCarbEntry: StoredCarbEntry? {
         switch configuration {
@@ -165,10 +155,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 tableView.reloadRows(at: [IndexPath(row: Row.notice.rawValue, section: 0)], with: .automatic)
             }
 
-            if let pendingInsulin = bolusRecommendation?.pendingInsulin {
-                self.pendingInsulin = pendingInsulin
-            }
-
             if computedInitialBolusRecommendation,
                 bolusRecommendation?.amount != oldValue?.amount,
                 bolusAmountTextField.text?.isEmpty == false
@@ -188,44 +174,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             }
         }
     }
-
-    var activeCarbohydratesDescription: String? = nil {
-        didSet {
-            activeCarbohydratesLabel?.text = activeCarbohydratesDescription
-        }
-    }
-
-    var activeCarbohydrates: Double? = nil {
-        didSet {
-            let cobStr: String
-            if let cob = activeCarbohydrates, let str = integerFormatter.string(from: cob) {
-                cobStr = str + " g"
-            } else {
-                cobStr = "-"
-
-            }
-            activeCarbohydratesDescription = String(format: NSLocalizedString("Active Carbohydrates: %@", comment: "The string format describing active carbohydrates. (1: localized glucose value description)"), cobStr)
-        }
-    }
-
-    var activeInsulinDescription: String? = nil {
-        didSet {
-            activeInsulinLabel?.text = activeInsulinDescription
-        }
-    }
-
-    var activeInsulin: Double? = nil {
-        didSet {
-            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
-        }
-    }
-
-    var pendingInsulin: Double? = nil {
-        didSet {
-            activeInsulinDescription = generateActiveInsulinDescription(activeInsulin: activeInsulin, pendingInsulin: pendingInsulin)
-        }
-    }
-
 
     var maxBolus: Double = 25
 
@@ -313,32 +261,15 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             }
 
             let maximumBolus = manager.settings.maximumBolus
-            let activeCarbohydrates = state.computeCarbsOnBoard(potentialCarbEntry: self.potentialCarbEntry, replacing: self.originalCarbEntry)?.quantity.doubleValue(for: .gram())
             let bolusRecommendation = try? state.recommendBolus(forPrediction: predictedGlucose)
 
-            reloadGroup.enter()
-            manager.doseStore.insulinOnBoard(at: Date()) { (result) in
-                let activeInsulin: Double?
-
-                switch result {
-                case .success(let value):
-                    activeInsulin = value.value
-                case .failure:
-                    activeInsulin = nil
+            DispatchQueue.main.async {
+                if let maxBolus = maximumBolus {
+                    self.maxBolus = maxBolus
                 }
 
-                DispatchQueue.main.async {
-                    if let maxBolus = maximumBolus {
-                        self.maxBolus = maxBolus
-                    }
-
-                    self.activeInsulin = activeInsulin
-                    self.activeCarbohydrates = activeCarbohydrates
-                    self.bolusRecommendation = bolusRecommendation
-                    self.computedInitialBolusRecommendation = true
-                }
-
-                reloadGroup.leave()
+                self.bolusRecommendation = bolusRecommendation
+                self.computedInitialBolusRecommendation = true
             }
 
             reloadGroup.leave()
@@ -417,18 +348,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     @IBOutlet weak var noticeLabel: UILabel? {
         didSet {
             updateNotice()
-        }
-    }
-
-    @IBOutlet weak var activeCarbohydratesLabel: UILabel? {
-        didSet {
-            activeCarbohydratesLabel?.text = activeCarbohydratesDescription
-        }
-    }
-
-    @IBOutlet weak var activeInsulinLabel: UILabel? {
-        didSet {
-            activeInsulinLabel?.text = activeInsulinDescription
         }
     }
 
@@ -662,26 +581,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         numberFormatter.maximumSignificantDigits = 3
         numberFormatter.minimumFractionDigits = 1
-
-        return numberFormatter
-    }()
-
-
-    private lazy var insulinFormatter: NumberFormatter = {
-        let numberFormatter = NumberFormatter()
-
-        numberFormatter.numberStyle = .decimal
-        numberFormatter.minimumFractionDigits = 2
-        numberFormatter.maximumFractionDigits = 2
-
-        return numberFormatter
-    }()
-
-    private lazy var integerFormatter: NumberFormatter = {
-        let numberFormatter = NumberFormatter()
-
-        numberFormatter.numberStyle = .none
-        numberFormatter.maximumFractionDigits = 0
 
         return numberFormatter
     }()
