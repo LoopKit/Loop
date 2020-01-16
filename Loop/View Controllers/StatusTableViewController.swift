@@ -313,7 +313,7 @@ final class StatusTableViewController: ChartsTableViewController {
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) -> Void in
-            predictedGlucoseValues = state.predictedGlucose ?? []
+            predictedGlucoseValues = state.predictedGlucoseIncludingPendingInsulin ?? []
 
             // Retry this refresh again if predicted glucose isn't available
             if state.predictedGlucose == nil {

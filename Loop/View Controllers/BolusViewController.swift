@@ -235,15 +235,26 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         _ = self.refreshContext.remove(.status)
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) in
+            let enteredBolus = DispatchQueue.main.sync { self.enteredBolus }
+
             let predictedGlucose: [PredictedGlucoseValue]
             do {
-                let enteredBolus = DispatchQueue.main.sync { self.enteredBolus }
-                predictedGlucose = try state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry)
+                predictedGlucose = try state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: false)
+
             } catch {
                 self.refreshContext.update(with: .status)
                 predictedGlucose = []
             }
-            self.glucoseChart.setPredictedGlucoseValues(predictedGlucose)
+
+            let predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]
+            do {
+                predictedGlucoseIncludingPendingInsulin = try state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: true)
+            } catch {
+                self.refreshContext.update(with: .status)
+                predictedGlucoseIncludingPendingInsulin = []
+            }
+
+            self.glucoseChart.setPredictedGlucoseValues(predictedGlucoseIncludingPendingInsulin)
 
             if let lastPoint = self.glucoseChart.predictedGlucosePoints.last?.y {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
@@ -486,7 +497,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         deviceManager.loopManager.getLoopState { [weak self] manager, state in
             guard let self = self else { return }
             let enteredBolus = DispatchQueue.main.sync { self.enteredBolus }
-            if let prediction = try? state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry) {
+            if let prediction = try? state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: true) {
                 self.glucoseChart.setPredictedGlucoseValues(prediction)
 
                 if let lastPoint = self.glucoseChart.predictedGlucosePoints.last?.y {
