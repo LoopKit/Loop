@@ -868,7 +868,11 @@ extension LoopDataManager {
         return pendingTempBasalInsulin + pendingBolusAmount
     }
 
-    /// - Throws: LoopError.missingDataError
+    /// - Throws:
+    ///     - LoopError.missingDataError
+    ///     - LoopError.configurationError
+    ///     - LoopError.glucoseTooOld
+    ///     - LoopError.pumpDataTooOld
     fileprivate func predictGlucose(
         using inputs: PredictionInputEffect,
         potentialBolus: DoseEntry? = nil,
@@ -884,6 +888,18 @@ extension LoopDataManager {
 
         guard let glucose = self.glucoseStore.latestGlucose else {
             throw LoopError.missingDataError(.glucose)
+        }
+
+        let pumpStatusDate = doseStore.lastAddedPumpData
+
+        let now = Date()
+
+        guard now.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
+            throw LoopError.glucoseTooOld(date: glucose.startDate)
+        }
+
+        guard now.timeIntervalSince(pumpStatusDate) <= settings.recencyInterval else {
+            throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
 
         var momentum: [GlucoseEffect] = []

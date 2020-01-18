@@ -425,7 +425,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 return self?.charts.chart(atIndex: 0, frame: frame)?.view
             }
 
-            cell.titleLabel?.text = NSLocalizedString("Carb & Bolus Forecast", comment: "Title text for glucose prediction chart on bolus screen")
+            cell.titleLabel?.text?.removeAll()
             cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)
             cell.selectionStyle = .none
@@ -446,7 +446,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         if let eventualGlucose = eventualGlucoseDescription {
             cell.subtitleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
         } else {
-            cell.subtitleLabel?.text = SettingsTableViewCell.NoValueString
+            cell.subtitleLabel?.text?.removeAll()
         }
     }
 
