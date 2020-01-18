@@ -592,8 +592,11 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         guard let pumpManager = pumpManager else {
             return units
         }
-
-        return pumpManager.roundToSupportedBolusVolume(units: units)
+        
+        let rounded = pumpManager.supportedBolusVolumes.enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
+        self.log.default("Rounded \(units) to \(rounded)")
+        
+        return rounded
     }
 
     func loopDataManager(

@@ -1071,6 +1071,11 @@ extension LoopDataManager {
             completion(LoopError.recommendationExpired(date: recommendedDose.date))
             return
         }
+        
+        if case .suspended = basalDeliveryState {
+            completion(LoopError.pumpSuspended)
+            return
+        }
 
         delegate?.loopDataManager(self, didRecommend: recommendedDose) { (error) in
             self.dataAccessQueue.async {
@@ -1322,7 +1327,7 @@ protocol LoopDataManagerDelegate: class {
     ///
     /// - Parameters:
     ///   - units: The recommended bolus in U
-    /// - Returns: a supported bolus volume in U. The volume returned should not be larger than the passed in rate.
+    /// - Returns: a supported bolus volume in U. The volume returned should be the nearest deliverable volume.
     func loopDataManager(_ manager: LoopDataManager, roundBolusVolume units: Double) -> Double
 }
 
