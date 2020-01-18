@@ -236,7 +236,6 @@ extension Collection where Element: GlucoseValue {
         let unit = correctionRange.unit
         let sensitivityValue = sensitivity.doubleValue(for: unit)
         let suspendThresholdValue = suspendThreshold.doubleValue(for: unit)
-        let delay = TimeInterval(minutes: 10)
 
         // For each prediction above target, determine the amount of insulin necessary to correct glucose based on the modeled effectiveness of the insulin at that time
         for prediction in self {
@@ -268,8 +267,8 @@ extension Collection where Element: GlucoseValue {
             // Compute the dose required to bring this prediction to target:
             // dose = (Glucose Δ) / (% effect × sensitivity)
 
-            // For 0 <= time <= delay, assume a small amount effected. This will result in large unit recommendation rather than no recommendation at all.
-            let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time - delay))
+            // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large unit recommendation rather than no recommendation at all.
+            let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
             let effectedSensitivity = percentEffected * sensitivityValue
             guard let correctionUnits = insulinCorrectionUnits(
                 fromValue: predictedGlucoseValue,
@@ -301,8 +300,8 @@ extension Collection where Element: GlucoseValue {
             eventual.quantity < eventualGlucoseTargets.lowerBound
         {
             let time = min.startDate.timeIntervalSince(date)
-            // For 0 <= time <= delay, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
-            let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time - delay))
+            // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
+            let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
 
             guard let units = insulinCorrectionUnits(
                 fromValue: min.quantity.doubleValue(for: unit),
