@@ -282,7 +282,8 @@ extension Collection where Element: GlucoseValue {
             // Compute the dose required to bring this prediction to target:
             // dose = (Glucose Δ) / (% effect × sensitivity)
 
-            let percentEffected = 1 - model.percentEffectRemaining(at: time)
+            // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large unit recommendation rather than no recommendation at all.
+            let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
             let effectedSensitivity = percentEffected * sensitivityValue
             guard let correctionUnits = insulinCorrectionUnits(
                 fromValue: predictedGlucoseValue,
@@ -314,7 +315,7 @@ extension Collection where Element: GlucoseValue {
             eventual.quantity < eventualGlucoseTargets.lowerBound
         {
             let time = min.startDate.timeIntervalSince(date)
-            // For time = 0, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
+            // For 0 <= time <= effectDelay, assume a small amount effected. This will result in large (negative) unit recommendation rather than no recommendation at all.
             let percentEffected = Swift.max(.ulpOfOne, 1 - model.percentEffectRemaining(at: time))
 
             guard let units = insulinCorrectionUnits(

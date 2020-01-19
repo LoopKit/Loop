@@ -406,12 +406,17 @@ final class NightscoutDataManager {
         uploader.uploadDeviceStatus(deviceStatus)
     }
 
-    func uploadGlucose(_ values: [GlucoseValue], sensorState: SensorDisplayable?) {
+    func uploadGlucose(_ values: [GlucoseValue], sensorState: SensorDisplayable?, fromDevice device: HKDevice?) {
         guard let uploader = deviceManager.remoteDataManager.nightscoutService.uploader else {
             return
         }
-
-        let device = "loop://\(UIDevice.current.name)"
+        
+        var deviceStr: String
+        if let device = device {
+            deviceStr = [device.name, device.manufacturer, device.model, device.firmwareVersion, device.softwareVersion].compactMap { $0 }.joined(separator: " ")
+        } else {
+            deviceStr = "loop://unknowndevice"
+        }
         let direction: String? = {
             switch sensorState?.trendType {
             case .up?:
@@ -434,9 +439,10 @@ final class NightscoutDataManager {
                 glucoseMGDL: Int(value.quantity.doubleValue(for: .milligramsPerDeciliter)),
                 at: value.startDate,
                 direction: direction,
-                device: device
+                device: deviceStr
             )
         }
+        uploader.flushAll();
     }
 }
 
