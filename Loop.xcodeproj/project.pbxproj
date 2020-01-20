@@ -375,6 +375,7 @@
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
+		C19E96E223D62C10003F79B0 /* ChartPointsLineLayerClipped.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96E123D62C10003F79B0 /* ChartPointsLineLayerClipped.swift */; };
 		C1A3EED2235233E1007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */; };
 		C1A3EED423523551007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED323523551007672E3 /* DerivedAssets.xcassets */; };
 		C1A3EED523535FFF007672E3 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */; };
@@ -1086,6 +1087,7 @@
 		C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-watch-assets.sh"; sourceTree = "<group>"; };
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
+		C19E96E123D62C10003F79B0 /* ChartPointsLineLayerClipped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartPointsLineLayerClipped.swift; sourceTree = "<group>"; };
 		C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		C1A3EED323523551007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
@@ -1702,6 +1704,7 @@
 				43B371851CE583890013C5A6 /* BasalStateView.swift */,
 				4313EDDF1D8A6BF90060FA79 /* ChartContainerView.swift */,
 				4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */,
+				C19E96E123D62C10003F79B0 /* ChartPointsLineLayerClipped.swift */,
 				4F08DE831E7BB70B006741EA /* ChartPointsScatterDownTrianglesLayer.swift */,
 				4F08DE841E7BB70B006741EA /* ChartPointsTouchHighlightLayerViewCache.swift */,
 				4337615E1D52F487004A3647 /* GlucoseHUDView.swift */,
@@ -2923,6 +2926,7 @@
 				4F20AE631E6B87B100D07A06 /* ChartContainerView.swift in Sources */,
 				43FCEEAB221A61B40013DD30 /* IOBChart.swift in Sources */,
 				43BFF0C61E465A4400FF19A9 /* UIColor+HIG.swift in Sources */,
+				C19E96E223D62C10003F79B0 /* ChartPointsLineLayerClipped.swift in Sources */,
 				43FCEEB7221BCD160013DD30 /* InsulinModelChart.swift in Sources */,
 				43FCEEBB22211C860013DD30 /* CarbEffectChart.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,

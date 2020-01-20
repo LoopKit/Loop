@@ -61,7 +61,7 @@ public extension DoseChart {
 
         // The dose area
         let lineModel = ChartLineModel(chartPoints: basalDosePoints, lineColor: colors.doseTint, lineWidth: 2, animDuration: 0, animDelay: 0)
-        let doseLine = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
+        let doseLine = ChartPointsLineLayerClipped(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
 
         let doseArea = ChartPointsFillsLayer(
             xAxis: xAxisLayer.axis,
