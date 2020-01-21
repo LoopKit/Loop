@@ -237,15 +237,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         self.deviceManager.loopManager.getLoopState { (manager, state) in
             let enteredBolus = DispatchQueue.main.sync { self.enteredBolus }
 
-            let predictedGlucose: [PredictedGlucoseValue]
-            do {
-                predictedGlucose = try state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: false)
-
-            } catch {
-                self.refreshContext.update(with: .status)
-                predictedGlucose = []
-            }
-
             let predictedGlucoseIncludingPendingInsulin: [PredictedGlucoseValue]
             do {
                 predictedGlucoseIncludingPendingInsulin = try state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: true)
@@ -272,7 +263,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             }
 
             let maximumBolus = manager.settings.maximumBolus
-            let bolusRecommendation = try? state.recommendBolus(forPrediction: predictedGlucose)
+            let bolusRecommendation = try? state.recommendBolus(forPrediction: predictedGlucoseIncludingPendingInsulin)
 
             DispatchQueue.main.async {
                 if let maxBolus = maximumBolus {
