@@ -70,6 +70,7 @@ final class LoopDataManager {
         carbStore = CarbStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
+            cacheLength: .hours(24),
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
@@ -1037,6 +1038,7 @@ extension LoopDataManager {
         
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
+            at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
@@ -1063,6 +1065,7 @@ extension LoopDataManager {
 
         let recommendation = predictedGlucose.recommendedBolus(
             to: glucoseTargetRange,
+            at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
