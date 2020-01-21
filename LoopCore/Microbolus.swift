@@ -19,6 +19,7 @@ public enum Microbolus {
         public var shouldOpenBolusScreen: Bool
         public var disableByOverride: Bool
         public var overrideLowerBound: Double
+        public var basalRateMultiplier: Double
 
         public init(
             enabled: Bool = false,
@@ -27,7 +28,8 @@ public enum Microbolus {
             minimumBolusSize: Double = 0,
             shouldOpenBolusScreen: Bool = false,
             disableByOverride: Bool = false,
-            overrideLowerBound: Double = 0
+            overrideLowerBound: Double = 0,
+            basalRateMultiplier: Double = 0 // 0 means MaximumBasalRatePerHour
         ) {
             self.enabled = enabled
             self.enabledWithoutCarbs = enabledWithoutCarbs
@@ -36,6 +38,7 @@ public enum Microbolus {
             self.shouldOpenBolusScreen = shouldOpenBolusScreen
             self.disableByOverride = disableByOverride
             self.overrideLowerBound = overrideLowerBound
+            self.basalRateMultiplier = basalRateMultiplier
         }
 
         public init?(rawValue: [String : Any]) {
@@ -68,6 +71,10 @@ public enum Microbolus {
             if let overrideLowerBound = rawValue["overrideLowerBound"] as? Double {
                 self.overrideLowerBound = overrideLowerBound
             }
+
+            if let basalRateMultiplier = rawValue["basalRateMultiplier"] as? Double {
+                self.basalRateMultiplier = basalRateMultiplier
+            }
         }
 
         public var rawValue: [String : Any] {
@@ -78,7 +85,8 @@ public enum Microbolus {
                 "minimumBolusSize": minimumBolusSize,
                 "shouldOpenBolusScreen": shouldOpenBolusScreen,
                 "disableByOverride": disableByOverride,
-                "overrideLowerBound": overrideLowerBound
+                "overrideLowerBound": overrideLowerBound,
+                "basalRateMultiplier": basalRateMultiplier
             ]
         }
     }

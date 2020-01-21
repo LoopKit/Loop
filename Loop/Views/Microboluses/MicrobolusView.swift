@@ -22,6 +22,7 @@ struct MicrobolusView: View {
         Form {
             switchSection
             partialApplicationSection
+            basalRateSection
             temporaryOverridesSection
             otherOptionsSection
             if viewModel.event != nil {
@@ -100,6 +101,22 @@ struct MicrobolusView: View {
 
             Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {
                 ForEach(0 ..< viewModel.minimumBolusSizeValues.count) { index in Text(String(format: "%.2f U", self.viewModel.minimumBolusSizeValues[index])).tag(index)
+                }
+            }
+        }
+    }
+
+    private var basalRateSection: some View {
+        Section(footer:
+            Text("Limits the maximum basal rate to a multiple of the scheduled basal rate in loop. The value cannot exceed your maximum basal rate setting.\nThis setting is ignored if microboluses are disabled.")
+        ) {
+            Picker(selection: $viewModel.basalRateMultiplierIndex, label: Text("Basal Rate Multiplier")) {
+                ForEach(0 ..< viewModel.basalRateMultiplierValues.count) { index in
+                    if self.viewModel.basalRateMultiplierValues[index] > 0 {
+                        Text(String(format: "x%.1f", self.viewModel.basalRateMultiplierValues[index])).tag(index)
+                    } else {
+                        Text("Max").tag(index)
+                    }
                 }
             }
         }

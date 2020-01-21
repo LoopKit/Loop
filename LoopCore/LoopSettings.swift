@@ -178,6 +178,15 @@ extension LoopSettings {
             scheduleOverride = nil
         }
     }
+
+    public func currentMaximumBasalRatePerHour(date: Date, basalRates: BasalRateSchedule?) -> Double? {
+        guard let maximumBasalRatePerHour = maximumBasalRatePerHour else { return nil }
+        guard dosingEnabled, microbolusSettings.basalRateMultiplier > 0,
+            let currentBasalRate = basalRates?.value(at: date)
+        else { return maximumBasalRatePerHour }
+
+        return min(maximumBasalRatePerHour, currentBasalRate * microbolusSettings.basalRateMultiplier)
+    }
 }
 
 extension LoopSettings: RawRepresentable {
