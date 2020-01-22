@@ -750,7 +750,7 @@ extension LoopDataManager {
                 case .failure(let error):
                     self.logger.error(error)
                     self.carbEffect = nil
-                case .success(let effects):
+                case .success(let (_, effects)):
                     self.carbEffect = effects
                 }
 
