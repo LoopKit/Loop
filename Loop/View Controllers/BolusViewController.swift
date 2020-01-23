@@ -35,10 +35,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
 
-        let notificationCenter = NotificationCenter.default
-
         notificationObservers += [
-            notificationCenter.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [weak self] note in
+            NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [weak self] note in
                 let context = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as! LoopDataManager.LoopUpdateContext.RawValue
                 DispatchQueue.main.async {
                     switch LoopDataManager.LoopUpdateContext(rawValue: context) {
@@ -231,7 +229,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             }
         }
 
-        // For now, do this every time
         _ = self.refreshContext.remove(.status)
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) in

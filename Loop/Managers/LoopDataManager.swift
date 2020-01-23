@@ -196,9 +196,12 @@ final class LoopDataManager {
         }
     }
 
+    /// When combining retrospective glucose discrepancies, extend the window slightly as a buffer.
+    private let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
+
     private var retrospectiveGlucoseDiscrepancies: [GlucoseEffect]? {
         didSet {
-            retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies?.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * 1.01)
+            retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies?.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
         }
     }
 
@@ -891,10 +894,10 @@ extension LoopDataManager {
         }
 
         let pumpStatusDate = doseStore.lastAddedPumpData
-
+        let lastGlucoseDate = glucose.startDate
         let now = Date()
 
-        guard now.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
+        guard now.timeIntervalSince(lastGlucoseDate) <= settings.recencyInterval else {
             throw LoopError.glucoseTooOld(date: glucose.startDate)
         }
 
@@ -912,7 +915,6 @@ extension LoopDataManager {
                     recentEntries.remove(at: index)
                 }
 
-                let lastGlucoseDate = glucose.startDate
                 let retrospectiveStart = lastGlucoseDate.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
 
                 if potentialCarbEntry.startDate > lastGlucoseDate, replacedCarbEntry == nil {
@@ -990,14 +992,14 @@ extension LoopDataManager {
         }
 
         let pumpStatusDate = doseStore.lastAddedPumpData
+        let lastGlucoseDate = glucose.startDate
+        let now = Date()
 
-        let startDate = Date()
-
-        guard startDate.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
+        guard now.timeIntervalSince(lastGlucoseDate) <= settings.recencyInterval else {
             throw LoopError.glucoseTooOld(date: glucose.startDate)
         }
 
-        guard startDate.timeIntervalSince(pumpStatusDate) <= settings.recencyInterval else {
+        guard now.timeIntervalSince(pumpStatusDate) <= settings.recencyInterval else {
             throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
 
@@ -1100,7 +1102,7 @@ extension LoopDataManager {
 
     private func computeRetrospectiveGlucoseEffect(startingAt glucose: GlucoseValue, carbEffects: [GlucoseEffect]) -> [GlucoseEffect] {
         let retrospectiveGlucoseDiscrepancies = insulinCounteractionEffects.subtracting(carbEffects, withUniformInterval: carbStore.delta)
-        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * 1.01)
+        let retrospectiveGlucoseDiscrepanciesSummed = retrospectiveGlucoseDiscrepancies.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
         return retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,

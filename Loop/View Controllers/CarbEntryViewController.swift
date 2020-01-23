@@ -118,7 +118,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     private(set) lazy var footerView: SetupTableFooterView = {
         let footerView = SetupTableFooterView(frame: .zero)
         footerView.primaryButton.addTarget(self, action: #selector(continueButtonPressed), for: .touchUpInside)
-        footerView.primaryButton.isEnabled = quantity != nil && quantity!.doubleValue(for: .gram()) > 0
+        footerView.primaryButton.isEnabled = quantity != nil && quantity!.doubleValue(for: preferredUnit) > 0
         return footerView
     }()
 
@@ -352,7 +352,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             return false
         }
 
-        guard let quantity = quantity, quantity.doubleValue(for: HKUnit.gram()) > 0 else { return false }
+        guard let quantity = quantity, quantity.doubleValue(for: preferredUnit) > 0 else { return false }
         guard quantity.compare(maxQuantity) != .orderedDescending else {
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxQuantity.doubleValue(for: .gram()))
             return false
@@ -362,7 +362,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     }
 
     private func updateContinueButtonEnabled() {
-        let hasValidQuantity = quantity != nil && quantity!.doubleValue(for: .gram()) > 0
+        let hasValidQuantity = quantity != nil && quantity!.doubleValue(for: preferredUnit) > 0
         let haveChangesBeenMade = updatedCarbEntry != nil
         footerView.primaryButton.isEnabled = hasValidQuantity && haveChangesBeenMade
     }

@@ -159,7 +159,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 reloadGroup.enter()
                 manager.carbStore.getGlucoseEffects(start: chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
-                    case .success(let (_, effects)):
+                    case .success((_, let effects)):
                         carbEffects = effects
                     case .failure(let error):
                         carbEffects = []
