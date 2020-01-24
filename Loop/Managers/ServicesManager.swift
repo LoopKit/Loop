@@ -28,7 +28,8 @@ class ServicesManager {
 
         self.analyticsServicesManager = AnalyticsServicesManager()
         self.loggingServicesManager = LoggingServicesManager()
-        self.remoteDataServicesManager = RemoteDataServicesManager(deviceDataManager: deviceDataManager)
+        self.remoteDataServicesManager = RemoteDataServicesManager()
+        self.remoteDataServicesManager.delegate = deviceDataManager
 
         restoreState()
     }
@@ -51,8 +52,9 @@ class ServicesManager {
 
     private func serviceFromRawValue(_ rawValue: Service.RawStateValue) -> Service? {
         guard let serviceType = serviceTypeFromRawValue(rawValue),
-            let rawState = rawValue["state"] as? Service.RawStateValue else {
-            return nil
+            let rawState = rawValue["state"] as? Service.RawStateValue
+            else {
+                return nil
         }
 
         return serviceType.init(rawState: rawState)
@@ -65,6 +67,7 @@ class ServicesManager {
     public func addActiveService(_ service: Service) {
         servicesLock.withLock {
             service.serviceDelegate = self
+
             services.append(service)
 
             if let analyticsService = service as? AnalyticsService {
@@ -94,6 +97,7 @@ class ServicesManager {
             }
 
             services.removeAll { $0.serviceIdentifier == service.serviceIdentifier }
+
             service.serviceDelegate = nil
 
             saveState()
@@ -105,11 +109,23 @@ class ServicesManager {
     }
 
     private func restoreState() {
-        services = UserDefaults.appGroup?.servicesState.compactMap { rawValue in
-            let service = serviceFromRawValue(rawValue)
-            service?.serviceDelegate = self
-            return service
-        } ?? []
+        UserDefaults.appGroup?.servicesState.forEach { rawValue in
+            if let service = serviceFromRawValue(rawValue) {
+                service.serviceDelegate = self
+
+                services.append(service)
+
+                if let analyticsService = service as? AnalyticsService {
+                    analyticsServicesManager.restoreService(analyticsService)
+                }
+                if let loggingService = service as? LoggingService {
+                    loggingServicesManager.restoreService(loggingService)
+                }
+                if let remoteDataService = service as? RemoteDataService {
+                    remoteDataServicesManager.restoreService(remoteDataService)
+                }
+            }
+        }
     }
 
 }

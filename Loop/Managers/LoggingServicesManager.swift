@@ -19,6 +19,10 @@ final class LoggingServicesManager: Logging {
         loggingServices.append(loggingService)
     }
 
+    func restoreService(_ loggingService: LoggingService) {
+        loggingServices.append(loggingService)
+    }
+
     func removeService(_ loggingService: LoggingService) {
         loggingServices.removeAll { $0.serviceIdentifier == loggingService.serviceIdentifier }
     }

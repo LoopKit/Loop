@@ -22,6 +22,10 @@ final class AnalyticsServicesManager {
         analyticsServices.append(analyticsService)
     }
 
+    func restoreService(_ analyticsService: AnalyticsService) {
+        analyticsServices.append(analyticsService)
+    }
+
     func removeService(_ analyticsService: AnalyticsService) {
         analyticsServices.removeAll { $0.serviceIdentifier == analyticsService.serviceIdentifier }
     }
