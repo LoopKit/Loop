@@ -420,8 +420,18 @@ extension LoopDataManager {
         }
     }
 
-    /// All the HealthKit types to be read and shared by stores
-    private var sampleTypes: Set<HKSampleType> {
+    /// All the HealthKit types to be read by stores
+    private var readTypes: Set<HKSampleType> {
+        return Set([
+            glucoseStore.sampleType,
+            carbStore.sampleType,
+            doseStore.sampleType,
+            HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!
+        ].compactMap { $0 })
+    }
+    
+    /// All the HealthKit types to be shared by stores
+    private var shareTypes: Set<HKSampleType> {
         return Set([
             glucoseStore.sampleType,
             carbStore.sampleType,
@@ -445,7 +455,7 @@ extension LoopDataManager {
 
     func authorize(_ completion: @escaping () -> Void) {
         // Authorize all types at once for simplicity
-        carbStore.healthStore.requestAuthorization(toShare: sampleTypes, read: sampleTypes) { (success, error) in
+        carbStore.healthStore.requestAuthorization(toShare: shareTypes, read: readTypes) { (success, error) in
             if success {
                 // Call the individual authorization methods to trigger query creation
                 self.carbStore.authorize({ _ in })
