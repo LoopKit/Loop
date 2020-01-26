@@ -750,7 +750,7 @@ extension LoopDataManager {
             doseStore.getGlucoseEffects(start: nextEffectDate, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.error("%{public}@", String(describing: error))
+                    self.logger.error("Could not fetch insulin effects: \(error)")
                     self.insulinEffectIncludingPendingInsulin = nil
                 case .success(let effects):
                     self.insulinEffectIncludingPendingInsulin = effects
