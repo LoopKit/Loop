@@ -18,6 +18,7 @@ enum SleepStoreError: Error {
     case noMatchingBedtime
     case unknownReturnConfiguration
     case noSleepDataAvailable
+    case queryError(String) // String is description of error
 }
 
 class SleepStore {
@@ -68,7 +69,7 @@ class SleepStore {
         let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortByDate]) { (query, samples, error) in
 
             if let error = error {
-                completion(.failure(error as! SleepStoreError))
+                completion(.failure(SleepStoreError.queryError(error.localizedDescription)))
             } else if let samples = samples as? [HKCategorySample] {
                 guard !samples.isEmpty else {
                     completion(.failure(SleepStoreError.noSleepDataAvailable))
