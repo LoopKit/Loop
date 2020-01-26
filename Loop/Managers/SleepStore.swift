@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import os.log
 
 enum SleepStoreResult<T> {
     case success(T)
@@ -23,6 +24,8 @@ enum SleepStoreError: Error {
 
 class SleepStore {
     var healthStore: HKHealthStore
+    
+    private let log = OSLog(category: "SleepStore")
     
     public init(
         healthStore: HKHealthStore
@@ -69,6 +72,7 @@ class SleepStore {
         let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: sampleLimit, sortDescriptors: [sortByDate]) { (query, samples, error) in
 
             if let error = error {
+                self.log.error("Error fetching sleep data: %{public}@", String(describing: error))
                 completion(.failure(SleepStoreError.queryError(error.localizedDescription)))
             } else if let samples = samples as? [HKCategorySample] {
                 guard !samples.isEmpty else {
