@@ -110,7 +110,9 @@ def make_glucose_values():
 
 def make_basal_doses():
     return [
-        BasalDose(1.0, hours(-0.5), hours(0.5)),
+        BasalDose(1.2, hours(-1.5), hours(0.5)),
+        BasalDose(0.9, hours(-1.0), hours(0.5)),
+        BasalDose(0.8, hours(-0.5), hours(0.5))
     ]
 
 
