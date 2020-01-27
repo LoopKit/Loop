@@ -750,7 +750,7 @@ extension LoopDataManager {
         // Fetch glucose effects as far back as we want to make retroactive analysis
         var latestGlucoseDate: Date?
         updateGroup.enter()
-        glucoseStore.getCachedGlucoseSamples(start: Date(timeIntervalSinceNow: -settings.recencyInterval)) { (values) in
+        glucoseStore.getCachedGlucoseSamples(start: Date(timeIntervalSinceNow: -settings.inputDataRecencyInterval)) { (values) in
             latestGlucoseDate = values.last?.startDate
             updateGroup.leave()
         }
@@ -971,7 +971,7 @@ extension LoopDataManager {
         retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
             startingAt: glucose,
             retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed,
-            recencyInterval: settings.recencyInterval,
+            recencyInterval: settings.inputDataRecencyInterval,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             basalRateSchedule: basalRateSchedule,
             glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
@@ -1000,12 +1000,12 @@ extension LoopDataManager {
 
         let startDate = Date()
 
-        guard startDate.timeIntervalSince(glucose.startDate) <= settings.recencyInterval else {
+        guard startDate.timeIntervalSince(glucose.startDate) <= settings.inputDataRecencyInterval else {
             self.predictedGlucose = nil
             throw LoopError.glucoseTooOld(date: glucose.startDate)
         }
 
-        guard startDate.timeIntervalSince(pumpStatusDate) <= settings.recencyInterval else {
+        guard startDate.timeIntervalSince(pumpStatusDate) <= settings.inputDataRecencyInterval else {
             self.predictedGlucose = nil
             throw LoopError.pumpDataTooOld(date: pumpStatusDate)
         }
