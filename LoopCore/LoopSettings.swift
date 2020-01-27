@@ -36,8 +36,13 @@ public struct LoopSettings: Equatable {
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 
-    /// The amount of time since a given date that data should be considered valid
-    public let recencyInterval = TimeInterval(minutes: 15)
+    /// The amount of time since a given date that input data should be considered valid
+    public let inputDataRecencyInterval = TimeInterval(minutes: 15)
+    
+    /// Loop completion aging category limits
+    public let completionFreshLimit = TimeInterval(minutes: 6)
+    public let completionAgingLimit = TimeInterval(minutes: 16)
+    public let completionStaleLimit = TimeInterval(hours: 12)
 
     public let batteryReplacementDetectionThreshold = 0.5
 
@@ -97,18 +102,6 @@ public struct LoopSettings: Equatable {
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
     }
-}
-
-extension LoopSettings: Settings {
-
-    public var insulinModel: InsulinModel? { return UserDefaults.appGroup?.insulinModelSettings?.model }
-
-    public var basalRateSchedule: BasalRateSchedule? { return UserDefaults.appGroup?.basalRateSchedule }
-
-    public var insulinSensitivitySchedule: InsulinSensitivitySchedule? { return UserDefaults.appGroup?.insulinSensitivitySchedule }
-
-    public var carbRatioSchedule: CarbRatioSchedule? { return UserDefaults.appGroup?.carbRatioSchedule }
-
 }
 
 extension LoopSettings {

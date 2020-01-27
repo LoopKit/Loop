@@ -124,8 +124,12 @@ final class DeviceDataManager {
         }
 
         loopManager.delegate = self
-        loopManager.carbStore.syncDelegate = remoteDataServicesManager
+
+        loopManager.carbStore.delegate = self
         loopManager.doseStore.delegate = self
+        loopManager.dosingDecisionStore.delegate = self
+        loopManager.glucoseStore.delegate = self
+        loopManager.settingsStore.delegate = self
 
         setupPump()
         setupCGM()
@@ -171,15 +175,6 @@ final class DeviceDataManager {
             log.default("CGMManager:%{public}@ did update with %d values", String(describing: type(of: manager)), values.count)
 
             loopManager.addGlucose(values) { result in
-                if manager.shouldSyncToRemoteService {
-                    switch result {
-                    case .success(let values):
-                        self.remoteDataServicesManager.upload(glucoseValues: values, sensorState: manager.sensorState)
-                    case .failure:
-                        break
-                    }
-                }
-
                 self.log.default("Asserting current pump data")
                 self.pumpManager?.assertCurrentPumpData()
             }
@@ -529,7 +524,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         log.error("PumpManager:%{public}@ did error: %{public}@", String(describing: type(of: pumpManager)), String(describing: error))
 
         setLastError(error: error)
-        remoteDataServicesManager.uploadLoopStatus(loopError: error)
+        loopManager.storeDosingDecision(withError: error)
     }
 
     func pumpManager(_ pumpManager: PumpManager, hasNewPumpEvents events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: Error?) -> Void) {
@@ -599,22 +594,80 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 }
 
+// MARK: - CarbStoreDelegate
+extension DeviceDataManager: CarbStoreDelegate {
+    
+    func carbStoreHasUpdatedCarbData(_ carbStore: CarbStore) {
+        remoteDataServicesManager.carbStoreHasUpdatedCarbData(carbStore)
+    }
+    
+    func carbStore(_ carbStore: CarbStore, didError error: CarbStore.CarbStoreError) {}
+    
+}
+
 // MARK: - DoseStoreDelegate
 extension DeviceDataManager: DoseStoreDelegate {
-    func doseStore(_ doseStore: DoseStore,
-        hasEventsNeedingUpload pumpEvents: [PersistedPumpEvent],
-        completion completionHandler: @escaping (_ uploadedObjectIDURLs: [URL]) -> Void
-    ) {
-        remoteDataServicesManager.upload(pumpEvents: pumpEvents, fromSource: "loop://\(UIDevice.current.name)") { (result) in
-            switch result {
-            case .success(let objects):
-                completionHandler(objects)
-            case .failure(let error):
-                self.log.error("%{public}@", String(describing: error))
-                completionHandler([])
-            }
-        }
+    
+    func doseStoreHasUpdatedDoseData(_ doseStore: DoseStore) {
+        remoteDataServicesManager.doseStoreHasUpdatedDoseData(doseStore)
     }
+    
+    func doseStoreHasUpdatedPumpEventData(_ doseStore: DoseStore) {
+        remoteDataServicesManager.doseStoreHasUpdatedPumpEventData(doseStore)
+    }
+    
+}
+
+// MARK: - DosingDecisionStoreDelegate
+extension DeviceDataManager: DosingDecisionStoreDelegate {
+
+    func dosingDecisionStoreHasUpdatedDosingDecisionData(_ dosingDecisionStore: DosingDecisionStore) {
+        remoteDataServicesManager.dosingDecisionStoreHasUpdatedDosingDecisionData(dosingDecisionStore)
+    }
+
+}
+
+// MARK: - GlucoseStoreDelegate
+extension DeviceDataManager: GlucoseStoreDelegate {
+    
+    func glucoseStoreHasUpdatedGlucoseData(_ glucoseStore: GlucoseStore) {
+        remoteDataServicesManager.glucoseStoreHasUpdatedGlucoseData(glucoseStore)
+    }
+    
+}
+
+// MARK: - SettingsStoreDelegate
+extension DeviceDataManager: SettingsStoreDelegate {
+    
+    func settingsStoreHasUpdatedSettingsData(_ settingsStore: SettingsStore) {
+        remoteDataServicesManager.settingsStoreHasUpdatedSettingsData(settingsStore)
+    }
+    
+}
+
+// MARK: - RemoteDataServicesManagerDelegate
+extension DeviceDataManager: RemoteDataServicesManagerDelegate {
+    
+    var carbStore: CarbStore? {
+        return loopManager.carbStore
+    }
+    
+    var doseStore: DoseStore? {
+        return loopManager.doseStore
+    }
+
+    var dosingDecisionStore: DosingDecisionStore? {
+        return loopManager.dosingDecisionStore
+    }
+
+    var glucoseStore: GlucoseStore? {
+        return loopManager.glucoseStore
+    }
+    
+    var settingsStore: SettingsStore? {
+        return loopManager.settingsStore
+    }
+
 }
 
 // MARK: - TestingPumpManager

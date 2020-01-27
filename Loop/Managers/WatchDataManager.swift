@@ -160,6 +160,18 @@ final class WatchDataManager: NSObject {
             if let trend = self.deviceManager.cgmManager?.sensorState?.trendType {
                 context.glucoseTrendRawValue = trend.rawValue
             }
+            
+            if let glucose = glucose {
+                updateGroup.enter()
+                manager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate) { (samples) in
+                    if let sample = samples.last {
+                        context.glucose = sample.quantity
+                        context.glucoseDate = sample.startDate
+                        context.glucoseSyncIdentifier = sample.syncIdentifier
+                    }
+                    updateGroup.leave()
+                }
+            }
 
             updateGroup.enter()
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
