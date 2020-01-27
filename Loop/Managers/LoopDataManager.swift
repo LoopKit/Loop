@@ -439,18 +439,28 @@ extension LoopDataManager {
         ].compactMap { $0 })
     }
 
+    var sleepDataAuthorizationRequired: Bool {
+        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .notDetermined
+    }
+    
+    var sleepDataSharingDenied: Bool {
+        return carbStore.healthStore.authorizationStatus(for: HKObjectType.categoryType(forIdentifier: HKCategoryTypeIdentifier.sleepAnalysis)!) == .sharingDenied
+    }
+
     /// True if any stores require HealthKit authorization
     var authorizationRequired: Bool {
         return glucoseStore.authorizationRequired ||
                carbStore.authorizationRequired ||
-               doseStore.authorizationRequired
+               doseStore.authorizationRequired ||
+               sleepDataAuthorizationRequired
     }
 
     /// True if the user has explicitly denied access to any stores' HealthKit types
     private var sharingDenied: Bool {
         return glucoseStore.sharingDenied ||
                carbStore.sharingDenied ||
-               doseStore.sharingDenied
+               doseStore.sharingDenied ||
+               sleepDataSharingDenied
     }
 
     func authorize(_ completion: @escaping () -> Void) {
