@@ -104,7 +104,7 @@ extension StatusChartsManager {
 
 extension StatusChartsManager {
     func setDoseEntries(_ doseEntries: [DoseEntry]) {
-        dose.setDoseEntries(doseEntries)
+        dose.doseEntries = doseEntries
         invalidateChart(atIndex: ChartIndex.dose.rawValue)
     }
 
