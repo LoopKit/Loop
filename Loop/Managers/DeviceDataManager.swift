@@ -228,7 +228,7 @@ final class DeviceDataManager {
                 case .failure(let error):
                     deviceLogReport = "Error fetching entries: \(error)"
                 case .success(let entries):
-                    deviceLogReport = entries.map { "* \($0.timestamp) \($0.deviceManager) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
+                    deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
                 }
                 
                 let report = [
