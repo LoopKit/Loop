@@ -149,7 +149,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             title = NSLocalizedString("carb-entry-title-add", value: "Add Carb Entry", comment: "The title of the view controller to create a new carb entry")
         }
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(continueButtonPressed))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: footerView.primaryButton.titleLabel?.text, style: .plain, target: self, action: #selector(continueButtonPressed))
         navigationItem.rightBarButtonItem?.isEnabled = false
     }
 
