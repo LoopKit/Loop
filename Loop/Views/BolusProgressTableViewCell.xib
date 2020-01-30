@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14854.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="dark"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14806.4"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="54" id="SGJ-NB-QMk" customClass="BolusProgressTableViewCell" customModule="Loop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" tableViewCell="SGJ-NB-QMk" id="jGE-di-Djd">
+                <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fv9-ct-CxM" userLabel="Background View">
+                        <rect key="frame" x="0.0" y="0.0" width="416" height="54"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    </view>
+                    <view contentMode="scaleToFill" horizontalHuggingPriority="251" placeholderIntrinsicWidth="332" placeholderIntrinsicHeight="32" translatesAutoresizingMaskIntoConstraints="NO" id="UrG-Ab-ud4" customClass="MKRingProgressView">
+                        <rect key="frame" x="369" y="11" width="32" height="32"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ACq-Bw-sij" userLabel="Square">
+                                <rect key="frame" x="11" y="11" width="10" height="10"/>
+                                <color key="backgroundColor" name="insulin"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="ACq-Bw-sij" secondAttribute="height" multiplier="1:1" id="KcF-0P-bM6"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="width" secondItem="UrG-Ab-ud4" secondAttribute="height" id="IbX-Nz-jyz"/>
+                            <constraint firstItem="ACq-Bw-sij" firstAttribute="centerY" secondItem="UrG-Ab-ud4" secondAttribute="centerY" id="JJe-bL-WIh"/>
+                            <constraint firstItem="ACq-Bw-sij" firstAttribute="width" secondItem="UrG-Ab-ud4" secondAttribute="width" multiplier="0.3" id="Tsx-mp-RDs"/>
+                            <constraint firstItem="ACq-Bw-sij" firstAttribute="centerX" secondItem="UrG-Ab-ud4" secondAttribute="centerX" id="rO0-0q-4oX"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="ringWidth">
+                                <real key="value" value="4"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="progress">
+                                <real key="value" value="17"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="startColor">
+                                <color key="value" name="insulin"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="endColor">
+                                <color key="value" name="insulin"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="shadowOpacity">
+                                <real key="value" value="0.0"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Bolusing" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xSg-dV-gfs">
+                        <rect key="frame" x="15" y="16" width="354" height="22"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="topMargin" id="8Fx-39-mMv"/>
+                    <constraint firstItem="xSg-dV-gfs" firstAttribute="centerY" secondItem="jGE-di-Djd" secondAttribute="centerY" id="8oR-Su-nsR"/>
+                    <constraint firstItem="xSg-dV-gfs" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="topMargin" constant="5" id="Dw0-cA-nUf"/>
+                    <constraint firstAttribute="trailing" secondItem="Fv9-ct-CxM" secondAttribute="trailing" id="FPD-cj-gFp"/>
+                    <constraint firstItem="xSg-dV-gfs" firstAttribute="leading" secondItem="jGE-di-Djd" secondAttribute="leadingMargin" id="G4l-xP-Te2"/>
+                    <constraint firstItem="UrG-Ab-ud4" firstAttribute="leading" secondItem="xSg-dV-gfs" secondAttribute="trailing" id="JjW-g8-NcF"/>
+                    <constraint firstItem="Fv9-ct-CxM" firstAttribute="leading" secondItem="jGE-di-Djd" secondAttribute="leading" id="MTG-YW-gBY"/>
+                    <constraint firstItem="Fv9-ct-CxM" firstAttribute="top" secondItem="jGE-di-Djd" secondAttribute="top" id="NRs-Uv-MTO"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="UrG-Ab-ud4" secondAttribute="trailing" id="b8e-f9-gMs"/>
+                    <constraint firstAttribute="bottomMargin" secondItem="UrG-Ab-ud4" secondAttribute="bottom" id="exw-VR-6Z2"/>
+                    <constraint firstAttribute="bottom" secondItem="Fv9-ct-CxM" secondAttribute="bottom" id="m8V-Ta-F4r"/>
+                </constraints>
+                <edgeInsets key="layoutMargins" top="8" left="15" bottom="8" right="8"/>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="backgroundView" destination="Fv9-ct-CxM" id="fit-vt-tfZ"/>
+                <outlet property="progressIndicator" destination="UrG-Ab-ud4" id="fUa-KI-CzA"/>
+                <outlet property="progressLabel" destination="xSg-dV-gfs" id="48G-HJ-93p"/>
+                <outlet property="stopSquare" destination="ACq-Bw-sij" id="y4h-8I-Pre"/>
+            </connections>
+            <point key="canvasLocation" x="-113.59999999999999" y="58.47076461769116"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <namedColor name="insulin">
+            <color red="1" green="0.58399999141693115" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

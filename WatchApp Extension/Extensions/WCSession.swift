@@ -6,6 +6,7 @@
 //  Copyright © 2016 Nathan Racklyeft. All rights reserved.
 //
 
+import LoopCore
 import WatchConnectivity
 import os.log
 
@@ -25,7 +26,7 @@ enum WCSessionMessageResult<T> {
 private let log = OSLog(category: "WCSession Extension")
 
 extension WCSession {
-    func sendCarbEntryMessage(_ carbEntry: CarbEntryUserInfo, replyHandler: @escaping (BolusSuggestionUserInfo) -> Void, errorHandler: @escaping (Error) -> Void) throws {
+    func sendCarbEntryMessage(_ carbEntry: CarbEntryUserInfo, replyHandler: @escaping (WatchContext) -> Void, errorHandler: @escaping (Error) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }
@@ -38,14 +39,18 @@ extension WCSession {
 
         sendMessage(carbEntry.rawValue,
             replyHandler: { reply in
-                guard let suggestion = BolusSuggestionUserInfo(rawValue: reply as BolusSuggestionUserInfo.RawValue) else {
+                guard let context = WatchContext(rawValue: reply as WatchContext.RawValue) else {
+                    log.error("sendCarbEntryMessage: could not decode reply: %{public}@", reply)
                     errorHandler(MessageError.decoding)
                     return
                 }
 
-                replyHandler(suggestion)
+                replyHandler(context)
             },
-            errorHandler: errorHandler
+            errorHandler: { error in
+                log.error("sendCarbEntryMessage: message send failed with error: %{public}@", String(describing: error))
+                errorHandler(error)
+            }
         )
     }
 
@@ -68,7 +73,7 @@ extension WCSession {
         )
     }
 
-    func sendSettingsUpdateMessage(_ userInfo: LoopSettingsUserInfo, completionHandler: @escaping (Error?) -> Void) throws {
+    func sendSettingsUpdateMessage(_ userInfo: LoopSettingsUserInfo, completionHandler: @escaping (Result<WatchContext>) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }
@@ -78,9 +83,13 @@ extension WCSession {
         }
 
         sendMessage(userInfo.rawValue, replyHandler: { (reply) in
-            completionHandler(nil)
+            if let context = WatchContext(rawValue: reply) {
+                completionHandler(.success(context))
+            } else {
+                completionHandler(.failure(MessageError.decoding))
+            }
         }, errorHandler: { (error) in
-            completionHandler(error)
+            completionHandler(.failure(error))
         })
     }
 

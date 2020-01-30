@@ -1,51 +1,6 @@
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
-
-/* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "基于公布的Fiasp胰岛素吸收的模型";
-
-/* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "基于已公布的Humalog，Novolog和Apidra胰岛素在成人中吸收的模型。";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "在成人胰岛素模型基础上专为儿童修改的胰岛素代谢模型";
-
-/* The short unit display string for decibles */
-"dB" = "dB";
-
-/* The subtitle format describing eventual glucose.  (1: localized glucose value description) (2: localized glucose units description) */
-"Eventually %1$@ %2$@" = "最终 %1$@ %2$@";
-
-/* Title of insulin model preset */
-"Fiasp" = "Fiasp";
-
-/* The short unit display string for grams */
-"g" = "克";
+/* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
+"Eventually %1$@" = "最终 %1$@";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ 单位";
-
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "毫克/分升";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "毫摩尔/升";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "速效胰岛素 - 成人模型";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Children" = "速效胰岛素 - 儿童模型";
-
-/* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Loop使用的默认模型参数，您可以自行修改胰岛素代谢时间。";
-
-/* The short unit display string for international units of insulin */
-"U" = "单位";
-
-/* Title of insulin model setting */
-"Walsh" = "Walsh";
 

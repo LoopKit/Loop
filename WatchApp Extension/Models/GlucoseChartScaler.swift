@@ -59,16 +59,9 @@ struct GlucoseChartScaler {
         minHeight: CGFloat = 2,
         alignedToScreenScale screenScale: CGFloat = WKInterfaceDevice.current().screenScale
     ) -> CGRect {
-        let minY: Double
-        let maxY: Double
 
-        if unit != .milligramsPerDeciliter {
-            minY = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: range.min).doubleValue(for: unit)
-            maxY = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: range.max).doubleValue(for: unit)
-        } else {
-            minY = range.min
-            maxY = range.max
-        }
+        let minY = range.min.doubleValue(for: unit)
+        let maxY = range.max.doubleValue(for: unit)
 
         switch coordinateSystem {
         case .standard:
@@ -86,7 +79,7 @@ struct GlucoseChartScaler {
 }
 
 extension GlucoseChartScaler {
-    init(size: CGSize, dateInterval: DateInterval, glucoseRange: Range<HKQuantity>, unit: HKUnit, coordinateSystem: CoordinateSystem = .standard) {
+    init(size: CGSize, dateInterval: DateInterval, glucoseRange: ClosedRange<HKQuantity>, unit: HKUnit, coordinateSystem: CoordinateSystem = .standard) {
         self.dates = dateInterval
         self.glucoseMin = glucoseRange.lowerBound.doubleValue(for: unit)
         self.glucoseMax = glucoseRange.upperBound.doubleValue(for: unit)
@@ -96,7 +89,7 @@ extension GlucoseChartScaler {
     }
 }
 
-extension Range where Bound == HKQuantity {
+extension ClosedRange where Bound == HKQuantity {
     fileprivate func span(with unit: HKUnit) -> Double {
         return upperBound.doubleValue(for: unit) - lowerBound.doubleValue(for: unit)
     }

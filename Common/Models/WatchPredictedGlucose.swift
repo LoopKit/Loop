@@ -11,10 +11,10 @@ import LoopKit
 import HealthKit
 
 
-struct WatchPredictedGlucose {
-    let values: [GlucoseValue]
+struct WatchPredictedGlucose: Equatable {
+    let values: [PredictedGlucoseValue]
 
-    init?(values: [GlucoseValue]) {
+    init?(values: [PredictedGlucoseValue]) {
         guard values.count > 1 else {
             return nil
         }

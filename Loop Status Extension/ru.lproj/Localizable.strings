@@ -1,51 +1,6 @@
-/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
-"%1$@ v%2$@" = "%1$@ v%2$@";
-
-/* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "модель, основанная на опубликованных данных усвоения FIASP инсулина";
-
-/* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "модель, основанная на опубликованных данных усвоения Humalog, Novolog и Apidra у взрослых";
-
-/* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "Поправка к модели для взрослых основанная на эмпирических данных для детей";
-
-/* The short unit display string for decibles */
-"dB" = "dB";
-
-/* The subtitle format describing eventual glucose.  (1: localized glucose value description) (2: localized glucose units description) */
-"Eventually %1$@ %2$@" = "В конечном итоге %1$@ %2$@";
-
-/* Title of insulin model preset */
-"Fiasp" = "Fiasp";
-
-/* The short unit display string for grams */
-"g" = "г";
+/* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
+"Eventually %1$@" = "В конечном итоге %1$@";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
 "IOB %1$@ U" = "IOB %1$@ ед";
-
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "мг/дл";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Боыстродействующий - взрослые";
-
-/* Title of insulin model preset */
-"Rapid-Acting – Children" = "Быстродействующий - дети";
-
-/* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Модель, используемая для цикла/контура, позволяет настройку длительности действия";
-
-/* The short unit display string for international units of insulin */
-"U" = "ед";
-
-/* Title of insulin model setting */
-"Walsh" = "Walsh";
 

@@ -1,0 +1,9 @@
+/* The subtitle format describing eventual glucose.  (1: localized glucose value description) */
+"Eventually %1$@" = "Til sidst %1$@";
+
+/* The subtitle format describing units of active insulin. (1: localized insulin value description) */
+"IOB %1$@ U" = "IOB %1$@ E";
+
+/* The short unit display string for international units of insulin */
+"U" = "E";
+

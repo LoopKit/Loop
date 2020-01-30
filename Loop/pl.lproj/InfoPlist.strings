@@ -1,8 +1,8 @@
-/* Bundle display name */
-"CFBundleDisplayName" = "Loop";
-
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth jest używany do komunikacji z pompą i urządzeniami ciągłego monitoringu glukozy.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth jest używany do komunikacji z pompą i urządzeniami ciągłego monitoringu glukozy.";

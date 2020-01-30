@@ -1,0 +1,33 @@
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "%@ atrás";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ U";
+
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ at %2$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ unidades por hora em %2$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/min";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "Ciclo fechado";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "Ciclo executado %@ atrás";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "Precisa de atenção";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "Ciclo aberto";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "Desconhecido";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "Aguardando a primeira execução";
+

@@ -1,33 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "Активные углеводы";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Активный инсулин";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Добавить запись углеводов";
+
 /* The title of the alert controller displayed after a bolus attempt fails */
 "Bolus Failed" = "Болюс не состоялся";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
 /* The action button title to dismiss an error message */
 "Dismiss" = "Пропустить";
-
-/* The short unit display string for grams */
-"g" = "г";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
 "Make sure your iPhone is nearby and try again" = "Убедитесь, что ваш iPhone поблизости и повторите попытку";
 
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "ммоль/л";
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Нетто скорость базала";
 
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Перезаписать";
 
 /* The label and value showing the recommended bolus */
 "Rec: %@ U" = "Рекомендовано: %@ ед";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Остаток картриджа";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
 "Send Failed" = "Ошибка отправки";
 
-/* The short unit display string for international units of insulin */
-"U" = "ед";
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "Ед./ч.";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Нагрузка";
 
