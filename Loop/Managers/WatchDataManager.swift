@@ -192,7 +192,7 @@ final class WatchDataManager: NSObject {
             }
 
             // Drop the first element in predictedGlucose because it is the current glucose
-            if let predictedGlucose = state.predictedGlucose?.dropFirst(), predictedGlucose.count > 0 {
+            if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin?.dropFirst(), predictedGlucose.count > 0 {
                 context.predictedGlucose = WatchPredictedGlucose(values: Array(predictedGlucose))
             }
 
