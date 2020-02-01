@@ -29,7 +29,7 @@ class RootNavigationController: UINavigationController {
             }
         case NSUserActivity.newCarbEntryActivityType:
             if let navVC = presentedViewController as? UINavigationController {
-                if let carbVC = navVC.topViewController as? CarbEntryEditViewController {
+                if let carbVC = navVC.topViewController as? CarbEntryViewController {
                     carbVC.restoreUserActivityState(activity)
                     return
                 } else {
