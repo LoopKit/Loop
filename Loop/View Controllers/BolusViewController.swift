@@ -21,8 +21,8 @@ private extension RefreshContext {
 
 final class BolusViewController: ChartsTableViewController, IdentifiableClass, UITextFieldDelegate {
     private enum Row: Int {
-        case carbEntry = 0
-        case chart
+        case chart = 0
+        case carbEntry
         case notice
         case recommended
         case entry
@@ -62,8 +62,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         let amount = bolusRecommendation?.amount ?? 0
         bolusAmountTextField.accessibilityHint = String(format: NSLocalizedString("Recommended Bolus: %@ Units", comment: "Accessibility hint describing recommended bolus units"), spellOutFormatter.string(from: amount) ?? "0")
-
-        bolusAmountTextField.becomeFirstResponder()
     }
 
     override func viewDidLayoutSubviews() {
