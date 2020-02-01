@@ -113,9 +113,9 @@ struct MicrobolusView: View {
             Picker(selection: $viewModel.basalRateMultiplierIndex, label: Text("Basal Rate Multiplier")) {
                 ForEach(0 ..< viewModel.basalRateMultiplierValues.count) { index in
                     if self.viewModel.basalRateMultiplierValues[index] > 0 {
-                        Text(String(format: "x%.1f", self.viewModel.basalRateMultiplierValues[index])).tag(index)
+                        Text("× " + self.viewModel.formatter.string(from: self.viewModel.basalRateMultiplierValues[index])!).tag(index)
                     } else {
-                        Text("Max").tag(index)
+                        Text("Max basal limit").tag(index)
                     }
                 }
             }
