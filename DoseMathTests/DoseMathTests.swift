@@ -626,7 +626,7 @@ class RecommendTempBasalTests: XCTestCase {
         )
 
         XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(0.8, dose!.bolusUnits, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.85, dose!.bolusUnits, accuracy: 1.0 / 40.0)
     }
     
     func testFlatAndHighAutomaticBolusWithOverride() {
@@ -647,7 +647,7 @@ class RecommendTempBasalTests: XCTestCase {
         
         XCTAssertEqual(0.8, dose!.basalAdjustment!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.basalAdjustment!.duration)
-        XCTAssertEqual(0.8, dose!.bolusUnits, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.85, dose!.bolusUnits, accuracy: 1.0 / 40.0)
         
         // Continue temp
         let lastTempBasal = DoseEntry(
@@ -672,7 +672,7 @@ class RecommendTempBasalTests: XCTestCase {
         )
         
         XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(0.8, dose!.bolusUnits, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.85, dose!.bolusUnits, accuracy: 1.0 / 40.0)
 
     }
 
@@ -711,7 +711,7 @@ class RecommendTempBasalTests: XCTestCase {
         )
 
         XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(0.15, dose!.bolusUnits, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.2, dose!.bolusUnits, accuracy: 1.0 / 40.0)
     }
 
     func testInRangeAndRising() {
@@ -748,7 +748,7 @@ class RecommendTempBasalTests: XCTestCase {
         )
 
         XCTAssertNil(dose!.basalAdjustment)
-        XCTAssertEqual(0.15, dose!.bolusUnits, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.2, dose!.bolusUnits, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndRising() {
