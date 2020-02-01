@@ -718,7 +718,7 @@ extension LoopDataManager {
         loopSubscription = updatePublisher
             .flatMap { _ in setBasalPublisher }
             .flatMap { _ in enactBolusPublisher }
-            .receive(on: DispatchQueue.main)
+            .receive(on: dataAccessQueue)
         .sink(
             receiveCompletion: { [weak self] completion in
                 guard let self = self else { return }
