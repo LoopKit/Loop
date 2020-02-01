@@ -135,6 +135,9 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // This gets rid of the empty space at the top.
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 0.01))
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
@@ -145,6 +148,9 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         } else {
             title = NSLocalizedString("carb-entry-title-add", value: "Add Carb Entry", comment: "The title of the view controller to create a new carb entry")
         }
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: footerView.primaryButton.titleLabel?.text, style: .plain, target: self, action: #selector(continueButtonPressed))
+        navigationItem.rightBarButtonItem?.isEnabled = false
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -364,7 +370,11 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     private func updateContinueButtonEnabled() {
         let hasValidQuantity = quantity != nil && quantity!.doubleValue(for: preferredUnit) > 0
         let haveChangesBeenMade = updatedCarbEntry != nil
-        footerView.primaryButton.isEnabled = hasValidQuantity && haveChangesBeenMade
+        
+        let readyToContinue = hasValidQuantity && haveChangesBeenMade
+        
+        footerView.primaryButton.isEnabled = readyToContinue
+        navigationItem.rightBarButtonItem?.isEnabled = readyToContinue
     }
 }
 
