@@ -96,7 +96,7 @@ struct MicrobolusView: View {
             Text("This is the minimum microbolus size in units that will be delivered. Only if the microbolus calculated is equal to or greater than this number of units will a bolus be delivered.")
         ) {
             Toggle (isOn: $viewModel.openBolusScreen) {
-                Text("Open Bolus screen after Carbs")
+                Text("Open bolus screen after carbs on watch")
             }
 
             Picker(selection: $viewModel.pickerMinimumBolusSizeIndex, label: Text("Minimum Bolus Size")) {

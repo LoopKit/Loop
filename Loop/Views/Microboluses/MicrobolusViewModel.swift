@@ -46,7 +46,7 @@ extension MicrobolusView {
             self.microbolusesWithoutCOB = settings.enabledWithoutCarbs
             self.partialApplication = settings.partialApplication
             self.microbolusesMinimumBolusSize = settings.minimumBolusSize
-            self.openBolusScreen = settings.shouldOpenBolusScreen
+            self.openBolusScreen = settings.shouldOpenBolusScreenOnWatch
             self.disableByOverride = settings.disableByOverride
             self.basalRateMultiplier = settings.basalRateMultiplier
             self.lowerBound = formatter.string(from: settings.overrideLowerBound) ?? ""
@@ -106,7 +106,7 @@ extension MicrobolusView {
                         enabledWithoutCarbs: $0.0.1,
                         partialApplication: $0.0.2,
                         minimumBolusSize: $0.0.3,
-                        shouldOpenBolusScreen: $0.1.0,
+                        shouldOpenBolusScreenOnWatch: $0.1.0,
                         disableByOverride: $0.1.1,
                         overrideLowerBound: $0.1.2,
                         basalRateMultiplier: $0.1.3

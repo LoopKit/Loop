@@ -16,7 +16,7 @@ public enum Microbolus {
         public var enabledWithoutCarbs: Bool
         public var partialApplication: Double
         public var minimumBolusSize: Double
-        public var shouldOpenBolusScreen: Bool
+        public var shouldOpenBolusScreenOnWatch: Bool
         public var disableByOverride: Bool
         public var overrideLowerBound: Double
         public var basalRateMultiplier: Double
@@ -26,7 +26,7 @@ public enum Microbolus {
             enabledWithoutCarbs: Bool = false,
             partialApplication: Double = 0.3,
             minimumBolusSize: Double = 0,
-            shouldOpenBolusScreen: Bool = false,
+            shouldOpenBolusScreenOnWatch: Bool = false,
             disableByOverride: Bool = false,
             overrideLowerBound: Double = 0,
             basalRateMultiplier: Double = 0 // 0 means MaximumBasalRatePerHour
@@ -35,7 +35,7 @@ public enum Microbolus {
             self.enabledWithoutCarbs = enabledWithoutCarbs
             self.partialApplication = partialApplication
             self.minimumBolusSize = minimumBolusSize
-            self.shouldOpenBolusScreen = shouldOpenBolusScreen
+            self.shouldOpenBolusScreenOnWatch = shouldOpenBolusScreenOnWatch
             self.disableByOverride = disableByOverride
             self.overrideLowerBound = overrideLowerBound
             self.basalRateMultiplier = basalRateMultiplier
@@ -60,8 +60,8 @@ public enum Microbolus {
                 self.minimumBolusSize = minimumBolusSize
             }
 
-            if let shouldOpenBolusScreen = rawValue["shouldOpenBolusScreen"] as? Bool {
-                self.shouldOpenBolusScreen = shouldOpenBolusScreen
+            if let shouldOpenBolusScreenOnWatch = rawValue["shouldOpenBolusScreenOnWatch"] as? Bool {
+                self.shouldOpenBolusScreenOnWatch = shouldOpenBolusScreenOnWatch
             }
 
             if let disableByOverride = rawValue["disableByOverride"] as? Bool {
@@ -83,7 +83,7 @@ public enum Microbolus {
                 "enabledWithoutCarbs": enabledWithoutCarbs,
                 "partialApplication": partialApplication,
                 "minimumBolusSize": minimumBolusSize,
-                "shouldOpenBolusScreen": shouldOpenBolusScreen,
+                "shouldOpenBolusScreenOnWatch": shouldOpenBolusScreenOnWatch,
                 "disableByOverride": disableByOverride,
                 "overrideLowerBound": overrideLowerBound,
                 "basalRateMultiplier": basalRateMultiplier

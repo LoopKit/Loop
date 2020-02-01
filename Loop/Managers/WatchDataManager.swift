@@ -157,7 +157,7 @@ final class WatchDataManager: NSObject {
             context.glucoseTrendRawValue = self.deviceManager.sensorState?.trendType?.rawValue
             context.doNotOpenBolusScreenWithMicroboluses = loopManager.settings.dosingEnabled
                 && loopManager.settings.microbolusSettings.enabled
-                && !loopManager.settings.microbolusSettings.shouldOpenBolusScreen
+                && !loopManager.settings.microbolusSettings.shouldOpenBolusScreenOnWatch
 
             context.cgmManagerState = self.deviceManager.cgmManager?.rawValue
 
