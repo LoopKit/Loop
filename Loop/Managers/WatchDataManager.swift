@@ -12,13 +12,15 @@ import WatchConnectivity
 import LoopKit
 import LoopCore
 
-
 final class WatchDataManager: NSObject {
 
     unowned let deviceManager: DeviceDataManager
 
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
+        self.sleepStore = SleepStore (healthStore: deviceManager.loopManager.glucoseStore.healthStore)
+        self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
+        self.bedtime = UserDefaults.appGroup?.bedtime
         self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
 
         super.init()
@@ -40,6 +42,53 @@ final class WatchDataManager: NSObject {
     }()
 
     private var lastSentSettings: LoopSettings?
+
+    let sleepStore: SleepStore
+    
+    var lastBedtimeQuery: Date {
+        didSet {
+            UserDefaults.appGroup?.lastBedtimeQuery = lastBedtimeQuery
+        }
+    }
+    
+    var bedtime: Date? {
+        didSet {
+            UserDefaults.appGroup?.bedtime = bedtime
+        }
+    }
+    
+    private func updateBedtimeIfNeeded() {
+        let now = Date()
+        let lastUpdateInterval = now.timeIntervalSince(lastBedtimeQuery)
+        let calendar = Calendar.current
+        
+        guard lastUpdateInterval >= TimeInterval(hours: 24) else {
+            // increment the bedtime by 1 day if it's before the current time, but we don't need to make another HealthKit query yet
+            if let bedtime = bedtime, bedtime < now {
+                let hourComponent = calendar.component(.hour, from: bedtime)
+                let minuteComponent = calendar.component(.minute, from: bedtime)
+                
+                if let newBedtime = calendar.nextDate(after: now, matching: DateComponents(hour: hourComponent, minute: minuteComponent), matchingPolicy: .nextTime), newBedtime.timeIntervalSinceNow <= .hours(24) {
+                    self.bedtime = newBedtime
+                }
+            }
+            
+            return
+        }
+
+        sleepStore.getAverageSleepStartTime() {
+            (result) in
+
+            self.lastBedtimeQuery = now
+            
+            switch result {
+                case .success(let bedtime):
+                    self.bedtime = bedtime
+                case .failure:
+                    self.bedtime = nil
+            }
+        }
+    }
 
     @objc private func updateWatch(_ notification: Notification) {
         guard
@@ -113,12 +162,13 @@ final class WatchDataManager: NSObject {
         }
 
         let complicationShouldUpdate: Bool
+        updateBedtimeIfNeeded()
 
         if let lastContext = lastComplicationContext,
             let lastGlucose = lastContext.glucose, let lastGlucoseDate = lastContext.glucoseDate,
             let newGlucose = context.glucose, let newGlucoseDate = context.glucoseDate
         {
-            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval
+            let enoughTimePassed = newGlucoseDate.timeIntervalSince(lastGlucoseDate) >= session.complicationUserInfoTransferInterval(bedtime: bedtime)
             let enoughTrendDrift = abs(newGlucose.doubleValue(for: minTrendUnit) - lastGlucose.doubleValue(for: minTrendUnit)) >= minTrendDrift
 
             complicationShouldUpdate = enoughTimePassed || enoughTrendDrift
@@ -322,6 +372,9 @@ extension WatchDataManager {
             "## WatchDataManager",
             "lastSentSettings: \(String(describing: lastSentSettings))",
             "lastComplicationContext: \(String(describing: lastComplicationContext))",
+            "lastBedtimeQuery: \(String(describing: lastBedtimeQuery))",
+            "bedtime: \(String(describing: bedtime))",
+            "complicationUserInfoTransferInterval: \(round(watchSession?.complicationUserInfoTransferInterval(bedtime: bedtime).minutes ?? 0)) min"
         ]
 
         if let session = watchSession {
@@ -334,8 +387,8 @@ extension WatchDataManager {
 
         return items.joined(separator: "\n")
     }
-}
 
+}
 
 extension WCSession {
     open override var debugDescription: String {
@@ -350,21 +403,29 @@ extension WCSession {
             "* outstandingUserInfoTransfers: \(outstandingUserInfoTransfers)",
             "* receivedApplicationContext: \(receivedApplicationContext)",
             "* remainingComplicationUserInfoTransfers: \(remainingComplicationUserInfoTransfers)",
-            "* complicationUserInfoTransferInterval: \(round(complicationUserInfoTransferInterval.minutes)) min",
             "* watchDirectoryURL: \(watchDirectoryURL?.absoluteString ?? "nil")",
         ].joined(separator: "\n")
     }
-
-    fileprivate var complicationUserInfoTransferInterval: TimeInterval {
+    
+    fileprivate func complicationUserInfoTransferInterval(bedtime: Date?) -> TimeInterval {
         let now = Date()
-        let timeUntilMidnight: TimeInterval
+        let timeUntilRefresh: TimeInterval
 
         if let midnight = Calendar.current.nextDate(after: now, matching: DateComponents(hour: 0), matchingPolicy: .nextTime) {
-            timeUntilMidnight = midnight.timeIntervalSince(now)
+            // we can have a more frequent refresh rate if we only refresh when it's likely the user is awake (based on HealthKit sleep data)
+            if let nextBedtime = bedtime {
+                let timeUntilBedtime = nextBedtime.timeIntervalSince(now)
+                // if bedtime is before the current time or more than 24 hours away, use midnight instead
+                timeUntilRefresh = (0..<TimeInterval(hours: 24)).contains(timeUntilBedtime) ? timeUntilBedtime : midnight.timeIntervalSince(now)
+            }
+            // otherwise, since (in most cases) the complications allowance refreshes at midnight, base it on the time remaining until midnight
+            else {
+                timeUntilRefresh = midnight.timeIntervalSince(now)
+            }
         } else {
-            timeUntilMidnight = .hours(24)
+            timeUntilRefresh = .hours(24)
         }
-
-        return timeUntilMidnight / Double(remainingComplicationUserInfoTransfers + 1)
+        
+        return timeUntilRefresh / Double(remainingComplicationUserInfoTransfers + 1)
     }
 }
