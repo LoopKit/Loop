@@ -8,11 +8,8 @@
 import LoopKit
 import MockKit
 
-#if DEBUG
+// TODO: Need a flag other than Debug for including MockCGMManager
 let staticCGMManagers: [CGMManager.Type] = [MockCGMManager.self]
-#else
-let staticCGMManagers: [CGMManager.Type] = []
-#endif
 
 let staticCGMManagersByIdentifier: [String: CGMManager.Type] = staticCGMManagers.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
