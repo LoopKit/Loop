@@ -660,6 +660,7 @@ extension LoopDataManager {
 
             dosingDecision.carbsOnBoard = state.carbsOnBoard
             dosingDecision.predictedGlucose = state.predictedGlucose
+            dosingDecision.predictedGlucoseIncludingPendingInsulin = state.predictedGlucoseIncludingPendingInsulin
             if let (recommendation: recommendation, date: date) = state.recommendedTempBasal {
                 dosingDecision.tempBasalRecommendationDate = TempBasalRecommendationDate(recommendation: recommendation, date: date)
             }
