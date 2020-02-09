@@ -460,13 +460,15 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         return amount >= 0 ? amount : nil
     }
+    
+    private var enteredBolusInsulinModel: InsulinModel? = self.deviceManager.loopManager.insulinModelSettings.model
 
     private var enteredBolus: DoseEntry? {
         guard let amount = enteredBolusAmount else {
             return nil
         }
 
-        return DoseEntry(type: .bolus, startDate: Date(), value: amount, unit: .units)
+        return DoseEntry(type: .bolus, startDate: Date(), value: amount, unit: .units, insulinModel: enteredBolusInsulinModel)
     }
 
     private var predictionRecomputation: DispatchWorkItem?

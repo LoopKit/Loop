@@ -32,6 +32,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             }
         }
     }
+    // TODO: change way insulin models are configured so this can be used for dose insulin curve selection
 
     weak var delegate: InsulinModelSettingsViewControllerDelegate?
 
