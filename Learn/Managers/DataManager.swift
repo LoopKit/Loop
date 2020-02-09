@@ -31,13 +31,16 @@ final class DataManager {
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInAppGroupDirectory(isReadOnly: true)
+        
+        let overrideHistory = UserDefaults.appGroup?.overrideHistory ?? TemporaryScheduleOverrideHistory()
 
         carbStore = CarbStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
             observationEnabled: false,
             carbRatioSchedule: carbRatioSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            overrideHistory: overrideHistory
         )
 
         doseStore = DoseStore(
@@ -46,7 +49,8 @@ final class DataManager {
             observationEnabled: false,
             insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            overrideHistory: overrideHistory
         )
 
         glucoseStore = GlucoseStore(
@@ -86,6 +90,93 @@ extension DataManager {
         return carbStore.insulinSensitivitySchedule
     }
 }
+
+
+// MARK: - Effects Data
+
+extension DataManager {
+    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection) -> Result<GlucoseEffects> {
+        let updateGroup = DispatchGroup()
+
+        let retrospectiveStart = day.start.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
+
+        var insulinEffects: [GlucoseEffect]?
+        var insulinFetchError: Error?
+        
+        updateGroup.enter()
+        doseStore.getGlucoseEffects(start: day.start, basalDosingEnd: day.end) { (result) -> Void in
+            switch result {
+            case .failure(let error):
+                insulinFetchError = error
+            case .success(let effects):
+                insulinEffects = effects
+            }
+
+            updateGroup.leave()
+        }
+
+        _ = updateGroup.wait(timeout: .distantFuture)
+        
+        guard insulinFetchError == nil else {
+            return .failure(insulinFetchError!)
+        }
+        
+        var counteractionEffects: [GlucoseEffectVelocity]?
+        var glucose: [StoredGlucoseSample]?
+        
+        updateGroup.enter()
+        glucoseStore.getCachedGlucoseSamples(start: day.start, end: day.end) { (samples) in
+            glucose = samples
+            counteractionEffects = samples.counteractionEffects(to: insulinEffects!)
+            
+            updateGroup.leave()
+        }
+        
+        _ = updateGroup.wait(timeout: .distantFuture)
+        
+        var carbEffects: [GlucoseEffect]?
+        var carbFetchError: Error?
+        
+        updateGroup.enter()
+        carbStore.getGlucoseEffects(
+            start: retrospectiveStart,
+            effectVelocities: settings.dynamicCarbAbsorptionEnabled ? counteractionEffects! : nil
+        ) { (result) -> Void in
+            switch result {
+            case .failure(let error):
+                carbFetchError = error
+            case .success(let (_, effects)):
+                carbEffects = effects
+            }
+
+            updateGroup.leave()
+        }
+
+        _ = updateGroup.wait(timeout: .distantFuture)
+        
+        guard carbFetchError == nil else {
+            return .failure(carbFetchError!)
+        }
+
+        // Get timeline of glucose discrepancies
+        let retrospectiveGlucoseDiscrepancies: [GlucoseEffect] = counteractionEffects!.subtracting(carbEffects!, withUniformInterval: carbStore.delta)
+        
+        let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
+        
+        let retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange] = retrospectiveGlucoseDiscrepancies.combinedSums(of: settings.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
+
+        return .success(GlucoseEffects(
+            dateInterval: day,
+            glucose: glucose!,
+            insulinEffects: insulinEffects!,
+            counteractionEffects: counteractionEffects!,
+            carbEffects: carbEffects!,
+            retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed
+        ))
+    }
+
+}
+
 
 
 // MARK: - HealthKit Setup
@@ -130,4 +221,15 @@ extension DataManager {
             completion()
         }
     }
+}
+
+
+struct GlucoseEffects {
+    var dateInterval: DateInterval
+    
+    var glucose: [StoredGlucoseSample]
+    var insulinEffects: [GlucoseEffect]
+    var counteractionEffects: [GlucoseEffectVelocity]
+    var carbEffects: [GlucoseEffect]
+    var retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]
 }

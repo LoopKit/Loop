@@ -28,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 lessonsVC.lessons = [
                     TimeInRangeLesson(dataManager: dataManager),
                     ModalDayLesson(dataManager: dataManager),
+                    ForecastErrorLesson(dataManager: dataManager),
                 ]
             }
         })
