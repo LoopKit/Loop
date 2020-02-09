@@ -371,7 +371,18 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         }
     }
 
-    // MARK: - TableView Delegate
+    @IBOutlet weak var insulinModelLabel: UILabel! {
+        didSet {
+            switch enteredBolusInsulinModel {
+            case let model as WalshInsulinModel:
+                insulinModelLabel?.text = model.title
+            case let model as ExponentialInsulinModelPreset:
+                insulinModelLabel?.text = model.title
+            default:
+                break
+            }
+        }
+    }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Row(rawValue: indexPath.row)! {
@@ -482,7 +493,18 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         return amount >= 0 ? amount : nil
     }
     
-    private var enteredBolusInsulinModel: InsulinModel?
+    var enteredBolusInsulinModel: InsulinModel? {
+        didSet {
+            switch enteredBolusInsulinModel {
+            case let model as WalshInsulinModel:
+                insulinModelLabel?.text = model.title
+            case let model as ExponentialInsulinModelPreset:
+                insulinModelLabel?.text = model.title
+            default:
+                break
+            }
+        }
+    }
 
     private var enteredBolus: DoseEntry? {
         guard let amount = enteredBolusAmount else {

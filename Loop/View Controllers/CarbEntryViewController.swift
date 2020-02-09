@@ -333,6 +333,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         let bolusVC = BolusViewController.instance()
         bolusVC.deviceManager = deviceManager
         bolusVC.glucoseUnit = glucoseUnit
+        bolusVC.enteredBolusInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
         if let originalEntry = originalCarbEntry {
             bolusVC.configuration = .updatedCarbEntry(from: originalEntry, to: updatedEntry)
         } else {
