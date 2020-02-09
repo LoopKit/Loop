@@ -75,7 +75,7 @@ final class LoopDataManager {
         doseStore = DoseStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            insulinModel: insulinModelSettings?.model,
+            defaultInsulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -367,14 +367,14 @@ extension LoopDataManager {
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
         get {
-            guard let model = doseStore.insulinModel else {
+            guard let model = doseStore.defaultInsulinModel else {
                 return nil
             }
 
             return InsulinModelSettings(model: model)
         }
         set {
-            doseStore.insulinModel = newValue?.model
+            doseStore.defaultInsulinModel = newValue?.model
             UserDefaults.appGroup?.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
@@ -959,7 +959,7 @@ extension LoopDataManager {
                 let earliestEffectDate = Date(timeIntervalSinceNow: .hours(-24))
                 let nextEffectDate = insulinCounteractionEffects.last?.endDate ?? earliestEffectDate
                 let bolusEffect = [potentialBolus]
-                    .glucoseEffects(insulinModel: model, insulinSensitivity: sensitivity)
+                    .glucoseEffects(defaultModel: model, longestEffectDuration: doseStore.longestEffectDuration, insulinSensitivity: sensitivity)
                     .filterDateRange(nextEffectDate, nil)
                 effects.append(bolusEffect)
             }

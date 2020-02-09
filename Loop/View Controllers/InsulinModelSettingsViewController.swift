@@ -173,7 +173,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             var unselectedModelValues = [[GlucoseValue]]()
 
             for (index, model) in allModels.enumerated() {
-                let effects = [bolus].glucoseEffects(insulinModel: model, insulinSensitivity: insulinSensitivitySchedule)
+                let effects = [bolus].glucoseEffects(defaultModel: model, longestEffectDuration: model.effectDuration, insulinSensitivity: insulinSensitivitySchedule)
                 let values = LoopMath.predictGlucose(startingAt: startingGlucoseSample, effects: effects)
 
                 if selectedModelIndex == index {

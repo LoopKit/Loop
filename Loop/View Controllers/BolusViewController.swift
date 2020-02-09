@@ -19,11 +19,13 @@ private extension RefreshContext {
     static let all: Set<RefreshContext> = [.glucose, .targets]
 }
 
+// TODO: this will need to be updated to reflect insulin model as well
 final class BolusViewController: ChartsTableViewController, IdentifiableClass, UITextFieldDelegate {
     private enum Row: Int {
         case carbEntry = 0
         case chart
         case notice
+        case model
         case recommended
         case entry
     }
@@ -92,6 +94,25 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         refreshContext.update(with: .size(size))
 
         super.viewWillTransition(to: size, with: coordinator)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        switch segue.destination {
+        case let vc as InsulinModelSettingsViewController:
+            vc.deviceManager = deviceManager
+            vc.insulinModel = enteredBolusInsulinModel ?? deviceManager.loopManager.insulinModelSettings?.model
+
+            if let insulinSensitivitySchedule = deviceManager.loopManager.insulinSensitivitySchedule {
+                vc.insulinSensitivitySchedule = insulinSensitivitySchedule
+            }
+
+            vc.delegate = self
+        default:
+            break
+        }
+        super.prepare(for: segue, sender: sender)
+        
+        bolusAmountTextField.resignFirstResponder()
     }
 
     // MARK: - State
@@ -461,7 +482,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         return amount >= 0 ? amount : nil
     }
     
-    private var enteredBolusInsulinModel: InsulinModel? = self.deviceManager.loopManager.insulinModelSettings.model
+    private var enteredBolusInsulinModel: InsulinModel?
 
     private var enteredBolus: DoseEntry? {
         guard let amount = enteredBolusAmount else {
@@ -594,12 +615,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         }
     }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        super.prepare(for: segue, sender: sender)
-
-        bolusAmountTextField.resignFirstResponder()
-    }
-
     // MARK: - UITextFieldDelegate
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -616,6 +631,36 @@ extension BolusViewController {
     }
 }
 
+extension BolusViewController: InsulinModelSettingsViewControllerDelegate {
+    func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController) {
+        
+        guard let model = controller.insulinModel else {
+            return
+        }
+        
+        self.enteredBolusInsulinModel = model
+        
+        /*guard let indexPath = self.tableView.indexPathForSelectedRow else {
+            return
+        }
+
+        switch sections[indexPath.section] {
+        case .configuration:
+            switch ConfigurationRow(rawValue: indexPath.row)! {
+            case .insulinModel:
+                if let model = controller.insulinModel {
+                    dataManager.loopManager.insulinModelSettings = InsulinModelSettings(model: model)
+                }
+
+                tableView.reloadRows(at: [indexPath], with: .none)
+            default:
+                assertionFailure()
+            }
+        default:
+            assertionFailure()
+        }*/
+    }
+}
 
 extension UIColor {
     static var alternateBlue: UIColor {

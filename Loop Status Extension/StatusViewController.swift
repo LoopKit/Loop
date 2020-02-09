@@ -77,7 +77,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         healthStore: healthStore,
         cacheStore: cacheStore,
         observationEnabled: false,
-        insulinModel: defaults?.insulinModelSettings?.model,
+        defaultInsulinModel: defaults?.insulinModelSettings?.model,
         basalProfile: defaults?.basalRateSchedule,
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
     )
