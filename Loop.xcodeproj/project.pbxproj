@@ -155,7 +155,6 @@
 		43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */; };
 		43C05CCA21EC382B006FB252 /* NumberEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CC921EC382B006FB252 /* NumberEntry.swift */; };
 		43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094491CACCC73001F6403 /* NotificationManager.swift */; };
-		43C246A81D89990F0031F8D1 /* Crypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C246A71D89990F0031F8D1 /* Crypto.framework */; };
 		43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */; };
 		43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */; };
 		43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
@@ -341,6 +340,10 @@
 		89E267FD2292456700A3F2AF /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FB2292456700A3F2AF /* FeatureFlags.swift */; };
 		89E267FF229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
 		89E26800229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
+		A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */; };
+		A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */; };
+		A966152A23EA5A37005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */; };
+		A966152B23EA5A37005D8B29 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152923EA5A37005D8B29 /* DerivedAssets.xcassets */; };
 		A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C62D8123316FF500535612 /* UserDefaults+Services.swift */; };
 		A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */; };
 		A9C62D882331703100535612 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9C62D852331703000535612 /* Service.swift */; };
@@ -350,12 +353,10 @@
 		A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DAE7CF2332D77F006AE942 /* LoopTests.swift */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
-		C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* DefaultAssets.xcassets */; };
 		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
-		C14336A12367535C00A01201 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */; };
 		C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165B8CD23302C5D0004112E /* RemoteCommand.swift */; };
 		C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
@@ -366,9 +367,6 @@
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C19E96DF23D275F8003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
-		C1A3EED2235233E1007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */; };
-		C1A3EED423523551007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED323523551007672E3 /* DerivedAssets.xcassets */; };
-		C1A3EED523535FFF007672E3 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */; };
 		C1C0BE2A224C0FA000C03B4D /* SwiftCharts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4346D1EF1C781BEA00ABAFE3 /* SwiftCharts.framework */; };
 		C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */; };
 		C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */; };
@@ -380,8 +378,6 @@
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
-		C1FDF4A8235EC5E1008B0251 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1FDF4A7235EC5E1008B0251 /* DerivedAssets.xcassets */; };
-		C1FDF4AA235EC62E008B0251 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1FDF4A9235EC62E008B0251 /* DerivedAssets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -625,7 +621,6 @@
 		43776F8C1B8022E90074EA36 /* Loop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Loop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		43776F8F1B8022E90074EA36 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppDelegate.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43776F961B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		43776F981B8022E90074EA36 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		43776F9B1B8022E90074EA36 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		43785E922120A01B0057DED1 /* NewCarbEntryIntent+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NewCarbEntryIntent+Loop.swift"; sourceTree = "<group>"; };
 		43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "INRelevantShortcutStore+Loop.swift"; sourceTree = "<group>"; };
@@ -639,7 +634,6 @@
 		437CEEE31CDE5C0A003C8C80 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		437D9BA11D7B5203007245E8 /* Loop.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Loop.xcconfig; sourceTree = "<group>"; };
 		437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PredictionTableViewController.swift; sourceTree = "<group>"; };
-		437DE503229C8375003B1074 /* copy-frameworks.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
 		438172D81F4E9E37003C3328 /* NewPumpEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPumpEvent.swift; sourceTree = "<group>"; };
 		438991661E91B563000EEF90 /* ChartPoint.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPoint.swift; sourceTree = "<group>"; };
 		4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ChartSettings+Loop.swift"; sourceTree = "<group>"; };
@@ -973,7 +967,6 @@
 		892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryViewController.swift; sourceTree = "<group>"; };
 		892FB4CC22040104005293EC /* OverridePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetRow.swift; sourceTree = "<group>"; };
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
-		894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverrideSelectionViewController.swift; sourceTree = "<group>"; };
 		898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartScaler.swift; sourceTree = "<group>"; };
 		898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartData.swift; sourceTree = "<group>"; };
@@ -989,6 +982,11 @@
 		89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotentialCarbEntryTableViewCell.swift; sourceTree = "<group>"; };
 		89E267FB2292456700A3F2AF /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		89E267FE229267DF00A3F2AF /* Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
+		A951C5FF23E8AB51003E26DC /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
+		A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
+		A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
+		A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
+		A966152923EA5A37005D8B29 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		A9C62D8123316FF500535612 /* UserDefaults+Services.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Services.swift"; sourceTree = "<group>"; };
 		A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DiagnosticLog+Subsystem.swift"; sourceTree = "<group>"; };
 		A9C62D852331703000535612 /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
@@ -1015,11 +1013,8 @@
 		C1814B85225E507C008D2D8E /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		C18A491222FCC22800FDA733 /* build-derived-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-assets.sh"; sourceTree = "<group>"; };
 		C18A491322FCC22900FDA733 /* make_scenario.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = make_scenario.py; sourceTree = "<group>"; };
-		C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-watch-assets.sh"; sourceTree = "<group>"; };
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshness.swift; sourceTree = "<group>"; };
-		C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
-		C1A3EED323523551007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
 		C1D197FE232CF92D0096D646 /* capture-build-details.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "capture-build-details.sh"; sourceTree = "<group>"; };
 		C1D289B422F90A52003FFBD9 /* BasalDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasalDeliveryState.swift; sourceTree = "<group>"; };
@@ -1029,8 +1024,6 @@
 		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
-		C1FDF4A7235EC5E1008B0251 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
-		C1FDF4A9235EC62E008B0251 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1045,7 +1038,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43C246A81D89990F0031F8D1 /* Crypto.framework in Frameworks */,
 				43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */,
 				43D9FFD621EAE05D00AF44BF /* LoopCore.framework in Frameworks */,
 				43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */,
@@ -1235,8 +1227,8 @@
 				43D9FFA321EA9A0C00AF44BF /* Learn */,
 				968DCD53F724DE56FFE51920 /* Frameworks */,
 				43776F8D1B8022E90074EA36 /* Products */,
-				437DE502229C834D003B1074 /* Scripts */,
 				437D9BA11D7B5203007245E8 /* Loop.xcconfig */,
+				A951C5FF23E8AB51003E26DC /* Version.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1260,17 +1252,16 @@
 		43776F8E1B8022E90074EA36 /* Loop */ = {
 			isa = PBXGroup;
 			children = (
-				C1FDF4A7235EC5E1008B0251 /* DerivedAssets.xcassets */,
 				C16DA84022E8E104008624C2 /* Plugins */,
 				7D7076651FE06EE4004AC8EA /* Localizable.strings */,
 				7D7076511FE06EE1004AC8EA /* InfoPlist.strings */,
 				43EDEE6B1CF2E12A00393BE3 /* Loop.entitlements */,
 				43F5C2D41B92A4A6003EB13D /* Info.plist */,
 				43776F8F1B8022E90074EA36 /* AppDelegate.swift */,
-				43776F981B8022E90074EA36 /* DefaultAssets.xcassets */,
-				C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */,
 				43776F9A1B8022E90074EA36 /* LaunchScreen.storyboard */,
 				43776F951B8022E90074EA36 /* Main.storyboard */,
+				A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */,
+				A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */,
 				43E344A01B9E144300C85C07 /* Extensions */,
 				43F5C2E41B93C5D4003EB13D /* Managers */,
 				43757D131C06F26C00910CB9 /* Models */,
@@ -1280,23 +1271,14 @@
 			path = Loop;
 			sourceTree = "<group>";
 		};
-		437DE502229C834D003B1074 /* Scripts */ = {
-			isa = PBXGroup;
-			children = (
-				437DE503229C8375003B1074 /* copy-frameworks.sh */,
-			);
-			path = Scripts;
-			sourceTree = "<group>";
-		};
 		43A943731B926B7B0051FA24 /* WatchApp */ = {
 			isa = PBXGroup;
 			children = (
-				C1FDF4A9235EC62E008B0251 /* DerivedAssets.xcassets */,
-				894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */,
-				C1A3EED323523551007672E3 /* DerivedAssets.xcassets */,
 				C1C73F0F1DE3D0270022FC89 /* InfoPlist.strings */,
 				43F5C2D61B92A4DC003EB13D /* Info.plist */,
 				43A943741B926B7B0051FA24 /* Interface.storyboard */,
+				A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */,
+				A966152923EA5A37005D8B29 /* DerivedAssets.xcassets */,
 			);
 			path = WatchApp;
 			sourceTree = "<group>";
@@ -1796,7 +1778,6 @@
 				C1D197FE232CF92D0096D646 /* capture-build-details.sh */,
 				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
 				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
-				C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */,
 				C18A491522FCC22900FDA733 /* copy-plugins.sh */,
 				C18A491322FCC22900FDA733 /* make_scenario.py */,
 			);
@@ -1865,7 +1846,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 43A943991B926B7B0051FA24 /* Build configuration list for PBXNativeTarget "WatchApp" */;
 			buildPhases = (
-				C1D1406222FB7ED200DA6242 /* Build Derived Watch Assets */,
+				C1D1406222FB7ED200DA6242 /* Build Derived Assets */,
 				43A943701B926B7B0051FA24 /* Resources */,
 				43A943981B926B7B0051FA24 /* Embed App Extensions */,
 				43105EF81BADC8F9009CD81E /* Frameworks */,
@@ -2050,7 +2031,7 @@
 					43776F8B1B8022E90074EA36 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2072,7 +2053,7 @@
 					43A943711B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2085,7 +2066,7 @@
 					43A9437D1B926B7B0051FA24 = {
 						CreatedOnToolsVersion = 7.0;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2140,7 +2121,7 @@
 					4F70C1DB1DE8DCA7006380B7 = {
 						CreatedOnToolsVersion = 8.1;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2198,12 +2179,11 @@
 			files = (
 				C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */,
 				43FCBBC21E51710B00343C1B /* LaunchScreen.storyboard in Resources */,
+				A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */,
+				A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */,
 				7D70764F1FE06EE1004AC8EA /* InfoPlist.strings in Resources */,
-				C1FDF4A8235EC5E1008B0251 /* DerivedAssets.xcassets in Resources */,
-				C1A3EED2235233E1007672E3 /* DerivedAssets.xcassets in Resources */,
 				7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
-				C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2211,12 +2191,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A966152B23EA5A37005D8B29 /* DerivedAssets.xcassets in Resources */,
 				C1C73F0D1DE3D0270022FC89 /* InfoPlist.strings in Resources */,
 				43A943761B926B7B0051FA24 /* Interface.storyboard in Resources */,
-				C14336A12367535C00A01201 /* DefaultAssets.xcassets in Resources */,
-				C1FDF4AA235EC62E008B0251 /* DerivedAssets.xcassets in Resources */,
-				C1A3EED523535FFF007672E3 /* DefaultAssets.xcassets in Resources */,
-				C1A3EED423523551007672E3 /* DerivedAssets.xcassets in Resources */,
+				A966152A23EA5A37005D8B29 /* DefaultAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2372,7 +2350,6 @@
 			inputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework/LoopKit",
 				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework/SwiftCharts",
-				"$(BUILT_PRODUCTS_DIR)/Crypto.framework/Crypto",
 				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework/LoopKitUI",
 				"$(BUILT_PRODUCTS_DIR)/LoopTestingKit.framework/LoopTestingKit",
 				"$(BUILT_PRODUCTS_DIR)/MockKit.framework/MockKit",
@@ -2383,7 +2360,6 @@
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/SwiftCharts.framework",
-				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Crypto.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopKitUI.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/LoopTestingKit.framework",
 				"$(BUILT_PRODUCTS_DIR)/$(FRAMEWORKS_FOLDER_PATH)/MockKit.framework",
@@ -2464,9 +2440,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\"\n";
+			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/Loop\"\n";
 		};
-		C1D1406222FB7ED200DA6242 /* Build Derived Watch Assets */ = {
+		C1D1406222FB7ED200DA6242 /* Build Derived Assets */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2475,14 +2451,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Build Derived Watch Assets";
+			name = "Build Derived Assets";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Scripts/build-derived-watch-assets.sh\"\n";
+			shellScript = "\"${SRCROOT}/Scripts/build-derived-assets.sh\" \"${SRCROOT}/WatchApp\"\n";
 		};
 		C1D19800232CFA2A0096D646 /* Capture Build Details */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3231,7 +3207,6 @@
 		432CF87920D8B8380066B889 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -3239,7 +3214,6 @@
 		432CF87A20D8B8380066B889 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -3250,53 +3224,96 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APP_GROUP_IDENTIFIER = "group.$(MAIN_APP_BUNDLE_IDENTIFIER)Group";
+				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ASSIGN_ENUM = YES;
+				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES_ERROR;
+				CLANG_WARN_BOOL_CONVERSION = YES_ERROR;
+				CLANG_WARN_COMMA = YES_ERROR;
+				CLANG_WARN_CONSTANT_CONVERSION = YES_ERROR;
+				CLANG_WARN_CXX0X_EXTENSIONS = YES;
+				CLANG_WARN_DELETE_NON_VIRTUAL_DTOR = YES_ERROR;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES_ERROR;
+				CLANG_WARN_FLOAT_CONVERSION = YES_ERROR;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES_ERROR;
 				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES_ERROR;
+				CLANG_WARN_MISSING_NOESCAPE = YES_ERROR;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_EXPLICIT_OWNERSHIP_TYPE = YES;
+				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_INTERFACE_IVARS = YES_ERROR;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = YES;
+				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES_AGGRESSIVE;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_PRAGMA_PACK = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES_ERROR;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES_AGGRESSIVE;
+				CLANG_WARN_VEXING_PARSE = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
+				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 57;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 57;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES_ERROR;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LOCALIZED_STRING_MACRO_NAMES = (
@@ -3305,12 +3322,17 @@
 					LocalizedString,
 				);
 				MAIN_APP_BUNDLE_IDENTIFIER = "$(inherited).Loop";
-				MTL_ENABLE_DEBUG_INFO = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "-Wall";
 				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
@@ -3322,47 +3344,90 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				APP_GROUP_IDENTIFIER = "group.$(MAIN_APP_BUNDLE_IDENTIFIER)Group";
+				CLANG_ANALYZER_GCD_PERFORMANCE = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_EMPTY_CONTEXT = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ANALYZER_SECURITY_FLOATLOOPCOUNTER = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_RAND = YES;
+				CLANG_ANALYZER_SECURITY_INSECUREAPI_STRCPY = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ASSIGN_ENUM = YES;
+				CLANG_WARN_ATOMIC_IMPLICIT_SEQ_CST = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES_ERROR;
+				CLANG_WARN_BOOL_CONVERSION = YES_ERROR;
+				CLANG_WARN_COMMA = YES_ERROR;
+				CLANG_WARN_CONSTANT_CONVERSION = YES_ERROR;
+				CLANG_WARN_CXX0X_EXTENSIONS = YES;
+				CLANG_WARN_DELETE_NON_VIRTUAL_DTOR = YES_ERROR;
 				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES_ERROR;
+				CLANG_WARN_FLOAT_CONVERSION = YES_ERROR;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES_ERROR;
 				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES_ERROR;
+				CLANG_WARN_MISSING_NOESCAPE = YES_ERROR;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_EXPLICIT_OWNERSHIP_TYPE = YES;
+				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_INTERFACE_IVARS = YES_ERROR;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES_ERROR;
+				CLANG_WARN_OBJC_MISSING_PROPERTY_SYNTHESIS = YES;
+				CLANG_WARN_OBJC_REPEATED_USE_OF_WEAK = YES_AGGRESSIVE;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_PRAGMA_PACK = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SEMICOLON_BEFORE_METHOD_BODY = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = YES_ERROR;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES_AGGRESSIVE;
+				CLANG_WARN_VEXING_PARSE = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: loudnate@gmail.com (XZN842LDLT)";
+				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 57;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 57;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS = YES;
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES_ERROR;
+				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
+				GCC_WARN_HIDDEN_VIRTUAL_FUNCTIONS = YES;
+				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
+				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNKNOWN_PRAGMAS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LOCALIZED_STRING_MACRO_NAMES = (
@@ -3372,11 +3437,15 @@
 				);
 				MAIN_APP_BUNDLE_IDENTIFIER = "$(inherited).Loop";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
 				WARNING_CFLAGS = "-Wall";
 				WATCHOS_DEPLOYMENT_TARGET = 4.1;
 			};
@@ -3387,19 +3456,17 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
-				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_BITCODE = YES;
+				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
 				"OTHER_SWIFT_FLAGS[sdk=iphonesimulator*]" = "-D IOS_SIMULATOR -D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER)";
 			};
 			name = Debug;
 		};
@@ -3408,17 +3475,15 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
-				CODE_SIGN_ENTITLEMENTS = Loop/Loop.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_BITCODE = YES;
+				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER)";
 			};
 			name = Release;
 		};
@@ -3426,23 +3491,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.watchkitextension";
-				PRODUCT_NAME = "${TARGET_NAME}";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;
@@ -3451,19 +3512,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch.watchkitextension";
-				PRODUCT_NAME = "${TARGET_NAME}";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP_EXTENSION)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "WatchApp Extension/Extensions/WatchApp Extension-Bridging-Header.h";
@@ -3476,18 +3534,16 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -3499,18 +3555,16 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopWatch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_WATCHAPP)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -3521,35 +3575,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = LoopCore;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				TARGETED_DEVICE_FAMILY = 4;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
@@ -3557,33 +3594,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = LoopCore;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
@@ -3592,26 +3614,13 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Learn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -3620,24 +3629,13 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = Learn/Learn.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = Learn/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)Learn";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -3645,32 +3643,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
@@ -3678,62 +3659,35 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = LoopCore/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
 		43E2D8D71D20BF42004DA55F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = DoseMathTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.DoseMathTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.DoseMathTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		43E2D8D81D20BF42004DA55F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = DoseMathTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.DoseMathTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.DoseMathTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
@@ -3741,16 +3695,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
 			name = Debug;
@@ -3759,16 +3707,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NONNULL = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LoopTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.loudnate.LoopTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loopkit.LoopTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Loop.app/Loop";
 			};
 			name = Release;
@@ -3776,42 +3718,33 @@
 		4F70C1E91DE8DCA8006380B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 			};
 			name = Debug;
 		};
 		4F70C1EA1DE8DCA8006380B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY)";
+				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).statuswidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "$(LOOP_PROVISIONING_PROFILE_SPECIFIER_STATUS_EXTENSION)";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -3820,16 +3753,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3837,9 +3761,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
@@ -3847,16 +3768,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_SUSPICIOUS_MOVES = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				CURRENT_PROJECT_VERSION = 57;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 57;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = LoopUI/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -3864,8 +3776,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER).LoopUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};

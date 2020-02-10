@@ -71,6 +71,10 @@ RemoteSettings.plist
 # Framework development
 Loop.xcworkspace
 
-# Avoid checking in built assets
-Loop/DerivedAssets.xcassets/
-WatchApp/DerivedAssets.xcassets/
+# Avoid checking in override assets
+/LoopOverride.xcconfig
+/VersionOverride.xcconfig
+/Loop/DerivedAssets.xcassets
+/Loop/DerivedAssetsOverride.xcassets
+/WatchApp/DerivedAssets.xcassets
+/WatchApp/DerivedAssetsOverride.xcassets
