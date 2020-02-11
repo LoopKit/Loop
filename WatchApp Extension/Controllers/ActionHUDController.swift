@@ -27,7 +27,7 @@ final class ActionHUDController: HUDInterfaceController {
     @IBOutlet var overrideButtonLabel: WKInterfaceLabel! {
         didSet {
             if FeatureFlags.sensitivityOverridesEnabled {
-                overrideButtonLabel.setText(NSLocalizedString("Override", comment: "The text for the Watch button for enabling a temporary override"))
+                overrideButtonLabel.setText(NSLocalizedString("Preset", comment: "The text for the Watch button for enabling a custom preset"))
             } else {
                 overrideButtonLabel.setText(NSLocalizedString("Workout", comment: "The text for the Watch button for enabling workout mode"))
             }

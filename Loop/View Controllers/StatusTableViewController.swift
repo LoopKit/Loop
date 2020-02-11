@@ -823,22 +823,22 @@ final class StatusTableViewController: ChartsTableViewController {
                     case .preMeal, .legacyWorkout:
                         assertionFailure("Pre-meal and legacy workout modes should not produce status rows")
                     case .preset(let preset):
-                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active override preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
+                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active custom preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
                     case .custom:
-                        cell.titleLabel.text = NSLocalizedString("Custom Override", comment: "The title of the cell indicating a generic temporary override is enabled")
+                        cell.titleLabel.text = NSLocalizedString("Custom Preset", comment: "The title of the cell indicating a generic custom preset is enabled")
                     }
 
                     if override.isActive() {
                         switch override.duration {
                         case .finite:
                             let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
-                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a custom preset end date"), endTimeText)
                         case .indefinite:
                             cell.subtitleLabel.text = nil
                         }
                     } else {
                         let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
-                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
+                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a custom preset start date"), startTimeText)
                     }
 
                     cell.accessoryView = nil
