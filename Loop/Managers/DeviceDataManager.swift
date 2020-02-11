@@ -12,6 +12,7 @@ import LoopKitUI
 import LoopCore
 import LoopTestingKit
 import UserNotifications
+import Foundation
 
 final class DeviceDataManager {
 
@@ -21,6 +22,8 @@ final class DeviceDataManager {
 
 
     private let log = DiagnosticLogger.shared.forCategory("DeviceManager")
+
+    private var lastGlucose:NewGlucoseSample?
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -123,6 +126,7 @@ final class DeviceDataManager {
 
         setupPump()
         setupCGM()
+        onIdleSpikeUpdate();
     }
 
     var isCGMManagerValidPumpManager: Bool {
@@ -507,6 +511,56 @@ extension DeviceDataManager: PumpManagerDelegate {
     func startDateToFilterNewPumpEvents(for manager: PumpManager) -> Date {
         dispatchPrecondition(condition: .onQueue(queue))
         return loopManager.doseStore.pumpEventQueryAfterDate
+    }
+
+    @objc func onIdleSpikeUpdate() {
+        log.default("PumpManager:\(type(of: pumpManager)) idle spike update")
+
+        lastBLEDrivenUpdate = Date()
+
+        self.cgmManager?.fetchNewDataIfNeeded { (result) in
+
+            if case .newData(let glucoseList) = result {
+                AnalyticsManager.shared.didFetchNewCGMData()
+                self.lastGlucose = glucoseList.first
+            } else if (self.lastGlucose == nil) {
+                self.lastGlucose = self.cgmManager?.sensorState as? NewGlucoseSample
+            }
+
+            if let manager = self.cgmManager {
+                self.queue.async {
+                    self.cgmManager(manager, didUpdateWith: result)
+                }
+                self.queue.async {
+                    self.setNextTimer()
+                }
+            }
+        }
+
+
+    }
+
+    func setNextTimer() {
+        dispatchPrecondition(condition: .onQueue(queue))
+        var intervalToNextUpdate = TimeInterval(minutes: 1.0)
+        var dateFromLastUpdate = self.lastGlucose?.date
+        if (dateFromLastUpdate != nil) {
+            self.log.default("Last spike update \(dateFromLastUpdate!.timeIntervalSinceNow.minutes) minutes ago")
+            dateFromLastUpdate = dateFromLastUpdate!.addingTimeInterval(TimeInterval(minutes: 5.25))
+            intervalToNextUpdate = dateFromLastUpdate!.timeIntervalSinceNow
+            self.log.default("Next spike update in \((intervalToNextUpdate/60).rounded(.towardZero)) minutes and \(intervalToNextUpdate.truncatingRemainder(dividingBy: 60.0)) seconds")
+        }
+        if (intervalToNextUpdate < 0) {
+            if (intervalToNextUpdate < .minutes(-5)) {
+                intervalToNextUpdate = TimeInterval(minutes:5.0)
+            } else {
+                intervalToNextUpdate = TimeInterval(minutes:1.0)
+            }
+        }
+        DispatchQueue.main.async {
+            // timer needs a runloop?
+            Timer.scheduledTimer(timeInterval: intervalToNextUpdate, target: self, selector: #selector(self.onIdleSpikeUpdate), userInfo: nil, repeats: false)
+        }
     }
 }
 
