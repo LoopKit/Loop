@@ -19,7 +19,6 @@ private extension RefreshContext {
     static let all: Set<RefreshContext> = [.glucose, .targets]
 }
 
-// TODO: this will need to be updated to reflect insulin model as well
 final class BolusViewController: ChartsTableViewController, IdentifiableClass, UITextFieldDelegate {
     private enum Row: Int {
         case carbEntry = 0
@@ -110,6 +109,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         default:
             break
         }
+        
         super.prepare(for: segue, sender: sender)
         
         bolusAmountTextField.resignFirstResponder()
@@ -661,26 +661,7 @@ extension BolusViewController: InsulinModelSettingsViewControllerDelegate {
         }
         
         self.enteredBolusInsulinModel = model
-        
-        /*guard let indexPath = self.tableView.indexPathForSelectedRow else {
-            return
-        }
 
-        switch sections[indexPath.section] {
-        case .configuration:
-            switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .insulinModel:
-                if let model = controller.insulinModel {
-                    dataManager.loopManager.insulinModelSettings = InsulinModelSettings(model: model)
-                }
-
-                tableView.reloadRows(at: [indexPath], with: .none)
-            default:
-                assertionFailure()
-            }
-        default:
-            assertionFailure()
-        }*/
     }
 }
 

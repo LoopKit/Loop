@@ -1080,6 +1080,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.configuration = .manualCorrection
+            vc.enteredBolusInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
             AnalyticsManager.shared.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
