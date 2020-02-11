@@ -23,13 +23,16 @@ class ServicesManager {
 
     private let servicesLock = UnfairLock()
 
-    init(pluginManager: PluginManager, deviceDataManager: DeviceDataManager) {
+    init(
+        pluginManager: PluginManager,
+        analyticsServicesManager: AnalyticsServicesManager,
+        loggingServicesManager: LoggingServicesManager,
+        remoteDataServicesManager: RemoteDataServicesManager
+    ) {
         self.pluginManager = pluginManager
-
-        self.analyticsServicesManager = AnalyticsServicesManager()
-        self.loggingServicesManager = LoggingServicesManager()
-        self.remoteDataServicesManager = RemoteDataServicesManager()
-        self.remoteDataServicesManager.delegate = deviceDataManager
+        self.analyticsServicesManager = analyticsServicesManager
+        self.loggingServicesManager = loggingServicesManager
+        self.remoteDataServicesManager = remoteDataServicesManager
 
         restoreState()
     }

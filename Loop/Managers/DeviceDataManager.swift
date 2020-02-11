@@ -66,9 +66,9 @@ final class DeviceDataManager {
 
     private(set) var servicesManager: ServicesManager!
 
-    var analyticsServicesManager: AnalyticsServicesManager { return servicesManager.analyticsServicesManager }
+    var analyticsServicesManager: AnalyticsServicesManager
 
-    var loggingServicesManager: LoggingServicesManager { return servicesManager.loggingServicesManager }
+    var loggingServicesManager: LoggingServicesManager
 
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
 
@@ -92,7 +92,10 @@ final class DeviceDataManager {
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         deviceLog = PersistentDeviceLog(storageFile: documentsDirectory.appendingPathComponent("DeviceLog.sqlite"))
-        
+
+        loggingServicesManager = LoggingServicesManager()
+        analyticsServicesManager = AnalyticsServicesManager()
+
         self.pluginManager = pluginManager
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
@@ -107,8 +110,6 @@ final class DeviceDataManager {
             self.cgmManager = pumpManager as? CGMManager
         }
 
-        servicesManager = ServicesManager(pluginManager: pluginManager, deviceDataManager: self)
-
         statusExtensionManager = StatusExtensionDataManager(deviceDataManager: self)
 
         loopManager = LoopDataManager(
@@ -118,6 +119,22 @@ final class DeviceDataManager {
             analyticsServicesManager: analyticsServicesManager
         )
         watchManager = WatchDataManager(deviceManager: self)
+        
+        let remoteDataServicesManager = RemoteDataServicesManager(
+            carbStore: loopManager.carbStore,
+            doseStore: loopManager.doseStore,
+            dosingDecisionStore: loopManager.dosingDecisionStore,
+            glucoseStore: loopManager.glucoseStore,
+            settingsStore: loopManager.settingsStore
+        )
+        
+        servicesManager = ServicesManager(
+            pluginManager: pluginManager,
+            analyticsServicesManager: analyticsServicesManager,
+            loggingServicesManager: loggingServicesManager,
+            remoteDataServicesManager: remoteDataServicesManager
+        )
+
 
         if debugEnabled {
             testingScenariosManager = LocalTestingScenariosManager(deviceManager: self)
@@ -643,31 +660,6 @@ extension DeviceDataManager: SettingsStoreDelegate {
         remoteDataServicesManager.settingsStoreHasUpdatedSettingsData(settingsStore)
     }
     
-}
-
-// MARK: - RemoteDataServicesManagerDelegate
-extension DeviceDataManager: RemoteDataServicesManagerDelegate {
-    
-    var carbStore: CarbStore? {
-        return loopManager.carbStore
-    }
-    
-    var doseStore: DoseStore? {
-        return loopManager.doseStore
-    }
-
-    var dosingDecisionStore: DosingDecisionStore? {
-        return loopManager.dosingDecisionStore
-    }
-
-    var glucoseStore: GlucoseStore? {
-        return loopManager.glucoseStore
-    }
-    
-    var settingsStore: SettingsStore? {
-        return loopManager.settingsStore
-    }
-
 }
 
 // MARK: - TestingPumpManager
