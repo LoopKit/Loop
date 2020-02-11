@@ -992,7 +992,7 @@ extension LoopDataManager {
                     let potentialCarbEffect = try carbStore.glucoseEffects(
                         of: [potentialCarbEntry],
                         startingAt: retrospectiveStart,
-                        effectVelocities: nil // ICE is irrelevant for future entries
+                        effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
                     )
 
                     effects.append(potentialCarbEffect)
