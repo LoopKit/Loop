@@ -1,5 +1,14 @@
 # Loop for iOS
 
+# You are on branch spike-autobolus
+This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
+
+Last updated on Feb 15, 2020
+
+Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/cf8e391e58c66006fa26cff76f126640b356227b
+
+Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/1bb99e70f51d7e9ba58dcaf47e54b282fe3a65ad
+
 ![App Icon](/Loop/Assets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
 
 [![Build Status](https://travis-ci.org/LoopKit/Loop.svg?branch=master)](https://travis-ci.org/LoopKit/Loop)
