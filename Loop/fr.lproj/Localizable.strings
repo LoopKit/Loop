@@ -91,7 +91,7 @@
 "Are you sure you want to delete this CGM?" = "Voulez-vous vraiment supprimer ce CGM ?";
 
 /* Format fragment for a specific time */
-"at %@" = "at %@";
+"at %@" = "à %@";
 
 /* The message displayed during a device authentication prompt for bolus specification */
 "Authenticate to Bolus %@ Units" = "Authentifier pour effectuer un Bolus %@ Unités";
@@ -117,7 +117,7 @@
 "Cancel" = "Annuler";
 
 /* The title of the cell indicating a bolus is being canceled */
-"Canceling Bolus" = "Annulation du Bolus en cours";
+"Canceling Bolus" = "Annulation du bolus en cours";
 
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Effets des glucides";
@@ -179,7 +179,7 @@
 "Delete CGM" = "Supprimer CGM";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Limites de Administration";
+"Delivery Limits" = "Limites d'administration";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Désactive";
@@ -197,7 +197,7 @@
 "Error Resuming" = "Erreur lors de la reprise";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Éventuellement %@";
+"Eventually %@" = "Prévision : %@";
 
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Dépasse le bolus maximal";
@@ -247,13 +247,13 @@
 "Insulin Sensitivities" = "Facteurs de sensibilité à l'insuline";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
-"Invalid data: %1$@" = "Données Incorrectes: %1$@";
+"Invalid data: %1$@" = "Données incorrectes: %1$@";
 
 /* The title text for the issue report cell */
 "Issue Report" = "Editer rapport";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Lance Application CGM";
+"Launches CGM app" = "Lance l'application CGM";
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Chargement...";
@@ -277,7 +277,7 @@
 "Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "Pas d'appareil connecté, ou échec durant la connectionà l'appareil";
+"No connected devices, or failure during device connection" = "Pas d'appareil connecté, ou échec prendant la connection à l'appareil";
 
 /* The title text for the override presets */
 "Override Presets" = "Préréglages de surcharges";

@@ -56,7 +56,7 @@
 "DyC-Sv-qP8.text" = "Dispositifs";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "Éventuellement 92 mg/dL";
+"E41-FN-nkk.text" = "Prévision : 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Observé";
@@ -107,7 +107,7 @@
 "PJv-p9-cFe.text" = "Un modèle de l'activité de l'insuline est utilisé pour estimer les effets de l'insuline sur le niveau de la glycémie. Un modèle fiable peut aider à empêcher un empillement d'insuline et recommender des traitements correctifs en toute sécurité.";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
-"Rse-x8-amW.text" = "Éventuellement 92 mg/dL";
+"Rse-x8-amW.text" = "Prévision : 92 mg/dL";
 
 /* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
 "SQx-au-ZcM.text" = "g COB";
