@@ -608,6 +608,34 @@ extension LoopDataManager {
             }
         }
     }
+    
+    /// Adds a new external bolus insulin dose
+    ///
+    /// - Parameters:
+    ///   - startDate: The date the dose was started at.
+    ///   - value: The number of Units in the dose.
+    ///   - insulinModel: The type of insulin model that should be used for the dose.
+    func logOutsideBolusInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: insulinModel)
+        
+        logOutsideBolusInsulinDose(dose: dose)
+    }
+    
+    /// Adds a new external bolus insulin dose
+    ///
+    /// - Parameters:
+    ///   - dose: The dose to be added.
+    func logOutsideBolusInsulinDose(dose: DoseEntry) {
+        let rawData = Data(UUID().uuidString.utf8)
+        let events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "ExternalBolus", type: .bolus)]
+        
+        // TODO: would this be correct for lastReconciliation?
+        addPumpEvents(events, lastReconciliation: nil) { (error) in
+            if let error = error {
+                self.logger.error(error)
+            }
+        }
+    }
 
     /// Adds and stores a pump reservoir volume
     ///
