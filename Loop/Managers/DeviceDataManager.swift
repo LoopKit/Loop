@@ -25,8 +25,6 @@ final class DeviceDataManager {
     
     private var lastGlucose:NewGlucoseSample?
 
-    private var lastGlucose:NewGlucoseSample?
-
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
 
