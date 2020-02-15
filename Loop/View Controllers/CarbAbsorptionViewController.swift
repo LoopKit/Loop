@@ -533,9 +533,16 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
-                        // Enact the user-entered bolus
                         if let bolus = bolusViewController.bolus, bolus > 0 {
-                            self.deviceManager.enactBolus(units: bolus) { _ in }
+                            let pumpInsulinModel = self.deviceManager.loopManager.insulinModelSettings?.model
+                            // The dose is an external dose.
+                            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
+                                // TODO: would Date() be appropriate here?!?
+                                self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                            // Enact the user-entered bolus
+                            } else {
+                                self.deviceManager.enactBolus(units: bolus) { _ in }
+                            }
                         }
                     case .failure(let error):
                         // Ignore bolus wizard errors
@@ -546,7 +553,15 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            deviceManager.enactBolus(units: bolus) { _ in }
+            let pumpInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
+            // the dose is an external dose
+            // TODO: this a valid way to compare the models?
+            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
+                // TODO: would Date() be appropriate here?!?
+                deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+            } else {
+                deviceManager.enactBolus(units: bolus) { _ in }
+            }
         }
     }
 }

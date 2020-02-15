@@ -1119,9 +1119,16 @@ final class StatusTableViewController: ChartsTableViewController {
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
-                        // Enact the user-entered bolus
                         if let bolus = bolusViewController.bolus, bolus > 0 {
-                            self.deviceManager.enactBolus(units: bolus) { _ in }
+                            let pumpInsulinModel = self.deviceManager.loopManager.insulinModelSettings?.model
+                            // The dose is an external dose.
+                            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
+                                // TODO: would Date() be appropriate here?!?
+                                self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                            // Enact the user-entered bolus
+                            } else {
+                                self.deviceManager.enactBolus(units: bolus) { _ in }
+                            }
                         }
                     case .failure(let error):
                         // Ignore bolus wizard errors
@@ -1134,7 +1141,15 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            self.deviceManager.enactBolus(units: bolus) { _ in }
+            let pumpInsulinModel = self.deviceManager.loopManager.insulinModelSettings?.model
+            // The dose is an external dose.
+            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
+                // TODO: would Date() be appropriate here?!?
+                self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+            // Enact the user-entered bolus
+            } else {
+                self.deviceManager.enactBolus(units: bolus) { _ in }
+            }
         }
     }
 

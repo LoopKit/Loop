@@ -68,6 +68,19 @@ extension ExponentialInsulinModelPreset: InsulinModel {
     public func percentEffectRemaining(at time: TimeInterval) -> Double {
         return model.percentEffectRemaining(at: time)
     }
+
+    public func isEqualTo(other: InsulinModel?) -> Bool {
+        if let other = other as? ExponentialInsulinModelPreset {
+            // TODO: this is bad style (sigh)
+            // they're both insulinmodelpresets
+            let currentModel = model as! ExponentialInsulinModel
+            return currentModel.actionDuration == other.actionDuration && currentModel.peakActivityTime == other.peakActivity && currentModel.delay == other.effectDelay
+        }
+        if let other = other as? ExponentialInsulinModel {
+            return model.isEqualTo(other: other)
+        }
+        return false
+    }
 }
 
 
