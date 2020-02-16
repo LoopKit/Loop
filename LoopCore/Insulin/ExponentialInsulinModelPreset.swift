@@ -7,7 +7,6 @@
 
 import LoopKit
 
-
 public enum ExponentialInsulinModelPreset: String {
     case humalogNovologAdult
     case humalogNovologChild
@@ -80,6 +79,10 @@ extension ExponentialInsulinModelPreset: InsulinModel {
             return model.isEqualTo(other: other)
         }
         return false
+    }
+    
+    public func getExponentialModel() -> InsulinModel {
+        return model
     }
 }
 

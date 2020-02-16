@@ -11,19 +11,6 @@ import LoopKit
 public enum InsulinModelSettings {
     case exponentialPreset(ExponentialInsulinModelPreset)
     case walsh(WalshInsulinModel)
-
-    // TODO: add list of all possible allowed insulin models
-    // currently:
-    //[
-    //    WalshInsulinModel(actionDuration: .hours(6)),
-    //    ExponentialInsulinModelPreset.humalogNovologAdult,
-    //    ExponentialInsulinModelPreset.humalogNovologChild,
-    //    ExponentialInsulinModelPreset.fiasp
-    //]
-    
-    
-    // TODO: would we want users to be able to add new models w/o having to rebuild?
-    // ex: exponential with 350 min peak
     
     public var model: InsulinModel {
         switch self {
