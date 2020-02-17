@@ -16,6 +16,8 @@ extension InsulinModelSettings {
             return model.title
         case .walsh(let model):
             return model.title
+        case .inhaled(let model):
+            return model.title
         }
     }
 }
@@ -40,7 +42,7 @@ extension ExponentialInsulinModelPreset {
         case .humalogNovologChild:
             return NSLocalizedString("An adjustment to the adult model based on empirical effects in children.", comment: "Subtitle of Rapid-Acting – Children preset")
         case .fiasp:
-            return NSLocalizedString("A model based on the published absorption of Fiasp insulin.", comment: "Subtitle of Fiasp preset")
+            return NSLocalizedString("A model based on the published absorption of Fiasp ultra-rapid-acting insulin.", comment: "Subtitle of Fiasp preset")
         }
     }
 }
@@ -53,5 +55,15 @@ extension WalshInsulinModel {
 
     var subtitle: String {
         return NSLocalizedString("The legacy model used by Loop, allowing customization of action duration.", comment: "Subtitle description of Walsh insulin model setting")
+    }
+}
+
+extension InhaledInsulinModel {
+    var title: String {
+        return NSLocalizedString("Inhaled", comment: "Title of inhaled insulin model setting")
+    }
+
+    var subtitle: String {
+        return NSLocalizedString("A model based on the published absorption of inhaled insulin.", comment: "Subtitle description of inhaled insulin model setting")
     }
 }
