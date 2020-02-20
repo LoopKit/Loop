@@ -342,7 +342,11 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     private func updateDeliverButtonState() {
         let deliverText = NSLocalizedString("Deliver", comment: "The button text to initiate a bolus")
-        if potentialCarbEntry == nil {
+        if let model = enteredBolusInsulinModel, !model.isEqualTo(other: deviceManager.loopManager.insulinModelSettings?.model) {
+            footerView.primaryButton.setTitle(NSLocalizedString("Log Dose", comment: "The button text to log an insulin dose not given by the pump"), for: .normal)
+            footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
+            footerView.primaryButton.tintColor = enteredBolusAmount != nil && enteredBolusAmount! > 0 ? .alternateBlue : .systemBlue
+        } else if potentialCarbEntry == nil {
             footerView.primaryButton.setTitle(deliverText, for: .normal)
             footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
         } else {
@@ -351,6 +355,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 footerView.primaryButton.tintColor = isBolusRecommended ? .alternateBlue : .systemBlue
             } else {
                 footerView.primaryButton.setTitle(deliverText, for: .normal)
+                footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
                 footerView.primaryButton.tintColor = .systemBlue
             }
         }
@@ -377,6 +382,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             case let model as WalshInsulinModel:
                 insulinModelLabel?.text = model.title
             case let model as ExponentialInsulinModelPreset:
+                insulinModelLabel?.text = model.title
+            case let model as InhaledInsulinModel:
                 insulinModelLabel?.text = model.title
             default:
                 break
@@ -500,9 +507,15 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 insulinModelLabel?.text = model.title
             case let model as ExponentialInsulinModelPreset:
                 insulinModelLabel?.text = model.title
+            case let model as InhaledInsulinModel:
+                insulinModelLabel?.text = model.title
             default:
                 break
             }
+            
+            updateDeliverButtonState()
+            predictionRecomputation?.cancel()
+            recomputePrediction()
         }
     }
 
