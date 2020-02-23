@@ -473,7 +473,9 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         updateDeliverButtonState()
 
         predictionRecomputation?.cancel()
-        let predictionRecomputation = DispatchWorkItem(block: recomputePrediction)
+        let predictionRecomputation = DispatchWorkItem { [weak self] in
+             self?.recomputePrediction()
+         }
         self.predictionRecomputation = predictionRecomputation
         let recomputeDelayMS = 300
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(recomputeDelayMS), execute: predictionRecomputation)
