@@ -619,6 +619,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
         let hudIsVisible = self.shouldShowHUD
         let statusIsVisible = self.shouldShowStatus
+        
+        hudView?.glucoseHUD.isVisible = hudIsVisible
 
         tableView.beginUpdates()
 
