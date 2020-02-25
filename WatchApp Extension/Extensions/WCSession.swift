@@ -125,4 +125,24 @@ extension WCSession {
             }
         )
     }
+    
+    func sendContextRequestMessage(_ userInfo: WatchContextRequestUserInfo, completionHandler: @escaping (Result<WatchContext>) -> Void) throws {
+        guard activationState == .activated else {
+            throw MessageError.activation
+        }
+
+        guard isReachable else {
+            throw MessageError.reachability
+        }
+
+        sendMessage(userInfo.rawValue, replyHandler: { (reply) in
+            if let context = WatchContext(rawValue: reply) {
+                completionHandler(.success(context))
+            } else {
+                completionHandler(.failure(MessageError.decoding))
+            }
+        }, errorHandler: { (error) in
+            completionHandler(.failure(error))
+        })
+    }
 }

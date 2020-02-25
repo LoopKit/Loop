@@ -69,7 +69,7 @@ final class ActionHUDController: HUDInterfaceController {
             overrideButtonGroup.state = .off
         }
     }
-
+    
     private var canEnableOverride: Bool {
         if FeatureFlags.sensitivityOverridesEnabled {
             return !loopManager.settings.overridePresets.isEmpty

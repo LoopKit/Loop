@@ -31,6 +31,7 @@ class HUDInterfaceController: WKInterfaceController {
         }
         
         loopManager.requestGlucoseBackfillIfNecessary()
+        loopManager.requestContextUpdate()
     }
 
     override func didDeactivate() {

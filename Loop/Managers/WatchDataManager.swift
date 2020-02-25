@@ -270,6 +270,11 @@ extension WatchDataManager: WCSessionDelegate {
             } else {
                 replyHandler([:])
             }
+        case WatchContextRequestUserInfo.name?:
+            self.createWatchContext { (context) in
+                // Send back the updated prediction and recommended bolus
+                replyHandler(context.rawValue)
+            }
         default:
             replyHandler([:])
         }
