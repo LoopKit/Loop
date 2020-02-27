@@ -534,13 +534,15 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                     switch result {
                     case .success:
                         if let bolus = bolusViewController.bolus, bolus > 0 {
-                            let pumpInsulinModel = self.deviceManager.loopManager.insulinModelSettings?.model
-                            // The dose is an external dose.
-                            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
-                                // TODO: would Date() be appropriate here?!?
-                                self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                            switch bolusViewController.configuration {
+                            case .logging:
+                                if let model = bolusViewController.enteredBolusInsulinModel {
+                                    self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                                } else {
+                                    self.log.error("Failed to get insulin model to log dose")
+                                }
                             // Enact the user-entered bolus
-                            } else {
+                            default:
                                 self.deviceManager.enactBolus(units: bolus) { _ in }
                             }
                         }
@@ -553,14 +555,16 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            let pumpInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
-            // the dose is an external dose
-            // TODO: this a valid way to compare the models?
-            if let model = bolusViewController.enteredBolusInsulinModel, !model.isEqualTo(other: pumpInsulinModel) {
-                // TODO: would Date() be appropriate here?!?
-                deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
-            } else {
-                deviceManager.enactBolus(units: bolus) { _ in }
+            switch bolusViewController.configuration {
+            case .logging:
+                if let model = bolusViewController.enteredBolusInsulinModel {
+                    self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                } else {
+                    self.log.error("Failed to get insulin model to log dose")
+                }
+            // Enact the user-entered bolus
+            default:
+                self.deviceManager.enactBolus(units: bolus) { _ in }
             }
         }
     }
