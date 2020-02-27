@@ -119,6 +119,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case manualCorrection
         case newCarbEntry(NewCarbEntry)
         case updatedCarbEntry(from: StoredCarbEntry, to: NewCarbEntry)
+        case logging
     }
 
     var configuration: Configuration = .manualCorrection {
@@ -128,13 +129,18 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 title = NSLocalizedString("Bolus", comment: "Title text for bolus screen (manual correction)")
             case .newCarbEntry, .updatedCarbEntry:
                 title = NSLocalizedString("Meal Bolus", comment: "Title text for bolus screen following a carb entry")
+            case .logging:
+                 title = NSLocalizedString("Log Dose", comment: "Title text for logging a dose")
+                isLoggingDose = true
             }
         }
     }
+    
+    var isLoggingDose: Bool = false
 
     var originalCarbEntry: StoredCarbEntry? {
         switch configuration {
-        case .manualCorrection:
+        case .manualCorrection, .logging:
             return nil
         case .newCarbEntry:
             return nil
@@ -145,7 +151,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     private var potentialCarbEntry: NewCarbEntry? {
         switch configuration {
-        case .manualCorrection:
+        case .manualCorrection, .logging:
             return nil
         case .newCarbEntry(let entry):
             return entry
@@ -340,7 +346,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     private func updateDeliverButtonState() {
         let deliverText = NSLocalizedString("Deliver", comment: "The button text to initiate a bolus")
-        if let model = enteredBolusInsulinModel, !model.isEqualTo(other: deviceManager.loopManager.insulinModelSettings?.model) {
+        if isLoggingDose {
             footerView.primaryButton.setTitle(NSLocalizedString("Log Dose", comment: "The button text to log an insulin dose not given by the pump"), for: .normal)
             footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
             footerView.primaryButton.tintColor = enteredBolusAmount != nil && enteredBolusAmount! > 0 ? .alternateBlue : .systemBlue
@@ -394,6 +400,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case .carbEntry where potentialCarbEntry == nil:
             return 0
         case .notice where bolusRecommendation?.notice == nil:
+            return 0
+        case .model where !isLoggingDose:
             return 0
         default:
             return super.tableView(tableView, heightForRowAt: indexPath)
