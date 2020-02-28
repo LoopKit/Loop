@@ -57,6 +57,8 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         }
     }
 
+    var glucoseChartCellHeight: CGFloat?
+
     fileprivate var quantity: HKQuantity? {
         didSet {
             updateContinueButtonEnabled()
@@ -151,6 +153,9 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: footerView.primaryButton.titleLabel?.text, style: .plain, target: self, action: #selector(continueButtonPressed))
         navigationItem.rightBarButtonItem?.isEnabled = false
+
+        // Sets text for back button on bolus screen
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Carb Entry", comment: "Back button text for bolus screen to return to carb entry screen"), style: .plain, target: nil, action: nil)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -345,6 +350,10 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             bolusVC.configuration = .newCarbEntry(updatedEntry)
         }
         bolusVC.selectedDefaultAbsorptionTimeEmoji = selectedDefaultAbsorptionTimeEmoji
+        bolusVC.glucoseChartCellHeight = glucoseChartCellHeight
+        if #available(iOS 13.0, *) {
+            bolusVC.isModalInPresentation = true
+        }
 
         show(bolusVC, sender: footerView.primaryButton)
     }

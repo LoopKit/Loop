@@ -957,6 +957,10 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
+    private var glucoseChartCellHeight: CGFloat {
+        self.tableView(tableView, heightForRowAt: IndexPath(row: ChartRow.glucose.rawValue, section: Section.charts.rawValue))
+    }
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
@@ -1072,6 +1076,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.glucoseChartCellHeight = glucoseChartCellHeight
 
             if let activity = sender as? NSUserActivity {
                 vc.restoreUserActivityState(activity)
@@ -1083,6 +1088,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.configuration = .manualCorrection
+            vc.glucoseChartCellHeight = glucoseChartCellHeight
             deviceManager.analyticsServicesManager.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
