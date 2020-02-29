@@ -40,7 +40,11 @@ extension UIColor {
     static let chartNowLine = HIGWhiteColor().withAlphaComponent(0.2)
 
     static let chartPlatter = HIGWhiteColorDark()
-
+   
+    static let agingColor = HIGYellowColor()
+    
+    static let staleColor = HIGRedColor()
+    
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color
 
