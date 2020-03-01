@@ -55,6 +55,7 @@ final class ActionHUDController: HUDInterfaceController {
             activeOverrideContext = nil
         }
 
+        updateForPreMeal(enabled: loopManager.settings.preMealOverride?.isActive() == true)
         updateForOverrideContext(activeOverrideContext)
 
         if loopManager.settings.preMealTargetRange == nil {
@@ -78,31 +79,77 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
+    private func updateForPreMeal(enabled: Bool) {
+        if enabled {
+            preMealButtonGroup.state = .on
+        } else {
+            preMealButtonGroup.turnOff()
+        }
+    }
+
     private func updateForOverrideContext(_ context: TemporaryScheduleOverride.Context?) {
         switch context {
         case nil:
-            preMealButtonGroup.turnOff()
             overrideButtonGroup.turnOff()
-        case .preMeal?:
-            preMealButtonGroup.state = .on
-            overrideButtonGroup.turnOff()
-        case .legacyWorkout?, .preset?, .custom?:
+        case .preset?, .custom?:
+            overrideButtonGroup.state = .on
+        case .legacyWorkout?:
             preMealButtonGroup.turnOff()
             overrideButtonGroup.state = .on
+        case .preMeal?:
+            assertionFailure()
         }
     }
 
     // MARK: - Menu Items
 
+    private var pendingMessageResponses = 0
+
     @IBAction func togglePreMealMode() {
-        let override: TemporaryScheduleOverride?
-        if preMealButtonGroup.state == .on {
-            override = nil
+        let isPreMealEnabled = preMealButtonGroup.state == .off
+        updateForPreMeal(enabled: isPreMealEnabled)
+        pendingMessageResponses += 1
+
+        var settings = loopManager.settings
+        if isPreMealEnabled {
+            settings.enablePreMealOverride(for: .hours(1))
         } else {
-            override = loopManager.settings.preMealOverride(for: .hours(1))
+            settings.clearOverride(matching: .preMeal)
         }
 
-        sendOverride(override)
+        let userInfo = LoopSettingsUserInfo(settings: settings)
+        do {
+            try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
+                DispatchQueue.main.async {
+                    self.pendingMessageResponses -= 1
+
+                    switch result {
+                    case .success(let context):
+                        if self.pendingMessageResponses == 0 {
+                            self.loopManager.settings.preMealOverride = settings.preMealOverride
+                        }
+
+                        ExtensionDelegate.shared().loopManager.updateContext(context)
+                    case .failure(let error):
+                        if self.pendingMessageResponses == 0 {
+                            ExtensionDelegate.shared().present(error)
+                            self.updateForPreMeal(enabled: isPreMealEnabled)
+                        }
+                    }
+                }
+            })
+        } catch {
+            pendingMessageResponses -= 1
+            if pendingMessageResponses == 0 {
+                updateForPreMeal(enabled: isPreMealEnabled)
+                presentAlert(
+                    withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
+                    message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
+                    preferredStyle: .alert,
+                    actions: [.dismissAction()]
+                )
+            }
+        }
     }
 
     @IBAction func toggleOverride() {
@@ -118,14 +165,16 @@ final class ActionHUDController: HUDInterfaceController {
         }
     }
 
-    private var pendingMessageResponses = 0
-
     private func sendOverride(_ override: TemporaryScheduleOverride?) {
         updateForOverrideContext(override?.context)
         pendingMessageResponses += 1
 
-        var settings = LoopSettings()
+        var settings = loopManager.settings
+        if override?.context == .legacyWorkout {
+            settings.preMealOverride = nil
+        }
         settings.scheduleOverride = override
+
         let userInfo = LoopSettingsUserInfo(settings: settings)
         do {
             try WCSession.default.sendSettingsUpdateMessage(userInfo, completionHandler: { (result) in
@@ -142,7 +191,7 @@ final class ActionHUDController: HUDInterfaceController {
                     case .failure(let error):
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
-                            self.updateForOverrideContext(self.loopManager.settings.scheduleOverride?.context)
+                            self.updateForOverrideContext(override?.context)
                         }
                     }
                 }
@@ -150,14 +199,14 @@ final class ActionHUDController: HUDInterfaceController {
         } catch {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
-                updateForOverrideContext(loopManager.settings.scheduleOverride?.context)
+                updateForOverrideContext(override?.context)
+                presentAlert(
+                    withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
+                    message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
+                    preferredStyle: .alert,
+                    actions: [.dismissAction()]
+                )
             }
-            presentAlert(
-                withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
-                message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
-                preferredStyle: .alert,
-                actions: [.dismissAction()]
-            )
         }
     }
 }

@@ -439,6 +439,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
             if currentContext.contains(.targets) {
                 self.statusCharts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
+                self.statusCharts.preMealOverride = self.deviceManager.loopManager.settings.preMealOverride
                 self.statusCharts.scheduleOverride = self.deviceManager.loopManager.settings.scheduleOverride
             }
             if self.statusCharts.scheduleOverride?.hasFinished() == true {

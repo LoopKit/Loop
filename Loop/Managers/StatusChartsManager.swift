@@ -79,6 +79,16 @@ extension StatusChartsManager {
         }
     }
 
+    var preMealOverride: TemporaryScheduleOverride? {
+        get {
+            return glucose.preMealOverride
+        }
+        set {
+            glucose.preMealOverride = newValue
+            invalidateChart(atIndex: ChartIndex.glucose.rawValue)
+        }
+    }
+
     var scheduleOverride: TemporaryScheduleOverride? {
         get {
             return glucose.scheduleOverride
