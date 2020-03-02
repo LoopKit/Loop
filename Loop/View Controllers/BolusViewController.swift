@@ -592,15 +592,27 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         let context = LAContext()
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            context.evaluatePolicy(.deviceOwnerAuthentication,
-                                   localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString),
-                                   reply: { (success, error) in
-                if success {
-                    DispatchQueue.main.async {
-                        self.setBolusAndClose(bolus)
+            if isLoggingDose {
+                context.evaluatePolicy(.deviceOwnerAuthentication,
+                                       localizedReason: String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt for logging an insulin dose"), amountString),
+                                       reply: { (success, error) in
+                    if success {
+                        DispatchQueue.main.async {
+                            self.setBolusAndClose(bolus)
+                        }
                     }
-                }
-            })
+                })
+            } else {
+                context.evaluatePolicy(.deviceOwnerAuthentication,
+                                       localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString),
+                                       reply: { (success, error) in
+                    if success {
+                        DispatchQueue.main.async {
+                            self.setBolusAndClose(bolus)
+                        }
+                    }
+                })
+            }
         } else {
             setBolusAndClose(bolus)
         }
