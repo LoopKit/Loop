@@ -134,7 +134,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             if lhs != rhs {
                 delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
             }
-        // TODO: check this handles it correctly
+        // There's only one type of InhaledInsulinModel, so we can directly call the delegate
         default:
             delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
         }
