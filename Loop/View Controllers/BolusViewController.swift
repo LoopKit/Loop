@@ -403,6 +403,9 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             return 0
         case .model where !isLoggingDose:
             return 0
+        // TODO: would removing the recommended be desired here?
+        case .recommended where isLoggingDose:
+            return 0
         default:
             return super.tableView(tableView, heightForRowAt: indexPath)
         }
