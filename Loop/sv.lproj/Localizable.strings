@@ -200,7 +200,7 @@
 "Error Resuming" = "Fel vid försök att återgå";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
-"Eventually %@" = "Förväntat slutresultat %@";
+"Eventually %@" = "Förväntat %@";
 
 /* The title of the alert describing a maximum bolus validation error */
 "Exceeds Maximum Bolus" = "Överstiger maxbolusdos";
@@ -388,7 +388,7 @@
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat glukosvärde är under tröskelvärdet kommer Loop inte att rekommendera en bolus, utan kommer alltid att föreslå en temporär basal på 0 enheter per timme.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat slutglukosvärde är under tröskelvärdet kommer Loop inte att rekommendera en bolus, utan kommer alltid att föreslå en temporär basal på 0 enheter per timme.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Målvärden för träning";
