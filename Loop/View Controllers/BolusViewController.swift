@@ -346,6 +346,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     private func updateDeliverButtonState() {
         let deliverText = NSLocalizedString("Deliver", comment: "The button text to initiate a bolus")
+
         if isLoggingDose {
             footerView.primaryButton.setTitle(NSLocalizedString("Log Dose", comment: "The button text to log an insulin dose not given by the pump"), for: .normal)
             footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
@@ -359,7 +360,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 footerView.primaryButton.tintColor = isBolusRecommended ? .alternateBlue : .systemBlue
             } else {
                 footerView.primaryButton.setTitle(deliverText, for: .normal)
-                footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
                 footerView.primaryButton.tintColor = .systemBlue
             }
         }
