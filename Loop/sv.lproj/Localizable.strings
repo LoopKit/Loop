@@ -188,7 +188,7 @@
 "Disables" = "Stänger av";
 
 /* The action hint of the workout mode toggle button when disabled */
-"Enables" = "Sätter på";
+"Enables" = "Slår på";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Ange tröskelvärde";
@@ -373,7 +373,7 @@
 "The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassing av effektvaraktighet.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Maximala bolusdosen är %@ enheter";
+"The maximum bolus amount is %@ Units" = "Den maximala bolusdosen är %@ enheter";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";
