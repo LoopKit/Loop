@@ -1185,6 +1185,14 @@ extension LoopDataManager {
         self.predictedGlucose = predictedGlucose
         let predictedGlucoseIncludingPendingInsulin = try predictGlucose(using: settings.enabledEffects, includingPendingInsulin: true)
         self.predictedGlucoseIncludingPendingInsulin = predictedGlucoseIncludingPendingInsulin
+        
+        if( settings.dosingStrategyAutomationEnabled && settings.dosingStrategyThreshold?.rawValue != nil){
+            if( glucose.quantity > HKQuantity(unit : HKUnit.milligramsPerDeciliter, doubleValue: settings.dosingStrategyThreshold!.value)){
+                settings.dosingStrategy = .automaticBolus
+            } else {
+                settings.dosingStrategy = .tempBasalOnly
+            }
+        }
 
         guard
             let maxBasal = settings.maximumBasalRatePerHour,
