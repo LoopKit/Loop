@@ -596,6 +596,8 @@ final class SettingsTableViewController: UITableViewController {
                         vc.delegate = self
                         vc.indexPath = indexPath
                         vc.title = sender?.textLabel?.text
+                        vc.placeholder = "Enter switching threshold"
+                        vc.contextHelp = "If Auto Strategy Switching is enabled, when current glucose is above the switching threshold, Loop will use Automatic Bolus strategy. When glucose is at or below the switching threshold, Loop will use Temp Basal Only strategy."
                         self.show(vc, sender: sender)
                     } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
                         let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
