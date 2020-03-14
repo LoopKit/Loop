@@ -32,6 +32,8 @@ extension ExponentialInsulinModelPreset {
             return NSLocalizedString("Rapid-Acting – Children", comment: "Title of insulin model preset")
         case .fiasp:
             return NSLocalizedString("Fiasp", comment: "Title of insulin model preset")
+        case .afrezza:
+            return NSLocalizedString("Afrezza", comment: "Title of insulin model preset")
         }
     }
 
@@ -43,6 +45,8 @@ extension ExponentialInsulinModelPreset {
             return NSLocalizedString("An adjustment to the adult model based on empirical effects in children.", comment: "Subtitle of Rapid-Acting – Children preset")
         case .fiasp:
             return NSLocalizedString("A model based on the published absorption of Fiasp ultra-rapid-acting insulin.", comment: "Subtitle of Fiasp preset")
+        case .afrezza:
+            return NSLocalizedString("A model based on the published absorption of Afrezza inhaled insulin.", comment: "Subtitle of Afrezza preset")
         }
     }
 }
