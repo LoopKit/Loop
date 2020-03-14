@@ -648,21 +648,29 @@ extension LoopDataManager {
         
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: curve)
         
-        logOutsideBolusInsulinDose(dose: dose)
+        logOutsideBolusInsulinDose(dose: dose) { (error) in
+            if error == nil {
+                self.recommendedBolus = nil
+                self.recommendedTempBasal = nil
+                self.insulinEffect = nil
+                self.notify(forChange: .bolus)
+            }
+        }
     }
     
     /// Adds a new external bolus insulin dose
     ///
     /// - Parameters:
     ///   - dose: The dose to be added.
-    func logOutsideBolusInsulinDose(dose: DoseEntry) {
+    func logOutsideBolusInsulinDose(dose: DoseEntry, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         let rawData = Data(UUID().uuidString.utf8)
-        let events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "ExternalBolus", type: .bolus)]
+        let events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "External Bolus", type: .bolus)]
         
-        // TODO: would this be correct for lastReconciliation?
-        addPumpEvents(events, lastReconciliation: nil) { (error) in
+        // ANNA TODO: would this be correct for lastReconciliation?
+        addPumpEvents(events, lastReconciliation: Date()) { (error) in
             if let error = error {
                 self.logger.error(error)
+                completion(error)
             }
         }
     }
