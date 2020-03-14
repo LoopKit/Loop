@@ -240,8 +240,6 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     self.updateTimelyStats(nil)
                     self.updateTotal()
                 }
-            default:
-                break
             }
         }
     }

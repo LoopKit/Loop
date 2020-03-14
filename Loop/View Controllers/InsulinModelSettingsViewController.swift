@@ -32,7 +32,6 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             }
         }
     }
-    // TODO: change way insulin models are configured so this can be used for dose insulin curve selection
 
     weak var delegate: InsulinModelSettingsViewControllerDelegate?
 
@@ -64,10 +63,11 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
 
     private var allModels: [InsulinModel] = [
         WalshInsulinModel(actionDuration: .hours(6)),
-        InhaledInsulinModel(),
+        //InhaledInsulinModel(),
         ExponentialInsulinModelPreset.humalogNovologAdult,
         ExponentialInsulinModelPreset.humalogNovologChild,
-        ExponentialInsulinModelPreset.fiasp
+        ExponentialInsulinModelPreset.fiasp,
+        ExponentialInsulinModelPreset.afrezza
     ]
 
     private var selectedModelIndex: Int? {
