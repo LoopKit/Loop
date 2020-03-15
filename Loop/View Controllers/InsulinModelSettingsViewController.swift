@@ -42,8 +42,6 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
         didSet {
             if let newValue = insulinModel as? WalshInsulinModel {
                 allModels[walshModelIndex] = newValue
-            } else if let newValue = insulinModel as? InhaledInsulinModel {
-                allModels[inhaledModelIndex] = newValue
             }
 
             refreshContext = true
@@ -59,11 +57,9 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
     var insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue<Double>(startTime: 0, value: 40)])!
 
     fileprivate let walshModelIndex = 0
-    fileprivate let inhaledModelIndex = 1
 
     private var allModels: [InsulinModel] = [
         WalshInsulinModel(actionDuration: .hours(6)),
-        //InhaledInsulinModel(),
         ExponentialInsulinModelPreset.humalogNovologAdult,
         ExponentialInsulinModelPreset.humalogNovologChild,
         ExponentialInsulinModelPreset.fiasp,
@@ -76,10 +72,8 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             return nil
         case is WalshInsulinModel:
             return walshModelIndex
-        case is InhaledInsulinModel:
-            return inhaledModelIndex
         case let selectedModel as ExponentialInsulinModelPreset:
-            for index in 2..<allModels.count {
+            for index in 1..<allModels.count {
                 if selectedModel == (allModels[index] as! ExponentialInsulinModelPreset) {
                     return index
                 }
@@ -134,7 +128,6 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
             if lhs != rhs {
                 delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
             }
-        // There's only one type of InhaledInsulinModel, so we can directly call the delegate
         default:
             delegate?.insulinModelSettingsViewControllerDidChangeValue(self)
         }
@@ -247,11 +240,6 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
                 cell.titleLabel.text = model.title
                 cell.subtitleLabel.text = model.subtitle
             case let model as ExponentialInsulinModelPreset:
-                configureCell(cell, duration: nil)
-
-                cell.titleLabel.text = model.title
-                cell.subtitleLabel.text = model.subtitle
-            case let model as InhaledInsulinModel:
                 configureCell(cell, duration: nil)
 
                 cell.titleLabel.text = model.title
