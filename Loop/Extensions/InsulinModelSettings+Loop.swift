@@ -16,8 +16,6 @@ extension InsulinModelSettings {
             return model.title
         case .walsh(let model):
             return model.title
-        case .inhaled(let model):
-            return model.title
         }
     }
 }
@@ -59,15 +57,5 @@ extension WalshInsulinModel {
 
     var subtitle: String {
         return NSLocalizedString("The legacy model used by Loop, allowing customization of action duration.", comment: "Subtitle description of Walsh insulin model setting")
-    }
-}
-
-extension InhaledInsulinModel {
-    var title: String {
-        return NSLocalizedString("Inhaled", comment: "Title of inhaled insulin model setting")
-    }
-
-    var subtitle: String {
-        return NSLocalizedString("A model based on the published absorption of inhaled insulin.", comment: "Subtitle description of inhaled insulin model setting")
     }
 }

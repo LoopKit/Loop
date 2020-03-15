@@ -387,8 +387,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 insulinModelLabel?.text = model.title
             case let model as ExponentialInsulinModelPreset:
                 insulinModelLabel?.text = model.title
-            case let model as InhaledInsulinModel:
-                insulinModelLabel?.text = model.title
             default:
                 break
             }
@@ -403,7 +401,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             return 0
         case .model where !isLoggingDose:
             return 0
-        // TODO: would removing the recommended be desired here?
+        // ANNA TODO: would removing the recommended be desired here?
         case .recommended where isLoggingDose:
             return 0
         default:
@@ -515,8 +513,6 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             case let model as WalshInsulinModel:
                 insulinModelLabel?.text = model.title
             case let model as ExponentialInsulinModelPreset:
-                insulinModelLabel?.text = model.title
-            case let model as InhaledInsulinModel:
                 insulinModelLabel?.text = model.title
             default:
                 break
