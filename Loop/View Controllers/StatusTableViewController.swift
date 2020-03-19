@@ -1123,7 +1123,7 @@ final class StatusTableViewController: ChartsTableViewController {
                             switch bolusViewController.configuration {
                             case .logging:
                                 if let model = bolusViewController.enteredBolusInsulinModel {
-                                    self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                                    self.deviceManager.loopManager?.logOutsideInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
                                 } else {
                                     self.log.error("Failed to get insulin model to log dose")
                                 }
@@ -1146,7 +1146,7 @@ final class StatusTableViewController: ChartsTableViewController {
             switch bolusViewController.configuration {
             case .logging:
                 if let model = bolusViewController.enteredBolusInsulinModel {
-                    self.deviceManager.loopManager?.logOutsideBolusInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                    self.deviceManager.loopManager?.logOutsideInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
                 } else {
                     self.log.error("Failed to get insulin model to log dose")
                 }

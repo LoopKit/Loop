@@ -24,15 +24,22 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case chart = 0
         case carbEntry
         case notice
+        case date
         case model
         case recommended
         case entry
     }
 
+    private var maximumDateFutureInterval = TimeInterval(hours: 48)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // This gets rid of the empty space at the top.
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 0.01))
+
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 44
+        tableView.register(DateAndDurationTableViewCell.nib(), forCellReuseIdentifier: DateAndDurationTableViewCell.className)
 
         glucoseChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 60)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 200)
 
@@ -93,6 +100,13 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         super.viewWillTransition(to: size, with: coordinator)
     }
     
+    override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        tableView.endEditing(false)
+        tableView.beginUpdates()
+        hideDatePickerCells(excluding: indexPath)
+        return indexPath
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
@@ -137,6 +151,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     }
     
     var isLoggingDose: Bool = false
+
+    var doseDate: Date? = nil
 
     var originalCarbEntry: StoredCarbEntry? {
         switch configuration {
@@ -401,7 +417,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             return 0
         case .model where !isLoggingDose:
             return 0
-        // ANNA TODO: would removing the recommended be desired here?
+        case .date where !isLoggingDose:
+            return 0
         case .recommended where isLoggingDose:
             return 0
         default:
@@ -418,8 +435,31 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         default:
             break
         }
+        
+        tableView.endUpdates()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let row = Row(rawValue: indexPath.row)
+        switch row {
+        case .date:
+            let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationTableViewCell.className) as! DateAndDurationTableViewCell
+
+           cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the bolus dose date picker cell")
+           cell.datePicker.isEnabled = true
+           cell.datePicker.datePickerMode = .dateAndTime
+           cell.datePicker.maximumDate = Date(timeIntervalSinceNow: maximumDateFutureInterval)
+           cell.datePicker.minuteInterval = 1
+           cell.date = Date()
+           cell.delegate = self
+
+           return cell
+        default:
+            return super.tableView(tableView, cellForRowAt: indexPath)
+        }
+    }
+            
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let row = Row(rawValue: indexPath.row)
         switch row {
@@ -705,6 +745,19 @@ extension UIColor {
             })
         } else {
             return UIColor(red: 50 / 255, green: 148 / 255, blue: 255 / 255, alpha: 1.0)
+        }
+    }
+}
+
+extension BolusViewController: DatePickerTableViewCellDelegate {
+    func datePickerTableViewCellDidUpdateDate(_ cell: DatePickerTableViewCell) {
+        guard let row = tableView.indexPath(for: cell)?.row else { return }
+
+        switch Row(rawValue: row) {
+        case .date?:
+            doseDate = cell.date
+        default:
+            break
         }
     }
 }

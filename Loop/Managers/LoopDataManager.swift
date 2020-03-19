@@ -629,13 +629,13 @@ extension LoopDataManager {
         }
     }
     
-    /// Adds a new external bolus insulin dose
+    /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
     ///
     /// - Parameters:
     ///   - startDate: The date the dose was started at.
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
-    func logOutsideBolusInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
+    func logOutsideInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
 
         var curve: InsulinModel? {
             switch insulinModel {
@@ -648,7 +648,7 @@ extension LoopDataManager {
         
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: curve)
         
-        logOutsideBolusInsulinDose(dose: dose) { (error) in
+        logOutsideInsulinDose(dose: dose) { (error) in
             if error == nil {
                 self.recommendedBolus = nil
                 self.recommendedTempBasal = nil
@@ -658,14 +658,18 @@ extension LoopDataManager {
         }
     }
     
-    /// Adds a new external bolus insulin dose
+    /// Logs a new external bolus insulin dose in the DoseStore and HealthKit
     ///
     /// - Parameters:
     ///   - dose: The dose to be added.
-    func logOutsideBolusInsulinDose(dose: DoseEntry, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
+    func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         let rawData = Data(UUID().uuidString.utf8)
         let events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "External Bolus", type: .bolus)]
         
+        // ANNA TODO: how to make sure this gets correctly reverted once the dose expires??
+        if let model = dose.insulinModel {
+            doseStore.longestEffectDuration = max(doseStore.longestEffectDuration, model.effectDuration)
+        }
         // ANNA TODO: would this be correct for lastReconciliation?
         addPumpEvents(events, lastReconciliation: Date()) { (error) in
             if let error = error {
