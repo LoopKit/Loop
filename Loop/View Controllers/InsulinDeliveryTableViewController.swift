@@ -143,7 +143,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         bolusVC.enteredBolusInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
         bolusVC.configuration = .logging
         
-        show(bolusVC, sender: sender)
+        let navigationWrapper = UINavigationController(rootViewController: bolusVC)
+        present(navigationWrapper, animated: true)
     }
 
     // MARK: - Data
@@ -327,14 +328,30 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             confirmMessage = NSLocalizedString("Are you sure you want to delete all reservoir values?", comment: "Action sheet confirmation message for reservoir deletion")
         case .history:
             confirmMessage = NSLocalizedString("Are you sure you want to delete all history entries?", comment: "Action sheet confirmation message for pump history deletion")
-        default:
-            confirmMessage = NSLocalizedString("No message could be found", comment: "Action sheet error message")
         }
 
         let sheet = UIAlertController(deleteAllConfirmationMessage: confirmMessage) {
             self.deleteAllObjects()
         }
         present(sheet, animated: true)
+    }
+        
+    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
+        guard let bolusViewController = segue.source as? BolusViewController else {
+            return
+        }
+
+        if let bolus = bolusViewController.bolus, bolus > 0 {
+            switch bolusViewController.configuration {
+            case .logging:
+                if let model = bolusViewController.enteredBolusInsulinModel {
+                    self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
+                }
+            // Enact the user-entered bolus
+            default:
+                self.deviceManager?.enactBolus(units: bolus) { _ in }
+            }
+        }
     }
 
     private var deletionPending = false
