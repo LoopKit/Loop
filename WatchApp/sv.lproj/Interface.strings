@@ -11,7 +11,7 @@
 "CWt-7U-cnK.text" = "15";
 
 /* Class = "WKInterfaceLabel"; text = "TOTAL CARBS"; ObjectID = "dea-qG-va8"; */
-"dea-qG-va8.text" = "Kolh totalt";
+"dea-qG-va8.text" = "Kolh. totalt";
 
 /* Class = "WKInterfaceButton"; accessibilityLabel = "Subtract"; ObjectID = "Dh9-HV-fXy"; */
 "Dh9-HV-fXy.accessibilityLabel" = "Subtrahera";
@@ -56,7 +56,7 @@
 "hjF-xr-cwO.title" = "−";
 
 /* Class = "WKInterfaceLabel"; text = "Carbs"; ObjectID = "hln-CI-MRP"; */
-"hln-CI-MRP.text" = "Kolh";
+"hln-CI-MRP.text" = "Kolh.";
 
 /* Class = "WKInterfaceLabel"; text = "—"; ObjectID = "IRi-4t-ESO"; */
 "IRi-4t-ESO.text" = "—";
@@ -71,7 +71,7 @@
 "Mhe-aR-kQQ.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "0.000"; ObjectID = "mpK-zY-UvA"; */
-"mpK-zY-UvA.text" = "0.000";
+"mpK-zY-UvA.text" = "0,000";
 
 /* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
 "MZU-QV-PtZ.text" = "TITLE";
@@ -95,7 +95,7 @@
 "T4U-wP-dSW.text" = "Label";
 
 /* Class = "WKInterfaceLabel"; text = "10:09 AM"; ObjectID = "Ury-of-vQg"; */
-"Ury-of-vQg.text" = "10:09 AM";
+"Ury-of-vQg.text" = "10:09";
 
 /* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
 "UVY-pa-SUL.text" = "🏃‍♀️";
@@ -110,7 +110,7 @@
 "XkS-y5-khE.text" = "<body>";
 
 /* Class = "WKInterfaceLabel"; text = "ACTIVE CARBS"; ObjectID = "ycL-5X-a05"; */
-"ycL-5X-a05.text" = "AKTIVA KOLH";
+"ycL-5X-a05.text" = "AKTIVA KOLH.";
 
 /* Class = "WKInterfaceLabel"; text = "---"; ObjectID = "yl8-ZP-c3l"; */
 "yl8-ZP-c3l.text" = "---";
