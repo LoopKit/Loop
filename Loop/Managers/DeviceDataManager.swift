@@ -706,6 +706,16 @@ extension DeviceDataManager {
             case .cancelTemporaryOverride:
                 log.default("Canceling temporary override from remote command")
                 loopManager.settings.scheduleOverride = nil
+            case .bolusEntry(let bolusValue):
+                log.default("Enacting remote bolus entry: \(bolusValue)")
+                // enact bolus
+                // TODO: check valid entry
+                self.enactBolus(units: bolusValue) { _ in }
+            case .carbsEntry(let newEntry):
+                let addCompletion: (CarbStoreResult<StoredCarbEntry>) -> Void = { _ in }
+                loopManager.carbStore.addCarbEntry(newEntry, completion: addCompletion )
+            default:
+                log.info("Unknown remote command")
             }
         } else {
             log.info("Unhandled remote notification: \(notification)")

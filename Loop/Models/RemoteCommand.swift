@@ -3,10 +3,14 @@
 //  Loop
 //
 //  Created by Pete Schwamb on 9/16/19.
+//  Modified :
+//   03/24/20 Jose Paredes
+//
 //  Copyright © 2019 LoopKit Authors. All rights reserved.
 //
 
 import Foundation
+import HealthKit
 import LoopKit
 
 public enum RemoteCommandError: Error {
@@ -19,6 +23,8 @@ enum RemoteCommand {
 
     case temporaryScheduleOverride(TemporaryScheduleOverride)
     case cancelTemporaryOverride
+    case bolusEntry(Double)
+    case carbsEntry(NewCarbEntry)
 }
 
 
@@ -36,6 +42,18 @@ extension RemoteCommand {
             self = .temporaryScheduleOverride(override)
         } else if let _ = notification["cancel-temporary-override"] as? String {
             self = .cancelTemporaryOverride
+        }  else if let bolusValue = notification["bolus-entry"] as? Double {
+            self = .bolusEntry(bolusValue)
+        } else if let carbsValue = notification["carbs-entry"] as? Double {
+            
+            // TODO: get default absorption value
+            var absorptionTime = TimeInterval(hours: 3.0)
+            if let absorptionOverride = notification["absorption-time"] as? Double {
+                absorptionTime = TimeInterval(hours: absorptionOverride)
+            }
+            let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
+            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "custom", absorptionTime: absorptionTime)
+            self = .carbsEntry(newEntry)
         }
         else {
             return nil
