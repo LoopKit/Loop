@@ -708,14 +708,21 @@ extension DeviceDataManager {
                 loopManager.settings.scheduleOverride = nil
             case .bolusEntry(let bolusValue):
                 log.default("Enacting remote bolus entry: \(bolusValue)")
-                // enact bolus
-                // TODO: check valid entry
-                self.enactBolus(units: bolusValue) { _ in }
+              
+                // enact bolus; make sure maxbolus is in place for protection
+                if let maxBolus = loopManager.settings.maximumBolus {
+                   if bolusValue.isLessThanOrEqualTo(maxBolus) {
+                      self.enactBolus(units: bolusValue) { _ in }
+                   } else {
+                       log.default("Remote bolus higher than maximum. Aborting...")
+                   }
+                } else {
+                    log.default("No max bolus detected. Aborting...")
+                }
             case .carbsEntry(let newEntry):
+                log.default("Adding carbs entry.")
                 let addCompletion: (CarbStoreResult<StoredCarbEntry>) -> Void = { _ in }
                 loopManager.carbStore.addCarbEntry(newEntry, completion: addCompletion )
-            default:
-                log.info("Unknown remote command")
             }
         } else {
             log.info("Unhandled remote notification: \(notification)")

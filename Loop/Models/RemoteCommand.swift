@@ -52,7 +52,7 @@ extension RemoteCommand {
                 absorptionTime = TimeInterval(hours: absorptionOverride)
             }
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
-            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "custom", absorptionTime: absorptionTime)
+            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "Remote Entry", absorptionTime: absorptionTime)
             self = .carbsEntry(newEntry)
         }
         else {
