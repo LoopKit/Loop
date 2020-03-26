@@ -10,7 +10,9 @@ import Foundation
 import HealthKit
 import LoopKit
 import LoopCore
-
+import OneTimePassword
+import Base32
+//import CommonCrypto
 
 final class LoopDataManager {
     enum LoopUpdateContext: Int {
@@ -22,7 +24,12 @@ final class LoopDataManager {
     }
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
-
+    
+    // OTP
+    private var otpToken: Token
+    private var secretKey: String
+    var otpURL: String
+    
     let carbStore: CarbStore
 
     let doseStore: DoseStore
@@ -41,7 +48,25 @@ final class LoopDataManager {
             NotificationCenter.default.removeObserver(observer)
         }
     }
-
+    
+    func refreshOTPToken() {
+       // TODO: refresh tokens
+       // generate secret key
+       let base32Dictionary = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789"
+       secretKey = String((0..<32).map{_ in base32Dictionary.randomElement()!})
+       let secretKeyData = MF_Base32Codec.data(fromBase32String: secretKey)!
+        
+       // generator+token
+       let generator = Generator(factor: .timer(period: 30), secret: secretKeyData, algorithm: .sha1, digits: 6)!
+       self.otpToken = Token(name: "Loop User", issuer: "Loop", generator: generator)
+      
+       // URL
+       self.otpURL = "otpauth://totp/Loop%20User?algoritm=SHA1&digits=6&issuer=Loop&period=30&secret=\(secretKey)"
+    }
+    func otp() -> String {
+        return self.otpToken.currentPassword!
+    }
+    
     init(
         lastLoopCompleted: Date?,
         basalDeliveryState: PumpManagerStatus.BasalDeliveryState?,
@@ -53,6 +78,27 @@ final class LoopDataManager {
         overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup?.overrideHistory ?? .init(),
         lastPumpEventsReconciliation: Date?
     ) {
+        
+        // OTP
+        // TODO: persistense
+
+        // generate secret key
+        let base32Dictionary = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789"
+        self.secretKey = String((0..<32).map{_ in base32Dictionary.randomElement()!})
+        let secretKeyData = MF_Base32Codec.data(fromBase32String: self.secretKey)!
+         
+        // generator+token
+        let generator = Generator(factor: .timer(period: 30), secret: secretKeyData, algorithm: .sha1, digits: 6)!
+        self.otpToken = Token(name: "Loop User", issuer: "Loop", generator: generator)
+        
+        // url
+        self.otpURL = "otpauth://totp/Loop%20User?algoritm=SHA1&digits=6&issuer=Loop&period=30&secret=\(secretKey)"
+        print("OTP URL: \(otpURL)")
+        
+        // first password
+        let password = self.otpToken.currentPassword!
+        print("OTP: \(password)")
+        
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lockedBasalDeliveryState = Locked(basalDeliveryState)
@@ -134,6 +180,7 @@ final class LoopDataManager {
         ]
     }
 
+   
     /// Loop-related settings
     ///
     /// These are not thread-safe.
@@ -1486,9 +1533,10 @@ extension LoopDataManager {
     /// - parameter completion: A closure called once the report has been generated. The closure takes a single argument of the report string.
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
         getLoopState { (manager, state) in
-
+            let otp = self.otp()
             var entries: [String] = [
                 "## LoopDataManager",
+                "otp: \(otp)",
                 "settings: \(String(reflecting: manager.settings))",
 
                 "insulinCounteractionEffects: [",

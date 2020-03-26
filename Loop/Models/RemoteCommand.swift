@@ -30,7 +30,24 @@ enum RemoteCommand {
 
 // Push Notifications
 extension RemoteCommand {
-    init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset]) {
+    init?(notification: [String: Any], allowedPresets: [TemporaryScheduleOverridePreset], otp: String) {
+        
+        // TODO: check OTP
+        if let otpIn = notification["otp"] as? String {
+            print("OTP:   \(otp)")
+            print("OTPIn: \(otpIn)")
+            if (otpIn.count == 6 && otp.count == 6) {
+                if( !(otpIn == otp) ) {
+                   print("OTP Check Failed")
+                   return nil
+                }
+                print("OTP Check Passed")
+            }
+        } else {
+            print("OTP Check Failed")
+            return nil
+        }
+        
         if let overrideEnactName = notification["override-name"] as? String,
             let preset = allowedPresets.first(where: { $0.name == overrideEnactName }),
             let remoteAddress = notification["remote-address"] as? String
@@ -52,7 +69,7 @@ extension RemoteCommand {
                 absorptionTime = TimeInterval(hours: absorptionOverride)
             }
             let quantity = HKQuantity(unit: .gram(), doubleValue: carbsValue)
-            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "Remote Entry", absorptionTime: absorptionTime)
+            let newEntry = NewCarbEntry(quantity: quantity, startDate: Date(), foodType: "", absorptionTime: absorptionTime)
             self = .carbsEntry(newEntry)
         }
         else {
