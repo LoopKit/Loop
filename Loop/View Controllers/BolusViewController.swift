@@ -152,7 +152,12 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     
     var isLoggingDose: Bool = false
 
-    var doseDate: Date? = nil
+    var doseDate: Date? {
+        didSet {
+            predictionRecomputation?.cancel()
+            recomputePrediction()
+        }
+    }
 
     var originalCarbEntry: StoredCarbEntry? {
         switch configuration {
@@ -557,8 +562,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             default:
                 break
             }
-            
-            updateDeliverButtonState()
+
             predictionRecomputation?.cancel()
             recomputePrediction()
         }
@@ -569,7 +573,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             return nil
         }
 
-        return DoseEntry(type: .bolus, startDate: Date(), value: amount, unit: .units, insulinModel: enteredBolusInsulinModel)
+        return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, insulinModel: enteredBolusInsulinModel)
     }
 
     private var predictionRecomputation: DispatchWorkItem?
