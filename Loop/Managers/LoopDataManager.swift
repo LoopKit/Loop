@@ -649,7 +649,9 @@ extension LoopDataManager {
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: curve)
         
         logOutsideInsulinDose(dose: dose) { (error) in
-            if error == nil {
+            if let error = error {
+                 self.logger.error(error)
+            } else {
                 self.recommendedBolus = nil
                 self.recommendedTempBasal = nil
                 self.insulinEffect = nil
@@ -664,13 +666,20 @@ extension LoopDataManager {
     ///   - dose: The dose to be added.
     func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         let rawData = Data(UUID().uuidString.utf8)
-        let events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "External Bolus", type: .bolus)]
         
-        // ANNA TODO: how to make sure this gets correctly reverted once the dose expires??
+        var events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "External Bolus", type: .bolus)]
+        
+        if case .some(.tempBasal(let dose)) = basalDeliveryState {
+            // Ensure the currently-running temp basal is accounted for
+            // The raw data can be empty, as the event won't be persisted
+            let pendingBasal = NewPumpEvent(date: dose.startDate, dose: dose, isMutable: true, raw: Data(), title: String(describing: dose), type: .tempBasal)
+            events.append(pendingBasal)
+        }
+
         if let model = dose.insulinModel {
             doseStore.longestEffectDuration = max(doseStore.longestEffectDuration, model.effectDuration)
         }
-        // ANNA TODO: would this be correct for lastReconciliation?
+        // ANNA TODO: what should be done for lastReconciliation?
         addPumpEvents(events, lastReconciliation: Date()) { (error) in
             if let error = error {
                 self.logger.error(error)
