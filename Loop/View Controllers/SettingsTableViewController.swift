@@ -20,6 +20,12 @@ final class SettingsTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //self.navigationItem.hidesBackButton = false
+        
+        
+        self.navigationItem.leftBarButtonItem =
+            UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTable(_:)))
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
@@ -34,9 +40,16 @@ final class SettingsTableViewController: UITableViewController {
         super.viewDidAppear(animated)
 
         AnalyticsManager.shared.didDisplaySettingsScreen()
+        
+        self.tableView.reloadData()
+        otpTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in self.tableView.reloadData() }
     }
-
+    override func viewWillDisappear(_ animated: Bool) {
+        otpTimer?.invalidate()
+    }
+    
     var dataManager: DeviceDataManager!
+    private var otpTimer: Timer!
 
     private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
     private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
@@ -54,6 +67,7 @@ final class SettingsTableViewController: UITableViewController {
     fileprivate enum LoopRow: Int, CaseCountable {
         case dosing = 0
         case diagnostic
+        case otp
     }
 
     fileprivate enum PumpRow: Int, CaseCountable {
@@ -173,6 +187,14 @@ final class SettingsTableViewController: UITableViewController {
 
                 cell.textLabel?.text = NSLocalizedString("Issue Report", comment: "The title text for the issue report cell")
                 cell.detailTextLabel?.text = nil
+                cell.accessoryType = .disclosureIndicator
+
+                return cell
+            case .otp:
+                let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
+
+                cell.textLabel?.text = NSLocalizedString("One Time Password", comment: "The title text for the OTP")
+                cell.detailTextLabel?.text = dataManager.loopManager.otp()
                 cell.accessoryType = .disclosureIndicator
 
                 return cell
@@ -557,6 +579,12 @@ final class SettingsTableViewController: UITableViewController {
                 show(vc, sender: sender)
             case .dosing:
                 break
+            case .otp:
+                let vc = OTPSelectionViewController()
+                vc.loopManager = dataManager.loopManager
+                show(vc, sender: sender)
+                break
+                
             }
         case .services:
             switch ServiceRow(rawValue: indexPath.row)! {
@@ -607,6 +635,10 @@ final class SettingsTableViewController: UITableViewController {
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
     }
+    @objc private func refreshTable(_ sender: UISwitch) {
+        self.tableView.reloadData()
+    }
+    
 }
 
 // MARK: - DeviceManager view controller delegation
