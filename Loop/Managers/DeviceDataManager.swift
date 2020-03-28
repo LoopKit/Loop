@@ -698,7 +698,7 @@ extension Notification.Name {
 extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
         
-        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, otp: loopManager.otp()) {
+        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, otp: loopManager.otpManager.otp()) {
             switch command {
             case .temporaryScheduleOverride(let override):
                 log.default("Enacting remote temporary override: \(override)")

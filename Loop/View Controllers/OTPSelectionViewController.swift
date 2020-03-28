@@ -17,7 +17,11 @@ import LoopUI
 
 class OTPSelectionViewController: UITableViewController {
     
-    var loopManager: LoopDataManager?
+    var otpManager: OTPManager?
+    var currentOTPLabelView: UILabel?
+    var createdLabelView: UILabel?
+    var qrCodeView: UIImageView?
+    var timer: Timer?
     
     private func generateQRCode(from string: String) -> UIImage? {
         let data = string.data(using: String.Encoding.ascii)
@@ -32,11 +36,34 @@ class OTPSelectionViewController: UITableViewController {
     }
     
     private func showQRCode() {
-       if let image = generateQRCode(from: loopManager!.otpURL) {
-           let imageView = UIImageView(image: image)
-           imageView.contentMode = .scaleAspectFit
-           tableView.tableHeaderView = imageView
-           tableView.tableHeaderView!.backgroundColor = tableView.backgroundColor
+       if let image = generateQRCode(from: otpManager!.otpURL) {
+           let headerView = tableView.tableHeaderView!
+        
+           // current otp
+           let otp = otpManager!.otp()
+           currentOTPLabelView!.text = "Current OTP: \(otp)"
+        
+           // current otp
+           let created = otpManager!.created
+           createdLabelView!.text = "\(created)"
+           
+           // change current QR Code
+           qrCodeView!.removeFromSuperview()
+           let newQRCodeView = UIImageView(image: image)
+           headerView.addSubview(newQRCodeView)
+            
+           // arrange
+           newQRCodeView.center = CGPoint(x: headerView.frame.size.width/2, y: 300)
+           currentOTPLabelView!.frame.size.width = headerView.frame.size.width
+           createdLabelView!.frame.size.width = headerView.frame.size.width
+           var labelyLoc = 300 - newQRCodeView.frame.size.height / 2 - 50
+           currentOTPLabelView!.center = CGPoint(x: headerView.frame.size.width/2, y: labelyLoc)
+           labelyLoc = 300 + newQRCodeView.frame.size.height / 2 + 50
+           createdLabelView!.center = CGPoint(x: headerView.frame.size.width/2, y: labelyLoc)
+        
+           // keep new one
+           qrCodeView = newQRCodeView
+        
          }
     }
     override func viewDidLoad() {
@@ -51,26 +78,50 @@ class OTPSelectionViewController: UITableViewController {
         tableView.tableFooterView!.backgroundColor = UIColor.systemGray6
         tableView.backgroundColor = UIColor.systemGray6
         tableView.separatorStyle = .none
-       
-        showQRCode()
-       
-        // center QR code image?
-        tableView.contentInset.top = 100
         
+        // create the views
+        let headerView = UIView()
+        
+        qrCodeView = UIImageView()
+        qrCodeView!.contentMode = .scaleAspectFit
+        
+        currentOTPLabelView = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: 50))
+        currentOTPLabelView!.text = "Current OTP: xxxxxx"
+        currentOTPLabelView!.font = UIFont.boldSystemFont(ofSize: 24)
+        currentOTPLabelView!.textAlignment = .center
+      
+        createdLabelView = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: 50))
+        createdLabelView!.text = "xxxxxx"
+        createdLabelView!.font = UIFont.boldSystemFont(ofSize: 24)
+        createdLabelView!.textAlignment = .center
+       
+        headerView.addSubview(currentOTPLabelView!)
+        headerView.addSubview(createdLabelView!)
+        headerView.addSubview(qrCodeView!)
+                   
+        tableView.tableHeaderView = headerView
+        tableView.tableHeaderView?.backgroundColor = tableView.backgroundColor
+        
+        showQRCode()
+    
         // reuse text button cell view
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
     }
     @objc private func refreshQR(_ sender: UIBarButtonItem) {
-        loopManager!.refreshOTPToken()
+        self.otpManager!.refreshOTPToken()
         self.showQRCode()
     }
     override func viewDidAppear(_ animated: Bool) {
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+           // current otp
+           let otp = self.otpManager!.otp()
+           self.currentOTPLabelView!.text = "Current OTP: \(otp)"
+        }
         super.viewDidAppear(animated)
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        // Notify observers if the strategy changed since viewDidAppear
-       
+    override func viewWillDisappear(_ animated: Bool) {       
+        timer?.invalidate()
         super.viewWillDisappear(animated)
     }
     
@@ -112,7 +163,7 @@ class OTPSelectionViewController: UITableViewController {
 
         tableView.deselectRow(at: indexPath, animated: true)
         if(indexPath.row == 0) {
-           loopManager!.refreshOTPToken()
+           otpManager!.refreshOTPToken()
            showQRCode()
         }
     }

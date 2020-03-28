@@ -12,6 +12,7 @@ import LoopKit
 import LoopKitUI
 import LoopCore
 import LoopTestingKit
+import LocalAuthentication
 
 
 final class SettingsTableViewController: UITableViewController {
@@ -20,13 +21,7 @@ final class SettingsTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //self.navigationItem.hidesBackButton = false
-        
-        
-        self.navigationItem.leftBarButtonItem =
-            UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTable(_:)))
-
+    
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
 
@@ -41,15 +36,10 @@ final class SettingsTableViewController: UITableViewController {
 
         AnalyticsManager.shared.didDisplaySettingsScreen()
         
-        self.tableView.reloadData()
-        otpTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in self.tableView.reloadData() }
+        self.tableView.reloadData()        
     }
-    override func viewWillDisappear(_ animated: Bool) {
-        otpTimer?.invalidate()
-    }
-    
+       
     var dataManager: DeviceDataManager!
-    private var otpTimer: Timer!
 
     private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
     private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
@@ -194,7 +184,7 @@ final class SettingsTableViewController: UITableViewController {
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
 
                 cell.textLabel?.text = NSLocalizedString("One Time Password", comment: "The title text for the OTP")
-                cell.detailTextLabel?.text = dataManager.loopManager.otp()
+                cell.detailTextLabel?.text = dataManager.loopManager.otpManager.created
                 cell.accessoryType = .disclosureIndicator
 
                 return cell
@@ -580,11 +570,18 @@ final class SettingsTableViewController: UITableViewController {
             case .dosing:
                 break
             case .otp:
-                let vc = OTPSelectionViewController()
-                vc.loopManager = dataManager.loopManager
-                show(vc, sender: sender)
+                let otpAuth = LAContext()
+                otpAuth.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Access OTP Secret" ) { success, fail in
+                   if success {
+                      DispatchQueue.main.async { [unowned self] in
+                         let vc = OTPSelectionViewController()
+                         vc.otpManager = self.dataManager.loopManager.otpManager
+                         self.show(vc, sender: sender)
+                     }
+                   }
+                }
+                tableView.deselectRow(at: indexPath, animated: true)
                 break
-                
             }
         case .services:
             switch ServiceRow(rawValue: indexPath.row)! {
@@ -634,9 +631,6 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
-    }
-    @objc private func refreshTable(_ sender: UISwitch) {
-        self.tableView.reloadData()
     }
     
 }

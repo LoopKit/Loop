@@ -390,6 +390,7 @@
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
+		DD20DABD242FBB9C009D65CE /* OTPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD20DABC242FBB9C009D65CE /* OTPManager.swift */; };
 		DD638F86242CD05600C5DBF2 /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F85242CD05600C5DBF2 /* CryptoKit.framework */; };
 		DDFC49E8242CE844009A4801 /* Base32.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; };
 		DDFC49E9242CE844009A4801 /* Base32.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -1108,6 +1109,7 @@
 		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
+		DD20DABC242FBB9C009D65CE /* OTPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPManager.swift; sourceTree = "<group>"; };
 		DD638F70242C5F0200C5DBF2 /* Loop-ab-remoteCarbsAndBolus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Loop-ab-remoteCarbsAndBolus"; sourceTree = "<group>"; };
 		DD638F72242C600200C5DBF2 /* Carthage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Carthage; sourceTree = "<group>"; };
 		DD638F73242C603500C5DBF2 /* OneTimePassword.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OneTimePassword.framework; path = Carthage/Build/iOS/OneTimePassword.framework; sourceTree = "<group>"; };
@@ -1674,6 +1676,7 @@
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
+				DD20DABC242FBB9C009D65CE /* OTPManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2707,6 +2710,7 @@
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				43D9003321EB258C00AF44BF /* InsulinModelSettings+Loop.swift in Sources */,
+				DD20DABD242FBB9C009D65CE /* OTPManager.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
