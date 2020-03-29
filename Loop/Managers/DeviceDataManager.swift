@@ -89,7 +89,6 @@ final class DeviceDataManager {
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
-            observePumpManager()
         } else {
             pumpManager = nil
         }
@@ -157,13 +156,6 @@ final class DeviceDataManager {
         return Manager.init(rawState: rawState) as? PumpManagerUI
     }
     
-    private func observePumpManager() {
-        if let pumpManager = pumpManager {
-            pumpManager.removeStatusObserver(self)
-            pumpManager.addStatusObserver(self, queue: .main)
-        }
-    }
-    
     private func processCGMResult(_ manager: CGMManager, result: CGMResult) {
         switch result {
         case .newData(let values):
@@ -224,8 +216,6 @@ private extension DeviceDataManager {
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
             loopManager?.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
-        
-        observePumpManager()
     }
 
     func setLastError(error: Error) {
@@ -399,7 +389,7 @@ extension DeviceDataManager: PumpManagerDelegate {
     }
 
     func pumpManager(_ pumpManager: PumpManager, didUpdate status: PumpManagerStatus, oldStatus: PumpManagerStatus) {
-        //dispatchPrecondition(condition: .onQueue(queue))
+        dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:\(type(of: pumpManager)) did update status: \(status)")
 
         loopManager.doseStore.device = status.device
