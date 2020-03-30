@@ -94,7 +94,7 @@ final class SettingsTableViewController: UITableViewController {
 
         return formatter
     }()
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
@@ -565,7 +565,6 @@ final class SettingsTableViewController: UITableViewController {
             case .diagnostic:
                 let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: dataManager)
                 vc.title = sender?.textLabel?.text
-
                 show(vc, sender: sender)
             case .dosing:
                 break
@@ -576,7 +575,9 @@ final class SettingsTableViewController: UITableViewController {
                       DispatchQueue.main.async { [unowned self] in
                          let vc = OTPSelectionViewController()
                          vc.otpManager = self.dataManager.loopManager.otpManager
-                         self.show(vc, sender: sender)
+                         let otpNavController = OTPNavigationController(rootViewController: vc)
+                         otpNavController.modalPresentationStyle = .fullScreen
+                         self.present(otpNavController, animated: true, completion: nil)
                      }
                    }
                 }

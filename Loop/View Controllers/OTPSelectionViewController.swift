@@ -8,21 +8,16 @@
 
 import Foundation
 import UIKit
-import HealthKit
-import Intents
-import LoopCore
-import LoopKit
-import LoopKitUI
-import LoopUI
 
-class OTPSelectionViewController: UITableViewController {
+class OTPSelectionViewController: UIViewController { 
     
     var otpManager: OTPManager?
-    var currentOTPLabelView: UILabel?
-    var createdLabelView: UILabel?
-    var qrCodeView: UIImageView?
-    var timer: Timer?
-    
+    private var currentOTPLabelView: UILabel?
+    private var createdLabelView: UILabel?
+    private var qrCodeView: UIImageView?
+    private var timer: Timer?
+    private var dismissTimer: Timer?
+       
     private func generateQRCode(from string: String) -> UIImage? {
         let data = string.data(using: String.Encoding.ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
@@ -34,59 +29,56 @@ class OTPSelectionViewController: UITableViewController {
         }
         return nil
     }
-    
     private func showQRCode() {
        if let image = generateQRCode(from: otpManager!.otpURL) {
-           let headerView = tableView.tableHeaderView!
+           //let headerView = tableView.tableHeaderView!
+           let theView = self.view!
         
            // current otp
            let otp = otpManager!.otp()
-           currentOTPLabelView!.text = "Current OTP: \(otp)"
+           currentOTPLabelView!.text = "\(otp)"
         
-           // current otp
+           // current created tag
            let created = otpManager!.created
            createdLabelView!.text = "\(created)"
            
            // change current QR Code
            qrCodeView!.removeFromSuperview()
            let newQRCodeView = UIImageView(image: image)
-           headerView.addSubview(newQRCodeView)
-            
-           // arrange
-           newQRCodeView.center = CGPoint(x: headerView.frame.size.width/2, y: 300)
-           currentOTPLabelView!.frame.size.width = headerView.frame.size.width
-           createdLabelView!.frame.size.width = headerView.frame.size.width
-           var labelyLoc = 300 - newQRCodeView.frame.size.height / 2 - 50
-           currentOTPLabelView!.center = CGPoint(x: headerView.frame.size.width/2, y: labelyLoc)
-           labelyLoc = 300 + newQRCodeView.frame.size.height / 2 + 50
-           createdLabelView!.center = CGPoint(x: headerView.frame.size.width/2, y: labelyLoc)
+           theView.addSubview(newQRCodeView)
         
-           // keep new one
+           // arrange
+           let  yLoc = theView.frame.size.height / 2
+           newQRCodeView.center = CGPoint(x: theView.frame.size.width/2, y: yLoc)
+           currentOTPLabelView!.frame.size.width = theView.frame.size.width
+           createdLabelView!.frame.size.width = theView.frame.size.width
+           var labelyLoc = yLoc - newQRCodeView.frame.size.height / 2 - 50
+           currentOTPLabelView!.center = CGPoint(x: theView.frame.size.width/2, y: labelyLoc)
+           labelyLoc = yLoc + newQRCodeView.frame.size.height / 2 + 50
+           createdLabelView!.center = CGPoint(x: theView.frame.size.width/2, y: labelyLoc)
+        
+           // keep new QR code
            qrCodeView = newQRCodeView
         
          }
     }
     override func viewDidLoad() {
-        super.viewDidLoad()
         self.navigationItem.rightBarButtonItem =
         UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshQR(_:)))
         
-        self.title = "Secret Key"
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.alwaysBounceVertical = false
-        tableView.tableFooterView = UIView(frame: .zero)
-        tableView.tableFooterView!.backgroundColor = UIColor.systemGray6
-        tableView.backgroundColor = UIColor.systemGray6
-        tableView.separatorStyle = .none
+        self.navigationItem.leftBarButtonItem =
+        UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissView(_:)))
         
+        self.title = "Secret Key"
+
         // create the views
-        let headerView = UIView()
+        let theView = UIView()
         
         qrCodeView = UIImageView()
         qrCodeView!.contentMode = .scaleAspectFit
         
         currentOTPLabelView = UILabel(frame: CGRect(x: 0, y: 0, width: 0, height: 50))
-        currentOTPLabelView!.text = "Current OTP: xxxxxx"
+        currentOTPLabelView!.text = "xxxxxx"
         currentOTPLabelView!.font = UIFont.boldSystemFont(ofSize: 24)
         currentOTPLabelView!.textAlignment = .center
       
@@ -95,76 +87,41 @@ class OTPSelectionViewController: UITableViewController {
         createdLabelView!.font = UIFont.boldSystemFont(ofSize: 24)
         createdLabelView!.textAlignment = .center
        
-        headerView.addSubview(currentOTPLabelView!)
-        headerView.addSubview(createdLabelView!)
-        headerView.addSubview(qrCodeView!)
-                   
-        tableView.tableHeaderView = headerView
-        tableView.tableHeaderView?.backgroundColor = tableView.backgroundColor
+        theView.addSubview(currentOTPLabelView!)
+        theView.addSubview(createdLabelView!)
+        theView.addSubview(qrCodeView!)
+        theView.backgroundColor = UIColor.systemGray6
+        theView.frame.size.width = UIScreen.main.bounds.width
+        theView.frame.size.height = UIScreen.main.bounds.height
+        self.view = theView
         
         showQRCode()
-    
-        // reuse text button cell view
-        tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
+        
+        super.viewDidLoad()
     }
     @objc private func refreshQR(_ sender: UIBarButtonItem) {
+        // TODO: prompt double check
         self.otpManager!.refreshOTPToken()
         self.showQRCode()
+    }
+    @objc private func dismissView(_ sender: UIBarButtonItem) {
+        self.dismiss(animated: true, completion: nil)
     }
     override func viewDidAppear(_ animated: Bool) {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
            // current otp
            let otp = self.otpManager!.otp()
-           self.currentOTPLabelView!.text = "Current OTP: \(otp)"
+           self.currentOTPLabelView!.text = "\(otp)"
+        }
+        dismissTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: false ) { _ in
+            self.dismiss(animated: true, completion: nil)
         }
         super.viewDidAppear(animated)
     }
-
     override func viewWillDisappear(_ animated: Bool) {       
         timer?.invalidate()
+        dismissTimer?.invalidate()
         super.viewWillDisappear(animated)
     }
-    
-    // MARK: - UITableViewDataSource
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return " "
-    }
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 80
-    }
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-   
-         // refresh button
-         let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
-         cell.textLabel?.text = "Refresh Secret Key"
-         cell.textLabel?.textAlignment = .center
-         cell.tintColor = .link
-         cell.isEnabled = true
-         return cell
-    }
-
-    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        view.tintColor = tableView.backgroundColor
-    }
-    
-    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.backgroundColor = UIColor.clear
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
-        tableView.deselectRow(at: indexPath, animated: true)
-        if(indexPath.row == 0) {
-           otpManager!.refreshOTPToken()
-           showQRCode()
-        }
-    }
 }
+

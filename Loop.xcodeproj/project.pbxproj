@@ -391,6 +391,7 @@
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		DD20DABD242FBB9C009D65CE /* OTPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD20DABC242FBB9C009D65CE /* OTPManager.swift */; };
+		DD20DABF24302125009D65CE /* OTPNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD20DABE24302125009D65CE /* OTPNavigationController.swift */; };
 		DD638F86242CD05600C5DBF2 /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F85242CD05600C5DBF2 /* CryptoKit.framework */; };
 		DDFC49E8242CE844009A4801 /* Base32.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; };
 		DDFC49E9242CE844009A4801 /* Base32.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -1110,6 +1111,7 @@
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
 		DD20DABC242FBB9C009D65CE /* OTPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPManager.swift; sourceTree = "<group>"; };
+		DD20DABE24302125009D65CE /* OTPNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPNavigationController.swift; sourceTree = "<group>"; };
 		DD638F70242C5F0200C5DBF2 /* Loop-ab-remoteCarbsAndBolus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Loop-ab-remoteCarbsAndBolus"; sourceTree = "<group>"; };
 		DD638F72242C600200C5DBF2 /* Carthage */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Carthage; sourceTree = "<group>"; };
 		DD638F73242C603500C5DBF2 /* OneTimePassword.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OneTimePassword.framework; path = Carthage/Build/iOS/OneTimePassword.framework; sourceTree = "<group>"; };
@@ -1632,6 +1634,7 @@
 				89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */,
 				C15C5D3B23B7211100C1B247 /* DosingStrategySelectionViewController.swift */,
 				DDFC49F0242D4FE8009A4801 /* OTPSelectionViewController.swift */,
+				DD20DABE24302125009D65CE /* OTPNavigationController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -2758,6 +2761,7 @@
 				4372E490213CFCE70068E043 /* LoopSettingsUserInfo.swift in Sources */,
 				89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
+				DD20DABF24302125009D65CE /* OTPNavigationController.swift in Sources */,
 				43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
