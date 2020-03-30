@@ -55,7 +55,7 @@ class OTPManager {
        // generator+token
        let secretKeyData = MF_Base32Codec.data(fromBase32String: secretKey)!
        let generator = Generator(factor: .timer(period: 30), secret: secretKeyData, algorithm: .sha1, digits: 6)!
-       self.otpToken = Token(name: "Loop User", issuer: "Loop", generator: generator)
+       self.otpToken = Token(name: "\(created)", issuer: "Loop", generator: generator)
       
        // URL
        self.otpURL = "otpauth://totp/\(created)?algoritm=SHA1&digits=6&issuer=Loop&period=30&secret=\(secretKey)"
@@ -83,8 +83,8 @@ class OTPManager {
            } catch {}
                 
         }
-        print("OTP Secret Key: \(secretKey)")
-        print("OTP Created: \(created)")
+        //print("OTP Secret Key: \(secretKey)")
+        //print("OTP Created: \(created)")
 
         let secretKeyData = MF_Base32Codec.data(fromBase32String: self.secretKey)!
          
@@ -94,11 +94,11 @@ class OTPManager {
         
         // url
         self.otpURL = "otpauth://totp/\(created)?algoritm=SHA1&digits=6&issuer=Loop&period=30&secret=\(secretKey)"
-        print("OTP URL: \(otpURL)")
+        //print("OTP URL: \(otpURL)")
         
         // first password
-        let password = self.otpToken.currentPassword!
-        print("OTP: \(password)")
+        // let password = self.otpToken.currentPassword!
+        //print("OTP: \(password)")
     }
 }
 

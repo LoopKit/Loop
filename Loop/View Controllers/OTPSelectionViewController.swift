@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class OTPSelectionViewController: UIViewController { 
+class OTPSelectionViewController: UIViewController {
     
     var otpManager: OTPManager?
     private var currentOTPLabelView: UILabel?
@@ -17,7 +17,8 @@ class OTPSelectionViewController: UIViewController {
     private var qrCodeView: UIImageView?
     private var timer: Timer?
     private var dismissTimer: Timer?
-       
+    private var start: Double!
+    
     private func generateQRCode(from string: String) -> UIImage? {
         let data = string.data(using: String.Encoding.ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
@@ -100,22 +101,55 @@ class OTPSelectionViewController: UIViewController {
         super.viewDidLoad()
     }
     @objc private func refreshQR(_ sender: UIBarButtonItem) {
-        // TODO: prompt double check
-        self.otpManager!.refreshOTPToken()
-        self.showQRCode()
+        let refreshAlert = UIAlertController(title: "Refresh Secret Key", message: "This action will invalidate current key. Are you sure you want to refresh? ", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default ) {_ in
+            self.otpManager!.refreshOTPToken()
+            self.showQRCode()
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default ) {_ in
+        }
+        
+        refreshAlert.addAction(okAction)
+        refreshAlert.addAction(cancelAction)
+        
+        // disable views dismiss timer
+        self.dismissTimer?.invalidate()
+                
+        // show alert
+        present(refreshAlert, animated: true, completion: nil)
+        
+        // dismiss after 10 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+           refreshAlert.dismiss(animated: true, completion: nil)
+            
+           // restart view's dismiss timer for what remains of the 120 seconds
+           let now = Double(DispatchTime.now().uptimeNanoseconds)/1000000000
+           let remaining = 120 - (now - self.start)
+            
+           // invalidate previous view dismiss timer
+           self.dismissTimer?.invalidate()
+            
+           // set new view dismiss timer
+           self.dismissTimer = Timer.scheduledTimer(timeInterval: remaining, target: self, selector: #selector(self.dismissView), userInfo:nil, repeats: false )
+            
+        }
     }
     @objc private func dismissView(_ sender: UIBarButtonItem) {
         self.dismiss(animated: true, completion: nil)
     }
     override func viewDidAppear(_ animated: Bool) {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+        self.timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
            // current otp
            let otp = self.otpManager!.otp()
            self.currentOTPLabelView!.text = "\(otp)"
         }
-        dismissTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: false ) { _ in
-            self.dismiss(animated: true, completion: nil)
-        }
+        
+        // allow this view to be displayed for only 120 seconds
+        self.dismissTimer = Timer.scheduledTimer(timeInterval: 120, target: self, selector: #selector(dismissView), userInfo:nil, repeats: false )
+        
+        // keep tract of view view appearing
+        self.start = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
+        
         super.viewDidAppear(animated)
     }
     override func viewWillDisappear(_ animated: Bool) {       
