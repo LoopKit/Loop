@@ -6,7 +6,6 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-
 import Foundation
 import LoopKit
 import OneTimePassword
@@ -31,6 +30,7 @@ extension KeychainManager {
     }
 }
 
+private let Base32Dictionary = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 class OTPManager {
 
     private var otpToken: Token
@@ -41,8 +41,7 @@ class OTPManager {
     func refreshOTPToken() {
        // TODO: refresh tokens
        // generate secret key
-       let base32Dictionary = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789"
-       self.secretKey = String((0..<32).map{_ in base32Dictionary.randomElement()!})
+       self.secretKey = String((0..<32).map{_ in Base32Dictionary.randomElement()!})
        self.created = String(format: "%.0f", round(Date().timeIntervalSince1970*1000))
         
        // try to save new secret key
@@ -71,9 +70,9 @@ class OTPManager {
             self.secretKey = secretKeyVal
             self.created = createdVal
         } else {
+            
            // generate secret key
-           let base32Dictionary = "ABCDEFGHIJKLMNOPQRSTUVWXYZ23456789"
-           self.secretKey = String((0..<32).map{_ in base32Dictionary.randomElement()!})
+           self.secretKey = String((0..<32).map{_ in Base32Dictionary.randomElement()!})
            self.created = String(format: "%.0f", round(Date().timeIntervalSince1970*1000))
             
            // try to save secretKey
@@ -90,7 +89,7 @@ class OTPManager {
          
         // generator+token
         let generator = Generator(factor: .timer(period: 30), secret: secretKeyData, algorithm: .sha1, digits: 6)!
-        self.otpToken = Token(name: "Loop User", issuer: "Loop", generator: generator)
+        self.otpToken = Token(name: "\(created)", issuer: "Loop", generator: generator)
         
         // url
         self.otpURL = "otpauth://totp/\(created)?algoritm=SHA1&digits=6&issuer=Loop&period=30&secret=\(secretKey)"
