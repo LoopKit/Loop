@@ -38,8 +38,6 @@ final class DeviceDataManager {
 
     /// The last time a BLE heartbeat was received and acted upon.
     private var lastBLEDrivenUpdate = Date.distantPast
-    
-    private var deviceLog: PersistentDeviceLog
 
     // MARK: - CGM
 
@@ -91,11 +89,6 @@ final class DeviceDataManager {
 
     init() {
         pluginManager = PluginManager()
-        
-        let fileManager = FileManager.default
-        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
-        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"))
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -199,51 +192,7 @@ final class DeviceDataManager {
         updatePumpManagerBLEHeartbeatPreference()
     }
 
-    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
-        self.loopManager.generateDiagnosticReport { (loopReport) in
-            self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
-                let deviceLogReport: String
-                switch result {
-                case .failure(let error):
-                    deviceLogReport = "Error fetching entries: \(error)"
-                case .success(let entries):
-                    deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
-                }
-                
-                let report = [
-                    Bundle.main.localizedNameAndVersion,
-                    "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
-                    "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
-                    "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
-                    "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
-                    "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-                    "",
-                    "## FeatureFlags",
-                    "\(FeatureFlags)",
-                    "",
-                    "## DeviceDataManager",
-                    "* launchDate: \(self.launchDate)",
-                    "* lastError: \(String(describing: self.lastError))",
-                    "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
-                    "",
-                    self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
-                    "",
-                    self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
-                    "",
-                    "## Device Communication Log",
-                    deviceLogReport,
-                    "",
-                    String(reflecting: self.watchManager!),
-                    "",
-                    String(reflecting: self.statusExtensionManager!),
-                    "",
-                    loopReport,
-                ].joined(separator: "\n")
-                
-                completion(report)
-            }
-        }
-    }
+
 }
 
 private extension DeviceDataManager {
@@ -328,7 +277,6 @@ extension DeviceDataManager: RemoteDataManagerDelegate {
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
-
     func scheduleNotification(for manager: DeviceManager,
                               identifier: String,
                               content: UNNotificationContent,
@@ -345,9 +293,8 @@ extension DeviceDataManager: DeviceManagerDelegate {
     func clearNotification(for manager: DeviceManager, identifier: String) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
-
+    
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
-        deviceLog.log(managerIdentifier: Swift.type(of: manager).managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
 }
 
@@ -716,6 +663,36 @@ extension DeviceDataManager: LoopDataManagerDelegate {
     }
 }
 
+
+// MARK: - CustomDebugStringConvertible
+extension DeviceDataManager: CustomDebugStringConvertible {
+    var debugDescription: String {
+        return [
+            Bundle.main.localizedNameAndVersion,
+            "* bundleIdentifier: \(Bundle.main.bundleIdentifier ?? "N/A")",
+            "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
+            "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+            "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
+            "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
+            "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+            "",
+            "## DeviceDataManager",
+            "* launchDate: \(launchDate)",
+            "* lastError: \(String(describing: lastError))",
+            "* lastBLEDrivenUpdate: \(lastBLEDrivenUpdate)",
+            "",
+            cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
+            "",
+            pumpManager != nil ? String(reflecting: pumpManager!) : "pumpManager: nil",
+            "",
+            String(reflecting: watchManager!),
+            "",
+            String(reflecting: statusExtensionManager!),
+        ].joined(separator: "\n")
+>>>>>>> parent of caf79113... prepare to merge with dev
+    }
+}
+
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
@@ -724,18 +701,6 @@ extension Notification.Name {
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
-
-        if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, otp: loopManager.otpManager.otp()) {
-            switch command {
-            case .temporaryScheduleOverride(let override):
-                log.default("Enacting remote temporary override: \(override)")
-                loopManager.settings.scheduleOverride = override
-            case .cancelTemporaryOverride:
-                log.default("Canceling temporary override from remote command")
-                loopManager.settings.scheduleOverride = nil
-            case .bolusEntry(let bolusValue):
-                log.default("Enacting remote bolus entry: \(bolusValue)")
-
                 // enact bolus; make sure maxbolus is in place for protection
                 if let maxBolus = loopManager.settings.maximumBolus {
                    if bolusValue.isLessThanOrEqualTo(maxBolus) {
