@@ -1,11 +1,11 @@
-/* Bundle display name */
-"CFBundleDisplayName" = "Loop";
-
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth wird verwendet, um mit Insulinpumpen und kontinuierlichen Blutzuckermessgeräten zu kommunizieren.";
+
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth wird verwendet, um mit Insulinpumpen und kontinuierlichen Blutzuckermessgeräten zu kommunizieren";
+"NSBluetoothPeripheralUsageDescription" = "Bluetooth wird verwendet, um mit Insulinpumpen und kontinuierlichen Blutzuckermessgeräten zu kommunizieren.";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Face ID wird benutzt, um einen Insulin-Bolus zu authentifizieren.";

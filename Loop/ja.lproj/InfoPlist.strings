@@ -1,0 +1,18 @@
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "ブルートゥースは、インスリンポンプおよび連続グルコースモニタデバイスと通信するために使用されます";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "ブルートゥースは、インスリンポンプおよび連続グルコースモニタデバイスと通信するために使用されます";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "フェイスIDはインスリンボーラスの認証に使用されます";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "アプリに入力された炭水化物の食事データは、健康データベースに保存されます。 グルコースデータはHealthKitに安全に保存されます";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "健康データベースからの食事データは、グルコース効果を決定するために使用される。 グルコースデータはグラフ作成と解析のためにHealthKitから検索されます";
+

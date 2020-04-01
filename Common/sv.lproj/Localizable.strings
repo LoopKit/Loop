@@ -1,0 +1,57 @@
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Lägg till kolhydrater";
+
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Beräknar procentandelen glukosmätningar inom ett specifikt målvärde";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Fortsätt";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dl";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/l";
+
+/* Lesson title */
+"Modal Day" = "Genomsnittlig dag";
+
+/* Lesson result text for no data */
+"No data available" = "Ingen data tillgänglig";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Section title for glucose range */
+"Range" = "Målvärde";
+
+/* Title of config entry */
+"Start Date" = "Starttid";
+
+/* Lesson title */
+"Time in Range" = "Tid inom målvärde";
+
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visar de vanligaste glukosvärdena under olika tider på dagen";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Veckor";
+

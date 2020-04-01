@@ -78,10 +78,14 @@ final class ExtensionDelegate: NSObject, WKExtensionDelegate {
         if WCSession.default.activationState != .activated {
             WCSession.default.activate()
         }
+
+        NotificationCenter.default.post(name: type(of: self).didBecomeActiveNotification, object: self)
     }
 
     func applicationWillResignActive() {
         UserDefaults.standard.startOnChartPage = (WKExtension.shared().visibleInterfaceController as? ChartHUDController) != nil
+
+        NotificationCenter.default.post(name: type(of: self).willResignActiveNotification, object: self)
     }
 
     // Presumably the main thread?
@@ -239,6 +243,9 @@ extension ExtensionDelegate: UNUserNotificationCenterDelegate {
 
 
 extension ExtensionDelegate {
+    static let didBecomeActiveNotification = Notification.Name("ExtensionDelegate.didBecomeActive")
+
+    static let willResignActiveNotification = Notification.Name("ExtensionDelegate.willResignActive")
 
     /// Global shortcut to present an alert for a specific error out-of-context with a specific interface controller.
     ///

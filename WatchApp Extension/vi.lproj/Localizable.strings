@@ -1,0 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "Lượng Carbs còn hoạt động";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Lượng Insulin còn hoạt động";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Khai báo khối lượng Carb";
+
+/* The title of the alert controller displayed after a bolus attempt fails */
+"Bolus Failed" = "Bolus lỗi";
+
+/* The action button title to dismiss an error message */
+"Dismiss" = "Từ bỏ";
+
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
+"Make sure your iPhone is nearby and try again" = "Đảm bảo rằng iPhone của bạn đang ở gần và thử lại";
+
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Tỷ lệ liều basal ròng";
+
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Chồng liều";
+
+/* The label and value showing the recommended bolus */
+"Rec: %@ U" = "Khuyến nghị: %@ U";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Khối lượng ngăn chứa insulin";
+
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
+"Send Failed" = "Chuyển bị lỗi";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/giờ";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Tập luyện";
+

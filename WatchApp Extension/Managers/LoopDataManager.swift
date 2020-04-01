@@ -77,6 +77,9 @@ extension LoopDataManager {
         dispatchPrecondition(condition: .onQueue(.main))
 
         if activeContext == nil || context.shouldReplace(activeContext!) {
+            if let newGlucoseSample = context.newGlucoseSample {
+                self.glucoseStore.addGlucose(newGlucoseSample) { (_) in }
+            }
             activeContext = context
         }
     }
@@ -108,7 +111,7 @@ extension LoopDataManager {
             NotificationCenter.default.post(name: LoopDataManager.didUpdateContextNotification, object: self)
         }
     }
-
+    
     @discardableResult
     func requestGlucoseBackfillIfNecessary() -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))

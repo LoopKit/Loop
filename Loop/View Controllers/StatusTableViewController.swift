@@ -313,7 +313,7 @@ final class StatusTableViewController: ChartsTableViewController {
         // TODO: Don't always assume currentContext.contains(.status)
         reloadGroup.enter()
         self.deviceManager.loopManager.getLoopState { (manager, state) -> Void in
-            predictedGlucoseValues = state.predictedGlucose ?? []
+            predictedGlucoseValues = state.predictedGlucoseIncludingPendingInsulin ?? []
 
             // Retry this refresh again if predicted glucose isn't available
             if state.predictedGlucose == nil {
@@ -487,6 +487,7 @@ final class StatusTableViewController: ChartsTableViewController {
                     hudView.glucoseHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                         at: glucose.startDate,
                         unit: unit,
+                        staleGlucoseAge: self.deviceManager.loopManager.settings.inputDataRecencyInterval,
                         sensor: self.deviceManager.sensorState
                     )
                 }
@@ -1045,7 +1046,7 @@ final class StatusTableViewController: ChartsTableViewController {
     override func restoreUserActivityState(_ activity: NSUserActivity) {
         switch activity.activityType {
         case NSUserActivity.newCarbEntryActivityType:
-            performSegue(withIdentifier: CarbEntryEditViewController.className, sender: activity)
+            performSegue(withIdentifier: CarbEntryViewController.className, sender: activity)
         default:
             break
         }
@@ -1064,10 +1065,9 @@ final class StatusTableViewController: ChartsTableViewController {
         case let vc as CarbAbsorptionViewController:
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
-        case let vc as CarbEntryTableViewController:
-            vc.carbStore = deviceManager.loopManager.carbStore
-            vc.hidesBottomBarWhenPushed = true
-        case let vc as CarbEntryEditViewController:
+        case let vc as CarbEntryViewController:
+            vc.deviceManager = deviceManager
+            vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
 
@@ -1078,10 +1078,10 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
         case let vc as BolusViewController:
-            vc.configureWithLoopManager(self.deviceManager.loopManager,
-                recommendation: sender as? BolusRecommendation,
-                glucoseUnit: self.statusCharts.glucose.glucoseUnit
-            )
+            vc.deviceManager = deviceManager
+            vc.glucoseUnit = statusCharts.glucose.glucoseUnit
+            vc.configuration = .manualCorrection
+            AnalyticsManager.shared.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
                 vc.scheduledOverride = deviceManager.loopManager.settings.scheduleOverride
@@ -1098,46 +1098,43 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    /// Unwind segue action from the CarbEntryEditViewController
-    ///
-    /// - parameter segue: The unwind segue
-    @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {
-        guard let carbVC = segue.source as? CarbEntryEditViewController, let updatedEntry = carbVC.updatedCarbEntry else {
+    @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
+
+    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
+        guard let bolusViewController = segue.source as? BolusViewController else {
             return
         }
 
-        if #available(iOS 12.0, *) {
-            let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
-            interaction.donate { [weak self] (error) in
-                if let error = error {
-                    self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
-                }
-            }
-        }
-        deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry) { (result) -> Void in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let recommendation):
-                    if self.active && self.visible, let bolus = recommendation?.amount, bolus > 0 {
-                        self.performSegue(withIdentifier: BolusViewController.className, sender: recommendation)
-                    }
-                case .failure(let error):
-                    // Ignore bolus wizard errors
-                    if error is CarbStore.CarbStoreError {
-                        self.present(UIAlertController(with: error), animated: true)
-                    } else {
-                        self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
+        if let carbEntry = bolusViewController.updatedCarbEntry {
+            if #available(iOS 12.0, *) {
+                let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
+                interaction.donate { [weak self] (error) in
+                    if let error = error {
+                        self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
                     }
                 }
             }
-        }
-    }
 
-    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
-        if let bolusViewController = segue.source as? BolusViewController {
-            if let bolus = bolusViewController.bolus, bolus > 0 {
-                deviceManager.enactBolus(units: bolus) { (_) in }
+            deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        // Enact the user-entered bolus
+                        if let bolus = bolusViewController.bolus, bolus > 0 {
+                            self.deviceManager.enactBolus(units: bolus) { _ in }
+                        }
+                    case .failure(let error):
+                        // Ignore bolus wizard errors
+                        if error is CarbStore.CarbStoreError {
+                            self.present(UIAlertController(with: error), animated: true)
+                        } else {
+                            self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
+                        }
+                    }
+                }
             }
+        } else if let bolus = bolusViewController.bolus, bolus > 0 {
+            self.deviceManager.enactBolus(units: bolus) { _ in }
         }
     }
 
@@ -1262,13 +1259,23 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
+        var error: Error? = nil
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            self.present(UIAlertController(with: deviceError.error), animated: true)
+            error = deviceError.error
         } else if let lastLoopError = lastLoopError {
-            self.present(UIAlertController(with: lastLoopError), animated: true)
+            error = lastLoopError
+        }
+
+        if error != nil {
+            let alertController = UIAlertController(with: error!)
+            let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
+                self.deviceManager.loopManager.loop()
+            })
+            alertController.addAction(manualLoopAction)
+            present(alertController, animated: true)
         }
     }
 
@@ -1297,7 +1304,7 @@ final class StatusTableViewController: ChartsTableViewController {
     // MARK: - Testing scenarios
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        if let testingScenariosManager = deviceManager.testingScenariosManager, testingScenariosManager.scenarioURLs.isEmpty {
+        if let testingScenariosManager = deviceManager.testingScenariosManager, !testingScenariosManager.scenarioURLs.isEmpty {
             if motion == .motionShake {
                 presentScenarioSelector()
             }
@@ -1370,6 +1377,10 @@ extension StatusTableViewController: DoseProgressObserver {
 }
 
 extension StatusTableViewController: OverrideSelectionViewControllerDelegate {
+    func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didUpdatePresets presets: [TemporaryScheduleOverridePreset]) {
+        deviceManager.loopManager.settings.overridePresets = presets
+    }
+
     func overrideSelectionViewController(_ vc: OverrideSelectionViewController, didConfirmOverride override: TemporaryScheduleOverride) {
         deviceManager.loopManager.settings.scheduleOverride = override
     }
