@@ -22,6 +22,10 @@ extension UIColor {
     // Equivalent to glucoseColor with alpha 0.14 on a black background
     static let darkGlucose = UIColor(named: "glucose-dark")!
 
+    static let insulin = UIColor(named: "insulin")!
+
+    static let darkInsulin = UIColor(named: "insulin-dark")!
+
     static let overrideColor = UIColor(named: "workout")!
 
     // Equivalent to workoutColor with alpha 0.14 on a black background
@@ -36,7 +40,11 @@ extension UIColor {
     static let chartNowLine = HIGWhiteColor().withAlphaComponent(0.2)
 
     static let chartPlatter = HIGWhiteColorDark()
-
+   
+    static let agingColor = HIGYellowColor()
+    
+    static let staleColor = HIGRedColor()
+    
     // MARK: - HIG colors
     // See: https://developer.apple.com/watch/human-interface-guidelines/visual-design/#color
 

@@ -1,0 +1,42 @@
+/* HUD row title for COB */
+"Active Carbs" = "Akt. hiilari";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Akt. insuliini";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Lisää hiilari";
+
+/* The title of the alert controller displayed after a bolus attempt fails */
+"Bolus Failed" = "Bolus epäonnistui";
+
+/* The action button title to dismiss an error message */
+"Dismiss" = "Hylkää";
+
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
+"Make sure your iPhone is nearby and try again" = "Varmista, että iPhone on riittävän lähellä ja yritä uudelleen";
+
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Basaali netto";
+
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Tilapäisas.";
+
+/* The label and value showing the recommended bolus */
+"Rec: %@ U" = "Suosit: %@ U";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Säiliön määrä";
+
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
+"Send Failed" = "Lähetys epäonnistui";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "U/h";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Liikunta";
+

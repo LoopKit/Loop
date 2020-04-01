@@ -36,10 +36,19 @@ public struct LoopSettings: Equatable {
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 
-    /// The amount of time since a given date that data should be considered valid
-    public let recencyInterval = TimeInterval(minutes: 15)
+    /// The amount of time since a given date that input data should be considered valid
+    public let inputDataRecencyInterval = TimeInterval(minutes: 15)
+    
+    /// Loop completion aging category limits
+    public let completionFreshLimit = TimeInterval(minutes: 6)
+    public let completionAgingLimit = TimeInterval(minutes: 16)
+    public let completionStaleLimit = TimeInterval(hours: 12)
 
     public let batteryReplacementDetectionThreshold = 0.5
+
+    public let defaultWatchCarbPickerValue = 15 // grams
+
+    public let defaultWatchBolusPickerValue = 1.0 // %
 
     // MARK - Display settings
 
@@ -50,7 +59,11 @@ public struct LoopSettings: Equatable {
     public var glucoseUnit: HKUnit? {
         return glucoseTargetRangeSchedule?.unit
     }
-
+    
+    // MARK - Push Notifications
+    
+    public var deviceToken: Data?
+    
     // MARK - Guardrails
 
     public func allowedSensitivityValues(for unit: HKUnit) -> [Double] {
@@ -132,7 +145,9 @@ extension LoopSettings {
             context: .preMeal,
             settings: TemporaryScheduleOverrideSettings(unit: unit, targetRange: premealTargetRange),
             startDate: date,
-            duration: .finite(duration)
+            duration: .finite(duration),
+            enactTrigger: .local,
+            syncIdentifier: UUID()
         )
     }
 
@@ -148,7 +163,9 @@ extension LoopSettings {
             context: .legacyWorkout,
             settings: TemporaryScheduleOverrideSettings(unit: unit, targetRange: legacyWorkoutTargetRange),
             startDate: date,
-            duration: duration.isInfinite ? .indefinite : .finite(duration)
+            duration: duration.isInfinite ? .indefinite : .finite(duration),
+            enactTrigger: .local,
+            syncIdentifier: UUID()
         )
     }
 

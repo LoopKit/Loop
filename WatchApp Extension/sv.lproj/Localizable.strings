@@ -1,0 +1,45 @@
+/* HUD row title for COB */
+"Active Carbs" = "Aktiva kolhydrater";
+
+/* HUD row title for IOB */
+"Active Insulin" = "Aktivt insulin";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Lägg till kolhydrater";
+
+/* The title of the alert controller displayed after a bolus attempt fails */
+"Bolus Failed" = "Bolus misslyckades";
+
+/* The action button title to dismiss an error message */
+"Dismiss" = "Avfärda";
+
+/* The recovery message displayed after a bolus attempt fails
+   The recovery message displayed after a carb entry send attempt fails
+   The recovery message displayed after a glucose range override send attempt fails */
+"Make sure your iPhone is nearby and try again" = "Säkerställ att telefonen är inom räckhåll och försök igen";
+
+/* HUD row title for Net Basal Rate */
+"Net Basal Rate" = "Nettobasaldos";
+
+/* The text for the Watch button for enabling a temporary override */
+"Override" = "Override";
+
+/* The label and value showing the recommended bolus */
+"Rec: %@ U" = "Rek: %@ E";
+
+/* HUD row title for remaining reservoir volume */
+"Reservoir Volume" = "Reservoarvolym";
+
+/* The title of the alert controller displayed after a carb entry send attempt fails
+   The title of the alert controller displayed after a glucose range override send attempt fails */
+"Send Failed" = "Sändning misslyckades";
+
+/* The short unit display string for international units of insulin */
+"U" = "E";
+
+/* The short unit display string for international units of insulin delivery per hour */
+"U/hr" = "E/h";
+
+/* The text for the Watch button for enabling workout mode */
+"Workout" = "Träning";
+

@@ -8,6 +8,7 @@
 
 import UIKit
 import LoopKitUI
+import LoopCore
 
 public final class LoopCompletionHUDView: BaseHUDView {
 
@@ -17,14 +18,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
         return 1
     }
 
-    enum Freshness {
-        case fresh
-        case aging
-        case stale
-        case unknown
-    }
-
-    private(set) var freshness = Freshness.unknown {
+    private(set) var freshness = LoopCompletionFreshness.unknown {
         didSet {
             updateTintColor()
         }
@@ -128,17 +122,8 @@ public final class LoopCompletionHUDView: BaseHUDView {
     @objc private func updateDisplay(_: Timer?) {
         if let date = lastLoopCompleted {
             let ago = abs(min(0, date.timeIntervalSinceNow))
-
-            switch ago {
-            case let t where t <= .minutes(6):
-                freshness = .fresh
-            case let t where t <= .minutes(16):
-                freshness = .aging
-            case let t where t <= .hours(12):
-                freshness = .stale
-            default:
-                freshness = .unknown
-            }
+            
+            freshness = LoopCompletionFreshness(age: ago)
 
             if let timeString = formatter.string(from: ago) {
                 switch traitCollection.preferredContentSizeCategory {
