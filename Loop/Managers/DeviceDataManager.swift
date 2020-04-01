@@ -676,7 +676,10 @@ extension DeviceDataManager: LoopDataManagerDelegate {
                     completion(.failure(error))
                 }
             }
-        )
+            
+            doseDispatchGroup.wait()
+            completion(bolusError)
+        }
     }
 }
 
