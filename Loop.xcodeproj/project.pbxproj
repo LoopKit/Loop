@@ -393,12 +393,6 @@
 		DD20DABD242FBB9C009D65CE /* OTPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD20DABC242FBB9C009D65CE /* OTPManager.swift */; };
 		DD20DABF24302125009D65CE /* OTPNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD20DABE24302125009D65CE /* OTPNavigationController.swift */; };
 		DD638F86242CD05600C5DBF2 /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F85242CD05600C5DBF2 /* CryptoKit.framework */; };
-		DDB05DC8243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
-		DDB05DC9243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
-		DDB05DCA243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
-		DDB05DCB243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
-		DDB05DCC243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
-		DDB05DCD243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */; };
 		DDFC49E8242CE844009A4801 /* Base32.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; };
 		DDFC49E9242CE844009A4801 /* Base32.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F8A242CD12700C5DBF2 /* Base32.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DDFC49EC242CE940009A4801 /* OneTimePassword.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F73242C603500C5DBF2 /* OneTimePassword.framework */; };
@@ -1124,7 +1118,6 @@
 		DD638F85242CD05600C5DBF2 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		DD638F89242CD0FF00C5DBF2 /* iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = iOS; path = Carthage/Build/iOS; sourceTree = "<group>"; };
 		DD638F8A242CD12700C5DBF2 /* Base32.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Base32.framework; path = Carthage/Build/iOS/Base32.framework; sourceTree = "<group>"; };
-		DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = LoopCompletionFreshness.swift; path = ../../Loop/LoopCore/LoopCompletionFreshness.swift; sourceTree = "<group>"; };
 		DDFC49F0242D4FE8009A4801 /* OTPSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPSelectionViewController.swift; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1548,7 +1541,6 @@
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
 				430B298C2041F56500BA9F93 /* LoopSettings.swift */,
-				DDB05DC7243442BF003A1526 /* LoopCompletionFreshness.swift */,
 				430B29892041F54A00BA9F93 /* NSUserDefaults.swift */,
 				431E73471FF95A900069B5F7 /* PersistenceController.swift */,
 				43D848AF1E7DCBE100DADCBC /* Result.swift */,
@@ -2786,7 +2778,6 @@
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
 				43F4EF1D1BA2A57600526CE1 /* DiagnosticLogger.swift in Sources */,
 				432E73CB1D24B3D6009AD15D /* RemoteDataManager.swift in Sources */,
-				DDB05DC8243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2844,7 +2835,6 @@
 				43BFF0B51E45C1E700FF19A9 /* NumberFormatter.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43517917230A0E1A0072ECC0 /* WKInterfaceLabel.swift in Sources */,
-				DDB05DCA243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				4328E01A1CFBE1DA00E199AA /* ActionHUDController.swift in Sources */,
 				4F11D3C320DD84DB006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
@@ -2856,7 +2846,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C05CB821EBEA54006FB252 /* HKUnit.swift in Sources */,
-				DDB05DCC243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				4345E3F421F036FC009E00E5 /* Result.swift in Sources */,
 				43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA921EB2B26006FB252 /* PersistenceController.swift in Sources */,
@@ -2909,7 +2898,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C05CB921EBEA54006FB252 /* HKUnit.swift in Sources */,
-				DDB05DCB243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				4345E3F521F036FC009E00E5 /* Result.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA821EB2B26006FB252 /* PersistenceController.swift in Sources */,
@@ -2964,7 +2952,6 @@
 				4FC8C8021DEB943800A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43BFF0BF1E45C8EA00FF19A9 /* UIColor+Widget.swift in Sources */,
 				C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */,
-				DDB05DC9243442BF003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				4F70C2121DE900EA006380B7 /* StatusExtensionContext.swift in Sources */,
 				4F70C1E11DE8DCA7006380B7 /* StatusViewController.swift in Sources */,
 			);
@@ -2991,7 +2978,6 @@
 				4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */,
 				4FB76FC61E8C57B100B39636 /* ChartsManager.swift in Sources */,
 				4FB76FB41E8C3F7C00B39636 /* ChartAxisValueDoubleUnit.swift in Sources */,
-				DDB05DCD243442C0003A1526 /* LoopCompletionFreshness.swift in Sources */,
 				4FB76FB31E8C3EE400B39636 /* ChartAxisValueDoubleLog.swift in Sources */,
 				43F1C31A1F5DC87700395429 /* ChartPoint.swift in Sources */,
 				4F7528A11DFE200B00C322D6 /* BasalStateView.swift in Sources */,
