@@ -91,7 +91,8 @@ final class DeviceDataManager {
         
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        deviceLog = PersistentDeviceLog(storageFile: documentsDirectory.appendingPathComponent("DeviceLog.sqlite"))
+        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"))
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
