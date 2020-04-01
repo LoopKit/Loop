@@ -101,7 +101,7 @@ class OTPSelectionViewController: UIViewController {
         super.viewDidLoad()
     }
     @objc private func refreshQR(_ sender: UIBarButtonItem) {
-        let refreshAlert = UIAlertController(title: "Refresh Secret Key", message: "This action will invalidate the current key. Are you sure you want to refresh? ", preferredStyle: .alert)
+        let refreshAlert = UIAlertController(title: "Refresh Secret Key", message: "This action will invalidate current key. Are you sure you want to refresh? ", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default ) {_ in
             self.otpManager!.refreshOTPToken()
             self.showQRCode()
