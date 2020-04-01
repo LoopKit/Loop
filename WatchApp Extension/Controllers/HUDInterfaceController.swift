@@ -29,6 +29,8 @@ class HUDInterfaceController: WKInterfaceController {
                 }
             }
         }
+        
+        loopManager.requestGlucoseBackfillIfNecessary()
     }
 
     override func didDeactivate() {
@@ -48,15 +50,15 @@ class HUDInterfaceController: WKInterfaceController {
             return
         }
 
-        glucoseLabel.setHidden(true)
+        glucoseLabel.setText("---")
+        glucoseLabel.setHidden(false)
         eventualGlucoseLabel.setHidden(true)
-        if let glucose = activeContext.glucose, let unit = activeContext.preferredGlucoseUnit {
+        if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -loopManager.settings.inputDataRecencyInterval {
             let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
             if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
                 let trend = activeContext.glucoseTrend?.symbol ?? ""
                 glucoseLabel.setText(glucoseValue + trend)
-                glucoseLabel.setHidden(false)
             }
 
             if let eventualGlucose = activeContext.eventualGlucose {
