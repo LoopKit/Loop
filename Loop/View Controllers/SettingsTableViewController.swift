@@ -530,6 +530,16 @@ final class SettingsTableViewController: UITableViewController {
             case .basalRate:
                 guard let pumpManager = dataManager.pumpManager else {
                     // Not allowing basal schedule entry without a configured pump.
+                    let alert = UIAlertController(
+                        title: NSLocalizedString("Unconfigured Pump", comment: "Alert title for unconfigured pump"),
+                        message: NSLocalizedString("Please configure a pump to view or edit scheduled basal rates.", comment: "Alert message for attempting to change basal rates before pump was configured."),
+                        preferredStyle: .alert
+                    )
+
+                    let acknowledgeChange = UIAlertAction(title: NSLocalizedString("OK", comment: "Button text to dismiss unconfigured pump alert."), style: .default) { _ in }
+                    alert.addAction(acknowledgeChange)
+
+                    present(alert, animated: true)
                     tableView.deselectRow(at: indexPath, animated: true)
                     return
                 }
