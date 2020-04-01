@@ -398,9 +398,6 @@
 		DDFC49EC242CE940009A4801 /* OneTimePassword.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F73242C603500C5DBF2 /* OneTimePassword.framework */; };
 		DDFC49ED242CE940009A4801 /* OneTimePassword.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DD638F73242C603500C5DBF2 /* OneTimePassword.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DDFC49F1242D4FE8009A4801 /* OTPSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFC49F0242D4FE8009A4801 /* OTPSelectionViewController.swift */; };
-		DDFE4A942433FC4600063AB5 /* remove-sim-archs.sh in Resources */ = {isa = PBXBuildFile; fileRef = DDFE4A932433FC4600063AB5 /* remove-sim-archs.sh */; };
-		DDFE4A962433FCC600063AB5 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFE4A952433FCC500063AB5 /* LoopCompletionFreshness.swift */; };
-		DDFE4A972433FCE400063AB5 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFE4A952433FCC500063AB5 /* LoopCompletionFreshness.swift */; };
 		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 /* End PBXBuildFile section */
 
@@ -1122,8 +1119,6 @@
 		DD638F89242CD0FF00C5DBF2 /* iOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = iOS; path = Carthage/Build/iOS; sourceTree = "<group>"; };
 		DD638F8A242CD12700C5DBF2 /* Base32.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Base32.framework; path = Carthage/Build/iOS/Base32.framework; sourceTree = "<group>"; };
 		DDFC49F0242D4FE8009A4801 /* OTPSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPSelectionViewController.swift; sourceTree = "<group>"; };
-		DDFE4A932433FC4600063AB5 /* remove-sim-archs.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "remove-sim-archs.sh"; sourceTree = "<group>"; };
-		DDFE4A952433FCC500063AB5 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshness.swift; sourceTree = "<group>"; };
 		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1545,7 +1540,6 @@
 				430B298D2041F56500BA9F93 /* GlucoseThreshold.swift */,
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
-				DDFE4A952433FCC500063AB5 /* LoopCompletionFreshness.swift */,
 				430B298C2041F56500BA9F93 /* LoopSettings.swift */,
 				430B29892041F54A00BA9F93 /* NSUserDefaults.swift */,
 				431E73471FF95A900069B5F7 /* PersistenceController.swift */,
@@ -1921,7 +1915,6 @@
 		C18A491122FCC20B00FDA733 /* Scripts */ = {
 			isa = PBXGroup;
 			children = (
-				DDFE4A932433FC4600063AB5 /* remove-sim-archs.sh */,
 				C1D197FE232CF92D0096D646 /* capture-build-details.sh */,
 				C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */,
 				C18A491222FCC22800FDA733 /* build-derived-assets.sh */,
@@ -2336,7 +2329,6 @@
 				C1A3EED2235233E1007672E3 /* DerivedAssets.xcassets in Resources */,
 				7D7076631FE06EE4004AC8EA /* Localizable.strings in Resources */,
 				43776F971B8022E90074EA36 /* Main.storyboard in Resources */,
-				DDFE4A942433FC4600063AB5 /* remove-sim-archs.sh in Resources */,
 				C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2854,7 +2846,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C05CB821EBEA54006FB252 /* HKUnit.swift in Sources */,
-				DDFE4A972433FCE400063AB5 /* LoopCompletionFreshness.swift in Sources */,
 				4345E3F421F036FC009E00E5 /* Result.swift in Sources */,
 				43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA921EB2B26006FB252 /* PersistenceController.swift in Sources */,
@@ -2907,7 +2898,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C05CB921EBEA54006FB252 /* HKUnit.swift in Sources */,
-				DDFE4A962433FCC600063AB5 /* LoopCompletionFreshness.swift in Sources */,
 				4345E3F521F036FC009E00E5 /* Result.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA821EB2B26006FB252 /* PersistenceController.swift in Sources */,
