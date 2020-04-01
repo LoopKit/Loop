@@ -16,9 +16,6 @@ import UserNotifications
 final class DeviceDataManager {
 
     private let queue = DispatchQueue(label: "com.loopkit.DeviceManagerQueue", qos: .utility)
-    
-    fileprivate let dosingQueue: DispatchQueue = DispatchQueue(label: "com.loopkit.DeviceManagerDosingQueue", qos: .utility)
-
 
     private let log = DiagnosticLogger.shared.forCategory("DeviceManager")
 
@@ -38,6 +35,8 @@ final class DeviceDataManager {
 
     /// The last time a BLE heartbeat was received and acted upon.
     private var lastBLEDrivenUpdate = Date.distantPast
+    
+    private var deviceLog: PersistentDeviceLog
 
     // MARK: - CGM
 
@@ -89,6 +88,11 @@ final class DeviceDataManager {
 
     init() {
         pluginManager = PluginManager()
+        
+        let fileManager = FileManager.default
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"))
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -192,7 +196,51 @@ final class DeviceDataManager {
         updatePumpManagerBLEHeartbeatPreference()
     }
 
-
+    func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
+        self.loopManager.generateDiagnosticReport { (loopReport) in
+            self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
+                let deviceLogReport: String
+                switch result {
+                case .failure(let error):
+                    deviceLogReport = "Error fetching entries: \(error)"
+                case .success(let entries):
+                    deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
+                }
+                
+                let report = [
+                    Bundle.main.localizedNameAndVersion,
+                    "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
+                    "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+                    "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
+                    "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
+                    "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+                    "",
+                    "## FeatureFlags",
+                    "\(FeatureFlags)",
+                    "",
+                    "## DeviceDataManager",
+                    "* launchDate: \(self.launchDate)",
+                    "* lastError: \(String(describing: self.lastError))",
+                    "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
+                    "",
+                    self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
+                    "",
+                    self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
+                    "",
+                    "## Device Communication Log",
+                    deviceLogReport,
+                    "",
+                    String(reflecting: self.watchManager!),
+                    "",
+                    String(reflecting: self.statusExtensionManager!),
+                    "",
+                    loopReport,
+                ].joined(separator: "\n")
+                
+                completion(report)
+            }
+        }
+    }
 }
 
 private extension DeviceDataManager {
@@ -277,6 +325,7 @@ extension DeviceDataManager: RemoteDataManagerDelegate {
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
+
     func scheduleNotification(for manager: DeviceManager,
                               identifier: String,
                               content: UNNotificationContent,
@@ -293,8 +342,9 @@ extension DeviceDataManager: DeviceManagerDelegate {
     func clearNotification(for manager: DeviceManager, identifier: String) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
-    
+
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
+        deviceLog.log(managerIdentifier: Swift.type(of: manager).managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
     }
 }
 
@@ -583,6 +633,10 @@ extension DeviceDataManager {
 
 // MARK: - LoopDataManagerDelegate
 extension DeviceDataManager: LoopDataManagerDelegate {
+    func loopDataManager(_ manager: LoopDataManager, didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date), completion: @escaping (Error?) -> Void) {
+        
+    }
+    
     func loopDataManager(_ manager: LoopDataManager, roundBasalRate unitsPerHour: Double) -> Double {
         guard let pumpManager = pumpManager else {
             return unitsPerHour
@@ -595,100 +649,34 @@ extension DeviceDataManager: LoopDataManagerDelegate {
         guard let pumpManager = pumpManager else {
             return units
         }
-        
-        let rounded = ([0.0] + pumpManager.supportedBolusVolumes).enumerated().min( by: { abs($0.1 - units) < abs($1.1 - units) } )!.1
-        self.log.default("Rounded \(units) to \(rounded)")
-        
-        return rounded
+
+        return pumpManager.roundToSupportedBolusVolume(units: units)
     }
 
     func loopDataManager(
         _ manager: LoopDataManager,
-        didRecommend automaticDose: (recommendation: AutomaticDoseRecommendation, date: Date),
-        completion: @escaping (_ error: Error?) -> Void
+        didRecommendBasalChange basal: (recommendation: TempBasalRecommendation, date: Date),
+        completion: @escaping (_ result: Result<DoseEntry>) -> Void
     ) {
         guard let pumpManager = pumpManager else {
-            completion(LoopError.configurationError(.pumpManager))
+            completion(.failure(LoopError.configurationError(.pumpManager)))
             return
         }
-        
-        dosingQueue.async {
-            let doseDispatchGroup = DispatchGroup()
-            
-            var tempBasalError: Error? = nil
-            var bolusError: Error? = nil
-            
-            if let basalAdjustment = automaticDose.recommendation.basalAdjustment {
-                self.log.default("LoopManager did recommend basal change")
-                
-                doseDispatchGroup.enter()
-                pumpManager.enactTempBasal(unitsPerHour: basalAdjustment.unitsPerHour, for: basalAdjustment.duration, completion: { result in
-                    switch result {
-                    case .failure(let error):
-                        tempBasalError = error
-                    default:
-                        break
-                    }
-                    doseDispatchGroup.leave()
-                })
-            }
-            
-            doseDispatchGroup.wait()
-            
-            guard tempBasalError == nil else {
-                completion(tempBasalError)
-                return
-            }
 
-            if automaticDose.recommendation.bolusUnits > 0 {
-                self.log.default("LoopManager did recommend bolus dose")
-                doseDispatchGroup.enter()
-                pumpManager.enactBolus(units: automaticDose.recommendation.bolusUnits, at: Date(), willRequest: { (dose) in
-                    self.log.default("PumpManager willRequest bolus")
-                }) { (result) in
-                    switch result {
-                    case .failure(let error):
-                        bolusError = error
-                    default:
-                        self.log.default("PumpManager issued bolus command")
-                        break
-                    }
-                    doseDispatchGroup.leave()
+        log.default("LoopManager did recommend basal change")
+
+        pumpManager.enactTempBasal(
+            unitsPerHour: basal.recommendation.unitsPerHour,
+            for: basal.recommendation.duration,
+            completion: { result in
+                switch result {
+                case .success(let doseEntry):
+                    completion(.success(doseEntry))
+                case .failure(let error):
+                    completion(.failure(error))
                 }
             }
-            
-            doseDispatchGroup.wait()
-            completion(bolusError)
-        }
-    }
-}
-
-
-// MARK: - CustomDebugStringConvertible
-extension DeviceDataManager: CustomDebugStringConvertible {
-    var debugDescription: String {
-        return [
-            Bundle.main.localizedNameAndVersion,
-            "* bundleIdentifier: \(Bundle.main.bundleIdentifier ?? "N/A")",
-            "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
-            "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
-            "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
-            "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
-            "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-            "",
-            "## DeviceDataManager",
-            "* launchDate: \(launchDate)",
-            "* lastError: \(String(describing: lastError))",
-            "* lastBLEDrivenUpdate: \(lastBLEDrivenUpdate)",
-            "",
-            cgmManager != nil ? String(reflecting: cgmManager!) : "cgmManager: nil",
-            "",
-            pumpManager != nil ? String(reflecting: pumpManager!) : "pumpManager: nil",
-            "",
-            String(reflecting: watchManager!),
-            "",
-            String(reflecting: statusExtensionManager!),
-        ].joined(separator: "\n")
+        )
     }
 }
 
@@ -700,35 +688,34 @@ extension Notification.Name {
 // MARK: - Remote Notification Handling
 extension DeviceDataManager {
     func handleRemoteNotification(_ notification: [String: AnyObject]) {
-        
         if let command = RemoteCommand(notification: notification, allowedPresets: loopManager.settings.overridePresets, otp: loopManager.otpManager.otp()) {
-            switch command {
-            case .temporaryScheduleOverride(let override):
-                log.default("Enacting remote temporary override: \(override)")
-                loopManager.settings.scheduleOverride = override
-            case .cancelTemporaryOverride:
-                log.default("Canceling temporary override from remote command")
-                loopManager.settings.scheduleOverride = nil
-            case .bolusEntry(let bolusValue):
-                log.default("Enacting remote bolus entry: \(bolusValue)")
-              
-                // enact bolus; make sure maxbolus is in place for protection
-                if let maxBolus = loopManager.settings.maximumBolus {
-                   if bolusValue.isLessThanOrEqualTo(maxBolus) {
-                      self.enactBolus(units: bolusValue) { _ in }
-                   } else {
-                       log.default("Remote bolus higher than maximum. Aborting...")
-                   }
-                } else {
-                    log.default("No max bolus detected. Aborting...")
-                }
-            case .carbsEntry(let newEntry):
-                log.default("Adding carbs entry.")
-                let addCompletion: (CarbStoreResult<StoredCarbEntry>) -> Void = { _ in }
-                loopManager.carbStore.addCarbEntry(newEntry, completion: addCompletion )
-            }
-        } else {
-            log.info("Unhandled remote notification: \(notification)")
-        }
-    }
+          switch command {
+          case .temporaryScheduleOverride(let override):
+              log.default("Enacting remote temporary override: \(override)")
+              loopManager.settings.scheduleOverride = override
+          case .cancelTemporaryOverride:
+              log.default("Canceling temporary override from remote command")
+              loopManager.settings.scheduleOverride = nil
+          case .bolusEntry(let bolusValue):
+              log.default("Enacting remote bolus entry: \(bolusValue)")
+
+              // enact bolus; make sure maxbolus is in place for protection
+              if let maxBolus = loopManager.settings.maximumBolus {
+                 if bolusValue.isLessThanOrEqualTo(maxBolus) {
+                    self.enactBolus(units: bolusValue) { _ in }
+                 } else {
+                     log.default("Remote bolus higher than maximum. Aborting...")
+                 }
+              } else {
+                  log.default("No max bolus detected. Aborting...")
+              }
+          case .carbsEntry(let newEntry):
+              log.default("Adding carbs entry.")
+              let addCompletion: (CarbStoreResult<StoredCarbEntry>) -> Void = { _ in }
+              loopManager.carbStore.addCarbEntry(newEntry, completion: addCompletion )
+          }
+      } else {
+          log.info("Unhandled remote notification: \(notification)")
+      }
+   }
 }
