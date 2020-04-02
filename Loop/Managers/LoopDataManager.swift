@@ -23,6 +23,9 @@ final class LoopDataManager {
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
+    // OTP
+    let otpManager: OTPManager
+    
     let carbStore: CarbStore
 
     let doseStore: DoseStore
@@ -53,6 +56,8 @@ final class LoopDataManager {
         overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup?.overrideHistory ?? .init(),
         lastPumpEventsReconciliation: Date?
     ) {
+        self.otpManager = OTPManager()
+        
         self.logger = DiagnosticLogger.shared.forCategory("LoopDataManager")
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
         self.lockedBasalDeliveryState = Locked(basalDeliveryState)
