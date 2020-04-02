@@ -91,7 +91,7 @@ class OTPSelectionViewController: UIViewController {
         theView.addSubview(currentOTPLabelView!)
         theView.addSubview(createdLabelView!)
         theView.addSubview(qrCodeView!)
-        theView.backgroundColor = UIColor.systemGray6
+        theView.backgroundColor = .cellBackgroundColor
         theView.frame.size.width = UIScreen.main.bounds.width
         theView.frame.size.height = UIScreen.main.bounds.height
         self.view = theView
