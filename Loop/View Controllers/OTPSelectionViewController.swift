@@ -9,6 +9,9 @@
 import Foundation
 import UIKit
 
+let ViewDismissTime: Double = 120
+let AlertDismissTime = 10
+
 class OTPSelectionViewController: UIViewController {
     
     var otpManager: OTPManager?
@@ -101,7 +104,7 @@ class OTPSelectionViewController: UIViewController {
         super.viewDidLoad()
     }
     @objc private func refreshQR(_ sender: UIBarButtonItem) {
-        let refreshAlert = UIAlertController(title: "Refresh Secret Key", message: "This action will invalidate current key. Are you sure you want to refresh? ", preferredStyle: .alert)
+        let refreshAlert = UIAlertController(title: "Refresh Secret Key", message: "This action will invalidate the current key. Are you sure you want to refresh? ", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default ) {_ in
             self.otpManager!.refreshOTPToken()
             self.showQRCode()
@@ -119,12 +122,12 @@ class OTPSelectionViewController: UIViewController {
         present(refreshAlert, animated: true, completion: nil)
         
         // dismiss after 10 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + DispatchTimeInterval.seconds(AlertDismissTime) ) {
            refreshAlert.dismiss(animated: true, completion: nil)
             
            // restart view's dismiss timer for what remains of the 120 seconds
            let now = Double(DispatchTime.now().uptimeNanoseconds)/1000000000
-           let remaining = 120 - (now - self.start)
+           let remaining = ViewDismissTime - (now - self.start)
             
            // invalidate previous view dismiss timer
            self.dismissTimer?.invalidate()
@@ -145,7 +148,7 @@ class OTPSelectionViewController: UIViewController {
         }
         
         // allow this view to be displayed for only 120 seconds
-        self.dismissTimer = Timer.scheduledTimer(timeInterval: 120, target: self, selector: #selector(dismissView), userInfo:nil, repeats: false )
+        self.dismissTimer = Timer.scheduledTimer(timeInterval: ViewDismissTime, target: self, selector: #selector(dismissView), userInfo:nil, repeats: false )
         
         // keep tract of view view appearing
         self.start = Double(DispatchTime.now().uptimeNanoseconds) / 1000000000
