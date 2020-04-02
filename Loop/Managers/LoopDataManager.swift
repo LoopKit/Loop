@@ -646,7 +646,22 @@ extension LoopDataManager {
             }
         }
         
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: curve)
+        // ANNA TODO: improve ~style~
+        var deliveredUnits: Double
+        
+        if let model = insulinModel as? ExponentialInsulinModelPreset {
+            switch model {
+            case .afrezza:
+                // The manufacturer has said that 4 units of Afrezza is roughly the same as 3 units of rapid-acting
+                deliveredUnits = 0.75 * units
+            default:
+                deliveredUnits = units
+            }
+        } else {
+            deliveredUnits = units
+        }
+        
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, deliveredUnits: deliveredUnits, insulinModel: curve)
         
         logOutsideInsulinDose(dose: dose) { (error) in
             if let error = error {
