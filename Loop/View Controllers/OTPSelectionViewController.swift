@@ -127,7 +127,7 @@ class OTPSelectionViewController: UIViewController {
             
            // restart view's dismiss timer for what remains of the 120 seconds
            let now = Double(DispatchTime.now().uptimeNanoseconds)/1000000000
-           let remaining = ViewDismissTime - (now - self.start)
+           let remaining = ViewDismissTime - (now - self.start) //
             
            // invalidate previous view dismiss timer
            self.dismissTimer?.invalidate()
