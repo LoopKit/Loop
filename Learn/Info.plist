@@ -25,7 +25,7 @@
 	<key>MainAppBundleIdentifier</key>
 	<string>$(MAIN_APP_BUNDLE_IDENTIFIER)</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation.</string>
+	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

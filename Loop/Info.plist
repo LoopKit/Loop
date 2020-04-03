@@ -51,7 +51,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID is used to authenticate insulin bolus.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation.</string>
+	<string>Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.</string>
 	<key>NSUserActivityTypes</key>
