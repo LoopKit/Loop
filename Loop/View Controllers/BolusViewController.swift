@@ -403,14 +403,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     @IBOutlet weak var insulinModelLabel: UILabel! {
         didSet {
-            switch enteredBolusInsulinModel {
-            case let model as WalshInsulinModel:
-                insulinModelLabel?.text = model.title
-            case let model as ExponentialInsulinModelPreset:
-                insulinModelLabel?.text = model.title
-            default:
-                break
-            }
+            updateInsulinModelLabel()
         }
     }
 
@@ -554,15 +547,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     
     var enteredBolusInsulinModel: InsulinModel? {
         didSet {
-            switch enteredBolusInsulinModel {
-            case let model as WalshInsulinModel:
-                insulinModelLabel?.text = model.title
-            case let model as ExponentialInsulinModelPreset:
-                insulinModelLabel?.text = model.title
-            default:
-                break
-            }
-
+            updateInsulinModelLabel()
             predictionRecomputation?.cancel()
             recomputePrediction()
         }
@@ -572,9 +557,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         guard let amount = enteredBolusAmount else {
             return nil
         }
-        
-        // ANNA TODO: improve ~style~
-        var deliveredUnits: Double
+
+        var deliveredUnits: Double = amount
         
         if let model = enteredBolusInsulinModel as? ExponentialInsulinModelPreset {
             switch model {
@@ -582,10 +566,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 // The manufacturer has said that 4 units of Afrezza is roughly the same as 3 units of rapid-acting
                 deliveredUnits = 0.75 * amount
             default:
-                deliveredUnits = amount
+                break
             }
-        } else {
-            deliveredUnits = amount
         }
 
         return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, deliveredUnits: deliveredUnits, insulinModel: enteredBolusInsulinModel)
@@ -723,6 +705,17 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             noticeLabel?.text = "⚠ \(notice.description(using: glucoseUnit))"
         } else {
             noticeLabel?.text = nil
+        }
+    }
+    
+    private func updateInsulinModelLabel() {
+        switch enteredBolusInsulinModel {
+        case let model as WalshInsulinModel:
+            insulinModelLabel?.text = model.title
+        case let model as ExponentialInsulinModelPreset:
+            insulinModelLabel?.text = model.title
+        default:
+            break
         }
     }
 

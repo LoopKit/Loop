@@ -638,18 +638,15 @@ extension LoopDataManager {
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
-        // ANNA TODO: improve ~style~
-        var deliveredUnits: Double
+        var deliveredUnits: Double = units
         if let model = insulinModel as? ExponentialInsulinModelPreset {
             switch model {
             case .afrezza:
                 // The manufacturer has said that 4 units of Afrezza is roughly the same as 3 units of rapid-acting
                 deliveredUnits = 0.75 * units
             default:
-                deliveredUnits = units
+                break
             }
-        } else {
-            deliveredUnits = units
         }
         
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, deliveredUnits: deliveredUnits, insulinModel: insulinModel)
