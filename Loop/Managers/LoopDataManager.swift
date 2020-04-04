@@ -618,8 +618,8 @@ extension LoopDataManager {
     ///   - events: The pump events to add
     ///   - completion: A closure called once upon completion
     ///   - error: An error explaining why the events could not be saved.
-    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
-        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation) { (error) in
+    func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, updateLastReconciliation: Bool = true, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
+        doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, updateLastReconciliation: updateLastReconciliation) { (error) in
             self.dataAccessQueue.async {
                 if error == nil {
                     self.insulinEffect = nil
@@ -694,8 +694,8 @@ extension LoopDataManager {
         if let model = dose.insulinModel {
             doseStore.longestEffectDuration = max(doseStore.longestEffectDuration, model.effectDuration)
         }
-        // ANNA TODO: what should be done for lastReconciliation?
-        addPumpEvents(events, lastReconciliation: Date()) { (error) in
+
+        addPumpEvents(events, lastReconciliation: nil, updateLastReconciliation: false) { (error) in
             if let error = error {
                 self.logger.error(error)
                 completion(error)
