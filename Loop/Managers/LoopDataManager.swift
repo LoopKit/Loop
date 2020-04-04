@@ -617,6 +617,8 @@ extension LoopDataManager {
     /// - Parameters:
     ///   - events: The pump events to add
     ///   - completion: A closure called once upon completion
+    ///   - lastReconciliation: The date that pump events were most recently reconciled against recorded pump history. Pump events are assumed to be reflective of delivery up until this point in time. If reservoir values are recorded after this time, they may be used to supplement event based delivery.
+    ///   - parameter updateLastReconciliation: Whether or not the last reconciliation time should be updated with the new value.
     ///   - error: An error explaining why the events could not be saved.
     func addPumpEvents(_ events: [NewPumpEvent], lastReconciliation: Date?, updateLastReconciliation: Bool = true, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
         doseStore.addPumpEvents(events, lastReconciliation: lastReconciliation, updateLastReconciliation: updateLastReconciliation) { (error) in
@@ -636,19 +638,8 @@ extension LoopDataManager {
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
-
-        var curve: InsulinModel? {
-            switch insulinModel {
-            case let model where insulinModel is ExponentialInsulinModelPreset:
-                return model
-            default:
-                return insulinModel
-            }
-        }
-        
         // ANNA TODO: improve ~style~
         var deliveredUnits: Double
-        
         if let model = insulinModel as? ExponentialInsulinModelPreset {
             switch model {
             case .afrezza:
@@ -661,7 +652,7 @@ extension LoopDataManager {
             deliveredUnits = units
         }
         
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, deliveredUnits: deliveredUnits, insulinModel: curve)
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, deliveredUnits: deliveredUnits, insulinModel: insulinModel)
         
         logOutsideInsulinDose(dose: dose) { (error) in
             if let error = error {
