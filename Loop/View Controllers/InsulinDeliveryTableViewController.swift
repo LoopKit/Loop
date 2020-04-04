@@ -348,7 +348,6 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 let doseDate = bolusViewController.doseDate
                 
                 self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
-                
             // Enact the user-entered bolus
             default:
                 self.deviceManager?.enactBolus(units: bolus) { _ in }

@@ -1123,11 +1123,10 @@ final class StatusTableViewController: ChartsTableViewController {
                         if let bolus = bolusViewController.bolus, bolus > 0 {
                             switch bolusViewController.configuration {
                             case .logging:
-                                if let model = bolusViewController.enteredBolusInsulinModel {
-                                    self.deviceManager.loopManager?.logOutsideInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
-                                } else {
-                                    self.log.error("Failed to get insulin model to log dose")
-                                }
+                                let model = bolusViewController.enteredBolusInsulinModel
+                                let doseDate = bolusViewController.doseDate
+                                
+                                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
                             // Enact the user-entered bolus
                             default:
                                 self.deviceManager.enactBolus(units: bolus) { _ in }
@@ -1146,11 +1145,10 @@ final class StatusTableViewController: ChartsTableViewController {
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
             switch bolusViewController.configuration {
             case .logging:
-                if let model = bolusViewController.enteredBolusInsulinModel {
-                    self.deviceManager.loopManager?.logOutsideInsulinDose(startDate: Date(), units: bolus, insulinModel: model)
-                } else {
-                    self.log.error("Failed to get insulin model to log dose")
-                }
+                let model = bolusViewController.enteredBolusInsulinModel
+                let doseDate = bolusViewController.doseDate
+                
+                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
             // Enact the user-entered bolus
             default:
                 self.deviceManager.enactBolus(units: bolus) { _ in }
