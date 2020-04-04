@@ -7,10 +7,11 @@
 
 import LoopKit
 
+
 public enum InsulinModelSettings {
     case exponentialPreset(ExponentialInsulinModelPreset)
     case walsh(WalshInsulinModel)
-    
+
     public var model: InsulinModel {
         switch self {
         case .exponentialPreset(let model):

@@ -737,13 +737,11 @@ extension BolusViewController {
 
 extension BolusViewController: InsulinModelSettingsViewControllerDelegate {
     func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController) {
-        
         guard let model = controller.insulinModel else {
             return
         }
         
         self.enteredBolusInsulinModel = model
-
     }
 }
 
