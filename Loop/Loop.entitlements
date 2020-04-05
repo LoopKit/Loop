@@ -12,7 +12,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>$(APP_GROUP_IDENTIFIER)</string>
+		<string>group.com.glucloser.LoopGroup</string>
 	</array>
 </dict>
 </plist>
