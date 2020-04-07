@@ -344,6 +344,7 @@
 		892FB4CD22040104005293EC /* OverridePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CC22040104005293EC /* OverridePresetRow.swift */; };
 		892FB4CF220402C0005293EC /* OverrideSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CE220402C0005293EC /* OverrideSelectionController.swift */; };
 		895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */; };
+		8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8968B113240C55F10074BB48 /* LoopSettingsTests.swift */; };
 		898ECA60218ABD17001E9D35 /* GlucoseChartScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */; };
 		898ECA61218ABD17001E9D35 /* GlucoseChartData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */; };
 		898ECA63218ABD21001E9D35 /* ComplicationChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */; };
@@ -1053,6 +1054,7 @@
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
 		894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverrideSelectionViewController.swift; sourceTree = "<group>"; };
+		8968B113240C55F10074BB48 /* LoopSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsTests.swift; sourceTree = "<group>"; };
 		898ECA5E218ABD17001E9D35 /* GlucoseChartScaler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartScaler.swift; sourceTree = "<group>"; };
 		898ECA5F218ABD17001E9D35 /* GlucoseChartData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseChartData.swift; sourceTree = "<group>"; };
 		898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComplicationChartManager.swift; sourceTree = "<group>"; };
@@ -1668,6 +1670,7 @@
 			children = (
 				43E2D90F1D20C581004DA55F /* Info.plist */,
 				43E2D8C91D20B9E7004DA55F /* KeychainManagerTests.swift */,
+				8968B113240C55F10074BB48 /* LoopSettingsTests.swift */,
 			);
 			path = LoopTests;
 			sourceTree = "<group>";
@@ -2884,6 +2887,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */,
 				43E2D9151D20C5A2004DA55F /* KeychainManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

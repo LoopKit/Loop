@@ -301,6 +301,7 @@ extension WatchDataManager: WCSessionDelegate {
             if let watchSettings = LoopSettingsUserInfo(rawValue: message)?.settings {
                 // So far we only support watch changes of temporary schedule overrides
                 var settings = deviceManager.loopManager.settings
+                settings.preMealOverride = watchSettings.preMealOverride
                 settings.scheduleOverride = watchSettings.scheduleOverride
 
                 // Prevent re-sending these updated settings back to the watch

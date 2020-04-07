@@ -142,6 +142,12 @@ final class LoopDataManager {
             guard settings != oldValue else {
                 return
             }
+
+            if settings.preMealOverride != oldValue.preMealOverride {
+                // The prediction isn't actually invalid, but a target range change requires recomputing recommended doses
+                predictedGlucose = nil
+            }
+
             if settings.scheduleOverride != oldValue.scheduleOverride {
                 overrideHistory.recordOverride(settings.scheduleOverride)
 

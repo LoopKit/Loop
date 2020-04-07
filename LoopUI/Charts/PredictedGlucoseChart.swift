@@ -37,6 +37,13 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
         }
     }
 
+    public var preMealOverride: TemporaryScheduleOverride? {
+        didSet {
+            preMealOverridePoints = []
+            preMealOverrideDurationPoints = []
+        }
+    }
+
     public var scheduleOverride: TemporaryScheduleOverride? {
         didSet {
             targetOverridePoints = []
@@ -45,6 +52,10 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
     }
 
     private var targetGlucosePoints: [ChartPoint] = []
+
+    private var preMealOverridePoints: [ChartPoint] = []
+
+    private var preMealOverrideDurationPoints: [ChartPoint] = []
 
     private var targetOverridePoints: [ChartPoint] = []
 
@@ -78,7 +89,24 @@ extension PredictedGlucoseChart {
         if targetGlucosePoints.isEmpty, xAxisValues.count > 1, let schedule = targetGlucoseSchedule {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
 
-            if let override = scheduleOverride, override.isActive() || override.startDate > Date() {
+            var displayedScheduleOverride = scheduleOverride
+            if let preMealOverride = preMealOverride, preMealOverride.isActive() {
+                preMealOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(preMealOverride, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
+                preMealOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(preMealOverride, unit: glucoseUnit, xAxisValues: xAxisValues)
+
+                if displayedScheduleOverride != nil {
+                    if displayedScheduleOverride!.endDate > preMealOverride.endDate {
+                        displayedScheduleOverride!.activeInterval = DateInterval(start: preMealOverride.endDate, end: displayedScheduleOverride!.endDate)
+                    } else {
+                        displayedScheduleOverride = nil
+                    }
+                }
+            } else {
+                preMealOverridePoints = []
+                preMealOverrideDurationPoints = []
+            }
+
+            if let override = displayedScheduleOverride, override.isActive() || override.startDate > Date() {
                 targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
                 targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues)
             } else {
@@ -87,7 +115,12 @@ extension PredictedGlucoseChart {
             }
         }
 
-        let points = glucosePoints + predictedGlucosePoints + targetGlucosePoints + targetOverridePoints + glucoseDisplayRangePoints
+        let points = [
+            glucosePoints, predictedGlucosePoints,
+            preMealOverridePoints, preMealOverrideDurationPoints,
+            targetGlucosePoints, targetOverridePoints,
+            glucoseDisplayRangePoints
+        ].flatMap { $0 }
 
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
@@ -106,26 +139,44 @@ extension PredictedGlucoseChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The glucose targets
-        let targetsLayer = ChartPointsFillsLayer(
-            xAxis: xAxisLayer.axis,
-            yAxis: yAxisLayer.axis,
-            fills: [
-                ChartPointsFill(
-                    chartPoints: targetGlucosePoints,
-                    fillColor: colors.glucoseTint.withAlphaComponent(targetOverridePoints.count > 1 ? 0.15 : 0.3),
-                    createContainerPoints: false
-                ),
+        let targetFillAlpha: CGFloat = preMealOverridePoints.count > 1 || targetOverridePoints.count > 1 ? 0.15 : 0.3
+        var fills: [ChartPointsFill?] = [
+            ChartPointsFill(
+                chartPoints: targetGlucosePoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(targetFillAlpha),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: preMealOverridePoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: preMealOverrideDurationPoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: targetOverrideDurationPoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            )
+        ]
+
+        if preMealOverridePoints.isEmpty {
+            fills.append(
                 ChartPointsFill(
                     chartPoints: targetOverridePoints,
                     fillColor: colors.glucoseTint.withAlphaComponent(0.3),
                     createContainerPoints: false
-                ),
-                ChartPointsFill(
-                    chartPoints: targetOverrideDurationPoints,
-                    fillColor: colors.glucoseTint.withAlphaComponent(0.3),
-                    createContainerPoints: false
                 )
-            ]
+            )
+        }
+
+        let targetsLayer = ChartPointsFillsLayer(
+            xAxis: xAxisLayer.axis,
+            yAxis: yAxisLayer.axis,
+            fills: fills
         )
 
         // Grid lines

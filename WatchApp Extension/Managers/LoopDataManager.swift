@@ -158,6 +158,7 @@ extension LoopDataManager {
             let chartData = GlucoseChartData(
                 unit: activeContext.preferredGlucoseUnit,
                 correctionRange: self.settings.glucoseTargetRangeSchedule,
+                preMealOverride: self.settings.preMealOverride,
                 scheduleOverride: self.settings.scheduleOverride,
                 historicalGlucose: samples,
                 predictedGlucose: activeContext.predictedGlucose?.values
