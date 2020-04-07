@@ -507,6 +507,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.glucoseUnit = deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
         default:
             break
         }
