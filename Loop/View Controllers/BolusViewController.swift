@@ -558,19 +558,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             return nil
         }
 
-        var deliveredUnits: Double = amount
-        
-        if let model = enteredBolusInsulinModel as? ExponentialInsulinModelPreset {
-            switch model {
-            case .afrezza:
-                // The manufacturer has said that 4 units of Afrezza is roughly the same as 3 units of rapid-acting
-                deliveredUnits = 0.75 * amount
-            default:
-                break
-            }
-        }
-
-        return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, deliveredUnits: deliveredUnits, insulinModel: enteredBolusInsulinModel)
+        return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, insulinModel: enteredBolusInsulinModel)
     }
 
     private var predictionRecomputation: DispatchWorkItem?
