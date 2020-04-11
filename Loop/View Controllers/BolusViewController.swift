@@ -30,7 +30,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case entry
     }
 
-    private var maximumDateFutureInterval = TimeInterval(hours: 48)
+    private let maximumDateFutureInterval = TimeInterval(hours: 4)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -371,7 +371,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         if isLoggingDose {
             footerView.primaryButton.setTitle(NSLocalizedString("Log Dose", comment: "The button text to log an insulin dose not given by the pump"), for: .normal)
             footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
-            footerView.primaryButton.tintColor = enteredBolusAmount != nil && enteredBolusAmount! > 0 ? .alternateBlue : .systemBlue
+            footerView.primaryButton.tintColor = .systemBlue
         } else if potentialCarbEntry == nil {
             footerView.primaryButton.setTitle(deliverText, for: .normal)
             footerView.primaryButton.isEnabled = enteredBolusAmount != nil && enteredBolusAmount! > 0
@@ -552,13 +552,21 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             recomputePrediction()
         }
     }
+    
+    // ANNA TODO: refactor
+    var enteredBolusInsulinModelSetting: InsulinModelSettings? {
+        if let model = enteredBolusInsulinModel {
+            return InsulinModelSettings(model: model)
+        }
+        return nil
+    }
 
     private var enteredBolus: DoseEntry? {
         guard let amount = enteredBolusAmount else {
             return nil
         }
 
-        return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, insulinModel: enteredBolusInsulinModel)
+        return DoseEntry(type: .bolus, startDate: doseDate ?? Date(), value: amount, unit: .units, insulinModelSetting: enteredBolusInsulinModelSetting)
     }
 
     private var predictionRecomputation: DispatchWorkItem?
@@ -620,27 +628,18 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         let context = LAContext()
 
         if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) {
-            if isLoggingDose {
-                context.evaluatePolicy(.deviceOwnerAuthentication,
-                                       localizedReason: String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt for logging an insulin dose"), amountString),
-                                       reply: { (success, error) in
-                    if success {
-                        DispatchQueue.main.async {
-                            self.setBolusAndClose(bolus)
-                        }
+            // The authentication reason should change if a dose is being logged
+            let localizedReason = isLoggingDose ? String(format: NSLocalizedString("Authenticate to log %@ Units", comment: "The message displayed during a device authentication prompt for logging an insulin dose"), amountString) : String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString)
+
+            context.evaluatePolicy(.deviceOwnerAuthentication,
+                                   localizedReason: localizedReason,
+                                   reply: { (success, error) in
+                if success {
+                    DispatchQueue.main.async {
+                        self.setBolusAndClose(bolus)
                     }
-                })
-            } else {
-                context.evaluatePolicy(.deviceOwnerAuthentication,
-                                       localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), amountString),
-                                       reply: { (success, error) in
-                    if success {
-                        DispatchQueue.main.async {
-                            self.setBolusAndClose(bolus)
-                        }
-                    }
-                })
-            }
+                }
+            })
         } else {
             setBolusAndClose(bolus)
         }

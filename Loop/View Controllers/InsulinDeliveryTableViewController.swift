@@ -376,8 +376,6 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             doseStore?.deleteAllReservoirValues(completion)
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
-        default:
-            break
         }
     }
 

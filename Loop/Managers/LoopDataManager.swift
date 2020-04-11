@@ -75,7 +75,7 @@ final class LoopDataManager {
         doseStore = DoseStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
-            defaultInsulinModel: insulinModelSettings?.model,
+            defaultInsulinModelSetting: insulinModelSettings,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             overrideHistory: overrideHistory,
@@ -367,14 +367,10 @@ extension LoopDataManager {
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
         get {
-            guard let model = doseStore.defaultInsulinModel else {
-                return nil
-            }
-
-            return InsulinModelSettings(model: model)
+            return doseStore.defaultInsulinModelSetting
         }
         set {
-            doseStore.defaultInsulinModel = newValue?.model
+            doseStore.defaultInsulinModelSetting = newValue
             UserDefaults.appGroup?.insulinModelSettings = newValue
 
             self.dataAccessQueue.async {
@@ -638,8 +634,15 @@ extension LoopDataManager {
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinModel: InsulinModel? = nil) {
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModel: insulinModel)
-        
+        var modelSetting: InsulinModelSettings? {
+            if let model = insulinModel {
+                return InsulinModelSettings(model: model)
+            }
+            return nil
+        }
+
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModelSetting: modelSetting)
+
         logOutsideInsulinDose(dose: dose) { (error) in
             if let error = error {
                  self.logger.error(error)
@@ -668,7 +671,7 @@ extension LoopDataManager {
             events.append(pendingBasal)
         }
 
-        if let model = dose.insulinModel {
+        if let model = dose.insulinModelSetting?.model {
             doseStore.longestEffectDuration = max(doseStore.longestEffectDuration, model.effectDuration)
         }
 
