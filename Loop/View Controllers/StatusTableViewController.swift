@@ -1081,7 +1081,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.configuration = .manualCorrection
-            vc.enteredBolusInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
+            vc.enteredBolusInsulinModelSetting = deviceManager.loopManager.insulinModelSettings
             AnalyticsManager.shared.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
@@ -1123,10 +1123,10 @@ final class StatusTableViewController: ChartsTableViewController {
                         if let bolus = bolusViewController.bolus, bolus > 0 {
                             switch bolusViewController.configuration {
                             case .logging:
-                                let model = bolusViewController.enteredBolusInsulinModel
+                                let modelSetting = bolusViewController.enteredBolusInsulinModelSetting
                                 let doseDate = bolusViewController.doseDate
                                 
-                                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
+                                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModelSetting: modelSetting)
                             // Enact the user-entered bolus
                             default:
                                 self.deviceManager.enactBolus(units: bolus) { _ in }
@@ -1145,10 +1145,10 @@ final class StatusTableViewController: ChartsTableViewController {
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
             switch bolusViewController.configuration {
             case .logging:
-                let model = bolusViewController.enteredBolusInsulinModel
+                let modelSetting = bolusViewController.enteredBolusInsulinModelSetting
                 let doseDate = bolusViewController.doseDate
                 
-                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
+                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModelSetting: modelSetting)
             // Enact the user-entered bolus
             default:
                 self.deviceManager.enactBolus(units: bolus) { _ in }

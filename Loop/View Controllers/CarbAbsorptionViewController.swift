@@ -536,10 +536,10 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                         if let bolus = bolusViewController.bolus, bolus > 0 {
                             switch bolusViewController.configuration {
                             case .logging:
-                                let model = bolusViewController.enteredBolusInsulinModel
+                                let modelSetting = bolusViewController.enteredBolusInsulinModelSetting
                                 let doseDate = bolusViewController.doseDate
                                 
-                                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
+                                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModelSetting: modelSetting)
                             // Enact the user-entered bolus
                             default:
                                 self.deviceManager.enactBolus(units: bolus) { _ in }
@@ -556,10 +556,10 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         } else if let bolus = bolusViewController.bolus, bolus > 0 {
             switch bolusViewController.configuration {
             case .logging:
-                let model = bolusViewController.enteredBolusInsulinModel
+                let modelSetting = bolusViewController.enteredBolusInsulinModelSetting
                 let doseDate = bolusViewController.doseDate
                 
-                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
+                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModelSetting: modelSetting)
             // Enact the user-entered bolus
             default:
                 self.deviceManager.enactBolus(units: bolus) { _ in }

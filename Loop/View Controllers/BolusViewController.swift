@@ -111,7 +111,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         switch segue.destination {
         case let vc as InsulinModelSettingsViewController:
             vc.deviceManager = deviceManager
-            vc.insulinModel = enteredBolusInsulinModel ?? deviceManager.loopManager.insulinModelSettings?.model
+            vc.insulinModel = enteredBolusInsulinModelSetting?.model ?? deviceManager.loopManager.insulinModelSettings?.model
 
             if let insulinSensitivitySchedule = deviceManager.loopManager.insulinSensitivitySchedule {
                 vc.insulinSensitivitySchedule = insulinSensitivitySchedule
@@ -544,21 +544,13 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         return amount >= 0 ? amount : nil
     }
-    
-    var enteredBolusInsulinModel: InsulinModel? {
+
+    var enteredBolusInsulinModelSetting: InsulinModelSettings? {
         didSet {
             updateInsulinModelLabel()
             predictionRecomputation?.cancel()
             recomputePrediction()
         }
-    }
-    
-    // ANNA TODO: refactor
-    var enteredBolusInsulinModelSetting: InsulinModelSettings? {
-        if let model = enteredBolusInsulinModel {
-            return InsulinModelSettings(model: model)
-        }
-        return nil
     }
 
     private var enteredBolus: DoseEntry? {
@@ -696,7 +688,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     }
     
     private func updateInsulinModelLabel() {
-        switch enteredBolusInsulinModel {
+        switch enteredBolusInsulinModelSetting?.model {
         case let model as WalshInsulinModel:
             insulinModelLabel?.text = model.title
         case let model as ExponentialInsulinModelPreset:
@@ -728,7 +720,7 @@ extension BolusViewController: InsulinModelSettingsViewControllerDelegate {
             return
         }
         
-        self.enteredBolusInsulinModel = model
+        self.enteredBolusInsulinModelSetting = InsulinModelSettings(model: model)
     }
 }
 

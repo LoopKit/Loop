@@ -140,7 +140,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         let bolusVC = BolusViewController.instance()
         bolusVC.deviceManager = deviceManager
         bolusVC.glucoseUnit = deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
-        bolusVC.enteredBolusInsulinModel = deviceManager.loopManager.insulinModelSettings?.model
+        bolusVC.enteredBolusInsulinModelSetting = deviceManager.loopManager.insulinModelSettings
         bolusVC.configuration = .logging
         
         let navigationWrapper = UINavigationController(rootViewController: bolusVC)
@@ -344,10 +344,10 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         if let bolus = bolusViewController.bolus, bolus > 0 {
             switch bolusViewController.configuration {
             case .logging:
-                let model = bolusViewController.enteredBolusInsulinModel
+                let modelSetting = bolusViewController.enteredBolusInsulinModelSetting
                 let doseDate = bolusViewController.doseDate
                 
-                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModel: model)
+                self.deviceManager?.loopManager?.logOutsideInsulinDose(startDate: doseDate ?? Date(), units: bolus, insulinModelSetting: modelSetting)
             // Enact the user-entered bolus
             default:
                 self.deviceManager?.enactBolus(units: bolus) { _ in }
