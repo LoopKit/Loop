@@ -23,6 +23,11 @@ struct CarbAndBolusFlow: View {
         case bolusConfirmation
     }
 
+    fileprivate enum AlertState {
+        case bolusRecommendationChanged
+        case communicationError(CarbAndBolusFlowViewModel.Error)
+    }
+
     // MARK: - State
     @State private var flowState: FlowState
     @ObservedObject private var viewModel: CarbAndBolusFlowViewModel
@@ -37,7 +42,7 @@ struct CarbAndBolusFlow: View {
     // MARK: - State: Bolus Entry
     @State private var bolusAmount: Double = 0
     @State private var receivedInitialBolusRecommendation = false
-    @State private var showingRecommendationChangedAlert = false
+    @State private var activeAlert: AlertState?
 
     // MARK: - State: Bolus Confirmation
     @State private var bolusConfirmationProgress: Double = 0
@@ -71,10 +76,10 @@ struct CarbAndBolusFlow: View {
 
         // Handle incoming bolus recommendations.
         .onReceive(viewModel.$recommendedBolusAmount, perform: handleNewBolusRecommendation)
-        .alert(isPresented: $showingRecommendationChangedAlert, content: recommendedBolusUpdatedAlert)
 
         // Handle error states.
-        .alert(item: $viewModel.error, content: communicationErrorAlert(for:))
+        .onReceive(viewModel.$error) { self.activeAlert = $0.map(AlertState.communicationError) }
+        .alert(item: $activeAlert, content: alert(for:))
     }
 }
 
@@ -308,14 +313,23 @@ extension CarbAndBolusFlow {
             }
 
             bolusAmount = recommendedBolus ?? 0
-            showingRecommendationChangedAlert = true
+            activeAlert = .bolusRecommendationChanged
         }
     }
 
-    private func recommendedBolusUpdatedAlert() -> Alert {
+    private func alert(for activeAlert: AlertState) -> Alert {
+        switch activeAlert {
+        case .bolusRecommendationChanged:
+            return recommendedBolusUpdatedAlert
+        case .communicationError(let error):
+            return communicationErrorAlert(for: error)
+        }
+    }
+
+    private var recommendedBolusUpdatedAlert: Alert {
         Alert(
             title: Text("Bolus Recommendation Updated", comment: "Alert title for updated bolus recommendation on Apple Watch"),
-            message: Text("The bolus recommendation has updated. Please reconfirm the bolus amount.", comment: "Alert message for updated bolus recommendation on Apple Watch"),
+            message: Text("Please reconfirm the bolus amount.", comment: "Alert message for updated bolus recommendation on Apple Watch"),
             dismissButton: .default(Text("OK"))
         )
     }
@@ -335,4 +349,8 @@ extension CarbAndBolusFlow {
             dismissButton: .default(Text("OK"), action: dismissAction)
         )
     }
+}
+
+extension CarbAndBolusFlow.AlertState: Hashable, Identifiable {
+    var id: Self { self }
 }
