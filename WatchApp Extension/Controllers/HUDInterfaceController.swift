@@ -82,11 +82,11 @@ class HUDInterfaceController: WKInterfaceController {
     }
 
     @IBAction func addCarbs() {
-        presentController(withName: AddCarbsInterfaceController.className, context: nil)
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.carbEntry)
     }
 
     @IBAction func setBolus() {
-        presentController(withName: BolusInterfaceController.className, context: loopManager.activeContext)
+        presentController(withName: CarbAndBolusFlowController.className, context: CarbAndBolusFlow.Configuration.manualBolus)
     }
 
 }

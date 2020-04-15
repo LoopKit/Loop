@@ -1124,7 +1124,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
 
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { result in
+            deviceManager.loopManager.addCarbEntry(carbEntry) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:

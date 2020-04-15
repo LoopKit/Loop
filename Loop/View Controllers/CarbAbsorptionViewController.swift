@@ -528,7 +528,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
 
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
+            deviceManager.loopManager.addCarbEntry(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:

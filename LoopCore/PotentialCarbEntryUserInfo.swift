@@ -1,5 +1,5 @@
 //
-//  CarbEntryUserInfo.swift
+//  PotentialCarbEntryUserInfo.swift
 //  Naterade
 //
 //  Created by Nathan Racklyeft on 1/23/16.
@@ -10,7 +10,7 @@ import Foundation
 import LoopKit
 
 
-public struct CarbEntryUserInfo {
+public struct PotentialCarbEntryUserInfo {
     public let carbEntry: NewCarbEntry
 
     public init(carbEntry: NewCarbEntry) {
@@ -19,14 +19,14 @@ public struct CarbEntryUserInfo {
 }
 
 
-extension CarbEntryUserInfo: RawRepresentable {
+extension PotentialCarbEntryUserInfo: RawRepresentable {
     public typealias RawValue = [String: Any]
 
-    static let version = 2
-    public static let name = "CarbEntryUserInfo"
+    static let version = 1
+    public static let name = "PotentialCarbEntryUserInfo"
 
     public init?(rawValue: RawValue) {
-        guard rawValue["v"] as? Int == type(of: self).version && rawValue["name"] as? String == CarbEntryUserInfo.name,
+        guard rawValue["v"] as? Int == type(of: self).version && rawValue["name"] as? String == PotentialCarbEntryUserInfo.name,
             let value = rawValue["ce"] as? NewCarbEntry.RawValue,
             let carbEntry = NewCarbEntry(rawValue: value)
         else {
@@ -39,7 +39,7 @@ extension CarbEntryUserInfo: RawRepresentable {
     public var rawValue: RawValue {
         return [
             "v": type(of: self).version,
-            "name": CarbEntryUserInfo.name,
+            "name": PotentialCarbEntryUserInfo.name,
             "ce": carbEntry.rawValue,
         ]
     }
