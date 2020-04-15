@@ -91,27 +91,27 @@ public final class GlucoseHUDView: BaseHUDView {
         }
     }
 
-    public func setGlucoseQuantity(_ glucoseQuantity: Double, at glucoseStartDate: Date, unit: HKUnit, sensor: SensorDisplayable?) {
+    public func setGlucoseQuantity(_ glucoseQuantity: Double, at glucoseStartDate: Date, unit: HKUnit, staleGlucoseAge: TimeInterval, sensor: SensorDisplayable?) {
         var accessibilityStrings = [String]()
 
         let time = timeFormatter.string(from: glucoseStartDate)
         caption?.text = time
         
-        let sensorDataCurrent = glucoseStartDate.timeIntervalSinceNow > TimeInterval(minutes: -15)
+        let glucoseValueCurrent = glucoseStartDate.timeIntervalSinceNow > -staleGlucoseAge
 
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: glucoseQuantity) {
-            if sensorDataCurrent {
+            if glucoseValueCurrent {
                 glucoseLabel.text = valueString
             } else {
-                glucoseLabel.text = "-"
+                glucoseLabel.text = "---"
             }
             accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
         }
 
         var unitStrings = [unit.localizedShortUnitString]
 
-        if let trend = sensor?.trendType, sensorDataCurrent {
+        if let trend = sensor?.trendType, glucoseValueCurrent {
             unitStrings.append(trend.symbol)
             accessibilityStrings.append(trend.localizedDescription)
         }
