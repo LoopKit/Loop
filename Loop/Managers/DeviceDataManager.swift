@@ -20,6 +20,7 @@ final class DeviceDataManager {
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
+    weak var deviceAlertManager: DeviceAlertManager?
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -44,22 +45,22 @@ final class DeviceDataManager {
             UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
         }
     }
-
+    
     // MARK: - Pump
-
+    
     var pumpManager: PumpManagerUI? {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
-
+            
             // If the current CGMManager is a PumpManager, we clear it out.
             if cgmManager is PumpManagerUI {
                 cgmManager = nil
             }
-
+            
             setupPump()
-
+            
             NotificationCenter.default.post(name: .PumpManagerChanged, object: self, userInfo: nil)
-
+            
             UserDefaults.appGroup?.pumpManagerRawValue = pumpManager?.rawValue
         }
     }
@@ -84,10 +85,9 @@ final class DeviceDataManager {
 
     // MARK: - Initialization
 
-
     private(set) var loopManager: LoopDataManager!
-
-    init(pluginManager: PluginManager) {
+    
+    init(pluginManager: PluginManager, deviceAlertManager: DeviceAlertManager) {
         
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -95,8 +95,9 @@ final class DeviceDataManager {
 
         loggingServicesManager = LoggingServicesManager()
         analyticsServicesManager = AnalyticsServicesManager()
-
+        
         self.pluginManager = pluginManager
+        self.deviceAlertManager = deviceAlertManager
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -294,6 +295,10 @@ private extension DeviceDataManager {
         loopManager.glucoseStore.managedDataInterval = cgmManager?.managedDataInterval
 
         updatePumpManagerBLEHeartbeatPreference()
+        if let cgmManager = cgmManager {
+            deviceAlertManager?.addAlertResponder(key: cgmManager.managerIdentifier,
+                                                  alertResponder: cgmManager)
+        }
     }
 
     func setupPump() {
@@ -308,6 +313,10 @@ private extension DeviceDataManager {
         // Proliferate PumpModel preferences to DoseStore
         if let pumpRecordsBasalProfileStartEvents = pumpManager?.pumpRecordsBasalProfileStartEvents {
             loopManager?.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
+        }
+        if let pumpManager = pumpManager {
+            deviceAlertManager?.addAlertResponder(key: pumpManager.managerIdentifier,
+                                                  alertResponder: pumpManager)
         }
     }
 
@@ -356,14 +365,11 @@ extension DeviceDataManager {
     func updatePumpManagerBLEHeartbeatPreference() {
         pumpManager?.setMustProvideBLEHeartbeat(pumpManagerMustProvideBLEHeartbeat)
     }
-    
-    func acknowledgeCGMAlert(alertID: Int) {
-        cgmManager?.acknowledgeAlert(alertID: alertID)
-    }
 }
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
+    #if !USE_NEW_ALERT_FACILITY
     func scheduleNotification(for manager: DeviceManager,
                               identifier: String,
                               content: UNNotificationContent,
@@ -373,10 +379,10 @@ extension DeviceDataManager: DeviceManagerDelegate {
             content: content,
             trigger: trigger
         )
-
+        
         UNUserNotificationCenter.current().add(request)
     }
-
+    
     func clearNotification(for manager: DeviceManager, identifier: String) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }
@@ -384,9 +390,26 @@ extension DeviceDataManager: DeviceManagerDelegate {
     func removeNotificationRequests(for manager: DeviceManager, identifiers: [String]) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
     }
+    #endif
     
     func deviceManager(_ manager: DeviceManager, logEventForDeviceIdentifier deviceIdentifier: String?, type: DeviceLogEntryType, message: String, completion: ((Error?) -> Void)?) {
         deviceLog.log(managerIdentifier: Swift.type(of: manager).managerIdentifier, deviceIdentifier: deviceIdentifier, type: type, message: message, completion: completion)
+    }
+}
+
+// MARK: - UserAlertHandler
+extension DeviceDataManager: DeviceAlertHandler {
+
+    func issueAlert(_ alert: DeviceAlert) {
+        deviceAlertManager?.issueAlert(alert)
+    }
+    
+    func removePendingAlert(identifier: DeviceAlert.Identifier) {
+        deviceAlertManager?.removePendingAlert(identifier: identifier)
+    }
+    
+    func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
+        deviceAlertManager?.removeDeliveredAlert(identifier: identifier)
     }
 }
 
