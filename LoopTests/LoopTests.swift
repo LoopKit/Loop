@@ -11,3 +11,15 @@ import XCTest
 @testable import Loop
 
 class LoopTests: XCTestCase {}
+
+extension XCTestCase {
+    
+    func waitOnMain() {
+        let exp = expectation(description: "waitOnMain")
+        DispatchQueue.main.async {
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+    }
+
+}

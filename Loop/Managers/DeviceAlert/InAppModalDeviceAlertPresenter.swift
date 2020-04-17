@@ -1,5 +1,5 @@
 //
-//  InAppUserAlertHandler.swift
+//  InAppModalDeviceAlertPresenter.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -9,17 +9,30 @@
 import Foundation
 import LoopKit
 
-public class InAppModalDeviceAlertHandler: DeviceAlertHandler {
-    
+public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
+
     private weak var rootViewController: UIViewController?
     private weak var deviceAlertManagerResponder: DeviceAlertManagerResponder?
-    
+
     private var alertsShowing: [DeviceAlert.Identifier: (UIAlertController, DeviceAlert)] = [:]
     private var alertsPending: [DeviceAlert.Identifier: (Timer, DeviceAlert)] = [:]
+
+    typealias ActionFactoryFunction = (String?, UIAlertAction.Style, ((UIAlertAction) -> Void)?) -> UIAlertAction
+    private let newActionFunc: ActionFactoryFunction
     
-    init(rootViewController: UIViewController, deviceAlertManagerResponder: DeviceAlertManagerResponder) {
+    typealias TimerFactoryFunction = (TimeInterval, Bool, (() -> Void)?) -> Timer
+    private let newTimerFunc: TimerFactoryFunction
+
+    init(rootViewController: UIViewController,
+         deviceAlertManagerResponder: DeviceAlertManagerResponder,
+         newActionFunc: @escaping ActionFactoryFunction = UIAlertAction.init,
+         newTimerFunc: TimerFactoryFunction? = nil) {
         self.rootViewController = rootViewController
         self.deviceAlertManagerResponder = deviceAlertManagerResponder
+        self.newActionFunc = newActionFunc
+        self.newTimerFunc = newTimerFunc ?? { timeInterval, repeats, block in
+            return Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: repeats) { _ in block?() }
+        }
     }
         
     public func issueAlert(_ alert: DeviceAlert) {
@@ -41,15 +54,20 @@ public class InAppModalDeviceAlertHandler: DeviceAlertHandler {
     }
     
     public func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
+        removeDeliveredAlert(identifier: identifier, completion: nil)
+    }
+    
+    // For tests only
+    func removeDeliveredAlert(identifier: DeviceAlert.Identifier, completion: (() -> Void)?) {
         DispatchQueue.main.async {
-            self.alertsShowing[identifier]?.0.dismiss(animated: true)
+            self.alertsShowing[identifier]?.0.dismiss(animated: true, completion: completion)
             self.clearDeliveredAlert(identifier: identifier)
         }
     }
 }
 
 /// Private functions
-extension InAppModalDeviceAlertHandler {
+extension InAppModalDeviceAlertPresenter {
         
     private func schedule(alert: DeviceAlert, interval: TimeInterval, repeats: Bool) {
         guard alert.foregroundContent != nil else {
@@ -59,7 +77,7 @@ extension InAppModalDeviceAlertHandler {
             if self.isAlertPending(identifier: alert.identifier) {
                 return
             }
-            let timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: repeats) { [weak self] timer in
+            let timer = self.newTimerFunc(interval, repeats) { [weak self] in
                 self?.show(alert: alert)
                 if !repeats {
                     self?.clearPendingAlert(identifier: alert.identifier)
@@ -119,7 +137,7 @@ extension InAppModalDeviceAlertHandler {
         dispatchPrecondition(condition: .onQueue(.main))
         // For now, this is a simple alert with an "OK" button
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: action, style: .default, handler: { _ in completion() }))
+        alertController.addAction(newActionFunc(action, .default, { _ in completion() }))
         topViewController(controller: rootViewController)?.present(alertController, animated: true)
         return alertController
     }

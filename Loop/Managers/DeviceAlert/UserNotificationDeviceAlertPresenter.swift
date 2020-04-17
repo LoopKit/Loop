@@ -1,5 +1,5 @@
 //
-//  UserNotificationAlertHandler.swift
+//  UserNotificationDeviceAlertPresenter.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -9,22 +9,35 @@
 import LoopKit
 import UserNotifications
 
-class UserNotificationDeviceAlertHandler: DeviceAlertHandler {
+protocol UserNotificationCenter {
+    func add(_ request: UNNotificationRequest, withCompletionHandler: ((Error?) -> Void)?)
+    func removePendingNotificationRequests(withIdentifiers: [String])
+    func removeDeliveredNotifications(withIdentifiers: [String])
+}
+
+extension UNUserNotificationCenter: UserNotificationCenter {}
+
+class UserNotificationDeviceAlertPresenter: DeviceAlertPresenter {
     
-    let alertInBackgroundOnly: Bool
+    let alertInBackgroundOnly = true
     let isAppInBackgroundFunc: () -> Bool
-    let userNotificationCenter: UNUserNotificationCenter = UNUserNotificationCenter.current()
+    let userNotificationCenter: UserNotificationCenter
     
-    init(alertInBackgroundOnly: Bool = true, isAppInBackgroundFunc: @escaping () -> Bool) {
-        self.alertInBackgroundOnly = alertInBackgroundOnly
+    init(isAppInBackgroundFunc: @escaping () -> Bool,
+         userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current()) {
         self.isAppInBackgroundFunc = isAppInBackgroundFunc
+        self.userNotificationCenter = userNotificationCenter
     }
         
     func issueAlert(_ alert: DeviceAlert) {
         DispatchQueue.main.async {
             if self.alertInBackgroundOnly && self.isAppInBackgroundFunc() || !self.alertInBackgroundOnly {
                 if let request = alert.asUserNotificationRequest() {
-                    self.userNotificationCenter.add(request)
+                    self.userNotificationCenter.add(request) { error in
+                        if let error = error {
+                            print("Something went wrong posting the user notification: \(error)")
+                        }
+                    }
                     // For now, UserNotifications do not not acknowledge...not yet at least
                 }
             }
@@ -32,11 +45,15 @@ class UserNotificationDeviceAlertHandler: DeviceAlertHandler {
     }
     
     func removePendingAlert(identifier: DeviceAlert.Identifier) {
-        userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
+        DispatchQueue.main.async {
+            self.userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
+        }
     }
     
     func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-        userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
+        DispatchQueue.main.async {
+            self.userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
+        }
     }
 }
 
@@ -64,7 +81,7 @@ public extension DeviceAlert {
         userNotificationContent.threadIdentifier = identifier.value // Used to match categoryIdentifier, but I /think/ we want multiple threads for multiple alert types, no?
         userNotificationContent.userInfo = [
             LoopNotificationUserInfoKey.managerIDForAlert.rawValue: identifier.managerIdentifier,
-            LoopNotificationUserInfoKey.alertTypeId.rawValue: identifier.typeIdentifier
+            LoopNotificationUserInfoKey.alertTypeID.rawValue: identifier.alertIdentifier
         ]
         return userNotificationContent
     }

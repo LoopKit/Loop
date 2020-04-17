@@ -20,13 +20,15 @@ protocol DeviceAlertManagerResponder: class {
 /// - etc.
 public final class DeviceAlertManager {
 
-    var handlers: [DeviceAlertHandler] = []
+    var handlers: [DeviceAlertPresenter] = []
     var responders: [String: Weak<DeviceAlertResponder>] = [:]
     
     public init(rootViewController: UIViewController,
-                isAppInBackgroundFunc: @escaping () -> Bool) {
-        handlers = [UserNotificationDeviceAlertHandler(isAppInBackgroundFunc: isAppInBackgroundFunc),
-                    InAppModalDeviceAlertHandler(rootViewController: rootViewController, deviceAlertManagerResponder: self)]
+                isAppInBackgroundFunc: @escaping () -> Bool,
+                handlers: [DeviceAlertPresenter]? = nil) {
+        self.handlers = handlers ??
+            [UserNotificationDeviceAlertPresenter(isAppInBackgroundFunc: isAppInBackgroundFunc),
+             InAppModalDeviceAlertPresenter(rootViewController: rootViewController, deviceAlertManagerResponder: self)]
     }
     
     public func addAlertResponder(key: String, alertResponder: DeviceAlertResponder) {
@@ -41,12 +43,12 @@ public final class DeviceAlertManager {
 extension DeviceAlertManager: DeviceAlertManagerResponder {
     func acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier) {
         if let responder = responders[identifier.managerIdentifier]?.value {
-            responder.acknowledgeAlert(typeIdentifier: identifier.typeIdentifier)
+            responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
         }
     }
 }
 
-extension DeviceAlertManager: DeviceAlertHandler {
+extension DeviceAlertManager: DeviceAlertPresenter {
 
     public func issueAlert(_ alert: DeviceAlert) {
         handlers.forEach { $0.issueAlert(alert) }
