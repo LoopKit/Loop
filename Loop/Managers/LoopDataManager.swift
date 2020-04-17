@@ -634,8 +634,8 @@ extension LoopDataManager {
     ///   - value: The number of Units in the dose.
     ///   - insulinModel: The type of insulin model that should be used for the dose.
     func logOutsideInsulinDose(startDate: Date, units: Double, insulinModelSetting: InsulinModelSettings? = nil) {
-
-        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, insulinModelSetting: insulinModelSetting)
+        let syncIdentifier = Data(UUID().uuidString.utf8).hexadecimalString
+        let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelSetting: insulinModelSetting)
 
         logOutsideInsulinDose(dose: dose) { (error) in
             if let error = error {
@@ -653,23 +653,10 @@ extension LoopDataManager {
     ///
     /// - Parameters:
     ///   - dose: The dose to be added.
-    func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: DoseStore.DoseStoreError?) -> Void) {
-        let rawData = Data(UUID().uuidString.utf8)
-        
-        var events = [NewPumpEvent(date: dose.startDate, dose: dose, isMutable: false, raw: rawData, title: "External Bolus", type: .bolus)]
-        
-        if case .some(.tempBasal(let dose)) = basalDeliveryState {
-            // Ensure the currently-running temp basal is accounted for
-            // The raw data can be empty, as the event won't be persisted
-            let pendingBasal = NewPumpEvent(date: dose.startDate, dose: dose, isMutable: true, raw: Data(), title: String(describing: dose), type: .tempBasal)
-            events.append(pendingBasal)
-        }
+    func logOutsideInsulinDose(dose: DoseEntry, completion: @escaping (_ error: Error?) -> Void) {
+        let doseList = [dose]
 
-        if let model = dose.insulinModelSetting?.model {
-            doseStore.longestEffectDuration = max(doseStore.longestEffectDuration, model.effectDuration)
-        }
-
-        addPumpEvents(events, lastReconciliation: nil, updateLastReconciliation: false) { (error) in
+        doseStore.logOutsideDoseEvents(doseList) { (error) in
             if let error = error {
                 self.logger.error(error)
                 completion(error)
