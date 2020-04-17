@@ -1447,7 +1447,8 @@
                                     <rect key="frame" x="8" y="102" width="398" height="1"/>
                                     <segments>
                                         <segment title="Reservoir"/>
-                                        <segment title="Event History"/>
+                                        <segment title="Pump History"/>
+                                        <segment title="Other Insulin"/>
                                     </segments>
                                     <connections>
                                         <action selector="selectedSegmentChanged:" destination="UE6-NF-dYc" eventType="valueChanged" id="RC4-m1-0pi"/>
