@@ -1,5 +1,5 @@
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "%@ sitten";
+"%@ ago" = "%@";
 
 /* The format string describing the basal rate. */
 "%@ U" = "%@ U";
@@ -17,10 +17,10 @@
 "Closed loop" = "Suljettu säätö";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
-"Loop ran %@ ago" = "Viimeisin säätökierros %@ sitten";
+"Loop ran %@ ago" = "Viimeisin säätö %@ sitten";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
-"Needs attention" = "Tarvitsee huomion";
+"Needs attention" = "Tarvitsee huomiota";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Avoin säätö";
@@ -29,5 +29,5 @@
 "Unknown" = "Tuntematon";
 
 /* Acessibility label describing completion HUD waiting for first run */
-"Waiting for first run" = "Odotetaan ensimmäistä ...";
+"Waiting for first run" = "Odotetaan ensimmäistä säätöä";
 
