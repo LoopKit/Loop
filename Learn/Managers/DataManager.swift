@@ -95,7 +95,7 @@ extension DataManager {
 // MARK: - Effects Data
 
 extension DataManager {
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection) -> Result<GlucoseEffects> {
+    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 
         let retrospectiveStart = day.start.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
@@ -125,7 +125,9 @@ extension DataManager {
         var glucose: [StoredGlucoseSample]?
         
         updateGroup.enter()
-        glucoseStore.getCachedGlucoseSamples(start: day.start, end: day.end) { (samples) in
+        // Get enough glucose readings for momentum at the beginning of the day
+        let glucoseStart = day.start.addingTimeInterval(-momentumDataInterval)
+        glucoseStore.getCachedGlucoseSamples(start: glucoseStart, end: day.end) { (samples) in
             glucose = samples
             counteractionEffects = samples.counteractionEffects(to: insulinEffects!)
             

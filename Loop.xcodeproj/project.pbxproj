@@ -386,6 +386,7 @@
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
 		C19E96DF23D275F8003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
+		C1A1238C244B66BC00DE2739 /* ResidualsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A1238B244B66BC00DE2739 /* ResidualsCell.swift */; };
 		C1A3EED2235233E1007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */; };
 		C1A3EED423523551007672E3 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1A3EED323523551007672E3 /* DerivedAssets.xcassets */; };
 		C1A3EED523535FFF007672E3 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 894F71E11FFEC4D8007D365C /* DefaultAssets.xcassets */; };
@@ -1106,6 +1107,7 @@
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
 		C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshness.swift; sourceTree = "<group>"; };
+		C1A1238B244B66BC00DE2739 /* ResidualsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResidualsCell.swift; sourceTree = "<group>"; };
 		C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		C1A3EED323523551007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
 		C1C6591B1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_dropping_then_rising.json; sourceTree = "<group>"; };
@@ -1286,6 +1288,7 @@
 				4345E3F721F03D2A009E00E5 /* DatesAndNumberCell.swift */,
 				4345E3F921F0473B009E00E5 /* TextCell.swift */,
 				C10EF91F240325250091392C /* ForecastErrorCell.swift */,
+				C1A1238B244B66BC00DE2739 /* ResidualsCell.swift */,
 				C10EF92124032A710091392C /* ChartTableViewCell.xib */,
 			);
 			path = Display;
@@ -2860,6 +2863,7 @@
 				4345E3F821F03D2A009E00E5 /* DatesAndNumberCell.swift in Sources */,
 				43D9F82221EF0A7A000578CD /* QuantityRangeEntry.swift in Sources */,
 				43D9F81A21EC593C000578CD /* UITableViewCell.swift in Sources */,
+				C1A1238C244B66BC00DE2739 /* ResidualsCell.swift in Sources */,
 				43D9F82021EF0906000578CD /* NSNumber.swift in Sources */,
 				43C05CC221EC06E4006FB252 /* LessonConfigurationViewController.swift in Sources */,
 				C10EF923240339B00091392C /* DateFormatter.swift in Sources */,

@@ -20,9 +20,16 @@ class ForecastErrorSection: LessonSectionProviding {
     let cells: [LessonCellProviding]
 
     init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
-        cells = summaries.sorted(by: { $0.0 < $1.0 }).map { pair -> LessonCellProviding in
-            ForecastErrorCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
+        var allCells = [LessonCellProviding]()
+        summaries.sorted(by: { $0.0 < $1.0 }).forEach { pair in
+            allCells.append(
+                ForecastErrorCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
+            )
+            allCells.append(
+                ResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
+            )
         }
+        cells = allCells
     }
 }
 
@@ -76,6 +83,8 @@ final class ForecastErrorLesson: Lesson {
             completion([LessonSection(headerTitle: "Error: Loop not fully configured", footerTitle: nil, cells: [])])
             return
         }
+        
+        print("starting run for dates: \(dates)")
         
         
         let calculator = ForecastErrorCalculator(
@@ -171,8 +180,10 @@ private class ForecastErrorCalculator {
         calculator.execute(calculator: { (dataManager, day, results, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
         
-            let result = dataManager.fetchEffects(for: day, retrospectiveCorrection: self.retrospectiveCorrection)
-            
+            let result = dataManager.fetchEffects(for: day,
+                                                  retrospectiveCorrection: self.retrospectiveCorrection,
+                                                  momentumDataInterval: dataManager.glucoseStore.momentumDataInterval)
+
             switch result {
             case .failure(let error):
                 completion(error)
@@ -180,10 +191,11 @@ private class ForecastErrorCalculator {
                 _ = results.mutate({ (results) in
                     if effects.glucose.count > 0 {
                         let glucoseInterpolated = effects.glucose.interpolatedToSimulationTimeline(start: day.start, end: day.end)
-                        let forecasts = self.forecastError(effects: effects,
-                                                          targetGlucose: glucoseInterpolated,
-                                                          momentumDataInterval: dataManager.glucoseStore.momentumDataInterval,
-                                                          delta: dataManager.carbStore.delta)
+                        let forecasts = self.forecastError(date: day,
+                                                           effects: effects,
+                                                           targetGlucose: glucoseInterpolated,
+                                                           momentumDataInterval: dataManager.glucoseStore.momentumDataInterval,
+                                                           delta: dataManager.carbStore.delta)
                         results[day] = ForecastSummary(date: day, forecasts: forecasts, actualGlucose: effects.glucose)
                     }
                 })
@@ -193,12 +205,22 @@ private class ForecastErrorCalculator {
         }, completion: completion)
     }
     
-    fileprivate func forecastError(effects: GlucoseEffects, targetGlucose: [GlucoseValue], momentumDataInterval: TimeInterval, delta: TimeInterval) -> [Forecast] {
+    fileprivate func forecastError(date: DateInterval, effects: GlucoseEffects, targetGlucose: [GlucoseValue], momentumDataInterval: TimeInterval, delta: TimeInterval) -> [Forecast] {
         var momentumWindowStart = 0
+        
+        print("Computing error for \(effects.dateInterval.start) to \(effects.dateInterval.end)")
+        
+        let targetBGByDate = targetGlucose.reduce(into: [Date: GlucoseValue]()) {
+            $0[$1.startDate] = $1
+        }
         
         var forecasts = [Forecast]()
         
         for (index, glucose) in effects.glucose.enumerated() {
+            
+            guard glucose.startDate >= date.start else {
+                continue
+            }
             
             while glucose.startDate.timeIntervalSince(effects.glucose[momentumWindowStart].startDate) > momentumDataInterval {
                 momentumWindowStart += 1
@@ -207,49 +229,56 @@ private class ForecastErrorCalculator {
             let glucoseMomentumEffect = momentumWindow.linearMomentumEffect(
                 duration: momentumDataInterval,
                 delta: TimeInterval(minutes: 5)
-                
             )
+            
+            let pastRetrospectiveGlucoseDiscrepanciesSummed = effects.retrospectiveGlucoseDiscrepanciesSummed.filter { (change) -> Bool in
+                change.startDate < glucose.startDate
+            }
             
             // Calculate retrospective correction
             let retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
                 startingAt: glucose,
-                retrospectiveGlucoseDiscrepanciesSummed: effects.retrospectiveGlucoseDiscrepanciesSummed,
+                retrospectiveGlucoseDiscrepanciesSummed: pastRetrospectiveGlucoseDiscrepanciesSummed,
                 recencyInterval: settings.inputDataRecencyInterval,
                 insulinSensitivitySchedule: insulinSensitivitySchedule,
                 basalRateSchedule: basalRateSchedule,
                 glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
                 retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval
             )
-            let effectsUsed = [
+            
+            let forecastStart = glucose.startDate.dateCeiledToTimeInterval(delta)
+            let forecastEnd = forecastStart + insulinModelSettings.model.effectDuration
+            
+            var effectsUsed: [[GlucoseEffect]] = [
                 effects.carbEffects,
                 effects.insulinEffects,
                 retrospectiveGlucoseEffect
-            ]
+                ].map { $0.filter { $0.startDate >= forecastStart && $0.startDate <= forecastEnd } }
+            
+
+            // Ensure we have at least one effect value at each point of the forecast
+            var zeroEffect = [GlucoseEffect]()
+            var forecastDate = forecastStart
+            while forecastDate <= forecastEnd {
+                zeroEffect.append(GlucoseEffect(startDate: forecastDate, quantity: HKQuantity.init(unit: HKUnit.milligramsPerDeciliter, doubleValue: 0)))
+                forecastDate += delta
+            }
+            effectsUsed.append(zeroEffect)
             
             let forecast = LoopMath.predictGlucose(startingAt: glucose, momentum: glucoseMomentumEffect, effects: effectsUsed)
-            
-            // Map predicted and target to nearest forecast point
-            let startDate = targetGlucose[0].startDate
+                        
             let unit = HKUnit.milligramsPerDeciliter // Just used for math, not display
             var residuals = [GlucoseEffect]()
-            var targetGlucoseIter = targetGlucose.makeIterator()
-            var targetGlucoseValue = targetGlucoseIter.next()
             for value in forecast {
-                let index = Int(round(value.startDate.timeIntervalSince(startDate) / delta))
-                while
-                    let target = targetGlucoseValue,
-                    Int(round(target.startDate.timeIntervalSince(startDate) / delta)) < index
-                {
-                    targetGlucoseValue = targetGlucoseIter.next()
-                }
-                if let target = targetGlucoseValue, abs(target.startDate.timeIntervalSince(value.startDate)) < delta / 2 {
+                
+                if let target = targetBGByDate[value.startDate] {
                     let residual = value.quantity.doubleValue(for: unit) - target.quantity.doubleValue(for: unit)
                     residuals.append(GlucoseEffect(startDate: value.startDate, quantity: HKQuantity(unit: unit, doubleValue: residual)))
                 }
                 //print("residuals: \(residuals)")
             }
 
-            forecasts.append(Forecast(startTime: startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
+            forecasts.append(Forecast(startTime: glucose.startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
             
         }
         return forecasts

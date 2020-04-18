@@ -1,8 +1,8 @@
 //
-//  ForecastErrorCell.swift
+//  ResidualsCell.swift
 //  Learn
 //
-//  Created by Pete Schwamb on 2/23/20.
+//  Created by Pete Schwamb on 4/18/20.
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
@@ -12,27 +12,7 @@ import SwiftCharts
 import LoopKit
 import HealthKit
 
-final class ChartTableViewCell: UITableViewCell, NibLoadable {
-
-    @IBOutlet weak var chartContentView: ChartContainerView!
-
-    @IBOutlet weak var titleLabel: UILabel?
-
-    @IBOutlet weak var subtitleLabel: UILabel?
-
-    override func prepareForReuse() {
-        super.prepareForReuse()
-
-        chartContentView.chartGenerator = nil
-    }
-
-    func reloadChart() {
-        chartContentView.reloadChart()
-    }
-}
-
-
-class ForecastErrorCell: LessonCellProviding {
+class ResidualsCell: LessonCellProviding {
 
     let date: DateInterval
     let actualGlucose: [GlucoseValue]
@@ -99,7 +79,7 @@ class ForecastErrorCell: LessonCellProviding {
         generateXAxisValues()
     }
     
-    func glucosePointsFromValues(_ glucoseValues: [GlucoseValue]) -> [ChartPoint] {
+    func pointsFromResiduals(_ glucoseValues: [GlucoseValue]) -> [ChartPoint] {
         let unitFormatter = QuantityFormatter()
         unitFormatter.unitStyle = .short
         unitFormatter.setPreferredNumberFormatter(for: glucoseUnit)
@@ -120,15 +100,15 @@ class ForecastErrorCell: LessonCellProviding {
         guard let xAxisModel = xAxisModel, let xAxisValues = xAxisValues else {
             return nil
         }
-
-        let glucosePoints = glucosePointsFromValues(actualGlucose)
         
-        let points = glucosePoints
+        let selectedForecast = forecasts[forecasts.count / 6]
 
-        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points,
+        let chartPoints = pointsFromResiduals(selectedForecast.residuals)
+        
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(chartPoints,
             minSegmentCount: 2,
             maxSegmentCount: 4,
-            multiple: glucoseUnit.chartableIncrement * 25,
+            multiple: 2,
             axisValueGenerator: {
                 ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
             },
@@ -146,32 +126,15 @@ class ForecastErrorCell: LessonCellProviding {
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
 
         // Glucose
-        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: glucosePoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: colors.glucoseTint, optimized: true)
+        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: chartPoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: colors.glucoseTint, optimized: true)
 
-        var prediction: ChartLayer?
-        
-        let selectedForecast = forecasts[forecasts.count / 6]
-        
-        let predictedGlucosePoints = glucosePointsFromValues(selectedForecast.predictedGlucose)
-
-        if predictedGlucosePoints.count > 1 {
-            let lineColor = colors.glucoseTint
-
-            let lineModel = ChartLineModel.predictionLine(
-                points: predictedGlucosePoints,
-                color: lineColor,
-                width: 1
-            )
-
-            prediction = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
-        }
         
         if gestureRecognizer != nil {
             glucoseChartCache = ChartPointsTouchHighlightLayerViewCache(
                 xAxisLayer: xAxisLayer,
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
-                chartPoints: glucosePoints + predictedGlucosePoints,
+                chartPoints: chartPoints,
                 tintColor: colors.glucoseTint,
                 gestureRecognizer: gestureRecognizer
             )
@@ -183,7 +146,6 @@ class ForecastErrorCell: LessonCellProviding {
             yAxisLayer,
             glucoseChartCache?.highlightLayer,
             circles,
-            prediction,
         ]
 
         self.chart = Chart(
@@ -242,7 +204,7 @@ class ForecastErrorCell: LessonCellProviding {
         }
 
         cell.titleLabel?.text = dateFormatter.string(from: date)
-        cell.subtitleLabel?.text = "Forecast Error"
+        cell.subtitleLabel?.text = "Residuals"
 
         return cell
     }
