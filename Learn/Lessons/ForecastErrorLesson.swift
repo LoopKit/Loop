@@ -214,7 +214,7 @@ private class ForecastErrorCalculator {
             let retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
                 startingAt: glucose,
                 retrospectiveGlucoseDiscrepanciesSummed: effects.retrospectiveGlucoseDiscrepanciesSummed,
-                recencyInterval: settings.recencyInterval,
+                recencyInterval: settings.inputDataRecencyInterval,
                 insulinSensitivitySchedule: insulinSensitivitySchedule,
                 basalRateSchedule: basalRateSchedule,
                 glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
