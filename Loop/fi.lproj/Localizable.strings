@@ -132,6 +132,9 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Hiilihydraattivaikutus";
 
+/* Back button text for bolus screen to return to carb entry screen */
+"Carb Entry" = "Hiilihydraatit";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Hiilihydraattisuhteet";
