@@ -123,10 +123,10 @@ class PredictionTableViewController: ChartsTableViewController, IdentifiableClas
         self.deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
             totalRetrospectiveCorrection = state.totalRetrospectiveCorrection
-            self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucose ?? [])
+            self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucoseIncludingPendingInsulin ?? [])
 
             do {
-                let glucose = try state.predictGlucose(using: self.selectedInputs)
+                let glucose = try state.predictGlucose(using: self.selectedInputs, includingPendingInsulin: true)
                 self.glucoseChart.setAlternatePredictedGlucoseValues(glucose)
             } catch {
                 self.refreshContext.update(with: .status)

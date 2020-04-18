@@ -20,13 +20,13 @@
 "Maximum" = "Maximum";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+"mg/dL" = "mg/dl";
 
 /* Placeholder for lower range entry */
 "Minimum" = "Minimum";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+"mmol/L" = "mmol/l";
 
 /* Lesson title */
 "Modal Day" = "Genomsnittlig dag";

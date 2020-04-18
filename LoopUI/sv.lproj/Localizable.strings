@@ -8,7 +8,7 @@
 "%1$@ at %2$@" = "%1$@ at %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ eheter per timme kl %2$@";
+"%1$@ units per hour at %2$@" = "%1$@ enheter/h kl. %2$@";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
 "%1$@/min" = "%1$@/min";
@@ -17,10 +17,10 @@
 "Closed loop" = "Sluten loop";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
-"Loop ran %@ ago" = "Loop kördes %@ sedan";
+"Loop ran %@ ago" = "Loop kördes för %@ sedan";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
-"Needs attention" = "Kräver uppmärksamhet";
+"Needs attention" = "Kräver åtgärd";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Öppen loop";
