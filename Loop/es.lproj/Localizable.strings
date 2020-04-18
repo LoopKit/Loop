@@ -258,6 +258,9 @@ Title text for button to set up a new pump */
 /* The title of the loggly service */
 "Loggly" = "Loggly";
 
+/* The title for logging a dose */
+"Log Dose" = "Anotar Dosis";
+
 /* The notification title for a loop failure */
 "Loop Failure" = "Falla del Loop";
 

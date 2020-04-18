@@ -100,6 +100,9 @@
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
 "OFA-qT-ZAg.text" = "Etiqueta";
 
+/* Class = "UILabel"; text = "Insulin Model"; ObjectID = "p3P-qy-RFY"; */
+"p3P-qy-RFY.text" = "Modelo de Insulina";
+
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Glucosa Proyectada";
 
@@ -141,6 +144,9 @@
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
 "zbc-87-wxZ.text" = "Título";
+
+/* Class = "UINavigationItem"; title = "Insulin Delivery"; ObjectID = "zeG-5C-TpR"; */
+"zeG-5C-TpR.title" = "Administración de Insulina";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";
