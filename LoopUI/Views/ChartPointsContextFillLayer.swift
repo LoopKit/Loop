@@ -8,7 +8,7 @@
 import SwiftCharts
 
 
-struct ChartPointsFill {
+public struct ChartPointsFill {
     let chartPoints: [ChartPoint]
     let fillColor: UIColor
     let createContainerPoints: Bool
@@ -55,7 +55,7 @@ struct ChartPointsFill {
 }
 
 
-final class ChartPointsFillsLayer: ChartCoordsSpaceLayer {
+final public class ChartPointsFillsLayer: ChartCoordsSpaceLayer {
     let fills: [ChartPointsFill]
 
     init?(xAxis: ChartAxis, yAxis: ChartAxis, fills: [ChartPointsFill?]) {
@@ -68,7 +68,7 @@ final class ChartPointsFillsLayer: ChartCoordsSpaceLayer {
         super.init(xAxis: xAxis, yAxis: yAxis)
     }
 
-    override func chartInitialized(chart: Chart) {
+    override public func chartInitialized(chart: Chart) {
         super.chartInitialized(chart: chart)
 
         let view = ChartPointsFillsView(

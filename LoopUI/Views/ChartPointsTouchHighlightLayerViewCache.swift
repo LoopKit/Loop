@@ -10,7 +10,7 @@ import Foundation
 import SwiftCharts
 
 
-final class ChartPointsTouchHighlightLayerViewCache {
+final public class ChartPointsTouchHighlightLayerViewCache {
     private lazy var containerView = UIView(frame: .zero)
 
     private lazy var xAxisOverlayView = UIView()
@@ -34,9 +34,9 @@ final class ChartPointsTouchHighlightLayerViewCache {
 
     private let axisLabelSettings: ChartLabelSettings
 
-    private(set) var highlightLayer: ChartPointsTouchHighlightLayer<ChartPoint, UIView>!
+    private(set) public var highlightLayer: ChartPointsTouchHighlightLayer<ChartPoint, UIView>!
 
-    init(xAxisLayer: ChartAxisLayer, yAxisLayer: ChartAxisLayer, axisLabelSettings: ChartLabelSettings, chartPoints: [ChartPoint], tintColor: UIColor, gestureRecognizer: UIGestureRecognizer? = nil, onCompleteHighlight: (() -> Void)? = nil) {
+    public init(xAxisLayer: ChartAxisLayer, yAxisLayer: ChartAxisLayer, axisLabelSettings: ChartLabelSettings, chartPoints: [ChartPoint], tintColor: UIColor, gestureRecognizer: UIGestureRecognizer? = nil, onCompleteHighlight: (() -> Void)? = nil) {
 
         self.axisLabelSettings = axisLabelSettings
 

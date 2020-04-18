@@ -359,6 +359,13 @@
 		89E26800229267DF00A3F2AF /* Optional.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E267FE229267DF00A3F2AF /* Optional.swift */; };
 		C10428971D17BAD400DD539A /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
+		C10EF920240325250091392C /* ForecastErrorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10EF91F240325250091392C /* ForecastErrorCell.swift */; };
+		C10EF92224032A710091392C /* ChartTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C10EF92124032A710091392C /* ChartTableViewCell.xib */; };
+		C10EF923240339B00091392C /* DateFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FCEEAC221A66780013DD30 /* DateFormatter.swift */; };
+		C10EF924240340C40091392C /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
+		C10EF92524034B1C0091392C /* ChartColorPalette+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6663931E905FD2009E74FC /* ChartColorPalette+Loop.swift */; };
+		C10EF92624034B490091392C /* ChartSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */; };
+		C10EF92924034FB70091392C /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10EF92824034FB70091392C /* UIColor.swift */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C120269823E4704E0044C90B /* ForecastErrorLesson.swift in Sources */ = {isa = PBXBuildFile; fileRef = C120269723E4704E0044C90B /* ForecastErrorLesson.swift */; };
 		C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* DefaultAssets.xcassets */; };
@@ -1068,6 +1075,9 @@
 		89E267FE229267DF00A3F2AF /* Optional.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Optional.swift; sourceTree = "<group>"; };
 		C10428961D17BAD400DD539A /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
+		C10EF91F240325250091392C /* ForecastErrorCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastErrorCell.swift; sourceTree = "<group>"; };
+		C10EF92124032A710091392C /* ChartTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChartTableViewCell.xib; sourceTree = "<group>"; };
+		C10EF92824034FB70091392C /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		C120269723E4704E0044C90B /* ForecastErrorLesson.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastErrorLesson.swift; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
 		C12CB9AC23106A3C00F84978 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Intents.strings; sourceTree = "<group>"; };
@@ -1270,6 +1280,8 @@
 			children = (
 				4345E3F721F03D2A009E00E5 /* DatesAndNumberCell.swift */,
 				4345E3F921F0473B009E00E5 /* TextCell.swift */,
+				C10EF91F240325250091392C /* ForecastErrorCell.swift */,
+				C10EF92124032A710091392C /* ChartTableViewCell.xib */,
 			);
 			path = Display;
 			sourceTree = "<group>";
@@ -1428,6 +1440,7 @@
 				43C5F259222C921B00905D10 /* OSLog.swift */,
 				43D9F81921EC593C000578CD /* UITableViewCell.swift */,
 				C1814B85225E507C008D2D8E /* Sequence.swift */,
+				C10EF92824034FB70091392C /* UIColor.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2338,6 +2351,7 @@
 				43D9FFAF21EA9A0F00AF44BF /* LaunchScreen.storyboard in Resources */,
 				43D9FFAC21EA9A0F00AF44BF /* Assets.xcassets in Resources */,
 				43D9FFAA21EA9A0C00AF44BF /* Main.storyboard in Resources */,
+				C10EF92224032A710091392C /* ChartTableViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2815,12 +2829,15 @@
 			files = (
 				43C05CBD21EBF77D006FB252 /* LessonsViewController.swift in Sources */,
 				43C05CB621EBE321006FB252 /* NSTimeInterval.swift in Sources */,
+				C10EF92624034B490091392C /* ChartSettings+Loop.swift in Sources */,
 				43C5F25A222C921B00905D10 /* OSLog.swift in Sources */,
 				43C05CB521EBE274006FB252 /* Date.swift in Sources */,
 				43D9F82421EFF1AB000578CD /* LessonResultsViewController.swift in Sources */,
+				C10EF920240325250091392C /* ForecastErrorCell.swift in Sources */,
 				43C728F9222A448700C62969 /* DayCalculator.swift in Sources */,
 				4345E3FA21F0473B009E00E5 /* TextCell.swift in Sources */,
 				43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */,
+				C10EF924240340C40091392C /* HKUnit.swift in Sources */,
 				43D9F81821EC51CC000578CD /* DateEntry.swift in Sources */,
 				C120269823E4704E0044C90B /* ForecastErrorLesson.swift in Sources */,
 				43D9FFC021EAB22E00AF44BF /* DataManager.swift in Sources */,
@@ -2836,8 +2853,11 @@
 				43D9F81A21EC593C000578CD /* UITableViewCell.swift in Sources */,
 				43D9F82021EF0906000578CD /* NSNumber.swift in Sources */,
 				43C05CC221EC06E4006FB252 /* LessonConfigurationViewController.swift in Sources */,
+				C10EF923240339B00091392C /* DateFormatter.swift in Sources */,
 				C1B51BB223E5C3D000804885 /* RetrospectiveCorrection.swift in Sources */,
+				C10EF92924034FB70091392C /* UIColor.swift in Sources */,
 				43C05CC621EC29E7006FB252 /* TextFieldTableViewCell.swift in Sources */,
+				C10EF92524034B1C0091392C /* ChartColorPalette+Loop.swift in Sources */,
 				43C05CC021EBFFA4006FB252 /* Lesson.swift in Sources */,
 				C1814B86225E507C008D2D8E /* Sequence.swift in Sources */,
 				43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */,

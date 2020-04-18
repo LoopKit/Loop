@@ -14,6 +14,19 @@ import LoopUI
 import HealthKit
 import os.log
 
+
+class ForecastErrorSection: LessonSectionProviding {
+
+    let cells: [LessonCellProviding]
+
+    init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
+        cells = summaries.sorted(by: { $0.0 < $1.0 }).map { pair -> LessonCellProviding in
+            ForecastErrorCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
+        }
+    }
+}
+
+
 final class ForecastErrorLesson: Lesson {
     let title = NSLocalizedString("Forecast Error", comment: "Lesson title")
 
@@ -29,8 +42,6 @@ final class ForecastErrorLesson: Lesson {
 
     private let dateIntervalEntry: DateIntervalEntry
 
-    private let rangeEntry: QuantityRangeEntry
-
     init(dataManager: DataManager) {
         self.dataManager = dataManager
         self.glucoseUnit = dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
@@ -39,23 +50,17 @@ final class ForecastErrorLesson: Lesson {
 
         dateIntervalEntry = DateIntervalEntry(
             end: Date(),
-            weeks: 2
+            weeks: 0,
+            days: 1
         )
 
-        rangeEntry = QuantityRangeEntry.glucoseRange(
-            minValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80),
-            maxValue: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 160),
-            quantityFormatter: glucoseFormatter,
-            unit: glucoseUnit)
-
         self.configurationSections = [
-            dateIntervalEntry,
-            rangeEntry
+            dateIntervalEntry
         ]
     }
 
     func execute(completion: @escaping ([LessonSectionProviding]) -> Void) {
-        guard let dates = dateIntervalEntry.dateInterval, let closedRange = rangeEntry.closedRange else {
+        guard let dates = dateIntervalEntry.dateInterval else {
             // TODO: Cleaner error presentation
             completion([LessonSection(headerTitle: "Error: Please fill out all fields", footerTitle: nil, cells: [])])
             return
@@ -76,7 +81,6 @@ final class ForecastErrorLesson: Lesson {
         let calculator = ForecastErrorCalculator(
             dataManager: dataManager,
             dates: dates,
-            range: closedRange,
             basalRateSchedule: basalRateSchedule,
             carbRatioSchedule: carbRatioSchedule,
             insulinModelSettings: insulinModelSettings,
@@ -101,22 +105,11 @@ final class ForecastErrorLesson: Lesson {
                 let numberFormatter = NumberFormatter()
                 numberFormatter.numberStyle = .percent
 
-                var aggregator = TimeInRangeAggregator()
-                resultsByDay.forEach({ (pair) in
-                    aggregator.add(percentInRange: pair.value, for: pair.key)
-                })
-
                 completion([
-                    TimesInRangeSection(
-                        ranges: aggregator.results.map { [$0.range:$0.value] } ?? [:],
-                        dateFormatter: dateFormatter,
-                        numberFormatter: numberFormatter
-                    ),
-                    TimesInRangeSection(
-                        ranges: resultsByDay,
-                        dateFormatter: dateFormatter,
-                        numberFormatter: numberFormatter
-                    )
+                    ForecastErrorSection(
+                        summaries: resultsByDay,
+                        glucoseUnit: self.glucoseUnit,
+                        dateFormatter: dateFormatter)
                 ])
             }
         }
@@ -124,12 +117,22 @@ final class ForecastErrorLesson: Lesson {
 }
 
 
+struct Forecast {
+    let startTime: Date
+    let predictedGlucose: [PredictedGlucoseValue]
+    let targetGlucose: [GlucoseValue]
+    let residuals: [GlucoseEffect]
+}
 
+struct ForecastSummary {
+    let date: DateInterval
+    let forecasts: [Forecast]
+    let actualGlucose: [GlucoseValue]
+}
 
 /// Time-in-range, e.g. "2 weeks starting on March 5"
 private class ForecastErrorCalculator {
-    let calculator: DayCalculator<[DateInterval: Double]>
-    let range: ClosedRange<HKQuantity>
+    let calculator: DayCalculator<[DateInterval: ForecastSummary]>
     let dataManager: DataManager
     let retrospectiveCorrection: RetrospectiveCorrection
     let basalRateSchedule: BasalRateSchedule
@@ -140,11 +143,8 @@ private class ForecastErrorCalculator {
 
     private let log: OSLog
 
-    private let unit = HKUnit.milligramsPerDeciliter
-
     init(dataManager: DataManager,
          dates: DateInterval,
-         range: ClosedRange<HKQuantity>,
          basalRateSchedule: BasalRateSchedule,
          carbRatioSchedule: CarbRatioSchedule,
          insulinModelSettings: InsulinModelSettings,
@@ -152,7 +152,6 @@ private class ForecastErrorCalculator {
          settings: LoopSettings
     ) {
         self.dataManager = dataManager
-        self.range = range
         self.calculator = DayCalculator(dataManager: dataManager, dates: dates, initial: [:])
         self.basalRateSchedule = basalRateSchedule
         self.carbRatioSchedule = carbRatioSchedule
@@ -166,8 +165,8 @@ private class ForecastErrorCalculator {
         log = OSLog(category: String(describing: type(of: self)))
     }
 
-    func execute(completion: @escaping (_ result: Result<[DateInterval: Double]>) -> Void) {
-        os_log(.default, log: log, "Computing Time in range from %{public}@ between %{public}@", String(describing: calculator.dates), String(describing: range))
+    func execute(completion: @escaping (_ result: Result<[DateInterval: ForecastSummary]>) -> Void) {
+        os_log(.default, log: log, "Computing forecast error from %{public}@", String(describing: calculator.dates))
         
         calculator.execute(calculator: { (dataManager, day, results, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
@@ -177,16 +176,15 @@ private class ForecastErrorCalculator {
             switch result {
             case .failure(let error):
                 completion(error)
-            case .success(let effects):                
+            case .success(let effects):
                 _ = results.mutate({ (results) in
                     if effects.glucose.count > 0 {
                         let glucoseInterpolated = effects.glucose.interpolatedToSimulationTimeline(start: day.start, end: day.end)
-                        results[day] = self.forecastError(effects: effects,
+                        let forecasts = self.forecastError(effects: effects,
                                                           targetGlucose: glucoseInterpolated,
                                                           momentumDataInterval: dataManager.glucoseStore.momentumDataInterval,
                                                           delta: dataManager.carbStore.delta)
-                    } else {
-                        results[day] = 0
+                        results[day] = ForecastSummary(date: day, forecasts: forecasts, actualGlucose: effects.glucose)
                     }
                 })
                 completion(nil)
@@ -195,8 +193,10 @@ private class ForecastErrorCalculator {
         }, completion: completion)
     }
     
-    fileprivate func forecastError(effects: GlucoseEffects, targetGlucose: [GlucoseValue], momentumDataInterval: TimeInterval, delta: TimeInterval) -> Double {
+    fileprivate func forecastError(effects: GlucoseEffects, targetGlucose: [GlucoseValue], momentumDataInterval: TimeInterval, delta: TimeInterval) -> [Forecast] {
         var momentumWindowStart = 0
+        
+        var forecasts = [Forecast]()
         
         for (index, glucose) in effects.glucose.enumerated() {
             
@@ -230,7 +230,7 @@ private class ForecastErrorCalculator {
             
             // Map predicted and target to nearest forecast point
             let startDate = targetGlucose[0].startDate
-            let unit = HKUnit.milligramsPerDeciliter
+            let unit = HKUnit.milligramsPerDeciliter // Just used for math, not display
             var residuals = [GlucoseEffect]()
             var targetGlucoseIter = targetGlucose.makeIterator()
             var targetGlucoseValue = targetGlucoseIter.next()
@@ -246,11 +246,13 @@ private class ForecastErrorCalculator {
                     let residual = value.quantity.doubleValue(for: unit) - target.quantity.doubleValue(for: unit)
                     residuals.append(GlucoseEffect(startDate: value.startDate, quantity: HKQuantity(unit: unit, doubleValue: residual)))
                 }
-                print("residuals: \(residuals)")
+                //print("residuals: \(residuals)")
             }
+
+            forecasts.append(Forecast(startTime: startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
             
         }
-        return 1.0
+        return forecasts
     }
 }
 
@@ -261,7 +263,7 @@ extension BidirectionalCollection where Element: GlucoseSampleValue, Index == In
         else {
             return []
         }
-        let unit = HKUnit.milligramsPerDeciliter
+        let unit = HKUnit.milligramsPerDeciliter // Just used for math, not display
         var values = [GlucoseEffect]()
         
         var iter = makeIterator()
@@ -296,27 +298,4 @@ extension BidirectionalCollection where Element: GlucoseSampleValue, Index == In
         return values
     }
 }
-
-//class LinearInterpolation {
-//    private var n : Int
-//    private var x : [Double]
-//    private var y : [Double]
-//    init (x: [Double], y: [Double]) {
-//        assert(x.count == y.count)
-//        self.n = x.count-1
-//        self.x = x
-//        self.y = y
-//    }
-//
-//    func interpolate(t: Double) -> Double {
-//        if t <= x[0] { return y[0] }
-//        for i in 1...n {
-//            if t <= x[i] {
-//                let ans = (t-x[i-1]) * (y[i] - y[i-1]) / (x[i]-x[i-1]) + y[i-1]
-//                return ans
-//            }
-//        }
-//        return y[n]
-//    }
-//}
 

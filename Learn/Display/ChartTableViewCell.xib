@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartTableViewCell" rowHeight="200" id="zoz-nu-gD6" customClass="ChartTableViewCell" customModule="Loop" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="200"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zoz-nu-gD6" id="Og3-o6-hT9">
+                <rect key="frame" x="0.0" y="0.0" width="375" height="200"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chart Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="25J-gt-V4Y">
+                        <rect key="frame" x="20" y="11" width="78" height="18"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subtitle" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xEe-1i-IbO">
+                        <rect key="frame" x="297" y="11" width="58" height="18"/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Epr-l2-cNT" customClass="ChartContainerView" customModule="LoopUI">
+                        <rect key="frame" x="0.0" y="29" width="375" height="171"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="171" id="OqV-zp-jh4"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="Epr-l2-cNT" firstAttribute="top" secondItem="25J-gt-V4Y" secondAttribute="bottom" id="8Fs-iR-S7f"/>
+                    <constraint firstItem="25J-gt-V4Y" firstAttribute="leading" secondItem="Og3-o6-hT9" secondAttribute="leadingMargin" id="LQB-aE-baJ"/>
+                    <constraint firstItem="xEe-1i-IbO" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="25J-gt-V4Y" secondAttribute="trailing" constant="8" symbolic="YES" id="SAh-c6-QE3"/>
+                    <constraint firstAttribute="trailing" secondItem="Epr-l2-cNT" secondAttribute="trailing" id="TCd-Nh-Dwg"/>
+                    <constraint firstItem="25J-gt-V4Y" firstAttribute="top" secondItem="Og3-o6-hT9" secondAttribute="topMargin" id="Uer-MK-w6G"/>
+                    <constraint firstAttribute="bottom" secondItem="Epr-l2-cNT" secondAttribute="bottom" id="Xvu-i9-XOY"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="xEe-1i-IbO" secondAttribute="trailing" id="Zvb-zZ-ATT"/>
+                    <constraint firstItem="Epr-l2-cNT" firstAttribute="leading" secondItem="Og3-o6-hT9" secondAttribute="leading" id="ezL-23-gY0"/>
+                    <constraint firstItem="xEe-1i-IbO" firstAttribute="top" secondItem="Og3-o6-hT9" secondAttribute="topMargin" id="sad-8b-Jo5"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="chartContentView" destination="Epr-l2-cNT" id="g6g-pN-BZb"/>
+                <outlet property="subtitleLabel" destination="xEe-1i-IbO" id="QEz-aq-2d3"/>
+                <outlet property="titleLabel" destination="25J-gt-V4Y" id="ek8-hU-dxA"/>
+            </connections>
+            <point key="canvasLocation" x="74.637681159420296" y="-169.41964285714286"/>
+        </tableViewCell>
+    </objects>
+</document>

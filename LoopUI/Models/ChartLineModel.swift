@@ -16,7 +16,7 @@ extension ChartLineModel {
     ///   - color: The line color
     ///   - width: The line width
     /// - Returns: A new line model
-    static func predictionLine(points: [T], color: UIColor, width: CGFloat) -> ChartLineModel {
+    static public func predictionLine(points: [T], color: UIColor, width: CGFloat) -> ChartLineModel {
         // TODO: Bug in ChartPointsLineLayer requires a non-zero animation to draw the dash pattern
         return self.init(chartPoints: points, lineColor: color, lineWidth: width, animDuration: 0.0001, animDelay: 0, dashPattern: [6, 5])
     }
