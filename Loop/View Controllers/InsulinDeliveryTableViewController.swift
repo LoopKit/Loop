@@ -398,8 +398,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
         case .logDose:
-            // ANNA TODO: add delete
-            break
+             doseStore?.deleteAllOutsideDoseEvents(completion)
         }
     }
 
@@ -450,7 +449,6 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             case .logDose(let values):
                 let event = values[indexPath.row]
                 let time = timeFormatter.string(from: event.date)
-                // ANNA TODO: ways to make this more descriptive?
                 cell.textLabel?.text = event.title ?? NSLocalizedString("Unknown", comment: "The default title to use when an entry has none")
                 cell.detailTextLabel?.text = time
                 //cell.accessoryType = entry.isUploaded ? .checkmark : .none
@@ -504,7 +502,14 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 self.values = .logDose(doses)
                 
                 tableView.deleteRows(at: [indexPath], with: .automatic)
-                //dosestore.delete, ANNA TODO
+                doseStore?.deleteOutsideDoseEvent(value) { (error) -> Void in
+                    if let error = error {
+                        DispatchQueue.main.async {
+                            self.present(UIAlertController(with: error), animated: true)
+                            self.reloadData()
+                        }
+                    }
+                }
             }
         }
     }
