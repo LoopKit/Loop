@@ -135,6 +135,12 @@
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Ratios Glucides";
 
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Ajouter des glucides";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Editer les glucides";
+
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Glucides";
 
