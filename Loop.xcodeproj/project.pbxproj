@@ -372,6 +372,8 @@
 		C1265BEE231BF7F700652B84 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 43776F981B8022E90074EA36 /* DefaultAssets.xcassets */; };
 		C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */ = {isa = PBXBuildFile; fileRef = C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */; };
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
+		C13515EE244C6D1C00AC8B95 /* SpotCheckCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */; };
+		C13515F0244C6D5100AC8B95 /* SpotCheckResidualCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */; };
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
@@ -1093,6 +1095,8 @@
 		C12CB9B623106A6200F84978 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12CB9B823106A6300F84978 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
+		C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckCell.swift; sourceTree = "<group>"; };
+		C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckResidualCell.swift; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
@@ -1285,6 +1289,8 @@
 		4345E3F621F03C2E009E00E5 /* Display */ = {
 			isa = PBXGroup;
 			children = (
+				C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */,
+				C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */,
 				4345E3F721F03D2A009E00E5 /* DatesAndNumberCell.swift */,
 				4345E3F921F0473B009E00E5 /* TextCell.swift */,
 				C10EF91F240325250091392C /* ForecastErrorCell.swift */,
@@ -2857,6 +2863,7 @@
 				C1B51BB123E5C3CC00804885 /* StandardRetrospectiveCorrection.swift in Sources */,
 				43C728F72222700000C62969 /* DateIntervalEntry.swift in Sources */,
 				43D9F81E21EF0609000578CD /* NumberRangeEntry.swift in Sources */,
+				C13515EE244C6D1C00AC8B95 /* SpotCheckCell.swift in Sources */,
 				43C05CCA21EC382B006FB252 /* NumberEntry.swift in Sources */,
 				4345E3FE21F04A50009E00E5 /* DateIntervalFormatter.swift in Sources */,
 				43C5F257222C7B7200905D10 /* TimeComponents.swift in Sources */,
@@ -2873,6 +2880,7 @@
 				C10EF92524034B1C0091392C /* ChartColorPalette+Loop.swift in Sources */,
 				43C05CC021EBFFA4006FB252 /* Lesson.swift in Sources */,
 				C1814B86225E507C008D2D8E /* Sequence.swift in Sources */,
+				C13515F0244C6D5100AC8B95 /* SpotCheckResidualCell.swift in Sources */,
 				43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

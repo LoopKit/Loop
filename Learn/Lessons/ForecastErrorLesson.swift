@@ -19,15 +19,16 @@ class ForecastErrorSection: LessonSectionProviding {
 
     let cells: [LessonCellProviding]
 
-    init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
+    init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter, delta: TimeInterval) {
         var allCells = [LessonCellProviding]()
         summaries.sorted(by: { $0.0 < $1.0 }).forEach { pair in
-            allCells.append(
-                ForecastErrorCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
-            )
-            allCells.append(
-                ResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter)
-            )
+            let cellsForDate: [LessonCellProviding] = [
+                SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                ResidualsCell(date: pair.key, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                ForecastErrorCell(date: pair.key, forecasts: pair.value.forecasts, delta: delta, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+            ]
+            allCells.append(contentsOf: cellsForDate)
         }
         cells = allCells
     }
@@ -118,13 +119,18 @@ final class ForecastErrorLesson: Lesson {
                     ForecastErrorSection(
                         summaries: resultsByDay,
                         glucoseUnit: self.glucoseUnit,
-                        dateFormatter: dateFormatter)
+                        dateFormatter: dateFormatter,
+                        delta: self.dataManager.carbStore.delta)
                 ])
             }
         }
     }
 }
 
+struct Residual {
+    let time: TimeInterval
+    let quantity: HKQuantity
+}
 
 struct Forecast {
     let startTime: Date

@@ -15,7 +15,6 @@ import HealthKit
 class ResidualsCell: LessonCellProviding {
 
     let date: DateInterval
-    let actualGlucose: [GlucoseValue]
     let forecasts: [Forecast]
     let glucoseUnit: HKUnit
     let dateFormatter: DateIntervalFormatter
@@ -44,25 +43,13 @@ class ResidualsCell: LessonCellProviding {
     
     private var xAxisModel: ChartAxisModel?
     
-    private lazy var timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        let dateFormat = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: Locale.current)!
-        let isAmPmTimeFormat = dateFormat.firstIndex(of: "a") != nil
-        formatter.dateFormat = isAmPmTimeFormat
-            ? "h a"
-            : "H:mm"
-        return formatter
-    }()
-
-    
     private var glucoseChartCache: ChartPointsTouchHighlightLayerViewCache?
     
     private var chart: Chart?
 
 
-    init(date: DateInterval, actualGlucose: [GlucoseValue], forecasts: [Forecast], colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
+    init(date: DateInterval, forecasts: [Forecast], colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
         self.date = date
-        self.actualGlucose = actualGlucose
         self.forecasts = forecasts
         self.colors = colors
         self.chartSettings = settings
@@ -79,19 +66,24 @@ class ResidualsCell: LessonCellProviding {
         generateXAxisValues()
     }
     
-    func pointsFromResiduals(_ glucoseValues: [GlucoseValue]) -> [ChartPoint] {
+    func pointsFromResiduals(_ forecasts: [Forecast]) -> [ChartPoint] {
         let unitFormatter = QuantityFormatter()
         unitFormatter.unitStyle = .short
         unitFormatter.setPreferredNumberFormatter(for: glucoseUnit)
         let unitString = unitFormatter.string(from: glucoseUnit)
-        let dateFormatter = DateFormatter(timeStyle: .short)
+        
+        var points = [ChartPoint]()
 
-        return glucoseValues.map {
-            return ChartPoint(
-                x: ChartAxisValueDate(date: $0.startDate, formatter: dateFormatter),
-                y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: unitFormatter.numberFormatter)
-            )
+        for forecast in forecasts {
+            let forecastPoints: [ChartPoint] = forecast.residuals.map {
+                return ChartPoint(
+                    x: ChartAxisValueDouble($0.startDate.timeIntervalSince(forecast.startTime)),
+                    y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: unitFormatter.numberFormatter)
+                )
+            }
+            points.append(contentsOf: forecastPoints)
         }
+        return points
     }
     
     public func generateChart(withFrame frame: CGRect) -> Chart?
@@ -101,9 +93,7 @@ class ResidualsCell: LessonCellProviding {
             return nil
         }
         
-        let selectedForecast = forecasts[forecasts.count / 6]
-
-        let chartPoints = pointsFromResiduals(selectedForecast.residuals)
+        let chartPoints = pointsFromResiduals(forecasts)
         
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(chartPoints,
             minSegmentCount: 2,
@@ -126,7 +116,7 @@ class ResidualsCell: LessonCellProviding {
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
 
         // Glucose
-        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: chartPoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: colors.glucoseTint, optimized: true)
+        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: chartPoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor(displayP3Red: 0, green: 0, blue: 0, alpha: 0.2), optimized: true)
 
         
         if gestureRecognizer != nil {
@@ -160,29 +150,27 @@ class ResidualsCell: LessonCellProviding {
     
     private func generateXAxisValues() {
         
+        let lastResidualOffset: TimeInterval = forecasts.map { (forecast) -> TimeInterval in
+            return forecast.residuals.map { $0.startDate.timeIntervalSince(forecast.startTime) }.max() ?? 0
+        }.max() ?? 0
+        
         let points = [
             ChartPoint(
-                x: ChartAxisValueDate(date: date.start, formatter: self.timeFormatter),
+                x: ChartAxisValueDouble(0),
                 y: ChartAxisValue(scalar: 0)
             ),
             ChartPoint(
-                x: ChartAxisValueDate(date: date.end, formatter: self.timeFormatter),
+                x: ChartAxisValueDouble(lastResidualOffset),
                 y: ChartAxisValue(scalar: 0)
             )
         ]
 
-        let segments = ceil(date.end.timeIntervalSince(date.start).hours)
-
         let xAxisValues = ChartAxisValuesStaticGenerator.generateXAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 12,
-            multiple: TimeInterval(hours: 3),
+            multiple: TimeInterval(hours: 1),
             axisValueGenerator: {
-                ChartAxisValueDate(
-                    date: ChartAxisValueDate.dateFromScalar($0),
-                    formatter: timeFormatter,
-                    labelSettings: axisLabelSettings
-                )
+                ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
             },
             addPaddingSegmentIfEdge: false
         )
