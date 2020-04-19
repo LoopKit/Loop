@@ -101,7 +101,7 @@ class SpotCheckResidualsCell: LessonCellProviding {
             return nil
         }
         
-        let selectedForecast = forecasts[forecasts.count / 6]
+        let selectedForecast = forecasts[forecasts.count / 2]
 
         let chartPoints = pointsFromResiduals(selectedForecast.residuals)
         

@@ -131,7 +131,7 @@ class SpotCheckCell: LessonCellProviding {
 
         var prediction: ChartLayer?
         
-        let selectedForecast = forecasts[forecasts.count / 6]
+        let selectedForecast = forecasts[forecasts.count / 2]
         
         let predictedGlucosePoints = glucosePointsFromValues(selectedForecast.predictedGlucose)
 
@@ -189,8 +189,6 @@ class SpotCheckCell: LessonCellProviding {
                 y: ChartAxisValue(scalar: 0)
             )
         ]
-
-        let segments = ceil(date.end.timeIntervalSince(date.start).hours)
 
         let xAxisValues = ChartAxisValuesStaticGenerator.generateXAxisValuesWithChartPoints(points,
             minSegmentCount: 2,

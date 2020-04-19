@@ -278,7 +278,7 @@ private class ForecastErrorCalculator {
             for value in forecast {
                 
                 if let target = targetBGByDate[value.startDate] {
-                    let residual = value.quantity.doubleValue(for: unit) - target.quantity.doubleValue(for: unit)
+                    let residual = target.quantity.doubleValue(for: unit) - value.quantity.doubleValue(for: unit) 
                     residuals.append(GlucoseEffect(startDate: value.startDate, quantity: HKQuantity(unit: unit, doubleValue: residual)))
                 }
                 //print("residuals: \(residuals)")
