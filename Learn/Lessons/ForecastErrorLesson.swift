@@ -22,13 +22,15 @@ class ForecastErrorSection: LessonSectionProviding {
     init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter, delta: TimeInterval) {
         var allCells = [LessonCellProviding]()
         summaries.sorted(by: { $0.0 < $1.0 }).forEach { pair in
-            let cellsForDate: [LessonCellProviding] = [
-                SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                ResidualsCell(date: pair.key, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                ForecastErrorCell(date: pair.key, forecasts: pair.value.forecasts, delta: delta, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-            ]
-            allCells.append(contentsOf: cellsForDate)
+            if pair.value.forecasts.count > 0 {
+                let cellsForDate: [LessonCellProviding] = [
+                    SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    ResidualsCell(date: pair.key, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    ForecastErrorCell(date: pair.key, forecasts: pair.value.forecasts, delta: delta, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                ]
+                allCells.append(contentsOf: cellsForDate)
+            }
         }
         cells = allCells
     }
@@ -185,8 +187,11 @@ private class ForecastErrorCalculator {
         
         calculator.execute(calculator: { (dataManager, day, results, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
+            
+            //let effectsFecther = dataManager
+            let effectsFetcher = RemoteDataManager()
         
-            let result = dataManager.fetchEffects(for: day,
+            let result = effectsFetcher.fetchEffects(for: day,
                                                   retrospectiveCorrection: self.retrospectiveCorrection,
                                                   momentumDataInterval: dataManager.glucoseStore.momentumDataInterval)
 
@@ -281,10 +286,11 @@ private class ForecastErrorCalculator {
                     let residual = target.quantity.doubleValue(for: unit) - value.quantity.doubleValue(for: unit) 
                     residuals.append(GlucoseEffect(startDate: value.startDate, quantity: HKQuantity(unit: unit, doubleValue: residual)))
                 }
-                //print("residuals: \(residuals)")
             }
-
-            forecasts.append(Forecast(startTime: glucose.startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
+            
+            if residuals.count > 0 {
+                forecasts.append(Forecast(startTime: glucose.startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
+            }
             
         }
         return forecasts

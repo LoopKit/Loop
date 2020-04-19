@@ -91,10 +91,13 @@ extension DataManager {
     }
 }
 
+protocol EffectsFetcher {
+    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects>
+}
 
 // MARK: - Effects Data
 
-extension DataManager {
+extension DataManager: EffectsFetcher {
     func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 

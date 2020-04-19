@@ -374,6 +374,8 @@
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
 		C13515EE244C6D1C00AC8B95 /* SpotCheckCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */; };
 		C13515F0244C6D5100AC8B95 /* SpotCheckResidualCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */; };
+		C13515F2244CA6F400AC8B95 /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */; };
+		C13515F4244CAC1F00AC8B95 /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C13515F3244CAC1F00AC8B95 /* NightscoutUploadKit.framework */; };
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
@@ -1097,6 +1099,8 @@
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckCell.swift; sourceTree = "<group>"; };
 		C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckResidualCell.swift; sourceTree = "<group>"; };
+		C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDataManager.swift; sourceTree = "<group>"; };
+		C13515F3244CAC1F00AC8B95 /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
@@ -1189,6 +1193,7 @@
 				43D9FFB421EA9AD800AF44BF /* LoopUI.framework in Frameworks */,
 				43D9FFBB21EA9CC900AF44BF /* LoopKit.framework in Frameworks */,
 				43D9FFB621EA9B2F00AF44BF /* HealthKit.framework in Frameworks */,
+				C13515F4244CAC1F00AC8B95 /* NightscoutUploadKit.framework in Frameworks */,
 				43D9FFBC21EA9CCD00AF44BF /* LoopKitUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1537,6 +1542,7 @@
 			children = (
 				43D9FFBF21EAB22E00AF44BF /* DataManager.swift */,
 				43C728F8222A448700C62969 /* DayCalculator.swift */,
+				C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1884,6 +1890,7 @@
 				C1E2773D224177C000354103 /* ClockKit.framework */,
 				4344628120A7A37E00C4BE6F /* CoreBluetooth.framework */,
 				43C246A71D89990F0031F8D1 /* Crypto.framework */,
+				C13515F3244CAC1F00AC8B95 /* NightscoutUploadKit.framework */,
 				4D3B40021D4A9DFE00BC6334 /* G4ShareSpy.framework */,
 				43D9002C21EB225D00AF44BF /* HealthKit.framework */,
 				43F5C2C81B929C09003EB13D /* HealthKit.framework */,
@@ -2472,6 +2479,7 @@
 				"$(BUILT_PRODUCTS_DIR)/LoopKit.framework/LoopKit",
 				"$(BUILT_PRODUCTS_DIR)/LoopKitUI.framework/LoopKitUI",
 				"$(BUILT_PRODUCTS_DIR)/SwiftCharts.framework/SwiftCharts",
+				"$(BUILT_PRODUCTS_DIR)/NightscoutUploadKit.framework/NightscoutUploadKit",
 			);
 			name = "Copy Frameworks with Carthage";
 			outputFileListPaths = (
@@ -2856,6 +2864,7 @@
 				4345E3FA21F0473B009E00E5 /* TextCell.swift in Sources */,
 				43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */,
 				C10EF924240340C40091392C /* HKUnit.swift in Sources */,
+				C13515F2244CA6F400AC8B95 /* RemoteDataManager.swift in Sources */,
 				43D9F81821EC51CC000578CD /* DateEntry.swift in Sources */,
 				C120269823E4704E0044C90B /* ForecastErrorLesson.swift in Sources */,
 				43D9FFC021EAB22E00AF44BF /* DataManager.swift in Sources */,
