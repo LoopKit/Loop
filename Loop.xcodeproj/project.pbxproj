@@ -109,7 +109,6 @@
 		437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
 		437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */; };
 		438172D91F4E9E37003C3328 /* NewPumpEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438172D81F4E9E37003C3328 /* NewPumpEvent.swift */; };
-		438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
 		438849EC1D29EC34003B3F23 /* AmplitudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849EB1D29EC34003B3F23 /* AmplitudeService.swift */; };
 		438849EE1D2A1EBB003B3F23 /* MLabService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849ED1D2A1EBB003B3F23 /* MLabService.swift */; };
 		4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4389916A1E91B689000EEF90 /* ChartSettings+Loop.swift */; };
@@ -374,8 +373,13 @@
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
 		C13515EE244C6D1C00AC8B95 /* SpotCheckCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */; };
 		C13515F0244C6D5100AC8B95 /* SpotCheckResidualCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */; };
-		C13515F2244CA6F400AC8B95 /* RemoteDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */; };
+		C13515F2244CA6F400AC8B95 /* DataSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515F1244CA6F400AC8B95 /* DataSourceManager.swift */; };
 		C13515F4244CAC1F00AC8B95 /* NightscoutUploadKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C13515F3244CAC1F00AC8B95 /* NightscoutUploadKit.framework */; };
+		C13515F8244D084900AC8B95 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515F7244D084900AC8B95 /* SettingsViewController.swift */; };
+		C13515FA244D0A4B00AC8B95 /* NightscoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438849E91D297CB6003B3F23 /* NightscoutService.swift */; };
+		C13515FC244D2B4B00AC8B95 /* InsulinModelSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13515FB244D2B4B00AC8B95 /* InsulinModelSettings.swift */; };
+		C1351603244D377500AC8B95 /* KeychainManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1351602244D377500AC8B95 /* KeychainManager.swift */; };
+		C1351605244D3C0300AC8B95 /* NightscoutDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1351604244D3C0300AC8B95 /* NightscoutDataSource.swift */; };
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
 		C15713821DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */; };
@@ -1099,8 +1103,12 @@
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
 		C13515ED244C6D1C00AC8B95 /* SpotCheckCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckCell.swift; sourceTree = "<group>"; };
 		C13515EF244C6D5000AC8B95 /* SpotCheckResidualCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotCheckResidualCell.swift; sourceTree = "<group>"; };
-		C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteDataManager.swift; sourceTree = "<group>"; };
+		C13515F1244CA6F400AC8B95 /* DataSourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSourceManager.swift; sourceTree = "<group>"; };
 		C13515F3244CAC1F00AC8B95 /* NightscoutUploadKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = NightscoutUploadKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C13515F7244D084900AC8B95 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		C13515FB244D2B4B00AC8B95 /* InsulinModelSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsulinModelSettings.swift; sourceTree = "<group>"; };
+		C1351602244D377500AC8B95 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
+		C1351604244D3C0300AC8B95 /* NightscoutDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightscoutDataSource.swift; sourceTree = "<group>"; };
 		C15713811DAC6983005BC4D2 /* MealBolusNightscoutTreatment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MealBolusNightscoutTreatment.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
@@ -1406,7 +1414,6 @@
 				438849EB1D29EC34003B3F23 /* AmplitudeService.swift */,
 				4341F4EA1EDB92AC001C936B /* LogglyService.swift */,
 				438849ED1D2A1EBB003B3F23 /* MLabService.swift */,
-				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
 			);
 			path = ServiceAuthentication;
 			sourceTree = "<group>";
@@ -1460,6 +1467,8 @@
 				43D9F81921EC593C000578CD /* UITableViewCell.swift */,
 				C1814B85225E507C008D2D8E /* Sequence.swift */,
 				C10EF92824034FB70091392C /* UIColor.swift */,
+				C13515FB244D2B4B00AC8B95 /* InsulinModelSettings.swift */,
+				C1351602244D377500AC8B95 /* KeychainManager.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1470,6 +1479,7 @@
 				43C05CC121EC06E4006FB252 /* LessonConfigurationViewController.swift */,
 				43D9F82321EFF1AB000578CD /* LessonResultsViewController.swift */,
 				43C05CBC21EBF77D006FB252 /* LessonsViewController.swift */,
+				C13515F7244D084900AC8B95 /* SettingsViewController.swift */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -1542,7 +1552,8 @@
 			children = (
 				43D9FFBF21EAB22E00AF44BF /* DataManager.swift */,
 				43C728F8222A448700C62969 /* DayCalculator.swift */,
-				C13515F1244CA6F400AC8B95 /* RemoteDataManager.swift */,
+				C13515F1244CA6F400AC8B95 /* DataSourceManager.swift */,
+				C1351604244D3C0300AC8B95 /* NightscoutDataSource.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1758,6 +1769,7 @@
 		4F7528A61DFE20AE00C322D6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C13515F9244D0A3E00AC8B95 /* ServiceAuthentication */,
 				4F08DE7C1E7BB6E5006741EA /* ChartAxisValueDoubleLog.swift */,
 				4F08DE7D1E7BB6E5006741EA /* ChartAxisValueDoubleUnit.swift */,
 				4FB76FCD1E8C835D00B39636 /* ChartColorPalette.swift */,
@@ -1909,6 +1921,14 @@
 				43F78D4B1C914197002152D1 /* LoopKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C13515F9244D0A3E00AC8B95 /* ServiceAuthentication */ = {
+			isa = PBXGroup;
+			children = (
+				438849E91D297CB6003B3F23 /* NightscoutService.swift */,
+			);
+			path = ServiceAuthentication;
 			sourceTree = "<group>";
 		};
 		C16DA84022E8E104008624C2 /* Plugins */ = {
@@ -2707,7 +2727,6 @@
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */,
 				C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */,
-				438849EA1D297CB6003B3F23 /* NightscoutService.swift in Sources */,
 				438172D91F4E9E37003C3328 /* NewPumpEvent.swift in Sources */,
 				4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
@@ -2854,6 +2873,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43C05CBD21EBF77D006FB252 /* LessonsViewController.swift in Sources */,
+				C13515FC244D2B4B00AC8B95 /* InsulinModelSettings.swift in Sources */,
 				43C05CB621EBE321006FB252 /* NSTimeInterval.swift in Sources */,
 				C10EF92624034B490091392C /* ChartSettings+Loop.swift in Sources */,
 				43C5F25A222C921B00905D10 /* OSLog.swift in Sources */,
@@ -2864,7 +2884,7 @@
 				4345E3FA21F0473B009E00E5 /* TextCell.swift in Sources */,
 				43C728F5222266F000C62969 /* ModalDayLesson.swift in Sources */,
 				C10EF924240340C40091392C /* HKUnit.swift in Sources */,
-				C13515F2244CA6F400AC8B95 /* RemoteDataManager.swift in Sources */,
+				C13515F2244CA6F400AC8B95 /* DataSourceManager.swift in Sources */,
 				43D9F81821EC51CC000578CD /* DateEntry.swift in Sources */,
 				C120269823E4704E0044C90B /* ForecastErrorLesson.swift in Sources */,
 				43D9FFC021EAB22E00AF44BF /* DataManager.swift in Sources */,
@@ -2876,14 +2896,17 @@
 				43C05CCA21EC382B006FB252 /* NumberEntry.swift in Sources */,
 				4345E3FE21F04A50009E00E5 /* DateIntervalFormatter.swift in Sources */,
 				43C5F257222C7B7200905D10 /* TimeComponents.swift in Sources */,
+				C13515F8244D084900AC8B95 /* SettingsViewController.swift in Sources */,
 				4345E3F821F03D2A009E00E5 /* DatesAndNumberCell.swift in Sources */,
 				43D9F82221EF0A7A000578CD /* QuantityRangeEntry.swift in Sources */,
 				43D9F81A21EC593C000578CD /* UITableViewCell.swift in Sources */,
 				C1A1238C244B66BC00DE2739 /* ResidualsCell.swift in Sources */,
 				43D9F82021EF0906000578CD /* NSNumber.swift in Sources */,
+				C1351603244D377500AC8B95 /* KeychainManager.swift in Sources */,
 				43C05CC221EC06E4006FB252 /* LessonConfigurationViewController.swift in Sources */,
 				C10EF923240339B00091392C /* DateFormatter.swift in Sources */,
 				C1B51BB223E5C3D000804885 /* RetrospectiveCorrection.swift in Sources */,
+				C1351605244D3C0300AC8B95 /* NightscoutDataSource.swift in Sources */,
 				C10EF92924034FB70091392C /* UIColor.swift in Sources */,
 				43C05CC621EC29E7006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				C10EF92524034B1C0091392C /* ChartColorPalette+Loop.swift in Sources */,
@@ -2994,6 +3017,7 @@
 				4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				43FCEEAF221A67A70013DD30 /* NumberFormatter+Charts.swift in Sources */,
 				4F75289A1DFE1F6000C322D6 /* BasalRateHUDView.swift in Sources */,
+				C13515FA244D0A4B00AC8B95 /* NightscoutService.swift in Sources */,
 				4F75289C1DFE1F6000C322D6 /* GlucoseHUDView.swift in Sources */,
 				4FB76FB81E8C429D00B39636 /* CGPoint.swift in Sources */,
 				43FCEEB5221BCA020013DD30 /* COBChart.swift in Sources */,

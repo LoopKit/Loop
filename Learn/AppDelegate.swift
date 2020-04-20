@@ -30,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     ModalDayLesson(dataManager: dataManager),
                     ForecastErrorLesson(dataManager: dataManager),
                 ]
+                lessonsVC.dataManager = dataManager
             }
         })
 

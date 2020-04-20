@@ -10,17 +10,20 @@ import Foundation
 import NightscoutUploadKit
 import LoopKit
 import LoopKitUI
+import os.log
 
 
 // Encapsulates a Nightscout site and its authentication
-class NightscoutService: ServiceAuthenticationUI {
-    var credentialValues: [String?]
+public class NightscoutService: ServiceAuthenticationUI {
+    public var credentialValues: [String?]
+    
+    private let log = OSLog(category: "NightscoutService")
 
-    var credentialFormFields: [ServiceCredential]
+    public var credentialFormFields: [ServiceCredential]
 
-    let title: String = NSLocalizedString("Nightscout", comment: "The title of the Nightscout service")
+    public let title: String = NSLocalizedString("Nightscout", comment: "The title of the Nightscout service")
 
-    init(siteURL: URL?, APISecret: String?) {
+    public init(siteURL: URL?, APISecret: String?) {
         credentialValues = [
             siteURL?.absoluteString,
             APISecret,
@@ -45,16 +48,15 @@ class NightscoutService: ServiceAuthenticationUI {
     }
 
     // The uploader instance, if credentials are present
-    private(set) var uploader: NightscoutUploader? {
+    public private(set) var uploader: NightscoutUploader? {
         didSet {
-            let logger = DiagnosticLogger.shared.forCategory("NightscoutService")
             uploader?.errorHandler = { (error: Error, context: String) -> Void in
-                logger.error("Error \(error), while \(context)")
+                self.log.error("Error: %{public}@, while %{public}@", String(describing: error), context)
             }
         }
     }
 
-    var siteURL: URL? {
+    public var siteURL: URL? {
         if let URLString = credentialValues[0], !URLString.isEmpty {
             return URL(string: URLString)
         }
@@ -62,13 +64,13 @@ class NightscoutService: ServiceAuthenticationUI {
         return nil
     }
 
-    var APISecret: String? {
+    public var APISecret: String? {
         return credentialValues[1]
     }
 
-    var isAuthorized: Bool = true
+    public var isAuthorized: Bool = true
 
-    func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
+    public func verify(_ completion: @escaping (_ success: Bool, _ error: Error?) -> Void) {
         guard let siteURL = siteURL, let APISecret = APISecret else {
             isAuthorized = false
             completion(false, nil)
@@ -82,7 +84,7 @@ class NightscoutService: ServiceAuthenticationUI {
         self.uploader = uploader
     }
 
-    func reset() {
+    public func reset() {
         isAuthorized = false
         uploader = nil
     }

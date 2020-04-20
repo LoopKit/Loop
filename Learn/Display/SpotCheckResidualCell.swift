@@ -171,8 +171,6 @@ class SpotCheckResidualsCell: LessonCellProviding {
             )
         ]
 
-        let segments = ceil(date.end.timeIntervalSince(date.start).hours)
-
         let xAxisValues = ChartAxisValuesStaticGenerator.generateXAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 12,

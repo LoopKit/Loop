@@ -12,5 +12,6 @@ import LoopUI
 
 extension DateAndDurationTableViewCell: NibLoadable { }
 
+extension SettingsTableViewCell: IdentifiableClass { }
 
 extension TextButtonTableViewCell: IdentifiableClass { }

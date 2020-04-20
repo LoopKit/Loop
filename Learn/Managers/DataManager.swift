@@ -12,6 +12,8 @@ import LoopCore
 
 
 final class DataManager {
+    let dataSourceManager: DataSourceManager
+    
     let carbStore: CarbStore
 
     let doseStore: DoseStore
@@ -28,6 +30,8 @@ final class DataManager {
         settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings()
     ) {
         self.settings = settings
+        
+        self.dataSourceManager = DataSourceManager()
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInAppGroupDirectory(isReadOnly: true)
@@ -57,6 +61,15 @@ final class DataManager {
             healthStore: healthStore,
             cacheStore: cacheStore,
             observationEnabled: false
+        )
+        
+        dataSourceManager.localLoopDataSource = self
+    }
+    
+    var therapySettings: LearnTherapySettings {
+        return LearnTherapySettings(
+            momentumDataInterval: glucoseStore.momentumDataInterval,
+            insulinModel: insulinModelSettings!
         )
     }
 }
@@ -91,13 +104,22 @@ extension DataManager {
     }
 }
 
-protocol EffectsFetcher {
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects>
-}
 
-// MARK: - Effects Data
+// MARK: - DataSource
 
-extension DataManager: EffectsFetcher {
+extension DataManager: LearnDataSource {
+    var category: String {
+        return "Local"
+    }
+    
+    var title: String {
+        return "Health"
+    }
+    
+    var identifier: String {
+        return "Health"
+    }
+    
     func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 

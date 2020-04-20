@@ -45,7 +45,7 @@ final class ForecastErrorLesson: Lesson {
     let configurationSections: [LessonSectionProviding]
 
     private let dataManager: DataManager
-
+    
     private let glucoseUnit: HKUnit
 
     private let glucoseFormatter = QuantityFormatter()
@@ -80,7 +80,8 @@ final class ForecastErrorLesson: Lesson {
             let basalRateSchedule = dataManager.basalRateSchedule,
             let carbRatioSchedule = dataManager.carbRatioSchedule,
             let insulinModelSettings = dataManager.insulinModelSettings,
-            let insulinSensitivitySchedule = dataManager.insulinSensitivitySchedule
+            let insulinSensitivitySchedule = dataManager.insulinSensitivitySchedule,
+            let dataSource = dataManager.dataSourceManager.selectedDataSource
             else
         {
             completion([LessonSection(headerTitle: "Error: Loop not fully configured", footerTitle: nil, cells: [])])
@@ -97,6 +98,7 @@ final class ForecastErrorLesson: Lesson {
             carbRatioSchedule: carbRatioSchedule,
             insulinModelSettings: insulinModelSettings,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
+            dataSource: dataSource,
             settings: dataManager.settings)
 
         calculator.execute { result in
@@ -157,6 +159,7 @@ private class ForecastErrorCalculator {
     let insulinModelSettings: InsulinModelSettings
     let insulinSensitivitySchedule: InsulinSensitivitySchedule
     let settings: LoopSettings
+    let dataSource: LearnDataSource
 
     private let log: OSLog
 
@@ -166,6 +169,7 @@ private class ForecastErrorCalculator {
          carbRatioSchedule: CarbRatioSchedule,
          insulinModelSettings: InsulinModelSettings,
          insulinSensitivitySchedule: InsulinSensitivitySchedule,
+         dataSource: LearnDataSource,
          settings: LoopSettings
     ) {
         self.dataManager = dataManager
@@ -174,6 +178,7 @@ private class ForecastErrorCalculator {
         self.carbRatioSchedule = carbRatioSchedule
         self.insulinModelSettings = insulinModelSettings
         self.insulinSensitivitySchedule = insulinSensitivitySchedule
+        self.dataSource = dataSource
         self.settings = settings
         
         let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
@@ -188,10 +193,8 @@ private class ForecastErrorCalculator {
         calculator.execute(calculator: { (dataManager, day, results, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
             
-            //let effectsFecther = dataManager
-            let effectsFetcher = RemoteDataManager()
         
-            let result = effectsFetcher.fetchEffects(for: day,
+            let result = self.dataSource.fetchEffects(for: day,
                                                   retrospectiveCorrection: self.retrospectiveCorrection,
                                                   momentumDataInterval: dataManager.glucoseStore.momentumDataInterval)
 
