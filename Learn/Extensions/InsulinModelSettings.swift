@@ -11,6 +11,8 @@ import LoopCore
 import LoopKit
 
 extension InsulinModelSettings {
+    typealias RawValue = [String: Any]
+    
     var modelName: String {
         switch self {
         case .exponentialPreset:
@@ -20,7 +22,6 @@ extension InsulinModelSettings {
         }
     }
     
-    typealias RawValue = [String: Any]
     init?(rawValue: RawValue) {
         guard let modelName = rawValue["modelName"] as? String else {
             return nil

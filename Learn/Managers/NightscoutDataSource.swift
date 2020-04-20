@@ -66,21 +66,18 @@ class NightscoutDataSource: LearnDataSource {
         self.api = api
     }
     
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects> {
+    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, delta: TimeInterval) -> Result<GlucoseEffects> {
 
         let fetchGroup = DispatchGroup()
         
-        var glucose: [StoredGlucoseSample]? = []
-//        var insulinEffects: [GlucoseEffect]?
-//        var counteractionEffects: [GlucoseEffectVelocity]?
-//        var carbEffects: [GlucoseEffect]?
-//        var retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange]?
+        var glucose: [StoredGlucoseSample] = []
         
         let forecastDuration = therapySettings.insulinModel.model.effectDuration
 
-        fetchGroup.enter()
         let neededGlucoseInterval = DateInterval(start: day.start.addingTimeInterval(-therapySettings.momentumDataInterval),
                                                  end: day.end.addingTimeInterval(forecastDuration))
+
+        fetchGroup.enter()
         api.fetchGlucose(dateInterval: neededGlucoseInterval, maxCount: 600) { (result) in
             switch result {
             case .failure(let error):
@@ -91,23 +88,91 @@ class NightscoutDataSource: LearnDataSource {
             }
             fetchGroup.leave()
         }
-        
+
+        var treatments: [NightscoutTreatment] = []
+        let neededTreatmentsInterval = DateInterval(start: day.start.addingTimeInterval(-therapySettings.insulinModel.model.effectDuration),
+                                                 end: day.end.addingTimeInterval(forecastDuration))
+
         fetchGroup.enter()
-        api.fetchTreatments(dateInterval: day, maxCount: 500) { (result) in
+        api.fetchTreatments(dateInterval: neededTreatmentsInterval, maxCount: 500) { (result) in
             switch result {
             case .failure(let error):
                 print("Error fetching glucose: \(error)")
-            case .success(let treatments):
-                print("Fetched \(treatments.count) treatments")
+            case .success(let fetchedTreatments):
+                print("Fetched \(fetchedTreatments.count) treatments")
+                treatments = fetchedTreatments
             }
             fetchGroup.leave()
         }
         
         _ = fetchGroup.wait(timeout: .now() + .seconds(10))
         
-        let glucoseEffects = GlucoseEffects(dateInterval: day, glucose: glucose!, insulinEffects: [], counteractionEffects: [], carbEffects: [], retrospectiveGlucoseDiscrepanciesSummed: [])
+        let doses = treatments.compactMap { $0.dose }
+        print("Found \(doses.count) doses")
+        let normalizedDoses = doses.reconciled().annotated(with: therapySettings.basalSchedule)
+        print("Normalized to \(normalizedDoses.count) doses")
+        let insulinEffects = normalizedDoses.glucoseEffects(insulinModel: therapySettings.insulinModel.model, insulinSensitivity: therapySettings.sensitivity)
+        
+        let carbEntries = treatments.compactMap { $0.carbEntry }
+        print("Found \(carbEntries) carb entries")
+        
+        let counteractionEffects = glucose.counteractionEffects(to: insulinEffects)
+
+        let carbModelSettings = therapySettings.carbModelSettings
+        
+        let carbEffects = carbEntries.map(
+            to: counteractionEffects,
+            carbRatio: therapySettings.carbRatios,
+            insulinSensitivity: therapySettings.sensitivity,
+            absorptionTimeOverrun: therapySettings.absorptionTimeOverrun,
+            defaultAbsorptionTime: therapySettings.defaultAbsorptionTime,
+            delay: therapySettings.carbEffectDelay,
+            initialAbsorptionTimeOverrun: carbModelSettings.initialAbsorptionTimeOverrun,
+            absorptionModel: carbModelSettings.absorptionModel,
+            adaptiveAbsorptionRateEnabled: carbModelSettings.adaptiveAbsorptionRateEnabled,
+            adaptiveRateStandbyIntervalFraction: carbModelSettings.adaptiveRateStandbyIntervalFraction
+        ).dynamicGlucoseEffects(
+            from: neededTreatmentsInterval.start,
+            to: neededTreatmentsInterval.end,
+            carbRatios: therapySettings.carbRatios,
+            insulinSensitivities: therapySettings.sensitivity,
+            defaultAbsorptionTime: therapySettings.defaultAbsorptionTime,
+            absorptionModel: carbModelSettings.absorptionModel,
+            delay: therapySettings.carbEffectDelay,
+            delta: delta
+        )
+
+        
+        let glucoseEffects = GlucoseEffects(dateInterval: day, glucose: glucose, insulinEffects: insulinEffects, counteractionEffects: [], carbEffects: [], retrospectiveGlucoseDiscrepanciesSummed: [])
         
         return .success(glucoseEffects)
     }
 }
 
+extension NightscoutTreatment {
+    var dose: DoseEntry? {
+        switch self {
+        case let bolus as BolusNightscoutTreatment:
+            let endDate = bolus.timestamp.addingTimeInterval(bolus.duration)
+            return DoseEntry(type: .bolus, startDate: bolus.timestamp, endDate: endDate, value: bolus.amount, unit: .units, deliveredUnits: bolus.amount, description: "Bolus", syncIdentifier: bolus.id, scheduledBasalRate: nil)
+        case let tempBasal as TempBasalNightscoutTreatment:
+            let endDate = tempBasal.timestamp.addingTimeInterval(tempBasal.duration)
+            return DoseEntry(type: .tempBasal, startDate: tempBasal.timestamp, endDate: endDate, value: tempBasal.rate, unit: .unitsPerHour, deliveredUnits: tempBasal.amount, description: "TempBasal", syncIdentifier: tempBasal.id, scheduledBasalRate: nil)
+        default:
+            return nil
+        }
+    }
+
+    var carbEntry: StoredCarbEntry? {
+        switch self {
+        case let meal as MealBolusNightscoutTreatment:
+            guard let identifier = meal.id, let uuid = identifier.asUUID else {
+                return nil
+            }
+            return StoredCarbEntry(sampleUUID: uuid, syncIdentifier: identifier, syncVersion: 0, startDate: meal.timestamp, unitString: "grams", value: meal.carbs, foodType: meal.foodType, absorptionTime: meal.absorptionTime, createdByCurrentApp: false, externalID: identifier, isUploaded: true)
+        default:
+            return nil
+        }
+    }
+
+}

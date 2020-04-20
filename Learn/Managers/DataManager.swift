@@ -66,10 +66,18 @@ final class DataManager {
         dataSourceManager.localLoopDataSource = self
     }
     
+    // TODO: Placeholder until values being fetched from nightscout
     var therapySettings: LearnTherapySettings {
         return LearnTherapySettings(
             momentumDataInterval: glucoseStore.momentumDataInterval,
-            insulinModel: insulinModelSettings!
+            insulinModel: insulinModelSettings!,
+            basalSchedule: basalRateSchedule!,
+            sensitivity: insulinSensitivitySchedule!,
+            carbRatios: carbRatioSchedule!,
+            absorptionTimeOverrun: carbStore.absorptionTimeOverrun,
+            defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
+            carbAbsortionModel: carbStore.carbAbsorptionModel,
+            carbEffectDelay: carbStore.delay
         )
     }
 }
@@ -120,7 +128,7 @@ extension DataManager: LearnDataSource {
         return "Health"
     }
     
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, momentumDataInterval: TimeInterval) -> Result<GlucoseEffects> {
+    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, delta: TimeInterval) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 
         let retrospectiveStart = day.start.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
@@ -151,7 +159,7 @@ extension DataManager: LearnDataSource {
         
         updateGroup.enter()
         // Get enough glucose readings for momentum at the beginning of the day
-        let glucoseStart = day.start.addingTimeInterval(-momentumDataInterval)
+        let glucoseStart = day.start.addingTimeInterval(-therapySettings.momentumDataInterval)
         glucoseStore.getCachedGlucoseSamples(start: glucoseStart, end: day.end) { (samples) in
             glucose = samples
             counteractionEffects = samples.counteractionEffects(to: insulinEffects!)

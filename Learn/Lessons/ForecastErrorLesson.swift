@@ -196,7 +196,7 @@ private class ForecastErrorCalculator {
         
             let result = self.dataSource.fetchEffects(for: day,
                                                   retrospectiveCorrection: self.retrospectiveCorrection,
-                                                  momentumDataInterval: dataManager.glucoseStore.momentumDataInterval)
+                                                  delta: dataManager.carbStore.delta)
 
             switch result {
             case .failure(let error):
