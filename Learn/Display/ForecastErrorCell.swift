@@ -101,7 +101,7 @@ class ForecastErrorCell: LessonCellProviding {
                 let value = residual.quantity.doubleValue(for: glucoseUnit)
                 
                 let offset = residual.startDate.timeIntervalSince(forecast.startTime)
-                let bin = ceil(offset / delta) * delta
+                let bin = TimeInterval(ceil(offset / delta) * delta).hours
                 bins[bin] = (bins[bin] ?? [Double]()) + [value]
             }
         }
@@ -194,13 +194,15 @@ class ForecastErrorCell: LessonCellProviding {
                 y: ChartAxisValue(scalar: 0)
             )
         ]
+        
+        let formatter = NumberFormatter()
 
         let xAxisValues = ChartAxisValuesStaticGenerator.generateXAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 12,
             multiple: TimeInterval(hours: 1),
             axisValueGenerator: {
-                ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
+                ChartAxisValueDoubleUnit(TimeInterval($0).hours, unitString: HKUnit.hour().unitString, formatter: formatter)
             },
             addPaddingSegmentIfEdge: false
         )

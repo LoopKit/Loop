@@ -77,7 +77,7 @@ class ResidualsCell: LessonCellProviding {
         for forecast in forecasts {
             let forecastPoints: [ChartPoint] = forecast.residuals.map {
                 return ChartPoint(
-                    x: ChartAxisValueDouble($0.startDate.timeIntervalSince(forecast.startTime)),
+                    x: ChartAxisValueDouble($0.startDate.timeIntervalSince(forecast.startTime).hours),
                     y: ChartAxisValueDoubleUnit($0.quantity.doubleValue(for: glucoseUnit), unitString: unitString, formatter: unitFormatter.numberFormatter)
                 )
             }
@@ -116,7 +116,7 @@ class ResidualsCell: LessonCellProviding {
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
 
         // Glucose
-        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: chartPoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor(displayP3Red: 0, green: 0, blue: 0, alpha: 0.2), optimized: true)
+        let circles = ChartPointsScatterCirclesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: chartPoints, displayDelay: 0, itemSize: CGSize(width: 4, height: 4), itemFillColor: UIColor(displayP3Red: 0, green: 0, blue: 0, alpha: 0.1), optimized: true)
 
         
         if gestureRecognizer != nil {
@@ -164,13 +164,15 @@ class ResidualsCell: LessonCellProviding {
                 y: ChartAxisValue(scalar: 0)
             )
         ]
+        
+        let formatter = NumberFormatter()
 
         let xAxisValues = ChartAxisValuesStaticGenerator.generateXAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
             maxSegmentCount: 12,
             multiple: TimeInterval(hours: 1),
             axisValueGenerator: {
-                ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
+                ChartAxisValueDoubleUnit(TimeInterval($0).hours, unitString: HKUnit.hour().unitString, formatter: formatter)
             },
             addPaddingSegmentIfEdge: false
         )
