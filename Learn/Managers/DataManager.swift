@@ -77,7 +77,8 @@ final class DataManager {
             absorptionTimeOverrun: carbStore.absorptionTimeOverrun,
             defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
             carbAbsortionModel: carbStore.carbAbsorptionModel,
-            carbEffectDelay: carbStore.delay
+            carbEffectDelay: carbStore.delay,
+            retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval
         )
     }
 }

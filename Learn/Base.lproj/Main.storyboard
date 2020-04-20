@@ -14,7 +14,7 @@
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="u6I-T8-rcv">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Lesson" textLabel="5TI-M7-MbY" detailTextLabel="SHr-J8-bg6" style="IBUITableViewCellStyleSubtitle" id="NHi-oz-lGR">
                                 <rect key="frame" x="0.0" y="55.5" width="375" height="60.5"/>
@@ -104,17 +104,17 @@
             </objects>
             <point key="canvasLocation" x="3410" y="118"/>
         </scene>
-        <!--Settings View Controller-->
+        <!--Settings-->
         <scene sceneID="Aop-fE-n0N">
             <objects>
-                <tableViewController id="NYg-Ml-A86" customClass="SettingsViewController" customModule="Learn" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="zp4-KL-rAk">
+                <tableViewController title="Settings" id="NYg-Ml-A86" customClass="SettingsViewController" customModule="Learn" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="zp4-KL-rAk">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="45x-He-RSM">
-                                <rect key="frame" x="0.0" y="28" width="375" height="43.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="375" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="45x-He-RSM" id="NSl-jZ-2eK">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
@@ -127,7 +127,7 @@
                             <outlet property="delegate" destination="NYg-Ml-A86" id="be1-m6-fQR"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="nsD-5i-RC3"/>
+                    <navigationItem key="navigationItem" title="Settings" id="nsD-5i-RC3"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uxy-PR-ndr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

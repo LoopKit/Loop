@@ -191,7 +191,7 @@ private class ForecastErrorCalculator {
         os_log(.default, log: log, "Computing forecast error from %{public}@", String(describing: calculator.dates))
         
         calculator.execute(calculator: { (dataManager, day, results, completion) in
-            os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
+            os_log(.default, log: self.log, "Fetching source data for %{public}@", String(describing: day))
             
         
             let result = self.dataSource.fetchEffects(for: day,

@@ -35,6 +35,7 @@ struct LearnTherapySettings {
     var defaultAbsorptionTime: TimeInterval
     var carbAbsortionModel: CarbAbsorptionModel
     var carbEffectDelay: TimeInterval
+    var retrospectiveCorrectionGroupingInterval: TimeInterval
     
     var carbModelSettings: CarbModelSettings {
         return carbAbsortionModel.settings(with: absorptionTimeOverrun)
@@ -48,7 +49,8 @@ struct LearnTherapySettings {
          absorptionTimeOverrun: Double,
          defaultAbsorptionTime: TimeInterval,
          carbAbsortionModel: CarbAbsorptionModel,
-         carbEffectDelay: TimeInterval)
+         carbEffectDelay: TimeInterval,
+         retrospectiveCorrectionGroupingInterval: TimeInterval)
     {
         self.momentumDataInterval = momentumDataInterval
         self.insulinModel = insulinModel
@@ -59,6 +61,7 @@ struct LearnTherapySettings {
         self.defaultAbsorptionTime = defaultAbsorptionTime
         self.carbAbsortionModel = carbAbsortionModel
         self.carbEffectDelay = carbEffectDelay
+        self.retrospectiveCorrectionGroupingInterval = retrospectiveCorrectionGroupingInterval
     }
     
     init?(rawValue: RawValue) {
@@ -76,7 +79,8 @@ struct LearnTherapySettings {
             let defaultAbsorptionTime = rawValue["defaultAbsorptionTime"] as? TimeInterval,
             let carbAbsortionModelRaw = rawValue["carbAbsortionModel"] as? CarbAbsorptionModel.RawValue,
             let carbAbsorptionModel = CarbAbsorptionModel(rawValue: carbAbsortionModelRaw),
-            let carbEffectDelay = rawValue["carbEffectDelay"] as? TimeInterval
+            let carbEffectDelay = rawValue["carbEffectDelay"] as? TimeInterval,
+            let retrospectiveCorrectionGroupingInterval = rawValue["retrospectiveCorrectionGroupingInterval"] as? TimeInterval
         else {
             return nil
         }
@@ -89,6 +93,7 @@ struct LearnTherapySettings {
         self.defaultAbsorptionTime = defaultAbsorptionTime
         self.carbAbsortionModel = carbAbsorptionModel
         self.carbEffectDelay = carbEffectDelay
+        self.retrospectiveCorrectionGroupingInterval = retrospectiveCorrectionGroupingInterval
     }
     
     var rawValue: RawValue {
@@ -101,7 +106,8 @@ struct LearnTherapySettings {
             "absorptionTimeOverrun": absorptionTimeOverrun,
             "defaultAbsorptionTime": defaultAbsorptionTime,
             "carbAbsortionModel": carbAbsortionModel.rawValue,
-            "carbEffectDelay": carbEffectDelay
+            "carbEffectDelay": carbEffectDelay,
+            "retrospectiveCorrectionGroupingInterval": retrospectiveCorrectionGroupingInterval,
         ]
     }    
 }

@@ -78,6 +78,7 @@ class NightscoutDataSource: LearnDataSource {
                                                  end: day.end.addingTimeInterval(forecastDuration))
 
         fetchGroup.enter()
+        print("Fetching glucose for: \(neededGlucoseInterval)")
         api.fetchGlucose(dateInterval: neededGlucoseInterval, maxCount: 600) { (result) in
             switch result {
             case .failure(let error):
@@ -89,15 +90,18 @@ class NightscoutDataSource: LearnDataSource {
             fetchGroup.leave()
         }
 
+        _ = fetchGroup.wait(timeout: .distantFuture)
+
         var treatments: [NightscoutTreatment] = []
         let neededTreatmentsInterval = DateInterval(start: day.start.addingTimeInterval(-therapySettings.insulinModel.model.effectDuration),
                                                  end: day.end.addingTimeInterval(forecastDuration))
 
         fetchGroup.enter()
+        print("Fetching treatments for: \(neededTreatmentsInterval)")
         api.fetchTreatments(dateInterval: neededTreatmentsInterval, maxCount: 500) { (result) in
             switch result {
             case .failure(let error):
-                print("Error fetching glucose: \(error)")
+                print("Error fetching treatments: \(error)")
             case .success(let fetchedTreatments):
                 print("Fetched \(fetchedTreatments.count) treatments")
                 treatments = fetchedTreatments
@@ -105,7 +109,7 @@ class NightscoutDataSource: LearnDataSource {
             fetchGroup.leave()
         }
         
-        _ = fetchGroup.wait(timeout: .now() + .seconds(10))
+        _ = fetchGroup.wait(timeout: .distantFuture)
         
         let doses = treatments.compactMap { $0.dose }
         print("Found \(doses.count) doses")
@@ -114,7 +118,7 @@ class NightscoutDataSource: LearnDataSource {
         let insulinEffects = normalizedDoses.glucoseEffects(insulinModel: therapySettings.insulinModel.model, insulinSensitivity: therapySettings.sensitivity)
         
         let carbEntries = treatments.compactMap { $0.carbEntry }
-        print("Found \(carbEntries) carb entries")
+        print("Found \(carbEntries.count) carb entries")
         
         let counteractionEffects = glucose.counteractionEffects(to: insulinEffects)
 
@@ -142,8 +146,14 @@ class NightscoutDataSource: LearnDataSource {
             delta: delta
         )
 
+        // Get timeline of glucose discrepancies
+        let retrospectiveGlucoseDiscrepancies: [GlucoseEffect] = counteractionEffects.subtracting(carbEffects, withUniformInterval: delta)
+
+        let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
         
-        let glucoseEffects = GlucoseEffects(dateInterval: day, glucose: glucose, insulinEffects: insulinEffects, counteractionEffects: [], carbEffects: [], retrospectiveGlucoseDiscrepanciesSummed: [])
+        let retrospectiveGlucoseDiscrepanciesSummed: [GlucoseChange] = retrospectiveGlucoseDiscrepancies.combinedSums(of: therapySettings.retrospectiveCorrectionGroupingInterval * retrospectiveCorrectionGroupingIntervalMultiplier)
+        
+        let glucoseEffects = GlucoseEffects(dateInterval: day, glucose: glucose, insulinEffects: insulinEffects, counteractionEffects: counteractionEffects, carbEffects: carbEffects, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed)
         
         return .success(glucoseEffects)
     }
@@ -169,7 +179,7 @@ extension NightscoutTreatment {
             guard let identifier = meal.id, let uuid = identifier.asUUID else {
                 return nil
             }
-            return StoredCarbEntry(sampleUUID: uuid, syncIdentifier: identifier, syncVersion: 0, startDate: meal.timestamp, unitString: "grams", value: meal.carbs, foodType: meal.foodType, absorptionTime: meal.absorptionTime, createdByCurrentApp: false, externalID: identifier, isUploaded: true)
+            return StoredCarbEntry(sampleUUID: uuid, syncIdentifier: identifier, syncVersion: 0, startDate: meal.timestamp, unitString: "g", value: meal.carbs, foodType: meal.foodType, absorptionTime: meal.absorptionTime, createdByCurrentApp: false, externalID: identifier, isUploaded: true)
         default:
             return nil
         }

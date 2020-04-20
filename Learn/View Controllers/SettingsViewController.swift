@@ -31,11 +31,19 @@ class SettingsViewController: UITableViewController {
         
         tableView.register(SettingsTableViewCell.self, forCellReuseIdentifier: SettingsTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
-
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch Section(rawValue: section)! {
+        case .dataSources:
+            return NSLocalizedString("Data Sources", comment: "Section header for data sources list in settings")
+        case .actions:
+            return nil
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
