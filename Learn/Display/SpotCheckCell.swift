@@ -131,7 +131,7 @@ class SpotCheckCell: LessonCellProviding {
 
         var prediction: ChartLayer?
         
-        let selectedForecast = forecasts[forecasts.count / 2]
+        let selectedForecast = forecasts[forecasts.count / 5]
         
         let predictedGlucosePoints = glucosePointsFromValues(selectedForecast.predictedGlucose)
 

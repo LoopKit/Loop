@@ -85,7 +85,7 @@ class NightscoutDataSource: LearnDataSource {
                 print("Error fetching glucose: \(error)")
             case .success(let samples):
                 print("Fetched \(samples.count) glucose samples")
-                glucose = samples.compactMap { $0.asStoredGlucoseSample }
+                glucose = samples.compactMap { $0.asStoredGlucoseSample }.sorted { $0.startDate <= $1.startDate }
             }
             fetchGroup.leave()
         }
