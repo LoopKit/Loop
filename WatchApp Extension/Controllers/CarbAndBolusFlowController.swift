@@ -17,7 +17,8 @@ final class CarbAndBolusFlowController: WKHostingController<CarbAndBolusFlow>, I
     private lazy var viewModel = {
         CarbAndBolusFlowViewModel(
             configuration: configuration,
-            dismiss: { [unowned self] in
+            dismiss: { [weak self] in
+                guard let self = self else { return }
                 self.willDeactivateObserver = nil
                 self.dismiss()
             }

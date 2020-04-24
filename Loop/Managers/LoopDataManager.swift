@@ -540,14 +540,7 @@ extension LoopDataManager {
 
                     self.carbEffect = nil
                     self.carbsOnBoard = nil
-
-                    do {
-                        try self.update()
-
-                        completion(.success(()))
-                    } catch let error {
-                        completion(.failure(error))
-                    }
+                    completion(.success(()))
                 case .failure(let error):
                     completion(.failure(error))
                 }
