@@ -57,7 +57,19 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
         }
     }
     
-    let alertIdentifier = DeviceAlert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
+    class MockSoundPlayer: AlertSoundPlayer {
+        var vibrateCalled = false
+        func vibrate() {
+            vibrateCalled = true
+        }
+        var urlPlayed: URL?
+        func play(url: URL) {
+            urlPlayed = url
+        }
+    }
+    
+    static let managerIdentifier = "managerIdentifier"
+    let alertIdentifier = DeviceAlert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bar")
     let foregroundContent = DeviceAlert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
     let backgroundContent = DeviceAlert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "")
     
@@ -66,11 +78,13 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
     var mockTimerRepeats: Bool?
     var mockAlertManagerResponder: MockAlertManagerResponder!
     var mockViewController: MockViewController!
+    var mockSoundPlayer: MockSoundPlayer!
     var inAppModalDeviceAlertPresenter: InAppModalDeviceAlertPresenter!
     
     override func setUp() {
         mockAlertManagerResponder = MockAlertManagerResponder()
         mockViewController = MockViewController()
+        mockSoundPlayer = MockSoundPlayer()
         
         let newTimerFunc: InAppModalDeviceAlertPresenter.TimerFactoryFunction = { timeInterval, repeats, block in
             let timer = Timer(timeInterval: timeInterval, repeats: repeats) { _ in block?() }
@@ -82,6 +96,7 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
         inAppModalDeviceAlertPresenter =
             InAppModalDeviceAlertPresenter(rootViewController: mockViewController,
                                            deviceAlertManagerResponder: mockAlertManagerResponder,
+                                           soundPlayer: mockSoundPlayer,
                                            newActionFunc: MockAlertAction.init,
                                            newTimerFunc: newTimerFunc)
     }
@@ -94,8 +109,58 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
         let alertController = mockViewController.viewControllerPresented as? UIAlertController
         XCTAssertNotNil(alertController)
         XCTAssertEqual("FOREGROUND", alertController?.title)
+        XCTAssertEqual(nil, mockSoundPlayer.urlPlayed?.absoluteString)
+        XCTAssertFalse(mockSoundPlayer.vibrateCalled)
     }
     
+    func testIssueImmediateAlertWithSound() {
+        let alert = DeviceAlert(identifier: alertIdentifier,
+                                foregroundContent: foregroundContent,
+                                backgroundContent: backgroundContent,
+                                trigger: .immediate,
+                                soundName: "soundName")
+        inAppModalDeviceAlertPresenter.issueAlert(alert)
+
+        waitOnMain()
+        let alertController = mockViewController.viewControllerPresented as? UIAlertController
+        XCTAssertNotNil(alertController)
+        XCTAssertEqual("FOREGROUND", alertController?.title)
+        XCTAssertEqual("\(InAppModalDeviceAlertPresenterTests.managerIdentifier)-soundName", mockSoundPlayer.urlPlayed?.lastPathComponent)
+        XCTAssertTrue(mockSoundPlayer.vibrateCalled)
+    }
+    
+    func testIssueImmediateAlertWithVibrate() {
+        let alert = DeviceAlert(identifier: alertIdentifier,
+                                foregroundContent: foregroundContent,
+                                backgroundContent: backgroundContent,
+                                trigger: .immediate,
+                                soundName: .vibrate)
+        inAppModalDeviceAlertPresenter.issueAlert(alert)
+
+        waitOnMain()
+        let alertController = mockViewController.viewControllerPresented as? UIAlertController
+        XCTAssertNotNil(alertController)
+        XCTAssertEqual("FOREGROUND", alertController?.title)
+        XCTAssertEqual(nil, mockSoundPlayer.urlPlayed?.absoluteString)
+        XCTAssertTrue(mockSoundPlayer.vibrateCalled)
+    }
+    
+    func testIssueImmediateAlertWithSilence() {
+        let alert = DeviceAlert(identifier: alertIdentifier,
+                                foregroundContent: foregroundContent,
+                                backgroundContent: backgroundContent,
+                                trigger: .immediate,
+                                soundName: .silence)
+        inAppModalDeviceAlertPresenter.issueAlert(alert)
+
+        waitOnMain()
+        let alertController = mockViewController.viewControllerPresented as? UIAlertController
+        XCTAssertNotNil(alertController)
+        XCTAssertEqual("FOREGROUND", alertController?.title)
+        XCTAssertEqual(nil, mockSoundPlayer.urlPlayed?.absoluteString)
+        XCTAssertFalse(mockSoundPlayer.vibrateCalled)
+    }
+
     func testRemoveImmediateAlert() {
         let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
         inAppModalDeviceAlertPresenter.issueAlert(alert)
