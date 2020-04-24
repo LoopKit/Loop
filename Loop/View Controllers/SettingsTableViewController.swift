@@ -477,18 +477,28 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(scheduleVC, sender: sender)
             case .suspendThreshold:
+                func presentSuspendThresholdEditor(initialValue: HKQuantity?, unit: HKUnit) {
+                    let editor = SuspendThresholdEditor(
+                        value: initialValue,
+                        unit: unit,
+                        onSave: { [dataManager, tableView] newValue in
+                            dataManager!.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: unit, value: newValue.doubleValue(for: unit))
+
+                            tableView.reloadRows(at: [indexPath], with: .automatic)
+                        }
+                    )
+
+                    let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
+                        tableView.deselectRow(at: indexPath, animated: true)
+                    })
+
+                    self.present(hostingController, animated: true)
+                }
+
                 if let minBGGuard = dataManager.loopManager.settings.suspendThreshold {
-                    let vc = GlucoseThresholdTableViewController(threshold: minBGGuard.value, glucoseUnit: minBGGuard.unit)
-                    vc.delegate = self
-                    vc.indexPath = indexPath
-                    vc.title = sender?.textLabel?.text
-                    self.show(vc, sender: sender)
+                    presentSuspendThresholdEditor(initialValue: minBGGuard.quantity, unit: minBGGuard.unit)
                 } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
-                    let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
-                    vc.delegate = self
-                    vc.indexPath = indexPath
-                    vc.title = sender?.textLabel?.text
-                    self.show(vc, sender: sender)
+                    presentSuspendThresholdEditor(initialValue: nil, unit: unit)
                 }
             case .insulinModel:
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
@@ -808,36 +818,6 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
         default:
             assertionFailure()
         }
-    }
-}
-
-
-extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDelegate {
-    func textFieldTableViewControllerDidEndEditing(_ controller: LoopKitUI.TextFieldTableViewController) {
-        if let indexPath = controller.indexPath {
-            switch sections[indexPath.section] {
-            case .configuration:
-                switch ConfigurationRow(rawValue: indexPath.row)! {
-                case .suspendThreshold:
-                    if let controller = controller as? GlucoseThresholdTableViewController,
-                        let value = controller.value, let minBGGuard = valueNumberFormatter.number(from: value)?.doubleValue {
-                        dataManager.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: minBGGuard)
-                    } else {
-                        dataManager.loopManager.settings.suspendThreshold = nil
-                    }
-                default:
-                    assertionFailure()
-                }
-            default:
-                assertionFailure()
-            }
-        }
-
-        tableView.reloadData()
-    }
-
-    func textFieldTableViewControllerDidReturn(_ controller: LoopKitUI.TextFieldTableViewController) {
-        _ = navigationController?.popViewController(animated: true)
     }
 }
 

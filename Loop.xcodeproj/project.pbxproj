@@ -327,6 +327,8 @@
 		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */; };
 		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
+		892ADE082446E1C2007CE08C /* SuspendThresholdEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892ADE072446E1C2007CE08C /* SuspendThresholdEditor.swift */; };
+		892ADE0A2446E9C3007CE08C /* ExplicitlyDismissibleModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */; };
 		892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */; };
 		892FB4CD22040104005293EC /* OverridePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CC22040104005293EC /* OverridePresetRow.swift */; };
 		892FB4CF220402C0005293EC /* OverrideSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CE220402C0005293EC /* OverrideSelectionController.swift */; };
@@ -341,6 +343,7 @@
 		895788B1242E69A2002CB114 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788A9242E69A1002CB114 /* Color.swift */; };
 		895788B2242E69A2002CB114 /* CircularAccessoryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788AA242E69A1002CB114 /* CircularAccessoryButtonStyle.swift */; };
 		895788B3242E69A2002CB114 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788AB242E69A2002CB114 /* ActionButton.swift */; };
+		893C9F852446F54E00CD4185 /* Environment+Dismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */; };
 		895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */; };
 		8968B1122408B3520074BB48 /* UIFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8968B1112408B3520074BB48 /* UIFont.swift */; };
 		8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8968B113240C55F10074BB48 /* LoopSettingsTests.swift */; };
@@ -358,6 +361,8 @@
 		89A605ED24328972009C1096 /* BolusArrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605EC24328972009C1096 /* BolusArrow.swift */; };
 		89A605EF2432925D009C1096 /* CompletionCheckmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605EE2432925D009C1096 /* CompletionCheckmark.swift */; };
 		89A605F12432BD18009C1096 /* BolusConfirmationVisual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605F02432BD18009C1096 /* BolusConfirmationVisual.swift */; };
+		89AC9DB2244A41BB004A6B8A /* Guardrail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89AC9DB1244A41BB004A6B8A /* Guardrail.swift */; };
+		89AC9DB4244A423D004A6B8A /* SuspendThresholdPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89AC9DB3244A423D004A6B8A /* SuspendThresholdPicker.swift */; };
 		89ADE13B226BFA0F0067222B /* TestingScenariosManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */; };
 		89CA2B30226C0161004D9350 /* DirectoryObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */; };
 		89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */; };
@@ -1009,6 +1014,8 @@
 		892A5D58222F0A27008961AB /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = LoopTestingKit.framework; path = Carthage/Build/iOS/LoopTestingKit.framework; sourceTree = SOURCE_ROOT; };
 		892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeReplaceableCollection.swift; sourceTree = "<group>"; };
+		892ADE072446E1C2007CE08C /* SuspendThresholdEditor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SuspendThresholdEditor.swift; sourceTree = "<group>"; };
+		892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplicitlyDismissibleModal.swift; sourceTree = "<group>"; };
 		892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryViewController.swift; sourceTree = "<group>"; };
 		892FB4CC22040104005293EC /* OverridePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetRow.swift; sourceTree = "<group>"; };
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
@@ -1023,6 +1030,7 @@
 		895788A9242E69A1002CB114 /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		895788AA242E69A1002CB114 /* CircularAccessoryButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircularAccessoryButtonStyle.swift; sourceTree = "<group>"; };
 		895788AB242E69A2002CB114 /* ActionButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
+		893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+Dismiss.swift"; sourceTree = "<group>"; };
 		895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverrideSelectionViewController.swift; sourceTree = "<group>"; };
 		8968B1112408B3520074BB48 /* UIFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFont.swift; sourceTree = "<group>"; };
 		8968B113240C55F10074BB48 /* LoopSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsTests.swift; sourceTree = "<group>"; };
@@ -1042,6 +1050,8 @@
 		89A605EC24328972009C1096 /* BolusArrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusArrow.swift; sourceTree = "<group>"; };
 		89A605EE2432925D009C1096 /* CompletionCheckmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionCheckmark.swift; sourceTree = "<group>"; };
 		89A605F02432BD18009C1096 /* BolusConfirmationVisual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusConfirmationVisual.swift; sourceTree = "<group>"; };
+		89AC9DB1244A41BB004A6B8A /* Guardrail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guardrail.swift; sourceTree = "<group>"; };
+		89AC9DB3244A423D004A6B8A /* SuspendThresholdPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuspendThresholdPicker.swift; sourceTree = "<group>"; };
 		89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingScenariosManager.swift; sourceTree = "<group>"; };
 		89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryObserver.swift; sourceTree = "<group>"; };
 		89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingScenariosTableViewController.swift; sourceTree = "<group>"; };
@@ -1578,6 +1588,8 @@
 				892A5D58222F0A27008961AB /* Debug.swift */,
 				A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */,
 				89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */,
+				893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */,
+				89AC9DB1244A41BB004A6B8A /* Guardrail.swift */,
 				43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				89E267FE229267DF00A3F2AF /* Optional.swift */,
@@ -1603,6 +1615,7 @@
 				892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */,
 				43DBF0581C93F73800B3C386 /* CarbEntryTableViewController.swift */,
 				43A51E201EB6DBDD000736CC /* ChartsTableViewController.swift */,
+				892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */,
 				433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */,
 				C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
@@ -1621,19 +1634,21 @@
 			isa = PBXGroup;
 			children = (
 				C1F8B1D122375E4200DD66CF /* BolusProgressTableViewCell.swift */,
-				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
 				43B260481ED248FB008CAA77 /* CarbEntryTableViewCell.swift */,
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
+				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
+				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
+				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */,
+				892ADE072446E1C2007CE08C /* SuspendThresholdEditor.swift */,
+				89AC9DB3244A423D004A6B8A /* SuspendThresholdPicker.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
-				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
-				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
-				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
+				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -2679,6 +2694,7 @@
 				4F70C2131DE90339006380B7 /* StatusExtensionContext.swift in Sources */,
 				43C05CC521EC29E3006FB252 /* TextFieldTableViewCell.swift in Sources */,
 				4FF4D1001E18374700846527 /* WatchContext.swift in Sources */,
+				893C9F852446F54E00CD4185 /* Environment+Dismiss.swift in Sources */,
 				C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */,
 				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
 				4311FB9B1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift in Sources */,
@@ -2695,6 +2711,7 @@
 				1DA649A7244126CD00F61E75 /* UserNotificationDeviceAlertPresenter.swift in Sources */,
 				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
+				892ADE0A2446E9C3007CE08C /* ExplicitlyDismissibleModal.swift in Sources */,
 				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				89E267FC2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
@@ -2712,10 +2729,12 @@
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
+				892ADE082446E1C2007CE08C /* SuspendThresholdEditor.swift in Sources */,
 				892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */,
 				43DBF0591C93F73800B3C386 /* CarbEntryTableViewController.swift in Sources */,
 				89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */,
 				43E93FB71E469A5100EAB8DB /* HKUnit.swift in Sources */,
+				89AC9DB2244A41BB004A6B8A /* Guardrail.swift in Sources */,
 				43C05CAF21EB2C24006FB252 /* NSBundle.swift in Sources */,
 				1DB1065124467E18005542BD /* DeviceAlertManager.swift in Sources */,
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
@@ -2766,6 +2785,7 @@
 				89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */,
+				89AC9DB4244A423D004A6B8A /* SuspendThresholdPicker.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
