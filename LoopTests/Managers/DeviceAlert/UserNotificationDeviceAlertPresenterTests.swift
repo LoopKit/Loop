@@ -40,7 +40,6 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
     }
     
     var userNotificationDeviceAlertPresenter: UserNotificationDeviceAlertPresenter!
-    var isInBackground = true
     
     let alertIdentifier = DeviceAlert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
     let foregroundContent = DeviceAlert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
@@ -50,11 +49,8 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
     
     override func setUp() {
         mockUserNotificationCenter = MockUserNotificationCenter()
-        
-        isInBackground = true
         userNotificationDeviceAlertPresenter =
-            UserNotificationDeviceAlertPresenter(isAppInBackgroundFunc: { return self.isInBackground },
-                                                 userNotificationCenter: mockUserNotificationCenter)
+            UserNotificationDeviceAlertPresenter(userNotificationCenter: mockUserNotificationCenter)
     }
 
     func testIssueImmediateAlert() {
@@ -170,16 +166,6 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
         let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: nil, trigger: .immediate)
         userNotificationDeviceAlertPresenter.issueAlert(alert)
 
-        waitOnMain()
-        
-        XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
-    }
-    
-    func testDoesNotShowInForeground() {
-        isInBackground = false
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert)
-        
         waitOnMain()
         
         XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)

@@ -44,9 +44,7 @@ class DeviceAlertManagerTests: XCTestCase {
     
     override func setUp() {
         mockPresenter = MockPresenter()
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                isAppInBackgroundFunc: { return self.isInBackground },
-                                                handlers: [mockPresenter])
+        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(), handlers: [mockPresenter])
     }
     
     func testIssueAlertOnHandlerCalled() {
