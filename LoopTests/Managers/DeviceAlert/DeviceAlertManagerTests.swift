@@ -70,7 +70,7 @@ class DeviceAlertManagerTests: XCTestCase {
 
     func testAlertResponderAcknowledged() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(key: Self.mockManagerIdentifier, alertResponder: responder)
+        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
         deviceAlertManager.acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier(managerIdentifier: Self.mockManagerIdentifier, alertIdentifier: Self.mockTypeIdentifier))
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == true)
@@ -78,7 +78,7 @@ class DeviceAlertManagerTests: XCTestCase {
     
     func testAlertResponderNotAcknowledgedIfWrongManagerIdentifier() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(key: Self.mockManagerIdentifier, alertResponder: responder)
+        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
         deviceAlertManager.acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier(managerIdentifier: "foo", alertIdentifier: Self.mockTypeIdentifier))
         XCTAssertTrue(responder.acknowledged.isEmpty)
@@ -86,13 +86,13 @@ class DeviceAlertManagerTests: XCTestCase {
     
     func testRemovedAlertResponderDoesntAcknowledge() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(key: Self.mockManagerIdentifier, alertResponder: responder)
+        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
         deviceAlertManager.acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier(managerIdentifier: Self.mockManagerIdentifier, alertIdentifier: Self.mockTypeIdentifier))
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == true)
         
         responder.acknowledged[DeviceAlertManagerTests.mockTypeIdentifier] = false
-        deviceAlertManager.removeAlertResponder(key: DeviceAlertManagerTests.mockManagerIdentifier)
+        deviceAlertManager.removeAlertResponder(managerIdentifier: DeviceAlertManagerTests.mockManagerIdentifier)
         deviceAlertManager.acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier(managerIdentifier: Self.mockManagerIdentifier, alertIdentifier: Self.mockTypeIdentifier))
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == false)
     }

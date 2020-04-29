@@ -296,8 +296,10 @@ private extension DeviceDataManager {
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
-            deviceAlertManager?.addAlertResponder(key: cgmManager.managerIdentifier,
+            deviceAlertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
                                                   alertResponder: cgmManager)
+            deviceAlertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
+                                                    soundVendor: cgmManager)
         }
     }
 
@@ -315,8 +317,10 @@ private extension DeviceDataManager {
             loopManager?.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
         if let pumpManager = pumpManager {
-            deviceAlertManager?.addAlertResponder(key: pumpManager.managerIdentifier,
+            deviceAlertManager?.addAlertResponder(managerIdentifier: pumpManager.managerIdentifier,
                                                   alertResponder: pumpManager)
+            deviceAlertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
+                                                    soundVendor: pumpManager)
         }
     }
 

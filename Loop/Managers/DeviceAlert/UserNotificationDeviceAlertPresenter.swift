@@ -70,7 +70,7 @@ public extension DeviceAlert {
         let userNotificationContent = UNMutableNotificationContent()
         userNotificationContent.title = content.title
         userNotificationContent.body = content.body
-        userNotificationContent.sound = content.isCritical ? .defaultCritical : .default
+        userNotificationContent.sound = getUserNotificationSound()
         // TODO: Once we have a final design and approval for custom UserNotification buttons, we'll need to set categoryIdentifier
 //        userNotificationContent.categoryIdentifier = LoopNotificationCategory.alert.rawValue
         userNotificationContent.threadIdentifier = identifier.value // Used to match categoryIdentifier, but I /think/ we want multiple threads for multiple alert types, no?
@@ -79,6 +79,29 @@ public extension DeviceAlert {
             LoopNotificationUserInfoKey.alertTypeID.rawValue: identifier.alertIdentifier
         ]
         return userNotificationContent
+    }
+    
+    private func getUserNotificationSound() -> UNNotificationSound? {
+        guard let content = backgroundContent else {
+            return nil
+        }
+        if let sound = sound {
+            switch sound {
+            case .vibrate:
+                // TODO: Not sure how to "force" UNNotificationSound to "vibrate only"...so for now we just do the default
+                break
+            case .silence:
+                // TODO: Not sure how to "force" UNNotificationSound to "silence"...so for now we just do the default
+                break
+            default:
+                if let actualFileName = DeviceAlertManager.soundURL(for: self)?.lastPathComponent {
+                    let unname = UNNotificationSoundName(rawValue: actualFileName)
+                    return content.isCritical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
+                }
+            }
+        }
+        
+        return content.isCritical ? .defaultCritical : .default
     }
 }
 
@@ -94,4 +117,3 @@ public extension DeviceAlert.Trigger {
         }
     }
 }
-

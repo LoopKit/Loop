@@ -8,6 +8,14 @@
 
 import Foundation
 import LoopKit
+import AudioToolbox
+import AVFoundation
+
+
+public protocol AlertSoundPlayer {
+    func vibrate()
+    func play(url: URL)
+}
 
 public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
 
@@ -23,12 +31,16 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
     typealias TimerFactoryFunction = (TimeInterval, Bool, (() -> Void)?) -> Timer
     private let newTimerFunc: TimerFactoryFunction
 
+    private let soundPlayer: AlertSoundPlayer
+
     init(rootViewController: UIViewController,
          deviceAlertManagerResponder: DeviceAlertManagerResponder,
+         soundPlayer: AlertSoundPlayer = AVSoundPlayer(),
          newActionFunc: @escaping ActionFactoryFunction = UIAlertAction.init,
          newTimerFunc: TimerFactoryFunction? = nil) {
         self.rootViewController = rootViewController
         self.deviceAlertManagerResponder = deviceAlertManagerResponder
+        self.soundPlayer = soundPlayer
         self.newActionFunc = newActionFunc
         self.newTimerFunc = newTimerFunc ?? { timeInterval, repeats, block in
             return Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: repeats) { _ in block?() }
@@ -95,6 +107,7 @@ extension InAppModalDeviceAlertPresenter {
             if self.isAlertShowing(identifier: alert.identifier) {
                 return
             }
+            self.playSound(for: alert)
             let alertController = self.presentAlert(title: content.title, message: content.body, action: content.acknowledgeActionButtonLabel) { [weak self] in
                 self?.clearDeliveredAlert(identifier: alert.identifier)
                 self?.deviceAlertManagerResponder?.acknowledgeDeviceAlert(identifier: alert.identifier)
@@ -156,4 +169,44 @@ extension InAppModalDeviceAlertPresenter {
         return controller
     }
     
+    private func playSound(for alert: DeviceAlert) {
+        guard let sound = alert.sound else { return }
+        switch sound {
+        case .vibrate:
+            soundPlayer.vibrate()
+        case .silence:
+            break
+        default:
+            // Assuming in-app alerts should also vibrate.  That way, if the user has "silent mode" on, they still get
+            // some kind of haptic feedback
+            soundPlayer.vibrate()
+            guard let url = DeviceAlertManager.soundURL(for: alert) else { return }
+            soundPlayer.play(url: url)
+        }
+    }
+}
+
+private class AVSoundPlayer: AlertSoundPlayer {
+    private var soundEffect: AVAudioPlayer?
+    private let log = DiagnosticLog(category: "AVSoundPlayer")
+    
+    func vibrate() {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+    }
+    
+    func play(url: URL) {
+        DispatchQueue.main.async {
+            do {
+                // The AVAudioPlayer has to remain around until the sound completes playing.  A cleaner way might be
+                // to wait until that completes, then delete it, but seems overkill.
+                let soundEffect = try AVAudioPlayer(contentsOf: url)
+                self.soundEffect = soundEffect
+                if !soundEffect.play() {
+                    self.log.default("couldn't play sound (app may be in the background): %@", url.absoluteString)
+                }
+            } catch {
+                self.log.error("couldn't play sound %@: %@", url.absoluteString, String(describing: error))
+            }
+        }
+    }
 }
