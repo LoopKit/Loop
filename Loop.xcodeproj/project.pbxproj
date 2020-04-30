@@ -332,6 +332,7 @@
 		892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */; };
 		892FB4CD22040104005293EC /* OverridePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CC22040104005293EC /* OverridePresetRow.swift */; };
 		892FB4CF220402C0005293EC /* OverrideSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CE220402C0005293EC /* OverrideSelectionController.swift */; };
+		893C9F852446F54E00CD4185 /* Environment+Dismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */; };
 		894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894F6DD2243BCBDB00CCE676 /* Environment+SizeClass.swift */; };
 		894F6DD7243C047300CCE676 /* View+Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894F6DD6243C047300CCE676 /* View+Position.swift */; };
 		894F6DD9243C060600CCE676 /* ScalablePositionedText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894F6DD8243C060600CCE676 /* ScalablePositionedText.swift */; };
@@ -343,7 +344,6 @@
 		895788B1242E69A2002CB114 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788A9242E69A1002CB114 /* Color.swift */; };
 		895788B2242E69A2002CB114 /* CircularAccessoryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788AA242E69A1002CB114 /* CircularAccessoryButtonStyle.swift */; };
 		895788B3242E69A2002CB114 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895788AB242E69A2002CB114 /* ActionButton.swift */; };
-		893C9F852446F54E00CD4185 /* Environment+Dismiss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */; };
 		895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */; };
 		8968B1122408B3520074BB48 /* UIFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8968B1112408B3520074BB48 /* UIFont.swift */; };
 		8968B114240C55F10074BB48 /* LoopSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8968B113240C55F10074BB48 /* LoopSettingsTests.swift */; };
@@ -1019,6 +1019,7 @@
 		892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryViewController.swift; sourceTree = "<group>"; };
 		892FB4CC22040104005293EC /* OverridePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetRow.swift; sourceTree = "<group>"; };
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
+		893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+Dismiss.swift"; sourceTree = "<group>"; };
 		894F6DD2243BCBDB00CCE676 /* Environment+SizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+SizeClass.swift"; sourceTree = "<group>"; };
 		894F6DD6243C047300CCE676 /* View+Position.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "View+Position.swift"; path = "WatchApp Extension/Views/View+Position.swift"; sourceTree = SOURCE_ROOT; };
 		894F6DD8243C060600CCE676 /* ScalablePositionedText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScalablePositionedText.swift; sourceTree = "<group>"; };
@@ -1030,7 +1031,6 @@
 		895788A9242E69A1002CB114 /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		895788AA242E69A1002CB114 /* CircularAccessoryButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CircularAccessoryButtonStyle.swift; sourceTree = "<group>"; };
 		895788AB242E69A2002CB114 /* ActionButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
-		893C9F842446F54E00CD4185 /* Environment+Dismiss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+Dismiss.swift"; sourceTree = "<group>"; };
 		895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverrideSelectionViewController.swift; sourceTree = "<group>"; };
 		8968B1112408B3520074BB48 /* UIFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFont.swift; sourceTree = "<group>"; };
 		8968B113240C55F10074BB48 /* LoopSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettingsTests.swift; sourceTree = "<group>"; };

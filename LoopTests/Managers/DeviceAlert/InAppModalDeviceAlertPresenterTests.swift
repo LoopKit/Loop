@@ -57,7 +57,7 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
         }
     }
     
-    class MockSoundPlayer: AlertSoundPlayer {
+    class MockSoundPlayer: DeviceAlertSoundPlayer {
         var vibrateCalled = false
         func vibrate() {
             vibrateCalled = true

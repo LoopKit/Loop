@@ -8,14 +8,6 @@
 
 import Foundation
 import LoopKit
-import AudioToolbox
-import AVFoundation
-
-
-public protocol AlertSoundPlayer {
-    func vibrate()
-    func play(url: URL)
-}
 
 public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
 
@@ -31,11 +23,11 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
     typealias TimerFactoryFunction = (TimeInterval, Bool, (() -> Void)?) -> Timer
     private let newTimerFunc: TimerFactoryFunction
 
-    private let soundPlayer: AlertSoundPlayer
+    private let soundPlayer: DeviceAlertSoundPlayer
 
     init(rootViewController: UIViewController,
          deviceAlertManagerResponder: DeviceAlertManagerResponder,
-         soundPlayer: AlertSoundPlayer = AVSoundPlayer(),
+         soundPlayer: DeviceAlertSoundPlayer = DeviceAVSoundPlayer(),
          newActionFunc: @escaping ActionFactoryFunction = UIAlertAction.init,
          newTimerFunc: TimerFactoryFunction? = nil) {
         self.rootViewController = rootViewController
@@ -182,31 +174,6 @@ extension InAppModalDeviceAlertPresenter {
             soundPlayer.vibrate()
             guard let url = DeviceAlertManager.soundURL(for: alert) else { return }
             soundPlayer.play(url: url)
-        }
-    }
-}
-
-private class AVSoundPlayer: AlertSoundPlayer {
-    private var soundEffect: AVAudioPlayer?
-    private let log = DiagnosticLog(category: "AVSoundPlayer")
-    
-    func vibrate() {
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-    }
-    
-    func play(url: URL) {
-        DispatchQueue.main.async {
-            do {
-                // The AVAudioPlayer has to remain around until the sound completes playing.  A cleaner way might be
-                // to wait until that completes, then delete it, but seems overkill.
-                let soundEffect = try AVAudioPlayer(contentsOf: url)
-                self.soundEffect = soundEffect
-                if !soundEffect.play() {
-                    self.log.default("couldn't play sound (app may be in the background): %@", url.absoluteString)
-                }
-            } catch {
-                self.log.error("couldn't play sound %@: %@", url.absoluteString, String(describing: error))
-            }
         }
     }
 }
