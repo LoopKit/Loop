@@ -13,7 +13,7 @@ import LoopKitUI
 
 
 struct SuspendThresholdEditor: View {
-    @State private var value = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 80)
+    @State private var value: HKQuantity
     @State private var isEditing = false
     @State private var showingConfirmationAlert = false
 
@@ -50,8 +50,8 @@ struct SuspendThresholdEditor: View {
                 // https://bugs.swift.org/browse/SR-11628
                 if true {
                     Card {
-                        SuspendThresholdPicker(value: $value, unit: unit, isEditing: $isEditing)
                         SuspendThresholdDescription()
+                        SuspendThresholdPicker(value: $value, unit: unit, isEditing: $isEditing)
                     }
                 }
             },
@@ -89,7 +89,7 @@ struct SuspendThresholdEditor: View {
     private func confirmationAlert() -> Alert {
         Alert(
             title: Text("Save Suspend Threshold?", comment: "Alert title for confirming a suspend threshold outside the recommended range"),
-            message: Text("The suspend threshold you have entered is outside of what we recommend.", comment: "Alert message for confirming a suspend threshold outside the recommended range"),
+            message: Text("The suspend threshold you have entered is outside of what Tidepool generally recommends.", comment: "Alert message for confirming a suspend threshold outside the recommended range"),
             primaryButton: .cancel(Text("Go Back")),
             secondaryButton: .default(
                 Text("Continue"),
@@ -105,7 +105,7 @@ struct SuspendThresholdEditor: View {
 }
 
 struct SuspendThresholdDescription: View {
-    let text = Text("When your glucose is below or predicted to go below this value, the app will recommend a basal rate of 0 U/h and will not recommend a bolus.", comment: "Suspend threshold description")
+    let text = Text("When your glucose is predicted to go below this value, the app will recommend a basal rate of 0 U/h and will not recommend a bolus.", comment: "Suspend threshold description")
 
     var body: some View {
         SettingDescription(text: text)
@@ -121,14 +121,10 @@ struct SuspendThresholdGuardrailWarning: View {
 
     private var title: Text {
         switch safetyClassificationThreshold {
-        case .minimum:
-            return Text("Lowest Suspend Threshold", comment: "Title text for the lowest suspend threshold warning")
-        case .belowRecommended:
+        case .minimum, .belowRecommended:
             return Text("Low Suspend Threshold", comment: "Title text for the low suspend threshold warning")
-        case .aboveRecommended:
+        case .aboveRecommended, .maximum:
             return Text("High Suspend Threshold", comment: "Title text for the high suspend threshold warning")
-        case .maximum:
-            return Text("Highest Suspend Threshold", comment: "Title text for the highest suspend threshold warning")
         }
     }
 }

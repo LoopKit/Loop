@@ -17,37 +17,13 @@ struct SuspendThresholdPicker: View {
     var unit: HKUnit
     @Binding var isEditing: Bool
 
-    private var formatter: NumberFormatter
-
-    init(value: Binding<HKQuantity>, unit: HKUnit, isEditing: Binding<Bool>) {
-        self._value = value
-        self.unit = unit
-        self._isEditing = isEditing
-        self.formatter = {
-            let quantityFormatter = QuantityFormatter()
-            quantityFormatter.setPreferredNumberFormatter(for: unit)
-            return quantityFormatter.numberFormatter
-        }()
-    }
-
     var body: some View {
         VStack {
             HStack {
                 Spacer()
-
-                if Guardrail.suspendThreshold.classification(for: value) != .withinRecommendedRange {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(accentColor)
-                        .transition(.springInScaleOut)
-                }
-
-                Text(formatter.string(from: value.doubleValue(for: unit)) ?? "\(value.doubleValue(for: unit))")
-                    .foregroundColor(accentColor)
-                    .animation(nil)
-
-                Text(unit.shortLocalizedUnitString())
-                    .foregroundColor(.gray)
+                GuardrailConstrainedQuantityView(value: value, unit: unit, guardrail: .suspendThreshold, isEditing: isEditing)
             }
+            .contentShape(Rectangle())
             .onTapGesture {
                 withAnimation {
                     self.isEditing.toggle()
@@ -61,27 +37,10 @@ struct SuspendThresholdPicker: View {
             }
         }
     }
-
-    private var accentColor: Color {
-        switch Guardrail.suspendThreshold.classification(for: value) {
-        case .withinRecommendedRange:
-            return isEditing ? .accentColor : .primary
-        case .outsideRecommendedRange(let threshold):
-            switch threshold {
-            case .minimum, .maximum:
-                return .severeWarning
-            case .belowRecommended, .aboveRecommended:
-                return .warning
-            }
-        }
-    }
 }
 
 fileprivate extension AnyTransition {
-    static let expandFromTop = move(edge: .top).combined(with: .opacity).combined(with: .scale(scale: 0, anchor: .top))
-
-    static let springInScaleOut = asymmetric(
-        insertion: AnyTransition.scale.animation(.spring(dampingFraction: 0.5)),
-        removal: AnyTransition.scale.combined(with: .opacity)
-    )
+    static let expandFromTop = move(edge: .top)
+        .combined(with: .opacity)
+        .combined(with: .scale(scale: 0, anchor: .top))
 }
