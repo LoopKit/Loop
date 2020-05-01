@@ -684,28 +684,28 @@ extension LoopDataManager {
     }
 
     func storeSettings() {
-        if let loopSettings = UserDefaults.appGroup?.loopSettings {
-            var settings = StoredSettings()
-
-            settings.dosingEnabled = loopSettings.dosingEnabled
-            settings.glucoseTargetRangeSchedule = loopSettings.glucoseTargetRangeSchedule
-            settings.preMealTargetRange = loopSettings.preMealTargetRange
-            settings.overridePresets = loopSettings.overridePresets
-            settings.scheduleOverride = loopSettings.scheduleOverride
-            settings.maximumBasalRatePerHour = loopSettings.maximumBasalRatePerHour
-            settings.maximumBolus = loopSettings.maximumBolus
-            settings.suspendThreshold = loopSettings.suspendThreshold
-            settings.glucoseUnit = loopSettings.glucoseUnit
-            settings.deviceToken = loopSettings.deviceToken
-            settings.bundleIdentifier = Bundle.main.bundleIdentifier
-
-            settings.insulinModel = UserDefaults.appGroup?.insulinModelSettings?.model
-            settings.basalRateSchedule = UserDefaults.appGroup?.basalRateSchedule
-            settings.insulinSensitivitySchedule = UserDefaults.appGroup?.insulinSensitivitySchedule
-            settings.carbRatioSchedule = UserDefaults.appGroup?.carbRatioSchedule
-
-            self.settingsStore.storeSettings(settings) {}
+        guard let appGroup = UserDefaults.appGroup, let loopSettings = appGroup.loopSettings else {
+            return
         }
+
+        let settings = StoredSettings(date: Date(),
+                                      dosingEnabled: loopSettings.dosingEnabled,
+                                      glucoseTargetRangeSchedule: loopSettings.glucoseTargetRangeSchedule,
+                                      preMealTargetRange: loopSettings.preMealTargetRange,
+                                      workoutTargetRange: loopSettings.legacyWorkoutTargetRange,
+                                      overridePresets: loopSettings.overridePresets,
+                                      scheduleOverride: loopSettings.scheduleOverride,
+                                      preMealOverride: loopSettings.preMealOverride,
+                                      maximumBasalRatePerHour: loopSettings.maximumBasalRatePerHour,
+                                      maximumBolus: loopSettings.maximumBolus,
+                                      suspendThreshold: loopSettings.suspendThreshold,
+                                      deviceToken: loopSettings.deviceToken?.hexadecimalString,
+                                      insulinModel: StoredSettings.InsulinModel(appGroup.insulinModelSettings),
+                                      basalRateSchedule: appGroup.basalRateSchedule,
+                                      insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
+                                      carbRatioSchedule: appGroup.carbRatioSchedule,
+                                      bloodGlucoseUnit: loopSettings.glucoseUnit)
+        self.settingsStore.storeSettings(settings) {}
     }
 
     // Actions
@@ -1653,5 +1653,36 @@ private extension TemporaryScheduleOverride {
             return false
         }
         return abs(basalRateMultiplier - 1.0) >= .ulpOfOne
+    }
+}
+
+private extension StoredSettings.InsulinModel {
+    init?(_ insulinModelSettings: InsulinModelSettings?) {
+        guard let insulinModelSettings = insulinModelSettings else {
+            return nil
+        }
+        
+        var modelType: StoredSettings.InsulinModel.ModelType
+        var actionDuration: TimeInterval
+        var peakActivity: TimeInterval?
+        
+        switch insulinModelSettings {
+        case .exponentialPreset(let preset):
+            switch preset {
+            case .humalogNovologAdult:
+                modelType = .rapidAdult
+            case .humalogNovologChild:
+                modelType = .rapidChild
+            case .fiasp:
+                modelType = .fiasp
+            }
+            actionDuration = preset.actionDuration
+            peakActivity = preset.peakActivity
+        case .walsh(let model):
+            modelType = .walsh
+            actionDuration = model.actionDuration
+        }
+        
+        self.init(modelType: modelType, actionDuration: actionDuration, peakActivity: peakActivity)
     }
 }

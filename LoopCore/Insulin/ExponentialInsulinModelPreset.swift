@@ -17,7 +17,7 @@ public enum ExponentialInsulinModelPreset: String {
 
 // MARK: - Model generation
 extension ExponentialInsulinModelPreset {
-    var actionDuration: TimeInterval {
+    public var actionDuration: TimeInterval {
         switch self {
         case .humalogNovologAdult:
             return .minutes(360)
@@ -28,7 +28,7 @@ extension ExponentialInsulinModelPreset {
         }
     }
 
-    var peakActivity: TimeInterval {
+    public var peakActivity: TimeInterval {
         switch self {
         case .humalogNovologAdult:
             return .minutes(75)
