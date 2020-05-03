@@ -70,6 +70,9 @@ class SpotCheckCell: LessonCellProviding {
         self.glucoseUnit = glucoseUnit
         self.dateFormatter = dateFormatter
         
+        print("Forecast.startTime = \(forecast.startTime)")
+        print("Eventual bg = \(forecast.predictedGlucose.last!.quantity) at \(forecast.predictedGlucose.last!.startDate)")
+        
         axisLabelSettings = ChartLabelSettings(
             font: .systemFont(ofSize: 14),  // caption1, but hard-coded until axis can scale with type preference
             fontColor: colors.axisLabel

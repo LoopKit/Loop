@@ -78,7 +78,8 @@ class NightscoutDataSource: LearnDataSource {
     func fetchTherapySettings() -> LearnTherapySettings? {
         let fetchGroup = DispatchGroup()
         var settings: LearnTherapySettings?
-
+        
+        fetchGroup.enter()
         api.fetchCurrentProfile { (profileFetchResult) in
             switch profileFetchResult {
             case .success(let profileSet):
@@ -123,10 +124,17 @@ class NightscoutDataSource: LearnDataSource {
         _ = fetchGroup.wait(timeout: .distantFuture)
 
         var treatments: [NightscoutTreatment] = []
-        let neededTreatmentsInterval = DateInterval(start: day.start.addingTimeInterval(-therapySettings.insulinModel.model.effectDuration),
+        var neededTreatmentsInterval = DateInterval(start: day.start.addingTimeInterval(-therapySettings.insulinModel.model.effectDuration),
                                                  end: day.end.addingTimeInterval(forecastDuration))
 
         fetchGroup.enter()
+        
+        // Issue report generated 2020-05-03 02:55:01 +0000
+        let cutoffDate = DateFormatter.descriptionFormatter.date(from: "2020-05-03 02:55:01 +0000")!
+        if neededTreatmentsInterval.end > cutoffDate {
+            neededTreatmentsInterval.end = cutoffDate
+        }
+        
         print("Fetching treatments for: \(neededTreatmentsInterval)")
         api.fetchTreatments(dateInterval: neededTreatmentsInterval, maxCount: 500) { (result) in
             switch result {
@@ -143,7 +151,7 @@ class NightscoutDataSource: LearnDataSource {
         
         let doses = treatments.compactMap { $0.dose }
         print("Found \(doses.count) doses")
-        let normalizedDoses = doses.reconciled().annotated(with: therapySettings.basalSchedule)
+        let normalizedDoses = doses.reversed().reconciled().annotated(with: therapySettings.basalSchedule)
         print("Normalized to \(normalizedDoses.count) doses")
         let insulinEffects = normalizedDoses.glucoseEffects(insulinModel: therapySettings.insulinModel.model, insulinSensitivity: therapySettings.sensitivity)
         
@@ -276,5 +284,15 @@ extension NightscoutTreatment {
         default:
             return nil
         }
+    }
+}
+
+
+extension DateFormatter {
+    static var descriptionFormatter: DateFormatter {
+        let formatter = self.init()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ssZZZZZ"
+
+        return formatter
     }
 }

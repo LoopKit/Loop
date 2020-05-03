@@ -69,9 +69,6 @@ class SpotCheckResidualsCell: LessonCellProviding {
         self.glucoseUnit = glucoseUnit
         self.dateFormatter = dateFormatter
         
-        print("Selected forecast: \(forecast)")
-        print("Actual glucose: \(forecast)")
-
         axisLabelSettings = ChartLabelSettings(
             font: .systemFont(ofSize: 14),  // caption1, but hard-coded until axis can scale with type preference
             fontColor: colors.axisLabel
@@ -115,6 +112,10 @@ class SpotCheckResidualsCell: LessonCellProviding {
             },
             addPaddingSegmentIfEdge: false
         )
+        
+        guard yAxisValues.count > 1 else {
+            return nil
+        }
 
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
 

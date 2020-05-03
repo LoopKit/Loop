@@ -28,7 +28,7 @@ class ForecastErrorSection: LessonSectionProviding {
         var allCells = [LessonCellProviding]()
         summaries.sorted(by: { $0.0 < $1.0 }).forEach { pair in
             if pair.value.forecasts.count > 0 {
-                let spotCheckForecast = pair.value.forecasts[pair.value.forecasts.count / 2]
+                let spotCheckForecast = pair.value.forecasts.last!
                 let cellsForDate: [LessonCellProviding] = [
                     SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecast: spotCheckForecast, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
                     SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecast: spotCheckForecast, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
@@ -209,9 +209,10 @@ private class ForecastErrorCalculator {
                 continue
             }
             
-            while glucose.startDate.timeIntervalSince(effects.glucose[momentumWindowStart].startDate) > momentumDataInterval {
+            while glucose.startDate.timeIntervalSince(effects.glucose[momentumWindowStart].startDate) >= momentumDataInterval {
                 momentumWindowStart += 1
             }
+            
             let momentumWindow = effects.glucose[momentumWindowStart...index]
             let glucoseMomentumEffect = momentumWindow.linearMomentumEffect(
                 duration: momentumDataInterval,
@@ -264,10 +265,15 @@ private class ForecastErrorCalculator {
                 }
             }
             
-            if residuals.count > 0 {
+            let cutoffDate = DateFormatter.descriptionFormatter.date(from: "2020-05-03 02:48:29 +0000")!
+            if glucose.startDate == cutoffDate {
+                print("here")
+            }
+
+            
+            if glucose.startDate <= cutoffDate {
                 forecasts.append(Forecast(startTime: glucose.startDate, predictedGlucose: forecast, targetGlucose: targetGlucose, residuals: residuals))
             }
-            
         }
         return forecasts
     }
