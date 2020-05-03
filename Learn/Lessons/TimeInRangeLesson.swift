@@ -15,13 +15,14 @@ import os.log
 
 
 final class TimeInRangeLesson: Lesson {
-    let title = NSLocalizedString("Time in Range", comment: "Lesson title")
+    
+    static let title = NSLocalizedString("Time in Range", comment: "Lesson title")
 
-    let subtitle = NSLocalizedString("Computes the percentage of glucose measurements within a specified range", comment: "Lesson subtitle")
+    static let subtitle = NSLocalizedString("Computes the percentage of glucose measurements within a specified range", comment: "Lesson subtitle")
 
     let configurationSections: [LessonSectionProviding]
 
-    private let dataManager: DataManager
+    private let dataSource: LearnDataSource
 
     private let glucoseUnit: HKUnit
 
@@ -31,9 +32,10 @@ final class TimeInRangeLesson: Lesson {
 
     private let rangeEntry: QuantityRangeEntry
 
-    init(dataManager: DataManager) {
-        self.dataManager = dataManager
-        self.glucoseUnit = dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+
+    init(dataSource: LearnDataSource, preferredGlucoseUnit: HKUnit) {
+        self.dataSource = dataSource
+        self.glucoseUnit = preferredGlucoseUnit
 
         glucoseFormatter.setPreferredNumberFormatter(for: glucoseUnit)
 
@@ -61,7 +63,7 @@ final class TimeInRangeLesson: Lesson {
             return
         }
 
-        let calculator = TimeInRangeCalculator(dataManager: dataManager, dates: dates, range: closedRange)
+        let calculator = TimeInRangeCalculator(dataSource: dataSource, dates: dates, range: closedRange)
 
         calculator.execute { result in
             switch result {
@@ -158,8 +160,8 @@ private class TimeInRangeCalculator {
 
     private let unit = HKUnit.milligramsPerDeciliter
 
-    init(dataManager: DataManager, dates: DateInterval, range: ClosedRange<HKQuantity>) {
-        self.calculator = DayCalculator(dataManager: dataManager, dates: dates, initial: [:])
+    init(dataSource: LearnDataSource, dates: DateInterval, range: ClosedRange<HKQuantity>) {
+        self.calculator = DayCalculator(dataSource: dataSource, dates: dates, initial: [:])
         self.range = range
 
         log = OSLog(category: String(describing: type(of: self)))
@@ -168,10 +170,10 @@ private class TimeInRangeCalculator {
     func execute(completion: @escaping (_ result: Result<[DateInterval: Double]>) -> Void) {
         os_log(.default, log: log, "Computing Time in range from %{public}@ between %{public}@", String(describing: calculator.dates), String(describing: range))
 
-        calculator.execute(calculator: { (dataManager, day, results, completion) in
+        calculator.execute(calculator: { (dataSource, day, results, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
 
-            dataManager.glucoseStore.getGlucoseSamples(start: day.start, end: day.end) { (result) in
+            dataSource.getGlucoseSamples(start: day.start, end: day.end) { (result) in
                 switch result {
                 case .failure(let error):
                     os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))

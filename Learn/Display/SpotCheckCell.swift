@@ -17,9 +17,9 @@ class SpotCheckCell: LessonCellProviding {
 
     let date: DateInterval
     let actualGlucose: [GlucoseValue]
-    let forecasts: [Forecast]
+    let forecast: Forecast
     let glucoseUnit: HKUnit
-    let dateFormatter: DateIntervalFormatter
+    let dateFormatter: DateFormatter
     
     private let colors: ChartColorPalette
     
@@ -59,12 +59,12 @@ class SpotCheckCell: LessonCellProviding {
     private var glucoseChartCache: ChartPointsTouchHighlightLayerViewCache?
     
     private var chart: Chart?
+    
 
-
-    init(date: DateInterval, actualGlucose: [GlucoseValue], forecasts: [Forecast], colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
+    init(date: DateInterval, actualGlucose: [GlucoseValue], forecast: Forecast, colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateFormatter) {
         self.date = date
         self.actualGlucose = actualGlucose
-        self.forecasts = forecasts
+        self.forecast = forecast
         self.colors = colors
         self.chartSettings = settings
         self.glucoseUnit = glucoseUnit
@@ -131,9 +131,7 @@ class SpotCheckCell: LessonCellProviding {
 
         var prediction: ChartLayer?
         
-        let selectedForecast = forecasts[forecasts.count / 5]
-        
-        let predictedGlucosePoints = glucosePointsFromValues(selectedForecast.predictedGlucose)
+        let predictedGlucosePoints = glucosePointsFromValues(forecast.predictedGlucose)
 
         if predictedGlucosePoints.count > 1 {
             let lineColor = colors.glucoseTint
@@ -220,7 +218,7 @@ class SpotCheckCell: LessonCellProviding {
             return self?.generateChart(withFrame: frame)?.view
         }
 
-        cell.titleLabel?.text = dateFormatter.string(from: date)
+        cell.titleLabel?.text = dateFormatter.string(from: forecast.startTime)
         cell.subtitleLabel?.text = "Forecast Spot Check"
 
         return cell

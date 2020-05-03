@@ -65,22 +65,34 @@ final class DataManager {
         
         dataSourceManager.localLoopDataSource = self
     }
+}
+
+struct LocalLoopTherapySettings: LearnTherapySettings {
+    var momentumDataInterval: TimeInterval
     
-    // TODO: Placeholder until values being fetched from nightscout
-    var therapySettings: LearnTherapySettings {
-        return LearnTherapySettings(
-            momentumDataInterval: glucoseStore.momentumDataInterval,
-            insulinModel: insulinModelSettings!,
-            basalSchedule: basalRateSchedule!,
-            sensitivity: insulinSensitivitySchedule!,
-            carbRatios: carbRatioSchedule!,
-            absorptionTimeOverrun: carbStore.absorptionTimeOverrun,
-            defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
-            carbAbsortionModel: carbStore.carbAbsorptionModel,
-            carbEffectDelay: carbStore.delay,
-            retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval
-        )
-    }
+    var insulinModel: InsulinModelSettings
+    
+    var basalSchedule: BasalRateSchedule
+    
+    var sensitivity: InsulinSensitivitySchedule
+    
+    var carbRatios: CarbRatioSchedule
+    
+    var absorptionTimeOverrun: Double
+    
+    var defaultAbsorptionTime: TimeInterval
+    
+    var carbAbsortionModel: CarbAbsorptionModel
+    
+    var carbEffectDelay: TimeInterval
+    
+    var retrospectiveCorrectionGroupingInterval: TimeInterval
+    
+    var retrospectiveCorrection: RetrospectiveCorrection
+    
+    var delta: TimeInterval
+    
+    var inputDataRecencyInterval: TimeInterval
 }
 
 
@@ -117,6 +129,7 @@ extension DataManager {
 // MARK: - DataSource
 
 extension DataManager: LearnDataSource {
+    
     var category: String {
         return "Local"
     }
@@ -129,10 +142,42 @@ extension DataManager: LearnDataSource {
         return "Health"
     }
     
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, delta: TimeInterval) -> Result<GlucoseEffects> {
+    func fetchTherapySettings() -> LearnTherapySettings? {
+        let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
+        let retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: retrospectiveCorrectionEffectDuration)
+
+        return LocalLoopTherapySettings(
+            momentumDataInterval: glucoseStore.momentumDataInterval,
+            insulinModel: insulinModelSettings!,
+            basalSchedule: basalRateSchedule!,
+            sensitivity: insulinSensitivitySchedule!,
+            carbRatios: carbRatioSchedule!,
+            absorptionTimeOverrun: carbStore.absorptionTimeOverrun,
+            defaultAbsorptionTime: carbStore.defaultAbsorptionTimes.medium,
+            carbAbsortionModel: carbStore.carbAbsorptionModel,
+            carbEffectDelay: carbStore.delay,
+            retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval,
+            retrospectiveCorrection: retrospectiveCorrection,
+            delta: carbStore.delta,
+            inputDataRecencyInterval: settings.inputDataRecencyInterval
+        )
+    }
+    
+    func getGlucoseSamples(start: Date, end: Date?, completion: @escaping (Result<[StoredGlucoseSample]>) -> Void) {
+        self.glucoseStore.getGlucoseSamples(start: start, end: end) { (result) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let samples):
+                completion(.success(samples))
+            }
+        }
+    }
+
+    func fetchEffects(for day: DateInterval, using therapySettings: LearnTherapySettings) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 
-        let retrospectiveStart = day.start.addingTimeInterval(-retrospectiveCorrection.retrospectionInterval)
+        let retrospectiveStart = day.start.addingTimeInterval(-therapySettings.retrospectiveCorrection.retrospectionInterval)
 
         var insulinEffects: [GlucoseEffect]?
         var insulinFetchError: Error?
@@ -213,6 +258,11 @@ extension DataManager: LearnDataSource {
 
 }
 
+extension DataManager: PreferredUnitProvider {
+    var glucoseUnit: HKUnit {
+        return glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+    }
+}
 
 
 // MARK: - HealthKit Setup

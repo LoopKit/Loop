@@ -7,14 +7,14 @@
 
 import Foundation
 import UIKit
-
+import HealthKit
 
 protocol Lesson {
-    init(dataManager: DataManager)
+    init(dataSource: LearnDataSource, preferredGlucoseUnit: HKUnit)
 
-    var title: String { get }
+    static var title: String { get }
 
-    var subtitle: String { get }
+    static var subtitle: String { get }
 
     var configurationSections: [LessonSectionProviding] { get }
 

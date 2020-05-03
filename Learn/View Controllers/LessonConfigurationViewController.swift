@@ -33,7 +33,7 @@ class LessonConfigurationViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = lesson.title
+        title = type(of: lesson).title
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableView.automaticDimension
 

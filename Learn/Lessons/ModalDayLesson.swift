@@ -12,21 +12,21 @@ import LoopKit
 import os.log
 
 final class ModalDayLesson: Lesson {
-    let title = NSLocalizedString("Modal Day", comment: "Lesson title")
+    static let title = NSLocalizedString("Modal Day", comment: "Lesson title")
 
-    let subtitle = NSLocalizedString("Visualizes the most frequent glucose values by time of day", comment: "Lesson subtitle")
+    static let subtitle = NSLocalizedString("Visualizes the most frequent glucose values by time of day", comment: "Lesson subtitle")
 
     let configurationSections: [LessonSectionProviding]
 
-    private let dataManager: DataManager
+    private let dataSource: LearnDataSource
 
     private let dateIntervalEntry: DateIntervalEntry
 
     private let glucoseUnit: HKUnit
 
-    init(dataManager: DataManager) {
-        self.dataManager = dataManager
-        self.glucoseUnit = dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+    init(dataSource: LearnDataSource, preferredGlucoseUnit: HKUnit) {
+        self.dataSource = dataSource
+        self.glucoseUnit = preferredGlucoseUnit
 
         dateIntervalEntry = DateIntervalEntry(
             end: Date(),
@@ -47,7 +47,7 @@ final class ModalDayLesson: Lesson {
 
         let calendar = Calendar.current
 
-        let calculator = ModalDayCalculator(dataManager: dataManager, dates: dates, bucketSize: .minutes(60), unit: glucoseUnit, calendar: calendar)
+        let calculator = ModalDayCalculator(dataSource: dataSource, dates: dates, bucketSize: .minutes(60), unit: glucoseUnit, calendar: calendar)
         calculator.execute { (result) in
             switch result {
             case .failure(let error):
@@ -170,8 +170,8 @@ fileprivate class ModalDayCalculator {
     let calendar: Calendar
     private let log: OSLog
 
-    init(dataManager: DataManager, dates: DateInterval, bucketSize: TimeInterval, unit: HKUnit, calendar: Calendar) {
-        self.calculator = DayCalculator(dataManager: dataManager, dates: dates, initial: ModalDayBuilder(calendar: calendar, bucketSize: bucketSize, unit: unit))
+    init(dataSource: LearnDataSource, dates: DateInterval, bucketSize: TimeInterval, unit: HKUnit, calendar: Calendar) {
+        self.calculator = DayCalculator(dataSource: dataSource, dates: dates, initial: ModalDayBuilder(calendar: calendar, bucketSize: bucketSize, unit: unit))
         self.bucketSize = bucketSize
         self.calendar = calendar
 
@@ -181,10 +181,10 @@ fileprivate class ModalDayCalculator {
     func execute(completion: @escaping (_ result: Result<[ModalDayBucket]>) -> Void) {
         os_log(.default, log: log, "Computing Modal day in %{public}@", String(describing: calculator.dates))
 
-        calculator.execute(calculator: { (dataManager, day, mutableResult, completion) in
+        calculator.execute(calculator: { (dataSource, day, mutableResult, completion) in
             os_log(.default, log: self.log, "Fetching samples in %{public}@", String(describing: day))
 
-            dataManager.glucoseStore.getGlucoseSamples(start: day.start, end: day.end, completion: { (result) in
+            dataSource.getGlucoseSamples(start: day.start, end: day.end, completion: { (result) in
                 switch result {
                 case .failure(let error):
                     os_log(.error, log: self.log, "Failed to fetch samples: %{public}@", String(describing: error))

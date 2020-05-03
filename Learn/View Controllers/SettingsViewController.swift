@@ -14,7 +14,6 @@ import LoopKit
 class SettingsViewController: UITableViewController {
     
     var dataSourceManager: DataSourceManager!
-    var dataManager: DataManager!
     
     // MARK: - Table view data source
     enum Section: Int, CaseIterable {
@@ -92,9 +91,7 @@ class SettingsViewController: UITableViewController {
                 let vc = AuthenticationViewController(authentication: service)
                 vc.authenticationObserver = { [weak self] (service) in
                     if let url = service.siteURL, let host = url.host, let api = service.uploader, let secret = service.APISecret, let self = self {
-                        // TODO: fetch settings from NS
-                        let therapySettings = self.dataManager.therapySettings
-                        let source = NightscoutDataSource(title: host, identifier: host, api: api, therapySettings: therapySettings)
+                        let source = NightscoutDataSource(title: host, identifier: host, api: api)
                         let keychain = KeychainManager()
                         keychain.storeNightscoutCredentials(identifier: host, url: url, secret: secret)
                         self.dataSourceManager.addNightscoutDataSource(source)

@@ -24,7 +24,7 @@ class LessonResultsViewController: UITableViewController, IdentifiableClass {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = lesson.title
+        title = type(of: lesson).title
 
         for section in results {
             for cell in section.cells {

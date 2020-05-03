@@ -6,11 +6,17 @@
 //
 
 import UIKit
+import HealthKit
+
+protocol PreferredUnitProvider {
+    var glucoseUnit: HKUnit { get }
+}
 
 class LessonsViewController: UITableViewController {
     
-    var dataManager: DataManager!
-    
+    var dataSourceManager: DataSourceManager!
+    var preferredUnitProvider: PreferredUnitProvider!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -23,7 +29,7 @@ class LessonsViewController: UITableViewController {
     }
 
 
-    var lessons: [Lesson] = [] {
+    var lessons: [Lesson.Type] = [] {
         didSet {
             if isViewLoaded {
                 tableView.reloadData()
@@ -39,10 +45,10 @@ class LessonsViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Lesson", for: indexPath)
-        let lesson = lessons[indexPath.row]
-
-        cell.textLabel?.text = lesson.title
-        cell.detailTextLabel?.text = lesson.subtitle
+        
+        let lessonType = lessons[indexPath.row]
+        cell.textLabel?.text = lessonType.title
+        cell.detailTextLabel?.text = lessonType.subtitle
 
         return cell
     }
@@ -55,13 +61,14 @@ class LessonsViewController: UITableViewController {
         switch targetViewController {
         case let vc as LessonConfigurationViewController:
             if let cell = sender as? UITableViewCell,
-                let indexPath = tableView.indexPath(for: cell)
+                let indexPath = tableView.indexPath(for: cell),
+                let dataSource = dataSourceManager.selectedDataSource
             {
-                vc.lesson = lessons[indexPath.row]
+                let lessonType = lessons[indexPath.row]
+                vc.lesson = lessonType.init(dataSource: dataSource, preferredGlucoseUnit: preferredUnitProvider.glucoseUnit)
             }
         case let vc as SettingsViewController:
-            vc.dataSourceManager = dataManager.dataSourceManager
-            vc.dataManager = dataManager
+            vc.dataSourceManager = dataSourceManager
         default:
             break
         }

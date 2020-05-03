@@ -130,14 +130,13 @@ final class NightscoutDataManager {
             bundleIdentifier: Bundle.main.bundleIdentifier)
 
         let profile = ProfileSet.Profile(
-            timezone: basalRateSchedule.timeZone,
+            timeZone: basalRateSchedule.timeZone,
             dia: insulinModelSettings.model.effectDuration,
             sensitivity: insulinSensitivitySchedule.items.scheduleItems(),
             carbratio: carbRatioSchedule.items.scheduleItems(),
             basal: basalRateSchedule.items.scheduleItems(),
             targetLow: targetLowItems,
-            targetHigh: targetHighItems,
-            units: correctionSchedule.unit.shortLocalizedUnitString())
+            targetHigh: targetHighItems)
 
         let store: [String: ProfileSet.Profile] = [
             "Default": profile

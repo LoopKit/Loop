@@ -15,19 +15,25 @@ import HealthKit
 import os.log
 
 
+enum ForecastErrorLessonError: Error {
+    case missingProfile
+}
+
+
 class ForecastErrorSection: LessonSectionProviding {
 
     let cells: [LessonCellProviding]
 
-    init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter, delta: TimeInterval) {
+    init(summaries: [DateInterval: ForecastSummary], glucoseUnit: HKUnit, dateIntervalFormatter: DateIntervalFormatter, dateFormatter: DateFormatter, delta: TimeInterval) {
         var allCells = [LessonCellProviding]()
         summaries.sorted(by: { $0.0 < $1.0 }).forEach { pair in
             if pair.value.forecasts.count > 0 {
+                let spotCheckForecast = pair.value.forecasts[pair.value.forecasts.count / 2]
                 let cellsForDate: [LessonCellProviding] = [
-                    SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                    SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                    ResidualsCell(date: pair.key, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
-                    ForecastErrorCell(date: pair.key, forecasts: pair.value.forecasts, delta: delta, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    SpotCheckCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecast: spotCheckForecast, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    SpotCheckResidualsCell(date: pair.key, actualGlucose: pair.value.actualGlucose, forecast: spotCheckForecast, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateFormatter),
+                    ResidualsCell(date: pair.key, forecasts: pair.value.forecasts, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateIntervalFormatter),
+                    ForecastErrorCell(date: pair.key, forecasts: pair.value.forecasts, delta: delta, colors: .default, settings: .default, glucoseUnit: glucoseUnit, dateFormatter: dateIntervalFormatter),
                 ]
                 allCells.append(contentsOf: cellsForDate)
             }
@@ -38,23 +44,24 @@ class ForecastErrorSection: LessonSectionProviding {
 
 
 final class ForecastErrorLesson: Lesson {
-    let title = NSLocalizedString("Forecast Error", comment: "Lesson title")
+    
+    static let title = NSLocalizedString("Forecast Error", comment: "Lesson title")
 
-    let subtitle = NSLocalizedString("Visualizes Loop's forecast error", comment: "Lesson subtitle")
+    static let subtitle = NSLocalizedString("Visualizes Loop's forecast error", comment: "Lesson subtitle")
 
     let configurationSections: [LessonSectionProviding]
 
-    private let dataManager: DataManager
-    
     private let glucoseUnit: HKUnit
 
     private let glucoseFormatter = QuantityFormatter()
 
     private let dateIntervalEntry: DateIntervalEntry
+    
+    private let dataSource: LearnDataSource
 
-    init(dataManager: DataManager) {
-        self.dataManager = dataManager
-        self.glucoseUnit = dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+    init(dataSource: LearnDataSource, preferredGlucoseUnit: HKUnit) {
+        self.dataSource = dataSource
+        self.glucoseUnit = preferredGlucoseUnit
 
         glucoseFormatter.setPreferredNumberFormatter(for: glucoseUnit)
 
@@ -76,30 +83,14 @@ final class ForecastErrorLesson: Lesson {
             return
         }
         
-        guard
-            let basalRateSchedule = dataManager.basalRateSchedule,
-            let carbRatioSchedule = dataManager.carbRatioSchedule,
-            let insulinModelSettings = dataManager.insulinModelSettings,
-            let insulinSensitivitySchedule = dataManager.insulinSensitivitySchedule,
-            let dataSource = dataManager.dataSourceManager.selectedDataSource
-            else
-        {
-            completion([LessonSection(headerTitle: "Error: Loop not fully configured", footerTitle: nil, cells: [])])
+        guard let therapySettings = dataSource.fetchTherapySettings() else {
+            completion([LessonSection(headerTitle: "Error: Could not get therapy settings from selected data source", footerTitle: nil, cells: [])])
             return
         }
-        
+                
         print("starting run for dates: \(dates)")
-        
-        
-        let calculator = ForecastErrorCalculator(
-            dataManager: dataManager,
-            dates: dates,
-            basalRateSchedule: basalRateSchedule,
-            carbRatioSchedule: carbRatioSchedule,
-            insulinModelSettings: insulinModelSettings,
-            insulinSensitivitySchedule: insulinSensitivitySchedule,
-            dataSource: dataSource,
-            settings: dataManager.settings)
+                
+        let calculator = ForecastErrorCalculator(dataSource: dataSource, therapySettings: therapySettings, dates: dates)
 
         calculator.execute { result in
             switch result {
@@ -115,7 +106,8 @@ final class ForecastErrorLesson: Lesson {
                     return
                 }
 
-                let dateFormatter = DateIntervalFormatter(dateStyle: .short, timeStyle: .none)
+                let dateIntervalFormatter = DateIntervalFormatter(dateStyle: .short, timeStyle: .none)
+                let dateFormatter = DateFormatter(dateStyle: .short, timeStyle: .short)
                 let numberFormatter = NumberFormatter()
                 numberFormatter.numberStyle = .percent
 
@@ -123,8 +115,9 @@ final class ForecastErrorLesson: Lesson {
                     ForecastErrorSection(
                         summaries: resultsByDay,
                         glucoseUnit: self.glucoseUnit,
+                        dateIntervalFormatter: dateIntervalFormatter,
                         dateFormatter: dateFormatter,
-                        delta: self.dataManager.carbStore.delta)
+                        delta: therapySettings.delta)
                 ])
             }
         }
@@ -152,38 +145,16 @@ struct ForecastSummary {
 /// Time-in-range, e.g. "2 weeks starting on March 5"
 private class ForecastErrorCalculator {
     let calculator: DayCalculator<[DateInterval: ForecastSummary]>
-    let dataManager: DataManager
-    let retrospectiveCorrection: RetrospectiveCorrection
-    let basalRateSchedule: BasalRateSchedule
-    let carbRatioSchedule: CarbRatioSchedule
-    let insulinModelSettings: InsulinModelSettings
-    let insulinSensitivitySchedule: InsulinSensitivitySchedule
-    let settings: LoopSettings
     let dataSource: LearnDataSource
+    let therapySettings: LearnTherapySettings
 
     private let log: OSLog
 
-    init(dataManager: DataManager,
-         dates: DateInterval,
-         basalRateSchedule: BasalRateSchedule,
-         carbRatioSchedule: CarbRatioSchedule,
-         insulinModelSettings: InsulinModelSettings,
-         insulinSensitivitySchedule: InsulinSensitivitySchedule,
-         dataSource: LearnDataSource,
-         settings: LoopSettings
-    ) {
-        self.dataManager = dataManager
-        self.calculator = DayCalculator(dataManager: dataManager, dates: dates, initial: [:])
-        self.basalRateSchedule = basalRateSchedule
-        self.carbRatioSchedule = carbRatioSchedule
-        self.insulinModelSettings = insulinModelSettings
-        self.insulinSensitivitySchedule = insulinSensitivitySchedule
+    init(dataSource: LearnDataSource, therapySettings: LearnTherapySettings, dates: DateInterval) {
         self.dataSource = dataSource
-        self.settings = settings
+        self.therapySettings = therapySettings
+        self.calculator = DayCalculator(dataSource: dataSource, dates: dates, initial: [:])
         
-        let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
-        retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: retrospectiveCorrectionEffectDuration)
-
         log = OSLog(category: String(describing: type(of: self)))
     }
 
@@ -193,10 +164,12 @@ private class ForecastErrorCalculator {
         calculator.execute(calculator: { (dataManager, day, results, completion) in
             os_log(.default, log: self.log, "Fetching source data for %{public}@", String(describing: day))
             
-        
-            let result = self.dataSource.fetchEffects(for: day,
-                                                  retrospectiveCorrection: self.retrospectiveCorrection,
-                                                  delta: dataManager.carbStore.delta)
+            guard let therapySettings = self.dataSource.fetchTherapySettings() else {
+                completion(ForecastErrorLessonError.missingProfile)
+                return
+            }
+            
+            let result = self.dataSource.fetchEffects(for: day, using: therapySettings)
 
             switch result {
             case .failure(let error):
@@ -208,8 +181,8 @@ private class ForecastErrorCalculator {
                         let forecasts = self.forecastError(date: day,
                                                            effects: effects,
                                                            targetGlucose: glucoseInterpolated,
-                                                           momentumDataInterval: dataManager.glucoseStore.momentumDataInterval,
-                                                           delta: dataManager.carbStore.delta)
+                                                           momentumDataInterval: therapySettings.momentumDataInterval,
+                                                           delta: therapySettings.delta)
                         results[day] = ForecastSummary(date: day, forecasts: forecasts, actualGlucose: effects.glucose)
                     }
                 })
@@ -250,18 +223,18 @@ private class ForecastErrorCalculator {
             }
             
             // Calculate retrospective correction
-            let retrospectiveGlucoseEffect = retrospectiveCorrection.computeEffect(
+            let retrospectiveGlucoseEffect = therapySettings.retrospectiveCorrection.computeEffect(
                 startingAt: glucose,
                 retrospectiveGlucoseDiscrepanciesSummed: pastRetrospectiveGlucoseDiscrepanciesSummed,
-                recencyInterval: settings.inputDataRecencyInterval,
-                insulinSensitivitySchedule: insulinSensitivitySchedule,
-                basalRateSchedule: basalRateSchedule,
-                glucoseCorrectionRangeSchedule: settings.glucoseTargetRangeSchedule,
-                retrospectiveCorrectionGroupingInterval: settings.retrospectiveCorrectionGroupingInterval
+                recencyInterval: therapySettings.inputDataRecencyInterval,
+                insulinSensitivitySchedule: therapySettings.sensitivity,
+                basalRateSchedule: therapySettings.basalSchedule,
+                glucoseCorrectionRangeSchedule: nil, // Not actually used
+                retrospectiveCorrectionGroupingInterval: therapySettings.retrospectiveCorrectionGroupingInterval
             )
             
             let forecastStart = glucose.startDate.dateCeiledToTimeInterval(delta)
-            let forecastEnd = forecastStart + insulinModelSettings.model.effectDuration
+            let forecastEnd = forecastStart + therapySettings.insulinModel.model.effectDuration
             
             var effectsUsed: [[GlucoseEffect]] = [
                 effects.carbEffects,

@@ -11,6 +11,7 @@ import NightscoutUploadKit
 import LoopKit
 import LoopUI
 import LoopCore
+import HealthKit
 
 class NightscoutDataSource: LearnDataSource {
 
@@ -24,23 +25,18 @@ class NightscoutDataSource: LearnDataSource {
     
     var identifier: String
     
-    var therapySettings: LearnTherapySettings
-    
     var api: NightscoutUploader
 
     init?(rawState: RawStateValue) {
         guard
             let title = rawState["title"] as? String,
-            let identifier = rawState["identifier"] as? String,
-            let settingsRaw = rawState["settings"] as? LearnTherapySettings.RawValue,
-            let settings = LearnTherapySettings(rawValue: settingsRaw)
+            let identifier = rawState["identifier"] as? String
         else {
             return nil
         }
         
         self.title = title
         self.identifier = identifier
-        self.therapySettings = settings
         
         let keychain = KeychainManager()
         
@@ -55,18 +51,52 @@ class NightscoutDataSource: LearnDataSource {
         return [
             "title": title,
             "identifier": identifier,
-            "settings": therapySettings.rawValue
         ]
     }
     
-    init(title: String, identifier: String, api: NightscoutUploader, therapySettings: LearnTherapySettings) {
+    init(title: String, identifier: String, api: NightscoutUploader) {
         self.title = title
         self.identifier = identifier
-        self.therapySettings = therapySettings
         self.api = api
     }
     
-    func fetchEffects(for day: DateInterval, retrospectiveCorrection: RetrospectiveCorrection, delta: TimeInterval) -> Result<GlucoseEffects> {
+    func getGlucoseSamples(start: Date, end: Date?, completion: @escaping (Result<[StoredGlucoseSample]>) -> Void) {
+        // 2 weeks of 5m glucose is 4032 samples
+        api.fetchGlucose(dateInterval: DateInterval(start: start, end: end ?? Date()), maxCount: 6000) { (result) in
+            switch result {
+            case .failure(let error):
+                print("Error fetching glucose: \(error)")
+                completion(.failure(error))
+            case .success(let samples):
+                print("Fetched \(samples.count) glucose samples")
+                let glucose = samples.compactMap { $0.asStoredGlucoseSample }.sorted { $0.startDate <= $1.startDate }
+                completion(.success(glucose))
+            }
+        }
+    }
+    
+    func fetchTherapySettings() -> LearnTherapySettings? {
+        let fetchGroup = DispatchGroup()
+        var settings: LearnTherapySettings?
+
+        api.fetchCurrentProfile { (profileFetchResult) in
+            switch profileFetchResult {
+            case .success(let profileSet):
+                if let profile = profileSet.store[profileSet.defaultProfile] {
+                    settings = NightscoutTherapySettings(profile: profile)
+                }
+            default:
+                break
+            }
+            fetchGroup.leave()
+        }
+        
+        _ = fetchGroup.wait(timeout: .distantFuture)
+        
+        return settings
+    }
+
+    func fetchEffects(for day: DateInterval, using therapySettings: LearnTherapySettings) -> Result<GlucoseEffects> {
 
         let fetchGroup = DispatchGroup()
         
@@ -143,11 +173,11 @@ class NightscoutDataSource: LearnDataSource {
             defaultAbsorptionTime: therapySettings.defaultAbsorptionTime,
             absorptionModel: carbModelSettings.absorptionModel,
             delay: therapySettings.carbEffectDelay,
-            delta: delta
+            delta: therapySettings.delta
         )
 
         // Get timeline of glucose discrepancies
-        let retrospectiveGlucoseDiscrepancies: [GlucoseEffect] = counteractionEffects.subtracting(carbEffects, withUniformInterval: delta)
+        let retrospectiveGlucoseDiscrepancies: [GlucoseEffect] = counteractionEffects.subtracting(carbEffects, withUniformInterval: therapySettings.delta)
 
         let retrospectiveCorrectionGroupingIntervalMultiplier = 1.01
         
@@ -156,6 +186,69 @@ class NightscoutDataSource: LearnDataSource {
         let glucoseEffects = GlucoseEffects(dateInterval: day, glucose: glucose, insulinEffects: insulinEffects, counteractionEffects: counteractionEffects, carbEffects: carbEffects, retrospectiveGlucoseDiscrepanciesSummed: retrospectiveGlucoseDiscrepanciesSummed)
         
         return .success(glucoseEffects)
+    }
+}
+
+struct NightscoutTherapySettings: LearnTherapySettings {
+    var momentumDataInterval: TimeInterval
+    
+    var insulinModel: InsulinModelSettings
+    
+    var basalSchedule: BasalRateSchedule
+    
+    var sensitivity: InsulinSensitivitySchedule
+    
+    var carbRatios: CarbRatioSchedule
+    
+    var absorptionTimeOverrun: Double
+    
+    var defaultAbsorptionTime: TimeInterval
+    
+    var carbAbsortionModel: CarbAbsorptionModel
+    
+    var carbEffectDelay: TimeInterval
+    
+    var retrospectiveCorrectionGroupingInterval: TimeInterval
+
+    var retrospectiveCorrection: RetrospectiveCorrection
+    
+    var delta: TimeInterval
+    
+    var inputDataRecencyInterval: TimeInterval
+    
+    init?(profile: ProfileSet.Profile) {
+        momentumDataInterval = TimeInterval(minutes: 15)
+        // TODO: Not currently provided in NS
+        insulinModel = InsulinModelSettings.exponentialPreset(.humalogNovologAdult)
+        
+        guard
+            let basalSchedule = BasalRateSchedule(dailyItems: profile.basal.compactMap { RepeatingScheduleValue<Double>(startTime: $0.offset, value: $0.value) }, timeZone: profile.timeZone),
+            let sensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.milligramsPerDeciliter, dailyItems: profile.sensitivity.compactMap { RepeatingScheduleValue<Double>(startTime: $0.offset, value: $0.value) }, timeZone: profile.timeZone),
+            let carbRatioSchedule = CarbRatioSchedule(unit: HKUnit.gram(), dailyItems: profile.carbratio.compactMap { RepeatingScheduleValue<Double>(startTime: $0.offset, value: $0.value) }, timeZone: profile.timeZone)
+        else {
+            return nil
+        }
+        
+        self.basalSchedule = basalSchedule
+        self.sensitivity = sensitivitySchedule
+        self.carbRatios = carbRatioSchedule
+        
+        // TODO: Not currently provided in NS; using Loop default
+        self.absorptionTimeOverrun = 1.5
+        // TODO: Not currently provided in NS; using Loop default
+        self.defaultAbsorptionTime = TimeInterval(hours: 3)
+        // TODO: Not currently provided in NS; using Loop default
+        self.carbAbsortionModel = CarbAbsorptionModel.nonlinear
+        // TODO: Not currently provided in NS; using Loop default
+        self.carbEffectDelay = TimeInterval(minutes: 10)
+        // TODO: Not currently provided in NS; using Loop default
+        self.retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
+        let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
+        self.retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: retrospectiveCorrectionEffectDuration)
+        
+        self.delta = TimeInterval(minutes: 5)
+        // TODO: Not currently provided in NS; using Loop default
+        self.inputDataRecencyInterval = TimeInterval(minutes: 15)
     }
 }
 
@@ -184,5 +277,4 @@ extension NightscoutTreatment {
             return nil
         }
     }
-
 }

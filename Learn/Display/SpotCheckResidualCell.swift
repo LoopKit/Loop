@@ -16,9 +16,9 @@ class SpotCheckResidualsCell: LessonCellProviding {
 
     let date: DateInterval
     let actualGlucose: [GlucoseValue]
-    let forecasts: [Forecast]
+    let forecast: Forecast
     let glucoseUnit: HKUnit
-    let dateFormatter: DateIntervalFormatter
+    let dateFormatter: DateFormatter
     
     private let colors: ChartColorPalette
     
@@ -60,15 +60,18 @@ class SpotCheckResidualsCell: LessonCellProviding {
     private var chart: Chart?
 
 
-    init(date: DateInterval, actualGlucose: [GlucoseValue], forecasts: [Forecast], colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateIntervalFormatter) {
+    init(date: DateInterval, actualGlucose: [GlucoseValue], forecast: Forecast, colors: ChartColorPalette, settings: ChartSettings, glucoseUnit: HKUnit, dateFormatter: DateFormatter) {
         self.date = date
         self.actualGlucose = actualGlucose
-        self.forecasts = forecasts
+        self.forecast = forecast
         self.colors = colors
         self.chartSettings = settings
         self.glucoseUnit = glucoseUnit
         self.dateFormatter = dateFormatter
         
+        print("Selected forecast: \(forecast)")
+        print("Actual glucose: \(forecast)")
+
         axisLabelSettings = ChartLabelSettings(
             font: .systemFont(ofSize: 14),  // caption1, but hard-coded until axis can scale with type preference
             fontColor: colors.axisLabel
@@ -101,9 +104,7 @@ class SpotCheckResidualsCell: LessonCellProviding {
             return nil
         }
         
-        let selectedForecast = forecasts[forecasts.count / 5]
-
-        let chartPoints = pointsFromResiduals(selectedForecast.residuals)
+        let chartPoints = pointsFromResiduals(forecast.residuals)
         
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(chartPoints,
             minSegmentCount: 2,
@@ -201,7 +202,7 @@ class SpotCheckResidualsCell: LessonCellProviding {
             return self?.generateChart(withFrame: frame)?.view
         }
 
-        cell.titleLabel?.text = dateFormatter.string(from: date)
+        cell.titleLabel?.text = dateFormatter.string(from: forecast.startTime)
         cell.subtitleLabel?.text = "Residuals Spot Check"
 
         return cell

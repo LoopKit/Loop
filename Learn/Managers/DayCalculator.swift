@@ -10,14 +10,14 @@ import LoopCore
 import LoopKit
 
 class DayCalculator<ResultType> {
-    typealias Calculator = (_ dataManager: DataManager, _ day: DateInterval, _ results: Locked<ResultType>, _ completion: @escaping (_ error: Error?) -> Void) -> Void
+    typealias Calculator = (_ dataSource: LearnDataSource, _ day: DateInterval, _ results: Locked<ResultType>, _ completion: @escaping (_ error: Error?) -> Void) -> Void
 
-    let dataManager: DataManager
+    let dataSource: LearnDataSource
     let dates: DateInterval
     private var lockedResults: Locked<ResultType>
 
-    init(dataManager: DataManager, dates: DateInterval, initial: ResultType) {
-        self.dataManager = dataManager
+    init(dataSource: LearnDataSource, dates: DateInterval, initial: ResultType) {
+        self.dataSource = dataSource
         self.dates = dates
         self.lockedResults = Locked(initial)
     }
@@ -43,7 +43,7 @@ class DayCalculator<ResultType> {
             }
 
             group.enter()
-            calculator(dataManager, interval, lockedResults) { error in
+            calculator(dataSource, interval, lockedResults) { error in
                 if let error = error {
                     anyError = error
                 }
