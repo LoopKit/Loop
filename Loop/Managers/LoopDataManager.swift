@@ -308,7 +308,7 @@ final class LoopDataManager {
         NotificationManager.clearLoopNotRunningNotifications()
         NotificationManager.scheduleLoopNotRunningNotifications()
         analyticsServicesManager.loopDidSucceed(duration)
-        storeDosingDecision()
+        storeDosingDecision(withDate: date)
         NotificationCenter.default.post(name: .LoopCompleted, object: self)
 
     }
@@ -653,32 +653,35 @@ extension LoopDataManager {
         }
     }
 
-    func storeDosingDecision(withError error: Error? = nil) {
-        getLoopState { manager, state in
-            var dosingDecision = StoredDosingDecision()
+    func storeDosingDecision(withDate date: Date = Date(), withError error: Error? = nil) {
+        getLoopState { (_, state) in
+            self.doseStore.insulinOnBoard(at: date) { result in
+                self.dataAccessQueue.async {
+                    var insulinOnBoardError: Error?
+                    var insulinOnBoard: InsulinValue?
 
-            dosingDecision.carbsOnBoard = state.carbsOnBoard
-            dosingDecision.predictedGlucose = state.predictedGlucose
-            dosingDecision.predictedGlucoseIncludingPendingInsulin = state.predictedGlucoseIncludingPendingInsulin
-            if let (recommendation: recommendation, date: date) = state.recommendedTempBasal {
-                dosingDecision.tempBasalRecommendationDate = TempBasalRecommendationDate(recommendation: recommendation, date: date)
-            }
-            dosingDecision.recommendedBolus = state.recommendedBolus?.recommendation.amount
-            if let lastReservoirValue = manager.doseStore.lastReservoirValue {
-                dosingDecision.lastReservoirValue = LastReservoirValue(startDate: lastReservoirValue.startDate, unitVolume: lastReservoirValue.unitVolume)
-            }
-            dosingDecision.pumpManagerStatus = self.delegate?.pumpManagerStatus
-            dosingDecision.error = error ?? state.error
+                    switch result {
+                    case .failure(let error):
+                        insulinOnBoardError = error
+                    case .success(let insulinValue):
+                        insulinOnBoard = insulinValue
+                    }
 
-            manager.doseStore.insulinOnBoard(at: Date()) { result in
-                switch result {
-                case .success(let insulinOnBoard):
-                    dosingDecision.insulinOnBoard = insulinOnBoard
-                case .failure(let doseStoreError):
-                    dosingDecision.error = dosingDecision.error ?? doseStoreError
+                    let dosingDecision = StoredDosingDecision(date: date,
+                                                              insulinOnBoard: insulinOnBoard,
+                                                              carbsOnBoard: state.carbsOnBoard,
+                                                              scheduleOverride: self.settings.scheduleOverride,
+                                                              glucoseTargetRangeSchedule: self.settings.glucoseTargetRangeSchedule,
+                                                              glucoseTargetRangeScheduleApplyingOverrideIfActive: self.settings.glucoseTargetRangeScheduleApplyingOverrideIfActive,
+                                                              predictedGlucose: state.predictedGlucose,
+                                                              predictedGlucoseIncludingPendingInsulin: state.predictedGlucoseIncludingPendingInsulin,
+                                                              lastReservoirValue: StoredDosingDecision.LastReservoirValue(self.doseStore.lastReservoirValue),
+                                                              recommendedTempBasal: StoredDosingDecision.TempBasalRecommendationWithDate(state.recommendedTempBasal),
+                                                              recommendedBolus: StoredDosingDecision.BolusRecommendationWithDate(state.recommendedBolus),
+                                                              pumpManagerStatus: self.delegate?.pumpManagerStatus,
+                                                              errors: [error, state.error, insulinOnBoardError].compactMap { $0 })
+                    self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
                 }
-
-                self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
             }
         }
     }
@@ -1653,6 +1656,33 @@ private extension TemporaryScheduleOverride {
             return false
         }
         return abs(basalRateMultiplier - 1.0) >= .ulpOfOne
+    }
+}
+
+private extension StoredDosingDecision.LastReservoirValue {
+    init?(_ reservoirValue: ReservoirValue?) {
+        guard let reservoirValue = reservoirValue else {
+            return nil
+        }
+        self.init(startDate: reservoirValue.startDate, unitVolume: reservoirValue.unitVolume)
+    }
+}
+
+private extension StoredDosingDecision.TempBasalRecommendationWithDate {
+    init?(_ tempBasalRecommendationDate: (recommendation: TempBasalRecommendation, date: Date)?) {
+        guard let tempBasalRecommendationDate = tempBasalRecommendationDate else {
+            return nil
+        }
+        self.init(recommendation: tempBasalRecommendationDate.recommendation, date: tempBasalRecommendationDate.date)
+    }
+}
+
+private extension StoredDosingDecision.BolusRecommendationWithDate {
+    init?(_ bolusRecommendationDate: (recommendation: BolusRecommendation, date: Date)?) {
+        guard let bolusRecommendationDate = bolusRecommendationDate else {
+            return nil
+        }
+        self.init(recommendation: bolusRecommendationDate.recommendation, date: bolusRecommendationDate.date)
     }
 }
 
