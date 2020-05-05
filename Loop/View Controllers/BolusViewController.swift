@@ -147,6 +147,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             case .logging:
                  title = NSLocalizedString("Log Dose", comment: "Title text for logging a dose")
                 isLoggingDose = true
+                navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
             }
         }
     }
