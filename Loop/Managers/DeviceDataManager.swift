@@ -74,6 +74,18 @@ final class DeviceDataManager {
     var remoteDataServicesManager: RemoteDataServicesManager { return servicesManager.remoteDataServicesManager }
 
     private(set) var pumpManagerHUDProvider: HUDProvider?
+    
+    var maximumBasalRatePerHour: Double? {
+        set {
+            loopManager.settings.maximumBasalRatePerHour = newValue
+            if let rate = newValue {
+                pumpManager?.setMaximumTempBasalRate(rate)
+            }
+        }
+        get {
+            return loopManager.settings.maximumBasalRatePerHour
+        }
+    }
 
     // MARK: - WatchKit
 

@@ -824,7 +824,7 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
 
 extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerDelegate {
     func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBasalRatePerHour(_ vc: DeliveryLimitSettingsTableViewController) {
-        dataManager.loopManager.settings.maximumBasalRatePerHour = vc.maximumBasalRatePerHour
+        dataManager.maximumBasalRatePerHour = vc.maximumBasalRatePerHour
 
         tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
     }
