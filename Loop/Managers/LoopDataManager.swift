@@ -89,7 +89,7 @@ final class LoopDataManager {
             lastPumpEventsReconciliation: lastPumpEventsReconciliation
         )
 
-        dosingDecisionStore = DosingDecisionStore(storeCache: UserDefaults.appGroup!)
+        dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: .hours(24))
 
         glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: .hours(24))
 
