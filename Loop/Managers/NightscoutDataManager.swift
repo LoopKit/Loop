@@ -404,6 +404,15 @@ final class NightscoutDataManager {
 
         self.lastDeviceStatusUpload = Date()
         uploader.uploadDeviceStatus(deviceStatus)
+
+        // Nightscout requires each battery status to be uploaded independently
+        if let cgmManager = deviceManager.cgmManager, let batteryLevel = cgmManager.batteryLevel {
+            let cgmStatus = UploaderStatus(name: cgmManager.device?.name ?? cgmManager.localizedTitle , timestamp: Date(), battery: batteryLevel)
+            let deviceStatus = DeviceStatus(device: "cgm://\(cgmStatus.name)", timestamp: Date(), pumpStatus: nil, uploaderStatus: uploaderStatus, loopStatus: nil, radioAdapter: nil, overrideStatus: nil)
+            uploader.uploadDeviceStatus(deviceStatus)
+
+        }
+
     }
 
     func uploadGlucose(_ values: [GlucoseValue], sensorState: SensorDisplayable?, fromDevice device: HKDevice?) {
