@@ -130,10 +130,10 @@ class NightscoutDataSource: LearnDataSource {
         fetchGroup.enter()
         
         // Issue report generated 2020-05-03 02:55:01 +0000
-        let cutoffDate = DateFormatter.descriptionFormatter.date(from: "2020-05-03 02:55:01 +0000")!
-        if neededTreatmentsInterval.end > cutoffDate {
-            neededTreatmentsInterval.end = cutoffDate
-        }
+//        let cutoffDate = DateFormatter.descriptionFormatter.date(from: "2020-05-03 02:55:01 +0000")!
+//        if neededTreatmentsInterval.end > cutoffDate {
+//            neededTreatmentsInterval.end = cutoffDate
+//        }
         
         print("Fetching treatments for: \(neededTreatmentsInterval)")
         api.fetchTreatments(dateInterval: neededTreatmentsInterval, maxCount: 500) { (result) in
