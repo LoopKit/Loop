@@ -48,13 +48,11 @@ final class WatchDataManager: NSObject {
             return
         }
 
-        switch updateContext {
-        case .glucose, .tempBasal:
-            sendWatchContextIfNeeded()
-        case .preferences:
+        // Any update context should trigger a watch update
+        sendWatchContextIfNeeded()
+
+        if case .preferences = updateContext {
             sendSettingsIfNeeded()
-        default:
-            break
         }
     }
 

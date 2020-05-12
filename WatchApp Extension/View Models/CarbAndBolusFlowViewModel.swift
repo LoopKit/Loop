@@ -32,6 +32,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     private let carbEntrySyncIdentifier = UUID().uuidString
     private var carbEntryUnderConsideration: NewCarbEntry?
     private var contextUpdateObservation: AnyObject?
+    private var hasSentConfirmationMessage = false
 
     // MARK: - Constants
     private static let defaultMaxBolus: Double = 10 // U
@@ -61,7 +62,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             object: loopManager,
             queue: nil
         ) { [weak self] _ in
-            guard let self = self else { return }
+            guard
+                let self = self,
+                !self.hasSentConfirmationMessage
+            else {
+                return
+            }
+            
             self.maxBolus = loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
             switch self.configuration {
             case .carbEntry:
@@ -180,13 +187,19 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) {
+        guard !hasSentConfirmationMessage else {
+            return
+        }
+
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), carbEntry: carbEntry)
         do {
-            try WCSession.default.sendBolusMessage(bolus) { (error) in
+            try WCSession.default.sendBolusMessage(bolus) { [weak self] (error) in
                 DispatchQueue.main.async {
                     if let error = error {
                         ExtensionDelegate.shared().present(error)
                     } else {
+                        self?.hasSentConfirmationMessage = true
+
                         let loopManager = ExtensionDelegate.shared().loopManager
                         if let carbEntry = bolus.carbEntry {
                             loopManager.addConfirmedCarbEntry(carbEntry)
