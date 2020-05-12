@@ -7,12 +7,14 @@
 //
 
 import Foundation
+import LoopKit
 import LoopTestingKit
 
 
 final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, DirectoryObserver {
     unowned let deviceManager: DeviceDataManager
-    let log: CategoryLogger
+
+    let log = DiagnosticLog(category: "LocalTestingScenariosManager")
 
     private let fileManager = FileManager.default
     private let scenariosSource: URL
@@ -34,14 +36,13 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
         self.deviceManager = deviceManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         self.scenariosSource = documentsDirectory.appendingPathComponent("scenarios")
-        self.log = DiagnosticLogger.shared.forCategory("TestingScenarioManager")
 
-        log.debug("Place testing scenarios in \(scenariosSource.path)")
+        log.debug("Place testing scenarios in %{public}@", scenariosSource.path)
         if !fileManager.fileExists(atPath: scenariosSource.path) {
             do {
                 try fileManager.createDirectory(at: scenariosSource, withIntermediateDirectories: false)
             } catch {
-                log.error(error)
+                log.error("%{public}@", String(describing: error))
             }
         }
 
@@ -65,7 +66,7 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
             delegate?.testingScenariosManager(self, didUpdateScenarioURLs: scenarioURLs)
             log.debug("Reloaded scenario URLs")
         } catch {
-            log.error(error)
+            log.error("%{public}@", String(describing: error))
         }
     }
 }

@@ -8,17 +8,21 @@
 
 import UIKit
 import Intents
+import LoopCore
 import LoopKit
 import UserNotifications
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    private lazy var log = DiagnosticLogger.shared.forCategory("AppDelegate")
+    private lazy var log = DiagnosticLog(category: "AppDelegate")
 
+    private lazy var pluginManager = PluginManager()
+
+    private var deviceDataManager: DeviceDataManager!
+    private var deviceAlertManager: DeviceAlertManager!
+    
     var window: UIWindow?
-
-    private var deviceManager: DeviceDataManager?
 
     private var rootViewController: RootNavigationController! {
         return window?.rootViewController as? RootNavigationController
@@ -46,7 +50,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private func finishLaunch() {
         log.default("Finishing launching")
         
-        deviceManager = DeviceDataManager()
+        deviceAlertManager = DeviceAlertManager(rootViewController: rootViewController)
+        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, deviceAlertManager: deviceAlertManager)
+
+        deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+        SharedLogging.instance = deviceDataManager.loggingServicesManager
         
         NotificationManager.authorize(delegate: self)
  
@@ -55,7 +64,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         mainStatusViewController.deviceManager = deviceManager
         
         rootViewController.pushViewController(mainStatusViewController, animated: false)
+
+        let notificationOption = launchOptions?[.remoteNotification]
         
+        if let notification = notificationOption as? [String: AnyObject] {
+            deviceManager?.handleRemoteNotification(notification)
+        
+        let notificationOption = launchOptions?[.remoteNotification]
+        
+        if let notification = notificationOption as? [String: AnyObject] {
+            deviceDataManager.handleRemoteNotification(notification)
+        }
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -70,12 +89,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         finishLaunch()
-
-        let notificationOption = launchOptions?[.remoteNotification]
-        
-        if let notification = notificationOption as? [String: AnyObject] {
-            deviceManager?.handleRemoteNotification(notification)
-        }
 
         return true
     }
@@ -93,7 +106,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceManager?.updatePumpManagerBLEHeartbeatPreference()
+        deviceDataManager.updatePumpManagerBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -107,7 +120,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         if #available(iOS 12.0, *) {
             if userActivity.activityType == NewCarbEntryIntent.className {
-                log.default("Restoring \(userActivity.activityType) intent")
+                log.default("Restoring %{public}@ intent", userActivity.activityType)
                 rootViewController.restoreUserActivityState(.forNewCarbEntry())
                 return true
             }
@@ -116,7 +129,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         switch userActivity.activityType {
         case NSUserActivity.newCarbEntryActivityType,
              NSUserActivity.viewLoopStatusActivityType:
-            log.default("Restoring \(userActivity.activityType) activity")
+            log.default("Restoring %{public}@ activity", userActivity.activityType)
             restorationHandler([rootViewController])
             return true
         default:
@@ -128,24 +141,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
-        log.default("RemoteNotifications device token: \(token)")
-        deviceManager?.loopManager.settings.deviceToken = deviceToken
+        log.default("RemoteNotifications device token: %{public}@", token)
+        deviceDataManager.loopManager.settings.deviceToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        log.error("Failed to register: \(error)")
+        log.error("Failed to register: %{public}@", String(describing: error))
     }
     
     func application(_ application: UIApplication,
                      didReceiveRemoteNotification userInfo: [AnyHashable : Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
-    ) {
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         guard let notification = userInfo as? [String: AnyObject] else {
             completionHandler(.failed)
             return
         }
       
-        deviceManager?.handleRemoteNotification(notification)
+        deviceDataManager.handleRemoteNotification(notification)
         completionHandler(.noData)
     }
     
@@ -156,7 +168,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             finishLaunch()
         }
     }
-
 }
 
 
@@ -164,26 +175,34 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         switch response.actionIdentifier {
         case NotificationManager.Action.retryBolus.rawValue:
-            if  let units = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.bolusAmount.rawValue] as? Double,
-                let startDate = response.notification.request.content.userInfo[NotificationManager.UserInfoKey.bolusStartDate.rawValue] as? Date,
+            if  let units = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusAmount.rawValue] as? Double,
+                let startDate = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
-                AnalyticsManager.shared.didRetryBolus()
+                deviceDataManager.analyticsServicesManager.didRetryBolus()
 
-                deviceManager?.enactBolus(units: units, at: startDate) { (_) in
+                deviceDataManager.enactBolus(units: units, at: startDate) { (_) in
                     completionHandler()
                 }
                 return
             }
+        case NotificationManager.Action.acknowledgeDeviceAlert.rawValue:
+            let userInfo = response.notification.request.content.userInfo
+            if let alertIdentifier = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? DeviceAlert.AlertIdentifier,
+                let managerIdentifier = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String {
+                deviceAlertManager.acknowledgeDeviceAlert(identifier:
+                    DeviceAlert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
+            }
         default:
             break
         }
-        
+
         completionHandler()
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.badge, .sound, .alert])
+        // UserNotifications are not to be displayed while in the foreground
+        completionHandler([])
     }
     
 }

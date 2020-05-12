@@ -30,7 +30,7 @@ protocol TestingScenariosManagerRequirements: TestingScenariosManager {
     var deviceManager: DeviceDataManager { get }
     var activeScenarioURL: URL? { get set }
     var activeScenario: TestingScenario? { get set }
-    var log: CategoryLogger { get }
+    var log: DiagnosticLog { get }
     func fetchScenario(from url: URL, completion: @escaping (Result<TestingScenario, Error>) -> Void)
 }
 
@@ -122,7 +122,7 @@ extension TestingScenariosManagerRequirements {
                 load(scenario) { error in
                     if error == nil {
                         self.activeScenarioURL = url
-                        self.log.debug(successLogMessage)
+                        self.log.debug("@{public}%", successLogMessage)
                     }
                     completion(error)
                 }
@@ -179,7 +179,7 @@ extension TestingScenariosManagerRequirements {
 
         func bail(with error: Error) {
             activeScenarioURL = nil
-            log.error(error)
+            log.error("%{public}@", String(describing: error))
             completion(error)
         }
 

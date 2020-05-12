@@ -14,11 +14,7 @@ struct NotificationManager {
 
     enum Action: String {
         case retryBolus
-    }
-
-    enum UserInfoKey: String {
-        case bolusAmount
-        case bolusStartDate
+        case acknowledgeDeviceAlert
     }
 
     private static var notificationCategories: Set<UNNotificationCategory> {
@@ -36,20 +32,43 @@ struct NotificationManager {
             intentIdentifiers: [],
             options: []
         ))
+        
+        let acknowledgeDeviceAlertAction = UNNotificationAction(
+            identifier: Action.acknowledgeDeviceAlert.rawValue,
+            title: NSLocalizedString("OK", comment: "The title of the notification action to acknowledge a device alert"),
+            options: .foreground
+        )
+        
+        categories.append(UNNotificationCategory(
+            identifier: LoopNotificationCategory.alert.rawValue,
+            actions: [acknowledgeDeviceAlertAction],
+            intentIdentifiers: [],
+            options: .customDismissAction
+        ))
 
         return Set(categories)
     }
 
     static func authorize(delegate: UNUserNotificationCenterDelegate) {
+        var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+            authOptions.insert(.criticalAlert)
+        }
+        
         let center = UNUserNotificationCenter.current()
-
         center.delegate = delegate
-        center.requestAuthorization(options: [.badge, .sound, .alert]) { (granted, error) in
-            guard granted else { return }
+        center.requestAuthorization(options: authOptions) { (granted, error) in
+            guard granted else {
+                return
+            }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                guard settings.authorizationStatus == .authorized else { return }
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
+                guard settings.authorizationStatus == .authorized else {
+                    return
+                }
+                if FeatureFlags.remoteOverridesEnabled {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
                 }
             }
         }
@@ -94,8 +113,8 @@ struct NotificationManager {
         }
 
         notification.userInfo = [
-            UserInfoKey.bolusAmount.rawValue: units,
-            UserInfoKey.bolusStartDate.rawValue: startDate
+            LoopNotificationUserInfoKey.bolusAmount.rawValue: units,
+            LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate
         ]
 
         let request = UNNotificationRequest(

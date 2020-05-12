@@ -85,12 +85,6 @@ final class ModalDayLesson: Lesson {
     }
 }
 
-
-fileprivate extension TextCell {
-
-}
-
-
 fileprivate struct ModalDayBucket {
     let time: Range<TimeComponents>
     let orderedValues: [Double]
@@ -164,8 +158,7 @@ fileprivate struct ModalDayBuilder {
 
 
 fileprivate class ModalDayCalculator {
-    typealias ResultType = ModalDayBuilder
-    let calculator: DayCalculator<ResultType>
+    let calculator: DayCalculator<ModalDayBuilder>
     let bucketSize: TimeInterval
     let calendar: Calendar
     private let log: OSLog

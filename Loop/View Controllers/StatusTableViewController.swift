@@ -141,7 +141,7 @@ final class StatusTableViewController: ChartsTableViewController {
 
         onscreen = true
 
-        AnalyticsManager.shared.didDisplayStatusScreen()
+        deviceManager.analyticsServicesManager.didDisplayStatusScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -353,10 +353,8 @@ final class StatusTableViewController: ChartsTableViewController {
             if currentContext.contains(.carbs) {
                 reloadGroup.enter()
                 manager.carbStore.getCarbsOnBoardValues(start: startDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? state.insulinCounteractionEffects : nil) { (values) in
-                    DispatchQueue.main.async {
-                        cobValues = values
-                        reloadGroup.leave()
-                    }
+                    cobValues = values
+                    reloadGroup.leave()
                 }
             }
 
@@ -366,57 +364,49 @@ final class StatusTableViewController: ChartsTableViewController {
         if currentContext.contains(.glucose) {
             reloadGroup.enter()
             self.deviceManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: startDate) { (values) -> Void in
-                DispatchQueue.main.async {
-                    glucoseValues = values
-                    reloadGroup.leave()
-                }
+                glucoseValues = values
+                reloadGroup.leave()
             }
         }
 
         if currentContext.contains(.insulin) {
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getInsulinOnBoardValues(start: startDate) { (result) -> Void in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure(let error):
-                        self.log.error("DoseStore failed to get insulin on board values: %{public}@", String(describing: error))
-                        retryContext.update(with: .insulin)
-                        iobValues = []
-                    case .success(let values):
-                        iobValues = values
-                    }
-                    reloadGroup.leave()
+                switch result {
+                case .failure(let error):
+                    self.log.error("DoseStore failed to get insulin on board values: %{public}@", String(describing: error))
+                    retryContext.update(with: .insulin)
+                    iobValues = []
+                case .success(let values):
+                    iobValues = values
                 }
+                reloadGroup.leave()
             }
 
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getNormalizedDoseEntries(start: startDate) { (result) -> Void in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure(let error):
-                        self.log.error("DoseStore failed to get normalized dose entries: %{public}@", String(describing: error))
-                        retryContext.update(with: .insulin)
-                        doseEntries = []
-                    case .success(let doses):
-                        doseEntries = doses
-                    }
-                    reloadGroup.leave()
+                switch result {
+                case .failure(let error):
+                    self.log.error("DoseStore failed to get normalized dose entries: %{public}@", String(describing: error))
+                    retryContext.update(with: .insulin)
+                    doseEntries = []
+                case .success(let doses):
+                    doseEntries = doses
                 }
+                reloadGroup.leave()
             }
 
             reloadGroup.enter()
             deviceManager.loopManager.doseStore.getTotalUnitsDelivered(since: Calendar.current.startOfDay(for: Date())) { (result) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .failure:
-                        retryContext.update(with: .insulin)
-                        totalDelivery = nil
-                    case .success(let total):
-                        totalDelivery = total.value
-                    }
-
-                    reloadGroup.leave()
+                switch result {
+                case .failure:
+                    retryContext.update(with: .insulin)
+                    totalDelivery = nil
+                case .success(let total):
+                    totalDelivery = total.value
                 }
+
+                reloadGroup.leave()
             }
         }
 
@@ -449,6 +439,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
             if currentContext.contains(.targets) {
                 self.statusCharts.targetGlucoseSchedule = self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule
+                self.statusCharts.preMealOverride = self.deviceManager.loopManager.settings.preMealOverride
                 self.statusCharts.scheduleOverride = self.deviceManager.loopManager.settings.scheduleOverride
             }
             if self.statusCharts.scheduleOverride?.hasFinished() == true {
@@ -629,6 +620,8 @@ final class StatusTableViewController: ChartsTableViewController {
 
         let hudIsVisible = self.shouldShowHUD
         let statusIsVisible = self.shouldShowStatus
+        
+        hudView?.glucoseHUD.isVisible = hudIsVisible
 
         tableView.beginUpdates()
 
@@ -833,22 +826,22 @@ final class StatusTableViewController: ChartsTableViewController {
                     case .preMeal, .legacyWorkout:
                         assertionFailure("Pre-meal and legacy workout modes should not produce status rows")
                     case .preset(let preset):
-                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active override preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
+                        cell.titleLabel.text = String(format: NSLocalizedString("%@ %@", comment: "The format for an active custom preset. (1: preset symbol)(2: preset name)"), preset.symbol, preset.name)
                     case .custom:
-                        cell.titleLabel.text = NSLocalizedString("Custom Override", comment: "The title of the cell indicating a generic temporary override is enabled")
+                        cell.titleLabel.text = NSLocalizedString("Custom Preset", comment: "The title of the cell indicating a generic custom preset is enabled")
                     }
 
                     if override.isActive() {
                         switch override.duration {
                         case .finite:
                             let endTimeText = DateFormatter.localizedString(from: override.activeInterval.end, dateStyle: .none, timeStyle: .short)
-                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a temporary override end date"), endTimeText)
+                            cell.subtitleLabel.text = String(format: NSLocalizedString("until %@", comment: "The format for the description of a custom preset end date"), endTimeText)
                         case .indefinite:
                             cell.subtitleLabel.text = nil
                         }
                     } else {
                         let startTimeText = DateFormatter.localizedString(from: override.startDate, dateStyle: .none, timeStyle: .short)
-                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a temporary override start date"), startTimeText)
+                        cell.subtitleLabel.text = String(format: NSLocalizedString("starting at %@", comment: "The format for the description of a custom preset start date"), startTimeText)
                     }
 
                     cell.accessoryView = nil
@@ -963,6 +956,10 @@ final class StatusTableViewController: ChartsTableViewController {
         case .hud, .status:
             return UITableView.automaticDimension
         }
+    }
+
+    private var glucoseChartCellHeight: CGFloat {
+        self.tableView(tableView, heightForRowAt: IndexPath(row: ChartRow.glucose.rawValue, section: Section.charts.rawValue))
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -1080,6 +1077,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.glucoseChartCellHeight = glucoseChartCellHeight
 
             if let activity = sender as? NSUserActivity {
                 vc.restoreUserActivityState(activity)
@@ -1091,7 +1089,8 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.configuration = .manualCorrection
-            AnalyticsManager.shared.didDisplayBolusScreen()
+            vc.glucoseChartCellHeight = glucoseChartCellHeight
+            deviceManager.analyticsServicesManager.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
                 vc.scheduledOverride = deviceManager.loopManager.settings.scheduleOverride
@@ -1125,7 +1124,7 @@ final class StatusTableViewController: ChartsTableViewController {
                 }
             }
 
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(carbEntry) { result in
+            deviceManager.loopManager.addCarbEntry(carbEntry) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
@@ -1269,23 +1268,13 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     @objc private func showLastError(_: Any) {
-        var error: Error? = nil
         // First, check whether we have a device error after the most recent completion date
         if let deviceError = deviceManager.lastError,
             deviceError.date > (hudView?.loopCompletionHUD.lastLoopCompleted ?? .distantPast)
         {
-            error = deviceError.error
+            self.present(UIAlertController(with: deviceError.error), animated: true)
         } else if let lastLoopError = lastLoopError {
-            error = lastLoopError
-        }
-
-        if error != nil {
-            let alertController = UIAlertController(with: error!)
-            let manualLoopAction = UIAlertAction(title: NSLocalizedString("Retry", comment: "The button text for attempting a manual loop"), style: .default, handler: { _ in
-                self.deviceManager.loopManager.loop()
-            })
-            alertController.addAction(manualLoopAction)
-            present(alertController, animated: true)
+            self.present(UIAlertController(with: lastLoopError), animated: true)
         }
     }
 

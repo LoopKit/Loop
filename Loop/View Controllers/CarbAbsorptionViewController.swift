@@ -159,7 +159,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 reloadGroup.enter()
                 manager.carbStore.getGlucoseEffects(start: chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
-                    case .success(let (_, effects)):
+                    case .success((_, let effects)):
                         carbEffects = effects
                     case .failure(let error):
                         carbEffects = []
@@ -379,7 +379,6 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
 
-            cell.isUploading = !status.entry.isUploaded && (deviceManager.loopManager.carbStore.syncDelegate != nil)
             return cell
         }
     }
@@ -529,7 +528,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
                 }
             }
 
-            deviceManager.loopManager.addCarbEntryAndRecommendBolus(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
+            deviceManager.loopManager.addCarbEntry(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:

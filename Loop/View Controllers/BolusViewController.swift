@@ -24,9 +24,10 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case chart = 0
         case carbEntry
         case notice
-        case recommended
-        case entry
+        case bolus
     }
+
+    var glucoseChartCellHeight: CGFloat?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -156,6 +157,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 bolusRecommendation?.amount != oldValue?.amount,
                 bolusAmountTextField.text?.isEmpty == false
             {
+                bolusAmountGauge.cancelActiveTouches()
                 bolusAmountTextField.text?.removeAll()
 
                 let alert = UIAlertController(
@@ -169,6 +171,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
                 present(alert, animated: true)
             }
+
+            updateEnteredBolusFraction()
         }
     }
 
@@ -241,6 +245,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                 predictedGlucoseIncludingPendingInsulin = []
             }
 
+            self.bolusAmountOfLastPrediction = enteredBolus?.programmedUnits ?? 0
             self.glucoseChart.setPredictedGlucoseValues(predictedGlucoseIncludingPendingInsulin)
 
             if let lastPoint = self.glucoseChart.predictedGlucosePoints.last?.y {
@@ -259,7 +264,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             }
 
             let maximumBolus = manager.settings.maximumBolus
-            let bolusRecommendation = try? state.recommendBolus(forPrediction: predictedGlucoseIncludingPendingInsulin)
+            let bolusRecommendation = try? state.recommendBolus(consideringPotentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry)
 
             DispatchQueue.main.async {
                 if let maxBolus = maximumBolus {
@@ -268,6 +273,19 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
                 self.bolusRecommendation = bolusRecommendation
                 self.computedInitialBolusRecommendation = true
+
+                if let override = manager.settings.scheduleOverride, override.isActive() {
+                    self.overrideBadgeView.isHidden = false
+                    switch override.context {
+                    case .preset(let preset):
+                        self.overrideBadgeView.emoji = preset.symbol
+                    default:
+                        // Show the blue dot without a symbol
+                        self.overrideBadgeView.emoji = " "
+                    }
+                } else {
+                    self.overrideBadgeView.isHidden = true
+                }
             }
 
             reloadGroup.leave()
@@ -275,6 +293,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
         reloadGroup.notify(queue: .main) {
             self.updateDeliverButtonState()
+            self.updateRecommendedAmountLabelColor()
             self.redrawChart()
         }
     }
@@ -336,8 +355,12 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     // MARK: - IBOutlets
 
-    @IBOutlet weak var recommendedBolusAmountLabel: UILabel? {
+    @IBOutlet weak var recommendedBolusAmountLabel: UILabel! {
         didSet {
+            if #available(iOS 13, *) {
+                recommendedBolusAmountLabel?.font = UIFont(style: .title1, design: .rounded, traits: .traitBold)
+            }
+
             let amount = bolusRecommendation?.amount ?? 0
             recommendedBolusAmountLabel?.text = bolusUnitsFormatter.string(from: amount)
         }
@@ -349,10 +372,26 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         }
     }
 
+    @IBOutlet private weak var bolusAmountGauge: SegmentedGaugeBarView! {
+        didSet {
+            if #available(iOS 13.0, *) {
+                bolusAmountGauge.backgroundColor = .systemGray6
+            } else {
+                bolusAmountGauge.backgroundColor = .white
+            }
+            bolusAmountGauge.delegate = self
+            bolusAmountGauge.displaysThumb = true
+        }
+    }
+
+    @IBOutlet weak var overrideBadgeView: OverrideBadgeView!
+
     // MARK: - TableView Delegate
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch Row(rawValue: indexPath.row)! {
+        case .chart:
+            return glucoseChartCellHeight ?? super.tableView(tableView, heightForRowAt: indexPath)
         case .carbEntry where potentialCarbEntry == nil:
             return 0
         case .notice where bolusRecommendation?.notice == nil:
@@ -366,8 +405,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         switch Row(rawValue: indexPath.row)! {
         case .carbEntry where potentialCarbEntry != nil:
             navigationController?.popViewController(animated: true)
-        case .recommended:
-            acceptRecommendedBolus()
+        case .bolus:
+            bolusAmountTextField.becomeFirstResponder()
         default:
             break
         }
@@ -418,7 +457,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
             cell.selectionStyle = .none
 
             cell.addGestureRecognizer(charts.gestureRecognizer!)
-        case .recommended:
+        case .bolus:
             cell.accessibilityCustomActions = [
                 UIAccessibilityCustomAction(name: NSLocalizedString("AcceptRecommendedBolus", comment: "Action to copy the recommended Bolus value to the actual Bolus Field"), target: self, selector: #selector(BolusViewController.acceptRecommendedBolus))
             ]
@@ -437,27 +476,61 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         }
     }
 
-    @objc func acceptRecommendedBolus() {
+    @IBAction private func acceptRecommendedBolus() {
         bolusAmountTextField?.text = recommendedBolusAmountLabel?.text
         bolusAmountTextField?.resignFirstResponder()
-
+        updateEnteredBolusFraction()
+        updateRecommendedAmountLabelColor()
         updateDeliverButtonState()
-        predictionRecomputation?.cancel()
         recomputePrediction()
     }
     
     @IBOutlet weak var bolusAmountTextField: UITextField! {
         didSet {
+            if #available(iOS 13.0, *) {
+                let font = UIFont(style: .title1, design: .monospaced)
+                bolusAmountTextField.attributedPlaceholder = NSAttributedString(string: "0.0", attributes: [.font: font])
+                bolusAmountTextField.font = font
+            }
+
             bolusAmountTextField.addTarget(self, action: #selector(bolusAmountChanged), for: .editingChanged)
         }
     }
 
-    private var enteredBolusAmount: Double? {
-        guard let text = bolusAmountTextField?.text, let amount = bolusUnitsFormatter.number(from: text)?.doubleValue else {
-            return nil
-        }
+    // Enforce a minimum bolus delta for prediction recomputation.
+    private lazy var minimumBolusDeltaForRecomputation: Double = {
+        let minimumBolusIncrement = deviceManager.pumpManager?.minimumBolusIncrement ?? 0.05
+        // Use a slightly smaller value to account for floating point precision.
+        return minimumBolusIncrement * 0.999
+    }()
 
-        return amount >= 0 ? amount : nil
+    private var bolusAmountOfLastPrediction = 0.0
+
+    private var enteredBolusAmount: Double? {
+        get {
+            guard let text = bolusAmountTextField?.text, let amount = bolusUnitsFormatter.number(from: text)?.doubleValue else {
+                return nil
+            }
+
+            return amount >= 0 ? amount : nil
+        }
+        set {
+            let newValue = newValue ?? 0
+            let roundedVolume = deviceManager.pumpManager?.roundToNearestBolusVolume(units: newValue) ?? newValue
+
+            defer {
+                updateDeliverButtonState()
+                updateRecommendedAmountLabelColor()
+                recomputePrediction()
+            }
+
+            guard roundedVolume > 0 else {
+                bolusAmountTextField?.text?.removeAll()
+                return
+            }
+
+            bolusAmountTextField?.text = bolusUnitsFormatter.string(from: roundedVolume)
+        }
     }
 
     private var enteredBolus: DoseEntry? {
@@ -472,31 +545,90 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     @objc private func bolusAmountChanged() {
         updateDeliverButtonState()
-
-        predictionRecomputation?.cancel()
-        let predictionRecomputation = DispatchWorkItem(block: recomputePrediction)
-        self.predictionRecomputation = predictionRecomputation
-        let recomputeDelayMS = 300
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(recomputeDelayMS), execute: predictionRecomputation)
+        updateRecommendedAmountLabelColor()
+        recomputePrediction(after: .milliseconds(300), then: { [weak self] in
+            self?.updateEnteredBolusFraction()
+        })
     }
 
-    private func recomputePrediction() {
-        deviceManager.loopManager.getLoopState { [weak self] manager, state in
-            guard let self = self else { return }
-            let enteredBolus = DispatchQueue.main.sync { self.enteredBolus }
-            if let prediction = try? state.predictGlucose(using: .all, potentialBolus: enteredBolus, potentialCarbEntry: self.potentialCarbEntry, replacingCarbEntry: self.originalCarbEntry, includingPendingInsulin: true) {
-                self.glucoseChart.setPredictedGlucoseValues(prediction)
+    private func recomputePrediction(
+        after delay: DispatchTimeInterval = .seconds(0),
+        then completion: (() -> Void)? = nil
+    ) {
+        func updatePrediction() {
+            let enteredBolus = self.enteredBolus
+            self.bolusAmountOfLastPrediction = enteredBolus?.programmedUnits ?? 0
+            deviceManager.loopManager.getLoopState { [weak self] manager, state in
+                guard let self = self else { return }
 
-                if let lastPoint = self.glucoseChart.predictedGlucosePoints.last?.y {
-                    self.eventualGlucoseDescription = String(describing: lastPoint)
-                } else {
-                    self.eventualGlucoseDescription = nil
-                }
+                if let prediction = try? state.predictGlucose(
+                    using: .all,
+                    potentialBolus: enteredBolus,
+                    potentialCarbEntry: self.potentialCarbEntry,
+                    replacingCarbEntry: self.originalCarbEntry,
+                    includingPendingInsulin: true
+                ) {
+                    self.glucoseChart.setPredictedGlucoseValues(prediction)
 
-                DispatchQueue.main.async {
-                    self.redrawChart()
+                    if let lastPoint = self.glucoseChart.predictedGlucosePoints.last?.y {
+                        self.eventualGlucoseDescription = String(describing: lastPoint)
+                    } else {
+                        self.eventualGlucoseDescription = nil
+                    }
+
+                    DispatchQueue.main.async {
+                        self.redrawChart()
+                    }
                 }
             }
+        }
+
+        predictionRecomputation?.cancel()
+        let predictionRecomputation = DispatchWorkItem {
+            updatePrediction()
+            completion?()
+        }
+        self.predictionRecomputation = predictionRecomputation
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: predictionRecomputation)
+    }
+
+    private func updateEnteredBolusFraction() {
+        let recommendedAmount = bolusRecommendation?.amount ?? 0
+        let enteredAmount = enteredBolusAmount ?? 0
+
+        UIView.animate(withDuration: 0.3, animations: {
+            if recommendedAmount > 0 {
+                self.bolusAmountGauge.progress = enteredAmount / recommendedAmount
+            } else {
+                self.bolusAmountGauge.progress = 0
+            }
+        })
+
+        let canInteractViaGauge = recommendedAmount > 0 && enteredAmount <= recommendedAmount
+        bolusAmountGauge.isUserInteractionEnabled = canInteractViaGauge
+        let alpha: CGFloat = canInteractViaGauge ? 1 : 0.4
+        if alpha != bolusAmountGauge.alpha {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.bolusAmountGauge.alpha = alpha
+            })
+        }
+    }
+
+    private func updateRecommendedAmountLabelColor() {
+        let defaultColor: UIColor
+        if #available(iOS 13.0, *) {
+            defaultColor = .label
+        } else {
+            defaultColor = .black
+        }
+
+        let recommendedAmount = bolusRecommendation?.amount ?? 0
+        let isRecommendedAmountEntered = enteredBolusAmount == bolusRecommendation?.amount
+        let textColor = recommendedAmount > 0 && isRecommendedAmountEntered ? .doseTintColor : defaultColor
+        if textColor != recommendedBolusAmountLabel.textColor {
+            UIView.transition(with: recommendedBolusAmountLabel, duration: 0.25, options: .transitionCrossDissolve, animations: {
+                self.recommendedBolusAmountLabel.textColor = textColor
+            })
         }
     }
 
@@ -576,10 +708,8 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
 
     private lazy var bolusUnitsFormatter: NumberFormatter = {
         let numberFormatter = NumberFormatter()
-
-        numberFormatter.maximumSignificantDigits = 3
-        numberFormatter.minimumFractionDigits = 1
-
+        numberFormatter.minimumFractionDigits = 2
+        numberFormatter.maximumFractionDigits = 2
         return numberFormatter
     }()
 
@@ -606,6 +736,21 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
     }
 }
 
+extension BolusViewController: SegmentedGaugeBarViewDelegate {
+    func segmentedGaugeBarView(_ view: SegmentedGaugeBarView, didUpdateProgressFrom oldValue: Double, to newValue: Double) {
+        guard
+            let recommendedAmount = bolusRecommendation?.amount,
+            case let newAmount = newValue * recommendedAmount,
+            abs(newAmount - bolusAmountOfLastPrediction) >= minimumBolusDeltaForRecomputation
+        else {
+            return
+        }
+
+        enteredBolusAmount = newAmount
+        updateRecommendedAmountLabelColor()
+    }
+}
+
 extension BolusViewController {
     static func instance() -> BolusViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -625,5 +770,28 @@ extension UIColor {
         } else {
             return UIColor(red: 50 / 255, green: 148 / 255, blue: 255 / 255, alpha: 1.0)
         }
+    }
+}
+
+fileprivate extension PumpManager {
+    var minimumBolusIncrement: Double {
+        supportedBolusVolumes.filter({ $0 > 0 }).min()!
+    }
+
+    // `roundToSupportedBolusVolume(units:)` truncates to a supported dose volume; this function rounds to the nearest.
+    func roundToNearestBolusVolume(units: Double) -> Double {
+        guard let ceiledIndex = supportedBolusVolumes.firstIndex(where: { volume in volume >= units }) else {
+            return supportedBolusVolumes.last!
+        }
+
+        guard ceiledIndex != supportedBolusVolumes.startIndex else {
+            return supportedBolusVolumes.first!
+        }
+
+        let floored = supportedBolusVolumes[ceiledIndex - 1]
+        let ceiled = supportedBolusVolumes[ceiledIndex]
+        return abs(units - floored) <= abs(units - ceiled)
+            ? floored
+            : ceiled
     }
 }

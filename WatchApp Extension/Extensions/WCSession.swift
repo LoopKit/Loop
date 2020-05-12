@@ -26,21 +26,20 @@ enum WCSessionMessageResult<T> {
 private let log = OSLog(category: "WCSession Extension")
 
 extension WCSession {
-    func sendCarbEntryMessage(_ carbEntry: CarbEntryUserInfo, replyHandler: @escaping (WatchContext) -> Void, errorHandler: @escaping (Error) -> Void) throws {
+    func sendPotentialCarbEntryMessage(_ carbEntry: PotentialCarbEntryUserInfo, replyHandler: @escaping (WatchContext) -> Void, errorHandler: @escaping (Error) -> Void) throws {
         guard activationState == .activated else {
             throw MessageError.activation
         }
 
         guard isReachable else {
-            log.default("sendCarbEntryMessage: Phone is unreachable, sending as userInfo")
-            transferUserInfo(carbEntry.rawValue)
+            log.default("sendPotentialCarbEntryMessage: Phone is unreachable, taking no action")
             return
         }
 
         sendMessage(carbEntry.rawValue,
             replyHandler: { reply in
                 guard let context = WatchContext(rawValue: reply as WatchContext.RawValue) else {
-                    log.error("sendCarbEntryMessage: could not decode reply: %{public}@", reply)
+                    log.error("sendPotentialCarbEntryMessage: could not decode reply: %{public}@", reply)
                     errorHandler(MessageError.decoding)
                     return
                 }
@@ -48,7 +47,7 @@ extension WCSession {
                 replyHandler(context)
             },
             errorHandler: { error in
-                log.error("sendCarbEntryMessage: message send failed with error: %{public}@", String(describing: error))
+                log.error("sendPotentialCarbEntryMessage: message send failed with error: %{public}@", String(describing: error))
                 errorHandler(error)
             }
         )
@@ -124,5 +123,25 @@ extension WCSession {
                 completionHandler(.failure(.send(error)))
             }
         )
+    }
+    
+    func sendContextRequestMessage(_ userInfo: WatchContextRequestUserInfo, completionHandler: @escaping (Result<WatchContext>) -> Void) throws {
+        guard activationState == .activated else {
+            throw MessageError.activation
+        }
+
+        guard isReachable else {
+            throw MessageError.reachability
+        }
+
+        sendMessage(userInfo.rawValue, replyHandler: { (reply) in
+            if let context = WatchContext(rawValue: reply) {
+                completionHandler(.success(context))
+            } else {
+                completionHandler(.failure(MessageError.decoding))
+            }
+        }, errorHandler: { (error) in
+            completionHandler(.failure(error))
+        })
     }
 }

@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
     CLKTextProvider *firstItem = textProviders.firstObject;
 
-    for (NSInteger index = 1; index < textProviders.count; index++) {
+    for (NSUInteger index = 1; index < textProviders.count; index++) {
         CLKTextProvider *secondItem = [textProviders objectAtIndex: index];
         firstItem = [CLKTextProvider textProviderWithFormat:formatString, firstItem, secondItem];
     }
