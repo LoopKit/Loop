@@ -15,13 +15,12 @@ import LoopCore
 final class WatchDataManager: NSObject {
 
     private unowned let deviceManager: DeviceDataManager
-
+    
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
         self.sleepStore = SleepStore (healthStore: deviceManager.loopManager.glucoseStore.healthStore)
         self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
         self.bedtime = UserDefaults.appGroup?.bedtime
-        self.log = DiagnosticLogger.shared.forCategory("WatchDataManager")
 
         super.init()
 

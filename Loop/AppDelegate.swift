@@ -19,10 +19,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private lazy var pluginManager = PluginManager()
 
-    private var deviceDataManager: DeviceDataManager!
+    private var deviceDataManager: DeviceDataManager?
     private var deviceAlertManager: DeviceAlertManager!
     
     var window: UIWindow?
+    
+    var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 
     private var rootViewController: RootNavigationController! {
         return window?.rootViewController as? RootNavigationController
@@ -42,53 +44,48 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             let contents = try? Data(contentsOf: fileURL)
             return contents != nil
         } catch {
-            log.error(error)
+            log.error("Could not create after first unlock test file: %@", String(describing: error))
         }
         return false
     }
     
-    private func finishLaunch() {
+    private func finishLaunch(application: UIApplication) {
         log.default("Finishing launching")
         
         deviceAlertManager = DeviceAlertManager(rootViewController: rootViewController)
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, deviceAlertManager: deviceAlertManager)
 
-        deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+        deviceDataManager?.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
-        SharedLogging.instance = deviceDataManager.loggingServicesManager
+        SharedLogging.instance = deviceDataManager?.loggingServicesManager
         
         NotificationManager.authorize(delegate: self)
  
         let mainStatusViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         
-        mainStatusViewController.deviceManager = deviceManager
+        mainStatusViewController.deviceManager = deviceDataManager
         
         rootViewController.pushViewController(mainStatusViewController, animated: false)
 
         let notificationOption = launchOptions?[.remoteNotification]
         
         if let notification = notificationOption as? [String: AnyObject] {
-            deviceManager?.handleRemoteNotification(notification)
-        
-        let notificationOption = launchOptions?[.remoteNotification]
-        
-        if let notification = notificationOption as? [String: AnyObject] {
-            deviceDataManager.handleRemoteNotification(notification)
+            deviceDataManager?.handleRemoteNotification(notification)
         }
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        log.default("didFinishLaunchingWithOptions \(String(describing: launchOptions))")
+        self.launchOptions = launchOptions
         
-        AnalyticsManager.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
-
+        log.default("didFinishLaunchingWithOptions %{public}@", String(describing: launchOptions))
+        
         guard isAfterFirstUnlock else {
             log.default("Launching before first unlock; pausing launch...")
             return false
         }
 
-        finishLaunch()
+        finishLaunch(application: application)
 
         return true
     }
@@ -106,7 +103,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceDataManager.updatePumpManagerBLEHeartbeatPreference()
+        deviceDataManager?.updatePumpManagerBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
@@ -142,7 +139,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         log.default("RemoteNotifications device token: %{public}@", token)
-        deviceDataManager.loopManager.settings.deviceToken = deviceToken
+        deviceDataManager?.loopManager.settings.deviceToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -157,15 +154,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return
         }
       
-        deviceDataManager.handleRemoteNotification(notification)
+        deviceDataManager?.handleRemoteNotification(notification)
         completionHandler(.noData)
     }
     
     func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
         log.default("applicationProtectedDataDidBecomeAvailable")
         
-        if deviceManager == nil {
-            finishLaunch()
+        if deviceDataManager == nil {
+            finishLaunch(application: application)
         }
     }
 }
@@ -179,9 +176,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 let startDate = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
-                deviceDataManager.analyticsServicesManager.didRetryBolus()
+                deviceDataManager?.analyticsServicesManager.didRetryBolus()
 
-                deviceDataManager.enactBolus(units: units, at: startDate) { (_) in
+                deviceDataManager?.enactBolus(units: units, at: startDate) { (_) in
                     completionHandler()
                 }
                 return
