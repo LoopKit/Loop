@@ -445,17 +445,23 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(scheduleVC, sender: sender)
             case .insulinSensitivity:
-                let unit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
-                let allowedSensitivityValues = dataManager.loopManager.settings.allowedSensitivityValues(for: unit)
-                let scheduleVC = InsulinSensitivityScheduleViewController(allowedValues: allowedSensitivityValues, unit: unit)
+                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
 
-                scheduleVC.delegate = self
-                scheduleVC.insulinSensitivityScheduleStorageDelegate = self
-                scheduleVC.title = NSLocalizedString("Insulin Sensitivities", comment: "The title of the insulin sensitivities schedule screen")
+                let editor = InsulinSensitivityScheduleEditor(
+                    schedule: dataManager.loopManager.insulinSensitivitySchedule,
+                    glucoseUnit: glucoseUnit,
+                    onSave: { [dataManager] newSchedule in
+                        dataManager?.loopManager.insulinSensitivitySchedule = newSchedule
+                        dataManager?.analyticsServicesManager.didChangeInsulinSensitivitySchedule()
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
 
-                scheduleVC.schedule = dataManager.loopManager.insulinSensitivitySchedule
-
-                show(scheduleVC, sender: sender)
+                let hostingController = DismissibleHostingController(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
+                
+                present(hostingController, animated: true)
             case .glucoseTargetRange:
                 let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
                 let allowedCorrectionRangeValues = dataManager.loopManager.settings.allowedCorrectionRangeValues(for: unit)
@@ -785,15 +791,6 @@ extension SettingsTableViewController: GlucoseRangeScheduleStorageDelegate {
         dataManager.loopManager.settings.glucoseTargetRangeSchedule = viewController.schedule
         completion(.success)
         tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.glucoseTargetRange.rawValue, section: Section.configuration.rawValue)], with: .none)
-    }
-}
-
-extension SettingsTableViewController: InsulinSensitivityScheduleStorageDelegate {
-    func saveSchedule(_ schedule: InsulinSensitivitySchedule, for viewController: InsulinSensitivityScheduleViewController, completion: @escaping (SaveInsulinSensitivityScheduleResult) -> Void) {
-        dataManager.loopManager.insulinSensitivitySchedule = schedule
-        dataManager.analyticsServicesManager.didChangeInsulinSensitivitySchedule()
-        completion(.success)
-        tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.insulinSensitivity.rawValue, section: Section.configuration.rawValue)], with: .none)
     }
 }
 

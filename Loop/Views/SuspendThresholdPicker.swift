@@ -18,10 +18,17 @@ struct SuspendThresholdPicker: View {
     @Binding var isEditing: Bool
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack {
                 Spacer()
-                GuardrailConstrainedQuantityView(value: value, unit: unit, guardrail: .suspendThreshold, isEditing: isEditing)
+                GuardrailConstrainedQuantityView(
+                    value: value,
+                    unit: unit,
+                    guardrail: .suspendThreshold,
+                    isEditing: isEditing,
+                    // Workaround for strange animation behavior on appearance
+                    forceDisableAnimations: true
+                )
             }
             .contentShape(Rectangle())
             .onTapGesture {
