@@ -3,11 +3,11 @@
 # You are on branch spike-autobolus
 This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
 
-Last updated on Apr 24, 2020
+Last updated on May 15, 2020
 
-Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/7a3abb0a56e6ff91b0d1754d1719393cc79c9cb5
+Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/7f7ea5303379ed1958e29a2dbb44b117173d9b62
 
-Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/dca33b9e4d725e02fc96bfd5d6a4df049b2a8347
+Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/7c434522bd43cca31f61ada41de053ad7cdb6798
 
 ![App Icon](/Loop/Assets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
 
