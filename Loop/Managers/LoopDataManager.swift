@@ -266,13 +266,7 @@ final class LoopDataManager {
     }
     private let lockedLastLoopCompleted: Locked<Date?>
 
-    fileprivate var lastLoopError: Error? {
-        didSet {
-            if lastLoopError != nil {
-                analyticsServicesManager.loopDidError()
-            }
-        }
-    }
+    fileprivate var lastLoopError: Error?
 
     /// A timeline of average velocity of glucose change counteracting predicted insulin effects
     fileprivate var insulinCounteractionEffects: [GlucoseEffectVelocity] = [] {
@@ -310,7 +304,13 @@ final class LoopDataManager {
         analyticsServicesManager.loopDidSucceed(duration)
         storeDosingDecision(withDate: date)
         NotificationCenter.default.post(name: .LoopCompleted, object: self)
+    }
 
+    private func loopDidError(date: Date, error: Error, duration: TimeInterval) {
+        logger.error("%{public}@", String(describing: error))
+        lastLoopError = error
+        analyticsServicesManager.loopDidError()
+        storeDosingDecision(withDate: date, withError: error)
     }
 }
 
@@ -736,10 +736,8 @@ extension LoopDataManager {
 
                 if self.settings.dosingEnabled {
                     self.setRecommendedTempBasal { (error) -> Void in
-                        self.lastLoopError = error
-
                         if let error = error {
-                            self.logger.error("%{public}@", String(describing: error))
+                            self.loopDidError(date: Date(), error: error, duration: -startDate.timeIntervalSinceNow)
                         } else {
                             self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
                         }
@@ -753,7 +751,7 @@ extension LoopDataManager {
                     self.loopDidComplete(date: Date(), duration: -startDate.timeIntervalSinceNow)
                 }
             } catch let error {
-                self.lastLoopError = error
+                self.loopDidError(date: Date(), error: error, duration: -startDate.timeIntervalSinceNow)
             }
 
             self.logger.default("Loop ended")

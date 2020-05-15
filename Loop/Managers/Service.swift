@@ -9,11 +9,7 @@
 import LoopKit
 import MockKit
 
-#if DEBUG
 let staticServices: [Service.Type] = [MockService.self]
-#else
-let staticServices: [Service.Type] = []
-#endif
 
 let staticServicesByIdentifier: [String: Service.Type] = staticServices.reduce(into: [:]) { (map, Type) in
     map[Type.serviceIdentifier] = Type
