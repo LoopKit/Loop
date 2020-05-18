@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Ajouter des glucides";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Ceci calcule le pourcentage des mesures de glycémie dans une plage spécifique";
+
 /* The short unit display string for decibles */
 "dB" = "dB";
 
@@ -18,6 +21,12 @@
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* Section title for glucose range */
+"Range" = "Plage";
+
+/* Title of config entry */
+"Start Date" = "Date de commencement";
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
