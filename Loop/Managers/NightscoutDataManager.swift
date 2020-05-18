@@ -407,8 +407,8 @@ final class NightscoutDataManager {
 
         // Nightscout requires each battery status to be uploaded independently
         if let cgmManager = deviceManager.cgmManager, let batteryLevel = cgmManager.batteryLevel {
-            let cgmStatus = UploaderStatus(name: cgmManager.device?.name ?? cgmManager.localizedTitle , timestamp: Date(), battery: batteryLevel)
-            let deviceStatus = DeviceStatus(device: "cgm://\(cgmStatus.name)", timestamp: Date(), pumpStatus: nil, uploaderStatus: uploaderStatus, loopStatus: nil, radioAdapter: nil, overrideStatus: nil)
+            let cgmStatus = UploaderStatus(name: cgmManager.device?.name ?? cgmManager.localizedTitle , timestamp: Date(), battery: Int(round(batteryLevel * 100)) )
+            let deviceStatus = DeviceStatus(device: "cgm://\(cgmStatus.name)", timestamp: Date(), pumpStatus: nil, uploaderStatus: cgmStatus, loopStatus: nil, radioAdapter: nil, overrideStatus: nil)
             uploader.uploadDeviceStatus(deviceStatus)
 
         }
