@@ -178,7 +178,7 @@ final class NightscoutDataManager {
             recommendedBolus = state.recommendedBolus?.recommendation.amount
 
             let carbsOnBoard = state.carbsOnBoard
-            let predictedGlucose = state.predictedGlucose
+            let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin
             let recommendedTempBasal = state.recommendedTempBasal
 
             manager.doseStore.insulinOnBoard(at: Date()) { (result) in
