@@ -66,6 +66,7 @@ final class SettingsTableViewController: UITableViewController {
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
+        case correctionRangeOverrides
         case suspendThreshold
         case basalRate
         case deliveryLimits
@@ -241,6 +242,14 @@ final class SettingsTableViewController: UITableViewController {
                     configCell.detailTextLabel?.text = String(format: NSLocalizedString("%1$@ – %2$@ %3$@", comment: "Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit)"), minTarget, maxTarget, unit.localizedShortUnitString)
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
+                }
+            case .correctionRangeOverrides:
+                // TODO: Copy not final.
+                configCell.textLabel?.text = NSLocalizedString("Correction Range Overrides", comment: "The title text for the correction range overrides")
+                if dataManager.loopManager.settings.preMealTargetRange == nil {
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
+                } else {
+                    // TODO: Show some text in the detail label.
                 }
             case .suspendThreshold:
                 configCell.textLabel?.text = NSLocalizedString("Suspend Threshold", comment: "The title text in settings")
@@ -464,29 +473,50 @@ final class SettingsTableViewController: UITableViewController {
                 present(hostingController, animated: true)
             case .glucoseTargetRange:
                 let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
-                let allowedCorrectionRangeValues = dataManager.loopManager.settings.allowedCorrectionRangeValues(for: unit)
-                let scheduleVC = GlucoseRangeScheduleTableViewController(allowedValues: allowedCorrectionRangeValues, unit: unit)
 
-                if FeatureFlags.sensitivityOverridesEnabled {
-                    scheduleVC.overrideContexts.remove(.legacyWorkout)
-                }
+                let editor = CorrectionRangeScheduleEditor(
+                    schedule: dataManager.loopManager.settings.glucoseTargetRangeSchedule,
+                    unit: unit,
+                    minValue: dataManager.loopManager.settings.suspendThreshold?.quantity,
+                    onSave: { [dataManager] newSchedule in
+                        dataManager?.loopManager.settings.glucoseTargetRangeSchedule = newSchedule
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
 
-                scheduleVC.delegate = self
-                scheduleVC.title = NSLocalizedString("Correction Range", comment: "The title of the glucose target range schedule screen")
+                let hostingController = DismissibleHostingController(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
 
-                if let schedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule {
-                    var overrides: [TemporaryScheduleOverride.Context: DoubleRange] = [:]
-                    overrides[.preMeal] = dataManager.loopManager.settings.preMealTargetRange.filter { !$0.isZero }
-                    overrides[.legacyWorkout] = dataManager.loopManager.settings.legacyWorkoutTargetRange.filter { !$0.isZero }
-                    scheduleVC.setSchedule(schedule, withOverrideRanges: overrides)
-                }
+                present(hostingController, animated: true)
+            case .correctionRangeOverrides:
+                let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
 
-                show(scheduleVC, sender: sender)
+                let editor = CorrectionRangeOverridesEditor(
+                    value: CorrectionRangeOverrides(
+                        preMeal: dataManager.loopManager.settings.preMealTargetRange,
+                        workout: dataManager.loopManager.settings.legacyWorkoutTargetRange,
+                        unit: unit
+                    ),
+                    unit: unit,
+                    minValue: dataManager.loopManager.settings.suspendThreshold?.quantity,
+                    onSave: { [dataManager] overrides in
+                        dataManager?.loopManager.settings.preMealTargetRange = overrides.preMeal?.doubleRange(for: unit)
+                        dataManager?.loopManager.settings.legacyWorkoutTargetRange = overrides.workout?.doubleRange(for: unit)
+                    }
+                )
+
+                let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
+
+                self.present(hostingController, animated: true)
             case .suspendThreshold:
                 func presentSuspendThresholdEditor(initialValue: HKQuantity?, unit: HKUnit) {
                     let editor = SuspendThresholdEditor(
                         value: initialValue,
                         unit: unit,
+                        maxValue: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.minLowerBound(),
                         onSave: { [dataManager, tableView] newValue in
                             dataManager!.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: unit, value: newValue.doubleValue(for: unit))
 
@@ -781,16 +811,6 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
         }
 
         tableView.reloadRows(at: [indexPath], with: .none)
-    }
-}
-
-extension SettingsTableViewController: GlucoseRangeScheduleStorageDelegate {
-    func saveSchedule(for viewController: GlucoseRangeScheduleTableViewController, completion: @escaping (SaveGlucoseRangeScheduleResult) -> Void) {
-        dataManager.loopManager.settings.preMealTargetRange = viewController.overrideRanges[.preMeal].filter { !$0.isZero }
-        dataManager.loopManager.settings.legacyWorkoutTargetRange = viewController.overrideRanges[.legacyWorkout].filter { !$0.isZero }
-        dataManager.loopManager.settings.glucoseTargetRangeSchedule = viewController.schedule
-        completion(.success)
-        tableView.reloadRows(at: [IndexPath(row: ConfigurationRow.glucoseTargetRange.rawValue, section: Section.configuration.rawValue)], with: .none)
     }
 }
 
