@@ -1488,7 +1488,7 @@ extension LoopDataManager {
 
                 "predictedGlucose: [",
                 "* PredictedGlucoseValue(start, mg/dL)",
-                (state.predictedGlucose ?? []).reduce(into: "", { (entries, entry) in
+                (state.predictedGlucoseIncludingPendingInsulin ?? []).reduce(into: "", { (entries, entry) in
                     entries.append("* \(entry.startDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
                 }),
                 "]",
