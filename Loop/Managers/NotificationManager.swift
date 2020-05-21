@@ -127,11 +127,6 @@ struct NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // Cancel any previous scheduled notifications in the Loop Not Running category
-    static func clearPendingNotificationRequests() {
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-    }
-
     static func scheduleLoopNotRunningNotifications() {
         // Give a little extra time for a loop-in-progress to complete
         let gracePeriod = TimeInterval(minutes: 0.5)
