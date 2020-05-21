@@ -212,7 +212,8 @@ final class DeviceDataManager {
                 }
                 
                 let report = [
-                    Bundle.main.localizedNameAndVersion,
+                    "## LoopVersion",
+                    "* Version: \(Bundle.main.localizedNameAndVersion)",
                     "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
                     "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
                     "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
