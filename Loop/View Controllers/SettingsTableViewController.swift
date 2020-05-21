@@ -244,8 +244,7 @@ final class SettingsTableViewController: UITableViewController {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .correctionRangeOverrides:
-                // TODO: Copy not final.
-                configCell.textLabel?.text = NSLocalizedString("Correction Range Overrides", comment: "The title text for the correction range overrides")
+                configCell.textLabel?.text = NSLocalizedString("Temporary Correction Ranges", comment: "The title text for the correction range overrides")
                 if dataManager.loopManager.settings.preMealTargetRange == nil {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 } else {
@@ -438,21 +437,20 @@ final class SettingsTableViewController: UITableViewController {
             let row = ConfigurationRow(rawValue: indexPath.row)!
             switch row {
             case .carbRatio:
-                let scheduleVC = DailyQuantityScheduleTableViewController()
+                let editor = CarbRatioScheduleEditor(
+                    schedule: dataManager.loopManager.carbRatioSchedule,
+                    onSave: { [dataManager] newSchedule in
+                        dataManager?.loopManager.carbRatioSchedule = newSchedule
+                        dataManager?.analyticsServicesManager.didChangeCarbRatioSchedule()
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
 
-                scheduleVC.delegate = self
-                scheduleVC.title = NSLocalizedString("Carb Ratios", comment: "The title of the carb ratios schedule screen")
-                scheduleVC.unit = .gram()
+                let hostingController = DismissibleHostingController(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
 
-                if let schedule = dataManager.loopManager.carbRatioSchedule {
-                    scheduleVC.timeZone = schedule.timeZone
-                    scheduleVC.scheduleItems = schedule.items
-                    scheduleVC.unit = schedule.unit
-                } else if let timeZone = dataManager.pumpManager?.status.timeZone {
-                    scheduleVC.timeZone = timeZone
-                }
-
-                show(scheduleVC, sender: sender)
+                present(hostingController, animated: true)
             case .insulinSensitivity:
                 let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
 
@@ -510,7 +508,7 @@ final class SettingsTableViewController: UITableViewController {
                     tableView.deselectRow(at: indexPath, animated: true)
                 })
 
-                self.present(hostingController, animated: true)
+                present(hostingController, animated: true)
             case .suspendThreshold:
                 func presentSuspendThresholdEditor(initialValue: HKQuantity?, unit: HKUnit) {
                     let editor = SuspendThresholdEditor(
@@ -528,7 +526,7 @@ final class SettingsTableViewController: UITableViewController {
                         tableView.deselectRow(at: indexPath, animated: true)
                     })
 
-                    self.present(hostingController, animated: true)
+                    present(hostingController, animated: true)
                 }
 
                 if let minBGGuard = dataManager.loopManager.settings.suspendThreshold {
@@ -795,16 +793,8 @@ extension SettingsTableViewController: DailyValueScheduleTableViewControllerDele
                 if let controller = controller as? BasalScheduleTableViewController {
                     dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
                 }
-            case let row:
-                if let controller = controller as? DailyQuantityScheduleTableViewController {
-                    switch row {
-                    case .carbRatio:
-                        dataManager.loopManager.carbRatioSchedule = CarbRatioSchedule(unit: controller.unit, dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                        dataManager.analyticsServicesManager.didChangeCarbRatioSchedule()
-                    default:
-                        break
-                    }
-                }
+            default:
+                break
             }
         default:
             break

@@ -75,7 +75,7 @@ struct SuspendThresholdEditor: View {
                                     forceDisableAnimations: true
                                 )
                             },
-                            valuePicker: {
+                            expandedContent: {
                                 GlucoseValuePicker(
                                     value: $value.animation(),
                                     unit: unit,

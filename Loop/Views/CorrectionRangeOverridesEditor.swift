@@ -64,8 +64,7 @@ struct CorrectionRangeOverridesEditor: View {
 
     var body: some View {
         ConfigurationPage(
-            // TODO: Copy not final.
-            title: Text("Correction Range Overrides", comment: "Title for correction range overrides page"),
+            title: Text("Temporary\nCorrection Ranges", comment: "Title for temporary correction ranges page"),
             isSaveButtonEnabled: value != initialValue,
             cards: {
                 card(for: .preMeal)
@@ -114,7 +113,7 @@ struct CorrectionRangeOverridesEditor: View {
                         forceDisableAnimations: true
                     )
                 },
-                valuePicker: {
+                expandedContent: {
                     GlucoseRangePicker(
                         range: Binding(
                             get: { self.value.ranges[preset] ?? self.guardrail(for: preset).recommendedBounds },
@@ -134,12 +133,11 @@ struct CorrectionRangeOverridesEditor: View {
     }
 
     private func description(of preset: CorrectionRangeOverrides.Preset) -> Text {
-        // TODO: Copy not final.
         switch preset {
         case .preMeal:
-            return Text("When Pre-Meal Mode is active, the app adjusts insulin delivery in an effort to bring your glucose into your pre-meal correction range.", comment: "Description of pre-meal mode")
+            return Text("Temporarily lower your glucose target before a meal to impact post-meal glucose spikes.", comment: "Description of pre-meal mode")
         case .workout:
-            return Text("When Workout Mode is active, the app adjusts insulin delivery in an effort to bring your glucose into your workout correction range.", comment: "Description of workout mode")
+            return Text("Temporarily raise your glucose target before, during, or after physical activity to reduce the risk of low glucose events.", comment: "Description of workout mode")
         }
     }
 
