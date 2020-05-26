@@ -117,25 +117,14 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
         }
     }
     
-    func testRemovePendingAlert() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert)
-
-        waitOnMain()
-        userNotificationDeviceAlertPresenter.removePendingAlert(identifier: alert.identifier)
-        
-        waitOnMain()
-        XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
-    }
-    
-    func testRemoveDeliveredAlert() {
+    func testRetractAlert() {
         let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
         userNotificationDeviceAlertPresenter.issueAlert(alert)
 
         waitOnMain()
         mockUserNotificationCenter.deliverAll()
         
-        userNotificationDeviceAlertPresenter.removeDeliveredAlert(identifier: alert.identifier)
+        userNotificationDeviceAlertPresenter.retractAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)

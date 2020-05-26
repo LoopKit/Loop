@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19E287" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="StoredAlert" representedClassName=".StoredAlert" syncable="YES">
+        <attribute name="acknowledgedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="alertIdentifier" attributeType="String"/>
+        <attribute name="backgroundContent" optional="YES" attributeType="String"/>
+        <attribute name="foregroundContent" optional="YES" attributeType="String"/>
+        <attribute name="isCritical" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="issuedDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="managerIdentifier" attributeType="String"/>
+        <attribute name="modificationCounter" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="retractedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="sound" optional="YES" attributeType="String"/>
+        <attribute name="triggerInterval" optional="YES" attributeType="Double" usesScalarValueType="NO"/>
+        <attribute name="triggerType" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <elements>
+        <element name="StoredAlert" positionX="-63" positionY="-18" width="128" height="223"/>
+    </elements>
+</model>

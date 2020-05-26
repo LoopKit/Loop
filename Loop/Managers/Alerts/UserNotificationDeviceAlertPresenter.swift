@@ -37,14 +37,9 @@ class UserNotificationDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
     
-    func removePendingAlert(identifier: DeviceAlert.Identifier) {
+    func retractAlert(identifier: DeviceAlert.Identifier) {
         DispatchQueue.main.async {
             self.userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
-        }
-    }
-    
-    func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-        DispatchQueue.main.async {
             self.userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
         }
     }

@@ -20,7 +20,7 @@ final class DeviceDataManager {
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
-    weak var deviceAlertManager: DeviceAlertManager?
+    weak var deviceAlertManager: DeviceAlertManager!
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -252,46 +252,51 @@ final class DeviceDataManager {
     
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
         self.loopManager.generateDiagnosticReport { (loopReport) in
-            self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
-                let deviceLogReport: String
-                switch result {
-                case .failure(let error):
-                    deviceLogReport = "Error fetching entries: \(error)"
-                case .success(let entries):
-                    deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
+            
+            self.deviceAlertManager.getStoredEntries(startDate: Date() - .hours(48)) { (alertReport) in
+                
+                self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
+                    let deviceLogReport: String
+                    switch result {
+                    case .failure(let error):
+                        deviceLogReport = "Error fetching entries: \(error)"
+                    case .success(let entries):
+                        deviceLogReport = entries.map { "* \($0.timestamp) \($0.managerIdentifier) \($0.deviceIdentifier ?? "") \($0.type) \($0.message)" }.joined(separator: "\n")
+                    }
+                    
+                    let report = [
+                        Bundle.main.localizedNameAndVersion,
+                        "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
+                        "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
+                        "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
+                        "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
+                        "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
+                        "",
+                        "## FeatureFlags",
+                        "\(FeatureFlags)",
+                        "",
+                        "## DeviceDataManager",
+                        "* launchDate: \(self.launchDate)",
+                        "* lastError: \(String(describing: self.lastError))",
+                        "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
+                        "",
+                        self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
+                        "",
+                        self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
+                        "",
+                        "## Device Communication Log",
+                        deviceLogReport,
+                        "",
+                        String(reflecting: self.watchManager!),
+                        "",
+                        String(reflecting: self.statusExtensionManager!),
+                        "",
+                        loopReport,
+                        alertReport
+                        ].joined(separator: "\n")
+                    
+                    completion(report)
                 }
-                
-                let report = [
-                    Bundle.main.localizedNameAndVersion,
-                    "* gitRevision: \(Bundle.main.gitRevision ?? "N/A")",
-                    "* gitBranch: \(Bundle.main.gitBranch ?? "N/A")",
-                    "* sourceRoot: \(Bundle.main.sourceRoot ?? "N/A")",
-                    "* buildDateString: \(Bundle.main.buildDateString ?? "N/A")",
-                    "* xcodeVersion: \(Bundle.main.xcodeVersion ?? "N/A")",
-                    "",
-                    "## FeatureFlags",
-                    "\(FeatureFlags)",
-                    "",
-                    "## DeviceDataManager",
-                    "* launchDate: \(self.launchDate)",
-                    "* lastError: \(String(describing: self.lastError))",
-                    "* lastBLEDrivenUpdate: \(self.lastBLEDrivenUpdate)",
-                    "",
-                    self.cgmManager != nil ? String(reflecting: self.cgmManager!) : "cgmManager: nil",
-                    "",
-                    self.pumpManager != nil ? String(reflecting: self.pumpManager!) : "pumpManager: nil",
-                    "",
-                    "## Device Communication Log",
-                    deviceLogReport,
-                    "",
-                    String(reflecting: self.watchManager!),
-                    "",
-                    String(reflecting: self.statusExtensionManager!),
-                    "",
-                    loopReport,
-                ].joined(separator: "\n")
-                
-                completion(report)
             }
         }
     }
@@ -418,12 +423,8 @@ extension DeviceDataManager: DeviceAlertPresenter {
         deviceAlertManager?.issueAlert(alert)
     }
     
-    func removePendingAlert(identifier: DeviceAlert.Identifier) {
-        deviceAlertManager?.removePendingAlert(identifier: identifier)
-    }
-    
-    func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-        deviceAlertManager?.removeDeliveredAlert(identifier: identifier)
+    func retractAlert(identifier: DeviceAlert.Identifier) {
+        deviceAlertManager?.retractAlert(identifier: identifier)
     }
 }
 

@@ -44,6 +44,8 @@ public final class DeviceAlertManager {
     
     let userNotificationCenter: UserNotificationCenter
     let fileManager: FileManager
+    
+    let alertStore: AlertStore
 
     public init(rootViewController: UIViewController,
                 handlers: [DeviceAlertPresenter]? = nil,
@@ -51,11 +53,15 @@ public final class DeviceAlertManager {
                 fileManager: FileManager = FileManager.default) {
         self.userNotificationCenter = userNotificationCenter
         self.fileManager = fileManager
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+        alertStore = AlertStore(storageFileURL: documentsDirectory?
+            .appendingPathComponent("AlertStore")
+            .appendingPathComponent("AlertStore.sqlite"))
         self.handlers = handlers ??
             [UserNotificationDeviceAlertPresenter(userNotificationCenter: userNotificationCenter),
             InAppModalDeviceAlertPresenter(rootViewController: rootViewController, deviceAlertManagerResponder: self)]
             
-        playbackPersistedAlerts()
+        playbackAlertsFromUserNotificationCenter()
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: DeviceAlertResponder) {
@@ -76,6 +82,8 @@ public final class DeviceAlertManager {
     }
 }
 
+// MARK: DeviceAlertManagerResponder implementation
+
 extension DeviceAlertManager: DeviceAlertManagerResponder {
     func acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier) {
         if let responder = responders[identifier.managerIdentifier]?.value {
@@ -85,21 +93,30 @@ extension DeviceAlertManager: DeviceAlertManagerResponder {
         log.debug("Removing notification %@ from delivered & pending notifications", identifier.value)
         userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
         userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
+        alertStore.recordAcknowledgement(of: identifier)
     }
 }
+
+// MARK: DeviceAlertPresenter implementation
 
 extension DeviceAlertManager: DeviceAlertPresenter {
 
     public func issueAlert(_ alert: DeviceAlert) {
         handlers.forEach { $0.issueAlert(alert) }
+        alertStore.recordIssued(alert: alert)
     }
-    public func removePendingAlert(identifier: DeviceAlert.Identifier) {
-        handlers.forEach { $0.removePendingAlert(identifier: identifier) }
+    
+    public func retractAlert(identifier: DeviceAlert.Identifier) {
+        handlers.forEach { $0.retractAlert(identifier: identifier) }
+        alertStore.recordRetraction(of: identifier)
     }
-    public func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-        handlers.forEach { $0.removeDeliveredAlert(identifier: identifier) }
+    
+    private func replayAlert(_ alert: DeviceAlert) {
+        handlers.forEach { $0.issueAlert(alert) }
     }
 }
+
+// MARK: Sound Support
 
 extension DeviceAlertManager {
     
@@ -135,33 +152,11 @@ extension DeviceAlertManager {
     
 }
 
-extension FileManager {
-    func copyIfNewer(from fromURL: URL, to toURL: URL) throws {
-        if fileExists(atPath: toURL.path) {
-            // If the source file is newer, remove the old one, otherwise skip it.
-            let toCreationDate = try toURL.fileCreationDate(self)
-            let fromCreationDate = try fromURL.fileCreationDate(self)
-            if fromCreationDate > toCreationDate {
-                try removeItem(at: toURL)
-            } else {
-                return
-            }
-        }
-        try copyItem(at: fromURL, to: toURL)
-    }
-}
-
-extension URL {
-    
-    func fileCreationDate(_ fileManager: FileManager) throws -> Date {
-        return try fileManager.attributesOfItem(atPath: self.path)[.creationDate] as! Date
-    }
-}
-
+// MARK: Alert Playback
 
 extension DeviceAlertManager {
     
-    private func playbackPersistedAlerts() {
+    private func playbackAlertsFromUserNotificationCenter() {
     
         userNotificationCenter.getDeliveredNotifications {
             $0.forEach { notification in
@@ -206,7 +201,7 @@ extension DeviceAlertManager {
                            trigger != nil ? "" : "Pending ",
                            trigger != nil ? "" : "new ",
                            savedAlertString, "\(newTrigger)")
-            self.issueAlert(newAlert)
+            self.replayAlert(newAlert)
         } catch {
             self.log.error("Could not decode alert: error %@, from %@", error.localizedDescription, savedAlertString)
         }
@@ -235,6 +230,63 @@ extension DeviceAlertManager {
 
 }
 
+// MARK: Alert storage access
+extension DeviceAlertManager {
+    
+    func getStoredEntries(startDate: Date, completion: @escaping (_ report: String) -> Void) {
+        alertStore.executeQuery(since: startDate, limit: 100) { result in
+            switch result {
+            case .failure(let error):
+                completion("Error: \(error)")
+            case .success(let entries):
+                let report = "## Alerts\n" + entries.1.map { storedAlert in
+                    return """
+                    **\(storedAlert.title ?? "??")**
+                    
+                    * alertIdentifier: \(storedAlert.alertIdentifier)
+                    * managerIdentifier: \(storedAlert.managerIdentifier)
+                    * issued: \(storedAlert.issuedDate)
+                    * acknowledged: \(storedAlert.acknowledgedDate?.description ?? "n/a")
+                    * retracted: \(storedAlert.retractedDate?.description ?? "n/a")
+                    * isCritical: \(storedAlert.isCritical)
+                    * trigger: \(storedAlert.trigger)
+                    * foregroundContent: \(storedAlert.foregroundContent ?? "n/a")
+                    * backgroundContent: \(storedAlert.backgroundContent ?? "n/a")
+                    * sound: \(storedAlert.sound ?? "n/a")
+
+                    """
+                }.joined(separator: "\n")
+                completion(report)
+            }
+        }
+    }
+}
+
+// MARK: Extensions
+
+extension FileManager {
+    func copyIfNewer(from fromURL: URL, to toURL: URL) throws {
+        if fileExists(atPath: toURL.path) {
+            // If the source file is newer, remove the old one, otherwise skip it.
+            let toCreationDate = try toURL.fileCreationDate(self)
+            let fromCreationDate = try fromURL.fileCreationDate(self)
+            if fromCreationDate > toCreationDate {
+                try removeItem(at: toURL)
+            } else {
+                return
+            }
+        }
+        try copyItem(at: fromURL, to: toURL)
+    }
+}
+
+extension URL {
+    
+    func fileCreationDate(_ fileManager: FileManager) throws -> Date {
+        return try fileManager.attributesOfItem(atPath: self.path)[.creationDate] as! Date
+    }
+}
+
 public extension DeviceAlert {
     
     enum Error: String, Swift.Error {
@@ -260,7 +312,6 @@ public extension DeviceAlert {
         userNotificationContent.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue] = encodedAlert
         userNotificationContent.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue] =
             DeviceAlertManager.timestampFormatter.string(from: timestamp)
-        print("Alert: \(encodedAlert)")
         return userNotificationContent
     }
     

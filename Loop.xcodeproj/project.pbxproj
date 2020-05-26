@@ -22,6 +22,12 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
+		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
+		1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
+		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
+		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
+		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
 		1DA649A7244126CD00F61E75 /* UserNotificationDeviceAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A6244126CD00F61E75 /* UserNotificationDeviceAlertPresenter.swift */; };
 		1DA649A9244126DA00F61E75 /* InAppModalDeviceAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A8244126DA00F61E75 /* InAppModalDeviceAlertPresenter.swift */; };
 		1DA7A84224476EAD008257F0 /* DeviceAlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84124476EAD008257F0 /* DeviceAlertManagerTests.swift */; };
@@ -612,6 +618,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
+		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
+		1D080CBC2473214A00356610 /* AlertStore.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AlertStore.xcdatamodel; sourceTree = "<group>"; };
+		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
+		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
 		1DA649A6244126CD00F61E75 /* UserNotificationDeviceAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotificationDeviceAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA649A8244126DA00F61E75 /* InAppModalDeviceAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModalDeviceAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA7A84124476EAD008257F0 /* DeviceAlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAlertManagerTests.swift; sourceTree = "<group>"; };
@@ -1246,32 +1258,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1DA6499D2441266400F61E75 /* DeviceAlert */ = {
+		1DA6499D2441266400F61E75 /* Alerts */ = {
 			isa = PBXGroup;
 			children = (
+				1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */,
+				1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */,
+				1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */,
+				1D05219C2469F1F5000EBBDE /* AlertStore.swift */,
 				1DB1065024467E18005542BD /* DeviceAlertManager.swift */,
 				1DA649A8244126DA00F61E75 /* InAppModalDeviceAlertPresenter.swift */,
+				1D05219A2469E9DF000EBBDE /* StoredAlert.swift */,
 				1DA649A6244126CD00F61E75 /* UserNotificationDeviceAlertPresenter.swift */,
 			);
-			path = DeviceAlert;
+			path = Alerts;
 			sourceTree = "<group>";
 		};
 		1DA7A83F24476E8C008257F0 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				1DA7A84024476E98008257F0 /* DeviceAlert */,
+				1DA7A84024476E98008257F0 /* Alerts */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		1DA7A84024476E98008257F0 /* DeviceAlert */ = {
+		1DA7A84024476E98008257F0 /* Alerts */ = {
 			isa = PBXGroup;
 			children = (
+				1D80313C24746274002810DF /* AlertStoreTests.swift */,
 				1DA7A84124476EAD008257F0 /* DeviceAlertManagerTests.swift */,
 				1DA7A84324477698008257F0 /* InAppModalDeviceAlertPresenterTests.swift */,
 				1DFE9E162447B6270082C280 /* UserNotificationDeviceAlertPresenterTests.swift */,
 			);
-			path = DeviceAlert;
+			path = Alerts;
 			sourceTree = "<group>";
 		};
 		4328E0121CFBE1B700E199AA /* Controllers */ = {
@@ -1681,7 +1699,7 @@
 		43F5C2E41B93C5D4003EB13D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				1DA6499D2441266400F61E75 /* DeviceAlert */,
+				1DA6499D2441266400F61E75 /* Alerts */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
 				439BED291E76093C00B0AED5 /* CGMManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
@@ -2751,6 +2769,7 @@
 				4372E48B213CB5F00068E043 /* Double.swift in Sources */,
 				430B29932041F5B300BA9F93 /* UserDefaults+Loop.swift in Sources */,
 				43CE7CDE1CA8B63E003CC1B0 /* Data.swift in Sources */,
+				1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */,
 				A999D40A24663DC7004C89D4 /* CarbStore.swift in Sources */,
 				C1F8B243223E73FD00DD66CF /* BolusProgressTableViewCell.swift in Sources */,
 				89D6953E23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift in Sources */,
@@ -2777,6 +2796,7 @@
 				4346D1E71C77F5FE00ABAFE3 /* ChartTableViewCell.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
 				C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
+				1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */,
 				892ADE082446E1C2007CE08C /* SuspendThresholdEditor.swift in Sources */,
 				892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */,
 				A999D40424663CE1004C89D4 /* DoseStore.swift in Sources */,
@@ -2802,6 +2822,7 @@
 				4F6663941E905FD2009E74FC /* ChartColorPalette+Loop.swift in Sources */,
 				4328E0351CFC0AE100E199AA /* WatchDataManager.swift in Sources */,
 				4345E3FC21F04911009E00E5 /* UIColor+HIG.swift in Sources */,
+				1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */,
 				43D381621EBD9759007F8C8F /* HeaderValuesTableViewCell.swift in Sources */,
 				A9C62D892331703100535612 /* LoggingServicesManager.swift in Sources */,
 				89E267FF229267DF00A3F2AF /* Optional.swift in Sources */,
@@ -2836,6 +2857,7 @@
 				89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */,
 				43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */,
 				43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */,
+				1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */,
 				438D42F91D7C88BC003244B0 /* PredictionInputEffect.swift in Sources */,
 				A9C62D8223316FF600535612 /* UserDefaults+Services.swift in Sources */,
 				892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */,
@@ -2843,6 +2865,7 @@
 				43DFB62320D4CAE7008A7BAE /* PumpManager.swift in Sources */,
 				892A5D59222F0A27008961AB /* Debug.swift in Sources */,
 				431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */,
+				1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */,
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,
@@ -3036,6 +3059,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
 				A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */,
 				A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */,
@@ -4201,6 +4225,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				1D080CBC2473214A00356610 /* AlertStore.xcdatamodel */,
+			);
+			currentVersion = 1D080CBC2473214A00356610 /* AlertStore.xcdatamodel */;
+			path = AlertStore.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 43776F841B8022E90074EA36 /* Project object */;
 }

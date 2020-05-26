@@ -50,23 +50,17 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
     
-    public func removePendingAlert(identifier: DeviceAlert.Identifier) {
+    public func retractAlert(identifier: DeviceAlert.Identifier) {
         DispatchQueue.main.async {
             self.alertsPending[identifier]?.0.invalidate()
             self.clearPendingAlert(identifier: identifier)
+            self.removeDeliveredAlert(identifier: identifier, completion: nil)
         }
     }
-    
-    public func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-        removeDeliveredAlert(identifier: identifier, completion: nil)
-    }
-    
-    // For tests only
+        
     func removeDeliveredAlert(identifier: DeviceAlert.Identifier, completion: (() -> Void)?) {
-        DispatchQueue.main.async {
-            self.alertsShowing[identifier]?.0.dismiss(animated: true, completion: completion)
-            self.clearDeliveredAlert(identifier: identifier)
-        }
+        self.alertsShowing[identifier]?.0.dismiss(animated: true, completion: completion)
+        self.clearDeliveredAlert(identifier: identifier)
     }
 }
 

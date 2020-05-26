@@ -18,13 +18,9 @@ class DeviceAlertManagerTests: XCTestCase {
         func issueAlert(_ alert: DeviceAlert) {
             issuedAlert = alert
         }
-        var removedPendingAlertIdentifier: DeviceAlert.Identifier?
-        func removePendingAlert(identifier: DeviceAlert.Identifier) {
-            removedPendingAlertIdentifier = identifier
-        }
-        var removeDeliveredAlertIdentifier: DeviceAlert.Identifier?
-        func removeDeliveredAlert(identifier: DeviceAlert.Identifier) {
-            removeDeliveredAlertIdentifier = identifier
+        var retractedAlertIdentifier: DeviceAlert.Identifier?
+        func retractAlert(identifier: DeviceAlert.Identifier) {
+            retractedAlertIdentifier = identifier
         }
     }
     
@@ -61,6 +57,9 @@ class DeviceAlertManagerTests: XCTestCase {
         override func copyItem(at srcURL: URL, to dstURL: URL) throws {
             copiedSrcURLs.append(srcURL)
             copiedDstURLs.append(dstURL)
+        }
+        override func urls(for directory: FileManager.SearchPathDirectory, in domainMask: FileManager.SearchPathDomainMask) -> [URL] {
+            return []
         }
     }
 
@@ -104,24 +103,15 @@ class DeviceAlertManagerTests: XCTestCase {
     func testIssueAlertOnHandlerCalled() {
         deviceAlertManager.issueAlert(mockDeviceAlert)
         XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.issuedAlert?.identifier)
-        XCTAssertNil(mockPresenter.removeDeliveredAlertIdentifier)
-        XCTAssertNil(mockPresenter.removedPendingAlertIdentifier)
+        XCTAssertNil(mockPresenter.retractedAlertIdentifier)
     }
     
-    func testRemovePendingAlertOnHandlerCalled() {
-        deviceAlertManager.removePendingAlert(identifier: mockDeviceAlert.identifier)
+    func testRetractAlertOnHandlerCalled() {
+        deviceAlertManager.retractAlert(identifier: mockDeviceAlert.identifier)
         XCTAssertNil(mockPresenter.issuedAlert)
-        XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.removedPendingAlertIdentifier)
-        XCTAssertNil(mockPresenter.removeDeliveredAlertIdentifier)
+        XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.retractedAlertIdentifier)
     }
     
-    func testRemoveDeliveredAlertOnHandlerCalled() {
-        deviceAlertManager.removeDeliveredAlert(identifier: mockDeviceAlert.identifier)
-        XCTAssertNil(mockPresenter.issuedAlert)
-        XCTAssertNil(mockPresenter.removedPendingAlertIdentifier)
-        XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.removeDeliveredAlertIdentifier)
-    }
-
     func testAlertResponderAcknowledged() {
         let responder = MockResponder()
         deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)

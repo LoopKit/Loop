@@ -257,13 +257,13 @@ class InAppModalDeviceAlertPresenterTests: XCTestCase {
         XCTAssertNil(mockViewController.viewControllerPresented)
     }
 
-    func testRemovePendingAlert() {
+    func testRetractAlert() {
         let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
         inAppModalDeviceAlertPresenter.issueAlert(alert)
         
         waitOnMain()
         XCTAssert(mockTimer?.isValid == true)
-        inAppModalDeviceAlertPresenter.removePendingAlert(identifier: alert.identifier)
+        inAppModalDeviceAlertPresenter.retractAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssert(mockTimer?.isValid == false)
