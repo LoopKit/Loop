@@ -1,5 +1,20 @@
 # Loop for iOS
 
+### Spike calibration guide: [Spike calibration](SPIKE_CALIBRATION.md), https://cyoung1024.github.io/spike-guide/calibration/
+
+```diff
+- Do not use this branch with rechargeable transmitters for Dexcom & Spike
+- Always have alarms enabled for both lows and highs (also fast drop & fast rise)
+- Read and follow the Spike calibration guide for every calibration
+- Disable automatic boluses until you are able to get a good calibration
+- Calibrate properly and often check the values reported by Spike against values from a glucose meter
+```
+If you are using Dexcom rechargeable transmitters please **use Spike in follower mode, with the Dexcom app as primary collector of data**.
+This is because recently there have been cases of rechargeable transmitters providing inaccurate data. The Dexcom app has safety mechanisms built in, while Spike will report any data it reads from the sensor.
+**What are the problems with rechargeable transmitters?**
+- Multiple users reported noisy data.
+- **If the transmitter's battery nearly runs out it will read HIGH**. It is extremely important to use the Dexcom app and Spike in follower mode to avoid this issue. If you're using Spike directly with the rechargeable transmitter, **Loop will deliver large boluses due to the erroneously reported increase in levels**.
+
 # You are on branch spike-autobolus
 This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
 
