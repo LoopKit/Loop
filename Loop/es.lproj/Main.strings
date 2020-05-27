@@ -25,8 +25,8 @@
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
 "aiu-ZA-zVa.title" = "Bolo";
 
-/* Class = "UILabel"; text = "Title"; ObjectID = "B9F-K3-7RI"; */
-"B9F-K3-7RI.text" = "Título";
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
+"ap1-M6-naG.text" = "Típo de Comida";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Etiqueta";
@@ -64,17 +64,23 @@
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
 "EAn-Ja-S1d.text" = "Observado";
 
-/* Class = "UILabel"; text = "Active Carbohydrates: 40g"; ObjectID = "hHZ-uY-aKw"; */
-"hHZ-uY-aKw.text" = "Carbohidratos Activos: 40gr";
+/* Class = "UILabel"; text = "Eventually 92 mg/dL"; ObjectID = "G51-pt-pmi"; */
+"G51-pt-pmi.text" = "Eventualmente 92 mg/dL";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
 "hZZ-2S-lrd.title" = "Efecto de Carbohidratos";
+
+/* Class = "UILabel"; text = "Label"; ObjectID = "IRb-Yj-AQH"; */
+"IRb-Yj-AQH.text" = "Etiqueta";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
 "IxU-As-glo.text" = "Los cambios observados en glucosa sustrayendo los cambios modelados para la entrega de insulina pueden ser utilizados para estimar la absorción de carbohidratos.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
 "J7x-W5-gwo.text" = "Detalle";
+
+/* Class = "UILabel"; text = "Detail"; ObjectID = "jQv-xb-gwu"; */
+"jQv-xb-gwu.text" = "Detaille";
 
 /* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
 "k0g-P7-OVN.text" = "⚠ Glucosa Proyectada Por Debajo Del Rango.";
@@ -106,8 +112,8 @@
 /* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
 "pi6-Dh-72V.title" = "Modelo de Insulina";
 
-/* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "Un modelo de actividad de insulin se utiliza para calcular los efectos de ésta en los niveles glucémicos. La precision del modelo puede ayudar a prevenir la acumulación de insulina y a hacer recomendaciones de tratamientos de corrección más seguros.";
+/* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
+"qPH-vU-xlu.text" = "Típo de Comida";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
 "Rse-x8-amW.text" = "eventualmente 92 mg/dL";
@@ -118,11 +124,11 @@
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
 "tuw-av-A3x.text" = "Glucosa";
 
+/* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
+"Tz7-80-bJ7.title" = "Agregar/Editar Entrada de Carbohidrados";
+
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Etiqueta";
-
-/* Class = "UILabel"; text = "Active Insulin: 1.5U"; ObjectID = "viU-7a-kbI"; */
-"viU-7a-kbI.text" = "Insulina Activa: 1.5U";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
 "Vpi-5b-bY5.title" = "Carbohidratos";
@@ -130,8 +136,8 @@
 /* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
 "Wk3-xv-IM5.text" = "4 horas";
 
-/* Class = "UIButton"; normalTitle = "Deliver"; ObjectID = "Ya0-9b-ZAS"; */
-"Ya0-9b-ZAS.normalTitle" = "Administración";
+/* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
+"Wx8-Tf-FnG.text" = "Cantidad Consumida";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "yn7-2M-jZz"; */
 "yn7-2M-jZz.text" = "0";
