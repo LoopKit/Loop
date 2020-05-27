@@ -11,6 +11,7 @@
 ```
 If you are using Dexcom rechargeable transmitters please **use Spike in follower mode, with the Dexcom app as primary collector of data**.
 This is because recently there have been cases of rechargeable transmitters providing inaccurate data. The Dexcom app has safety mechanisms built in, while Spike will report any data it reads from the sensor.
+
 **What are the problems with rechargeable transmitters?**
 - Multiple users reported noisy data.
 - **If the transmitter's battery nearly runs out it will read HIGH**. It is extremely important to use the Dexcom app and Spike in follower mode to avoid this issue. If you're using Spike directly with the rechargeable transmitter, **Loop will deliver large boluses due to the erroneously reported increase in levels**.
@@ -18,11 +19,11 @@ This is because recently there have been cases of rechargeable transmitters prov
 # You are on branch spike-autobolus
 This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
 
-Last updated on May 15, 2020
+Last updated on May 27, 2020
 
-Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/7f7ea5303379ed1958e29a2dbb44b117173d9b62
+Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/5fa561e2e74feca74f8115a2852ea3926ab27dcd
 
-Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/7c434522bd43cca31f61ada41de053ad7cdb6798
+Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/79435954af008d1e3ae71304868be39016f9ef61
 
 ![App Icon](/Loop/Assets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
 
