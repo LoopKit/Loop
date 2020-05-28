@@ -77,11 +77,14 @@ struct SuspendThresholdEditor: View {
                             },
                             expandedContent: {
                                 GlucoseValuePicker(
-                                    value: $value.animation(),
-                                    unit: unit,
-                                    guardrail: guardrail,
-                                    bounds: guardrail.absoluteBounds.lowerBound...(maxValue ?? guardrail.absoluteBounds.upperBound)
+                                    value: self.$value.animation(),
+                                    unit: self.unit,
+                                    guardrail: self.guardrail,
+                                    bounds: self.guardrail.absoluteBounds.lowerBound...(self.maxValue ?? self.guardrail.absoluteBounds.upperBound)
                                 )
+                                // Prevent the picker from expanding the card's width on small devices
+                                .frame(maxWidth: UIScreen.main.bounds.width - 48)
+                                .clipped()
                             }
                         )
                     }

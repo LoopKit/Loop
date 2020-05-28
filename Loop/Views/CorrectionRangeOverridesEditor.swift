@@ -123,8 +123,8 @@ struct CorrectionRangeOverridesEditor: View {
                                 }
                             }
                         ),
-                        unit: unit,
-                        minValue: minValue,
+                        unit: self.unit,
+                        minValue: self.minValue,
                         guardrail: self.guardrail(for: preset)
                     )
                 }
