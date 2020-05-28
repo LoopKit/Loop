@@ -64,6 +64,10 @@ extension DosingDecisionStore {
 extension StoredDosingDecision: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        var notificationSettings: UNNotificationSettings?
+        if let notificationSettingsData = try container.decodeIfPresent(Data.self, forKey: .notificationSettings) {
+            notificationSettings = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(notificationSettingsData) as? UNNotificationSettings
+        }
         let storedDosingDecisionError = try container.decodeIfPresent([StoredDosingDecisionError].self, forKey: .errors)
         self.init(date: try container.decode(Date.self, forKey: .date),
                   insulinOnBoard: try container.decodeIfPresent(InsulinValue.self, forKey: .insulinOnBoard),
@@ -77,6 +81,7 @@ extension StoredDosingDecision: Codable {
                   recommendedTempBasal: try container.decodeIfPresent(TempBasalRecommendationWithDate.self, forKey: .recommendedTempBasal),
                   recommendedBolus: try container.decodeIfPresent(BolusRecommendationWithDate.self, forKey: .recommendedBolus),
                   pumpManagerStatus: try container.decodeIfPresent(PumpManagerStatus.self, forKey: .pumpManagerStatus),
+                  notificationSettings: notificationSettings,
                   errors: storedDosingDecisionError?.map { $0.error },
                   syncIdentifier: try container.decode(String.self, forKey: .syncIdentifier))
     }
@@ -95,6 +100,10 @@ extension StoredDosingDecision: Codable {
         try container.encodeIfPresent(recommendedTempBasal, forKey: .recommendedTempBasal)
         try container.encodeIfPresent(recommendedBolus, forKey: .recommendedBolus)
         try container.encodeIfPresent(pumpManagerStatus, forKey: .pumpManagerStatus)
+        if let notificationSettings = notificationSettings {
+            let notificationSettingsData = try NSKeyedArchiver.archivedData(withRootObject: notificationSettings, requiringSecureCoding: false)
+            try container.encode(notificationSettingsData, forKey: .notificationSettings)
+        }
         try container.encodeIfPresent(errors?.map { StoredDosingDecisionError(error: $0) }, forKey: .errors)
         try container.encode(syncIdentifier, forKey: .syncIdentifier)
     }
@@ -191,6 +200,7 @@ extension StoredDosingDecision: Codable {
         case recommendedTempBasal
         case recommendedBolus
         case pumpManagerStatus
+        case notificationSettings
         case errors
         case syncIdentifier
     }
