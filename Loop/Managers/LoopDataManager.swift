@@ -512,6 +512,28 @@ extension LoopDataManager {
         _ samples: [NewGlucoseSample],
         completion: ((_ result: Result<[GlucoseValue]>) -> Void)? = nil
     ) {
+        var glucoseValues : [Double] = []
+        
+        for sample in samples {
+            glucoseValues.append(sample.quantity.doubleValue(for: .milligramsPerDeciliter))
+        }
+        
+        let latestStoredGlucoseValue = self.glucoseStore.latestGlucose?.quantity.doubleValue(for: .milligramsPerDeciliter)
+        if latestStoredGlucoseValue != nil {
+            glucoseValues.append(latestStoredGlucoseValue!)
+        }
+        
+        if glucoseValues.count > 1 {
+            var maxDiff : Double = 0
+            for i in 1 ..< glucoseValues.count {
+                let currentDiff = glucoseValues[i-1] - glucoseValues[i]
+                maxDiff = currentDiff > maxDiff ? currentDiff : maxDiff
+            }
+            if maxDiff > 50 {
+                self.settings.dosingEnabled = false
+            }
+        }
+        
         glucoseStore.addGlucose(samples) { (result) in
             self.dataAccessQueue.async {
                 switch result {
