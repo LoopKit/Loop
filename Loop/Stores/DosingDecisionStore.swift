@@ -82,6 +82,7 @@ extension StoredDosingDecision: Codable {
                   recommendedBolus: try container.decodeIfPresent(BolusRecommendationWithDate.self, forKey: .recommendedBolus),
                   pumpManagerStatus: try container.decodeIfPresent(PumpManagerStatus.self, forKey: .pumpManagerStatus),
                   notificationSettings: notificationSettings,
+                  deviceSettings: try container.decodeIfPresent(DeviceSettings.self, forKey: .deviceSettings),
                   errors: storedDosingDecisionError?.map { $0.error },
                   syncIdentifier: try container.decode(String.self, forKey: .syncIdentifier))
     }
@@ -104,6 +105,7 @@ extension StoredDosingDecision: Codable {
             let notificationSettingsData = try NSKeyedArchiver.archivedData(withRootObject: notificationSettings, requiringSecureCoding: false)
             try container.encode(notificationSettingsData, forKey: .notificationSettings)
         }
+        try container.encodeIfPresent(deviceSettings, forKey: .deviceSettings)
         try container.encodeIfPresent(errors?.map { StoredDosingDecisionError(error: $0) }, forKey: .errors)
         try container.encode(syncIdentifier, forKey: .syncIdentifier)
     }
@@ -201,6 +203,7 @@ extension StoredDosingDecision: Codable {
         case recommendedBolus
         case pumpManagerStatus
         case notificationSettings
+        case deviceSettings
         case errors
         case syncIdentifier
     }

@@ -29,6 +29,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+
         deviceAlertManager = DeviceAlertManager(rootViewController: rootViewController)
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, deviceAlertManager: deviceAlertManager)
 

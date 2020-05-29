@@ -412,6 +412,7 @@
 		A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */; };
 		A9E6DFEC246A0453005B1A1C /* SetBolusErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFEB246A0453005B1A1C /* SetBolusErrorTests.swift */; };
 		A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */; };
+		A9F66FC3247F451500096EA7 /* UIDevice+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */; };
@@ -1117,6 +1118,7 @@
 		A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerErrorTests.swift; sourceTree = "<group>"; };
 		A9E6DFEB246A0453005B1A1C /* SetBolusErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetBolusErrorTests.swift; sourceTree = "<group>"; };
 		A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopErrorTests.swift; sourceTree = "<group>"; };
+		A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Loop.swift"; sourceTree = "<group>"; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContextRequestUserInfo.swift; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
@@ -1643,6 +1645,7 @@
 				43F89CA222BDFBBC006BB54E /* UIActivityIndicatorView.swift */,
 				43F41C361D3BF32400C11ED6 /* UIAlertController.swift */,
 				43BFF0BB1E45C80600FF19A9 /* UIColor+Loop.swift */,
+				A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */,
 				8968B1112408B3520074BB48 /* UIFont.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
@@ -2873,6 +2876,7 @@
 				439897371CD2F80600223065 /* AnalyticsServicesManager.swift in Sources */,
 				A9C62D842331700E00535612 /* DiagnosticLog+Subsystem.swift in Sources */,
 				895FE0952201234000FCF18A /* OverrideSelectionViewController.swift in Sources */,
+				A9F66FC3247F451500096EA7 /* UIDevice+Loop.swift in Sources */,
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* ChartsTableViewController.swift in Sources */,

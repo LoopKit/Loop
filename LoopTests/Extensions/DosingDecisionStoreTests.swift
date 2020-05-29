@@ -77,6 +77,13 @@ class StoredDosingDecisionCodableTests: XCTestCase {
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
                                                   bolusState: .none)
+        let deviceSettings = StoredDosingDecision.DeviceSettings(name: "Device Name",
+                                                                 systemName: "Device System Name",
+                                                                 systemVersion: "Device System Version",
+                                                                 model: "Device Model",
+                                                                 modelIdentifier: "Device Model Identifier",
+                                                                 batteryLevel: 0.5,
+                                                                 batteryState: .charging)
         let errors: [Error] = [CarbStore.CarbStoreError.notConfigured,
                                DoseStore.DoseStoreError.configurationError,
                                LoopError.connectionError,
@@ -98,6 +105,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
                                                         recommendedBolus: recommendedBolus,
                                                         pumpManagerStatus: pumpManagerStatus,
                                                         notificationSettings: notificationSettings,
+                                                        deviceSettings: deviceSettings,
                                                         errors: errors,
                                                         syncIdentifier: "2A67A303-5203-4CB8-8263-79498265368E")
         try assertStoredDosingDecisionCodable(storedDosingDecision, encodesJSON: """
@@ -109,6 +117,15 @@ class StoredDosingDecisionCodableTests: XCTestCase {
     "startDate" : "2020-05-14T22:48:41Z"
   },
   "date" : "2020-05-14T22:38:14Z",
+  "deviceSettings" : {
+    "batteryLevel" : 0.5,
+    "batteryState" : "charging",
+    "model" : "Device Model",
+    "modelIdentifier" : "Device Model Identifier",
+    "name" : "Device Name",
+    "systemName" : "Device System Name",
+    "systemVersion" : "Device System Version"
+  },
   "errors" : [
     {
       "carbStoreError" : "notConfigured"
@@ -367,6 +384,8 @@ extension StoredDosingDecision: Equatable {
             lhs.recommendedTempBasal == rhs.recommendedTempBasal &&
             lhs.recommendedBolus == rhs.recommendedBolus &&
             lhs.pumpManagerStatus == rhs.pumpManagerStatus &&
+            lhs.notificationSettings == rhs.notificationSettings &&
+            lhs.deviceSettings == rhs.deviceSettings &&
             errorsEqual(lhs.errors, rhs.errors) &&
             lhs.syncIdentifier == rhs.syncIdentifier
     }

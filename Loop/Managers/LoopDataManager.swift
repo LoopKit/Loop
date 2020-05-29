@@ -681,6 +681,7 @@ extension LoopDataManager {
                                                                   recommendedBolus: StoredDosingDecision.BolusRecommendationWithDate(state.recommendedBolus),
                                                                   pumpManagerStatus: self.delegate?.pumpManagerStatus,
                                                                   notificationSettings: notificationSettings,
+                                                                  deviceSettings: UIDevice.current.deviceSettings,
                                                                   errors: [error, state.error, insulinOnBoardError].compactMap { $0 })
                         self.dosingDecisionStore.storeDosingDecision(dosingDecision) {}
                     }
@@ -1610,7 +1611,12 @@ extension LoopDataManager {
                             entries.append(report)
                             entries.append("")
 
-                            completion(entries.joined(separator: "\n"))
+                            UIDevice.current.generateDiagnosticReport { (report) in
+                                entries.append(report)
+                                entries.append("")
+
+                                completion(entries.joined(separator: "\n"))
+                            }
                         }
                     }
                 }
