@@ -30,19 +30,19 @@
 "D4C-I2-dhA.text" = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction.";
 
 /* Class = "UILabel"; text = "DEVICES"; ObjectID = "DyC-Sv-qP8"; */
-"DyC-Sv-qP8.text" = "جهاز";
+"DyC-Sv-qP8.text" = "أجهزة";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "eventually 92 mg/dL";
+"E41-FN-nkk.text" = "في النهاية 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
-"EAn-Ja-S1d.text" = "Observed";
+"EAn-Ja-S1d.text" = "مُلاحظ";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption.";
+"IxU-As-glo.text" = "التغيرات الملاحظة على سكر الدم وتغيرات الخصم المشكل من توصيل الأنسولين بالإمكان استخدامها لتقدير امتصاص الكربوهيدرات.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "تفاصل";
+"J7x-W5-gwo.text" = "تفاصيل";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "علامة";
@@ -51,25 +51,25 @@
 "OFA-qT-ZAg.text" = "علامة";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Predicted Glucose";
+"PA3-sP-cWY.title" = "سكر الدم المتوقع";
 
 /* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments.";
+"PJv-p9-cFe.text" = "يتم استخدام نموذج نشاط الأنسولين لتقدير آثار الأنسولين على مستويات قراءات سكر الدم. يمكن أن يساعد النموذج الدقيق في منع تكديس الأنسولين والتوصية بعلاجات تصحيحية آمنة.";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
-"Rse-x8-amW.text" = "eventually 92 mg/dL";
+"Rse-x8-amW.text" = "في النهاية 92 mg/dL";
 
 /* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+"SQx-au-ZcM.text" = "g كارب نشط";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
-"Vpi-5b-bY5.title" = "Carbohydrates";
+"Vpi-5b-bY5.title" = "الكربوهيدرات";
 
 /* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
-"Wk3-xv-IM5.text" = "4 hour";
+"Wk3-xv-IM5.text" = "4 ساعات";
 
 /* Class = "UIButton"; normalTitle = "Deliver"; ObjectID = "Ya0-9b-ZAS"; */
-"Ya0-9b-ZAS.normalTitle" = "Deliver";
+"Ya0-9b-ZAS.normalTitle" = "ضخ";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
 "aCb-Qs-bpu.text" = "تفاصيل";
@@ -81,7 +81,7 @@
 "bIL-Ub-qYp.text" = "علامة";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "تغير قراءات الدم";
+"bq4-98-cQU.text" = "تغير قراءات السكر";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
 "cpo-Po-gFM.text" = "علامة";
@@ -102,7 +102,7 @@
 "hZZ-2S-lrd.title" = "تأثيرات الكربوهيدرات";
 
 /* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Glucose Predicted Below Range";
+"k0g-P7-OVN.text" = "⚠ التنبأ بسكر الدم دون النطاق";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
 "k3F-Na-7mn.text" = "الضخ المستمر المقترح";
@@ -114,7 +114,7 @@
 "m9c-SQ-djE.text" = "انقر للتعيين";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Units";
+"mVz-dr-xLU.accessibilityLabel" = "وحدات";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
 "mVz-dr-xLU.text" = "وحدة";
