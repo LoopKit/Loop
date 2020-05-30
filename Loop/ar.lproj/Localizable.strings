@@ -32,25 +32,25 @@
 "%@ absorbed" = "%@ استغرق";
 
 /* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ حدة المجموع";
+"%@ U Total" = "%@ وحدة بشكل كامل";
 
 /* Appends a full-stop to a statement */
 "%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
-"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 min glucose regression coefficient (b₁), continued with decay over 30 min";
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 دقيقة معامل انحدار قراءات سكر الدم (b₁), ويستمر بالاضمحلال خلال 30 دقيقة";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min comparison of glucose prediction vs actual, continued with decay over 60 min";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 دقيقة مقارنة قراءات سكر الدم المتوقعة والفعلية , ويستمر بالاضمحلال خلال 60 دقيقة";
 
 /* Subtitle of Fiasp preset */
-"A model based on the published absorption of Fiasp insulin." = "A model based on the published absorption of Fiasp insulin.";
+"A model based on the published absorption of Fiasp insulin." = "نموذج يستند على امتصاص أنسولين Fiasp.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
-"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults.";
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "نموذج يستند على امتصاص أنسولين Humalog و Novolog و Apidra لدى البالغين.";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
-"AcceptRecommendedBolus" = "AcceptRecommendedBolus";
+"AcceptRecommendedBolus" = "استخدم قيمة الجرعة الموصى بها";
 
 /* The title of the Carbs On-Board graph */
 "Active Carbohydrates" = "الكربوهيدرات النشطة";
@@ -79,7 +79,7 @@
 "Amplitude" = "Amplitude";
 
 /* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "An adjustment to the adult model based on empirical effects in children.";
+"An adjustment to the adult model based on empirical effects in children." = "تعديل على نموذج الكبار على أساس التأثيرات التجريبية عند الأطفال.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -130,25 +130,25 @@
 "Carbohydrates" = "الكربوهيدرات";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "الكارب الذي تم امتصاصه (جرام) ÷ معامل الكارب (جرام لكل وحدة) × حاسية الأنسولين (%1$@/وحدة)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Change the pump battery immediately";
+"Change the pump battery immediately" = "قم بتغيير بطارية المضخة على الفور";
 
 /* The notification alert describing an empty pump reservoir */
-"Change the pump reservoir now" = "Change the pump reservoir now";
+"Change the pump reservoir now" = "قم بتغيير خزان المضخة الآن";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Check settings";
+"Check settings" = "تأكد من الإعدادات";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Check that your pump is in range";
+"Check that your pump is in range" = "تأكد أن المضخة في النطاق";
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "تأكد من مصدر قراءات السكر المستمرة";
 
 /* The title text for the looping enabled switch cell */
-"Closed Loop" = "الحلقة المغلقة";
+"Closed Loop" = "حلقة مغلقة";
 
 /* The title of the action used to dismiss an error alert */
 "com.loudnate.LoopKit.errorAlertActionTitle" = "موافق";
@@ -167,13 +167,13 @@
 "Correction Range" = "نطاق التصحيح";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Current glucose of %1$@ is below correction range.";
+"Current glucose of %1$@ is below correction range." = "قراءة سكر الدم %1$@ أقل من نطاق التصحيح.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "تجاوز مخصص";
 
 /* The title of the Loggly customer token credential */
-"Customer Token" = "Customer Token";
+"Customer Token" = "رمز العميل";
 
 /* Button title to delete CGM */
 "Delete CGM" = "حذف CGM";
@@ -206,7 +206,7 @@
 "Fiasp" = "Fiasp";
 
 /* The format string used to describe a finite workout targets duration */
-"For %1$@" = "For %1$@";
+"For %1$@" = "لمدة %1$@";
 
 /* The title of the glucose and prediction graph */
 "Glucose" = "قراءات السكر";
@@ -218,7 +218,7 @@
 "Glucose data not available" = "قراءات السكر غير متوفرة";
 
 /* Title of the prediction input effect for glucose momentum */
-"Glucose Momentum" = "Glucose Momentum";
+"Glucose Momentum" = "مقاومة سكر الدم";
 
 /* The placeholder text for the nightscout site URL credential */
 "https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
@@ -230,7 +230,7 @@
 "Insulin" = "الأنسولين";
 
 /* Description of the prediction input effect for insulin */
-"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)";
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "الأنسولين الذي تم امتصاصه (وحدات) × حساسيو الأنسولين (%1$@/وحدة)";
 
 /* The title of the insulin delivery graph */
 "Insulin Delivery" = "توصيل الأنسولين";
@@ -253,7 +253,7 @@
 "Issue Report" = "تقرير المشكلة";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Launches CGM app";
+"Launches CGM app" = "قم بتشغيل تطبيق نظام متابعة سكر الدم المستمرة";
 
 /* The loading message for the diagnostic report screen */
 "Loading..." = "تحميل...";
@@ -262,37 +262,37 @@
 "Loggly" = "Loggly";
 
 /* The notification title for a loop failure */
-"Loop Failure" = "فشل في حلقة";
+"Loop Failure" = "فشل في الحلقة المغلقة";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
-"Loop has not completed successfully in %@" = "Loop has not completed successfully in %@";
+"Loop has not completed successfully in %@" = "لم تتم الحلقة المغلقة بنجاح منذ %@";
 
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "بيانات مفقودة: %1$@";
 
 /* Details for missing data error when momentum effects are missing */
-"Momentum effects" = "Momentum effects";
+"Momentum effects" = "تأثيرات النشاط";
 
 /* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
+"Nightscout" = "نايتسكاوت";
 
 /* The error message displayed for device connection errors. */
-"No connected devices, or failure during device connection" = "No connected devices, or failure during device connection";
+"No connected devices, or failure during device connection" = "لا يوجد أجهزة متصلة, أو يوجد خطأ أثناء الاتصال";
 
 /* The title text for the override presets */
-"Override Presets" = "Override Presets";
+"Override Presets" = "تخطي الإعدادات المسبقة";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Pre-Meal Targets";
+"Pre-Meal Targets" = "أهداف ما قبل الوجبة";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Predicted glucose at %1$@ is %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "قراءاة سكر الدم بعد %1$@ هي %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Predicted glucose of %1$@ is below your suspend threshold setting.";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "قراءة سكر الدم المتوقعة %1$@ أقل من قيمة تعليق الضخ في الإعدادات.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
-"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "التوقع: %1$@\nالواقع: %2$@ (%3$@)";
 
 /* The title of the pump section in settings */
 "Pump" = "المضخة";
@@ -313,16 +313,16 @@
 "Pump Reservoir Low" = "خزان المضخة منخفض";
 
 /* The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "تم تعليق المضخة";
+"Pump Suspended" = "تم إيقاف الضخ مؤقتا";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Adults" = "Rapid-Acting – Adults";
+"Rapid-Acting – Adults" = "التأثيرالسريع - كبار";
 
 /* Title of insulin model preset */
-"Rapid-Acting – Children" = "Rapid-Acting – Children";
+"Rapid-Acting – Children" = "التأثيرالسريع - أطفال";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "انتهت صلاحية التوصية: %1$@ مضت";
+"Recommendation expired: %1$@ old" = "انتهت صلاحية التوصية منذ: %1$@ ";
 
 /* The title of the cell displaying a recommended temp basal value */
 "Recommended Basal" = "الضخ المستمر الموصى به";
@@ -361,13 +361,13 @@
 "Starting Bolus" = "بدء الجرعة";
 
 /* The title text in settings */
-"Suspend Threshold" = "حد التعليق";
+"Suspend Threshold" = "قيمة التعليق";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "انقر للاستئناف";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "The legacy model used by Loop, allowing customization of action duration.";
+"The legacy model used by Loop, allowing customization of action duration." = "النموذج المستخدم بالتطبيق، يسمح بتخصيص مدة الفعالية.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "الحد الأقصى للجرعة هو %@ وحدات";
@@ -379,14 +379,14 @@
 "until %@" = "حتى %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Use Workout Glucose Targets";
+"Use Workout Glucose Targets" = "استخدم أهداف قراءات سكر الدم للتمارين";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "عندما تكون قراءات السكر الحالية أو المتوقعة أقل من قيمة التعليق المؤقت ، لن يوصي التطبيق بجرعة، وسيوصي دائمًا بمعدل ضخ مؤقت يبلغ 0 وحدة في الساعة.";
 
 /* The label of the workout mode toggle button */
-"Workout Targets" = "Workout Targets";
+"Workout Targets" = "أهداف التمارين";
 
