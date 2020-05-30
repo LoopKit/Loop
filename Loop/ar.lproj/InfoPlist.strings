@@ -3,16 +3,16 @@
 "CFBundleName" = "$(PRODUCT_NAME)";
 
 /* Privacy - Bluetooth Always Usage Description */
-"NSBluetoothAlwaysUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothAlwaysUsageDescription" = "يستخدم البلوتوث للتواصل مع مضخة الأنسولين وأجهزة متابعة سكر الدم المستمرة.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
-"NSBluetoothPeripheralUsageDescription" = "Bluetooth is used to communicate with insulin pump and continuous glucose monitor devices.";
+"NSBluetoothPeripheralUsageDescription" = "يستخدم البلوتوث للتواصل مع مضخة الأنسولين وأجهزة متابعة سكر الدم المستمرة.";
 
 /* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID is used to authenticate insulin bolus.";
+"NSFaceIDUsageDescription" = "تستخدم هوية التعرف على الوجه للتحقق من أجل جرعة الأنسولين.";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Meal data from the Health database is used to determine glucose effects. Glucose data from the Health database is used for graphing and momentum calculation. Sleep data from the Health database is used to optimize delivery of Apple Watch complication updates during the time you are awake.";
+"NSHealthShareUsageDescription" = "يتم استخدام بيانات الوجبات من قواعد بيانات تطبيق صحتي لتحديد تأثيرات سكر الدم. يتم استخدام بيانات سكر الدم منقواعد بيانات تطبيق صحتي للرسم البياني والتحليل. تُستخدم بيانات النوم من قواعد بيانات تطبيق صحتي لتحسين توصيل تحديثات تعقيدات ساعة أبل أثناء فترة استيقاظك.";
 
 /* Privacy - Health Update Usage Description */
-"NSHealthUpdateUsageDescription" = "Carbohydrate meal data entered in the app and on the watch is stored in the Health database. Glucose data retrieved from the CGM is stored securely in HealthKit.";
+"NSHealthUpdateUsageDescription" = "بيانات كربوهيدرات الوجبة المدخلة للتطبيق و الساعة محفوظة في قواعد بيانات تطبيق صحتي. يتم تخزين بيانات سكر الدم المستردة من نظام متابعة سكر الدم المستمرة بشكل آمن في تطبيق صحتي.";
