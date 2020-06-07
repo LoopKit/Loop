@@ -1,0 +1,32 @@
+/* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
+"%1$@ at %2$@" = "%1$@ في %2$@";
+
+/* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
+"%1$@ units per hour at %2$@" = "%1$@ وحدات في الساعة وذلك في %2$@";
+
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/دقيقة";
+
+/* Format string describing the time interval since the last completion date. (1: The localized date components */
+"%@ ago" = "%@ مضت";
+
+/* The format string describing the basal rate. */
+"%@ U" = "%@ وحدة";
+
+/* Accessibility hint describing completion HUD for a closed loop */
+"Closed loop" = "حلقة مغلقة";
+
+/* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
+"Loop ran %@ ago" = "الحلقة تعمل منذ %@ ";
+
+/* Accessibility label component for glucose HUD describing an invalid state */
+"Needs attention" = "بحاجة للانتباه";
+
+/* Accessbility hint describing completion HUD for an open loop */
+"Open loop" = "حلقة مفتوحة";
+
+/* Accessibility value for an unknown value */
+"Unknown" = "غير معروف";
+
+/* Acessibility label describing completion HUD waiting for first run */
+"Waiting for first run" = "بانتظار أول تشغيل";
