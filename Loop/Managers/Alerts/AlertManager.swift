@@ -1,5 +1,5 @@
 //
-//  DeviceAlertManager.swift
+//  AlertManager.swift
 //  Loop
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -8,9 +8,9 @@
 
 import LoopKit
 
-protocol DeviceAlertManagerResponder: class {
-    /// Method for our Handlers to call to kick off alert response.  Differs from DeviceAlertResponder because here we need the whole `Identifier`.
-    func acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier)
+protocol AlertManagerResponder: class {
+    /// Method for our Handlers to call to kick off alert response.  Differs from AlertResponder because here we need the whole `Identifier`.
+    func acknowledgeAlert(identifier: Alert.Identifier)
 }
 
 public protocol UserNotificationCenter {
@@ -22,8 +22,8 @@ public protocol UserNotificationCenter {
 }
 extension UNUserNotificationCenter: UserNotificationCenter {}
 
-public enum DeviceAlertUserNotificationUserInfoKey: String {
-    case deviceAlert, deviceAlertTimestamp
+public enum AlertUserNotificationUserInfoKey: String {
+    case alert, alertTimestamp
 }
 
 /// Main (singleton-ish) class that is responsible for:
@@ -31,16 +31,16 @@ public enum DeviceAlertUserNotificationUserInfoKey: String {
 /// - managing the different responders that might acknowledge the alert
 /// - serializing alerts to storage
 /// - etc.
-public final class DeviceAlertManager {
+public final class AlertManager {
     static let soundsDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last!.appendingPathComponent("Sounds")
     
     static let timestampFormatter = ISO8601DateFormatter()
     
-    private let log = DiagnosticLog(category: "DeviceAlertManager")
+    private let log = DiagnosticLog(category: "AlertManager")
 
-    var handlers: [DeviceAlertPresenter] = []
-    var responders: [String: Weak<DeviceAlertResponder>] = [:]
-    var soundVendors: [String: Weak<DeviceAlertSoundVendor>] = [:]
+    var handlers: [AlertPresenter] = []
+    var responders: [String: Weak<AlertResponder>] = [:]
+    var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
     
     let userNotificationCenter: UserNotificationCenter
     let fileManager: FileManager
@@ -48,7 +48,7 @@ public final class DeviceAlertManager {
     let alertStore: AlertStore
 
     public init(rootViewController: UIViewController,
-                handlers: [DeviceAlertPresenter]? = nil,
+                handlers: [AlertPresenter]? = nil,
                 userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current(),
                 fileManager: FileManager = FileManager.default) {
         self.userNotificationCenter = userNotificationCenter
@@ -58,13 +58,13 @@ public final class DeviceAlertManager {
             .appendingPathComponent("AlertStore")
             .appendingPathComponent("AlertStore.sqlite"))
         self.handlers = handlers ??
-            [UserNotificationDeviceAlertPresenter(userNotificationCenter: userNotificationCenter),
-            InAppModalDeviceAlertPresenter(rootViewController: rootViewController, deviceAlertManagerResponder: self)]
+            [UserNotificationAlertPresenter(userNotificationCenter: userNotificationCenter),
+            InAppModalAlertPresenter(rootViewController: rootViewController, alertManagerResponder: self)]
             
         playbackAlertsFromUserNotificationCenter()
     }
 
-    public func addAlertResponder(managerIdentifier: String, alertResponder: DeviceAlertResponder) {
+    public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
         responders[managerIdentifier] = Weak(alertResponder)
     }
     
@@ -72,7 +72,7 @@ public final class DeviceAlertManager {
         responders.removeValue(forKey: managerIdentifier)
     }
     
-    public func addAlertSoundVendor(managerIdentifier: String, soundVendor: DeviceAlertSoundVendor) {
+    public func addAlertSoundVendor(managerIdentifier: String, soundVendor: AlertSoundVendor) {
         soundVendors[managerIdentifier] = Weak(soundVendor)
         initializeSoundVendor(managerIdentifier, soundVendor)
     }
@@ -82,10 +82,10 @@ public final class DeviceAlertManager {
     }
 }
 
-// MARK: DeviceAlertManagerResponder implementation
+// MARK: AlertManagerResponder implementation
 
-extension DeviceAlertManager: DeviceAlertManagerResponder {
-    func acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier) {
+extension AlertManager: AlertManagerResponder {
+    func acknowledgeAlert(identifier: Alert.Identifier) {
         if let responder = responders[identifier.managerIdentifier]?.value {
             responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
         }
@@ -97,51 +97,51 @@ extension DeviceAlertManager: DeviceAlertManagerResponder {
     }
 }
 
-// MARK: DeviceAlertPresenter implementation
+// MARK: AlertPresenter implementation
 
-extension DeviceAlertManager: DeviceAlertPresenter {
+extension AlertManager: AlertPresenter {
 
-    public func issueAlert(_ alert: DeviceAlert) {
+    public func issueAlert(_ alert: Alert) {
         handlers.forEach { $0.issueAlert(alert) }
         alertStore.recordIssued(alert: alert)
     }
     
-    public func retractAlert(identifier: DeviceAlert.Identifier) {
+    public func retractAlert(identifier: Alert.Identifier) {
         handlers.forEach { $0.retractAlert(identifier: identifier) }
         alertStore.recordRetraction(of: identifier)
     }
     
-    private func replayAlert(_ alert: DeviceAlert) {
+    private func replayAlert(_ alert: Alert) {
         handlers.forEach { $0.issueAlert(alert) }
     }
 }
 
 // MARK: Sound Support
 
-extension DeviceAlertManager {
+extension AlertManager {
     
-    public static func soundURL(for alert: DeviceAlert) -> URL? {
+    public static func soundURL(for alert: Alert) -> URL? {
         guard let sound = alert.sound else { return nil }
         return soundURL(managerIdentifier: alert.identifier.managerIdentifier, sound: sound)
     }
     
-    private static func soundURL(managerIdentifier: String, sound: DeviceAlert.Sound) -> URL? {
+    private static func soundURL(managerIdentifier: String, sound: Alert.Sound) -> URL? {
         guard let soundFileName = sound.filename else { return nil }
         
         // Seems all the sound files need to be in the sounds directory, so we namespace the filenames
         return soundsDirectoryURL.appendingPathComponent("\(managerIdentifier)-\(soundFileName)")
     }
     
-    private func initializeSoundVendor(_ managerIdentifier: String, _ soundVendor: DeviceAlertSoundVendor) {
+    private func initializeSoundVendor(_ managerIdentifier: String, _ soundVendor: AlertSoundVendor) {
         let sounds = soundVendor.getSounds()
         guard let baseURL = soundVendor.getSoundBaseURL(), !sounds.isEmpty else {
             return
         }
         do {
-            try fileManager.createDirectory(at: DeviceAlertManager.soundsDirectoryURL, withIntermediateDirectories: true, attributes: nil)
+            try fileManager.createDirectory(at: AlertManager.soundsDirectoryURL, withIntermediateDirectories: true, attributes: nil)
             for sound in sounds {
                 if let fromFilename = sound.filename,
-                    let toURL = DeviceAlertManager.soundURL(managerIdentifier: managerIdentifier, sound: sound) {
+                    let toURL = AlertManager.soundURL(managerIdentifier: managerIdentifier, sound: sound) {
                     try fileManager.copyIfNewer(from: baseURL.appendingPathComponent(fromFilename), to: toURL)
                 }
             }
@@ -154,7 +154,7 @@ extension DeviceAlertManager {
 
 // MARK: Alert Playback
 
-extension DeviceAlertManager {
+extension AlertManager {
     
     private func playbackAlertsFromUserNotificationCenter() {
     
@@ -182,21 +182,21 @@ extension DeviceAlertManager {
         playbackAnyNotificationRequest(request)
     }
     
-    private func playbackAnyNotificationRequest(_ request: UNNotificationRequest, usingTrigger trigger: DeviceAlert.Trigger? = nil) {
-        guard let savedAlertString = request.content.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue] as? String,
-            let savedAlertTimestampString = request.content.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue] as? String,
-            let savedAlertTimestamp = DeviceAlertManager.timestampFormatter.date(from: savedAlertTimestampString) else  {
+    private func playbackAnyNotificationRequest(_ request: UNNotificationRequest, usingTrigger trigger: Alert.Trigger? = nil) {
+        guard let savedAlertString = request.content.userInfo[AlertUserNotificationUserInfoKey.alert.rawValue] as? String,
+            let savedAlertTimestampString = request.content.userInfo[AlertUserNotificationUserInfoKey.alertTimestamp.rawValue] as? String,
+            let savedAlertTimestamp = AlertManager.timestampFormatter.date(from: savedAlertTimestampString) else  {
             self.log.error("Could not find persistent alert in notification")
             return
         }
         do {
-            let savedAlert = try DeviceAlert.decode(from: savedAlertString)
+            let savedAlert = try Alert.decode(from: savedAlertString)
             let newTrigger = trigger ?? determineNewTrigger(from: savedAlert, timestamp: savedAlertTimestamp)
-            let newAlert = DeviceAlert(identifier: savedAlert.identifier,
-                                       foregroundContent: savedAlert.foregroundContent,
-                                       backgroundContent: savedAlert.backgroundContent,
-                                       trigger: newTrigger,
-                                       sound: savedAlert.sound)
+            let newAlert = Alert(identifier: savedAlert.identifier,
+                                 foregroundContent: savedAlert.foregroundContent,
+                                 backgroundContent: savedAlert.backgroundContent,
+                                 trigger: newTrigger,
+                                 sound: savedAlert.sound)
             self.log.debug("Replaying %@Alert: %@ with %@trigger %@",
                            trigger != nil ? "" : "Pending ",
                            trigger != nil ? "" : "new ",
@@ -207,7 +207,7 @@ extension DeviceAlertManager {
         }
     }
     
-    private func determineNewTrigger(from alert: DeviceAlert, timestamp: Date) -> DeviceAlert.Trigger {
+    private func determineNewTrigger(from alert: Alert, timestamp: Date) -> Alert.Trigger {
         switch alert.trigger {
         case .immediate:
             return alert.trigger
@@ -231,7 +231,7 @@ extension DeviceAlertManager {
 }
 
 // MARK: Alert storage access
-extension DeviceAlertManager {
+extension AlertManager {
     
     func getStoredEntries(startDate: Date, completion: @escaping (_ report: String) -> Void) {
         alertStore.executeQuery(since: startDate, limit: 100) { result in
@@ -287,7 +287,7 @@ extension URL {
     }
 }
 
-public extension DeviceAlert {
+public extension Alert {
     
     enum Error: String, Swift.Error {
         case noBackgroundContent
@@ -309,9 +309,9 @@ public extension DeviceAlert {
             LoopNotificationUserInfoKey.alertTypeID.rawValue: identifier.alertIdentifier,
         ]
         let encodedAlert = try encodeToString()
-        userNotificationContent.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue] = encodedAlert
-        userNotificationContent.userInfo[DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue] =
-            DeviceAlertManager.timestampFormatter.string(from: timestamp)
+        userNotificationContent.userInfo[AlertUserNotificationUserInfoKey.alert.rawValue] = encodedAlert
+        userNotificationContent.userInfo[AlertUserNotificationUserInfoKey.alertTimestamp.rawValue] =
+            AlertManager.timestampFormatter.string(from: timestamp)
         return userNotificationContent
     }
     
@@ -328,7 +328,7 @@ public extension DeviceAlert {
                 // TODO: Not sure how to "force" UNNotificationSound to "silence"...so for now we just do the default
                 break
             default:
-                if let actualFileName = DeviceAlertManager.soundURL(for: self)?.lastPathComponent {
+                if let actualFileName = AlertManager.soundURL(for: self)?.lastPathComponent {
                     let unname = UNNotificationSoundName(rawValue: actualFileName)
                     return content.isCritical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
                 }
@@ -340,17 +340,17 @@ public extension DeviceAlert {
 }
 
 public extension UNNotificationRequest {
-    convenience init(from deviceAlert: DeviceAlert, timestamp: Date) throws {
-        let uncontent = try deviceAlert.getUserNotificationContent(timestamp: timestamp)
-        self.init(identifier: deviceAlert.identifier.value,
+    convenience init(from alert: Alert, timestamp: Date) throws {
+        let uncontent = try alert.getUserNotificationContent(timestamp: timestamp)
+        self.init(identifier: alert.identifier.value,
                   content: uncontent,
-                  trigger: UNTimeIntervalNotificationTrigger(from: deviceAlert.trigger))
+                  trigger: UNTimeIntervalNotificationTrigger(from: alert.trigger))
     }
 }
 
 fileprivate extension UNTimeIntervalNotificationTrigger {
-    convenience init?(from deviceAlertTrigger: DeviceAlert.Trigger) {
-        switch deviceAlertTrigger {
+    convenience init?(from alertTrigger: Alert.Trigger) {
+        switch alertTrigger {
         case .immediate:
             return nil
         case .delayed(let timeInterval):

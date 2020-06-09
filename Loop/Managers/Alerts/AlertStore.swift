@@ -50,7 +50,7 @@ public class AlertStore {
 
 extension AlertStore {
     
-    public func recordIssued(alert: DeviceAlert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func recordIssued(alert: Alert, at date: Date = Date(), completion: ((Result<Void, Error>) -> Void)? = nil) {
         self.managedObjectContext.perform {
             _ = StoredAlert(from: alert, context: self.managedObjectContext, issuedDate: date)
             do {
@@ -64,17 +64,17 @@ extension AlertStore {
         }
     }
     
-    public func recordAcknowledgement(of identifier: DeviceAlert.Identifier, at date: Date = Date(),
+    public func recordAcknowledgement(of identifier: Alert.Identifier, at date: Date = Date(),
                                       completion: ((Result<Void, Error>) -> Void)? = nil) {
         recordUpdateOfLatest(of: identifier, with: { $0.acknowledgedDate = date }, completion: completion)
     }
     
-    public func recordRetraction(of identifier: DeviceAlert.Identifier, at date: Date = Date(),
+    public func recordRetraction(of identifier: Alert.Identifier, at date: Date = Date(),
                                  completion: ((Result<Void, Error>) -> Void)? = nil) {
         recordUpdateOfLatest(of: identifier, with: { $0.retractedDate = date }, completion: completion)
     }
     
-    private func recordUpdateOfLatest(of identifier: DeviceAlert.Identifier,
+    private func recordUpdateOfLatest(of identifier: Alert.Identifier,
                                       with block: @escaping (StoredAlert) -> Void,
                                       completion: ((Result<Void, Error>) -> Void)?) {
         self.managedObjectContext.perform {
@@ -102,7 +102,7 @@ extension AlertStore {
         }
     }
 
-    private func lookupLatest(identifier: DeviceAlert.Identifier, completion: @escaping (Result<StoredAlert?, Error>) -> Void) {
+    private func lookupLatest(identifier: Alert.Identifier, completion: @escaping (Result<StoredAlert?, Error>) -> Void) {
         managedObjectContext.perform {
             do {
                 let fetchRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
@@ -199,7 +199,7 @@ extension AlertStore {
     }
     
     // At the moment, this is only used for unit testing
-    internal func fetch(identifier: DeviceAlert.Identifier, completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
+    internal func fetch(identifier: Alert.Identifier, completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
         self.managedObjectContext.perform {
             let storedRequest: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
             storedRequest.predicate = identifier.equalsPredicate
@@ -213,7 +213,7 @@ extension AlertStore {
     }
 }
 
-extension DeviceAlert.Identifier {
+extension Alert.Identifier {
     var equalsPredicate: NSPredicate {
         return NSCompoundPredicate(andPredicateWithSubpredicates: [
             NSPredicate(format: "managerIdentifier == %@", managerIdentifier),

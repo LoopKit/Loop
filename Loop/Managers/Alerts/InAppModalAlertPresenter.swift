@@ -1,5 +1,5 @@
 //
-//  InAppModalDeviceAlertPresenter.swift
+//  InAppModalAlertPresenter.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -9,13 +9,13 @@
 import Foundation
 import LoopKit
 
-public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
+public class InAppModalAlertPresenter: AlertPresenter {
 
     private weak var rootViewController: UIViewController?
-    private weak var deviceAlertManagerResponder: DeviceAlertManagerResponder?
+    private weak var alertManagerResponder: AlertManagerResponder?
 
-    private var alertsShowing: [DeviceAlert.Identifier: (UIAlertController, DeviceAlert)] = [:]
-    private var alertsPending: [DeviceAlert.Identifier: (Timer, DeviceAlert)] = [:]
+    private var alertsShowing: [Alert.Identifier: (UIAlertController, Alert)] = [:]
+    private var alertsPending: [Alert.Identifier: (Timer, Alert)] = [:]
 
     typealias ActionFactoryFunction = (String?, UIAlertAction.Style, ((UIAlertAction) -> Void)?) -> UIAlertAction
     private let newActionFunc: ActionFactoryFunction
@@ -23,15 +23,15 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
     typealias TimerFactoryFunction = (TimeInterval, Bool, (() -> Void)?) -> Timer
     private let newTimerFunc: TimerFactoryFunction
 
-    private let soundPlayer: DeviceAlertSoundPlayer
+    private let soundPlayer: AlertSoundPlayer
 
     init(rootViewController: UIViewController,
-         deviceAlertManagerResponder: DeviceAlertManagerResponder,
-         soundPlayer: DeviceAlertSoundPlayer = DeviceAVSoundPlayer(),
+         alertManagerResponder: AlertManagerResponder,
+         soundPlayer: AlertSoundPlayer = DeviceAVSoundPlayer(),
          newActionFunc: @escaping ActionFactoryFunction = UIAlertAction.init,
          newTimerFunc: TimerFactoryFunction? = nil) {
         self.rootViewController = rootViewController
-        self.deviceAlertManagerResponder = deviceAlertManagerResponder
+        self.alertManagerResponder = alertManagerResponder
         self.soundPlayer = soundPlayer
         self.newActionFunc = newActionFunc
         self.newTimerFunc = newTimerFunc ?? { timeInterval, repeats, block in
@@ -39,7 +39,7 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
         
-    public func issueAlert(_ alert: DeviceAlert) {
+    public func issueAlert(_ alert: Alert) {
         switch alert.trigger {
         case .immediate:
             show(alert: alert)
@@ -50,7 +50,7 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
     
-    public func retractAlert(identifier: DeviceAlert.Identifier) {
+    public func retractAlert(identifier: Alert.Identifier) {
         DispatchQueue.main.async {
             self.alertsPending[identifier]?.0.invalidate()
             self.clearPendingAlert(identifier: identifier)
@@ -58,16 +58,16 @@ public class InAppModalDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
         
-    func removeDeliveredAlert(identifier: DeviceAlert.Identifier, completion: (() -> Void)?) {
+    func removeDeliveredAlert(identifier: Alert.Identifier, completion: (() -> Void)?) {
         self.alertsShowing[identifier]?.0.dismiss(animated: true, completion: completion)
         self.clearDeliveredAlert(identifier: identifier)
     }
 }
 
 /// Private functions
-extension InAppModalDeviceAlertPresenter {
+extension InAppModalAlertPresenter {
         
-    private func schedule(alert: DeviceAlert, interval: TimeInterval, repeats: Bool) {
+    private func schedule(alert: Alert, interval: TimeInterval, repeats: Bool) {
         guard alert.foregroundContent != nil else {
             return
         }
@@ -85,7 +85,7 @@ extension InAppModalDeviceAlertPresenter {
         }
     }
     
-    private func show(alert: DeviceAlert) {
+    private func show(alert: Alert) {
         guard let content = alert.foregroundContent else {
             return
         }
@@ -96,38 +96,38 @@ extension InAppModalDeviceAlertPresenter {
             self.playSound(for: alert)
             let alertController = self.presentAlert(title: content.title, message: content.body, action: content.acknowledgeActionButtonLabel) { [weak self] in
                 self?.clearDeliveredAlert(identifier: alert.identifier)
-                self?.deviceAlertManagerResponder?.acknowledgeDeviceAlert(identifier: alert.identifier)
+                self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
             }
             self.addDeliveredAlert(alert: alert, controller: alertController)
         }
     }
     
-    private func addPendingAlert(alert: DeviceAlert, timer: Timer) {
+    private func addPendingAlert(alert: Alert, timer: Timer) {
         dispatchPrecondition(condition: .onQueue(.main))
         self.alertsPending[alert.identifier] = (timer, alert)
     }
 
-    private func addDeliveredAlert(alert: DeviceAlert, controller: UIAlertController) {
+    private func addDeliveredAlert(alert: Alert, controller: UIAlertController) {
         dispatchPrecondition(condition: .onQueue(.main))
         self.alertsShowing[alert.identifier] = (controller, alert)
     }
     
-    private func clearPendingAlert(identifier: DeviceAlert.Identifier) {
+    private func clearPendingAlert(identifier: Alert.Identifier) {
         dispatchPrecondition(condition: .onQueue(.main))
         alertsPending[identifier] = nil
     }
 
-    private func clearDeliveredAlert(identifier: DeviceAlert.Identifier) {
+    private func clearDeliveredAlert(identifier: Alert.Identifier) {
         dispatchPrecondition(condition: .onQueue(.main))
         alertsShowing[identifier] = nil
     }
     
-    private func isAlertPending(identifier: DeviceAlert.Identifier) -> Bool {
+    private func isAlertPending(identifier: Alert.Identifier) -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))
         return alertsPending.index(forKey: identifier) != nil
     }
     
-    private func isAlertShowing(identifier: DeviceAlert.Identifier) -> Bool {
+    private func isAlertShowing(identifier: Alert.Identifier) -> Bool {
         dispatchPrecondition(condition: .onQueue(.main))
         return alertsShowing.index(forKey: identifier) != nil
     }
@@ -155,7 +155,7 @@ extension InAppModalDeviceAlertPresenter {
         return controller
     }
     
-    private func playSound(for alert: DeviceAlert) {
+    private func playSound(for alert: Alert) {
         guard let sound = alert.sound else { return }
         switch sound {
         case .vibrate:
@@ -166,7 +166,7 @@ extension InAppModalDeviceAlertPresenter {
             // Assuming in-app alerts should also vibrate.  That way, if the user has "silent mode" on, they still get
             // some kind of haptic feedback
             soundPlayer.vibrate()
-            guard let url = DeviceAlertManager.soundURL(for: alert) else { return }
+            guard let url = AlertManager.soundURL(for: alert) else { return }
             soundPlayer.play(url: url)
         }
     }

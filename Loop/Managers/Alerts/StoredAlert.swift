@@ -14,29 +14,29 @@ extension StoredAlert {
     static var encoder = JSONEncoder()
     static var decoder = JSONDecoder()
           
-    convenience init(from deviceAlert: DeviceAlert, context: NSManagedObjectContext, issuedDate: Date = Date()) {
+    convenience init(from alert: Alert, context: NSManagedObjectContext, issuedDate: Date = Date()) {
         do {
             self.init(context: context)
             self.issuedDate = issuedDate
-            alertIdentifier = deviceAlert.identifier.alertIdentifier
-            managerIdentifier = deviceAlert.identifier.managerIdentifier
-            triggerType = deviceAlert.trigger.storedType
-            triggerInterval = deviceAlert.trigger.storedInterval
-            isCritical = deviceAlert.foregroundContent?.isCritical ?? false || deviceAlert.backgroundContent?.isCritical ?? false
+            alertIdentifier = alert.identifier.alertIdentifier
+            managerIdentifier = alert.identifier.managerIdentifier
+            triggerType = alert.trigger.storedType
+            triggerInterval = alert.trigger.storedInterval
+            isCritical = alert.foregroundContent?.isCritical ?? false || alert.backgroundContent?.isCritical ?? false
             // Encode as JSON strings
             let encoder = StoredAlert.encoder
-            sound = try encoder.encodeToStringIfPresent(deviceAlert.sound)
-            foregroundContent = try encoder.encodeToStringIfPresent(deviceAlert.foregroundContent)
-            backgroundContent = try encoder.encodeToStringIfPresent(deviceAlert.backgroundContent)
+            sound = try encoder.encodeToStringIfPresent(alert.sound)
+            foregroundContent = try encoder.encodeToStringIfPresent(alert.foregroundContent)
+            backgroundContent = try encoder.encodeToStringIfPresent(alert.backgroundContent)
         } catch {
             fatalError("Failed to encode: \(error)")
         }
     }
 
-    public var trigger: DeviceAlert.Trigger {
+    public var trigger: Alert.Trigger {
         get {
             do {
-                return try DeviceAlert.Trigger(storedType: triggerType, storedInterval: triggerInterval)
+                return try Alert.Trigger(storedType: triggerType, storedInterval: triggerInterval)
             } catch {
                 fatalError("\(error): \(triggerType) \(String(describing: triggerInterval))")
             }
@@ -46,14 +46,14 @@ extension StoredAlert {
     public var title: String? {
         if let contentString = foregroundContent ?? backgroundContent,
             let contentData = contentString.data(using: .utf8),
-            let content = try? StoredAlert.decoder.decode(DeviceAlert.Content.self, from: contentData) {
+            let content = try? StoredAlert.decoder.decode(Alert.Content.self, from: contentData) {
             return content.title
         }
         return nil
     }
     
-    public var identifier: DeviceAlert.Identifier {
-        return DeviceAlert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier)
+    public var identifier: Alert.Identifier {
+        return Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier)
     }
     
     public override func willSave() {
@@ -64,7 +64,7 @@ extension StoredAlert {
     }
 }
 
-extension DeviceAlert.Trigger {
+extension Alert.Trigger {
     enum StorageError: Error {
         case invalidStoredInterval, invalidStoredType
     }

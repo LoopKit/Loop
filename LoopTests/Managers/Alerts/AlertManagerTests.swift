@@ -1,5 +1,5 @@
 //
-//  DeviceAlertManagerTests.swift
+//  AlertManagerTests.swift
 //  LoopTests
 //
 //  Created by Rick Pasetto on 4/15/20.
@@ -11,26 +11,26 @@ import UserNotifications
 import XCTest
 @testable import Loop
 
-class DeviceAlertManagerTests: XCTestCase {
+class AlertManagerTests: XCTestCase {
     
-    class MockPresenter: DeviceAlertPresenter {
-        var issuedAlert: DeviceAlert?
-        func issueAlert(_ alert: DeviceAlert) {
+    class MockPresenter: AlertPresenter {
+        var issuedAlert: Alert?
+        func issueAlert(_ alert: Alert) {
             issuedAlert = alert
         }
-        var retractedAlertIdentifier: DeviceAlert.Identifier?
-        func retractAlert(identifier: DeviceAlert.Identifier) {
+        var retractedAlertIdentifier: Alert.Identifier?
+        func retractAlert(identifier: Alert.Identifier) {
             retractedAlertIdentifier = identifier
         }
     }
     
-    class MockResponder: DeviceAlertResponder {
-        var acknowledged: [DeviceAlert.AlertIdentifier: Bool] = [:]
-        func acknowledgeAlert(alertIdentifier: DeviceAlert.AlertIdentifier) {
+    class MockResponder: AlertResponder {
+        var acknowledged: [Alert.AlertIdentifier: Bool] = [:]
+        func acknowledgeAlert(alertIdentifier: Alert.AlertIdentifier) {
             acknowledged[alertIdentifier] = true
         }
     }
-
+    
     class MockFileManager: FileManager {
         
         var fileExists = true
@@ -46,7 +46,7 @@ class DeviceAlertManagerTests: XCTestCase {
         }
         override func attributesOfItem(atPath path: String) throws -> [FileAttributeKey : Any] {
             return path.contains("Sounds") ? path.contains("existsNewer") ? [.creationDate: newer] : [.creationDate: older] :
-                 [.creationDate: newer]
+                [.creationDate: newer]
         }
         var removedURLs = [URL]()
         override func removeItem(at URL: URL) throws {
@@ -62,27 +62,27 @@ class DeviceAlertManagerTests: XCTestCase {
             return []
         }
     }
-
-    class MockSoundVendor: DeviceAlertSoundVendor {
+    
+    class MockSoundVendor: AlertSoundVendor {
         func getSoundBaseURL() -> URL? {
             // Hm.  It's not easy to make a "fake" URL, so we'll use this one:
             return Bundle.main.resourceURL
         }
         
-        func getSounds() -> [DeviceAlert.Sound] {
+        func getSounds() -> [Alert.Sound] {
             return [.sound(name: "doesntExist"), .sound(name: "existsNewer"), .sound(name: "existsOlder")]
         }
     }
     
     static let mockManagerIdentifier = "mockManagerIdentifier"
     static let mockTypeIdentifier = "mockTypeIdentifier"
-    static let mockIdentifier = DeviceAlert.Identifier(managerIdentifier: mockManagerIdentifier, alertIdentifier: mockTypeIdentifier)
-    let mockDeviceAlert = DeviceAlert(identifier: mockIdentifier, foregroundContent: nil, backgroundContent: nil, trigger: .immediate)
+    static let mockIdentifier = Alert.Identifier(managerIdentifier: mockManagerIdentifier, alertIdentifier: mockTypeIdentifier)
+    let mockAlert = Alert(identifier: mockIdentifier, foregroundContent: nil, backgroundContent: nil, trigger: .immediate)
     
     var mockFileManager: MockFileManager!
     var mockPresenter: MockPresenter!
     var mockUserNotificationCenter: MockUserNotificationCenter!
-    var deviceAlertManager: DeviceAlertManager!
+    var alertManager: AlertManager!
     var isInBackground = true
     
     override class func setUp() {
@@ -94,60 +94,60 @@ class DeviceAlertManagerTests: XCTestCase {
         mockFileManager = MockFileManager()
         mockPresenter = MockPresenter()
         mockUserNotificationCenter = MockUserNotificationCenter()
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                handlers: [mockPresenter],
-                                                userNotificationCenter: mockUserNotificationCenter,
-                                                fileManager: mockFileManager)
+        alertManager = AlertManager(rootViewController: UIViewController(),
+                                    handlers: [mockPresenter],
+                                    userNotificationCenter: mockUserNotificationCenter,
+                                    fileManager: mockFileManager)
     }
     
     func testIssueAlertOnHandlerCalled() {
-        deviceAlertManager.issueAlert(mockDeviceAlert)
-        XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.issuedAlert?.identifier)
+        alertManager.issueAlert(mockAlert)
+        XCTAssertEqual(mockAlert.identifier, mockPresenter.issuedAlert?.identifier)
         XCTAssertNil(mockPresenter.retractedAlertIdentifier)
     }
     
     func testRetractAlertOnHandlerCalled() {
-        deviceAlertManager.retractAlert(identifier: mockDeviceAlert.identifier)
+        alertManager.retractAlert(identifier: mockAlert.identifier)
         XCTAssertNil(mockPresenter.issuedAlert)
-        XCTAssertEqual(mockDeviceAlert.identifier, mockPresenter.retractedAlertIdentifier)
+        XCTAssertEqual(mockAlert.identifier, mockPresenter.retractedAlertIdentifier)
     }
     
     func testAlertResponderAcknowledged() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
+        alertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
-        deviceAlertManager.acknowledgeDeviceAlert(identifier: Self.mockIdentifier)
+        alertManager.acknowledgeAlert(identifier: Self.mockIdentifier)
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == true)
     }
     
     func testAlertResponderNotAcknowledgedIfWrongManagerIdentifier() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
+        alertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
-        deviceAlertManager.acknowledgeDeviceAlert(identifier: DeviceAlert.Identifier(managerIdentifier: "foo", alertIdentifier: Self.mockTypeIdentifier))
+        alertManager.acknowledgeAlert(identifier: Alert.Identifier(managerIdentifier: "foo", alertIdentifier: Self.mockTypeIdentifier))
         XCTAssertTrue(responder.acknowledged.isEmpty)
     }
     
     func testRemovedAlertResponderDoesntAcknowledge() {
         let responder = MockResponder()
-        deviceAlertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
+        alertManager.addAlertResponder(managerIdentifier: Self.mockManagerIdentifier, alertResponder: responder)
         XCTAssertTrue(responder.acknowledged.isEmpty)
-        deviceAlertManager.acknowledgeDeviceAlert(identifier: Self.mockIdentifier)
+        alertManager.acknowledgeAlert(identifier: Self.mockIdentifier)
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == true)
         
-        responder.acknowledged[DeviceAlertManagerTests.mockTypeIdentifier] = false
-        deviceAlertManager.removeAlertResponder(managerIdentifier: DeviceAlertManagerTests.mockManagerIdentifier)
-        deviceAlertManager.acknowledgeDeviceAlert(identifier: Self.mockIdentifier)
+        responder.acknowledged[AlertManagerTests.mockTypeIdentifier] = false
+        alertManager.removeAlertResponder(managerIdentifier: AlertManagerTests.mockManagerIdentifier)
+        alertManager.acknowledgeAlert(identifier: Self.mockIdentifier)
         XCTAssert(responder.acknowledged[Self.mockTypeIdentifier] == false)
     }
     
     func testAcknowledgedAlertsRemovedFromUserNotificationCenter() {
-        deviceAlertManager.acknowledgeDeviceAlert(identifier: Self.mockIdentifier)
+        alertManager.acknowledgeAlert(identifier: Self.mockIdentifier)
     }
     
     func testSoundVendorInitialization() {
         let soundVendor = MockSoundVendor()
-        deviceAlertManager.addAlertSoundVendor(managerIdentifier: Self.mockManagerIdentifier, soundVendor: soundVendor)
+        alertManager.addAlertSoundVendor(managerIdentifier: Self.mockManagerIdentifier, soundVendor: soundVendor)
         XCTAssertEqual("Sounds", mockFileManager.createdDirURL?.lastPathComponent)
         XCTAssertEqual(["\(Self.mockManagerIdentifier)-existsOlder"], mockFileManager.removedURLs.map { $0.lastPathComponent })
         XCTAssertEqual(["doesntExist", "existsOlder"], mockFileManager.copiedSrcURLs.map { $0.lastPathComponent })
@@ -155,48 +155,48 @@ class DeviceAlertManagerTests: XCTestCase {
     }
     
     // Unfortunately, it is not very easy to test playback of delivered notifications, because we
-    // can't construct UNNotifications.  Hopefully, the code footprint in `DeviceAlertManager.playbackDeliveredNotification` is small enough, because it calls common code under test.
+    // can't construct UNNotifications.  Hopefully, the code footprint in `AlertManager.playbackDeliveredNotification` is small enough, because it calls common code under test.
     
     func testPlaybackPendingImmediateNotification() {
         let date = Date()
-        let content = DeviceAlert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = DeviceAlert(identifier: Self.mockIdentifier,
-                                foregroundContent: content, backgroundContent: content, trigger: .immediate)
-
+        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+        let alert = Alert(identifier: Self.mockIdentifier,
+                          foregroundContent: content, backgroundContent: content, trigger: .immediate)
+        
         mockUserNotificationCenter.pendingRequests = [ try! UNNotificationRequest(from: alert, timestamp: date) ]
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                handlers: [mockPresenter],
-                                                userNotificationCenter: mockUserNotificationCenter,
-                                                fileManager: mockFileManager)
+        alertManager = AlertManager(rootViewController: UIViewController(),
+                                    handlers: [mockPresenter],
+                                    userNotificationCenter: mockUserNotificationCenter,
+                                    fileManager: mockFileManager)
         XCTAssertEqual(alert, mockPresenter.issuedAlert)
     }
     
     func testPlaybackPendingExpiredDelayedNotification() {
         let date = Date.distantPast
-        let content = DeviceAlert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = DeviceAlert(identifier: Self.mockIdentifier,
-                                foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
-
+        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+        let alert = Alert(identifier: Self.mockIdentifier,
+                          foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
+        
         mockUserNotificationCenter.pendingRequests = [ try! UNNotificationRequest(from: alert, timestamp: date) ]
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                handlers: [mockPresenter],
-                                                userNotificationCenter: mockUserNotificationCenter,
-                                                fileManager: mockFileManager)
-        let expected = DeviceAlert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
+        alertManager = AlertManager(rootViewController: UIViewController(),
+                                    handlers: [mockPresenter],
+                                    userNotificationCenter: mockUserNotificationCenter,
+                                    fileManager: mockFileManager)
+        let expected = Alert(identifier: Self.mockIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate)
         XCTAssertEqual(expected, mockPresenter.issuedAlert)
     }
     
     func testPlaybackPendingDelayedNotification() {
         let date = Date().addingTimeInterval(-15.0) // Pretend the 30-second-delayed alert was issued 15 seconds ago
-        let content = DeviceAlert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = DeviceAlert(identifier: Self.mockIdentifier,
-                                foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
-
+        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+        let alert = Alert(identifier: Self.mockIdentifier,
+                          foregroundContent: content, backgroundContent: content, trigger: .delayed(interval: 30.0))
+        
         mockUserNotificationCenter.pendingRequests = [ try! UNNotificationRequest(from: alert, timestamp: date) ]
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                handlers: [mockPresenter],
-                                                userNotificationCenter: mockUserNotificationCenter,
-                                                fileManager: mockFileManager)
+        alertManager = AlertManager(rootViewController: UIViewController(),
+                                    handlers: [mockPresenter],
+                                    userNotificationCenter: mockUserNotificationCenter,
+                                    fileManager: mockFileManager)
         // The trigger for this should be `.delayed` by "something less than 15 seconds",
         // but the exact value depends on the speed of executing this test.
         // As long as it is <= 15 seconds, we call it good.
@@ -211,24 +211,24 @@ class DeviceAlertManagerTests: XCTestCase {
     
     func testPlaybackPendingRepeatingNotification() {
         let date = Date.distantPast
-        let content = DeviceAlert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
-        let alert = DeviceAlert(identifier: Self.mockIdentifier,
-                                foregroundContent: content, backgroundContent: content, trigger: .repeating(repeatInterval: 60.0))
-
+        let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label")
+        let alert = Alert(identifier: Self.mockIdentifier,
+                          foregroundContent: content, backgroundContent: content, trigger: .repeating(repeatInterval: 60.0))
+        
         mockUserNotificationCenter.pendingRequests = [ try! UNNotificationRequest(from: alert, timestamp: date) ]
-        deviceAlertManager = DeviceAlertManager(rootViewController: UIViewController(),
-                                                handlers: [mockPresenter],
-                                                userNotificationCenter: mockUserNotificationCenter,
-                                                fileManager: mockFileManager)
+        alertManager = AlertManager(rootViewController: UIViewController(),
+                                    handlers: [mockPresenter],
+                                    userNotificationCenter: mockUserNotificationCenter,
+                                    fileManager: mockFileManager)
         XCTAssertEqual(alert, mockPresenter.issuedAlert)
     }
 }
 
 class MockUserNotificationCenter: UserNotificationCenter {
-        
+    
     var pendingRequests = [UNNotificationRequest]()
     var deliveredRequests = [UNNotificationRequest]()
-            
+    
     func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)? = nil) {
         pendingRequests.append(request)
     }
@@ -238,7 +238,7 @@ class MockUserNotificationCenter: UserNotificationCenter {
             pendingRequests.removeAll { $0.identifier == identifier }
         }
     }
-
+    
     func removeDeliveredNotifications(withIdentifiers identifiers: [String]) {
         identifiers.forEach { identifier in
             deliveredRequests.removeAll { $0.identifier == identifier }

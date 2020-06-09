@@ -15,11 +15,11 @@ class AlertStoreTests: XCTestCase {
     
     var alertStore: AlertStore!
     
-    static let identifier1 = DeviceAlert.Identifier(managerIdentifier: "managerIdentifier1", alertIdentifier: "alertIdentifier1")
-    let alert1 = DeviceAlert(identifier: identifier1, foregroundContent: nil, backgroundContent: nil, trigger: .immediate, sound: nil)
-    static let identifier2 = DeviceAlert.Identifier(managerIdentifier: "managerIdentifier2", alertIdentifier: "alertIdentifier2")
-    static let content = DeviceAlert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label", isCritical: true)
-    let alert2 = DeviceAlert(identifier: identifier2, foregroundContent: content, backgroundContent: content, trigger: .immediate, sound: .sound(name: "soundName"))
+    static let identifier1 = Alert.Identifier(managerIdentifier: "managerIdentifier1", alertIdentifier: "alertIdentifier1")
+    let alert1 = Alert(identifier: identifier1, foregroundContent: nil, backgroundContent: nil, trigger: .immediate, sound: nil)
+    static let identifier2 = Alert.Identifier(managerIdentifier: "managerIdentifier2", alertIdentifier: "alertIdentifier2")
+    static let content = Alert.Content(title: "title", body: "body", acknowledgeActionButtonLabel: "label", isCritical: true)
+    let alert2 = Alert(identifier: identifier2, foregroundContent: content, backgroundContent: content, trigger: .immediate, sound: .sound(name: "soundName"))
 
     override func setUp() {
         alertStore = AlertStore()
@@ -30,12 +30,12 @@ class AlertStoreTests: XCTestCase {
     }
     
     func testTriggerTypeIntervalConversion() {
-        let immediate = DeviceAlert.Trigger.immediate
-        let delayed = DeviceAlert.Trigger.delayed(interval: 1.0)
-        let repeating = DeviceAlert.Trigger.repeating(repeatInterval: 2.0)
-        XCTAssertEqual(immediate, try? DeviceAlert.Trigger(storedType: immediate.storedType, storedInterval: immediate.storedInterval))
-        XCTAssertEqual(delayed, try? DeviceAlert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval))
-        XCTAssertEqual(repeating, try? DeviceAlert.Trigger(storedType: repeating.storedType, storedInterval: repeating.storedInterval))
+        let immediate = Alert.Trigger.immediate
+        let delayed = Alert.Trigger.delayed(interval: 1.0)
+        let repeating = Alert.Trigger.repeating(repeatInterval: 2.0)
+        XCTAssertEqual(immediate, try? Alert.Trigger(storedType: immediate.storedType, storedInterval: immediate.storedInterval))
+        XCTAssertEqual(delayed, try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval))
+        XCTAssertEqual(repeating, try? Alert.Trigger(storedType: repeating.storedType, storedInterval: repeating.storedInterval))
         XCTAssertNil(immediate.storedInterval)
     }
     
@@ -50,7 +50,7 @@ class AlertStoreTests: XCTestCase {
         XCTAssertEqual(Date.distantPast, object.issuedDate)
         XCTAssertEqual(0, object.modificationCounter)
         XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
-        XCTAssertEqual(DeviceAlert.Trigger.immediate, object.trigger)
+        XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
     }
     
     func testRecordIssued() {

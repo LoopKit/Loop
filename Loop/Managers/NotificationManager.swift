@@ -14,7 +14,7 @@ struct NotificationManager {
 
     enum Action: String {
         case retryBolus
-        case acknowledgeDeviceAlert
+        case acknowledgeAlert
     }
 
     private static var notificationCategories: Set<UNNotificationCategory> {
@@ -33,15 +33,15 @@ struct NotificationManager {
             options: []
         ))
         
-        let acknowledgeDeviceAlertAction = UNNotificationAction(
-            identifier: Action.acknowledgeDeviceAlert.rawValue,
+        let acknowledgeAlertAction = UNNotificationAction(
+            identifier: Action.acknowledgeAlert.rawValue,
             title: NSLocalizedString("OK", comment: "The title of the notification action to acknowledge a device alert"),
             options: .foreground
         )
         
         categories.append(UNNotificationCategory(
             identifier: LoopNotificationCategory.alert.rawValue,
-            actions: [acknowledgeDeviceAlertAction],
+            actions: [acknowledgeAlertAction],
             intentIdentifiers: [],
             options: .customDismissAction
         ))

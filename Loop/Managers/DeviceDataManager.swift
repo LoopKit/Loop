@@ -20,7 +20,7 @@ final class DeviceDataManager {
     private let log = DiagnosticLog(category: "DeviceDataManager")
 
     let pluginManager: PluginManager
-    weak var deviceAlertManager: DeviceAlertManager!
+    weak var alertManager: AlertManager!
 
     /// Remember the launch date of the app for diagnostic reporting
     private let launchDate = Date()
@@ -99,7 +99,7 @@ final class DeviceDataManager {
 
     private(set) var loopManager: LoopDataManager!
     
-    init(pluginManager: PluginManager, deviceAlertManager: DeviceAlertManager) {
+    init(pluginManager: PluginManager, alertManager: AlertManager) {
         
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -109,7 +109,7 @@ final class DeviceDataManager {
         analyticsServicesManager = AnalyticsServicesManager()
         
         self.pluginManager = pluginManager
-        self.deviceAlertManager = deviceAlertManager
+        self.alertManager = alertManager
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -253,7 +253,7 @@ final class DeviceDataManager {
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void) {
         self.loopManager.generateDiagnosticReport { (loopReport) in
             
-            self.deviceAlertManager.getStoredEntries(startDate: Date() - .hours(48)) { (alertReport) in
+            self.alertManager.getStoredEntries(startDate: Date() - .hours(48)) { (alertReport) in
                 
                 self.deviceLog.getLogEntries(startDate: Date() - .hours(48)) { (result) in
                     let deviceLogReport: String
@@ -313,9 +313,9 @@ private extension DeviceDataManager {
 
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
-            deviceAlertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
                                                   alertResponder: cgmManager)
-            deviceAlertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
                                                     soundVendor: cgmManager)
         }
     }
@@ -334,9 +334,9 @@ private extension DeviceDataManager {
             loopManager?.doseStore.pumpRecordsBasalProfileStartEvents = pumpRecordsBasalProfileStartEvents
         }
         if let pumpManager = pumpManager {
-            deviceAlertManager?.addAlertResponder(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertResponder(managerIdentifier: pumpManager.managerIdentifier,
                                                   alertResponder: pumpManager)
-            deviceAlertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
+            alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
                                                     soundVendor: pumpManager)
         }
     }
@@ -417,14 +417,14 @@ extension DeviceDataManager: DeviceManagerDelegate {
 }
 
 // MARK: - UserAlertHandler
-extension DeviceDataManager: DeviceAlertPresenter {
+extension DeviceDataManager: AlertPresenter {
 
-    func issueAlert(_ alert: DeviceAlert) {
-        deviceAlertManager?.issueAlert(alert)
+    func issueAlert(_ alert: Alert) {
+        alertManager?.issueAlert(alert)
     }
     
-    func retractAlert(identifier: DeviceAlert.Identifier) {
-        deviceAlertManager?.retractAlert(identifier: identifier)
+    func retractAlert(identifier: Alert.Identifier) {
+        alertManager?.retractAlert(identifier: identifier)
     }
 }
 

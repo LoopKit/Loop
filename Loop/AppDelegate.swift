@@ -20,7 +20,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private lazy var pluginManager = PluginManager()
 
     private var deviceDataManager: DeviceDataManager!
-    private var deviceAlertManager: DeviceAlertManager!
+    private var alertManager: AlertManager!
     
     var window: UIWindow?
 
@@ -31,8 +31,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UIDevice.current.isBatteryMonitoringEnabled = true
 
-        deviceAlertManager = DeviceAlertManager(rootViewController: rootViewController)
-        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, deviceAlertManager: deviceAlertManager)
+        alertManager = AlertManager(rootViewController: rootViewController)
+        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager)
 
         SharedLogging.instance = deviceDataManager.loggingServicesManager
 
@@ -133,12 +133,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 }
                 return
             }
-        case NotificationManager.Action.acknowledgeDeviceAlert.rawValue:
+        case NotificationManager.Action.acknowledgeAlert.rawValue:
             let userInfo = response.notification.request.content.userInfo
-            if let alertIdentifier = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? DeviceAlert.AlertIdentifier,
+            if let alertIdentifier = userInfo[LoopNotificationUserInfoKey.alertTypeID.rawValue] as? Alert.AlertIdentifier,
                 let managerIdentifier = userInfo[LoopNotificationUserInfoKey.managerIDForAlert.rawValue] as? String {
-                deviceAlertManager.acknowledgeDeviceAlert(identifier:
-                    DeviceAlert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
+                alertManager.acknowledgeAlert(identifier:
+                    Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: alertIdentifier))
             }
         default:
             break

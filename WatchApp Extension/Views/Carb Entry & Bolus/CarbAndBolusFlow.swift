@@ -317,7 +317,7 @@ extension CarbAndBolusFlow {
         }
     }
 
-    private func alert(for activeAlert: AlertState) -> Alert {
+    private func alert(for activeAlert: AlertState) -> SwiftUI.Alert {
         switch activeAlert {
         case .bolusRecommendationChanged:
             return recommendedBolusUpdatedAlert
@@ -326,15 +326,15 @@ extension CarbAndBolusFlow {
         }
     }
 
-    private var recommendedBolusUpdatedAlert: Alert {
-        Alert(
+    private var recommendedBolusUpdatedAlert: SwiftUI.Alert {
+        SwiftUI.Alert(
             title: Text("Bolus Recommendation Updated", comment: "Alert title for updated bolus recommendation on Apple Watch"),
             message: Text("Please reconfirm the bolus amount.", comment: "Alert message for updated bolus recommendation on Apple Watch"),
             dismissButton: .default(Text("OK"))
         )
     }
 
-    private func communicationErrorAlert(for error: CarbAndBolusFlowViewModel.Error) -> Alert {
+    private func communicationErrorAlert(for error: CarbAndBolusFlowViewModel.Error) -> SwiftUI.Alert {
         let dismissAction: () -> Void
         switch error {
         case .potentialCarbEntryMessageSendFailure:
@@ -343,7 +343,7 @@ extension CarbAndBolusFlow {
             dismissAction = { self.bolusConfirmationProgress = 0 }
         }
 
-        return Alert(
+        return SwiftUI.Alert(
             title: Text(error.failureReason!),
             message: Text(error.recoverySuggestion!),
             dismissButton: .default(Text("OK"), action: dismissAction)

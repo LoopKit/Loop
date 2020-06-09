@@ -1,5 +1,5 @@
 //
-//  UserNotificationDeviceAlertPresenter.swift
+//  UserNotificationAlertPresenter.swift
 //  LoopKit
 //
 //  Created by Rick Pasetto on 4/9/20.
@@ -8,20 +8,20 @@
 
 import LoopKit
 
-class UserNotificationDeviceAlertPresenter: DeviceAlertPresenter {
+class UserNotificationAlertPresenter: AlertPresenter {
     
     let userNotificationCenter: UserNotificationCenter
-    let log = DiagnosticLog(category: "UserNotificationDeviceAlertPresenter")
+    let log = DiagnosticLog(category: "UserNotificationAlertPresenter")
     
     init(userNotificationCenter: UserNotificationCenter) {
         self.userNotificationCenter = userNotificationCenter
     }
     
-    func issueAlert(_ alert: DeviceAlert) {
+    func issueAlert(_ alert: Alert) {
         issueAlert(alert, timestamp: Date())
     }
 
-    func issueAlert(_ alert: DeviceAlert, timestamp: Date) {
+    func issueAlert(_ alert: Alert, timestamp: Date) {
         DispatchQueue.main.async {
             do {
                 let request = try UNNotificationRequest(from: alert, timestamp: timestamp)
@@ -37,7 +37,7 @@ class UserNotificationDeviceAlertPresenter: DeviceAlertPresenter {
         }
     }
     
-    func retractAlert(identifier: DeviceAlert.Identifier) {
+    func retractAlert(identifier: Alert.Identifier) {
         DispatchQueue.main.async {
             self.userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
             self.userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])

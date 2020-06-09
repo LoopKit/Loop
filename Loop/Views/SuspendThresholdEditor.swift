@@ -123,8 +123,8 @@ struct SuspendThresholdEditor: View {
         }
     }
 
-    private func confirmationAlert() -> Alert {
-        Alert(
+    private func confirmationAlert() -> SwiftUI.Alert {
+        SwiftUI.Alert(
             title: Text("Save Suspend Threshold?", comment: "Alert title for confirming a suspend threshold outside the recommended range"),
             message: Text("The suspend threshold you have entered is outside of what Tidepool generally recommends.", comment: "Alert message for confirming a suspend threshold outside the recommended range"),
             primaryButton: .cancel(Text("Go Back")),

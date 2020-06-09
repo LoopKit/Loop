@@ -1,5 +1,5 @@
 //
-//  UserNotificationDeviceAlertPresenterTests.swift
+//  UserNotificationAlertPresenterTests.swift
 //  LoopTests
 //
 //  Created by Rick Pasetto on 4/15/20.
@@ -10,25 +10,25 @@ import LoopKit
 import XCTest
 @testable import Loop
 
-class UserNotificationDeviceAlertPresenterTests: XCTestCase {
+class UserNotificationAlertPresenterTests: XCTestCase {
     
-    var userNotificationDeviceAlertPresenter: UserNotificationDeviceAlertPresenter!
+    var userNotificationAlertPresenter: UserNotificationAlertPresenter!
     
-    let alertIdentifier = DeviceAlert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
-    let foregroundContent = DeviceAlert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
-    let backgroundContent = DeviceAlert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "")
+    let alertIdentifier = Alert.Identifier(managerIdentifier: "foo", alertIdentifier: "bar")
+    let foregroundContent = Alert.Content(title: "FOREGROUND", body: "foreground", acknowledgeActionButtonLabel: "")
+    let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "")
 
     var mockUserNotificationCenter: MockUserNotificationCenter!
     
     override func setUp() {
         mockUserNotificationCenter = MockUserNotificationCenter()
-        userNotificationDeviceAlertPresenter =
-            UserNotificationDeviceAlertPresenter(userNotificationCenter: mockUserNotificationCenter)
+        userNotificationAlertPresenter =
+            UserNotificationAlertPresenter(userNotificationCenter: mockUserNotificationCenter)
     }
 
     func testIssueImmediateAlert() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
+        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -41,17 +41,17 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
             XCTAssertEqual([
                 LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
                 LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
-                DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue: "{\"trigger\":\"immediate\",\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
-                DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue: "0001-01-01T00:00:00Z",
+                AlertUserNotificationUserInfoKey.alert.rawValue: "{\"trigger\":\"immediate\",\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
+                AlertUserNotificationUserInfoKey.alertTimestamp.rawValue: "0001-01-01T00:00:00Z",
             ], request.content.userInfo as? [String: String])
             XCTAssertNil(request.trigger)
         }
     }
     
     func testIssueImmediateCriticalAlert() {
-        let backgroundContent = DeviceAlert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "", isCritical: true)
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        let backgroundContent = Alert.Content(title: "BACKGROUND", body: "background", acknowledgeActionButtonLabel: "", isCritical: true)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
+        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -64,16 +64,16 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
             XCTAssertEqual([
                 LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
                 LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
-                DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue: "{\"trigger\":\"immediate\",\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":true,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
-                DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue: "0001-01-01T00:00:00Z",
+                AlertUserNotificationUserInfoKey.alert.rawValue: "{\"trigger\":\"immediate\",\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":true,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
+                AlertUserNotificationUserInfoKey.alertTimestamp.rawValue: "0001-01-01T00:00:00Z",
             ], request.content.userInfo as? [String: String])
             XCTAssertNil(request.trigger)
         }
     }
     
     func testIssueDelayedAlert() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
-        userNotificationDeviceAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .delayed(interval: 0.1))
+        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -86,8 +86,8 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
             XCTAssertEqual([
                 LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
                 LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
-                DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue: "{\"trigger\":{\"delayed\":{\"delayInterval\":0.10000000000000001}},\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
-                DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue: "0001-01-01T00:00:00Z",
+                AlertUserNotificationUserInfoKey.alert.rawValue: "{\"trigger\":{\"delayed\":{\"delayInterval\":0.10000000000000001}},\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
+                AlertUserNotificationUserInfoKey.alertTimestamp.rawValue: "0001-01-01T00:00:00Z",
             ], request.content.userInfo as? [String: String])
             XCTAssertEqual(0.1, (request.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval)
             XCTAssertEqual(false, (request.trigger as? UNTimeIntervalNotificationTrigger)?.repeats)
@@ -95,8 +95,8 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
     }
     
     func testIssueRepeatingAlert() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: 100))
-        userNotificationDeviceAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .repeating(repeatInterval: 100))
+        userNotificationAlertPresenter.issueAlert(alert, timestamp: Date.distantPast)
 
         waitOnMain()
         
@@ -109,8 +109,8 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
             XCTAssertEqual([
                 LoopNotificationUserInfoKey.managerIDForAlert.rawValue: alertIdentifier.managerIdentifier,
                 LoopNotificationUserInfoKey.alertTypeID.rawValue: alertIdentifier.alertIdentifier,
-                DeviceAlertUserNotificationUserInfoKey.deviceAlert.rawValue: "{\"trigger\":{\"repeating\":{\"repeatInterval\":100}},\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
-                DeviceAlertUserNotificationUserInfoKey.deviceAlertTimestamp.rawValue: "0001-01-01T00:00:00Z",
+                AlertUserNotificationUserInfoKey.alert.rawValue: "{\"trigger\":{\"repeating\":{\"repeatInterval\":100}},\"identifier\":{\"managerIdentifier\":\"foo\",\"alertIdentifier\":\"bar\"},\"foregroundContent\":{\"body\":\"foreground\",\"isCritical\":false,\"title\":\"FOREGROUND\",\"acknowledgeActionButtonLabel\":\"\"},\"backgroundContent\":{\"body\":\"background\",\"isCritical\":false,\"title\":\"BACKGROUND\",\"acknowledgeActionButtonLabel\":\"\"}}",
+                AlertUserNotificationUserInfoKey.alertTimestamp.rawValue: "0001-01-01T00:00:00Z",
             ], request.content.userInfo as? [String: String])
             XCTAssertEqual(100, (request.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval)
             XCTAssertEqual(true, (request.trigger as? UNTimeIntervalNotificationTrigger)?.repeats)
@@ -118,13 +118,13 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
     }
     
     func testRetractAlert() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: backgroundContent, trigger: .immediate)
+        userNotificationAlertPresenter.issueAlert(alert)
 
         waitOnMain()
         mockUserNotificationCenter.deliverAll()
         
-        userNotificationDeviceAlertPresenter.retractAlert(identifier: alert.identifier)
+        userNotificationAlertPresenter.retractAlert(identifier: alert.identifier)
         
         waitOnMain()
         XCTAssertTrue(mockUserNotificationCenter.pendingRequests.isEmpty)
@@ -133,8 +133,8 @@ class UserNotificationDeviceAlertPresenterTests: XCTestCase {
 
     
     func testDoesNotShowIfNoBackgroundContent() {
-        let alert = DeviceAlert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: nil, trigger: .immediate)
-        userNotificationDeviceAlertPresenter.issueAlert(alert)
+        let alert = Alert(identifier: alertIdentifier, foregroundContent: foregroundContent, backgroundContent: nil, trigger: .immediate)
+        userNotificationAlertPresenter.issueAlert(alert)
 
         waitOnMain()
         
