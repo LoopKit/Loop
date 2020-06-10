@@ -19,7 +19,7 @@ This is because recently there have been cases of rechargeable transmitters prov
 # You are on branch spike-autobolus
 This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
 
-Last updated on May 27, 2020
+Last updated on Jun 10, 2020
 
 Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/5fa561e2e74feca74f8115a2852ea3926ab27dcd
 
