@@ -25,7 +25,7 @@ Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/
 
 Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/79435954af008d1e3ae71304868be39016f9ef61
 
-![App Icon](/Loop/Assets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
+![App Icon](/Loop/DefaultAssets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
 
 [![Build Status](https://travis-ci.org/LoopKit/Loop.svg?branch=master)](https://travis-ci.org/LoopKit/Loop)
 [![Join the chat at https://loop.zulipchat.com](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://loop.zulipchat.com)
