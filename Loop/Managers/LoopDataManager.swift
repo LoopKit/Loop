@@ -23,6 +23,8 @@ final class LoopDataManager {
 
     static let LoopUpdateContextKey = "com.loudnate.Loop.LoopDataManager.LoopUpdateContext"
 
+    private let cacheStore: PersistenceController
+
     let carbStore: CarbStore
 
     let doseStore: DoseStore
@@ -58,7 +60,8 @@ final class LoopDataManager {
         settings: LoopSettings = UserDefaults.appGroup?.loopSettings ?? LoopSettings(),
         overrideHistory: TemporaryScheduleOverrideHistory = UserDefaults.appGroup?.overrideHistory ?? .init(),
         lastPumpEventsReconciliation: Date?,
-        analyticsServicesManager: AnalyticsServicesManager
+        analyticsServicesManager: AnalyticsServicesManager,
+        localCacheDuration: TimeInterval = .days(1)
     ) {
         self.analyticsServicesManager = analyticsServicesManager
         self.lockedLastLoopCompleted = Locked(lastLoopCompleted)
@@ -67,11 +70,13 @@ final class LoopDataManager {
         self.overrideHistory = overrideHistory
 
         let healthStore = HKHealthStore()
-        let cacheStore = PersistenceController.controllerInAppGroupDirectory()
+
+        cacheStore = PersistenceController.controllerInAppGroupDirectory()
 
         carbStore = CarbStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
+            cacheLength: localCacheDuration,
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
@@ -82,6 +87,7 @@ final class LoopDataManager {
         doseStore = DoseStore(
             healthStore: healthStore,
             cacheStore: cacheStore,
+            cacheLength: localCacheDuration,
             insulinModel: insulinModelSettings?.model,
             basalProfile: basalRateSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
@@ -89,11 +95,11 @@ final class LoopDataManager {
             lastPumpEventsReconciliation: lastPumpEventsReconciliation
         )
 
-        dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: .hours(24))
+        dosingDecisionStore = DosingDecisionStore(store: cacheStore, expireAfter: localCacheDuration)
 
-        glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: .hours(24))
+        glucoseStore = GlucoseStore(healthStore: healthStore, cacheStore: cacheStore, cacheLength: localCacheDuration, observationInterval: .hours(24))
 
-        settingsStore = SettingsStore(store: cacheStore, expireAfter: .hours(24))
+        settingsStore = SettingsStore(store: cacheStore, expireAfter: localCacheDuration)
 
         retrospectiveCorrection = settings.enabledRetrospectiveCorrectionAlgorithm
 
@@ -1589,7 +1595,7 @@ extension LoopDataManager {
                 "carbsOnBoard: \(String(describing: state.carbsOnBoard))",
                 "error: \(String(describing: state.error))",
                 "",
-                "cacheStore: \(String(reflecting: self.glucoseStore.cacheStore))",
+                "cacheStore: \(String(reflecting: self.cacheStore))",
                 "",
                 String(reflecting: self.retrospectiveCorrection),
                 "",
@@ -1726,5 +1732,73 @@ private extension StoredSettings.InsulinModel {
         }
         
         self.init(modelType: modelType, actionDuration: actionDuration, peakActivity: peakActivity)
+    }
+}
+
+// MARK: - Simulated Core Data
+
+extension LoopDataManager {
+    public func generateSimulatedHistoricalCoreData(completion: @escaping (Error?) -> Void) {
+        guard FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when simulated core data is enabled")
+        }
+
+        self.settingsStore.generateSimulatedHistoricalSettingsObjects() { error in
+            guard error == nil else {
+                completion(error)
+                return
+            }
+            self.glucoseStore.generateSimulatedHistoricalGlucoseObjects() { error in
+                guard error == nil else {
+                    completion(error)
+                    return
+                }
+                self.carbStore.generateSimulatedHistoricalCarbObjects() { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.dosingDecisionStore.generateSimulatedHistoricalDosingDecisionObjects() { error in
+                        guard error == nil else {
+                            completion(error)
+                            return
+                        }
+                        self.doseStore.generateSimulatedHistoricalPumpEvents(completion: completion)
+                    }
+                }
+            }
+        }
+    }
+    
+    public func purgeHistoricalCoreData(completion: @escaping (Error?) -> Void) {
+        guard FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when simulated core data is enabled")
+        }
+
+        self.doseStore.purgeHistoricalPumpEvents() { error in
+            guard error == nil else {
+                completion(error)
+                return
+            }
+            self.dosingDecisionStore.purgeHistoricalDosingDecisionObjects() { error in
+                guard error == nil else {
+                    completion(error)
+                    return
+                }
+                self.carbStore.purgeHistoricalCarbObjects() { error in
+                    guard error == nil else {
+                        completion(error)
+                        return
+                    }
+                    self.glucoseStore.purgeHistoricalGlucoseObjects() { error in
+                        guard error == nil else {
+                            completion(error)
+                            return
+                        }
+                        self.settingsStore.purgeHistoricalSettingsObjects(completion: completion)
+                    }
+                }
+            }
+        }
     }
 }

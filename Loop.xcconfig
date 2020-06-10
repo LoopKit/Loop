@@ -19,6 +19,9 @@ APPICON_NAME = AppIcon
 // Features [DEFAULT]
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
 
+// General [DEFAULT]
+LOOP_LOCAL_CACHE_DURATION_DAYS = 1
+
 // Entitlements [DEFAULT]
 LOOP_ENTITLEMENTS = Loop/Loop.entitlements
 

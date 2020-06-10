@@ -16,6 +16,8 @@ struct FeatureFlagConfiguration: Decodable {
     let nonlinearCarbModelEnabled: Bool
     let remoteOverridesEnabled: Bool
     let criticalAlertsEnabled: Bool
+    let scenariosEnabled: Bool
+    let simulatedCoreDataEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -44,6 +46,18 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.criticalAlertsEnabled = false
         #endif
+
+        #if SCENARIOS_ENABLED
+        self.scenariosEnabled = true
+        #else
+        self.scenariosEnabled = false
+        #endif
+
+        #if SIMULATED_CORE_DATA_ENABLED
+        self.simulatedCoreDataEnabled = true
+        #else
+        self.simulatedCoreDataEnabled = false
+        #endif
     }
 }
 
@@ -55,6 +69,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* nonlinearCarbModelEnabled: \(nonlinearCarbModelEnabled)",
             "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
+            "* scenariosEnabled: \(scenariosEnabled)",
+            "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
         ].joined(separator: "\n")
     }
 }

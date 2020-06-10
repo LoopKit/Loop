@@ -1300,17 +1300,43 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
-    // MARK: - Testing scenarios
+    // MARK: - Debug Scenarios and Simulated Core Data
 
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        if let testingScenariosManager = deviceManager.testingScenariosManager, !testingScenariosManager.scenarioURLs.isEmpty {
+        if FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled {
             if motion == .motionShake {
-                presentScenarioSelector()
+                presentDebugMenu()
             }
         }
     }
 
+    private func presentDebugMenu() {
+        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios or simulated core data are enabled")
+        }
+
+        let actionSheet = UIAlertController(title: "Debug", message: nil, preferredStyle: .actionSheet)
+        if FeatureFlags.scenariosEnabled {
+            actionSheet.addAction(UIAlertAction(title: "Scenarios", style: .default) { _ in
+                DispatchQueue.main.async {
+                    self.presentScenarioSelector()
+                }
+            })
+        }
+        if FeatureFlags.simulatedCoreDataEnabled {
+            actionSheet.addAction(UIAlertAction(title: "Simulated Core Data", style: .default) { _ in
+                self.presentSimulatedCoreDataMenu()
+            })
+        }
+        actionSheet.addCancelAction()
+        present(actionSheet, animated: true)
+    }
+
     private func presentScenarioSelector() {
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
+
         guard let testingScenariosManager = deviceManager.testingScenariosManager else {
             return
         }
@@ -1320,7 +1346,7 @@ final class StatusTableViewController: ChartsTableViewController {
     }
 
     private func addScenarioStepGestureRecognizers() {
-        if debugEnabled {
+        if FeatureFlags.scenariosEnabled {
             let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(stepActiveScenarioForward))
             leftSwipe.direction = .left
             let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(stepActiveScenarioBackward))
@@ -1332,12 +1358,108 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
 
+    private func presentSimulatedCoreDataMenu() {
+        guard FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when simulated core data is enabled")
+        }
+
+        let actionSheet = UIAlertController(title: "Simulated Core Data", message: nil, preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Generate Simulated Historical", style: .default) { _ in
+            self.presentConfirmation(actionSheetMessage: "All existing Core Data older than 24 hours will be purged before generating new simulated historical Core Data. Are you sure?", actionTitle: "Generate Simulated Historical") {
+                self.generateSimulatedHistoricalCoreData()
+            }
+        })
+        actionSheet.addAction(UIAlertAction(title: "Purge Historical", style: .default) { _ in
+            self.presentConfirmation(actionSheetMessage: "All existing Core Data older than 24 hours will be purged. Are you sure?", actionTitle: "Purge Historical") {
+                self.purgeHistoricalCoreData()
+            }
+        })
+        actionSheet.addCancelAction()
+        present(actionSheet, animated: true)
+    }
+
+    private func generateSimulatedHistoricalCoreData() {
+        guard FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when simulated core data is enabled")
+        }
+
+        presentActivityIndicator(title: "Simulated Core Data", message: "Generating simulated historical...") { dismissActivityIndicator in
+            self.deviceManager.purgeHistoricalCoreData() { error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        dismissActivityIndicator()
+                        self.presentError(error)
+                        return
+                    }
+
+                    self.deviceManager.generateSimulatedHistoricalCoreData() { error in
+                        DispatchQueue.main.async {
+                            dismissActivityIndicator()
+                            if let error = error {
+                                self.presentError(error)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func purgeHistoricalCoreData() {
+        guard FeatureFlags.simulatedCoreDataEnabled else {
+            fatalError("\(#function) should be invoked only when simulated core data is enabled")
+        }
+
+        presentActivityIndicator(title: "Simulated Core Data", message: "Purging historical...") { dismissActivityIndicator in
+            self.deviceManager.purgeHistoricalCoreData() { error in
+                DispatchQueue.main.async {
+                    dismissActivityIndicator()
+                    if let error = error {
+                        self.presentError(error)
+                    }
+                }
+            }
+        }
+    }
+
+    private func presentConfirmation(actionSheetMessage: String, actionTitle: String, handler: @escaping () -> Void) {
+        let actionSheet = UIAlertController(title: nil, message: actionSheetMessage, preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: actionTitle, style: .destructive) { _ in handler() })
+        actionSheet.addCancelAction()
+        present(actionSheet, animated: true)
+    }
+
+    private func presentError(_ error: Error, handler: (() -> Void)? = nil) {
+        let alert = UIAlertController(title: "Error", message: "An error occurred: \(String(describing: error))", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in handler?() })
+        present(alert, animated: true)
+    }
+
+    private func presentActivityIndicator(title: String, message: String, completion: @escaping (@escaping () -> Void) -> Void) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addActivityIndicator()
+        present(alert, animated: true) { completion { alert.dismiss(animated: true) } }
+    }
+
     @objc private func stepActiveScenarioForward() {
         deviceManager.testingScenariosManager?.stepActiveScenarioForward { _ in }
     }
 
     @objc private func stepActiveScenarioBackward() {
         deviceManager.testingScenariosManager?.stepActiveScenarioBackward { _ in }
+    }
+}
+
+extension UIAlertController {
+    func addActivityIndicator() {
+        let frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        let activityIndicator = UIActivityIndicatorView(frame: frame)
+        activityIndicator.style = .default
+        activityIndicator.startAnimating()
+        let viewController = UIViewController()
+        viewController.preferredContentSize = frame.size
+        viewController.view.addSubview(activityIndicator)
+        self.setValue(viewController, forKey: "contentViewController")
     }
 }
 

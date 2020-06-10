@@ -100,5 +100,7 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan barcodes of devices</string>
+	<key>LoopLocalCacheDurationDays</key>
+	<string>$(LOOP_LOCAL_CACHE_DURATION_DAYS)</string>
 </dict>
 </plist>

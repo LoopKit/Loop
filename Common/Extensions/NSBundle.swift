@@ -69,4 +69,12 @@ extension Bundle {
     var xcodeVersion: String? {
         return object(forInfoDictionaryKey: "com-loopkit-Loop-xcode-version") as? String
     }
+
+    var localCacheDuration: TimeInterval? {
+        guard let localCacheDurationDaysString = object(forInfoDictionaryKey: "LoopLocalCacheDurationDays") as? String,
+            let localCacheDurationDays = Double(localCacheDurationDaysString) else {
+                return nil
+        }
+        return .days(localCacheDurationDays)
+    }
 }
