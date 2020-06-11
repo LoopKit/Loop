@@ -148,8 +148,19 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // UserNotifications are not to be displayed while in the foreground
-        completionHandler([])
+        switch notification.request.identifier {
+        // TODO: Until these notifications are converted to use the new alert system, they shall still show in the foreground
+        case LoopNotificationCategory.bolusFailure.rawValue,
+             LoopNotificationCategory.pumpReservoirLow.rawValue,
+             LoopNotificationCategory.pumpReservoirEmpty.rawValue,
+             LoopNotificationCategory.pumpBatteryLow.rawValue,
+             LoopNotificationCategory.pumpExpired.rawValue,
+             LoopNotificationCategory.pumpFault.rawValue:
+            completionHandler([.badge, .sound, .alert])
+        default:
+            // All other userNotifications are not to be displayed while in the foreground
+            completionHandler([])
+        }
     }
     
 }
