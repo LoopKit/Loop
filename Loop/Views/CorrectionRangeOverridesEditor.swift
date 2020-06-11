@@ -65,7 +65,7 @@ struct CorrectionRangeOverridesEditor: View {
     var body: some View {
         ConfigurationPage(
             title: Text("Temporary\nCorrection Ranges", comment: "Title for temporary correction ranges page"),
-            isSaveButtonEnabled: value != initialValue,
+            saveButtonState: value != initialValue ? .enabled : .disabled,
             cards: {
                 card(for: .preMeal)
                 if !FeatureFlags.sensitivityOverridesEnabled {

@@ -553,20 +553,24 @@ final class SettingsTableViewController: UITableViewController {
                     tableView.deselectRow(at: indexPath, animated: true)
                     return
                 }
-                let vc = BasalScheduleTableViewController(allowedBasalRates: pumpManager.supportedBasalRates, maximumScheduleItemCount: pumpManager.maximumBasalScheduleEntryCount, minimumTimeInterval: pumpManager.minimumBasalScheduleEntryDuration)
 
-                if let profile = dataManager.loopManager.basalRateSchedule {
-                    vc.scheduleItems = profile.items
-                    vc.timeZone = profile.timeZone
-                } else {
-                    vc.timeZone = pumpManager.status.timeZone
-                }
+                let editor = BasalRateScheduleEditor(
+                    schedule: dataManager.loopManager.basalRateSchedule,
+                    supportedBasalRates: pumpManager.supportedBasalRates,
+                    maximumBasalRate: dataManager.loopManager.settings.maximumBasalRatePerHour,
+                    maximumScheduleEntryCount: pumpManager.maximumBasalScheduleEntryCount,
+                    syncSchedule: pumpManager.syncBasalRateSchedule,
+                    onSave: { [dataManager] newSchedule in
+                        dataManager!.loopManager.basalRateSchedule = newSchedule
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
 
-                vc.title = NSLocalizedString("Basal Rates", comment: "The title of the basal rate profile screen")
-                vc.delegate = self
-                vc.syncSource = pumpManager
+                let hostingController = DismissibleHostingController(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
 
-                show(vc, sender: sender)
+                present(hostingController, animated: true)
             }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
@@ -777,30 +781,6 @@ extension SettingsTableViewController: ServiceSetupDelegate {
 extension SettingsTableViewController: ServiceSettingsDelegate {
     func serviceSettingsNotifying(_ object: ServiceSettingsNotifying, didDeleteService service: Service) {
         dataManager.servicesManager.removeActiveService(service)
-    }
-}
-
-extension SettingsTableViewController: DailyValueScheduleTableViewControllerDelegate {
-    func dailyValueScheduleTableViewControllerWillFinishUpdating(_ controller: DailyValueScheduleTableViewController) {
-        guard let indexPath = tableView.indexPathForSelectedRow else {
-            return
-        }
-
-        switch sections[indexPath.section] {
-        case .configuration:
-            switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .basalRate:
-                if let controller = controller as? BasalScheduleTableViewController {
-                    dataManager.loopManager.basalRateSchedule = BasalRateSchedule(dailyItems: controller.scheduleItems, timeZone: controller.timeZone)
-                }
-            default:
-                break
-            }
-        default:
-            break
-        }
-
-        tableView.reloadRows(at: [indexPath], with: .none)
     }
 }
 
