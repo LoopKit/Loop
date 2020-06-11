@@ -10,13 +10,15 @@ import UIKit
 import UserNotifications
 import LoopKit
 
-struct NotificationManager {
+enum NotificationManager {
 
     enum Action: String {
         case retryBolus
         case acknowledgeAlert
     }
+}
 
+extension NotificationManager {
     private static var notificationCategories: Set<UNNotificationCategory> {
         var categories = [UNNotificationCategory]()
 

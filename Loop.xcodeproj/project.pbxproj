@@ -25,6 +25,7 @@
 		1D05219B2469E9DF000EBBDE /* StoredAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219A2469E9DF000EBBDE /* StoredAlert.swift */; };
 		1D05219D2469F1F5000EBBDE /* AlertStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D05219C2469F1F5000EBBDE /* AlertStore.swift */; };
 		1D080CBD2473214A00356610 /* AlertStore.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D080CBB2473214A00356610 /* AlertStore.xcdatamodeld */; };
+		1D2609AD248EEB9900A6F258 /* LoopAlertsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2609AC248EEB9900A6F258 /* LoopAlertsManager.swift */; };
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
@@ -628,6 +629,7 @@
 		1D05219A2469E9DF000EBBDE /* StoredAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredAlert.swift; sourceTree = "<group>"; };
 		1D05219C2469F1F5000EBBDE /* AlertStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStore.swift; sourceTree = "<group>"; };
 		1D080CBC2473214A00356610 /* AlertStore.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = AlertStore.xcdatamodel; sourceTree = "<group>"; };
+		1D2609AC248EEB9900A6F258 /* LoopAlertsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopAlertsManager.swift; sourceTree = "<group>"; };
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
@@ -1727,6 +1729,7 @@
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
 				89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */,
 				A9C62D862331703000535612 /* LoggingServicesManager.swift */,
+				1D2609AC248EEB9900A6F258 /* LoopAlertsManager.swift */,
 				43A567681C94880B00334FAC /* LoopDataManager.swift */,
 				43C094491CACCC73001F6403 /* NotificationManager.swift */,
 				432E73CA1D24B3D6009AD15D /* RemoteDataServicesManager.swift */,
@@ -2866,6 +2869,7 @@
 				437D9BA31D7BC977007245E8 /* PredictionTableViewController.swift in Sources */,
 				4344628F20A7ADD500C4BE6F /* UserDefaults+CGM.swift in Sources */,
 				43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */,
+				1D2609AD248EEB9900A6F258 /* LoopAlertsManager.swift in Sources */,
 				A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */,
 				433EA4C41D9F71C800CD78FB /* CommandResponseViewController.swift in Sources */,
 				C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */,
