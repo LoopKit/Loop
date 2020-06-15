@@ -40,7 +40,7 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
     /// The currently-selected model.
     var insulinModel: InsulinModel? {
         didSet {
-            if let newValue = insulinModel as? WalshInsulinModel {
+            if let newValue = insulinModel as? WalshInsulinModel, let walshModelIndex = walshModelIndex {
                 allModels[walshModelIndex] = newValue
             }
 
@@ -56,14 +56,27 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
     /// The sensitivity (in glucose units) to use for demonstrating the model
     var insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: .milligramsPerDeciliter, dailyItems: [RepeatingScheduleValue<Double>(startTime: 0, value: 40)])!
 
-    fileprivate let walshModelIndex = 0
+    fileprivate lazy var walshModelIndex: Int? = {
+        for (index, model) in allModels.enumerated() {
+            if model is WalshInsulinModel {
+                return index
+            }
+        }
+        return nil
+    }()
 
-    private var allModels: [InsulinModel] = [
-        WalshInsulinModel(actionDuration: .hours(6)),
-        ExponentialInsulinModelPreset.humalogNovologAdult,
-        ExponentialInsulinModelPreset.humalogNovologChild,
-        ExponentialInsulinModelPreset.fiasp
-    ]
+    private lazy var allModels: [InsulinModel] = {
+        var models = [InsulinModel]()
+        if FeatureFlags.walshInsulinModelEnabled {
+            models.append(WalshInsulinModel(actionDuration: .hours(6)))
+        }
+        models.append(ExponentialInsulinModelPreset.humalogNovologAdult)
+        models.append(ExponentialInsulinModelPreset.humalogNovologChild)
+        if FeatureFlags.fiaspInsulinModelEnabled {
+            models.append(ExponentialInsulinModelPreset.fiasp)
+        }
+        return models
+    }()
 
     private var selectedModelIndex: Int? {
         switch insulinModel {
@@ -72,8 +85,8 @@ class InsulinModelSettingsViewController: ChartsTableViewController, Identifiabl
         case is WalshInsulinModel:
             return walshModelIndex
         case let selectedModel as ExponentialInsulinModelPreset:
-            for index in 1..<allModels.count {
-                if selectedModel == (allModels[index] as! ExponentialInsulinModelPreset) {
+            for (index, model) in allModels.enumerated() {
+                if selectedModel == model as? ExponentialInsulinModelPreset {
                     return index
                 }
             }
@@ -307,6 +320,10 @@ fileprivate extension InsulinModelSettingsViewController {
     }
 
     @IBAction func durationPickerChanged(_ sender: UIDatePicker) {
+        guard let walshModelIndex = walshModelIndex else {
+            return
+        }
+
         guard let cell = tableView.cellForRow(at: IndexPath(row: walshModelIndex, section: Section.models.rawValue)) as? TitleSubtitleTextFieldTableViewCell
         else {
             return

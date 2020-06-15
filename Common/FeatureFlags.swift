@@ -18,6 +18,8 @@ struct FeatureFlagConfiguration: Decodable {
     let criticalAlertsEnabled: Bool
     let scenariosEnabled: Bool
     let simulatedCoreDataEnabled: Bool
+    let walshInsulinModelEnabled: Bool
+    let fiaspInsulinModelEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -58,6 +60,20 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.simulatedCoreDataEnabled = false
         #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if WALSH_INSULIN_MODEL_DISABLED
+        self.walshInsulinModelEnabled = false
+        #else
+        self.walshInsulinModelEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if FIASP_INSULIN_MODEL_DISABLED
+        self.fiaspInsulinModelEnabled = false
+        #else
+        self.fiaspInsulinModelEnabled = true
+        #endif
     }
 }
 
@@ -71,6 +87,8 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
             "* scenariosEnabled: \(scenariosEnabled)",
             "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
+            "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
+            "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
         ].joined(separator: "\n")
     }
 }
