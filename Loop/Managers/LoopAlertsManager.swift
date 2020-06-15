@@ -48,7 +48,7 @@ extension LoopAlertsManager: CBCentralManagerDelegate {
     private func onBluetoothPermissionDenied() {
         log.default("Bluetooth permission denied")
         let content = Alert.Content(title: NSLocalizedString("Bluetooth Permission Denied", comment: "Bluetooth permission denied alert title"),
-                                      body: NSLocalizedString("The Tidepool Loop app needs permission to access your iPhone’s Bluetooth connection in order for the app to communicate with your pump and CGM sensor. You will be unable to use the app to receive CGM information and send commands to your pump until Bluetooth permissions are enabled.",
+                                      body: NSLocalizedString("Loop needs permission to access your iPhone’s Bluetooth connection in order for the app to communicate with your pump and CGM sensor. You will be unable to use the app to receive CGM information and send commands to your pump until Bluetooth permissions are enabled.",
                                                               comment: "Bluetooth permission denied alert body"),
                                       acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Default alert dismissal"))
         alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate))
@@ -61,7 +61,7 @@ extension LoopAlertsManager: CBCentralManagerDelegate {
 
     private func onBluetoothPoweredOff() {
         log.default("Bluetooth powered off")
-        let body = NSLocalizedString("You have turned Bluetooth off. The Tidepool Loop app cannot communicate with your pump and CGM sensor when Bluetooth is off. To resume automation, turn Bluetooth on.", comment: "Bluetooth off alert body")
+        let body = NSLocalizedString("You have turned Bluetooth off. Loop cannot communicate with your pump and CGM sensor when Bluetooth is off. To resume automation, turn Bluetooth on.", comment: "Bluetooth off alert body")
         let bgcontent = Alert.Content(title: NSLocalizedString("Bluetooth Off Alert", comment: "Bluetooth off background alert title"),
                                       body: body,
                                       acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Default alert dismissal"))
