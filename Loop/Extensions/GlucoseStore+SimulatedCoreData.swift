@@ -69,6 +69,7 @@ fileprivate extension StoredGlucoseSample {
                                    startDate: startDate,
                                    quantity: HKQuantity(unit: unit, doubleValue: value),
                                    isDisplayOnly: false,
+                                   wasUserEntered: false,
                                    provenanceIdentifier: Bundle.main.bundleIdentifier!)
     }
 }

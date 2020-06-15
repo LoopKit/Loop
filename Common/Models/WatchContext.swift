@@ -21,6 +21,8 @@ final class WatchContext: RawRepresentable {
     var glucose: HKQuantity?
     var glucoseTrendRawValue: Int?
     var glucoseDate: Date?
+    var glucoseIsDisplayOnly: Bool?
+    var glucoseWasUserEntered: Bool?
     var glucoseSyncIdentifier: String?
 
     var predictedGlucose: WatchPredictedGlucose?
@@ -61,6 +63,8 @@ final class WatchContext: RawRepresentable {
 
         glucoseTrendRawValue = rawValue["gt"] as? Int
         glucoseDate = rawValue["gd"] as? Date
+        glucoseIsDisplayOnly = rawValue["gdo"] as? Bool
+        glucoseWasUserEntered = rawValue["gue"] as? Bool
         glucoseSyncIdentifier = rawValue["gs"] as? String
         iob = rawValue["iob"] as? Double
         reservoir = rawValue["r"] as? Double
@@ -103,6 +107,8 @@ final class WatchContext: RawRepresentable {
 
         raw["gt"] = glucoseTrendRawValue
         raw["gd"] = glucoseDate
+        raw["gdo"] = glucoseIsDisplayOnly
+        raw["gue"] = glucoseWasUserEntered
         raw["gs"] = glucoseSyncIdentifier
         raw["iob"] = iob
         raw["ld"] = loopLastRunDate
@@ -132,7 +138,7 @@ extension WatchContext {
 extension WatchContext {
     var newGlucoseSample: NewGlucoseSample? {
         if let quantity = glucose, let date = glucoseDate, let syncIdentifier = glucoseSyncIdentifier {
-            return NewGlucoseSample(date: date, quantity: quantity, isDisplayOnly: false, syncIdentifier: syncIdentifier, syncVersion: 0)
+            return NewGlucoseSample(date: date, quantity: quantity, isDisplayOnly: glucoseIsDisplayOnly ?? false, wasUserEntered: glucoseWasUserEntered ?? false, syncIdentifier: syncIdentifier, syncVersion: 0)
         }
         return nil
     }

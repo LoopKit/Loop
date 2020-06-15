@@ -170,6 +170,8 @@ final class WatchDataManager: NSObject {
                     if let sample = samples.last {
                         context.glucose = sample.quantity
                         context.glucoseDate = sample.startDate
+                        context.glucoseIsDisplayOnly = sample.isDisplayOnly
+                        context.glucoseWasUserEntered = sample.wasUserEntered
                         context.glucoseSyncIdentifier = sample.syncIdentifier
                     }
                     updateGroup.leave()
