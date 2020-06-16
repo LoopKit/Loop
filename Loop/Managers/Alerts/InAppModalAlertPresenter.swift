@@ -94,7 +94,10 @@ extension InAppModalAlertPresenter {
                 return
             }
             self.playSound(for: alert)
-            let alertController = self.presentAlert(title: content.title, message: content.body, action: content.acknowledgeActionButtonLabel) { [weak self] in
+            let alertController = self.presentAlert(title: content.title,
+                                                    message: content.body,
+                                                    action: content.acknowledgeActionButtonLabel,
+                                                    isCritical: content.isCritical) { [weak self] in
                 self?.clearDeliveredAlert(identifier: alert.identifier)
                 self?.alertManagerResponder?.acknowledgeAlert(identifier: alert.identifier)
             }
@@ -132,11 +135,11 @@ extension InAppModalAlertPresenter {
         return alertsShowing.index(forKey: identifier) != nil
     }
 
-    private func presentAlert(title: String, message: String, action: String, completion: @escaping () -> Void) -> UIAlertController {
+    private func presentAlert(title: String, message: String, action: String, isCritical: Bool, completion: @escaping () -> Void) -> UIAlertController {
         dispatchPrecondition(condition: .onQueue(.main))
         // For now, this is a simple alert with an "OK" button
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alertController.addAction(newActionFunc(action, .default, { _ in completion() }))
+        alertController.addAction(newActionFunc(action, isCritical ? .destructive : .default, { _ in completion() }))
         topViewController(controller: rootViewController)?.present(alertController, animated: true)
         return alertController
     }
