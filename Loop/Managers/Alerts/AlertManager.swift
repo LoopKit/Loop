@@ -33,49 +33,50 @@ public enum AlertUserNotificationUserInfoKey: String {
 /// - etc.
 public final class AlertManager {
     private static let soundsDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last!.appendingPathComponent("Sounds")
-    
+
     fileprivate static let timestampFormatter = ISO8601DateFormatter()
-    
+
     private let log = DiagnosticLog(category: "AlertManager")
 
     private var handlers: [AlertPresenter] = []
     private var responders: [String: Weak<AlertResponder>] = [:]
     private var soundVendors: [String: Weak<AlertSoundVendor>] = [:]
-    
+
     private let userNotificationCenter: UserNotificationCenter
     private let fileManager: FileManager
-    
-    private let alertStore: AlertStore
+
+    let alertStore: AlertStore
 
     public init(rootViewController: UIViewController,
                 handlers: [AlertPresenter]? = nil,
                 userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current(),
                 fileManager: FileManager = FileManager.default,
-                alertStore: AlertStore? = nil) {
+                alertStore: AlertStore? = nil,
+                expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */) {
         self.userNotificationCenter = userNotificationCenter
         self.fileManager = fileManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-        self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: documentsDirectory)
+        self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: documentsDirectory, expireAfter: expireAfter)
         self.handlers = handlers ??
             [UserNotificationAlertPresenter(userNotificationCenter: userNotificationCenter),
             InAppModalAlertPresenter(rootViewController: rootViewController, alertManagerResponder: self)]
-        
+
         playbackAlertsFromPersistence()
     }
 
     public func addAlertResponder(managerIdentifier: String, alertResponder: AlertResponder) {
         responders[managerIdentifier] = Weak(alertResponder)
     }
-    
+
     public func removeAlertResponder(managerIdentifier: String) {
         responders.removeValue(forKey: managerIdentifier)
     }
-    
+
     public func addAlertSoundVendor(managerIdentifier: String, soundVendor: AlertSoundVendor) {
         soundVendors[managerIdentifier] = Weak(soundVendor)
         initializeSoundVendor(managerIdentifier, soundVendor)
     }
-    
+
     public func removeAlertSoundVendor(managerIdentifier: String) {
         soundVendors.removeValue(forKey: managerIdentifier)
     }
@@ -104,12 +105,12 @@ extension AlertManager: AlertPresenter {
         handlers.forEach { $0.issueAlert(alert) }
         alertStore.recordIssued(alert: alert)
     }
-    
+
     public func retractAlert(identifier: Alert.Identifier) {
         handlers.forEach { $0.retractAlert(identifier: identifier) }
         alertStore.recordRetraction(of: identifier)
     }
-    
+
     private func replayAlert(_ alert: Alert) {
         handlers.forEach { $0.issueAlert(alert) }
     }
@@ -118,19 +119,19 @@ extension AlertManager: AlertPresenter {
 // MARK: Sound Support
 
 extension AlertManager {
-    
+
     public static func soundURL(for alert: Alert) -> URL? {
         guard let sound = alert.sound else { return nil }
         return soundURL(managerIdentifier: alert.identifier.managerIdentifier, sound: sound)
     }
-    
+
     private static func soundURL(managerIdentifier: String, sound: Alert.Sound) -> URL? {
         guard let soundFileName = sound.filename else { return nil }
-        
+
         // Seems all the sound files need to be in the sounds directory, so we namespace the filenames
         return soundsDirectoryURL.appendingPathComponent("\(managerIdentifier)-\(soundFileName)")
     }
-    
+
     private func initializeSoundVendor(_ managerIdentifier: String, _ soundVendor: AlertSoundVendor) {
         let sounds = soundVendor.getSounds()
         guard let baseURL = soundVendor.getSoundBaseURL(), !sounds.isEmpty else {
@@ -148,17 +149,17 @@ extension AlertManager {
             log.error("Unable to copy sound files from soundVendor %@: %@", managerIdentifier, String(describing: error))
         }
     }
-    
+
 }
 
 // MARK: Alert Playback
 
 extension AlertManager {
-    
+
     private func playbackAlertsFromPersistence() {
         playbackAlertsFromAlertStore()
     }
-    
+
     private func playbackAlertsFromAlertStore() {
         alertStore.lookupAllUnacknowledged {
             switch $0 {
@@ -180,7 +181,7 @@ extension AlertManager {
 
 // MARK: Alert storage access
 extension AlertManager {
-    
+
     func getStoredEntries(startDate: Date, completion: @escaping (_ report: String) -> Void) {
         alertStore.executeQuery(since: startDate, limit: 100) { result in
             switch result {
@@ -190,7 +191,7 @@ extension AlertManager {
                 let report = "## Alerts\n" + entries.1.map { storedAlert in
                     return """
                     **\(storedAlert.title ?? "??")**
-                    
+
                     * alertIdentifier: \(storedAlert.alertIdentifier)
                     * managerIdentifier: \(storedAlert.managerIdentifier)
                     * issued: \(storedAlert.issuedDate)
@@ -229,18 +230,18 @@ extension FileManager {
 }
 
 extension URL {
-    
+
     func fileCreationDate(_ fileManager: FileManager) throws -> Date {
         return try fileManager.attributesOfItem(atPath: self.path)[.creationDate] as! Date
     }
 }
 
 public extension Alert {
-    
+
     enum Error: String, Swift.Error {
         case noBackgroundContent
     }
-        
+
     fileprivate func getUserNotificationContent(timestamp: Date) throws -> UNNotificationContent {
         guard let content = backgroundContent else {
             throw Error.noBackgroundContent
@@ -262,7 +263,7 @@ public extension Alert {
             AlertManager.timestampFormatter.string(from: timestamp)
         return userNotificationContent
     }
-    
+
     private func getUserNotificationSound() -> UNNotificationSound? {
         guard let content = backgroundContent else {
             return nil
@@ -282,7 +283,7 @@ public extension Alert {
                 }
             }
         }
-        
+
         return content.isCritical ? .defaultCritical : .default
     }
 }

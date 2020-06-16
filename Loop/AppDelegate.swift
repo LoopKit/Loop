@@ -32,7 +32,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UIDevice.current.isBatteryMonitoringEnabled = true
 
-        alertManager = AlertManager(rootViewController: rootViewController)
+        alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager)
         loopAlertsManager = LoopAlertsManager(alertManager: alertManager)
 

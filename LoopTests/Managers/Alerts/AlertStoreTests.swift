@@ -14,6 +14,8 @@ import XCTest
 class AlertStoreTests: XCTestCase {
     
     var alertStore: AlertStore!
+
+    static let historicDate = Date(timeIntervalSinceNow: -20 /* hours */ * 60 /* minutes */ * 60 /* seconds */)  // Within default 24 hour expiration
     
     static let identifier1 = Alert.Identifier(managerIdentifier: "managerIdentifier1", alertIdentifier: "alertIdentifier1")
     let alert1 = Alert(identifier: identifier1, foregroundContent: nil, backgroundContent: nil, trigger: .immediate, sound: nil)
@@ -43,8 +45,8 @@ class AlertStoreTests: XCTestCase {
         let immediate = Alert.Trigger.immediate
         let delayed = Alert.Trigger.delayed(interval: 10.0)
         let repeating = Alert.Trigger.repeating(repeatInterval: 20.0)
-        XCTAssertEqual(immediate, try? Alert.Trigger(storedType: immediate.storedType, storedInterval: immediate.storedInterval, storageDate: Date.distantPast))
-        XCTAssertEqual(immediate, try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval, storageDate: Date.distantPast))
+        XCTAssertEqual(immediate, try? Alert.Trigger(storedType: immediate.storedType, storedInterval: immediate.storedInterval, storageDate: Self.historicDate))
+        XCTAssertEqual(immediate, try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval, storageDate: Self.historicDate))
         XCTAssertEqual(immediate, try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval, storageDate: Date(timeIntervalSinceNow: -10.0.nextUp)))
         XCTAssertEqual(Alert.Trigger.delayed(interval: 10.0), try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval, storageDate: Date(timeIntervalSinceNow: 5.0)))
         let adjustedTrigger = try? Alert.Trigger(storedType: delayed.storedType, storedInterval: delayed.storedInterval, storageDate: Date(timeIntervalSinceNow: -5.0))
@@ -52,19 +54,19 @@ class AlertStoreTests: XCTestCase {
         case .delayed(let interval): XCTAssertLessThanOrEqual(interval, 5.0) // The new delay interval value may be close to, but no more than 5, but not exact
         default: XCTFail("Wrong trigger")
         }
-        XCTAssertEqual(repeating, try? Alert.Trigger(storedType: repeating.storedType, storedInterval: repeating.storedInterval, storageDate: Date.distantPast))
+        XCTAssertEqual(repeating, try? Alert.Trigger(storedType: repeating.storedType, storedInterval: repeating.storedInterval, storageDate: Self.historicDate))
         XCTAssertNil(immediate.storedInterval)
     }
     
     func testStoredAlertSerialization() {
-        let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Date.distantPast)
+        let object = StoredAlert(from: alert2, context: alertStore.managedObjectContext, issuedDate: Self.historicDate)
         XCTAssertNil(object.acknowledgedDate)
         XCTAssertNil(object.retractedDate)
         XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.backgroundContent)
         XCTAssertEqual("{\"body\":\"body\",\"isCritical\":true,\"title\":\"title\",\"acknowledgeActionButtonLabel\":\"label\"}", object.foregroundContent)
         XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
         XCTAssertEqual(true, object.isCritical)
-        XCTAssertEqual(Date.distantPast, object.issuedDate)
+        XCTAssertEqual(Self.historicDate, object.issuedDate)
         XCTAssertEqual(0, object.modificationCounter)
         XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
         XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
@@ -72,11 +74,11 @@ class AlertStoreTests: XCTestCase {
     
     func testRecordIssued() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
                 XCTAssertEqual(1, storedAlerts.count)
                 XCTAssertEqual(Self.identifier1, storedAlerts[0].identifier)
-                XCTAssertEqual(Date.distantPast, storedAlerts[0].issuedDate)
+                XCTAssertEqual(Self.historicDate, storedAlerts[0].issuedDate)
                 XCTAssertNil(storedAlerts[0].acknowledgedDate)
                 XCTAssertNil(storedAlerts[0].retractedDate)
                 expect.fulfill()
@@ -87,9 +89,9 @@ class AlertStoreTests: XCTestCase {
     
     func testRecordAcknowledged() {
         let expect = self.expectation(description: #function)
-        let issuedDate = Date.distantPast
+        let issuedDate = Self.historicDate
         let acknowledgedDate = issuedDate.addingTimeInterval(1)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.recordAcknowledgement(of: Self.identifier1, at: acknowledgedDate, completion: self.expectSuccess {
                 self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
                     XCTAssertEqual(1, storedAlerts.count)
@@ -106,9 +108,9 @@ class AlertStoreTests: XCTestCase {
     
     func testRecordRetracted() {
         let expect = self.expectation(description: #function)
-        let issuedDate = Date.distantPast
+        let issuedDate = Self.historicDate
         let retractedDate = issuedDate.addingTimeInterval(2)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.recordRetraction(of: Self.identifier1, at: retractedDate, completion: self.expectSuccess {
                 self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
                     XCTAssertEqual(1, storedAlerts.count)
@@ -127,10 +129,10 @@ class AlertStoreTests: XCTestCase {
     // and so are allowed
     func testRecordRetractedThenAcknowledged() {
         let expect = self.expectation(description: #function)
-        let issuedDate = Date.distantPast
+        let issuedDate = Self.historicDate
         let retractedDate = issuedDate.addingTimeInterval(2)
         let acknowledgedDate = issuedDate.addingTimeInterval(4)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.recordRetraction(of: Self.identifier1, at: retractedDate, completion: self.expectSuccess {
                 self.alertStore.recordAcknowledgement(of: Self.identifier1, at: acknowledgedDate, completion: self.expectSuccess {
                     self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
@@ -149,10 +151,10 @@ class AlertStoreTests: XCTestCase {
     
     func testRecordAcknowledgedThenRetracted() {
         let expect = self.expectation(description: #function)
-        let issuedDate = Date.distantPast
+        let issuedDate = Self.historicDate
         let retractedDate = issuedDate.addingTimeInterval(2)
         let acknowledgedDate = issuedDate.addingTimeInterval(4)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.recordAcknowledgement(of: Self.identifier1, at: acknowledgedDate, completion: self.expectSuccess {
                 self.alertStore.recordRetraction(of: Self.identifier1, at: retractedDate, completion: self.expectSuccess {
                     self.alertStore.fetch(identifier: Self.identifier1, completion: self.expectSuccess { storedAlerts in
@@ -171,7 +173,7 @@ class AlertStoreTests: XCTestCase {
     
     func testEmptyQuery() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.executeQuery(since: Date.distantPast, limit: 0, completion: self.expectSuccess { _, storedAlerts in
                 XCTAssertTrue(storedAlerts.isEmpty)
                 expect.fulfill()
@@ -182,12 +184,12 @@ class AlertStoreTests: XCTestCase {
     
     func testSimpleQuery() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.executeQuery(since: Date.distantPast, limit: 100, completion: self.expectSuccess { anchor, storedAlerts in
                 XCTAssertEqual(1, anchor.modificationCounter)
                 XCTAssertEqual(1, storedAlerts.count)
                 XCTAssertEqual(Self.identifier1, storedAlerts[0].identifier)
-                XCTAssertEqual(Date.distantPast, storedAlerts[0].issuedDate)
+                XCTAssertEqual(Self.historicDate, storedAlerts[0].issuedDate)
                 XCTAssertNil(storedAlerts[0].acknowledgedDate)
                 XCTAssertNil(storedAlerts[0].retractedDate)
                 expect.fulfill()
@@ -198,14 +200,14 @@ class AlertStoreTests: XCTestCase {
     
     func testSimpleQueryThenRetraction() {
         let expect = self.expectation(description: #function)
-        let issuedDate = Date.distantPast
+        let issuedDate = Self.historicDate
         let retractedDate = issuedDate.addingTimeInterval(2)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.executeQuery(since: Date.distantPast, limit: 100, completion: self.expectSuccess { anchor, storedAlerts in
                 XCTAssertEqual(1, anchor.modificationCounter)
                 XCTAssertEqual(1, storedAlerts.count)
                 XCTAssertEqual(Self.identifier1, storedAlerts[0].identifier)
-                XCTAssertEqual(Date.distantPast, storedAlerts[0].issuedDate)
+                XCTAssertEqual(Self.historicDate, storedAlerts[0].issuedDate)
                 XCTAssertNil(storedAlerts[0].acknowledgedDate)
                 XCTAssertNil(storedAlerts[0].retractedDate)
                 self.alertStore.recordRetraction(of: Self.identifier1, at: retractedDate, completion: self.expectSuccess {
@@ -226,7 +228,7 @@ class AlertStoreTests: XCTestCase {
     
     func testQueryByDate() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             let now = Date()
             self.alertStore.recordIssued(alert: self.alert2, at: now, completion: self.expectSuccess {
                 self.alertStore.executeQuery(since: now, limit: 100, completion: self.expectSuccess { anchor, storedAlerts in
@@ -245,13 +247,13 @@ class AlertStoreTests: XCTestCase {
     
     func testQueryWithLimit() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: self.expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: self.expectSuccess {
             self.alertStore.recordIssued(alert: self.alert2, at: Date(), completion: self.expectSuccess {
                 self.alertStore.executeQuery(since: Date.distantPast, limit: 1, completion: self.expectSuccess { anchor, storedAlerts in
                     XCTAssertEqual(1, anchor.modificationCounter)
                     XCTAssertEqual(1, storedAlerts.count)
                     XCTAssertEqual(Self.identifier1, storedAlerts[0].identifier)
-                    XCTAssertEqual(Date.distantPast, storedAlerts[0].issuedDate)
+                    XCTAssertEqual(Self.historicDate, storedAlerts[0].issuedDate)
                     XCTAssertNil(storedAlerts[0].acknowledgedDate)
                     XCTAssertNil(storedAlerts[0].retractedDate)
                     expect.fulfill()
@@ -263,7 +265,7 @@ class AlertStoreTests: XCTestCase {
     
     func testQueryThenContinue() {
         let expect = self.expectation(description: #function)
-        alertStore.recordIssued(alert: alert1, at: Date.distantPast, completion: expectSuccess {
+        alertStore.recordIssued(alert: alert1, at: Self.historicDate, completion: expectSuccess {
             let now = Date()
             self.alertStore.recordIssued(alert: self.alert2, at: now, completion: self.expectSuccess {
                 self.alertStore.executeQuery(since: Date.distantPast, limit: 1, completion: self.expectSuccess { anchor, _ in
@@ -285,7 +287,7 @@ class AlertStoreTests: XCTestCase {
     func testAcknowledgeFindsCorrectOne() {
         let expect = self.expectation(description: #function)
         let now = Date()
-        fillWith(startDate: Date.distantPast, data: [
+        fillWith(startDate: Self.historicDate, data: [
             (alert1, false, false),
             (alert2, false, false),
             (alert1, true, false)
@@ -297,7 +299,7 @@ class AlertStoreTests: XCTestCase {
                     XCTAssertNotNil(storedAlerts.last)
                     if let last = storedAlerts.last {
                         XCTAssertEqual(Self.identifier1, last.identifier)
-                        XCTAssertEqual(Date.distantPast, last.issuedDate)
+                        XCTAssertEqual(Self.historicDate, last.issuedDate)
                         XCTAssertEqual(now, last.acknowledgedDate)
                         XCTAssertNil(last.retractedDate)
                     }
@@ -319,7 +321,7 @@ class AlertStoreTests: XCTestCase {
     
     func testLookupAllUnacknowledgedOne() {
         let expect = self.expectation(description: #function)
-        fillWith(startDate: Date.distantPast, data: [(alert1, false, false)]) {
+        fillWith(startDate: Self.historicDate, data: [(alert1, false, false)]) {
             self.alertStore.lookupAllUnacknowledged(completion: self.expectSuccess { alerts in
                 self.assertEqual([self.alert1], alerts)
                 expect.fulfill()
@@ -331,7 +333,7 @@ class AlertStoreTests: XCTestCase {
     
     func testLookupAllUnacknowledgedOneAcknowledged() {
         let expect = self.expectation(description: #function)
-        fillWith(startDate: Date.distantPast, data: [(alert1, true, false)]) {
+        fillWith(startDate: Self.historicDate, data: [(alert1, true, false)]) {
             self.alertStore.lookupAllUnacknowledged(completion: self.expectSuccess { alerts in
                 self.assertEqual([], alerts)
                 expect.fulfill()
@@ -342,7 +344,7 @@ class AlertStoreTests: XCTestCase {
     
     func testLookupAllUnacknowledgedSomeNot() {
         let expect = self.expectation(description: #function)
-        fillWith(startDate: Date.distantPast, data: [
+        fillWith(startDate: Self.historicDate, data: [
             (alert1, false, false),
             (alert2, false, false),
             (alert1, true, false)
@@ -357,7 +359,7 @@ class AlertStoreTests: XCTestCase {
     
     func testLookupAllUnacknowledgedSomeRetracted() {
         let expect = self.expectation(description: #function)
-        fillWith(startDate: Date.distantPast, data: [
+        fillWith(startDate: Self.historicDate, data: [
             (alert1, false, true),
             (alert2, false, false),
             (alert1, false, true)

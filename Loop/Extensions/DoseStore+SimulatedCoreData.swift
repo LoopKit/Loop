@@ -20,7 +20,7 @@ extension DoseStore {
     private var simulatedOtherPerDay: Int { 1 }
     private var simulatedLimit: Int { 10000 }
 
-    public func generateSimulatedHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
         generatedSimulatedHistoricalBasalPumpEvents() { error in
             guard error == nil else {
                 completion(error)
@@ -125,7 +125,7 @@ extension DoseStore {
         completion(addPumpEvents(events: simulated))
     }
 
-    public func purgeHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalPumpEvents(completion: @escaping (Error?) -> Void) {
         purgePumpEventObjects(before: historicalEndDate, completion: completion)
     }
 }

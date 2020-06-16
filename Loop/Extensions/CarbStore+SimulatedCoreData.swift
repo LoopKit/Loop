@@ -19,7 +19,7 @@ extension CarbStore {
     private var simulatedDeletedPerDay: Int { 3 }
     private var simulatedLimit: Int { 10000 }
 
-    public func generateSimulatedHistoricalCarbObjects(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalCarbObjects(completion: @escaping (Error?) -> Void) {
         generateSimulatedHistoricalStoredCarbObjects() { error in
             guard error == nil else {
                 completion(error)
@@ -101,7 +101,7 @@ extension CarbStore {
         return addError
     }
 
-    public func purgeHistoricalCarbObjects(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalCarbObjects(completion: @escaping (Error?) -> Void) {
         purgeCachedCarbEntries(before: historicalEndDate, completion: completion)
     }
 }

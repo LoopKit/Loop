@@ -17,7 +17,7 @@ extension SettingsStore {
     private var simulatedPerDay: Int { 2 }
     private var simulatedLimit: Int { 10000 }
 
-    public func generateSimulatedHistoricalSettingsObjects(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalSettingsObjects(completion: @escaping (Error?) -> Void) {
         var startDate = Calendar.current.startOfDay(for: expireDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var simulated = [StoredSettings]()
@@ -52,7 +52,7 @@ extension SettingsStore {
         return addError
     }
 
-    public func purgeHistoricalSettingsObjects(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalSettingsObjects(completion: @escaping (Error?) -> Void) {
         purgeSettings(before: historicalEndDate, completion: completion)
     }
 }

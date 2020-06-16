@@ -21,7 +21,7 @@ extension GlucoseStore {
     private var simulatedValueIncrement: Double { 2.0 * .pi / 72.0 }    // 6 hour period
     private var simulatedLimit: Int { 10000 }
 
-    public func generateSimulatedHistoricalGlucoseObjects(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalGlucoseObjects(completion: @escaping (Error?) -> Void) {
         var startDate = Calendar.current.startOfDay(for: earliestCacheDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var value = 0.0
@@ -56,7 +56,7 @@ extension GlucoseStore {
         return addError
     }
 
-    public func purgeHistoricalGlucoseObjects(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalGlucoseObjects(completion: @escaping (Error?) -> Void) {
         purgeCachedGlucoseObjects(before: historicalEndDate, completion: completion)
     }
 }

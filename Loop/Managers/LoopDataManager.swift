@@ -1738,7 +1738,7 @@ private extension StoredSettings.InsulinModel {
 // MARK: - Simulated Core Data
 
 extension LoopDataManager {
-    public func generateSimulatedHistoricalCoreData(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalCoreData(completion: @escaping (Error?) -> Void) {
         guard FeatureFlags.simulatedCoreDataEnabled else {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }
@@ -1770,7 +1770,7 @@ extension LoopDataManager {
         }
     }
     
-    public func purgeHistoricalCoreData(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalCoreData(completion: @escaping (Error?) -> Void) {
         guard FeatureFlags.simulatedCoreDataEnabled else {
             fatalError("\(#function) should be invoked only when simulated core data is enabled")
         }

@@ -18,7 +18,7 @@ extension DosingDecisionStore {
     private var simulatedStartDateInterval: TimeInterval { .minutes(5) }
     private var simulatedLimit: Int { 10000 }
 
-    public func generateSimulatedHistoricalDosingDecisionObjects(completion: @escaping (Error?) -> Void) {
+    func generateSimulatedHistoricalDosingDecisionObjects(completion: @escaping (Error?) -> Void) {
         var startDate = Calendar.current.startOfDay(for: expireDate)
         let endDate = Calendar.current.startOfDay(for: historicalEndDate)
         var simulated = [StoredDosingDecision]()
@@ -51,7 +51,7 @@ extension DosingDecisionStore {
         return addError
     }
 
-    public func purgeHistoricalDosingDecisionObjects(completion: @escaping (Error?) -> Void) {
+    func purgeHistoricalDosingDecisionObjects(completion: @escaping (Error?) -> Void) {
         purgeDosingDecisions(before: historicalEndDate, completion: completion)
     }
 }
