@@ -1,6 +1,21 @@
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (pendiente: %@)";
 
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ absorbido";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "%@ U Totales";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
 
@@ -16,23 +31,8 @@
 /* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
 "%1$@ U/hour @ %2$@" = "%1$@ U/hora @ %2$@";
 
-/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
-"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
-
 /* Formats (1: carb value) and (2: food type) */
 "%1$@: %2$@" = "%1$@: %2$@";
-
-/* The format for an active override preset. (1: preset symbol)(2: preset name) */
-"%@ %@" = "%1$@ %2$@";
-
-/* Formats absorbed carb value */
-"%@ absorbed" = "%@ absorbido";
-
-/* The subtitle format describing total insulin. (1: localized insulin total) */
-"%@ U Total" = "%@ U Totales";
-
-/* Appends a full-stop to a statement */
-"%@." = "%@.";
 
 /* Description of the prediction input effect for glucose momentum */
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "Coeficiente de regresión de glucosa de 15 minutos (b₁), continuado con decadencia sobre 30 minutos.";
@@ -45,6 +45,9 @@
 
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un modelo basado en la publicación de la absorción de insulina Humalog, Novolog y Apidra en adultos.";
+
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Tiempo de Absorción";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AceptarBoloRecomendado";
@@ -61,6 +64,9 @@
 /* The string format describing active insulin. (1: localized insulin value description) */
 "Active Insulin: %@" = "Insulina Activa: %@";
 
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "Agregar Carbohidratos";
+
 /* Action sheet title selecting CGM
    Title text for button to set up a CGM */
 "Add CGM" = "Agregar CGM";
@@ -69,7 +75,7 @@
 "Add Meal" = "Agregar Alimento";
 
 /* Action sheet title selecting Pump
-Title text for button to set up a new pump */
+   Title text for button to set up a new pump */
 "Add Pump" = "Agregar Microinfusora";
 
 /* The title of the Amplitude service */
@@ -101,8 +107,12 @@ Title text for button to set up a new pump */
 "Basal Rates" = "Perfil Basal";
 
 /* The label of the bolus entry button
-   The notification title for a bolus failure */
+   The notification title for a bolus failure
+   Title text for bolus screen (manual correction) */
 "Bolus" = "Bolo";
+
+/* Alert title for an updated bolus recommendation */
+"Bolus Recommendation Updated" = "Recomendación de bolo fue actualicada";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Administró bolo %1$@ de %2$@";
@@ -119,9 +129,18 @@ Title text for button to set up a new pump */
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Efectos de carbohidratos";
 
+/* Back button text for bolus screen to return to carb entry screen */
+"Carb Entry" = "Entrada de Carbohidratos";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Relacíon de carbohidratos";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Agregar Carbohidratos";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Editar Entrada de Carbohidratos";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carbohidratos";
@@ -143,6 +162,9 @@ Title text for button to set up a new pump */
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Verifique su fuente de datos CGM";
+
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Escoja un tiempo más largo de absorción para comidas más grandes, o las cuales que contienen más grasa o proteína. Éste es consejo al algoritmo y no es necesario de que sea exacto. ";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Asa cerrada";
@@ -166,14 +188,21 @@ Title text for button to set up a new pump */
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
 "Current glucose of %1$@ is below correction range." = "Glucosa actual de %1$@ está por debajo del rango correctivo.";
 
-/* The title of the cell indicating a generic temporary override is enabled */
+/* Name of custom override
+   The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Sobreescritura personalizada";
 
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Token de Usuario";
 
+/* Title of the carb entry date picker cell */
+"Date" = "Fecha";
+
 /* Button title to delete CGM */
 "Delete CGM" = "Eliminar CGM";
+
+/* The button text to initiate a bolus */
+"Deliver" = "Entregar";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Límites de Dosificación";
@@ -264,6 +293,9 @@ Title text for button to set up a new pump */
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop no ha terminado correctamente en %@";
 
+/* Title text for bolus screen following a carb entry */
+"Meal Bolus" = "Bolo de Comida";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Faltan Datos: %1$@";
 
@@ -278,6 +310,12 @@ Title text for button to set up a new pump */
 
 /* The title text for the override presets */
 "Override Presets" = "Sobreescritura de objetivos preestablecidos";
+
+/* Alert message for attempting to change basal rates before pump was configured. */
+"Please configure a pump to view or edit scheduled basal rates." = "Configure microinfusora para mirar o cambiar el perfil basal.";
+
+/* Name of pre-meal workout override */
+"Pre-Meal" = "Pre-Comida";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Objetivos Pre-Comida";
@@ -333,8 +371,12 @@ Title text for button to set up a new pump */
 /* Title of the prediction input effect for retrospective correction */
 "Retrospective Correction" = "Corrección Retrospectiva";
 
-/* The title of the notification action to retry a bolus command */
+/* The button text for attempting a manual loop
+   The title of the notification action to retry a bolus command */
 "Retry" = "Reintentar";
+
+/* The button text to save a carb entry without bolusing */
+"Save without Bolusing" = "Guardar sin Entregar Bolo";
 
 /* The title of the services section in settings */
 "Services" = "Servicios";
@@ -363,6 +405,9 @@ Title text for button to set up a new pump */
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Toque para reanudar";
 
+/* Alert message for an updated bolus recommendation */
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "La recomendación de bolo ha sido updatada. Reconfirme el bolo.";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "El model utilizado por ediciones iniciales de Loop, permite ajustar duración de acción.";
 
@@ -371,6 +416,9 @@ Title text for button to set up a new pump */
 
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Alert title for unconfigured pump */
+"Unconfigured Pump" = "La microinfusora no está configurada";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "hasta la %@";
@@ -383,6 +431,9 @@ Title text for button to set up a new pump */
 
 /* Explanation of suspend threshold */
 "When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Cuando la glucosa actual o proyectada se encuentre debajo del nivel de suspensión, Loop no recomendará un bolo y siempre recomendará un basal temporal de 0 unidades por hora.";
+
+/* Name of legacy workout override */
+"Workout" = "Entrenamiento";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Objetivos de Ejercicio";
