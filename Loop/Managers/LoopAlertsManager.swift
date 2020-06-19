@@ -11,10 +11,13 @@ import LoopKit
 
 /// Class responsible for monitoring "system level" operations and alerting the user to any anomalous situations (e.g. bluetooth off)
 class LoopAlertsManager: NSObject {
+    
+    static let managerIdentifier = "Loop"
+    
     private var bluetoothCentralManager: CBCentralManager!
     private lazy var log = DiagnosticLog(category: String(describing: LoopAlertsManager.self))
     private weak var alertManager: AlertManager?
-    private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: "Loop", alertIdentifier: "bluetoothPoweredOff")
+    private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
 
     init(alertManager: AlertManager) {
         super.init()
