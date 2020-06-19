@@ -15,6 +15,11 @@ public class AlertStore {
         case notFound
     }
 
+    private enum PostUpdateAction {
+        case save, delete
+    }
+    private typealias ManagedObjectUpdateBlock = (StoredAlert) -> PostUpdateAction
+    
     // Available for tests only
     let managedObjectContext: NSManagedObjectContext
 
@@ -24,6 +29,12 @@ public class AlertStore {
 
     private let log = DiagnosticLog(category: "AlertStore")
 
+    // This is terribly inconvenient, but it turns out that executing the following expression in CoreData _differs_
+    // depending on whether it is in-memory or SQLite
+    private let predicateExpressionNotYetExpiredSQLite = "issuedDate + triggerInterval < %@"
+    private let predicateExpressionNotYetExpiredInMemory = "CAST(issuedDate, 'NSNumber') + triggerInterval < CAST(%@, 'NSNumber')"
+    private let predicateExpressionNotYetExpired: String
+    
     public init(storageDirectoryURL: URL? = nil, expireAfter: TimeInterval = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */) {
         managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         managedObjectContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
@@ -35,8 +46,10 @@ public class AlertStore {
                 .appendingPathComponent("AlertStore")
                 .appendingPathComponent("AlertStore.sqlite")
             storeDescription.url = storageFileURL
+            predicateExpressionNotYetExpired = predicateExpressionNotYetExpiredSQLite
         } else {
             storeDescription.type = NSInMemoryStoreType
+            predicateExpressionNotYetExpired = predicateExpressionNotYetExpiredInMemory
         }
         storeDescription.shouldMigrateStoreAutomatically = true
         storeDescription.shouldInferMappingModelAutomatically = true
@@ -72,17 +85,35 @@ public class AlertStore {
             }
         }
     }
-
+    
     public func recordAcknowledgement(of identifier: Alert.Identifier, at date: Date = Date(),
                                       completion: ((Result<Void, Error>) -> Void)? = nil) {
-        recordUpdateOfLatest(of: identifier, addingPredicate: NSPredicate(format: "acknowledgedDate == nil"), with: { $0.acknowledgedDate = date }, completion: completion)
+        recordUpdateOfLatest(of: identifier,
+                             addingPredicate: NSPredicate(format: "acknowledgedDate == nil"),
+                             with: {
+                                $0.acknowledgedDate = date
+                                return .save
+                             },
+                             completion: completion)
     }
-
+    
     public func recordRetraction(of identifier: Alert.Identifier, at date: Date = Date(),
                                  completion: ((Result<Void, Error>) -> Void)? = nil) {
-        recordUpdateOfLatest(of: identifier, addingPredicate: NSPredicate(format: "retractedDate == nil"), with: { $0.retractedDate = date }, completion: completion)
+        recordUpdateOfLatest(of: identifier,
+                             addingPredicate: NSPredicate(format: "retractedDate == nil"),
+                             with: {
+                                // if the alert was retracted before it was ever shown, delete it.
+                                // Note: this only applies to .delayed or .repeating alerts!
+                                if let delay = $0.trigger.interval, $0.issuedDate + delay >= date {
+                                    return .delete
+                                } else {
+                                    $0.retractedDate = date
+                                    return .save
+                                }
+                             },
+                             completion: completion)
     }
-
+    
     public func lookupAllUnacknowledged(completion: @escaping (Result<[StoredAlert], Error>) -> Void) {
         managedObjectContext.perform {
             do {
@@ -108,17 +139,20 @@ extension AlertStore {
 
     private func recordUpdateOfLatest(of identifier: Alert.Identifier,
                                       addingPredicate predicate: NSPredicate,
-                                      with block: @escaping (StoredAlert) -> Void,
+                                      with block: @escaping ManagedObjectUpdateBlock,
                                       completion: ((Result<Void, Error>) -> Void)?) {
         self.managedObjectContext.perform {
             self.lookupLatest(identifier: identifier, predicate: predicate) {
                 switch $0 {
                 case .success(let object):
                     if let object = object {
-                        block(object)
+                        let shouldDelete = block(object) == .delete
                         do {
+                            if shouldDelete {
+                                self.managedObjectContext.delete(object)
+                            }
                             try self.managedObjectContext.save()
-                            self.log.default("Recorded alert: %{public}@", identifier.value)
+                            self.log.default("%{public}@ alert: %{public}@", shouldDelete ? "Deleted" : "Recorded", identifier.value)
                             self.purgeExpired()
                             completion?(.success)
                         } catch {
@@ -217,12 +251,28 @@ extension AlertStore {
         let predicate: NSPredicate?
     }
     struct SinceDateFilter: QueryFilter {
+        let predicateExpressionNotYetExpired: String
         let date: Date
-        var predicate: NSPredicate? { NSPredicate(format: "issuedDate >= %@", date as NSDate) }
+        let excludingFutureAlerts: Bool
+        let now: Date
+        var predicate: NSPredicate? {
+            let datePredicate = NSPredicate(format: "issuedDate >= %@", date as NSDate)
+            // This predicate only _includes_ a record if it either has no interval (i.e. is 'immediate')
+            // _or_ it is a 'delayed' or 'repeating' alert (a non-nil triggerInterval) whose time has already come
+            // (that is, issuedDate + triggerInterval < now).
+            let futurePredicate = NSPredicate(format: "triggerInterval == nil OR \(predicateExpressionNotYetExpired)", now as NSDate)
+            return excludingFutureAlerts ?
+                NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, futurePredicate])
+                : datePredicate
+        }
     }
 
-    func executeQuery(since date: Date, limit: Int, completion: @escaping (QueryResult<SinceDateFilter>) -> Void) {
-        executeAlertQuery(from: QueryAnchor(filter: SinceDateFilter(date: date)), limit: limit, completion: completion)
+    func executeQuery(since date: Date, excludingFutureAlerts: Bool = true, now: Date = Date(), limit: Int, completion: @escaping (QueryResult<SinceDateFilter>) -> Void) {
+        let sinceDateFilter = SinceDateFilter(predicateExpressionNotYetExpired: predicateExpressionNotYetExpired,
+                                              date: date,
+                                              excludingFutureAlerts: excludingFutureAlerts,
+                                              now: now)
+        executeAlertQuery(from: QueryAnchor(filter: sinceDateFilter), limit: limit, completion: completion)
     }
 
     func continueQuery<Filter: QueryFilter>(from anchor: QueryAnchor<Filter>, limit: Int, completion: @escaping (QueryResult<Filter>) -> Void) {
@@ -281,6 +331,16 @@ extension Alert.Identifier {
             NSPredicate(format: "managerIdentifier == %@", managerIdentifier),
             NSPredicate(format: "alertIdentifier == %@", alertIdentifier)
         ])
+    }
+}
+
+extension Alert.Trigger {
+    var interval: TimeInterval? {
+        switch self {
+        case .delayed(let interval): return interval
+        case .repeating(let repeatInterval): return repeatInterval
+        case .immediate: return nil
+        }
     }
 }
 

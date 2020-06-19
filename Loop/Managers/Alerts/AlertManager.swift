@@ -290,9 +290,9 @@ public extension Alert {
 
 public extension UNNotificationRequest {
     convenience init(from alert: Alert, timestamp: Date) throws {
-        let uncontent = try alert.getUserNotificationContent(timestamp: timestamp)
+        let content = try alert.getUserNotificationContent(timestamp: timestamp)
         self.init(identifier: alert.identifier.value,
-                  content: uncontent,
+                  content: content,
                   trigger: UNTimeIntervalNotificationTrigger(from: alert.trigger))
     }
 }
