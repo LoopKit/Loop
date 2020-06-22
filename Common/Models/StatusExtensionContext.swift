@@ -152,25 +152,25 @@ extension PredictedGlucoseContext: RawRepresentable {
     }
 }
 
-struct PumpManagerHUDViewsContext: RawRepresentable {
+struct PumpManagerHUDViewContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
-    let pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue
+    let pumpManagerHUDViewRawValue: PumpManagerHUDViewRawValue
 
-    init(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValue) {
-        self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+    init(pumpManagerHUDViewRawValue: PumpManagerHUDViewRawValue) {
+        self.pumpManagerHUDViewRawValue = pumpManagerHUDViewRawValue
     }
     
     init?(rawValue: RawValue) {
-        if let pumpManagerHUDViewsRawValue = rawValue["pumpManagerHUDViewsRawValue"] as? PumpManagerHUDViewsRawValue {
-            self.pumpManagerHUDViewsRawValue = pumpManagerHUDViewsRawValue
+        if let pumpManagerHUDViewRawValue = rawValue["pumpManagerHUDViewRawValue"] as? PumpManagerHUDViewRawValue {
+            self.pumpManagerHUDViewRawValue = pumpManagerHUDViewRawValue
         } else {
             return nil
         }
     }
     
     var rawValue: RawValue {
-        return ["pumpManagerHUDViewsRawValue": pumpManagerHUDViewsRawValue]
+        return ["pumpManagerHUDViewRawValue": pumpManagerHUDViewRawValue]
     }
 }
 
@@ -184,7 +184,7 @@ struct StatusExtensionContext: RawRepresentable {
     var batteryPercentage: Double?
     var reservoirCapacity: Double?
     var sensor: SensorDisplayableContext?
-    var pumpManagerHUDViewsContext: PumpManagerHUDViewsContext?
+    var pumpManagerHUDViewContext: PumpManagerHUDViewContext?
     
     init() { }
     
@@ -209,8 +209,8 @@ struct StatusExtensionContext: RawRepresentable {
             sensor = SensorDisplayableContext(rawValue: rawValue)
         }
         
-        if let rawPumpManagerHUDViewsContext = rawValue["pumpManagerHUDViewsContext"] as? PumpManagerHUDViewsContext.RawValue {
-            pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(rawValue: rawPumpManagerHUDViewsContext)
+        if let rawPumpManagerHUDViewContext = rawValue["pumpManagerHUDViewContext"] as? PumpManagerHUDViewContext.RawValue {
+            pumpManagerHUDViewContext = PumpManagerHUDViewContext(rawValue: rawPumpManagerHUDViewContext)
         }
     }
     
@@ -225,7 +225,7 @@ struct StatusExtensionContext: RawRepresentable {
         raw["batteryPercentage"] = batteryPercentage
         raw["reservoirCapacity"] = reservoirCapacity
         raw["sensor"] = sensor?.rawValue
-        raw["pumpManagerHUDViewsContext"] = pumpManagerHUDViewsContext?.rawValue
+        raw["pumpManagerHUDViewContext"] = pumpManagerHUDViewContext?.rawValue
         
         return raw
     }

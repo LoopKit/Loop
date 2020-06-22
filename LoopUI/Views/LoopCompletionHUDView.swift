@@ -15,7 +15,7 @@ public final class LoopCompletionHUDView: BaseHUDView {
     @IBOutlet private weak var loopStateView: LoopStateView!
     
     override public var orderPriority: HUDViewOrderPriority {
-        return 1
+        return 2
     }
 
     private(set) var freshness = LoopCompletionFreshness.unknown {
@@ -132,18 +132,18 @@ public final class LoopCompletionHUDView: BaseHUDView {
                      UIContentSizeCategory.medium,
                      UIContentSizeCategory.large:
                     // Use a longer form only for smaller text sizes
-                    caption.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
+                    caption?.text = String(format: LocalizedString("%@ ago", comment: "Format string describing the time interval since the last completion date. (1: The localized date components"), timeString)
                 default:
-                    caption.text = timeString
+                    caption?.text = timeString
                 }
 
                 accessibilityLabel = String(format: LocalizedString("Loop ran %@ ago", comment: "Accessbility format label describing the time interval since the last completion date. (1: The localized date components)"), timeString)
             } else {
-                caption.text = "—"
+                caption?.text = "—"
                 accessibilityLabel = nil
             }
         } else {
-            caption.text = "—"
+            caption?.text = "—"
             accessibilityLabel = LocalizedString("Waiting for first run", comment: "Acessibility label describing completion HUD waiting for first run")
         }
 

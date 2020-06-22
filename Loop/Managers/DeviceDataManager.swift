@@ -42,6 +42,7 @@ final class DeviceDataManager {
         didSet {
             dispatchPrecondition(condition: .onQueue(.main))
             setupCGM()
+            NotificationCenter.default.post(name: .CGMManagerChanged, object: self, userInfo: nil)
             UserDefaults.appGroup?.cgmManagerRawValue = cgmManager?.rawValue
         }
     }
@@ -797,6 +798,7 @@ extension DeviceDataManager: LoopDataManagerDelegate {
 
 extension Notification.Name {
     static let PumpManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.PumpManagerChanged")
+    static let CGMManagerChanged = Notification.Name(rawValue:  "com.loopKit.notification.CGMManagerChanged")
     static let PumpEventsAdded = Notification.Name(rawValue:  "com.loopKit.notification.PumpEventsAdded")
 }
 

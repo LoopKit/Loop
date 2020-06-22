@@ -14,7 +14,7 @@ import LoopCore
 import LoopTestingKit
 import LoopUI
 
-final class SettingsTableViewController: UITableViewController {
+final class SettingsTableViewController: UITableViewController, IdentifiableClass {
 
     @IBOutlet var devicesSectionTitleView: UIView?
 
