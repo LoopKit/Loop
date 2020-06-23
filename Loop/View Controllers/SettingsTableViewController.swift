@@ -6,6 +6,7 @@
 //  Copyright © 2015 Nathan Racklyeft. All rights reserved.
 //
 
+import Combine
 import UIKit
 import HealthKit
 import LoopKit
@@ -18,6 +19,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
     @IBOutlet var devicesSectionTitleView: UIView?
 
+    private var trash = Set<AnyCancellable>()
+    private var showNotificationsWarning = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -28,6 +32,14 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         tableView.register(SettingsImageTableViewCell.self, forCellReuseIdentifier: SettingsImageTableViewCell.className)
         tableView.register(SwitchTableViewCell.self, forCellReuseIdentifier: SwitchTableViewCell.className)
         tableView.register(TextButtonTableViewCell.self, forCellReuseIdentifier: TextButtonTableViewCell.className)
+        
+        notificationsCriticalAlertPermissionsViewModel.showWarningPublisher
+            .receive(on: RunLoop.main)
+            .sink {
+                self.showNotificationsWarning = $0
+                self.tableView.reloadSections([Section.loop.rawValue], with: .none)
+            }
+        .store(in: &trash)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -41,6 +53,8 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     private lazy var isTestingPumpManager = dataManager.pumpManager is TestingPumpManager
     private lazy var isTestingCGMManager = dataManager.cgmManager is TestingCGMManager
 
+    let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
+    
     fileprivate enum Section: Int, CaseIterable {
         case loop = 0
         case pump
@@ -136,7 +150,11 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
         case .loop:
-            return LoopRow.count
+            if showNotificationsWarning {
+                return LoopRow.count
+            } else {
+                return LoopRow.count - 1
+            }
         case .pump:
             return PumpRow.count
         case .cgm:
@@ -168,7 +186,10 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 return switchCell
             case .notifications:
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-                cell.textLabel?.text = NSLocalizedString("Notifications", comment: "Title text for notifications button cell")
+                cell.textLabel?.text = NSLocalizedString("Notification & Critical Alert Permissions", comment: "Title text for Notification & Critical Alert Permissions button cell")
+                if showNotificationsWarning {
+                    cell.detailTextLabel?.text = NSLocalizedString("⚠️", comment: "Warning symbol")
+                }
                 cell.accessoryType = .disclosureIndicator
                 return cell
             }
@@ -596,10 +617,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             case .dosing:
                 break
             case .notifications:
-                let viewModel = LoopNotificationsViewModel()
                 let hostingController = DismissibleHostingController(
-                    rootView: LoopNotificationsView(backButtonText: NSLocalizedString("Settings", comment: "Settings return button"),
-                                                    viewModel: viewModel),
+                    rootView: NotificationsCriticalAlertPermissionsView(backButtonText: NSLocalizedString("Settings", comment: "Settings return button"),
+                                                                        viewModel: notificationsCriticalAlertPermissionsViewModel),
                     onDisappear: {
                         tableView.deselectRow(at: indexPath, animated: true)
                 })

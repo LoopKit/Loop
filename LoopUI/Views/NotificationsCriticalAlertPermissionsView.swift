@@ -10,38 +10,51 @@ import LoopKitUI
 import SwiftUI
 
 public struct NotificationsCriticalAlertPermissionsView: View, HorizontalSizeClassOverride {
+    @Environment(\.dismiss) var dismiss
 
+    private let backButtonText: String
     @ObservedObject private var viewModel: NotificationsCriticalAlertPermissionsViewModel
 
-    public init(viewModel: NotificationsCriticalAlertPermissionsViewModel) {
+    public init(backButtonText: String = "", viewModel: NotificationsCriticalAlertPermissionsViewModel) {
+        self.backButtonText = backButtonText
         self.viewModel = viewModel
     }
     
     public var body: some View {
-        VStack {
-            Text(LocalizedString("Notification & Critical Alert Permissions", comment: "Notification & Critical Alert Permissions screen title"))
-                .font(.largeTitle)
-                .bold()
-            List {
-                manageNotificationsSection
-                manageCriticalAlertsSection
-                notificationAndCriticalAlertPermissionSupportSection
+        NavigationView {
+            VStack {
+                List {
+                    manageNotificationsSection
+                    manageCriticalAlertsSection
+                    notificationAndCriticalAlertPermissionSupportSection
+                }
+                .listStyle(GroupedListStyle())
+                .navigationBarTitle(Text(LocalizedString("Alert Permissions", comment: "Notification & Critical Alert Permissions screen title")))
+                .navigationBarBackButtonHidden(false)
+                .navigationBarHidden(false)
+                .navigationBarItems(leading: dismissButton)
+                .environment(\.horizontalSizeClass, horizontalOverride)
             }
-            .listStyle(GroupedListStyle())
-            .navigationBarBackButtonHidden(false)
-            .navigationBarHidden(false)
-            .environment(\.horizontalSizeClass, horizontalOverride)
         }
     }
+    
 }
 
 extension NotificationsCriticalAlertPermissionsView {
+    
+    private var dismissButton: some View {
+        Button( action: { self.dismiss() }) {
+            Text(backButtonText)
+        }
+    }
+
     private var manageNotificationsSection: some View {
         Section {
             Button( action: { self.viewModel.gotoSettings() } ) {
                 HStack {
                     Text(LocalizedString("Manage Notifications in Settings", comment: "Manage Notifications in Settings button text"))
                     if !viewModel.notificationsPermissionsGiven {
+                        Spacer()
                         Text(LocalizedString("⚠️", comment: "Warning symbol"))
                     }
                 }
@@ -61,6 +74,7 @@ extension NotificationsCriticalAlertPermissionsView {
                 HStack {
                     Text(LocalizedString("Manage Critical Alerts in Settings", comment: "Manage Critical Alerts in Settings button text"))
                     if !viewModel.criticalAlertsPermissionsGiven {
+                        Spacer()
                         Text(LocalizedString("⚠️", comment: "Warning symbol"))
                     }
                 }
