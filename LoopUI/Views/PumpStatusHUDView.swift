@@ -33,7 +33,7 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     
     override func setup() {
         super.setup()
-        alertStatusView.setIconPosition(.left)        
+        statusHighlightView.setIconPosition(.left)
     }
     
     public override func tintColorDidChange() {
@@ -43,16 +43,16 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
         pumpManagerProvidedHUD?.tintColor = tintColor
     }
     
-    public func presentAddPumpAlert() {
-        alertStatusView.alertMessageLabel.text = LocalizedString("Add Pump", comment: "Title text for button to set up a pump")
-        alertStatusView.alertMessageLabel.tintColor = .label
-        alertStatusView.alertIcon.image = UIImage(systemName: "plus.circle")
-        alertStatusView.alertIcon.tintColor = .systemBlue
-        presentAlert()
+    public func presentAddPumpHighlight() {
+        statusHighlightView.messageLabel.text = LocalizedString("Add Pump", comment: "Title text for button to set up a pump")
+        statusHighlightView.messageLabel.tintColor = .label
+        statusHighlightView.icon.image = UIImage(systemName: "plus.circle")
+        statusHighlightView.icon.tintColor = .systemBlue
+        presentStatusHighlight()
     }
     
-    override public func presentAlert() {
-        guard !statusStackView.arrangedSubviews.contains(alertStatusView) else {
+    override public func presentStatusHighlight() {
+        guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
         
@@ -65,15 +65,15 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
             statusStackView.removeArrangedSubview(pumpManagerProvidedHUD)
         }
 
-        super.presentAlert()
+        super.presentStatusHighlight()
     }
     
-    override public func dismissAlert() {
-        guard statusStackView.arrangedSubviews.contains(alertStatusView) else {
+    override public func dismissStatusHighlight() {
+        guard statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
         
-        super.dismissAlert()
+        super.dismissStatusHighlight()
         
         statusStackView.addArrangedSubview(basalRateHUD)
         basalRateHUD.isHidden = false

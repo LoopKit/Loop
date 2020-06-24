@@ -1,5 +1,5 @@
 //
-//  AlertStatusHUDView.swift
+//  StatusHighlightHUDView.swift
 //  LoopUI
 //
 //  Created by Nathaniel Hamming on 2020-06-05.
@@ -8,15 +8,15 @@
 
 import UIKit
 
-public class AlertStatusHUDView: UIView, NibLoadable {
+public class StatusHighlightHUDView: UIView, NibLoadable {
     
     private var stackView: UIStackView!
     
-    @IBOutlet public weak var alertMessageLabel: UILabel!
+    @IBOutlet public weak var messageLabel: UILabel!
     
-    @IBOutlet public weak var alertIcon: UIImageView! {
+    @IBOutlet public weak var icon: UIImageView! {
         didSet {
-            alertIcon.tintColor = tintColor
+            icon.tintColor = tintColor
         }
     }
     
@@ -27,17 +27,17 @@ public class AlertStatusHUDView: UIView, NibLoadable {
     
     private var iconPosition: IconPosition = .right {
         didSet {
-            stackView.removeArrangedSubview(alertMessageLabel)
-            stackView.removeArrangedSubview(alertIcon)
+            stackView.removeArrangedSubview(messageLabel)
+            stackView.removeArrangedSubview(icon)
             switch iconPosition {
             case .left:
-                stackView.addArrangedSubview(alertIcon)
-                stackView.addArrangedSubview(alertMessageLabel)
-                alertMessageLabel.textAlignment = .left
+                stackView.addArrangedSubview(icon)
+                stackView.addArrangedSubview(messageLabel)
+                messageLabel.textAlignment = .left
             case .right:
-                stackView.addArrangedSubview(alertMessageLabel)
-                stackView.addArrangedSubview(alertIcon)
-                alertMessageLabel.textAlignment = .right
+                stackView.addArrangedSubview(messageLabel)
+                stackView.addArrangedSubview(icon)
+                messageLabel.textAlignment = .right
             }
         }
     }
@@ -53,7 +53,7 @@ public class AlertStatusHUDView: UIView, NibLoadable {
     }
     
     func setup() {
-        stackView = (AlertStatusHUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIStackView)
+        stackView = (StatusHighlightHUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIStackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(stackView)
 

@@ -25,6 +25,7 @@ struct SensorDisplayableContext: SensorDisplayable {
     let stateDescription: String
     let trendType: GlucoseTrend?
     let isLocal: Bool
+    let glucoseValueType: GlucoseValueType?
 }
 
 struct GlucoseContext: GlucoseValue {
@@ -91,6 +92,7 @@ extension SensorDisplayableContext: RawRepresentable {
             "isLocal": isLocal
         ]
         raw["trendType"] = trendType?.rawValue
+        raw["glucoseValueType"] = glucoseValueType?.rawValue
 
         return raw
     }
@@ -100,6 +102,7 @@ extension SensorDisplayableContext: RawRepresentable {
         stateDescription = other.stateDescription
         isLocal = other.isLocal
         trendType = other.trendType
+        glucoseValueType = other.glucoseValueType
     }
 
     init?(rawValue: RawValue) {
@@ -119,6 +122,12 @@ extension SensorDisplayableContext: RawRepresentable {
             trendType = GlucoseTrend(rawValue: rawValue)
         } else {
             trendType = nil
+        }
+        
+        if let glucoseValueRawValue = rawValue["glucoseValueType"] as? GlucoseValueType.RawValue {
+            glucoseValueType = GlucoseValueType(rawValue: glucoseValueRawValue)
+        } else {
+            glucoseValueType = nil
         }
     }
 }

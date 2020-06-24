@@ -34,7 +34,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     
     override func setup() {
         super.setup()
-        alertStatusView.setIconPosition(.right)
+        statusHighlightView.setIconPosition(.right)
     }
     
     public override func tintColorDidChange() {
@@ -44,16 +44,16 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         glucoseTrendHUD.tintColor = tintColor
     }
     
-    public func presentAddCGMAlert() {
-        alertStatusView.alertMessageLabel.text = LocalizedString("Add CGM", comment: "Title text for button to set up a CGM")
-        alertStatusView.alertMessageLabel.tintColor = .label
-        alertStatusView.alertIcon.image = UIImage(systemName: "plus.circle")
-        alertStatusView.alertIcon.tintColor = .systemBlue
-        presentAlert()
+    public func presentAddCGMHighlight() {
+        statusHighlightView.messageLabel.text = LocalizedString("Add CGM", comment: "Title text for button to set up a CGM")
+        statusHighlightView.messageLabel.tintColor = .label
+        statusHighlightView.icon.image = UIImage(systemName: "plus.circle")
+        statusHighlightView.icon.tintColor = .systemBlue
+        presentStatusHighlight()
     }
     
-    override public func presentAlert() {
-        guard !statusStackView.arrangedSubviews.contains(alertStatusView) else {
+    override public func presentStatusHighlight() {
+        guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
         
@@ -63,15 +63,15 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         statusStackView.removeArrangedSubview(glucoseValueHUD)
         statusStackView.removeArrangedSubview(glucoseTrendHUD)
         
-        super.presentAlert()
+        super.presentStatusHighlight()
     }
     
-    override public func dismissAlert() {
-        guard statusStackView.arrangedSubviews.contains(alertStatusView) else {
+    override public func dismissStatusHighlight() {
+        guard statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return
         }
         
-        super.dismissAlert()
+        super.dismissStatusHighlight()
         
         statusStackView.addArrangedSubview(glucoseValueHUD)
         statusStackView.addArrangedSubview(glucoseTrendHUD)

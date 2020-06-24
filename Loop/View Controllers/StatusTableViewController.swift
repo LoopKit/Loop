@@ -1265,9 +1265,9 @@ final class StatusTableViewController: ChartsTableViewController {
                     addPumpManagerViewToHUD(view)
                 }
                 pumpManagerHUDProvider.visible = active && onscreen
-                hudView.pumpStatusHUD.dismissAlert()
+                hudView.pumpStatusHUD.dismissStatusHighlight()
             } else {
-                hudView.pumpStatusHUD.presentAddPumpAlert()
+                hudView.pumpStatusHUD.presentAddPumpHighlight()
             }
         }
     }
@@ -1275,9 +1275,9 @@ final class StatusTableViewController: ChartsTableViewController {
     private func configureCGMManagerHUDViews() {
         if let hudView = hudView {
             if deviceManager.cgmManager != nil {
-                hudView.cgmStatusHUD.dismissAlert()
+                hudView.cgmStatusHUD.dismissStatusHighlight()
             } else {
-                hudView.cgmStatusHUD.presentAddCGMAlert()
+                hudView.cgmStatusHUD.presentAddCGMHighlight()
             }
         }
     }

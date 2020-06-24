@@ -7,10 +7,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AlertStatusHUDView" customModule="LoopUI" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="StatusHighlightHUDView">
             <connections>
-                <outlet property="alertIcon" destination="d0U-8x-dAf" id="7sK-VQ-QAe"/>
-                <outlet property="alertMessageLabel" destination="csC-XY-a5C" id="6kO-Ag-hi9"/>
+                <outlet property="icon" destination="d0U-8x-dAf" id="hf7-GR-Qim"/>
+                <outlet property="messageLabel" destination="csC-XY-a5C" id="b4Q-ZX-Y9A"/>
             </connections>
         </placeholder>
         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="5" id="vCH-Wo-Q6s">

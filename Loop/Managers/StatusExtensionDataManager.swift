@@ -111,7 +111,8 @@ final class StatusExtensionDataManager {
                     isStateValid: sensorInfo.isStateValid,
                     stateDescription: sensorInfo.stateDescription,
                     trendType: sensorInfo.trendType,
-                    isLocal: sensorInfo.isLocal
+                    isLocal: sensorInfo.isLocal,
+                    glucoseValueType: sensorInfo.glucoseValueType
                 )
             }
             
