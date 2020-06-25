@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
@@ -20,6 +19,7 @@ struct FeatureFlagConfiguration: Decodable {
     let simulatedCoreDataEnabled: Bool
     let walshInsulinModelEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
+    let observeHealthKitForCurrentAppOnly: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -73,6 +73,12 @@ struct FeatureFlagConfiguration: Decodable {
         self.fiaspInsulinModelEnabled = false
         #else
         self.fiaspInsulinModelEnabled = true
+        #endif
+        
+        #if OBSERVE_HEALTHKIT_FOR_CURRENT_APP_ONLY
+        self.observeHealthKitForCurrentAppOnly = true
+        #else
+        self.observeHealthKitForCurrentAppOnly = false
         #endif
     }
 }

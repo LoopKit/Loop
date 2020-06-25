@@ -56,12 +56,14 @@ class LoopDataManager {
 
         carbStore = CarbStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
             cacheStore: cacheStore,
             defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
             syncVersion: 0
         )
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
             cacheStore: cacheStore,
             cacheLength: .hours(4)
         )

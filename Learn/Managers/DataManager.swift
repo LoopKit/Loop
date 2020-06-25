@@ -34,6 +34,7 @@ final class DataManager {
 
         carbStore = CarbStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: false,
             cacheStore: cacheStore,
             observationEnabled: false,
             carbRatioSchedule: carbRatioSchedule,
@@ -42,6 +43,7 @@ final class DataManager {
 
         doseStore = DoseStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: false,
             cacheStore: cacheStore,
             observationEnabled: false,
             insulinModel: insulinModelSettings?.model,
@@ -51,6 +53,7 @@ final class DataManager {
 
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: false,
             cacheStore: cacheStore,
             observationEnabled: false
         )

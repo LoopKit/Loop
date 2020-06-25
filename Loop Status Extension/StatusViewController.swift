@@ -69,12 +69,14 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
+        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
         cacheStore: cacheStore,
         observationEnabled: false
     )
 
     lazy var doseStore = DoseStore(
         healthStore: healthStore,
+        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
         cacheStore: cacheStore,
         observationEnabled: false,
         insulinModel: defaults?.insulinModelSettings?.model,
