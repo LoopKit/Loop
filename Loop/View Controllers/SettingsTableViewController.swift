@@ -186,7 +186,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 return switchCell
             case .notifications:
                 let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
-                cell.textLabel?.text = NSLocalizedString("Notification & Critical Alert Permissions", comment: "Title text for Notification & Critical Alert Permissions button cell")
+                cell.textLabel?.text = NSLocalizedString("Alert Permissions", comment: "Title text for Notification & Critical Alert Permissions button cell")
                 if showNotificationsWarning {
                     cell.detailTextLabel?.text = NSLocalizedString("⚠️", comment: "Warning symbol")
                 }
