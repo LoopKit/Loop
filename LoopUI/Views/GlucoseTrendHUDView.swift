@@ -17,20 +17,42 @@ public final class GlucoseTrendHUDView: BaseHUDView {
         return 2
     }
 
-    @IBOutlet private weak var trendLabel: UILabel! {
+    @IBOutlet private weak var trendIcon: UIImageView! {
         didSet {
-            trendLabel.text = "–"
-            trendLabel.textColor = .secondaryLabel
+            trendIcon.image = UIImage(systemName: "questionmark.circle")
+            trendIcon.tintColor = .systemPurple
         }
     }
 
     public override func tintColorDidChange() {
         super.tintColorDidChange()
-
-        trendLabel.textColor = tintColor
+        
+        trendIcon.tintColor = tintColor
     }
 
-    public func setTrend(_ trend: GlucoseTrend) {
-        trendLabel.text = trend.symbol
+    public func setTrend(_ trend: GlucoseTrend?) {
+        guard let trend = trend else {
+            trendIcon.image = UIImage(systemName: "questionmark.circle")
+            return
+        }
+        
+        switch trend {
+        case .upUpUp:
+            // TODO this is a placeholder until I get the correct icon from design
+            trendIcon.image = UIImage(systemName: "arrow.up.circle")
+        case .upUp:
+            trendIcon.image = UIImage(systemName: "arrow.up.circle")
+        case .up:
+            trendIcon.image = UIImage(systemName: "arrow.up.right.circle")
+        case .flat:
+            trendIcon.image = UIImage(systemName: "arrow.right.circle")
+        case .down:
+            trendIcon.image = UIImage(systemName: "arrow.down.right.circle")
+        case .downDown:
+            trendIcon.image = UIImage(systemName: "arrow.down.circle")
+        case .downDownDown:
+            // TODO this is a placeholder until I get the correct icon from design
+            trendIcon.image = UIImage(systemName: "arrow.down.circle")
+        }
     }
 }

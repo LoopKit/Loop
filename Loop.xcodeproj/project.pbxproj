@@ -423,6 +423,7 @@
 		A9F703732489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */; };
 		A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */; };
 		A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */; };
+		B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */; };
 		B42C951724A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */; };
@@ -1147,6 +1148,7 @@
 		A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CarbStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GlucoseStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersistentDeviceLog+SimulatedCoreData.swift"; sourceTree = "<group>"; };
+		B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDViewModel.swift; sourceTree = "<group>"; };
 		B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsViewModel.swift; sourceTree = "<group>"; };
 		B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusHUDView.swift; sourceTree = "<group>"; };
@@ -1809,6 +1811,7 @@
 				4FB76FC41E8C576800B39636 /* Extensions */,
 				4FB76FC31E8C575900B39636 /* Charts */,
 				4F7528A61DFE20AE00C322D6 /* Models */,
+				B42C950F24A3C44F00857C73 /* ViewModel */,
 				4F7528931DFE1E1600C322D6 /* Views */,
 				4F75288D1DFE1DC600C322D6 /* LoopUI.h */,
 				4F75288E1DFE1DC600C322D6 /* Info.plist */,
@@ -1838,7 +1841,6 @@
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
 				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
-				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
 				B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */,
 				B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */,
 				B4E96D56248A7B0F002DABAD /* StatusHighlightHUDView.swift */,
@@ -2094,6 +2096,15 @@
 				A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		B42C950F24A3C44F00857C73 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */,
+				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
+			);
+			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		C16DA84022E8E104008624C2 /* Plugins */ = {
@@ -3219,6 +3230,7 @@
 				4FB76FB81E8C429D00B39636 /* CGPoint.swift in Sources */,
 				B4E96D57248A7B0F002DABAD /* StatusHighlightHUDView.swift in Sources */,
 				43FCEEB5221BCA020013DD30 /* COBChart.swift in Sources */,
+				B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */,
 				4F75289E1DFE1F6000C322D6 /* LoopCompletionHUDView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

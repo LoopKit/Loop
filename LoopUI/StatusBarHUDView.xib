@@ -26,20 +26,20 @@
                             <rect key="frame" x="8" y="10" width="142" height="50"/>
                             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         </view>
-                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="u3Q-Vj-Efw">
-                            <rect key="frame" x="8" y="10" width="134" height="50"/>
+                        <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="u3Q-Vj-Efw">
+                            <rect key="frame" x="16" y="10" width="126" height="50"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4ED-GN-I8z" customClass="GlucoseValueHUDView" customModule="LoopUI" customModuleProvider="target">
-                                    <rect key="frame" x="0.0" y="0.0" width="82.5" height="50"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="92" height="50"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="399" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zNz-ko-2fC">
-                                            <rect key="frame" x="0.0" y="-2" width="82.5" height="41"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="399" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zNz-ko-2fC">
+                                            <rect key="frame" x="0.0" y="-2" width="92" height="41"/>
+                                            <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="34"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="mmol/L" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JDP-Om-JBq">
-                                            <rect key="frame" x="0.0" y="31" width="82.5" height="14.5"/>
+                                            <rect key="frame" x="0.0" y="31" width="92" height="14.5"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -61,33 +61,36 @@
                                         <outlet property="unitLabel" destination="JDP-Om-JBq" id="yXe-kW-a8B"/>
                                     </connections>
                                 </view>
-                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uZi-T5-4vg" customClass="GlucoseTrendHUDView" customModule="LoopUI" customModuleProvider="target">
-                                    <rect key="frame" x="82.5" y="0.0" width="51.5" height="50"/>
+                                <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="uZi-T5-4vg" customClass="GlucoseTrendHUDView" customModule="LoopUI" customModuleProvider="target">
+                                    <rect key="frame" x="92" y="8" width="34" height="34"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="⇈" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O42-yg-eBc">
-                                            <rect key="frame" x="12" y="8.5" width="27.5" height="33.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" image="questionmark.circle" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="n3h-hy-PYx">
+                                            <rect key="frame" x="-1.5" y="-1" width="37" height="36"/>
+                                            <color key="tintColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="37" id="Hfr-Lz-hxc"/>
+                                                <constraint firstAttribute="height" constant="37" id="Lbj-a7-RtR"/>
+                                            </constraints>
+                                        </imageView>
                                     </subviews>
                                     <accessibility key="accessibilityConfiguration" label="Glucose Trend">
                                         <bool key="isElement" value="YES"/>
                                     </accessibility>
                                     <constraints>
-                                        <constraint firstAttribute="trailing" secondItem="O42-yg-eBc" secondAttribute="trailing" constant="12" id="94Y-Aw-Dta"/>
-                                        <constraint firstItem="O42-yg-eBc" firstAttribute="centerX" secondItem="uZi-T5-4vg" secondAttribute="centerX" id="F5H-o0-vDk"/>
-                                        <constraint firstItem="O42-yg-eBc" firstAttribute="leading" secondItem="uZi-T5-4vg" secondAttribute="leading" constant="12" id="MYN-hl-kAS"/>
-                                        <constraint firstItem="O42-yg-eBc" firstAttribute="centerY" secondItem="uZi-T5-4vg" secondAttribute="centerY" id="TiP-2W-fwt"/>
+                                        <constraint firstItem="n3h-hy-PYx" firstAttribute="centerY" secondItem="uZi-T5-4vg" secondAttribute="centerY" id="25A-Hg-ITL"/>
+                                        <constraint firstAttribute="width" constant="34" id="4dg-JX-PvQ"/>
+                                        <constraint firstItem="n3h-hy-PYx" firstAttribute="centerX" secondItem="uZi-T5-4vg" secondAttribute="centerX" id="Fxd-AX-wbS"/>
+                                        <constraint firstAttribute="height" constant="34" id="abf-ht-ckv"/>
                                     </constraints>
                                     <connections>
-                                        <outlet property="trendLabel" destination="O42-yg-eBc" id="2Bg-C7-gF8"/>
+                                        <outlet property="trendIcon" destination="n3h-hy-PYx" id="qj1-lb-77q"/>
                                     </connections>
                                 </view>
                             </subviews>
                             <constraints>
-                                <constraint firstItem="uZi-T5-4vg" firstAttribute="top" secondItem="u3Q-Vj-Efw" secondAttribute="top" id="4dN-UQ-D0h"/>
-                                <constraint firstAttribute="bottom" secondItem="uZi-T5-4vg" secondAttribute="bottom" id="xVn-vl-wc4"/>
+                                <constraint firstItem="uZi-T5-4vg" firstAttribute="centerY" secondItem="u3Q-Vj-Efw" secondAttribute="centerY" id="23C-wp-LQY"/>
+                                <constraint firstAttribute="bottom" secondItem="4ED-GN-I8z" secondAttribute="bottom" id="7dc-Jv-n2x"/>
+                                <constraint firstItem="4ED-GN-I8z" firstAttribute="top" secondItem="u3Q-Vj-Efw" secondAttribute="top" id="FyQ-mM-RPe"/>
                             </constraints>
                         </stackView>
                         <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="vmJ-km-UjN">
@@ -107,10 +110,10 @@
                         <constraint firstAttribute="bottom" secondItem="QwU-5e-NnT" secondAttribute="bottom" constant="20" id="HX0-Mo-7hM"/>
                         <constraint firstAttribute="trailing" secondItem="u3Q-Vj-Efw" secondAttribute="trailing" constant="8" id="SQf-2L-eun"/>
                         <constraint firstAttribute="bottom" secondItem="vmJ-km-UjN" secondAttribute="bottom" constant="8" id="Ski-fr-qQY"/>
-                        <constraint firstItem="u3Q-Vj-Efw" firstAttribute="leading" secondItem="76s-1c-uyr" secondAttribute="leading" constant="8" id="Yxh-ch-Sdk"/>
                         <constraint firstAttribute="bottom" secondItem="u3Q-Vj-Efw" secondAttribute="bottom" constant="20" id="cK2-Am-j0i"/>
                         <constraint firstAttribute="trailing" secondItem="vmJ-km-UjN" secondAttribute="trailing" constant="18" id="dKx-hl-4cd"/>
                         <constraint firstItem="QwU-5e-NnT" firstAttribute="leading" secondItem="76s-1c-uyr" secondAttribute="leading" constant="8" id="gSX-7g-ZXB"/>
+                        <constraint firstItem="u3Q-Vj-Efw" firstAttribute="leading" secondItem="QwU-5e-NnT" secondAttribute="leading" constant="8" id="o0e-1l-DTi"/>
                         <constraint firstAttribute="trailing" secondItem="QwU-5e-NnT" secondAttribute="trailing" id="tlj-zT-JTO"/>
                     </constraints>
                     <connections>
@@ -265,7 +268,7 @@
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="cSv-zq-wo3" secondAttribute="trailing" constant="8" id="44c-GO-CFS"/>
                         <constraint firstItem="xRi-qE-U6T" firstAttribute="leading" secondItem="F6P-l9-6hk" secondAttribute="leading" constant="8" id="4KS-fe-oLr"/>
-                        <constraint firstAttribute="trailing" secondItem="xRi-qE-U6T" secondAttribute="trailing" constant="8" id="MKi-JT-ZCr"/>
+                        <constraint firstItem="xRi-qE-U6T" firstAttribute="trailing" secondItem="cSv-zq-wo3" secondAttribute="trailing" id="5vy-0l-cWN"/>
                         <constraint firstAttribute="bottom" secondItem="cSv-zq-wo3" secondAttribute="bottom" constant="20" id="My7-an-f3Q"/>
                         <constraint firstItem="cSv-zq-wo3" firstAttribute="leading" secondItem="F6P-l9-6hk" secondAttribute="leading" id="UVW-4k-vOK"/>
                         <constraint firstAttribute="bottom" secondItem="xRi-qE-U6T" secondAttribute="bottom" constant="20" id="Ylj-JL-X3Y"/>
@@ -307,6 +310,7 @@
         </view>
     </objects>
     <resources>
+        <image name="questionmark.circle" catalog="system" width="128" height="121"/>
         <image name="reservoir" width="28" height="44"/>
         <image name="reservoir_mask" width="28" height="39"/>
     </resources>

@@ -17,8 +17,6 @@ public final class GlucoseValueHUDView: BaseHUDView {
         return 1
     }
 
-    static let staleGlucoseRepresentation: String = "---"
-    
     @IBOutlet public weak var unitLabel: UILabel! {
         didSet {
             unitLabel.text = "–"
@@ -28,7 +26,7 @@ public final class GlucoseValueHUDView: BaseHUDView {
 
     @IBOutlet public weak var glucoseLabel: UILabel! {
         didSet {
-            glucoseLabel.text = GlucoseHUDView.staleGlucoseRepresentation
+            glucoseLabel.text = CGMStatusHUDViewModel.staleGlucoseRepresentation
             glucoseLabel.textColor = .label
         }
     }
@@ -39,10 +37,8 @@ public final class GlucoseValueHUDView: BaseHUDView {
         switch self.tintColor {
         case UIColor.label:
             glucoseLabel.textColor = tintColor
-            unitLabel.textColor = .secondaryLabel
         default:
             glucoseLabel.textColor = tintColor
-            unitLabel.textColor = tintColor
         }
     }
 }

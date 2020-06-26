@@ -13,12 +13,25 @@ import LoopKitUI
 
 public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     
+    private var viewModel: CGMStatusHUDViewModel!
+    
     @IBOutlet public weak var glucoseValueHUD: GlucoseValueHUDView!
     
     @IBOutlet public weak var glucoseTrendHUD: GlucoseTrendHUDView!
     
     override public var orderPriority: HUDViewOrderPriority {
         return 1
+    }
+    
+    public var isVisible: Bool {
+        get {
+            viewModel.isVisible
+        }
+        set {
+            if viewModel.isVisible != newValue {
+                viewModel.isVisible = newValue
+            }
+        }
     }
     
     public override init(frame: CGRect) {
@@ -29,31 +42,36 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup()
-        
     }
     
     override func setup() {
         super.setup()
         statusHighlightView.setIconPosition(.right)
+        viewModel = CGMStatusHUDViewModel(staleGlucoseValueHandler: { self.glucoseValueHUD.glucoseLabel.text = $0 })
     }
     
     public override func tintColorDidChange() {
         super.tintColorDidChange()
         
         glucoseValueHUD.tintColor = tintColor
-        glucoseTrendHUD.tintColor = tintColor
+        switch tintColor {
+        case UIColor.label:
+            glucoseTrendHUD.tintColor = .systemPurple
+        default:
+            glucoseTrendHUD.tintColor = tintColor
+        }
     }
     
     public func presentAddCGMHighlight() {
-        statusHighlightView.messageLabel.text = LocalizedString("Add CGM", comment: "Title text for button to set up a CGM")
-        statusHighlightView.messageLabel.tintColor = .label
-        statusHighlightView.icon.image = UIImage(systemName: "plus.circle")
-        statusHighlightView.icon.tintColor = .systemBlue
-        presentStatusHighlight()
+        presentStatusHighlight(withMessage: LocalizedString("Add CGM", comment: "Title text for button to set up a CGM"),
+                               icon: UIImage(systemName: "plus.circle")!,
+                               color: .systemBlue)
     }
     
     override public func presentStatusHighlight() {
-        guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
+        guard statusStackView.arrangedSubviews.contains(glucoseValueHUD),
+            statusStackView.arrangedSubviews.contains(glucoseTrendHUD) else
+        {
             return
         }
         
@@ -83,96 +101,27 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
                                    at glucoseStartDate: Date,
                                    unit: HKUnit,
                                    staleGlucoseAge: TimeInterval,
-                                   sensor: SensorDisplayable?)
+                                   sensor: SensorDisplayable?,
+                                   statusHighlight: DeviceStatusHighlight?)
     {
-        // TODO refactor this function with LOOP-1293. Suggestion is to make a view model. Need to check with design about the display of stale glucose values.
-        var accessibilityStrings = [String]()
+        viewModel.setGlucoseQuantity(glucoseQuantity,
+                                     at: glucoseStartDate,
+                                     unit: unit,
+                                     staleGlucoseAge: staleGlucoseAge,
+                                     sensor: sensor)
         
-        let time = timeFormatter.string(from: glucoseStartDate)
-        caption?.text = time
+        glucoseValueHUD.glucoseLabel.text = viewModel.glucoseValueString
+        glucoseValueHUD.unitLabel.text = viewModel.unitsString
+        glucoseTrendHUD.setTrend(viewModel.trend)
+        tintColor = viewModel.tintColor ?? .label
+        accessibilityValue = viewModel.accessibilityString
         
-        isStaleAt = glucoseStartDate.addingTimeInterval(staleGlucoseAge)
-        let glucoseValueCurrent = Date() < isStaleAt!
-        
-        let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
-        if let valueString = numberFormatter.string(from: glucoseQuantity) {
-            if glucoseValueCurrent {
-                glucoseValueHUD.glucoseLabel.text = valueString
-                startStalenessTimerIfNeeded()
-            } else {
-                glucoseValueHUD.glucoseLabel.text = GlucoseValueHUDView.staleGlucoseRepresentation
-            }
-            accessibilityStrings.append(String(format: LocalizedString("%1$@ at %2$@", comment: "Accessbility format value describing glucose: (1: glucose number)(2: glucose time)"), valueString, time))
-        }
-        
-        if let trend = sensor?.trendType, glucoseValueCurrent {
-            glucoseTrendHUD.setTrend(trend)
-            accessibilityStrings.append(trend.localizedDescription)
-        }
-        
-        if sensor == nil {
-            sensorAlertState = .missing
-        } else if sensor!.isStateValid == false {
-            sensorAlertState = .invalid
-            accessibilityStrings.append(LocalizedString("Needs attention", comment: "Accessibility label component for glucose HUD describing an invalid state"))
-        } else if sensor!.isLocal == false {
-            sensorAlertState = .remote
+        if let statusHighlight = statusHighlight {
+            presentStatusHighlight(withMessage: statusHighlight.localizedMessage,
+                                   icon: statusHighlight.icon,
+                                   color: statusHighlight.color)
         } else {
-            sensorAlertState = .ok
-        }
-        glucoseValueHUD.unitLabel.text = unit.localizedShortUnitString
-        accessibilityValue = accessibilityStrings.joined(separator: ", ")
-    }
-    
-    private lazy var timeFormatter = DateFormatter(timeStyle: .short)
-    
-    private var stalenessTimer: Timer?
-    
-    private var isStaleAt: Date? {
-        didSet {
-            if oldValue != isStaleAt {
-                stalenessTimer?.invalidate()
-                stalenessTimer = nil
-            }
+            dismissStatusHighlight()
         }
     }
-    
-    public var isVisible: Bool = true {
-        didSet {
-            if oldValue != isVisible {
-                if !isVisible {
-                    stalenessTimer?.invalidate()
-                    stalenessTimer = nil
-                } else {
-                    startStalenessTimerIfNeeded()
-                }
-            }
-        }
-    }
-    
-    private func startStalenessTimerIfNeeded() {
-        if let fireDate = isStaleAt,
-            isVisible,
-            stalenessTimer == nil
-        {
-            stalenessTimer = Timer(fire: fireDate, interval: 0, repeats: false) { (_) in
-                self.glucoseValueHUD.glucoseLabel.text = GlucoseValueHUDView.staleGlucoseRepresentation
-            }
-            RunLoop.main.add(stalenessTimer!, forMode: .default)
-        }
-    }
-    
-    private enum SensorAlertState {
-        case ok
-        case missing
-        case invalid
-        case remote
-    }
-    
-    override public func stateColorsDidUpdate() {
-        super.stateColorsDidUpdate()
-    }
-    
-    private var sensorAlertState = SensorAlertState.ok
-    
 }

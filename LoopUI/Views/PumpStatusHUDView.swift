@@ -44,10 +44,9 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
     }
     
     public func presentAddPumpHighlight() {
-        statusHighlightView.messageLabel.text = LocalizedString("Add Pump", comment: "Title text for button to set up a pump")
-        statusHighlightView.messageLabel.tintColor = .label
-        statusHighlightView.icon.image = UIImage(systemName: "plus.circle")
-        statusHighlightView.icon.tintColor = .systemBlue
+        presentStatusHighlight(withMessage: LocalizedString("Add Pump", comment: "Title text for button to set up a pump"),
+                               icon: UIImage(systemName: "plus.circle")!,
+                               color: .systemBlue)
         presentStatusHighlight()
     }
     

@@ -40,6 +40,17 @@ import LoopKitUI
         }
     }
     
+    func presentStatusHighlight(withMessage message: String,
+                                icon: UIImage,
+                                color: UIColor)
+    {
+        statusHighlightView.messageLabel.text = message
+        statusHighlightView.messageLabel.tintColor = .label
+        statusHighlightView.icon.image = icon
+        statusHighlightView.icon.tintColor = color
+        presentStatusHighlight()
+    }
+    
     func presentStatusHighlight() {
         statusStackView?.addArrangedSubview(statusHighlightView)
         statusHighlightView.isHidden = false
