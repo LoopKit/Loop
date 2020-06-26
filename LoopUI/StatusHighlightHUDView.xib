@@ -18,17 +18,17 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" text="Add Device" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="csC-XY-a5C">
-                    <rect key="frame" x="0.0" y="0.0" width="84" height="50"/>
+                    <rect key="frame" x="0.0" y="0.0" width="87" height="50"/>
                     <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="16"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" image="exclamationmark.circle.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="d0U-8x-dAf">
-                    <rect key="frame" x="89" y="7" width="37" height="36"/>
+                    <rect key="frame" x="92" y="8.5" width="34" height="33"/>
                     <color key="tintColor" systemColor="systemRedColor" red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="37" id="BmB-id-qf8"/>
-                        <constraint firstAttribute="height" constant="37" id="eRB-5l-n71"/>
+                        <constraint firstAttribute="width" constant="34" id="BmB-id-qf8"/>
+                        <constraint firstAttribute="height" constant="34" id="eRB-5l-n71"/>
                     </constraints>
                 </imageView>
             </subviews>
