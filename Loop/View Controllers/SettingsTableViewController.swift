@@ -577,16 +577,38 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             case .insulinModel:
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
             case .deliveryLimits:
-                let vc = DeliveryLimitSettingsTableViewController(style: .grouped)
+                guard let pumpManager = dataManager.pumpManager else {
+                    // Disallow delivery limit configuration without a configured pump.
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    return
+                }
 
-                vc.maximumBasalRatePerHour = dataManager.loopManager.settings.maximumBasalRatePerHour
-                vc.maximumBolus = dataManager.loopManager.settings.maximumBolus
+                let maximumBasalRate = dataManager.loopManager.settings.maximumBasalRatePerHour.map {
+                    HKQuantity(unit: .internationalUnitsPerHour, doubleValue: $0)
+                }
 
-                vc.title = sender?.textLabel?.text
-                vc.delegate = self
-                vc.syncSource = dataManager.pumpManager
+                let maximumBolus = dataManager.loopManager.settings.maximumBolus.map {
+                    HKQuantity(unit: .internationalUnit(), doubleValue: $0)
+                }
 
-                show(vc, sender: sender)
+                let editor = DeliveryLimitsEditor(
+                    value: DeliveryLimits(maximumBasalRate: maximumBasalRate, maximumBolus: maximumBolus),
+                    supportedBasalRates: pumpManager.supportedBasalRates,
+                    scheduledBasalRange: dataManager.loopManager.basalRateSchedule?.valueRange(),
+                    supportedBolusVolumes: pumpManager.supportedBolusVolumes,
+                    onSave: { [dataManager] limits in
+                        dataManager!.loopManager.settings.maximumBasalRatePerHour = limits.maximumBasalRate?.doubleValue(for: .internationalUnitsPerHour)
+                        dataManager!.loopManager.settings.maximumBolus = limits.maximumBolus?.doubleValue(for: .internationalUnit())
+
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
+
+                let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
+
+                present(hostingController, animated: true)
             case .basalRate:
                 guard let pumpManager = dataManager.pumpManager else {
                     // Not allowing basal schedule entry without a configured pump.
@@ -862,22 +884,6 @@ extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegat
         }
     }
 }
-
-
-extension SettingsTableViewController: DeliveryLimitSettingsTableViewControllerDelegate {
-    func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBasalRatePerHour(_ vc: DeliveryLimitSettingsTableViewController) {
-        dataManager.maximumBasalRatePerHour = vc.maximumBasalRatePerHour
-
-        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
-    }
-
-    func deliveryLimitSettingsTableViewControllerDidUpdateMaximumBolus(_ vc: DeliveryLimitSettingsTableViewController) {
-        dataManager.loopManager.settings.maximumBolus = vc.maximumBolus
-
-        tableView.reloadRows(at: [[Section.configuration.rawValue, ConfigurationRow.deliveryLimits.rawValue]], with: .none)
-    }
-}
-
 
 private extension UIAlertController {
     convenience init(pumpDataDeletionHandler handler: @escaping () -> Void) {
