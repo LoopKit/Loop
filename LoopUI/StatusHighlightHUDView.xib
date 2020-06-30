@@ -37,7 +37,7 @@
                 <constraint firstItem="5r5-dV-daA" firstAttribute="bottom" secondItem="csC-XY-a5C" secondAttribute="bottom" id="b9I-Ze-H4c"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="5r5-dV-daA"/>
-            <point key="canvasLocation" x="-604" y="-107"/>
+            <point key="canvasLocation" x="-819" y="-140"/>
         </stackView>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
     </objects>

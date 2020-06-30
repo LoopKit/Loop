@@ -28,7 +28,7 @@ import LoopKitUI
     @IBOutlet public weak var backgroundView: UIView! {
         didSet {
             backgroundView.backgroundColor = .systemBackground
-            backgroundView.layer.cornerRadius = 25
+            backgroundView.layer.cornerRadius = 23
         }
     }
     
@@ -40,9 +40,20 @@ import LoopKitUI
         }
     }
     
-    func presentStatusHighlight(withMessage message: String,
-                                icon: UIImage,
-                                color: UIColor)
+    public func presentStatusHighlight(_ statusHighlight: DeviceStatusHighlight?) {
+        guard let statusHighlight = statusHighlight else {
+            dismissStatusHighlight()
+            return
+        }
+        
+        presentStatusHighlight(withMessage: statusHighlight.localizedMessage,
+                               icon: statusHighlight.icon,
+                               color: statusHighlight.color)
+    }
+    
+    public func presentStatusHighlight(withMessage message: String,
+                                       icon: UIImage,
+                                       color: UIColor)
     {
         statusHighlightView.messageLabel.text = message
         statusHighlightView.messageLabel.tintColor = .label

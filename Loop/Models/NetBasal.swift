@@ -30,7 +30,7 @@ struct NetBasal {
         }
     }
 
-    init(scheduledRateStartedAt: Date, scheduledBasal: AbsoluteScheduleValue<Double>) {
+    init(scheduledRateStartedAt: Date) {
         rate = 0
         start = scheduledRateStartedAt
         end = nil

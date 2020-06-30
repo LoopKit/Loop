@@ -219,6 +219,16 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
+    var pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight? {
+        didSet {
+            if oldValue != pumpStatusHighlight {
+                log.debug("New pumpStatusHighlight: %@", String(describing: pumpStatusHighlight))
+                refreshContext.update(with: .status)
+                self.reloadData(animated: true)
+            }
+        }
+    }
+    
     // Toggles the display mode based on the screen aspect ratio. Should not be updated outside of reloadData().
     private var landscapeMode = false
     
@@ -489,16 +499,23 @@ final class StatusTableViewController: ChartsTableViewController {
             
             self.tableView.beginUpdates()
             if let hudView = self.hudView {
-                // Glucose HUD
+                // CGM Status HUD
                 if let glucose = self.deviceManager.loopManager.glucoseStore.latestGlucose {
                     let unit = self.statusCharts.glucose.glucoseUnit
                     hudView.cgmStatusHUD.setGlucoseQuantity(glucose.quantity.doubleValue(for: unit),
                                                             at: glucose.startDate,
                                                             unit: unit,
                                                             staleGlucoseAge: self.deviceManager.loopManager.settings.inputDataRecencyInterval,
-                                                            sensor: self.deviceManager.sensorState,
-                                                            statusHighlight: (self.deviceManager.cgmManager as? CGMManagerUI)?.cgmStatusHighlight
-                    )
+                                                            sensor: self.deviceManager.sensorState)
+
+                    if self.deviceManager.cgmManager != nil {
+                        hudView.cgmStatusHUD.presentStatusHighlight((self.deviceManager.cgmManager as? CGMManagerUI)?.cgmStatusHighlight)
+                    }
+                }
+                
+                // Pump Status HUD
+                if self.deviceManager.pumpManager != nil {
+                    hudView.pumpStatusHUD.presentStatusHighlight(self.pumpStatusHighlight)
                 }
             }
             
@@ -573,7 +590,6 @@ final class StatusTableViewController: ChartsTableViewController {
         case enactingBolus
         case bolusing(dose: DoseEntry)
         case cancelingBolus
-        case pumpSuspended(resuming: Bool)
         
         var hasRow: Bool {
             switch self {
@@ -594,10 +610,6 @@ final class StatusTableViewController: ChartsTableViewController {
             statusRowMode = .enactingBolus
         } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
-        } else if case .suspended = basalDeliveryState {
-            statusRowMode = .pumpSuspended(resuming: false)
-        } else if self.basalDeliveryState == .resuming {
-            statusRowMode = .pumpSuspended(resuming: true)
         } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
             statusRowMode = .bolusing(dose: dose)
         } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
@@ -671,10 +683,6 @@ final class StatusTableViewController: ChartsTableViewController {
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
                 if oldDose != newDose {
-                    self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
-                }
-            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
-                if isResuming != wasResuming {
                     self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
             default:
@@ -880,21 +888,6 @@ final class StatusTableViewController: ChartsTableViewController {
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
                     return cell
-                case .pumpSuspended(let resuming):
-                    let cell = getTitleSubtitleCell()
-                    cell.titleLabel.text = NSLocalizedString("Pump Suspended", comment: "The title of the cell indicating the pump is suspended")
-                    
-                    if resuming {
-                        let indicatorView = UIActivityIndicatorView(style: .default)
-                        indicatorView.startAnimating()
-                        cell.accessoryView = indicatorView
-                        cell.subtitleLabel.text = nil
-                    } else {
-                        cell.accessoryView = nil
-                        cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
-                    }
-                    cell.selectionStyle = .default
-                    return cell
                 }
             }
         }
@@ -1000,24 +993,6 @@ final class StatusTableViewController: ChartsTableViewController {
                             } else {
                                 self.refreshContext.update(with: .status)
                                 self.log.debug("[reloadData] after manually enacting temp basal")
-                                self.reloadData()
-                            }
-                        }
-                    }
-                case .pumpSuspended(let resuming) where !resuming:
-                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
-                    self.deviceManager.pumpManager?.resumeDelivery() { (error) in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
-                                self.present(alert, animated: true, completion: nil)
-                                if case .suspended = self.basalDeliveryState {
-                                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: false), newSize: nil, animated: true)
-                                }
-                            } else {
-                                self.updateHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
-                                self.refreshContext.update(with: .insulin)
-                                self.log.debug("[reloadData] after manually resuming suspend")
                                 self.reloadData()
                             }
                         }
@@ -1285,8 +1260,6 @@ final class StatusTableViewController: ChartsTableViewController {
     
     private func addPumpManagerViewToHUD(_ view: LevelHUDView) {
         if let hudView = hudView {
-            let hudTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(hudViewTapped(_:)))
-            view.addGestureRecognizer(hudTapGestureRecognizer)
             view.stateColors = .pumpStatus
             hudView.addPumpManagerProvidedHUDView(view)
         }
@@ -1574,6 +1547,7 @@ extension StatusTableViewController: PumpManagerStatusObserver {
         
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState
+        self.pumpStatusHighlight = status.pumpStatusHighlight
     }
 }
 
