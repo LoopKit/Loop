@@ -13,7 +13,6 @@ class HUDInterfaceController: WKInterfaceController {
 
     @IBOutlet weak var loopHUDImage: WKInterfaceImage!
     @IBOutlet weak var glucoseLabel: WKInterfaceLabel!
-    @IBOutlet weak var eventualGlucoseLabel: WKInterfaceLabel!
 
     var loopManager = ExtensionDelegate.shared().loopManager
 
@@ -53,19 +52,12 @@ class HUDInterfaceController: WKInterfaceController {
 
         glucoseLabel.setText("---")
         glucoseLabel.setHidden(false)
-        eventualGlucoseLabel.setHidden(true)
         if let glucose = activeContext.glucose, let glucoseDate = activeContext.glucoseDate, let unit = activeContext.preferredGlucoseUnit, glucoseDate.timeIntervalSinceNow > -loopManager.settings.inputDataRecencyInterval {
             let formatter = NumberFormatter.glucoseFormatter(for: unit)
 
             if let glucoseValue = formatter.string(from: glucose.doubleValue(for: unit)) {
                 let trend = activeContext.glucoseTrend?.symbol ?? ""
                 glucoseLabel.setText(glucoseValue + trend)
-            }
-
-            if let eventualGlucose = activeContext.eventualGlucose {
-                let glucoseValue = formatter.string(from: eventualGlucose.doubleValue(for: unit))
-                eventualGlucoseLabel.setText(glucoseValue)
-                eventualGlucoseLabel.setHidden(false)
             }
         }
 
