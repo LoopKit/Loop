@@ -148,7 +148,8 @@ final class DeviceDataManager {
             pluginManager: pluginManager,
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
-            remoteDataServicesManager: remoteDataServicesManager
+            remoteDataServicesManager: remoteDataServicesManager,
+            dataManager: loopManager
         )
 
 

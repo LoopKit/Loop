@@ -22,18 +22,23 @@ class ServicesManager {
     private var services = [Service]()
 
     private let servicesLock = UnfairLock()
+    
+    // ANNA TODO: check this should be weak
+    weak var dataManager: LoopDataManager?
 
     init(
         pluginManager: PluginManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
-        remoteDataServicesManager: RemoteDataServicesManager
+        remoteDataServicesManager: RemoteDataServicesManager,
+        dataManager: LoopDataManager
     ) {
         self.pluginManager = pluginManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-
+        self.dataManager = dataManager
+        
         restoreState()
     }
 
@@ -110,6 +115,10 @@ class ServicesManager {
     private func saveState() {
         UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
     }
+    
+    private func storeSettings(settings: LoopSettings) {
+        dataManager?.settings = settings
+    }
 
     private func restoreState() {
         UserDefaults.appGroup?.servicesState.forEach { rawValue in
@@ -130,7 +139,6 @@ class ServicesManager {
             }
         }
     }
-
 }
 
 extension ServicesManager: ServiceDelegate {
@@ -139,4 +147,7 @@ extension ServicesManager: ServiceDelegate {
         saveState()
     }
 
+    func serviceHasNewTherapySettings(_ settings: LoopSettings) {
+        storeSettings(settings: settings)
+    }
 }
