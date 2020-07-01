@@ -1187,7 +1187,7 @@ extension LoopDataManager {
         self.predictedGlucoseIncludingPendingInsulin = predictedGlucoseIncludingPendingInsulin
 
         if( settings.dosingStrategyAutomationEnabled && settings.dosingStrategyThreshold?.rawValue != nil){
-            if( glucose.quantity > HKQuantity(unit : HKUnit.milligramsPerDeciliter, doubleValue: settings.dosingStrategyThreshold!.value)){
+             if( glucose.quantity > HKQuantity(unit : settings.glucoseUnit ?? .milligramsPerDeciliter, doubleValue: settings.dosingStrategyThreshold!.value)){
                 settings.dosingStrategy = .automaticBolus
             } else {
                 settings.dosingStrategy = .tempBasalOnly
