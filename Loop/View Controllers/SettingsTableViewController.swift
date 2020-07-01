@@ -46,6 +46,7 @@ final class SettingsTableViewController: UITableViewController {
         case pump
         case cgm
         case configuration
+        case strategy
         case services
         case testingPumpDataDeletion
         case testingCGMDataDeletion
@@ -73,6 +74,12 @@ final class SettingsTableViewController: UITableViewController {
         case dosingStrategy
         case carbRatio
         case insulinSensitivity
+    }
+
+    fileprivate enum StrategyRow: Int, CaseCountable {
+        case dosingStrategy = 0
+        case dosingStrategyAutomationEnabled
+        case dosingStrategyThreshold
     }
 
     fileprivate enum ServiceRow: Int, CaseCountable {
@@ -147,7 +154,9 @@ final class SettingsTableViewController: UITableViewController {
             return CGMRow.count
         case .configuration:
             return ConfigurationRow.count
-        case .services:
+        case .strategy:
+            return StrategyRow.count
+            case .services:
             return ServiceRow.count
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
             return 1
@@ -290,6 +299,36 @@ final class SettingsTableViewController: UITableViewController {
                 }
             }
 
+                    configCell.accessoryType = .disclosureIndicator
+            return configCell
+        case .strategy:
+            let configCell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
+
+            switch StrategyRow(rawValue: indexPath.row)! {
+                case .dosingStrategy:
+                    configCell.textLabel?.text = NSLocalizedString("Dosing Strategy", comment: "The title text for the dosing strategy setting row")
+                    configCell.detailTextLabel?.text = dataManager.loopManager.settings.dosingStrategy.title
+                case .dosingStrategyAutomationEnabled:
+                    let switchCell = tableView.dequeueReusableCell(withIdentifier: SwitchTableViewCell.className, for: indexPath) as! SwitchTableViewCell
+
+                    switchCell.selectionStyle = .none
+                    switchCell.switch?.isOn = dataManager.loopManager.settings.dosingStrategyAutomationEnabled
+                    switchCell.textLabel?.text = NSLocalizedString("Auto Strategy Switching", comment: "The title text for the Dosing Strategy enabled switch cell")
+
+                    switchCell.switch?.addTarget(self, action: #selector(dosingStrategyAutomationEnabledChanged(_:)), for: .valueChanged)
+
+                    return switchCell
+                case .dosingStrategyThreshold:
+                    configCell.textLabel?.text = NSLocalizedString("Dose Switching Threshold", comment: "The title text in settings")
+
+                    if let dosingStrategyThreshold = dataManager.loopManager.settings.dosingStrategyThreshold {
+                        let value = valueNumberFormatter.string(from: dosingStrategyThreshold.value, unit: dosingStrategyThreshold.unit) ?? SettingsTableViewCell.TapToSetString
+                        configCell.detailTextLabel?.text = value
+                    } else {
+                        configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
+                    }
+            }
+            
             configCell.accessoryType = .disclosureIndicator
             return configCell
         case .services:
@@ -342,6 +381,8 @@ final class SettingsTableViewController: UITableViewController {
             return NSLocalizedString("Continuous Glucose Monitor", comment: "The title of the continuous glucose monitor section in settings")
         case .configuration:
             return NSLocalizedString("Configuration", comment: "The title of the configuration section in settings")
+        case .strategy:
+                   return NSLocalizedString("Dosing Strategy", comment: "The title of the strategy section in settings")
         case .services:
             return NSLocalizedString("Services", comment: "The title of the services section in settings")
         case .testingPumpDataDeletion, .testingCGMDataDeletion:
@@ -558,6 +599,30 @@ final class SettingsTableViewController: UITableViewController {
 
                 show(vc, sender: sender)
             }
+                case .strategy:
+            let row = StrategyRow(rawValue: indexPath.row)!
+            switch row {
+                case .dosingStrategy:
+                    performSegue(withIdentifier: DosingStrategySelectionViewController.className, sender: sender)
+                case .dosingStrategyAutomationEnabled:
+                    break
+                case .dosingStrategyThreshold:
+                    if let dosingStrategyThreshold = dataManager.loopManager.settings.dosingStrategyThreshold {
+                        let vc = GlucoseThresholdTableViewController(threshold: dosingStrategyThreshold.value, glucoseUnit: dosingStrategyThreshold.unit)
+                        vc.delegate = self
+                        vc.indexPath = indexPath
+                        vc.title = sender?.textLabel?.text
+                        self.show(vc, sender: sender)
+                    } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                        let vc = GlucoseThresholdTableViewController(threshold: nil, glucoseUnit: unit)
+                        vc.delegate = self
+                        vc.indexPath = indexPath
+                        vc.title = sender?.textLabel?.text
+                        vc.placeholder = "Enter switching threshold"
+                        vc.contextHelp = "If Auto Strategy Switching is enabled, when current glucose is above the switching threshold, Loop will use Automatic Bolus strategy. When glucose is at or below the switching threshold, Loop will use Temp Basal Only strategy."
+                        self.show(vc, sender: sender)
+                    }
+            }
         case .loop:
             switch LoopRow(rawValue: indexPath.row)! {
             case .diagnostic:
@@ -616,6 +681,10 @@ final class SettingsTableViewController: UITableViewController {
 
     @objc private func dosingEnabledChanged(_ sender: UISwitch) {
         dataManager.loopManager.settings.dosingEnabled = sender.isOn
+    }
+
+    @objc private func dosingStrategyAutomationEnabledChanged(_ sender: UISwitch) {
+        dataManager.loopManager.settings.dosingStrategyAutomationEnabled = sender.isOn
     }
 }
 
@@ -844,7 +913,19 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
                 default:
                     assertionFailure()
                 }
-            default:
+            case .strategy:
+                switch StrategyRow(rawValue: indexPath.row)! {
+                     case .dosingStrategyThreshold:
+                       if let controller = controller as? GlucoseThresholdTableViewController,
+                           let value = controller.value, let dosingStrategyThreshold = valueNumberFormatter.number(from: value)?.doubleValue {
+                           dataManager.loopManager.settings.dosingStrategyThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: dosingStrategyThreshold)
+                       } else {
+                           dataManager.loopManager.settings.dosingStrategyThreshold = nil
+                       }
+                     default:
+                        assertionFailure()
+                }            
+                default:
                 assertionFailure()
             }
         }
