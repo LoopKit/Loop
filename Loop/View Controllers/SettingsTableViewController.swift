@@ -541,7 +541,8 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     onSave: { [dataManager] overrides in
                         dataManager?.loopManager.settings.preMealTargetRange = overrides.preMeal?.doubleRange(for: unit)
                         dataManager?.loopManager.settings.legacyWorkoutTargetRange = overrides.workout?.doubleRange(for: unit)
-                    }
+                    },
+                    sensitivityOverridesEnabled: !FeatureFlags.sensitivityOverridesEnabled
                 )
 
                 let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
