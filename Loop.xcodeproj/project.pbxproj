@@ -30,6 +30,7 @@
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
+		1D872C9524AD176E006317D4 /* Environment+AppName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D872C9424AD176E006317D4 /* Environment+AppName.swift */; };
 		1DA46B602492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */; };
 		1DA649A7244126CD00F61E75 /* UserNotificationAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A6244126CD00F61E75 /* UserNotificationAlertPresenter.swift */; };
 		1DA649A9244126DA00F61E75 /* InAppModalAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A8244126DA00F61E75 /* InAppModalAlertPresenter.swift */; };
@@ -647,6 +648,7 @@
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
+		1D872C9424AD176E006317D4 /* Environment+AppName.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Environment+AppName.swift"; sourceTree = "<group>"; };
 		1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsView.swift; sourceTree = "<group>"; };
 		1DA649A6244126CD00F61E75 /* UserNotificationAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA649A8244126DA00F61E75 /* InAppModalAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModalAlertPresenter.swift; sourceTree = "<group>"; };
@@ -1890,6 +1892,7 @@
 				438991661E91B563000EEF90 /* ChartPoint.swift */,
 				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				43FCEEAC221A66780013DD30 /* DateFormatter.swift */,
+				1D872C9424AD176E006317D4 /* Environment+AppName.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
 				43FCEEAE221A67A70013DD30 /* NumberFormatter+Charts.swift */,
 			);
@@ -3199,6 +3202,7 @@
 				43FCEEB3221BC3B60013DD30 /* DoseChart.swift in Sources */,
 				4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */,
 				1DA46B602492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
+				1D872C9524AD176E006317D4 /* Environment+AppName.swift in Sources */,
 				4FB76FB61E8C426900B39636 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
 				4F2C15931E09BF2C00E160D4 /* HUDView.swift in Sources */,
 				43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */,

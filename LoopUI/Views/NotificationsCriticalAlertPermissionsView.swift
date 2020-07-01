@@ -11,6 +11,7 @@ import SwiftUI
 
 public struct NotificationsCriticalAlertPermissionsView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.appName) var appName
 
     private let backButtonText: String
     @ObservedObject private var viewModel: NotificationsCriticalAlertPermissionsViewModel
@@ -58,10 +59,9 @@ extension NotificationsCriticalAlertPermissionsView {
                 }
             }
             DescriptiveText(label: LocalizedString("""
-                Notifications can appear while you are using another app on your iPhone, or while your iPhone is locked.
-
-                Notifications let you know about issues Tidepool Loop has without needing to open the app.
-                You can customize when you want to recieve notificiations, and how they should be delivered inside Tidepool Loop.
+                Notifications appear on your Lock screen or pop up while you’re using other apps.
+                
+                Notifications give you important \(appName) app information without requiring you to open the app.  You can customize when and how you want to receive these notifications.
                 """, comment: "Manage Notifications in Settings descriptive text"))
         }
     }
@@ -78,7 +78,7 @@ extension NotificationsCriticalAlertPermissionsView {
                 }
             }
             DescriptiveText(label: LocalizedString("""
-                Critical Alerts will always play a sound and appear on the Lock screen even if your iPhone is muted or Do Not Disturb is on.
+                Critical Alerts are a type of notification that will always play a sound and appear on your Lock screen, even if your iPhone is muted or if Do Not Disturb is on.
                 """, comment: "Manage Notifications in Settings descriptive text"))
         }
     }
@@ -88,7 +88,6 @@ extension NotificationsCriticalAlertPermissionsView {
             NavigationLink(destination: Text("Get help with Notification & Critical Alert Permissions screen")) {
                 Text(LocalizedString("Get help with Notification & Critical Alert Permissions", comment: "Get help with Notification & Critical Alert Permissions support button text"))
             }
-            DescriptiveText(label: LocalizedString("Text description here.", comment: ""))
         }
     }
 
