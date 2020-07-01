@@ -71,7 +71,6 @@ final class SettingsTableViewController: UITableViewController {
         case basalRate
         case deliveryLimits
         case insulinModel
-        case dosingStrategy
         case carbRatio
         case insulinSensitivity
     }
@@ -278,11 +277,8 @@ final class SettingsTableViewController: UITableViewController {
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
-            case .dosingStrategy:
-                configCell.textLabel?.text = NSLocalizedString("Dosing Strategy", comment: "The title text for the dosing strategy setting row")
-                configCell.detailTextLabel?.text = dataManager.loopManager.settings.dosingStrategy.title
             case .deliveryLimits:
-                configCell.textLabel?.text = NSLocalizedString("Delivery Limits", comment: "Title text for delivery limits")
+                    configCell.textLabel?.text = NSLocalizedString("Delivery Limits", comment: "Title text for delivery limits")
 
                 if dataManager.loopManager.settings.maximumBolus == nil || dataManager.loopManager.settings.maximumBasalRatePerHour == nil {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
@@ -555,8 +551,6 @@ final class SettingsTableViewController: UITableViewController {
                 }
             case .insulinModel:
                 performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
-            case .dosingStrategy:
-                performSegue(withIdentifier: DosingStrategySelectionViewController.className, sender: sender)
             case .deliveryLimits:
                 let vc = DeliveryLimitSettingsTableViewController(style: .grouped)
 
@@ -879,8 +873,8 @@ extension SettingsTableViewController: DosingStrategySelectionViewControllerDele
         }
 
         switch sections[indexPath.section] {
-        case .configuration:
-            switch ConfigurationRow(rawValue: indexPath.row)! {
+        case .strategy:
+            switch StrategyRow(rawValue: indexPath.row)! {
             case .dosingStrategy:
                 if let strategy = controller.dosingStrategy {
                     dataManager.loopManager.settings.dosingStrategy = strategy
@@ -916,17 +910,17 @@ extension SettingsTableViewController: LoopKitUI.TextFieldTableViewControllerDel
             case .strategy:
                 switch StrategyRow(rawValue: indexPath.row)! {
                      case .dosingStrategyThreshold:
-                       if let controller = controller as? GlucoseThresholdTableViewController,
-                           let value = controller.value, let dosingStrategyThreshold = valueNumberFormatter.number(from: value)?.doubleValue {
-                           dataManager.loopManager.settings.dosingStrategyThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: dosingStrategyThreshold)
-                       } else {
-                           dataManager.loopManager.settings.dosingStrategyThreshold = nil
-                       }
+                        if let controller = controller as? GlucoseThresholdTableViewController,
+                            let value = controller.value, let dosingStrategyThreshold = valueNumberFormatter.number(from: value)?.doubleValue {
+                            dataManager.loopManager.settings.dosingStrategyThreshold = GlucoseThreshold(unit: controller.glucoseUnit, value: dosingStrategyThreshold)
+                        } else {
+                            dataManager.loopManager.settings.dosingStrategyThreshold = nil
+                        }
                      default:
                         assertionFailure()
                 }            
                 default:
-                assertionFailure()
+                    assertionFailure()
             }
         }
 
