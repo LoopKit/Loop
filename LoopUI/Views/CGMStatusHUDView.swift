@@ -101,8 +101,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
                                    at glucoseStartDate: Date,
                                    unit: HKUnit,
                                    staleGlucoseAge: TimeInterval,
-                                   sensor: SensorDisplayable?,
-                                   statusHighlight: DeviceStatusHighlight?)
+                                   sensor: SensorDisplayable?)
     {
         viewModel.setGlucoseQuantity(glucoseQuantity,
                                      at: glucoseStartDate,
@@ -114,14 +113,6 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         glucoseValueHUD.unitLabel.text = viewModel.unitsString
         glucoseTrendHUD.setTrend(viewModel.trend)
         tintColor = viewModel.tintColor ?? .label
-        accessibilityValue = viewModel.accessibilityString
-        
-        if let statusHighlight = statusHighlight {
-            presentStatusHighlight(withMessage: statusHighlight.localizedMessage,
-                                   icon: statusHighlight.icon,
-                                   color: statusHighlight.color)
-        } else {
-            dismissStatusHighlight()
-        }
+        accessibilityValue = viewModel.accessibilityString        
     }
 }

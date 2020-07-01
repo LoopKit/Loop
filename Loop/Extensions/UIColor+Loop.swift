@@ -14,7 +14,7 @@ extension UIColor {
 
     @nonobjc static let axisLineColor = UIColor.clear
 
-    @nonobjc static let doseTintColor = UIColor.systemOrange
+    @nonobjc static let doseTintColor = UIColor.systemBlue
 
     @nonobjc static let freshColor = UIColor.HIGGreenColor()
 
@@ -48,5 +48,5 @@ extension UIColor {
         }
     }()
     
-    @nonobjc static let pumpStatusNormal = UIColor.systemGray
+    @nonobjc static let pumpStatusNormal = UIColor.systemBlue
 }

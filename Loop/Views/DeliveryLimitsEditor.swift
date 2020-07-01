@@ -303,7 +303,7 @@ struct DeliveryLimitsGuardrailWarning: View {
                     title = Text("High Maximum Basal Rate", comment: "Title text for high maximum basal rate warning")
                     let scheduledBasalRateMultiplierString = Self.scheduledBasalRateMultiplierFormatter.string(from: DeliveryLimitsEditor.recommendedMaximumScheduledBasalScaleFactor) ?? String(describing: DeliveryLimitsEditor.recommendedMaximumScheduledBasalScaleFactor)
                     let maximumScheduledBasalRateString = Self.basalRateFormatter.string(from: maximumScheduledBasalRate) ?? String(describing: maximumScheduledBasalRate)
-                    caption = Text("Tidepool recommends that your maximum basal rate does not exceed \(scheduledBasalRateMultiplierString) times your highest scheduled basal rate of \(maximumScheduledBasalRateString) U/hr.", comment: "Caption text for high maximum basal rate warning")
+                    caption = Text("The value you have entered exceeds \(scheduledBasalRateMultiplierString) times your highest scheduled basal rate of \(maximumScheduledBasalRateString) U/hr, which is higher than Tidepool generally recommends.", comment: "Caption text for high maximum basal rate warning")
                 }
             case .maximumBolus:
                 switch threshold {

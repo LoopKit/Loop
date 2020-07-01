@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="16096" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="16097" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="rNf-Mh-tID">
     <device id="watch38"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="16012"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
     </dependencies>
@@ -31,10 +31,6 @@
                                         <group width="1" height="26" alignment="left" id="iTE-zh-bqi">
                                             <items>
                                                 <label height="1" alignment="left" hidden="YES" textAlignment="center" id="MHD-Is-5mK">
-                                                    <fontDescription key="font" type="system" weight="light" pointSize="24"/>
-                                                </label>
-                                                <label height="1" alignment="right" hidden="YES" textAlignment="center" id="0zU-nK-BWD">
-                                                    <color key="textColor" red="1" green="1" blue="1" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <fontDescription key="font" type="system" weight="light" pointSize="24"/>
                                                 </label>
                                             </items>
@@ -150,7 +146,6 @@
                     </items>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
-                        <outlet property="eventualGlucoseLabel" destination="0zU-nK-BWD" id="0V7-RE-Lnr"/>
                         <outlet property="glucoseLabel" destination="MHD-Is-5mK" id="MDr-iV-fr1"/>
                         <outlet property="loopHUDImage" destination="Q7C-xN-eH8" id="CIe-B3-umI"/>
                         <outlet property="overrideButton" destination="dYe-c2-Sfm" id="m7H-fY-Cxg"/>
