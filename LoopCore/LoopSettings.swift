@@ -60,6 +60,10 @@ public struct LoopSettings: Equatable {
     
     public var dosingStrategy: DosingStrategy = .tempBasalOnly
 
+    public var dosingStrategyAutomationEnabled = false
+   
+    public var dosingStrategyThreshold: GlucoseThreshold? = nil
+    
     /// The interval over which to aggregate changes in glucose for retrospective correction
     public let retrospectiveCorrectionGroupingInterval = TimeInterval(minutes: 30)
 
@@ -123,13 +127,17 @@ public struct LoopSettings: Equatable {
         glucoseTargetRangeSchedule: GlucoseRangeSchedule? = nil,
         maximumBasalRatePerHour: Double? = nil,
         maximumBolus: Double? = nil,
-        suspendThreshold: GlucoseThreshold? = nil
+        suspendThreshold: GlucoseThreshold? = nil,
+        dosingStrategyAutomationEnabled: Bool = false,
+        dosingStrategyThreshold: GlucoseThreshold? = nil        
     ) {
         self.dosingEnabled = dosingEnabled
         self.glucoseTargetRangeSchedule = glucoseTargetRangeSchedule
         self.maximumBasalRatePerHour = maximumBasalRatePerHour
         self.maximumBolus = maximumBolus
         self.suspendThreshold = suspendThreshold
+        self.dosingStrategyAutomationEnabled = dosingStrategyAutomationEnabled
+        self.dosingStrategyThreshold = dosingStrategyThreshold    
     }
 }
 
@@ -269,6 +277,14 @@ extension LoopSettings: RawRepresentable {
             self.dosingStrategy = dosingStrategy
         }
 
+        if let dosingStrategyAutomationEnabled = rawValue["dosingStrategyAutomationEnabled"] as? Bool {
+            self.dosingStrategyAutomationEnabled = dosingStrategyAutomationEnabled
+        }
+
+        if let rawDosingStrategyThreshold = rawValue["dosingStrategyThreshold"] as? GlucoseThreshold.RawValue {
+            self.dosingStrategyThreshold = GlucoseThreshold(rawValue: rawDosingStrategyThreshold)
+        }
+
     }
 
     public var rawValue: RawValue {
@@ -286,7 +302,9 @@ extension LoopSettings: RawRepresentable {
         raw["maximumBolus"] = maximumBolus
         raw["minimumBGGuard"] = suspendThreshold?.rawValue
         raw["dosingStrategy"] = dosingStrategy.rawValue
-
+        raw["dosingStrategyAutomationEnabled"] = dosingStrategyAutomationEnabled
+        raw["dosingStrategyThreshold"] = dosingStrategyThreshold?.rawValue
+        
         return raw
     }
 }
