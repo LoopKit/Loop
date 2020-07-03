@@ -22,8 +22,7 @@ class ServicesManager {
     private var services = [Service]()
 
     private let servicesLock = UnfairLock()
-    
-    // ANNA TODO: check this should be weak
+
     weak var dataManager: LoopDataManager?
 
     init(
