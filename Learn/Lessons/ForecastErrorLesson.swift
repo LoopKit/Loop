@@ -146,11 +146,11 @@ struct ForecastSummary {
 private class ForecastErrorCalculator {
     let calculator: DayCalculator<[DateInterval: ForecastSummary]>
     let dataSource: LearnDataSource
-    let therapySettings: LearnTherapySettings
+    let therapySettings: TherapySettings
 
     private let log: OSLog
 
-    init(dataSource: LearnDataSource, therapySettings: LearnTherapySettings, dates: DateInterval) {
+    init(dataSource: LearnDataSource, therapySettings: TherapySettings, dates: DateInterval) {
         self.dataSource = dataSource
         self.therapySettings = therapySettings
         self.calculator = DayCalculator(dataSource: dataSource, dates: dates, initial: [:])

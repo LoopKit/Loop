@@ -392,6 +392,7 @@
 		C17824A61E1AF91F00D9D25C /* BolusRecommendation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824A41E1AD4D100D9D25C /* BolusRecommendation.swift */; };
 		C1814B86225E507C008D2D8E /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1814B85225E507C008D2D8E /* Sequence.swift */; };
 		C18C8C511D5A351900E043FB /* NightscoutDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */; };
+		C19E73C02468ED82000D0B1C /* TherapySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E73BF2468ED82000D0B1C /* TherapySettings.swift */; };
 		C19E96DF23D275F8003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */; };
 		C1A1238C244B66BC00DE2739 /* ResidualsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A1238B244B66BC00DE2739 /* ResidualsCell.swift */; };
@@ -1122,6 +1123,7 @@
 		C18A491422FCC22900FDA733 /* build-derived-watch-assets.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "build-derived-watch-assets.sh"; sourceTree = "<group>"; };
 		C18A491522FCC22900FDA733 /* copy-plugins.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-plugins.sh"; sourceTree = "<group>"; };
 		C18C8C501D5A351900E043FB /* NightscoutDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NightscoutDataManager.swift; sourceTree = "<group>"; };
+		C19E73BF2468ED82000D0B1C /* TherapySettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TherapySettings.swift; sourceTree = "<group>"; };
 		C19E96DD23D2733F003F79B0 /* LoopCompletionFreshness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopCompletionFreshness.swift; sourceTree = "<group>"; };
 		C1A1238B244B66BC00DE2739 /* ResidualsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResidualsCell.swift; sourceTree = "<group>"; };
 		C1A3EED1235233E1007672E3 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
@@ -1510,6 +1512,7 @@
 			isa = PBXGroup;
 			children = (
 				43C5F256222C7B7200905D10 /* TimeComponents.swift */,
+				C19E73BF2468ED82000D0B1C /* TherapySettings.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2914,6 +2917,7 @@
 				C1814B86225E507C008D2D8E /* Sequence.swift in Sources */,
 				C13515F0244C6D5100AC8B95 /* SpotCheckResidualCell.swift in Sources */,
 				43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */,
+				C19E73C02468ED82000D0B1C /* TherapySettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

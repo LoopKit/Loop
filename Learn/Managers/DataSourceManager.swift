@@ -24,33 +24,11 @@ protocol LearnDataSource {
     
     var category: String { get }
     
-    func fetchTherapySettings() -> LearnTherapySettings?
+    func fetchTherapySettings() -> TherapySettings?
 
     func getGlucoseSamples(start: Date, end: Date?, completion: @escaping (_ result: Result<[StoredGlucoseSample]>) -> Void)
 
-    func fetchEffects(for day: DateInterval, using therapySettings: LearnTherapySettings) -> Result<GlucoseEffects>
-}
-
-protocol LearnTherapySettings {
-    var momentumDataInterval: TimeInterval { get }
-    var insulinModel: InsulinModelSettings { get }
-    var basalSchedule: BasalRateSchedule { get }
-    var sensitivity: InsulinSensitivitySchedule { get }
-    var carbRatios: CarbRatioSchedule { get }
-    var absorptionTimeOverrun: Double { get }
-    var defaultAbsorptionTime: TimeInterval { get }
-    var carbAbsortionModel: CarbAbsorptionModel { get }
-    var carbEffectDelay: TimeInterval { get }
-    var retrospectiveCorrectionGroupingInterval: TimeInterval { get }
-    var retrospectiveCorrection: RetrospectiveCorrection { get }
-    var delta: TimeInterval { get }
-    var inputDataRecencyInterval: TimeInterval { get }
-}
-
-extension LearnTherapySettings {
-    var carbModelSettings: CarbModelSettings {
-        return carbAbsortionModel.settings(with: absorptionTimeOverrun)
-    }
+    func fetchEffects(for day: DateInterval, using therapySettings: TherapySettings) -> Result<GlucoseEffects>
 }
 
 class DataSourceManager {

@@ -75,9 +75,9 @@ class NightscoutDataSource: LearnDataSource {
         }
     }
     
-    func fetchTherapySettings() -> LearnTherapySettings? {
+    func fetchTherapySettings() -> TherapySettings? {
         let fetchGroup = DispatchGroup()
-        var settings: LearnTherapySettings?
+        var settings: TherapySettings?
         
         fetchGroup.enter()
         api.fetchCurrentProfile { (profileFetchResult) in
@@ -97,7 +97,7 @@ class NightscoutDataSource: LearnDataSource {
         return settings
     }
 
-    func fetchEffects(for day: DateInterval, using therapySettings: LearnTherapySettings) -> Result<GlucoseEffects> {
+    func fetchEffects(for day: DateInterval, using therapySettings: TherapySettings) -> Result<GlucoseEffects> {
 
         let fetchGroup = DispatchGroup()
         
@@ -197,7 +197,7 @@ class NightscoutDataSource: LearnDataSource {
     }
 }
 
-struct NightscoutTherapySettings: LearnTherapySettings {
+struct NightscoutTherapySettings: TherapySettings {
     var momentumDataInterval: TimeInterval
     
     var insulinModel: InsulinModelSettings

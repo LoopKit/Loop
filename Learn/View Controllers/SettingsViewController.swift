@@ -18,6 +18,7 @@ class SettingsViewController: UITableViewController {
     // MARK: - Table view data source
     enum Section: Int, CaseIterable {
         case dataSources
+        case profiles
         case actions
     }
     
@@ -40,7 +41,7 @@ class SettingsViewController: UITableViewController {
         switch Section(rawValue: section)! {
         case .dataSources:
             return NSLocalizedString("Data Sources", comment: "Section header for data sources list in settings")
-        case .actions:
+        case .actions, .profiles:
             return nil
         }
     }
@@ -51,6 +52,8 @@ class SettingsViewController: UITableViewController {
             return dataSourceManager.dataSources.count
         case .actions:
             return Action.allCases.count
+        case .profiles:
+            return 0
         }
     }
 
@@ -70,6 +73,10 @@ class SettingsViewController: UITableViewController {
             case .addDataSource:
                 cell.textLabel?.text = NSLocalizedString("Add Data Source", comment: "Title text for button to set up a new pump")
             }
+            return cell
+        case .profiles:
+            let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.className, for: indexPath)
+            cell.textLabel?.text = NSLocalizedString("Profile item", comment: "Title text for button to set up a new pump")
             return cell
         }
     }
@@ -103,6 +110,8 @@ class SettingsViewController: UITableViewController {
                 show(vc, sender: sender)
 
             }
+        case .profiles:
+            break
         }
     }
 }

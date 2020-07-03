@@ -67,7 +67,7 @@ final class DataManager {
     }
 }
 
-struct LocalLoopTherapySettings: LearnTherapySettings {
+struct LocalLoopTherapySettings: TherapySettings {
     var momentumDataInterval: TimeInterval
     
     var insulinModel: InsulinModelSettings
@@ -142,7 +142,7 @@ extension DataManager: LearnDataSource {
         return "Health"
     }
     
-    func fetchTherapySettings() -> LearnTherapySettings? {
+    func fetchTherapySettings() -> TherapySettings? {
         let retrospectiveCorrectionEffectDuration = TimeInterval(hours: 1)
         let retrospectiveCorrection = StandardRetrospectiveCorrection(effectDuration: retrospectiveCorrectionEffectDuration)
 
@@ -174,7 +174,7 @@ extension DataManager: LearnDataSource {
         }
     }
 
-    func fetchEffects(for day: DateInterval, using therapySettings: LearnTherapySettings) -> Result<GlucoseEffects> {
+    func fetchEffects(for day: DateInterval, using therapySettings: TherapySettings) -> Result<GlucoseEffects> {
         let updateGroup = DispatchGroup()
 
         let retrospectiveStart = day.start.addingTimeInterval(-therapySettings.retrospectiveCorrection.retrospectionInterval)
