@@ -115,8 +115,15 @@ class ServicesManager {
         UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
     }
     
-    private func storeSettings(settings: LoopSettings) {
-        dataManager?.settings = settings
+    private func storeSettings(settings: TherapySettings) {
+        dataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+        dataManager?.settings.preMealTargetRange = settings.preMealTargetRange
+        dataManager?.settings.legacyWorkoutTargetRange = settings.legacyWorkoutTargetRange
+        dataManager?.settings.suspendThreshold = settings.suspendThreshold
+        dataManager?.settings.maximumBolus = settings.maximumBolus
+        dataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
+        dataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
+        dataManager?.carbRatioSchedule = settings.carbRatioSchedule
     }
 
     private func restoreState() {
@@ -146,7 +153,7 @@ extension ServicesManager: ServiceDelegate {
         saveState()
     }
 
-    func serviceHasNewTherapySettings(_ settings: LoopSettings) {
+    func serviceHasNewTherapySettings(_ settings: TherapySettings) {
         storeSettings(settings: settings)
     }
 }
