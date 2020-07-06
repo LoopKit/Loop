@@ -31,6 +31,15 @@ class LoopDataManager {
         }
     }
 
+    // Main queue only
+    var supportedBolusVolumes = UserDefaults.standard.supportedBolusVolumes {
+        didSet {
+            UserDefaults.standard.supportedBolusVolumes = supportedBolusVolumes
+            needsDidUpdateContextNotification = true
+            sendDidUpdateContextNotificationIfNecessary()
+        }
+    }
+
     private let log = OSLog(category: "LoopDataManager")
 
     // Main queue only
