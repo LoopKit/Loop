@@ -22,6 +22,7 @@ import LoopKitUI
     @IBOutlet public weak var progressView: UIProgressView! {
         didSet {
             progressView.isHidden = true
+            progressView.tintColor = .systemPurple
         }
     }
     
@@ -33,6 +34,24 @@ import LoopKitUI
     }
     
     @IBOutlet public weak var statusStackView: UIStackView!
+    
+    public var lifecycleProgress: DeviceLifecycleProgress? {
+        didSet {
+            guard let lifecycleProgress = lifecycleProgress else {
+                resetProgress()
+                return
+            }
+             
+            progressView.isHidden = false
+            progressView.progress = Float(lifecycleProgress.percentComplete.clamped(to: 0...1))
+            progressView.tintColor = lifecycleProgress.progressState.color
+        }
+    }
+    
+    public func resetProgress() {
+        progressView.isHidden = true
+        progressView.progress = 0
+    }
     
     func setup() {
         if statusHighlightView == nil {
@@ -72,4 +91,5 @@ import LoopKitUI
         statusHighlightView.isHidden = true
         statusStackView?.removeArrangedSubview(statusHighlightView)
     }
+    
 }
