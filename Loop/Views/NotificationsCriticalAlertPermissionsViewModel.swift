@@ -13,8 +13,8 @@ import SwiftUI
 
 public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
     
-    @Published var notificationsPermissionsGiven = true
-    @Published var criticalAlertsPermissionsGiven = true
+    @Published var notificationsPermissionsGiven: Bool
+    @Published var criticalAlertsPermissionsGiven: Bool
 
     // This is a "bridge" between old & new UI; it allows us to "combine" the two @Published variables above into
     // one published item, and also provides it in a way that may be `.assign`ed in the new UI (see `init()`) and
@@ -27,9 +27,12 @@ public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
     }()
 
     @Published var showWarning = false
-    lazy private var trash = Set<AnyCancellable>()
+    lazy private var cancellables = Set<AnyCancellable>()
 
-    public init() {
+    public init(notificationsPermissionsGiven: Bool = true, criticalAlertsPermissionsGiven: Bool = true) {
+        self.notificationsPermissionsGiven = notificationsPermissionsGiven
+        self.criticalAlertsPermissionsGiven = criticalAlertsPermissionsGiven
+        
         NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: nil) {
             [weak self] _ in
             self?.updateState()
@@ -39,7 +42,7 @@ public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
         showWarningPublisher
             .receive(on: RunLoop.main)
             .assign(to: \.showWarning, on: self)
-            .store(in: &trash)
+            .store(in: &cancellables)
     }
     
     private func updateState() {
