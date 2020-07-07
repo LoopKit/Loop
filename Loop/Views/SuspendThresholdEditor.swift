@@ -62,7 +62,7 @@ struct SuspendThresholdEditor: View {
                 // https://bugs.swift.org/browse/SR-11628
                 if true {
                     Card {
-                        SettingDescription(text: description)
+                        SettingDescription(text: description, informationalContent: {Text("To be implemented")}) // ANNA TODO: placeholder so this builds
                         ExpandableSetting(
                             isEditing: $isEditing,
                             valueContent: {
