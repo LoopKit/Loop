@@ -124,6 +124,7 @@ class ServicesManager {
         dataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
         dataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
         dataManager?.carbRatioSchedule = settings.carbRatioSchedule
+        dataManager?.basalRateSchedule = settings.basalRateSchedule
     }
 
     private func restoreState() {
