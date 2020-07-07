@@ -1052,7 +1052,7 @@ final class StatusTableViewController: ChartsTableViewController {
     private func presentErrorCancelingBolus(_ error: (Error)) {
         self.log.error("Error Canceling Bolus: %@", error.localizedDescription)
         let title = NSLocalizedString("Error Canceling Bolus", comment: "The alert title for an error while canceling a bolus")
-        let body = NSLocalizedString("The app was unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Confirm total insulin delivered in your insulin delivery history and monitor your glucose closely.", comment: "The alert body for an error while canceling a bolus")
+        let body = NSLocalizedString("Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely.", comment: "The alert body for an error while canceling a bolus")
         let action = UIAlertAction(
             title: NSLocalizedString("com.loudnate.LoopKit.errorAlertActionTitle", value: "OK", comment: "The title of the action used to dismiss an error alert"), style: .default)
         let alert = UIAlertController(title: title, message: body, preferredStyle: .alert)
