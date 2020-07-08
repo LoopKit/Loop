@@ -23,6 +23,11 @@ import LoopKitUI
         didSet {
             progressView.isHidden = true
             progressView.tintColor = .systemPurple
+            // round the edges of the progress view
+            progressView.layer.cornerRadius = 2
+            progressView.clipsToBounds = true
+            progressView.layer.sublayers![1].cornerRadius = 2
+            progressView.subviews[1].clipsToBounds = true
         }
     }
     
