@@ -60,7 +60,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     public func presentAddCGMHighlight() {
         resetProgress()
         presentStatusHighlight(withMessage: LocalizedString("Add CGM", comment: "Title text for button to set up a CGM"),
-                               icon: UIImage(systemName: "plus.circle")!,
+                               image: UIImage(systemName: "plus.circle")!,
                                color: .systemBlue)
     }
     

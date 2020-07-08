@@ -66,17 +66,17 @@ import LoopKitUI
         }
         
         presentStatusHighlight(withMessage: statusHighlight.localizedMessage,
-                               icon: statusHighlight.icon,
+                               image: statusHighlight.image,
                                color: statusHighlight.color)
     }
     
     public func presentStatusHighlight(withMessage message: String,
-                                       icon: UIImage,
+                                       image: UIImage,
                                        color: UIColor)
     {
         statusHighlightView.messageLabel.text = message
         statusHighlightView.messageLabel.tintColor = .label
-        statusHighlightView.icon.image = icon
+        statusHighlightView.icon.image = image
         statusHighlightView.icon.tintColor = color
         presentStatusHighlight()
     }

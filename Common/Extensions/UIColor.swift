@@ -50,7 +50,7 @@ extension UIColor {
         }
     }()
 
-    @nonobjc static let agingColor = UIColor.systemOrange
+    @nonobjc static let agingColor = UIColor.systemYellow
 
     @nonobjc static let staleColor = UIColor.systemRed
 

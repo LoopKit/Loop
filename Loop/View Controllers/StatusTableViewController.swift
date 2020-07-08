@@ -229,6 +229,16 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
+    var pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress? {
+        didSet {
+            if oldValue != pumpLifecycleProgress {
+                log.debug("New pumpLifecycleProgress: %@", String(describing: pumpLifecycleProgress))
+                refreshContext.update(with: .status)
+                self.reloadData(animated: true)
+            }
+        }
+    }
+    
     var bluetoothState: BluetoothStateManager.BluetoothState = .other {
         didSet {
             if bluetoothState != oldValue {
@@ -536,6 +546,8 @@ final class StatusTableViewController: ChartsTableViewController {
                 } else {
                     hudView.pumpStatusHUD.presentStatusHighlight(self.pumpStatusHighlight)
                 }
+                
+                hudView.pumpStatusHUD.lifecycleProgress = self.pumpLifecycleProgress
             }
             
             // Show/hide the table view rows
@@ -1571,6 +1583,7 @@ extension StatusTableViewController: PumpManagerStatusObserver {
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState
         self.pumpStatusHighlight = status.pumpStatusHighlight
+        self.pumpLifecycleProgress = status.pumpLifecycleProgress
     }
 }
 
