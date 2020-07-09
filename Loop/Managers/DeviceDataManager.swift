@@ -149,7 +149,7 @@ final class DeviceDataManager {
             analyticsServicesManager: analyticsServicesManager,
             loggingServicesManager: loggingServicesManager,
             remoteDataServicesManager: remoteDataServicesManager,
-            dataManager: loopManager
+            loopDataManager: loopManager
         )
 
 

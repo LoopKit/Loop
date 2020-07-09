@@ -30,13 +30,13 @@ class ServicesManager {
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
         remoteDataServicesManager: RemoteDataServicesManager,
-        dataManager: LoopDataManager
+        loopDataManager: LoopDataManager
     ) {
         self.pluginManager = pluginManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-        self.loopDataManager = dataManager
+        self.loopDataManager = loopDataManager
         
         restoreState()
     }
@@ -116,15 +116,15 @@ class ServicesManager {
     }
     
     private func storeSettings(settings: TherapySettings) {
-        dataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
-        dataManager?.settings.preMealTargetRange = settings.preMealTargetRange
-        dataManager?.settings.legacyWorkoutTargetRange = settings.legacyWorkoutTargetRange
-        dataManager?.settings.suspendThreshold = settings.suspendThreshold
-        dataManager?.settings.maximumBolus = settings.maximumBolus
-        dataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
-        dataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
-        dataManager?.carbRatioSchedule = settings.carbRatioSchedule
-        dataManager?.basalRateSchedule = settings.basalRateSchedule
+        loopDataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+        loopDataManager?.settings.preMealTargetRange = settings.preMealTargetRange
+        loopDataManager?.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
+        loopDataManager?.settings.suspendThreshold = settings.suspendThreshold
+        loopDataManager?.settings.maximumBolus = settings.maximumBolus
+        loopDataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
+        loopDataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
+        loopDataManager?.carbRatioSchedule = settings.carbRatioSchedule
+        loopDataManager?.basalRateSchedule = settings.basalRateSchedule
     }
 
     private func restoreState() {
