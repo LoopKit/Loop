@@ -225,6 +225,15 @@ extension ExtensionDelegate: WCSessionDelegate {
             } else {
                 log.error("Could not decode LoopSettingsUserInfo: %{public}@", userInfo)
             }
+        case SupportedBolusVolumesUserInfo.name:
+            guard let volumes = SupportedBolusVolumesUserInfo(rawValue: userInfo)?.supportedBolusVolumes else {
+                log.error("Could not decode SupportedBolusVolumesUserInfo: %{public}@", userInfo)
+                return
+            }
+
+            DispatchQueue.main.async {
+                self.loopManager.supportedBolusVolumes = volumes
+            }
         case "WatchContext":
             // WatchContext is the only userInfo type without a "name" key. This isn't a great heuristic.
             updateContext(userInfo)

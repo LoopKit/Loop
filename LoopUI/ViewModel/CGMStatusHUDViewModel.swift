@@ -21,7 +21,9 @@ public class CGMStatusHUDViewModel {
     
     var accessibilityString: String = ""
     
-    var tintColor: UIColor?
+    var glucoseValueTintColor: UIColor = .label
+    
+    var glucoseTrendTintColor: UIColor = .systemPurple
     
     var staleGlucoseValueHandler: (String) -> Void
     
@@ -83,8 +85,15 @@ public class CGMStatusHUDViewModel {
         let numberFormatter = NumberFormatter.glucoseFormatter(for: unit)
         if let valueString = numberFormatter.string(from: glucoseQuantity) {
             if glucoseValueCurrent {
-                glucoseValueString = valueString
                 startStalenessTimerIfNeeded()
+                switch sensor?.glucoseValueType {
+                case .some(.belowRange):
+                    glucoseValueString = LocalizedString("LOW", comment: "String displayed instead of a glucose value below the CGM range")
+                case .some(.aboveRange):
+                    glucoseValueString = LocalizedString("HIGH", comment: "String displayed instead of a glucose value above the CGM range")
+                default:
+                    glucoseValueString = valueString
+                }
             } else {
                 glucoseValueString = CGMStatusHUDViewModel.staleGlucoseRepresentation
             }
@@ -98,7 +107,8 @@ public class CGMStatusHUDViewModel {
             trend = nil
         }
         
-        tintColor = sensor?.glucoseValueType?.color
+        glucoseValueTintColor = sensor?.glucoseValueType?.glucoseColor ?? .label
+        glucoseTrendTintColor = sensor?.glucoseValueType?.trendColor ?? .systemPurple
         
         unitsString = unit.localizedShortUnitString
         accessibilityString = accessibilityStrings.joined(separator: ", ")

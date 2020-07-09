@@ -76,7 +76,12 @@ class StoredDosingDecisionCodableTests: XCTestCase {
                                                                    udiDeviceIdentifier: "Device UDI Device Identifier"),
                                                   pumpBatteryChargeRemaining: 3.5,
                                                   basalDeliveryState: .initiatingTempBasal,
-                                                  bolusState: .none)
+                                                  bolusState: .none,
+                                                  pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
+                                                                                                             imageSystemName: "test.image",
+                                                                                                             state: .normal),
+                                                  pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress(percentComplete: 0.5,
+                                                                                                                 progressState: .warning))
         let deviceSettings = StoredDosingDecision.DeviceSettings(name: "Device Name",
                                                                  systemName: "Device System Name",
                                                                  systemVersion: "Device System Version",
@@ -295,6 +300,15 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "udiDeviceIdentifier" : "Device UDI Device Identifier"
     },
     "pumpBatteryChargeRemaining" : 3.5,
+    "pumpLifecycleProgress" : {
+      "percentComplete" : 0.5,
+      "progressState" : "warning"
+    },
+    "pumpStatusHighlight" : {
+      "imageSystemName" : "test.image",
+      "localizedMessage" : "Test message",
+      "state" : "normal"
+    },
     "timeZone" : {
       "identifier" : "America/Los_Angeles"
     }

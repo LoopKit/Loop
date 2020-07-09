@@ -30,12 +30,17 @@
 		1D4A3E2D2478628500FD601B /* StoredAlert+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */; };
 		1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */; };
 		1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D80313C24746274002810DF /* AlertStoreTests.swift */; };
-		1DA46B602492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */; };
 		1DA649A7244126CD00F61E75 /* UserNotificationAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A6244126CD00F61E75 /* UserNotificationAlertPresenter.swift */; };
 		1DA649A9244126DA00F61E75 /* InAppModalAlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA649A8244126DA00F61E75 /* InAppModalAlertPresenter.swift */; };
 		1DA7A84224476EAD008257F0 /* AlertManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84124476EAD008257F0 /* AlertManagerTests.swift */; };
 		1DA7A84424477698008257F0 /* InAppModalAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA7A84324477698008257F0 /* InAppModalAlertPresenterTests.swift */; };
 		1DB1065124467E18005542BD /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1065024467E18005542BD /* AlertManager.swift */; };
+		1DB1CA4D24A55F0000B3B94C /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4C24A55F0000B3B94C /* Image.swift */; };
+		1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */; };
+		1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */; };
+		1DDE273F24AEA4F200796622 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */; };
+		1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */; };
+		1DDE274124AEB6E300796622 /* Environment+AppName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D872C9424AD176E006317D4 /* Environment+AppName.swift */; };
 		1DFE9E172447B6270082C280 /* UserNotificationAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFE9E162447B6270082C280 /* UserNotificationAlertPresenterTests.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
@@ -87,7 +92,6 @@
 		43511CE221FD80E400566C63 /* RetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CDF21FD80E400566C63 /* RetrospectiveCorrection.swift */; };
 		43511CE321FD80E400566C63 /* StandardRetrospectiveCorrection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */; };
 		43511CEE220FC61700566C63 /* HUDRowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43511CED220FC61700566C63 /* HUDRowController.swift */; };
-		43517915230A07100072ECC0 /* NumberFormatter+WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43517914230A07100072ECC0 /* NumberFormatter+WatchApp.swift */; };
 		43517917230A0E1A0072ECC0 /* WKInterfaceLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43517916230A0E1A0072ECC0 /* WKInterfaceLabel.swift */; };
 		435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
 		435400351C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435400331C9F878D00D5819C /* SetBolusUserInfo.swift */; };
@@ -358,6 +362,8 @@
 		898ECA65218ABD9B001E9D35 /* CGRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA64218ABD9A001E9D35 /* CGRect.swift */; };
 		898ECA69218ABDA9001E9D35 /* CLKTextProvider+Compound.m in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */; };
 		899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 899433B723FE129700FA4BEA /* OverrideBadgeView.swift */; };
+		89A1B66E24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */; };
+		89A1B66F24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */; };
 		89A605E324327DFE009C1096 /* CarbAmountInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605E224327DFE009C1096 /* CarbAmountInput.swift */; };
 		89A605E524327F45009C1096 /* DoseVolumeInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605E424327F45009C1096 /* DoseVolumeInput.swift */; };
 		89A605E72432860C009C1096 /* PeriodicPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A605E62432860C009C1096 /* PeriodicPublisher.swift */; };
@@ -386,6 +392,7 @@
 		89F9119224358E2B00ECCAF3 /* CarbEntryInputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119124358E2B00ECCAF3 /* CarbEntryInputMode.swift */; };
 		89F9119424358E4500ECCAF3 /* CarbAbsorptionTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */; };
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
+		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */; };
 		A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */; };
 		A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */; };
@@ -419,7 +426,6 @@
 		A9F703752489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */; };
 		A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */; };
 		B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */; };
-		B42C951724A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */; };
 		B4E96D4F248A6E20002DABAD /* CGMStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */; };
@@ -429,6 +435,7 @@
 		B4E96D59248A7F9A002DABAD /* StatusHighlightHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D58248A7F9A002DABAD /* StatusHighlightHUDView.xib */; };
 		B4E96D5B248A8229002DABAD /* StatusBarHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */; };
 		B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */; };
+		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */; };
@@ -645,12 +652,16 @@
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
+		1D872C9424AD176E006317D4 /* Environment+AppName.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Environment+AppName.swift"; sourceTree = "<group>"; };
 		1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsView.swift; sourceTree = "<group>"; };
 		1DA649A6244126CD00F61E75 /* UserNotificationAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA649A8244126DA00F61E75 /* InAppModalAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModalAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA7A84124476EAD008257F0 /* AlertManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManagerTests.swift; sourceTree = "<group>"; };
 		1DA7A84324477698008257F0 /* InAppModalAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppModalAlertPresenterTests.swift; sourceTree = "<group>"; };
 		1DB1065024467E18005542BD /* AlertManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
+		1DB1CA4C24A55F0000B3B94C /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
+		1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1DFE9E162447B6270082C280 /* UserNotificationAlertPresenterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertPresenterTests.swift; sourceTree = "<group>"; };
 		4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewController.swift; sourceTree = "<group>"; };
 		4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinDeliveryTableViewController.swift; sourceTree = "<group>"; };
@@ -694,7 +705,6 @@
 		43511CDF21FD80E400566C63 /* RetrospectiveCorrection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetrospectiveCorrection.swift; sourceTree = "<group>"; };
 		43511CE021FD80E400566C63 /* StandardRetrospectiveCorrection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StandardRetrospectiveCorrection.swift; sourceTree = "<group>"; };
 		43511CED220FC61700566C63 /* HUDRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRowController.swift; sourceTree = "<group>"; };
-		43517914230A07100072ECC0 /* NumberFormatter+WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NumberFormatter+WatchApp.swift"; sourceTree = "<group>"; };
 		43517916230A0E1A0072ECC0 /* WKInterfaceLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKInterfaceLabel.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
 		435CB6221F37967800C320C7 /* InsulinModelSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinModelSettingsViewController.swift; sourceTree = "<group>"; };
@@ -1084,6 +1094,7 @@
 		898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLKTextProvider+Compound.m"; sourceTree = "<group>"; };
 		898ECA68218ABDA9001E9D35 /* CLKTextProvider+Compound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLKTextProvider+Compound.h"; sourceTree = "<group>"; };
 		899433B723FE129700FA4BEA /* OverrideBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideBadgeView.swift; sourceTree = "<group>"; };
+		89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedBolusVolumesUserInfo.swift; sourceTree = "<group>"; };
 		89A605E224327DFE009C1096 /* CarbAmountInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAmountInput.swift; sourceTree = "<group>"; };
 		89A605E424327F45009C1096 /* DoseVolumeInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseVolumeInput.swift; sourceTree = "<group>"; };
 		89A605E62432860C009C1096 /* PeriodicPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodicPublisher.swift; sourceTree = "<group>"; };
@@ -1110,6 +1121,7 @@
 		89F9119124358E2B00ECCAF3 /* CarbEntryInputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryInputMode.swift; sourceTree = "<group>"; };
 		89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAbsorptionTime.swift; sourceTree = "<group>"; };
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
+		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DosingDecisionStore.swift; path = ../Stores/DosingDecisionStore.swift; sourceTree = "<group>"; };
 		A951C5FF23E8AB51003E26DC /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
 		A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
@@ -1153,6 +1165,7 @@
 		B4E96D58248A7F9A002DABAD /* StatusHighlightHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusHighlightHUDView.xib; sourceTree = "<group>"; };
 		B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarHUDView.swift; sourceTree = "<group>"; };
 		B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusBarHUDView.xib; sourceTree = "<group>"; };
+		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContextRequestUserInfo.swift; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
@@ -1350,18 +1363,18 @@
 		4328E01F1CFBE2B100E199AA /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				898ECA68218ABDA9001E9D35 /* CLKTextProvider+Compound.h */,
+				898ECA66218ABDA8001E9D35 /* WatchApp Extension-Bridging-Header.h */,
+				898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */,
 				4344629120A7C19800C4BE6F /* ButtonGroup.swift */,
 				898ECA64218ABD9A001E9D35 /* CGRect.swift */,
 				4328E0221CFBE2C500E199AA /* CLKComplicationTemplate.swift */,
-				898ECA68218ABDA9001E9D35 /* CLKTextProvider+Compound.h */,
-				898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */,
+				89FE21AC24AC57E30033F501 /* Collection.swift */,
 				89E08FCB242E790C000D719B /* Comparable.swift */,
 				4F7E8AC420E2AB9600AEA65E /* Date.swift */,
 				43785E952120E4010057DED1 /* INRelevantShortcutStore+Loop.swift */,
 				4328E0231CFBE2C500E199AA /* NSUserDefaults+WatchApp.swift */,
-				43517914230A07100072ECC0 /* NumberFormatter+WatchApp.swift */,
 				4328E0241CFBE2C500E199AA /* UIColor.swift */,
-				898ECA66218ABDA8001E9D35 /* WatchApp Extension-Bridging-Header.h */,
 				4F2C15801E0495B200E160D4 /* WatchContext+WatchApp.swift */,
 				43CB2B2A1D924D450079823D /* WCSession.swift */,
 				4328E0251CFBE2C500E199AA /* WKAlertAction.swift */,
@@ -1672,6 +1685,7 @@
 				A9CBE457248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift */,
 				A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */,
 				A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */,
+				1D872C9424AD176E006317D4 /* Environment+AppName.swift */,
 				A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */,
 				43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
@@ -1729,11 +1743,15 @@
 				895F37F024A137D0000CCB42 /* DeliveryLimitsEditor.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
+				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
+				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
 				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */,
+				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
+				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
 				4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */,
 				C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */,
@@ -1746,6 +1764,7 @@
 			children = (
 				1DA6499D2441266400F61E75 /* Alerts */,
 				439897361CD2F80600223065 /* AnalyticsServicesManager.swift */,
+				B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */,
 				439BED291E76093C00B0AED5 /* CGMManager.swift */,
 				43DBF0521C93EC8200B3C386 /* DeviceDataManager.swift */,
 				43F78D251C8FC000002152D1 /* DoseMath.swift */,
@@ -1833,7 +1852,6 @@
 				4F2C15921E09BF2C00E160D4 /* HUDView.swift */,
 				437CEEBD1CD6E0CB003C8C80 /* LoopCompletionHUDView.swift */,
 				438DADC71CDE8F8B007697A5 /* LoopStateView.swift */,
-				1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */,
 				B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */,
 				B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */,
 				B4E96D56248A7B0F002DABAD /* StatusHighlightHUDView.swift */,
@@ -1884,6 +1902,7 @@
 				438991661E91B563000EEF90 /* ChartPoint.swift */,
 				43649A621C7A347F00523D7F /* CollectionType.swift */,
 				43FCEEAC221A66780013DD30 /* DateFormatter.swift */,
+				1DB1CA4C24A55F0000B3B94C /* Image.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
 				43FCEEAE221A67A70013DD30 /* NumberFormatter+Charts.swift */,
 			);
@@ -1916,14 +1935,15 @@
 				89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */,
-				435400331C9F878D00D5819C /* SetBolusUserInfo.swift */,
-				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
-				4FF4D0FF1E18374700846527 /* WatchContext.swift */,
-				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
-				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 				43C3B6F620BBCAA30026CAFA /* PumpManager.swift */,
 				C1FB428E217921D600FAB378 /* PumpManagerUI.swift */,
+				435400331C9F878D00D5819C /* SetBolusUserInfo.swift */,
+				4F70C2111DE900EA006380B7 /* StatusExtensionContext.swift */,
+				89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */,
+				4FF4D0FF1E18374700846527 /* WatchContext.swift */,
 				C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */,
+				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
+				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2095,7 +2115,6 @@
 			isa = PBXGroup;
 			children = (
 				B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */,
-				B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -2843,6 +2862,7 @@
 				89D6953E23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift in Sources */,
 				89CA2B30226C0161004D9350 /* DirectoryObserver.swift in Sources */,
 				1DA649A7244126CD00F61E75 /* UserNotificationAlertPresenter.swift in Sources */,
+				1DDE273F24AEA4F200796622 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */,
 				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
 				892ADE0A2446E9C3007CE08C /* ExplicitlyDismissibleModal.swift in Sources */,
@@ -2875,6 +2895,7 @@
 				1DB1065124467E18005542BD /* AlertManager.swift in Sources */,
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
+				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
 				43D9003321EB258C00AF44BF /* InsulinModelSettings+Loop.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
@@ -2883,6 +2904,8 @@
 				4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
+				B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */,
+				1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */,
 				A9CBE458248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift in Sources */,
 				4FB76FBB1E8C42CF00B39636 /* UIColor.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
@@ -2902,9 +2925,11 @@
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
+				1DDE274124AEB6E300796622 /* Environment+AppName.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
+				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
 				A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */,
 				43F89CA322BDFBBD006BB54E /* UIActivityIndicatorView.swift in Sources */,
 				A999D40624663D18004C89D4 /* PumpManagerError.swift in Sources */,
@@ -2950,6 +2975,7 @@
 				A999D40824663D6D004C89D4 /* SetBolusError.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
+				89A1B66E24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */,
 				432E73CB1D24B3D6009AD15D /* RemoteDataServicesManager.swift in Sources */,
 				43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */,
 				895F37F124A137D0000CCB42 /* DeliveryLimitsEditor.swift in Sources */,
@@ -2967,8 +2993,8 @@
 				4F2C15741E0209F500E160D4 /* NSTimeInterval.swift in Sources */,
 				89F9119224358E2B00ECCAF3 /* CarbEntryInputMode.swift in Sources */,
 				4FF4D1011E18375000846527 /* WatchContext.swift in Sources */,
+				89FE21AD24AC57E30033F501 /* Collection.swift in Sources */,
 				898ECA63218ABD21001E9D35 /* ComplicationChartManager.swift in Sources */,
-				43517915230A07100072ECC0 /* NumberFormatter+WatchApp.swift in Sources */,
 				43A9438A1B926B7B0051FA24 /* NotificationController.swift in Sources */,
 				439A7945211FE23A0041B75F /* NSUserActivity.swift in Sources */,
 				43A943881B926B7B0051FA24 /* ExtensionDelegate.swift in Sources */,
@@ -3013,6 +3039,7 @@
 				4328E01E1CFBE25F00E199AA /* CarbAndBolusFlowController.swift in Sources */,
 				89E08FCC242E790C000D719B /* Comparable.swift in Sources */,
 				432CF87520D8AC950066B889 /* NSUserDefaults+WatchApp.swift in Sources */,
+				89A1B66F24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */,
 				43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */,
 				4344629220A7C19800C4BE6F /* ButtonGroup.swift in Sources */,
 				89A605E924328862009C1096 /* Checkmark.swift in Sources */,
@@ -3181,7 +3208,6 @@
 				7D23667D21250C7E0028B67D /* LocalizedString.swift in Sources */,
 				43FCEEBD22212DD50013DD30 /* PredictedGlucoseChart.swift in Sources */,
 				436961911F19D11E00447E89 /* ChartPointsContextFillLayer.swift in Sources */,
-				B42C951724A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */,
 				4FF4D0F81E1725B000846527 /* NibLoadable.swift in Sources */,
 				4326BA641F3A44D9007CCAD4 /* ChartLineModel.swift in Sources */,
 				43FCEEB9221BCF790013DD30 /* GlucoseChart.swift in Sources */,
@@ -3190,7 +3216,6 @@
 				B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */,
 				43FCEEB3221BC3B60013DD30 /* DoseChart.swift in Sources */,
 				4F7528AA1DFE215100C322D6 /* HKUnit.swift in Sources */,
-				1DA46B602492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
 				4FB76FB61E8C426900B39636 /* ChartPointsTouchHighlightLayerViewCache.swift in Sources */,
 				4F2C15931E09BF2C00E160D4 /* HUDView.swift in Sources */,
 				43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */,
@@ -3212,6 +3237,7 @@
 				B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */,
 				4FB76FCE1E8C835D00B39636 /* ChartColorPalette.swift in Sources */,
 				43FCEEAD221A66780013DD30 /* DateFormatter.swift in Sources */,
+				1DB1CA4D24A55F0000B3B94C /* Image.swift in Sources */,
 				B4E96D55248A7509002DABAD /* GlucoseTrendHUDView.swift in Sources */,
 				4FB76FB51E8C41E200B39636 /* ChartPointsScatterDownTrianglesLayer.swift in Sources */,
 				43FCEEAF221A67A70013DD30 /* NumberFormatter+Charts.swift in Sources */,

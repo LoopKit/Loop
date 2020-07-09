@@ -24,7 +24,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     // MARK: - Published state
     @Published var isComputingRecommendedBolus = false
     @Published var recommendedBolusAmount: Double?
-    @Published var maxBolus: Double
+    @Published var bolusPickerValues: BolusPickerValues
     @Published var error: Error?
 
     // MARK: - Other state
@@ -35,6 +35,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     private var hasSentConfirmationMessage = false
 
     // MARK: - Constants
+    private static let defaultSupportedBolusVolumes = (0...600).map { 0.05 * Double($0) } // U
     private static let defaultMaxBolus: Double = 10 // U
 
     // MARK: - Initialization
@@ -53,7 +54,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             self._recommendedBolusAmount = Published(initialValue: loopManager.activeContext?.recommendedBolusDose)
         }
 
-        self._maxBolus = Published(initialValue: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus)
+        self._bolusPickerValues = Published(
+            initialValue: BolusPickerValues(
+                supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
+                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            )
+        )
+
         self.configuration = configuration
         self.dismiss = dismiss
 
@@ -69,7 +76,11 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                 return
             }
             
-            self.maxBolus = loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            self.bolusPickerValues = BolusPickerValues(
+                supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
+                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            )
+
             switch self.configuration {
             case .carbEntry:
                 // If this new context wasn't generated in response to a potential carb entry message,

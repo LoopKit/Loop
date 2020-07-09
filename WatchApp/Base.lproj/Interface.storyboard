@@ -255,7 +255,6 @@
                     </menu>
                     <variation key="device=watch38mm" spacing="5"/>
                     <connections>
-                        <outlet property="eventualGlucoseLabel" destination="yl8-ZP-c3l" id="PTg-ax-ppQ"/>
                         <outlet property="glucoseLabel" destination="Dt1-kz-jMZ" id="MQj-0o-PaV"/>
                         <outlet property="glucoseScene" destination="9BI-AC-l6c" id="O4a-P8-cHI"/>
                         <outlet property="loopHUDImage" destination="ifw-dh-btK" id="Bc0-er-dfe"/>

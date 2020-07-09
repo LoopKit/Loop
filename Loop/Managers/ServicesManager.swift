@@ -23,7 +23,7 @@ class ServicesManager {
 
     private let servicesLock = UnfairLock()
 
-    weak var dataManager: LoopDataManager?
+    weak var loopDataManager: LoopDataManager?
 
     init(
         pluginManager: PluginManager,
@@ -36,7 +36,7 @@ class ServicesManager {
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-        self.dataManager = dataManager
+        self.loopDataManager = dataManager
         
         restoreState()
     }

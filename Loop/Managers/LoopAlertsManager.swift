@@ -6,48 +6,30 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-import CoreBluetooth
 import LoopKit
 
 /// Class responsible for monitoring "system level" operations and alerting the user to any anomalous situations (e.g. bluetooth off)
-class LoopAlertsManager: NSObject {
+public class LoopAlertsManager {
+    
+    public enum BluetoothState {
+        case on
+        case off
+        case unauthorized
+    }
     
     static let managerIdentifier = "Loop"
     
-    private var bluetoothCentralManager: CBCentralManager!
     private lazy var log = DiagnosticLog(category: String(describing: LoopAlertsManager.self))
+    
     private weak var alertManager: AlertManager?
+    
     private let bluetoothPoweredOffIdentifier = Alert.Identifier(managerIdentifier: managerIdentifier, alertIdentifier: "bluetoothPoweredOff")
-
-    init(alertManager: AlertManager) {
-        super.init()
-        bluetoothCentralManager = CBCentralManager(delegate: self, queue: nil)
+    
+    init(alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager) {
         self.alertManager = alertManager
+        bluetoothStateManager.addBluetoothStateObserver(self)
     }
-}
-
-// MARK: CBCentralManagerDelegate implementation
-
-extension LoopAlertsManager: CBCentralManagerDelegate {
-    
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        switch central.state {
-        case .unauthorized:
-            switch central.authorization {
-            case .denied:
-                onBluetoothPermissionDenied()
-            default:
-                break
-            }
-        case .poweredOn:
-            onBluetoothPoweredOn()
-        case .poweredOff:
-            onBluetoothPoweredOff()
-        default:
-            break
-        }
-    }
-    
+        
     private func onBluetoothPermissionDenied() {
         log.default("Bluetooth permission denied")
         let content = Alert.Content(title: NSLocalizedString("Bluetooth Permission Denied", comment: "Bluetooth permission denied alert title"),
@@ -74,4 +56,23 @@ extension LoopAlertsManager: CBCentralManagerDelegate {
         alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: fgcontent, backgroundContent: bgcontent, trigger: .immediate))
     }
 
+}
+
+// MARK: - Bluetooth State Observer
+
+extension LoopAlertsManager: BluetoothStateManagerObserver {
+    public func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
+                                      bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
+    {
+        switch bluetoothState {
+        case .poweredOn:
+            onBluetoothPoweredOn()
+        case .poweredOff:
+            onBluetoothPoweredOff()
+        case .denied:
+            onBluetoothPermissionDenied()
+        default:
+            return
+        }
+    }
 }

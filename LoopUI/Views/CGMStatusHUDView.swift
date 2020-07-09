@@ -53,22 +53,18 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
     public override func tintColorDidChange() {
         super.tintColorDidChange()
         
-        glucoseValueHUD.tintColor = tintColor
-        switch tintColor {
-        case UIColor.label:
-            glucoseTrendHUD.tintColor = .systemPurple
-        default:
-            glucoseTrendHUD.tintColor = tintColor
-        }
+        glucoseValueHUD.tintColor = viewModel.glucoseValueTintColor
+        glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
     }
     
     public func presentAddCGMHighlight() {
+        resetProgress()
         presentStatusHighlight(withMessage: LocalizedString("Add CGM", comment: "Title text for button to set up a CGM"),
-                               icon: UIImage(systemName: "plus.circle")!,
+                               image: UIImage(systemName: "plus.circle")!,
                                color: .systemBlue)
     }
     
-    override public func presentStatusHighlight() {
+    override func presentStatusHighlight() {
         guard statusStackView.arrangedSubviews.contains(glucoseValueHUD),
             statusStackView.arrangedSubviews.contains(glucoseTrendHUD) else
         {
@@ -111,8 +107,11 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         
         glucoseValueHUD.glucoseLabel.text = viewModel.glucoseValueString
         glucoseValueHUD.unitLabel.text = viewModel.unitsString
+        glucoseValueHUD.tintColor = viewModel.glucoseValueTintColor
+        
         glucoseTrendHUD.setTrend(viewModel.trend)
-        tintColor = viewModel.tintColor ?? .label
-        accessibilityValue = viewModel.accessibilityString        
+        glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
+        
+        accessibilityValue = viewModel.accessibilityString
     }
 }
