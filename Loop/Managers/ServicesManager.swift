@@ -118,7 +118,7 @@ class ServicesManager {
     private func storeSettings(settings: TherapySettings) {
         loopDataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
         loopDataManager?.settings.preMealTargetRange = settings.preMealTargetRange
-        loopDataManager?.settings.legacyWorkoutTargetRange = settings.legacyWorkoutTargetRange
+        loopDataManager?.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
         loopDataManager?.settings.suspendThreshold = settings.suspendThreshold
         loopDataManager?.settings.maximumBolus = settings.maximumBolus
         loopDataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour

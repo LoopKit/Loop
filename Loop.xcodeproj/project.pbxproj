@@ -364,7 +364,6 @@
 		898ECA63218ABD21001E9D35 /* ComplicationChartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA62218ABD21001E9D35 /* ComplicationChartManager.swift */; };
 		898ECA65218ABD9B001E9D35 /* CGRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA64218ABD9A001E9D35 /* CGRect.swift */; };
 		898ECA69218ABDA9001E9D35 /* CLKTextProvider+Compound.m in Sources */ = {isa = PBXBuildFile; fileRef = 898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */; };
-		899012C3246F442F007B88BA /* CorrectionRangeOverridesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 899012C2246F442F007B88BA /* CorrectionRangeOverridesEditor.swift */; };
 		899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 899433B723FE129700FA4BEA /* OverrideBadgeView.swift */; };
 		89A1B66E24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */; };
 		89A1B66F24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */; };
@@ -1098,7 +1097,6 @@
 		898ECA66218ABDA8001E9D35 /* WatchApp Extension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WatchApp Extension-Bridging-Header.h"; sourceTree = "<group>"; };
 		898ECA67218ABDA8001E9D35 /* CLKTextProvider+Compound.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLKTextProvider+Compound.m"; sourceTree = "<group>"; };
 		898ECA68218ABDA9001E9D35 /* CLKTextProvider+Compound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLKTextProvider+Compound.h"; sourceTree = "<group>"; };
-		899012C2246F442F007B88BA /* CorrectionRangeOverridesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectionRangeOverridesEditor.swift; sourceTree = "<group>"; };
 		899433B723FE129700FA4BEA /* OverrideBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideBadgeView.swift; sourceTree = "<group>"; };
 		89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedBolusVolumesUserInfo.swift; sourceTree = "<group>"; };
 		89A605E224327DFE009C1096 /* CarbAmountInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAmountInput.swift; sourceTree = "<group>"; };
@@ -1747,7 +1745,6 @@
 				43B260481ED248FB008CAA77 /* CarbEntryTableViewCell.swift */,
 				4346D1E61C77F5FE00ABAFE3 /* ChartTableViewCell.swift */,
 				431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */,
-				899012C2246F442F007B88BA /* CorrectionRangeOverridesEditor.swift */,
 				895F37F024A137D0000CCB42 /* DeliveryLimitsEditor.swift */,
 				43D381611EBD9759007F8C8F /* HeaderValuesTableViewCell.swift */,
 				430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */,
@@ -2911,7 +2908,6 @@
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */,
 				438172D91F4E9E37003C3328 /* NewPumpEvent.swift in Sources */,
-				899012C3246F442F007B88BA /* CorrectionRangeOverridesEditor.swift in Sources */,
 				4389916B1E91B689000EEF90 /* ChartSettings+Loop.swift in Sources */,
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				43DBF04C1C93B8D700B3C386 /* BolusViewController.swift in Sources */,
