@@ -33,6 +33,7 @@ struct CorrectionRangeOverrides: Equatable {
 struct CorrectionRangeOverridesEditor: View {
     var initialValue: CorrectionRangeOverrides
     var unit: HKUnit
+    var correctionRangeScheduleRange: ClosedRange<HKQuantity>
     var minValue: HKQuantity?
     var save: (_ overrides: CorrectionRangeOverrides) -> Void
 
@@ -41,7 +42,7 @@ struct CorrectionRangeOverridesEditor: View {
     @State var presetBeingEdited: CorrectionRangeOverrides.Preset? {
         didSet {
             if let presetBeingEdited = presetBeingEdited, value.ranges[presetBeingEdited] == nil {
-                value.ranges[presetBeingEdited] = guardrail(for: presetBeingEdited).recommendedBounds
+                value.ranges[presetBeingEdited] = initiallySelectedValue(for: presetBeingEdited)
             }
         }
     }
@@ -52,12 +53,14 @@ struct CorrectionRangeOverridesEditor: View {
     init(
         value: CorrectionRangeOverrides,
         unit: HKUnit,
+        correctionRangeScheduleRange: ClosedRange<HKQuantity>,
         minValue: HKQuantity?,
         onSave save: @escaping (_ overrides: CorrectionRangeOverrides) -> Void
     ) {
         self._value = State(initialValue: value)
         self.initialValue = value
         self.unit = unit
+        self.correctionRangeScheduleRange = correctionRangeScheduleRange
         self.minValue = minValue
         self.save = save
     }
@@ -116,7 +119,7 @@ struct CorrectionRangeOverridesEditor: View {
                 expandedContent: {
                     GlucoseRangePicker(
                         range: Binding(
-                            get: { self.value.ranges[preset] ?? self.guardrail(for: preset).recommendedBounds },
+                            get: { self.value.ranges[preset] ?? self.initiallySelectedValue(for: preset) },
                             set: { newValue in
                                 withAnimation {
                                     self.value.ranges[preset] = newValue
@@ -124,7 +127,8 @@ struct CorrectionRangeOverridesEditor: View {
                             }
                         ),
                         unit: self.unit,
-                        minValue: self.minValue,
+                        minValue: self.selectableBounds(for: preset).lowerBound,
+                        maxValue: self.selectableBounds(for: preset).upperBound,
                         guardrail: self.guardrail(for: preset)
                     )
                 }
@@ -166,13 +170,39 @@ struct CorrectionRangeOverridesEditor: View {
     }
 
     private func guardrail(for preset: CorrectionRangeOverrides.Preset) -> Guardrail<HKQuantity> {
-        // TODO: Guardrail bounds not yet finalized.
         switch preset {
         case .preMeal:
-            return Guardrail(absoluteBounds: 60...180, recommendedBounds: 80...120, unit: .milligramsPerDeciliter)
+            return Guardrail(
+                absoluteBounds: Guardrail.correctionRange.absoluteBounds,
+                recommendedBounds: Guardrail.correctionRange.recommendedBounds.lowerBound...max(correctionRangeScheduleRange.lowerBound, Guardrail.correctionRange.recommendedBounds.lowerBound)
+            )
         case .workout:
-            return Guardrail(absoluteBounds: 60...180, recommendedBounds: 100...160, unit: .milligramsPerDeciliter)
+            return Guardrail(
+                absoluteBounds: Guardrail.correctionRange.absoluteBounds,
+                recommendedBounds: max(Guardrail.correctionRange.recommendedBounds.lowerBound, correctionRangeScheduleRange.lowerBound)...Guardrail.correctionRange.absoluteBounds.upperBound
+            )
         }
+    }
+
+    private func selectableBounds(for preset: CorrectionRangeOverrides.Preset) -> ClosedRange<HKQuantity> {
+        switch preset {
+        case .preMeal:
+            if let minValue = minValue {
+                return max(minValue, Guardrail.correctionRange.absoluteBounds.lowerBound)...correctionRangeScheduleRange.upperBound
+            } else {
+                return Guardrail.correctionRange.absoluteBounds.lowerBound...correctionRangeScheduleRange.upperBound
+            }
+        case .workout:
+            if let minValue = minValue {
+                return max(minValue, correctionRangeScheduleRange.upperBound)...Guardrail.correctionRange.absoluteBounds.upperBound
+            } else {
+                return correctionRangeScheduleRange.upperBound...Guardrail.correctionRange.absoluteBounds.upperBound
+            }
+        }
+    }
+
+    private func initiallySelectedValue(for preset: CorrectionRangeOverrides.Preset) -> ClosedRange<HKQuantity> {
+        guardrail(for: preset).recommendedBounds.clamped(to: selectableBounds(for: preset))
     }
 
     private var guardrailWarningIfNecessary: some View {
@@ -184,11 +214,11 @@ struct CorrectionRangeOverridesEditor: View {
         }
     }
 
-    private var crossedThresholds: [SafetyClassification.Threshold] {
-        return value.ranges
-            .flatMap { (preset, range) -> [SafetyClassification.Threshold] in
+    private var crossedThresholds: [CorrectionRangeOverrides.Preset: [SafetyClassification.Threshold]] {
+        value.ranges
+            .compactMapValuesWithKeys { preset, range in
                 let guardrail = self.guardrail(for: preset)
-                return [range.lowerBound, range.upperBound].compactMap { bound in
+                let thresholds: [SafetyClassification.Threshold] = [range.lowerBound, range.upperBound].compactMap { bound in
                     switch guardrail.classification(for: bound) {
                     case .withinRecommendedRange:
                         return nil
@@ -196,6 +226,8 @@ struct CorrectionRangeOverridesEditor: View {
                         return threshold
                     }
                 }
+
+                return thresholds.isEmpty ? nil : thresholds
             }
     }
 
@@ -218,14 +250,23 @@ struct CorrectionRangeOverridesEditor: View {
 }
 
 private struct CorrectionRangeOverridesGuardrailWarning: View {
-    var crossedThresholds: [SafetyClassification.Threshold]
+    var crossedThresholds: [CorrectionRangeOverrides.Preset: [SafetyClassification.Threshold]]
 
     var body: some View {
         assert(!crossedThresholds.isEmpty)
         return GuardrailWarning(
-            title: crossedThresholds.count == 1 ? singularWarningTitle(for: crossedThresholds.first!) : multipleWarningTitle,
-            thresholds: crossedThresholds
+            title: title,
+            thresholds: Array(crossedThresholds.values.flatMap { $0 }),
+            caption: caption
         )
+    }
+
+    private var title: Text {
+        if crossedThresholds.count == 1, crossedThresholds.values.first!.count == 1 {
+            return singularWarningTitle(for: crossedThresholds.values.first!.first!)
+        } else {
+            return multipleWarningTitle
+        }
     }
 
     private func singularWarningTitle(for threshold: SafetyClassification.Threshold) -> Text {
@@ -239,5 +280,18 @@ private struct CorrectionRangeOverridesGuardrailWarning: View {
 
     private var multipleWarningTitle: Text {
         Text("Correction Values", comment: "Title text for multi-value correction value warning")
+    }
+
+    var caption: Text? {
+        guard
+            crossedThresholds.count == 1,
+            let crossedPreMealThresholds = crossedThresholds[.preMeal]
+        else {
+            return nil
+        }
+
+        return crossedPreMealThresholds.allSatisfy { $0 == .aboveRecommended || $0 == .maximum }
+            ? Text("The value you have entered for this range is higher than your usual correction range. Tidepool typically recommends your pre-meal range be lower than your usual correction range.", comment: "Warning text for high pre-meal target value")
+            : nil
     }
 }
