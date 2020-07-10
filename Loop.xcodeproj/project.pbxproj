@@ -376,6 +376,7 @@
 		89CA2B30226C0161004D9350 /* DirectoryObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */; };
 		89CA2B32226C18B8004D9350 /* TestingScenariosTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */; };
 		89CA2B3D226E6B13004D9350 /* LocalTestingScenariosManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */; };
+		89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D1503D24B506EB00EDE253 /* Dictionary.swift */; };
 		89D6953E23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */; };
 		89E08FC2242E73DC000D719B /* CarbAmountPositionKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E08FC1242E73DC000D719B /* CarbAmountPositionKey.swift */; };
 		89E08FC4242E73F0000D719B /* GramLabelPositionKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E08FC3242E73F0000D719B /* GramLabelPositionKey.swift */; };
@@ -1107,6 +1108,7 @@
 		89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryObserver.swift; sourceTree = "<group>"; };
 		89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingScenariosTableViewController.swift; sourceTree = "<group>"; };
 		89CA2B3C226E6B13004D9350 /* LocalTestingScenariosManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTestingScenariosManager.swift; sourceTree = "<group>"; };
+		89D1503D24B506EB00EDE253 /* Dictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dictionary.swift; sourceTree = "<group>"; };
 		89D6953D23B6DF8A002B3066 /* PotentialCarbEntryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotentialCarbEntryTableViewCell.swift; sourceTree = "<group>"; };
 		89E08FC1242E73DC000D719B /* CarbAmountPositionKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbAmountPositionKey.swift; sourceTree = "<group>"; };
 		89E08FC3242E73F0000D719B /* GramLabelPositionKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GramLabelPositionKey.swift; sourceTree = "<group>"; };
@@ -1680,6 +1682,7 @@
 				43CE7CDD1CA8B63E003CC1B0 /* Data.swift */,
 				892A5D58222F0A27008961AB /* Debug.swift */,
 				A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */,
+				89D1503D24B506EB00EDE253 /* Dictionary.swift */,
 				89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */,
 				A999D40324663CE1004C89D4 /* DoseStore.swift */,
 				A9CBE457248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift */,
@@ -2921,6 +2924,7 @@
 				43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */,
 				A98556852493F901000FD662 /* AlertStore+SimulatedCoreData.swift in Sources */,
 				899433B823FE129800FA4BEA /* OverrideBadgeView.swift in Sources */,
+				89D1503E24B506EB00EDE253 /* Dictionary.swift in Sources */,
 				4302F4E31D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift in Sources */,
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
