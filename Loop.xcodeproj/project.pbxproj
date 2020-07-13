@@ -440,6 +440,7 @@
 		B4E96D5B248A8229002DABAD /* StatusBarHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */; };
 		B4E96D5D248A82A2002DABAD /* StatusBarHUDView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */; };
 		B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */; };
+		B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */; };
 		C10B28461EA9BA5E006EA1FC /* far_future_high_bg_forecast.json in Resources */ = {isa = PBXBuildFile; fileRef = C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */; };
 		C11C87DE1E21EAAD00BB71D3 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		C1201E2C23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */; };
@@ -1171,6 +1172,7 @@
 		B4E96D5A248A8229002DABAD /* StatusBarHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarHUDView.swift; sourceTree = "<group>"; };
 		B4E96D5C248A82A2002DABAD /* StatusBarHUDView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = StatusBarHUDView.xib; sourceTree = "<group>"; };
 		B4F3D25024AF890C0095CE44 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
+		B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceDataManager+DeviceStatus.swift"; sourceTree = "<group>"; };
 		C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast.json; sourceTree = "<group>"; };
 		C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContextRequestUserInfo.swift; sourceTree = "<group>"; };
 		C125F31A22FE7CE200FD0545 /* copy-frameworks.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "copy-frameworks.sh"; sourceTree = "<group>"; };
@@ -1683,6 +1685,7 @@
 				4F08DE8E1E7BB871006741EA /* CollectionType+Loop.swift */,
 				43CE7CDD1CA8B63E003CC1B0 /* Data.swift */,
 				892A5D58222F0A27008961AB /* Debug.swift */,
+				B4FEEF7C24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift */,
 				A9C62D832331700D00535612 /* DiagnosticLog+Subsystem.swift */,
 				89D1503D24B506EB00EDE253 /* Dictionary.swift */,
 				89CA2B2F226C0161004D9350 /* DirectoryObserver.swift */,
@@ -2855,6 +2858,7 @@
 				C1D289B522F90A52003FFBD9 /* BasalDeliveryState.swift in Sources */,
 				4F2C15821E074FC600E160D4 /* NSTimeInterval.swift in Sources */,
 				4311FB9B1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift in Sources */,
+				B4FEEF7D24B8A71F00A8DF9B /* DeviceDataManager+DeviceStatus.swift in Sources */,
 				C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */,
 				43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */,
 				43A51E1F1EB6D62A000736CC /* CarbAbsorptionViewController.swift in Sources */,

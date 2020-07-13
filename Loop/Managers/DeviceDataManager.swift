@@ -35,6 +35,8 @@ final class DeviceDataManager {
     private var lastBLEDrivenUpdate = Date.distantPast
 
     private var deviceLog: PersistentDeviceLog
+    
+    var bluetoothState: BluetoothStateManager.BluetoothState = .other
 
     // MARK: - CGM
 
@@ -100,7 +102,7 @@ final class DeviceDataManager {
 
     private(set) var loopManager: LoopDataManager!
 
-    init(pluginManager: PluginManager, alertManager: AlertManager) {
+    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager) {
         let localCacheDuration = Bundle.main.localCacheDuration ?? .days(1)
 
         let fileManager = FileManager.default
@@ -112,6 +114,8 @@ final class DeviceDataManager {
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
+        
+        bluetoothStateManager.addBluetoothStateObserver(self)
 
         if let pumpManagerRawValue = UserDefaults.appGroup?.pumpManagerRawValue {
             pumpManager = pumpManagerFromRawValue(pumpManagerRawValue)
@@ -864,5 +868,15 @@ extension DeviceDataManager {
                 self.loopManager.purgeHistoricalCoreData(completion: completion)
             }
         }
+    }
+}
+
+//MARK: - Bluetooth State Manager Obversation
+
+extension DeviceDataManager: BluetoothStateManagerObserver {
+    func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager,
+                               bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
+    {
+        self.bluetoothState = bluetoothState
     }
 }

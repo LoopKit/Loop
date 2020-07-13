@@ -42,14 +42,6 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
         basalRateHUD.tintColor = tintColor
     }
     
-    public func presentAddPumpHighlight() {
-        resetProgress()
-        presentStatusHighlight(withMessage: LocalizedString("Add Pump", comment: "Title text for button to set up a pump"),
-                               image: UIImage(systemName: "plus.circle")!,
-                               color: .systemBlue)
-        
-    }
-    
     override public func presentStatusHighlight() {
         guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return

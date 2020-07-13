@@ -8,6 +8,7 @@
 
 import CoreBluetooth
 import LoopKit
+import LoopKitUI
 
 public protocol BluetoothStateManagerObserver: class {
     func bluetoothStateManager(_ bluetoothStateManager: BluetoothStateManager, bluetoothStateDidUpdate bluetoothState: BluetoothStateManager.BluetoothState)
@@ -21,24 +22,13 @@ public class BluetoothStateManager: NSObject {
         case unauthorized
         case denied
         case other
-        
-        var statusHighlight: DeviceStatusHighlight? {
-            switch self {
-            case .poweredOff:
-                return BluetoothStateManager.bluetoothStateOffHighlight
-            case .unauthorized, .denied:
-                return BluetoothStateManager.bluetoothStateUnauthorizedHighlight
-            default:
-                return nil
-            }
-        }
-        
-        var action: (() -> Void)? {
+                
+        var action: HUDTapAction? {
             switch self {
             case .unauthorized, .denied:
-                return { UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!) }
+                return .openAppURL(URL(string: UIApplication.openSettingsURLString)!)
             case .poweredOff:
-                return { }
+                return .takeNoAction
             default:
                 return nil
             }
@@ -107,11 +97,15 @@ extension BluetoothStateManager {
         }
     }
     
-    public static var bluetoothStateOffHighlight: DeviceStatusHighlight {
+    public static var bluetoothOffHighlight: DeviceStatusHighlight {
+        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth Off", comment: "Message to the user to that the bluetooth is off"))
+    }
+    
+    public static var bluetoothEnableHighlight: DeviceStatusHighlight {
         return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Enable Bluetooth", comment: "Message to the user to enable bluetooth"))
     }
     
-    public static var bluetoothStateUnauthorizedHighlight: DeviceStatusHighlight {
-        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Allow Bluetooth", comment: "Message to the user to allow bluetooth"))
+    public static var bluetoothUnavailableHighlight: DeviceStatusHighlight {
+        return BluetoothStateHighlight(localizedMessage: NSLocalizedString("Bluetooth Unavailable", comment: "Message to the user that bluetooth is unavailable to the app"))
     }
 }

@@ -32,10 +32,11 @@ public class LoopAlertsManager {
         
     private func onBluetoothPermissionDenied() {
         log.default("Bluetooth permission denied")
-        let content = Alert.Content(title: NSLocalizedString("Bluetooth Permission Denied", comment: "Bluetooth permission denied alert title"),
-                                      body: NSLocalizedString("Loop needs permission to access your iPhone’s Bluetooth connection in order for the app to communicate with your pump and CGM sensor. You will be unable to use the app to receive CGM information and send commands to your pump until Bluetooth permissions are enabled.",
-                                                              comment: "Bluetooth permission denied alert body"),
-                                      acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Default alert dismissal"))
+        let title = NSLocalizedString("Bluetooth Unavailable Alert", comment: "Bluetooth unavailable alert title")
+        let body = NSLocalizedString("Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.", comment: "Bluetooth unavailable alert body.")
+        let content = Alert.Content(title: title,
+                                      body: body,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
         alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: content, backgroundContent: content, trigger: .immediate))
     }
 
@@ -46,13 +47,15 @@ public class LoopAlertsManager {
 
     private func onBluetoothPoweredOff() {
         log.default("Bluetooth powered off")
-        let body = NSLocalizedString("You have turned Bluetooth off. Loop cannot communicate with your pump and CGM sensor when Bluetooth is off. To resume automation, turn Bluetooth on.", comment: "Bluetooth off alert body")
-        let bgcontent = Alert.Content(title: NSLocalizedString("Bluetooth Off Alert", comment: "Bluetooth off background alert title"),
-                                      body: body,
-                                      acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Default alert dismissal"))
-        let fgcontent = Alert.Content(title: NSLocalizedString("Bluetooth Off", comment: "Bluetooth off foreground alert title"),
-                                      body: body,
-                                      acknowledgeActionButtonLabel: NSLocalizedString("OK", comment: "Default alert dismissal"))
+        let title = NSLocalizedString("Bluetooth Off Alert", comment: "Bluetooth off alert title")
+        let bgBody = NSLocalizedString("Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus.", comment: "Bluetooth off background alert body.")
+        let bgcontent = Alert.Content(title: title,
+                                      body: bgBody,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
+        let fgBody = NSLocalizedString("Turn on Bluetooth to receive alerts, alarms or sensor glucose readings.", comment: "Bluetooth off foreground alert body")
+        let fgcontent = Alert.Content(title: title,
+                                      body: fgBody,
+                                      acknowledgeActionButtonLabel: NSLocalizedString("Dismiss", comment: "Default alert dismissal"))
         alertManager?.issueAlert(Alert(identifier: bluetoothPoweredOffIdentifier, foregroundContent: fgcontent, backgroundContent: bgcontent, trigger: .immediate))
     }
 
