@@ -27,7 +27,7 @@
                             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         </view>
                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="u3Q-Vj-Efw">
-                            <rect key="frame" x="16" y="10" width="126" height="44"/>
+                            <rect key="frame" x="18" y="10" width="126" height="44"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4ED-GN-I8z" customClass="GlucoseValueHUDView" customModule="LoopUI" customModuleProvider="target">
                                     <rect key="frame" x="0.0" y="0.0" width="92" height="44"/>
@@ -108,12 +108,12 @@
                         <constraint firstItem="u3Q-Vj-Efw" firstAttribute="top" secondItem="76s-1c-uyr" secondAttribute="top" constant="10" id="7eK-H8-1dG"/>
                         <constraint firstItem="QwU-5e-NnT" firstAttribute="top" secondItem="76s-1c-uyr" secondAttribute="top" constant="10" id="FJE-uP-HIa"/>
                         <constraint firstAttribute="bottom" secondItem="QwU-5e-NnT" secondAttribute="bottom" constant="20" id="HX0-Mo-7hM"/>
-                        <constraint firstAttribute="trailing" secondItem="u3Q-Vj-Efw" secondAttribute="trailing" constant="8" id="SQf-2L-eun"/>
+                        <constraint firstAttribute="trailing" secondItem="u3Q-Vj-Efw" secondAttribute="trailing" constant="6" id="SQf-2L-eun"/>
                         <constraint firstAttribute="bottom" secondItem="vmJ-km-UjN" secondAttribute="bottom" constant="8" id="Ski-fr-qQY"/>
                         <constraint firstAttribute="bottom" secondItem="u3Q-Vj-Efw" secondAttribute="bottom" constant="20" id="cK2-Am-j0i"/>
                         <constraint firstAttribute="trailing" secondItem="vmJ-km-UjN" secondAttribute="trailing" constant="18" id="dKx-hl-4cd"/>
                         <constraint firstItem="QwU-5e-NnT" firstAttribute="leading" secondItem="76s-1c-uyr" secondAttribute="leading" constant="8" id="gSX-7g-ZXB"/>
-                        <constraint firstItem="u3Q-Vj-Efw" firstAttribute="leading" secondItem="QwU-5e-NnT" secondAttribute="leading" constant="8" id="o0e-1l-DTi"/>
+                        <constraint firstItem="u3Q-Vj-Efw" firstAttribute="leading" secondItem="QwU-5e-NnT" secondAttribute="leading" constant="10" id="o0e-1l-DTi"/>
                         <constraint firstAttribute="trailing" secondItem="QwU-5e-NnT" secondAttribute="trailing" id="tlj-zT-JTO"/>
                     </constraints>
                     <connections>
@@ -163,20 +163,20 @@
                             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         </view>
                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="xRi-qE-U6T">
-                            <rect key="frame" x="8" y="10" width="126" height="44"/>
+                            <rect key="frame" x="6" y="10" width="126" height="44"/>
                             <subviews>
                                 <view contentMode="scaleToFill" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="fsr-gH-zny" customClass="BasalRateHUDView" customModule="LoopUI">
-                                    <rect key="frame" x="0.0" y="0.0" width="66" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="70" height="44"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="geI-yt-4dZ" customClass="BasalStateView" customModule="LoopUI">
-                                            <rect key="frame" x="11" y="2" width="44" height="24"/>
+                                            <rect key="frame" x="13" y="4" width="44" height="22"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="44" id="MH2-vl-X1f"/>
-                                                <constraint firstAttribute="height" constant="24" id="RH0-65-hn8"/>
+                                                <constraint firstAttribute="height" constant="22" id="RH0-65-hn8"/>
                                             </constraints>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-0.85 U" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="x36-Sl-eth">
-                                            <rect key="frame" x="0.0" y="27" width="66" height="13.5"/>
+                                            <rect key="frame" x="0.0" y="27" width="70" height="13.5"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCaption2"/>
                                             <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -189,7 +189,7 @@
                                         <constraint firstItem="x36-Sl-eth" firstAttribute="leading" secondItem="fsr-gH-zny" secondAttribute="leading" id="HLa-kN-zKm"/>
                                         <constraint firstItem="x36-Sl-eth" firstAttribute="top" secondItem="geI-yt-4dZ" secondAttribute="bottom" constant="1" id="IhN-WP-cis"/>
                                         <constraint firstAttribute="bottom" secondItem="x36-Sl-eth" secondAttribute="bottom" constant="3.5" id="PnU-P2-jqu"/>
-                                        <constraint firstItem="geI-yt-4dZ" firstAttribute="top" secondItem="fsr-gH-zny" secondAttribute="top" constant="2" id="dMd-u4-EV0"/>
+                                        <constraint firstItem="geI-yt-4dZ" firstAttribute="top" secondItem="fsr-gH-zny" secondAttribute="top" constant="4" id="dMd-u4-EV0"/>
                                         <constraint firstItem="x36-Sl-eth" firstAttribute="trailing" secondItem="fsr-gH-zny" secondAttribute="trailing" id="epR-pj-I12"/>
                                         <constraint firstItem="geI-yt-4dZ" firstAttribute="centerX" secondItem="fsr-gH-zny" secondAttribute="centerX" id="h0T-1M-q42"/>
                                     </constraints>
@@ -199,10 +199,10 @@
                                     </connections>
                                 </view>
                                 <view contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="zyz-JH-sNX" customClass="LevelHUDView" customModule="LoopKitUI">
-                                    <rect key="frame" x="74" y="0.0" width="52" height="44"/>
+                                    <rect key="frame" x="78" y="0.0" width="48" height="44"/>
                                     <subviews>
                                         <view clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="jfu-In-s2Y">
-                                            <rect key="frame" x="8" y="5" width="36" height="34"/>
+                                            <rect key="frame" x="6" y="5" width="36" height="34"/>
                                             <subviews>
                                                 <view contentMode="scaleAspectFit" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="Q7F-Ri-GZd" customClass="LevelMaskView" customModule="LoopKitUI">
                                                     <rect key="frame" x="7" y="5" width="22" height="29"/>
@@ -233,7 +233,7 @@
                                             </constraints>
                                         </view>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="44U" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K9w-1i-FGo">
-                                            <rect key="frame" x="16" y="14.5" width="20.5" height="11"/>
+                                            <rect key="frame" x="14" y="14.5" width="20.5" height="11"/>
                                             <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="9"/>
                                             <color key="textColor" systemColor="systemBlueColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -243,13 +243,13 @@
                                         <bool key="isElement" value="YES"/>
                                     </accessibility>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="52" id="5PW-rw-7mW"/>
+                                        <constraint firstAttribute="width" constant="48" id="5PW-rw-7mW"/>
                                         <constraint firstItem="K9w-1i-FGo" firstAttribute="centerY" secondItem="jfu-In-s2Y" secondAttribute="centerY" constant="-2" id="BWD-ZK-UZ5"/>
                                         <constraint firstAttribute="bottom" secondItem="jfu-In-s2Y" secondAttribute="bottom" constant="5" id="JC7-IZ-sXa"/>
                                         <constraint firstItem="K9w-1i-FGo" firstAttribute="centerX" secondItem="jfu-In-s2Y" secondAttribute="centerX" id="Mah-jP-K8a"/>
                                         <constraint firstItem="jfu-In-s2Y" firstAttribute="top" secondItem="zyz-JH-sNX" secondAttribute="top" constant="5" id="gsV-RE-Izc"/>
-                                        <constraint firstAttribute="trailing" secondItem="jfu-In-s2Y" secondAttribute="trailing" constant="8" id="kTg-za-OGJ"/>
-                                        <constraint firstItem="jfu-In-s2Y" firstAttribute="leading" secondItem="zyz-JH-sNX" secondAttribute="leading" constant="8" id="ufk-q1-kY4"/>
+                                        <constraint firstAttribute="trailing" secondItem="jfu-In-s2Y" secondAttribute="trailing" constant="6" id="kTg-za-OGJ"/>
+                                        <constraint firstItem="jfu-In-s2Y" firstAttribute="leading" secondItem="zyz-JH-sNX" secondAttribute="leading" constant="6" id="ufk-q1-kY4"/>
                                     </constraints>
                                     <connections>
                                         <outlet property="levelMaskView" destination="Q7F-Ri-GZd" id="HeI-MW-sXE"/>
@@ -273,8 +273,8 @@
                     </accessibility>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="cSv-zq-wo3" secondAttribute="trailing" constant="8" id="44c-GO-CFS"/>
-                        <constraint firstItem="xRi-qE-U6T" firstAttribute="leading" secondItem="F6P-l9-6hk" secondAttribute="leading" constant="8" id="4KS-fe-oLr"/>
-                        <constraint firstItem="xRi-qE-U6T" firstAttribute="trailing" secondItem="cSv-zq-wo3" secondAttribute="trailing" constant="-8" id="5vy-0l-cWN"/>
+                        <constraint firstItem="xRi-qE-U6T" firstAttribute="leading" secondItem="F6P-l9-6hk" secondAttribute="leading" constant="6" id="4KS-fe-oLr"/>
+                        <constraint firstItem="xRi-qE-U6T" firstAttribute="trailing" secondItem="cSv-zq-wo3" secondAttribute="trailing" constant="-10" id="5vy-0l-cWN"/>
                         <constraint firstAttribute="bottom" secondItem="cSv-zq-wo3" secondAttribute="bottom" constant="20" id="My7-an-f3Q"/>
                         <constraint firstItem="cSv-zq-wo3" firstAttribute="leading" secondItem="F6P-l9-6hk" secondAttribute="leading" id="UVW-4k-vOK"/>
                         <constraint firstAttribute="bottom" secondItem="xRi-qE-U6T" secondAttribute="bottom" constant="20" id="Ylj-JL-X3Y"/>

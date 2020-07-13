@@ -219,26 +219,6 @@ final class StatusTableViewController: ChartsTableViewController {
         }
     }
     
-    var pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight? {
-        didSet {
-            if oldValue != pumpStatusHighlight {
-                log.debug("New pumpStatusHighlight: %@", String(describing: pumpStatusHighlight))
-                refreshContext.update(with: .status)
-                self.reloadData(animated: true)
-            }
-        }
-    }
-    
-    var pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress? {
-        didSet {
-            if oldValue != pumpLifecycleProgress {
-                log.debug("New pumpLifecycleProgress: %@", String(describing: pumpLifecycleProgress))
-                refreshContext.update(with: .status)
-                self.reloadData(animated: true)
-            }
-        }
-    }
-    
     var bluetoothState: BluetoothStateManager.BluetoothState = .other {
         didSet {
             if bluetoothState != oldValue {
@@ -544,10 +524,10 @@ final class StatusTableViewController: ChartsTableViewController {
                 } else if self.deviceManager.pumpManager == nil {
                     hudView.pumpStatusHUD.presentAddPumpHighlight()
                 } else {
-                    hudView.pumpStatusHUD.presentStatusHighlight(self.pumpStatusHighlight)
+                    hudView.pumpStatusHUD.presentStatusHighlight(self.deviceManager.pumpManagerStatus?.pumpStatusHighlight)
                 }
                 
-                hudView.pumpStatusHUD.lifecycleProgress = self.pumpLifecycleProgress
+                hudView.pumpStatusHUD.lifecycleProgress = self.deviceManager.pumpManagerStatus?.pumpLifecycleProgress
             }
             
             // Show/hide the table view rows
@@ -1582,8 +1562,6 @@ extension StatusTableViewController: PumpManagerStatusObserver {
         
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState
-        self.pumpStatusHighlight = status.pumpStatusHighlight
-        self.pumpLifecycleProgress = status.pumpLifecycleProgress
     }
 }
 

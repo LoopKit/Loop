@@ -13,6 +13,7 @@
                 <outlet property="messageLabel" destination="csC-XY-a5C" id="b4Q-ZX-Y9A"/>
             </connections>
         </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="5" id="vCH-Wo-Q6s">
             <rect key="frame" x="0.0" y="0.0" width="126" height="50"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
@@ -39,7 +40,6 @@
             <viewLayoutGuide key="safeArea" id="5r5-dV-daA"/>
             <point key="canvasLocation" x="-819" y="-140"/>
         </stackView>
-        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
     </objects>
     <resources>
         <image name="exclamationmark.circle.fill" catalog="system" width="128" height="121"/>
