@@ -28,6 +28,10 @@ public struct LoopSettings: Equatable {
             if let newValue = scheduleOverride, newValue.context == .preMeal {
                 preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
             }
+
+            if scheduleOverride?.context == .legacyWorkout {
+                preMealOverride = nil
+            }
         }
     }
 
@@ -35,6 +39,10 @@ public struct LoopSettings: Equatable {
         didSet {
             if let newValue = preMealOverride, newValue.context != .preMeal || newValue.settings.insulinNeedsScaleFactor != nil {
                 preconditionFailure("The `preMealOverride` field should be used only for a pre-meal target range override")
+            }
+
+            if preMealOverride != nil, scheduleOverride?.context == .legacyWorkout {
+                scheduleOverride = nil
             }
         }
     }
