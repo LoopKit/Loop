@@ -124,6 +124,7 @@ class ServicesManager {
         loopDataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
         loopDataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
         loopDataManager?.carbRatioSchedule = settings.carbRatioSchedule
+        loopDataManager?.basalRateSchedule = settings.basalRateSchedule
     }
 
     private func restoreState() {
