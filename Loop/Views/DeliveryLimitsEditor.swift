@@ -110,7 +110,9 @@ struct DeliveryLimitsEditor: View {
         let recommendedLowerBound = minimumSupportedBasalRate == 0 ? supportedBasalRates.dropFirst().first! : minimumSupportedBasalRate
         let recommendedUpperBound: Double
         if let maximumScheduledBasalRate = scheduledBasalRange?.upperBound {
-            recommendedUpperBound = Self.recommendedMaximumScheduledBasalScaleFactor * maximumScheduledBasalRate
+            recommendedUpperBound = maximumScheduledBasalRate == 0
+                ? recommendedLowerBound
+                : Self.recommendedMaximumScheduledBasalScaleFactor * maximumScheduledBasalRate
         } else {
             recommendedUpperBound = supportedBasalRates.last!
         }
