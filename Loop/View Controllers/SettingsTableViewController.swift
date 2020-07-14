@@ -484,10 +484,20 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 present(hostingController, animated: true)
             case .suspendThreshold:
                 func presentSuspendThresholdEditor(initialValue: HKQuantity?, unit: HKUnit) {
+                    let settings = dataManager.loopManager.settings
+                    let maxAllowableSuspendThreshold = [
+                        settings.glucoseTargetRangeSchedule?.minLowerBound().doubleValue(for: unit),
+                        settings.preMealTargetRange?.minValue,
+                        settings.legacyWorkoutTargetRange?.minValue
+                    ]
+                    .compactMap { $0 }
+                    .min()
+                    .map { HKQuantity(unit: unit, doubleValue: $0) }
+
                     let editor = SuspendThresholdEditor(
                         value: initialValue,
                         unit: unit,
-                        maxValue: dataManager.loopManager.settings.glucoseTargetRangeSchedule?.minLowerBound(),
+                        maxValue: maxAllowableSuspendThreshold,
                         onSave: { [dataManager, tableView] newValue in
                             dataManager!.loopManager.settings.suspendThreshold = GlucoseThreshold(unit: unit, value: newValue.doubleValue(for: unit))
 
