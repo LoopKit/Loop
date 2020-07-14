@@ -1816,3 +1816,16 @@ extension LoopDataManager {
         }
     }
 }
+
+extension LoopDataManager {
+    public var therapySettings: TherapySettings {
+        TherapySettings(glucoseTargetRangeSchedule: settings.glucoseTargetRangeSchedule,
+                        preMealTargetRange: settings.preMealTargetRange,
+                        workoutTargetRange: settings.legacyWorkoutTargetRange,
+                        maximumBasalRatePerHour: settings.maximumBasalRatePerHour,
+                        maximumBolus: settings.maximumBolus,
+                        suspendThreshold: settings.suspendThreshold,
+                        insulinSensitivitySchedule: insulinSensitivitySchedule,
+                        carbRatioSchedule: carbRatioSchedule)
+    }
+}

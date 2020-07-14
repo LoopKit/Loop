@@ -6,6 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
+import LoopKit
 import LoopKitUI
 import SwiftUI
 
@@ -73,7 +74,7 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            NavigationLink(destination: Text("Therapy Settings")) {
+            NavigationLink(destination: TherapySettingsView(viewModel: TherapySettingsViewModel(therapySettings: viewModel.therapySettings))) {
                 LargeButton(action: { },
                             includeArrow: false,
                             imageView: AnyView(Image("Therapy Icon")),
@@ -191,6 +192,7 @@ public struct SettingsView_Previews: PreviewProvider {
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
+                                          therapySettings: TherapySettings(),
                                           initialDosingEnabled: true)
         return Group {
             SettingsView(viewModel: viewModel)
