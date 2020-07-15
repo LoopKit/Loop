@@ -11,33 +11,6 @@ import HealthKit
 import LoopKit
 import LoopKitUI
 
-
-struct DeliveryLimits: Equatable {
-    enum Setting: Equatable {
-        case maximumBasalRate
-        case maximumBolus
-    }
-
-    var settings: [Setting: HKQuantity]
-
-    init(maximumBasalRate: HKQuantity?, maximumBolus: HKQuantity?) {
-        settings = [:]
-        settings[.maximumBasalRate] = maximumBasalRate
-        settings[.maximumBolus] = maximumBolus
-    }
-
-    var maximumBasalRate: HKQuantity? {
-        get { settings[.maximumBasalRate] }
-        set { settings[.maximumBasalRate] = newValue }
-    }
-
-    var maximumBolus: HKQuantity? {
-        get { settings[.maximumBolus] }
-        set { settings[.maximumBolus] = newValue }
-    }
-}
-
-
 struct DeliveryLimitsEditor: View {
     var initialValue: DeliveryLimits
     var supportedBasalRates: [Double]
@@ -77,7 +50,7 @@ struct DeliveryLimitsEditor: View {
 
     var body: some View {
         ConfigurationPage(
-            title: Text("Delivery Limits", comment: "Title for delivery limits page"),
+            title: Text(TherapySetting.deliveryLimits.title),
             saveButtonState: saveButtonState,
             cards: {
                 maximumBasalRateCard
@@ -125,7 +98,7 @@ struct DeliveryLimitsEditor: View {
 
     var maximumBasalRateCard: Card {
         Card {
-            SettingDescription(text: Text("Maximum basal rate is the highest temporary basal rate Tidepool Loop is allowed to set automatically.", comment: "Maximum bolus setting description"), informationalContent: {Text("To be implemented")}) // ANNA TODO: placeholder so this builds
+            SettingDescription(text: Text(DeliveryLimits.Setting.maximumBasalRate.descriptiveText), informationalContent: {Text("To be implemented")}) // ANNA TODO: placeholder so this builds
             ExpandableSetting(
                 isEditing: Binding(
                     get: { self.settingBeingEdited == .maximumBasalRate },
@@ -136,7 +109,7 @@ struct DeliveryLimitsEditor: View {
                     }
                 ),
                 leadingValueContent: {
-                    Text("Maximum Basal Rate", comment: "Title text for maximum basal rate configuration")
+                    Text(DeliveryLimits.Setting.maximumBasalRate.title)
                 },
                 trailingValueContent: {
                     GuardrailConstrainedQuantityView(
@@ -182,7 +155,7 @@ struct DeliveryLimitsEditor: View {
     var maximumBolusCard: Card {
         Card {
             SettingDescription(
-                text: Text("Maximum bolus is the highest bolus amount you can deliver at one time.", comment: "Maximum basal rate setting description"), informationalContent: {Text("To be implemented")}) // ANNA TODO: placeholder so this builds
+                text: Text(DeliveryLimits.Setting.maximumBolus.descriptiveText), informationalContent: {Text("To be implemented")}) // ANNA TODO: placeholder so this builds
             ExpandableSetting(
                 isEditing: Binding(
                     get: { self.settingBeingEdited == .maximumBolus },
@@ -193,7 +166,7 @@ struct DeliveryLimitsEditor: View {
                     }
                 ),
                 leadingValueContent: {
-                    Text("Maximum Bolus", comment: "Title text for maximum bolus configuration")
+                    Text(DeliveryLimits.Setting.maximumBolus.title)
                 },
                 trailingValueContent: {
                     GuardrailConstrainedQuantityView(
@@ -321,7 +294,7 @@ struct DeliveryLimitsGuardrailWarning: View {
             return GuardrailWarning(title: title, threshold: threshold, caption: caption)
         case 2:
             return GuardrailWarning(
-                title: Text("Delivery Limits"),
+                title: Text(TherapySetting.deliveryLimits.title),
                 thresholds: Array(crossedThresholds.values),
                 caption: Text("The values you have entered are outside of what Tidepool generally recommends.", comment: "Caption text for warning where both delivery limits are outside the recommended range")
             )
