@@ -57,7 +57,6 @@
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="devicesSectionTitleView" destination="ywS-mm-GoX" id="7tF-Zf-Op2"/>
-                        <segue destination="pi6-Dh-72V" kind="show" identifier="InsulinModelSettingsViewController" id="oOS-dJ-9ls"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ymW-vT-DZk" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1029,112 +1028,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hu2-qg-8CR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="840" y="1980"/>
-        </scene>
-        <!--Insulin Model-->
-        <scene sceneID="aYb-a3-1ho">
-            <objects>
-                <tableViewController title="Insulin Model" hidesBottomBarWhenPushed="YES" id="pi6-Dh-72V" customClass="InsulinModelSettingsViewController" customModule="Loop" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="qMA-N1-7bJ">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ChartTableViewCell" rowHeight="270" id="8pT-uy-G4i" customClass="ChartTableViewCell" customModule="Loop" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="28" width="375" height="270"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="8pT-uy-G4i" id="LOX-ER-hlk">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="270"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="m4y-ya-ryt" customClass="ChartContainerView" customModule="LoopUI">
-                                            <rect key="frame" x="0.0" y="11" width="375" height="170"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="170" id="6cy-yd-uxX"/>
-                                            </constraints>
-                                        </view>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalCompressionResistancePriority="749" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PJv-p9-cFe">
-                                            <rect key="frame" x="16" y="189" width="343" height="70"/>
-                                            <string key="text">An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments.</string>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCaption1"/>
-                                            <color key="textColor" systemColor="secondaryLabelColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="PJv-p9-cFe" firstAttribute="leading" secondItem="LOX-ER-hlk" secondAttribute="leadingMargin" id="12l-wY-2Jb"/>
-                                        <constraint firstItem="m4y-ya-ryt" firstAttribute="leading" secondItem="LOX-ER-hlk" secondAttribute="leading" id="9zX-SB-Ek0"/>
-                                        <constraint firstItem="PJv-p9-cFe" firstAttribute="trailing" secondItem="LOX-ER-hlk" secondAttribute="trailingMargin" id="MAw-U5-xhy"/>
-                                        <constraint firstAttribute="trailing" secondItem="m4y-ya-ryt" secondAttribute="trailing" id="QpN-4m-mR3"/>
-                                        <constraint firstItem="PJv-p9-cFe" firstAttribute="top" secondItem="m4y-ya-ryt" secondAttribute="bottom" constant="8" symbolic="YES" id="eiD-Zk-cYU"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="PJv-p9-cFe" secondAttribute="bottom" priority="750" id="kYb-qM-j9x"/>
-                                        <constraint firstItem="m4y-ya-ryt" firstAttribute="top" secondItem="LOX-ER-hlk" secondAttribute="topMargin" id="xmX-K8-HPE"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="chartContentView" destination="m4y-ya-ryt" id="1a2-ad-5JD"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="TitleSubtitleTextFieldTableViewCell" rowHeight="64" id="umk-et-mtJ" customClass="TitleSubtitleTextFieldTableViewCell" customModule="Loop" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="298" width="375" height="64"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="umk-et-mtJ" id="ecJ-5o-gRU">
-                                    <rect key="frame" x="0.0" y="0.0" width="335" height="64"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="750" verticalHuggingPriority="252" verticalCompressionResistancePriority="751" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cpo-Po-gFM">
-                                            <rect key="frame" x="16" y="11" width="42" height="20.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l7l-mw-Oc9">
-                                            <rect key="frame" x="16" y="33.5" width="311" height="19.5"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="4 hour" textAlignment="right" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Wk3-xv-IM5">
-                                            <rect key="frame" x="66" y="10.5" width="261" height="22"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits"/>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="l7l-mw-Oc9" firstAttribute="leading" secondItem="ecJ-5o-gRU" secondAttribute="leadingMargin" id="3ft-dm-HjK"/>
-                                        <constraint firstItem="l7l-mw-Oc9" firstAttribute="top" secondItem="cpo-Po-gFM" secondAttribute="bottom" constant="2" id="CcR-Cv-wWY"/>
-                                        <constraint firstItem="Wk3-xv-IM5" firstAttribute="baseline" secondItem="cpo-Po-gFM" secondAttribute="baseline" id="Eqx-AE-J5n"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="l7l-mw-Oc9" secondAttribute="trailing" id="HiJ-Ru-8jv"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="l7l-mw-Oc9" secondAttribute="bottom" id="cQS-1x-mvF"/>
-                                        <constraint firstItem="cpo-Po-gFM" firstAttribute="leading" secondItem="ecJ-5o-gRU" secondAttribute="leadingMargin" id="jLc-QH-LZR"/>
-                                        <constraint firstItem="cpo-Po-gFM" firstAttribute="top" secondItem="ecJ-5o-gRU" secondAttribute="topMargin" id="jbm-L2-olt"/>
-                                        <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="cpo-Po-gFM" secondAttribute="trailing" priority="750" id="k3R-LK-YV9"/>
-                                        <constraint firstItem="Wk3-xv-IM5" firstAttribute="trailing" secondItem="ecJ-5o-gRU" secondAttribute="trailingMargin" id="twQ-h6-cPp"/>
-                                        <constraint firstItem="Wk3-xv-IM5" firstAttribute="leading" secondItem="cpo-Po-gFM" secondAttribute="trailing" constant="8" symbolic="YES" id="u0z-SP-YcO"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="subtitleLabel" destination="l7l-mw-Oc9" id="bbv-Fj-q1z"/>
-                                    <outlet property="textField" destination="Wk3-xv-IM5" id="oU0-sB-n0D"/>
-                                    <outlet property="titleLabel" destination="cpo-Po-gFM" id="8Ok-PU-Bx4"/>
-                                </connections>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="pi6-Dh-72V" id="6vm-ov-Oi7"/>
-                            <outlet property="delegate" destination="pi6-Dh-72V" id="nPH-IM-5sk"/>
-                        </connections>
-                    </tableView>
-                    <connections>
-                        <outlet property="durationPicker" destination="Nsn-Eh-Q51" id="4z5-GH-8j1"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="JUq-JL-nn0" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="countDownTimer" countDownDuration="14400" minuteInterval="15" useCurrentDate="NO" id="Nsn-Eh-Q51">
-                    <rect key="frame" x="0.0" y="0.0" width="375" height="216"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
-                </datePicker>
-            </objects>
-            <point key="canvasLocation" x="2477.5999999999999" y="1978.56071964018"/>
         </scene>
         <!--OverrideSelectionViewController-->
         <scene sceneID="O3A-Oa-kvc">

@@ -8,7 +8,7 @@
 import LoopKit
 
 
-public enum InsulinModelSettings {
+public enum InsulinModelSettings: Equatable {
     case exponentialPreset(ExponentialInsulinModelPreset)
     case walsh(WalshInsulinModel)
 

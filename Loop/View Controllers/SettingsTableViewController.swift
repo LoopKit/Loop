@@ -8,6 +8,7 @@
 
 import Combine
 import UIKit
+import SwiftUI
 import HealthKit
 import LoopKit
 import LoopKitUI
@@ -18,7 +19,7 @@ import LoopUI
 final class SettingsTableViewController: UITableViewController, IdentifiableClass {
     @IBOutlet var devicesSectionTitleView: UIView?
 
-    private var trash = Set<AnyCancellable>()
+    private var cancellables = Set<AnyCancellable>()
     private var showNotificationsWarning = false
     
     override func viewDidLoad() {
@@ -38,7 +39,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 self.showNotificationsWarning = $0
                 self.tableView.reloadSections([Section.loop.rawValue], with: .none)
             }
-        .store(in: &trash)
+        .store(in: &cancellables)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -103,22 +104,6 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
         return formatter
     }()
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        switch segue.destination {
-        case let vc as InsulinModelSettingsViewController:
-            vc.deviceManager = dataManager
-            vc.insulinModel = dataManager.loopManager.insulinModelSettings?.model
-
-            if let insulinSensitivitySchedule = dataManager.loopManager.insulinSensitivitySchedule {
-                vc.insulinSensitivitySchedule = insulinSensitivitySchedule
-            }
-
-            vc.delegate = self
-        default:
-            break
-        }
-    }
 
     func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController & CompletionNotifying) {
         var setupViewController = pumpManager.setupViewController()
@@ -518,7 +503,30 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     presentSuspendThresholdEditor(initialValue: nil, unit: unit)
                 }
             case .insulinModel:
-                performSegue(withIdentifier: InsulinModelSettingsViewController.className, sender: sender)
+                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let viewModel = InsulinModelSelectionViewModel(
+                    insulinModelSettings: dataManager.loopManager.insulinModelSettings ?? .exponentialPreset(.humalogNovologAdult),
+                    insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule
+                )
+
+                viewModel.$insulinModelSettings
+                    .sink { [dataManager] newValue in
+                        dataManager!.loopManager!.insulinModelSettings = newValue
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                    .store(in: &cancellables)
+
+                let modelSelectionView = InsulinModelSelection(
+                    viewModel: viewModel,
+                    glucoseUnit: glucoseUnit,
+                    supportedModelSettings: .init(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled)
+                )
+
+                let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
+
+                present(hostingController, animated: true)
             case .deliveryLimits:
                 guard let pumpManager = dataManager.pumpManager else {
                     // Disallow delivery limit configuration without a configured pump.
@@ -929,30 +937,6 @@ extension SettingsTableViewController: ServiceSetupDelegate {
 extension SettingsTableViewController: ServiceSettingsDelegate {
     func serviceSettingsNotifying(_ object: ServiceSettingsNotifying, didDeleteService service: Service) {
         dataManager.servicesManager.removeActiveService(service)
-    }
-}
-
-extension SettingsTableViewController: InsulinModelSettingsViewControllerDelegate {
-    func insulinModelSettingsViewControllerDidChangeValue(_ controller: InsulinModelSettingsViewController) {
-        guard let indexPath = self.tableView.indexPathForSelectedRow else {
-            return
-        }
-
-        switch sections[indexPath.section] {
-        case .configuration:
-            switch ConfigurationRow(rawValue: indexPath.row)! {
-            case .insulinModel:
-                if let model = controller.insulinModel {
-                    dataManager.loopManager.insulinModelSettings = InsulinModelSettings(model: model)
-                }
-
-                tableView.reloadRows(at: [indexPath], with: .none)
-            default:
-                assertionFailure()
-            }
-        default:
-            assertionFailure()
-        }
     }
 }
 
