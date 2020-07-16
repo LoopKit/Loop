@@ -752,6 +752,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           therapySettings: dataManager.loopManager.therapySettings,
+                                          supportedBasalRates: dataManager.pumpManager?.supportedBasalRates,
                                           initialDosingEnabled: dataManager.loopManager.settings.dosingEnabled,
                                           setDosingEnabled: { [weak self] in
                                             self?.setDosingEnabled($0)

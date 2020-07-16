@@ -1826,6 +1826,8 @@ extension LoopDataManager {
                         maximumBolus: settings.maximumBolus,
                         suspendThreshold: settings.suspendThreshold,
                         insulinSensitivitySchedule: insulinSensitivitySchedule,
-                        carbRatioSchedule: carbRatioSchedule)
+                        carbRatioSchedule: carbRatioSchedule,
+                        basalRateSchedule: basalRateSchedule,
+                        insulinModel: StoredSettings.InsulinModel(insulinModelSettings))
     }
 }
