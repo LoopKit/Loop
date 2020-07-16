@@ -44,7 +44,7 @@ public final class BasalRateHUDView: BaseHUDView {
             accessibilityValue = nil
         }
 
-            basalStateView.netBasalPercent = percent
+        basalStateView.netBasalPercent = percent
     }
 
     private lazy var decimalFormatter: NumberFormatter = {

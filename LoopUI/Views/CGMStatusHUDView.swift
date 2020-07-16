@@ -56,7 +56,7 @@ public final class CGMStatusHUDView: DeviceStatusHUDView, NibLoadable {
         glucoseValueHUD.tintColor = viewModel.glucoseValueTintColor
         glucoseTrendHUD.tintColor = viewModel.glucoseTrendTintColor
     }
-    
+
     override func presentStatusHighlight() {
         guard statusStackView.arrangedSubviews.contains(glucoseValueHUD),
             statusStackView.arrangedSubviews.contains(glucoseTrendHUD) else

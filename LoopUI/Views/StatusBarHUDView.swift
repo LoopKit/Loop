@@ -17,7 +17,7 @@ public class StatusBarHUDView: UIView, NibLoadable {
     
     @IBOutlet public weak var pumpStatusHUD: PumpStatusHUDView!
         
-    public var containerView: UIView!
+    public var containerView: UIStackView!
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -30,7 +30,7 @@ public class StatusBarHUDView: UIView, NibLoadable {
     }
     
     func setup() {
-        containerView = (StatusBarHUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIView)
+        containerView = (StatusBarHUDView.nib().instantiate(withOwner: self, options: nil)[0] as! UIStackView)
         containerView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(containerView)
 
@@ -45,7 +45,7 @@ public class StatusBarHUDView: UIView, NibLoadable {
         self.backgroundColor = UIColor.secondarySystemBackground
     }
         
-    public func removePumpManagerProvidedViews() {
+    public func removePumpManagerProvidedView() {
         pumpStatusHUD.removePumpManagerProvidedHUD()
     }
     

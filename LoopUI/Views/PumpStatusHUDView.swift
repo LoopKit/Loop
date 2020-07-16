@@ -41,7 +41,7 @@ public final class PumpStatusHUDView: DeviceStatusHUDView, NibLoadable {
         
         basalRateHUD.tintColor = tintColor
     }
-    
+
     override public func presentStatusHighlight() {
         guard !statusStackView.arrangedSubviews.contains(statusHighlightView) else {
             return

@@ -9,6 +9,7 @@
 import Foundation
 import LoopKit
 import LoopKitUI
+import MockKitUI
 
 private let managersByIdentifier: [String: PumpManagerUI.Type] = staticPumpManagers.compactMap{ $0 as? PumpManagerUI.Type}.reduce(into: [:]) { (map, Type) in
     map[Type.managerIdentifier] = Type
@@ -19,7 +20,7 @@ typealias PumpManagerHUDViewRawValue = [String: Any]
 func PumpManagerHUDViewFromRawValue(_ rawValue: PumpManagerHUDViewRawValue, pluginManager: PluginManager) -> LevelHUDView? {
     guard
         let identifier = rawValue["managerIdentifier"] as? String,
-        let rawState = rawValue["hudProviderViews"] as? HUDProvider.HUDViewRawState,
+        let rawState = rawValue["hudProviderView"] as? HUDProvider.HUDViewRawState,
         let manager = pluginManager.getPumpManagerTypeByIdentifier(identifier) ?? staticPumpManagersByIdentifier[identifier] as? PumpManagerUI.Type else
     {
         return nil

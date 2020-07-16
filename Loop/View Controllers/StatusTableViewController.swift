@@ -88,7 +88,7 @@ final class StatusTableViewController: ChartsTableViewController {
             tableView.addGestureRecognizer(gestureRecognizer)
         }
         
-        tableView.estimatedRowHeight = 70
+        tableView.estimatedRowHeight = 74
         
         // Estimate an initial value
         landscapeMode = UIScreen.main.bounds.size.width > UIScreen.main.bounds.size.height
@@ -218,7 +218,7 @@ final class StatusTableViewController: ChartsTableViewController {
             }
         }
     }
-        
+
     // Toggles the display mode based on the screen aspect ratio. Should not be updated outside of reloadData().
     private var landscapeMode = false
     
@@ -925,7 +925,7 @@ final class StatusTableViewController: ChartsTableViewController {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
             // Compute the height of the HUD, defaulting to 70
-            let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height ?? 70)
+            let hudHeight = ceil(hudView?.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height ?? 74)
             var availableSize = max(tableView.bounds.width, tableView.bounds.height)
             
             if #available(iOS 11.0, *) {
@@ -1223,7 +1223,7 @@ final class StatusTableViewController: ChartsTableViewController {
     
     private func configurePumpManagerHUDViews() {
         if let hudView = hudView {
-            hudView.removePumpManagerProvidedViews()
+            hudView.removePumpManagerProvidedView()
             if let pumpManagerHUDProvider = deviceManager.pumpManagerHUDProvider {
                 if let view = pumpManagerHUDProvider.createHUDView() {
                     addPumpManagerViewToHUD(view)
