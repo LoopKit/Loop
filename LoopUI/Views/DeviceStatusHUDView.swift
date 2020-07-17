@@ -76,7 +76,7 @@ import LoopKitUI
     }
     
     public func presentStatusHighlight(withMessage message: String,
-                                       image: UIImage,
+                                       image: UIImage?,
                                        color: UIColor)
     {
         statusHighlightView.messageLabel.text = message
