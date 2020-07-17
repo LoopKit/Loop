@@ -550,11 +550,11 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     onSave: { [dataManager] limits in
                         dataManager!.loopManager.settings.maximumBasalRatePerHour = limits.maximumBasalRate?.doubleValue(for: .internationalUnitsPerHour)
                         dataManager!.loopManager.settings.maximumBolus = limits.maximumBolus?.doubleValue(for: .internationalUnit())
-
+                        
                         tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
                 )
-
+                
                 let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
                     tableView.deselectRow(at: indexPath, animated: true)
                 })
@@ -747,12 +747,13 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         let cgmViewModel = DeviceViewModel(deviceManagerUI: dataManager.cgmManager as? DeviceManagerUI, isSetUp: dataManager.cgmManager != nil) { [weak self] in
             self?.didSelectCGM()
         }
+        let pumpSupportedIncrements = dataManager.pumpManager.map { PumpSupportedIncrements(basalRates: $0.supportedBasalRates, bolusVolumes: $0.supportedBolusVolumes) }
         let viewModel = SettingsViewModel(appNameAndVersion: Bundle.main.localizedNameAndVersion,
                                           notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           therapySettings: dataManager.loopManager.therapySettings,
-                                          supportedBasalRates: dataManager.pumpManager?.supportedBasalRates,
+                                          pumpSupportedIncrements: pumpSupportedIncrements,
                                           initialDosingEnabled: dataManager.loopManager.settings.dosingEnabled,
                                           setDosingEnabled: { [weak self] in
                                             self?.setDosingEnabled($0)
