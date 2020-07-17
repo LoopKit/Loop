@@ -88,8 +88,7 @@ extension BluetoothStateManager: CBCentralManagerDelegate {
 extension BluetoothStateManager {
     struct BluetoothStateHighlight: DeviceStatusHighlight {
         var localizedMessage: String
-        //TODO need correct icon from design
-        var imageSystemName: String = "wifi.slash"
+        var imageName: String = "bluetooth.disabled"
         var state: DeviceStatusHighlightState = .critical
         
         init(localizedMessage: String) {

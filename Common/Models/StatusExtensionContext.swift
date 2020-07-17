@@ -55,15 +55,15 @@ struct PredictedGlucoseContext {
 
 struct DeviceStatusHighlightContext: DeviceStatusHighlight {
     var localizedMessage: String
-    var imageSystemName: String
+    var imageName: String
     var state: DeviceStatusHighlightState
     
     init(localizedMessage: String,
-         imageSystemName: String,
+         imageName: String,
          state: DeviceStatusHighlightState)
     {
         self.localizedMessage = localizedMessage
-        self.imageSystemName = imageSystemName
+        self.imageName = imageName
         self.state = state
     }
     
@@ -73,7 +73,7 @@ struct DeviceStatusHighlightContext: DeviceStatusHighlight {
         }
         
         self.init(localizedMessage: deviceStatusHighlight.localizedMessage,
-                  imageSystemName: deviceStatusHighlight.imageSystemName,
+                  imageName: deviceStatusHighlight.imageName,
                   state: deviceStatusHighlight.state)
     }
 }
@@ -212,7 +212,7 @@ extension DeviceStatusHighlightContext: RawRepresentable {
 
     init?(rawValue: RawValue) {
         guard let localizedMessage = rawValue["localizedMessage"] as? String,
-            let imageSystemName = rawValue["imageSystemName"] as? String,
+            let imageName = rawValue["imageName"] as? String,
             let rawState = rawValue["state"] as? DeviceStatusHighlightState.RawValue,
             let state = DeviceStatusHighlightState(rawValue: rawState) else
         {
@@ -220,14 +220,14 @@ extension DeviceStatusHighlightContext: RawRepresentable {
         }
 
         self.localizedMessage = localizedMessage
-        self.imageSystemName = imageSystemName
+        self.imageName = imageName
         self.state = state
     }
     
     var rawValue: RawValue {
         return [
             "localizedMessage": localizedMessage,
-            "imageSystemName": imageSystemName,
+            "imageName": imageName,
             "state": state.rawValue,
         ]
     }

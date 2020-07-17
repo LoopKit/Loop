@@ -55,7 +55,7 @@ extension DeviceDataManager {
     
     struct AddDeviceStatusHighlight: DeviceStatusHighlight {
         var localizedMessage: String
-        var imageSystemName: String = "plus.circle"
+        var imageName: String = "plus.circle"
         var state: DeviceStatusHighlightState = .normal
     }
     

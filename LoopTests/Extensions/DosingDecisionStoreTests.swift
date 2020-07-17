@@ -78,7 +78,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
                                                   basalDeliveryState: .initiatingTempBasal,
                                                   bolusState: .none,
                                                   pumpStatusHighlight: PumpManagerStatus.PumpStatusHighlight(localizedMessage: "Test message",
-                                                                                                             imageSystemName: "test.image",
+                                                                                                             imageName: "test.image",
                                                                                                              state: .normal),
                                                   pumpLifecycleProgress: PumpManagerStatus.PumpLifecycleProgress(percentComplete: 0.5,
                                                                                                                  progressState: .warning))
@@ -305,7 +305,7 @@ class StoredDosingDecisionCodableTests: XCTestCase {
       "progressState" : "warning"
     },
     "pumpStatusHighlight" : {
-      "imageSystemName" : "test.image",
+      "imageName" : "test.image",
       "localizedMessage" : "Test message",
       "state" : "normal"
     },
