@@ -261,7 +261,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
             case .correctionRangeOverrides:
-                configCell.textLabel?.text = NSLocalizedString("Temporary Correction Ranges", comment: "The title text for the correction range overrides")
+                configCell.textLabel?.text = NSLocalizedString("Temporary Ranges", comment: "The title text for the correction range overrides")
                 if dataManager.loopManager.settings.preMealTargetRange == nil {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 } else {
@@ -470,14 +470,12 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             case .suspendThreshold:
                 func presentSuspendThresholdEditor(initialValue: HKQuantity?, unit: HKUnit) {
                     let settings = dataManager.loopManager.settings
-                    let maxAllowableSuspendThreshold = [
-                        settings.glucoseTargetRangeSchedule?.minLowerBound().doubleValue(for: unit),
-                        settings.preMealTargetRange?.minValue,
-                        settings.legacyWorkoutTargetRange?.minValue
-                    ]
-                    .compactMap { $0 }
-                    .min()
-                    .map { HKQuantity(unit: unit, doubleValue: $0) }
+                    let maxAllowableSuspendThreshold = Guardrail.maxSuspendThresholdValue(
+                        correctionRangeSchedule: settings.glucoseTargetRangeSchedule,
+                        preMealTargetRange: settings.preMealTargetRange,
+                        workoutTargetRange: settings.legacyWorkoutTargetRange,
+                        unit: unit
+                    )
 
                     let editor = SuspendThresholdEditor(
                         value: initialValue,
