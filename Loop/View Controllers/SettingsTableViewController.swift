@@ -751,6 +751,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
                                           therapySettings: dataManager.loopManager.therapySettings,
+                                          supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
                                           initialDosingEnabled: dataManager.loopManager.settings.dosingEnabled,
                                           setDosingEnabled: { [weak self] in

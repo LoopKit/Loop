@@ -50,12 +50,6 @@
 		430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430D85881F44037000AF2D4F /* HUDViewTableViewCell.swift */; };
 		4311FB9B1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4311FB9A1F37FE1B00D4C0A7 /* TitleSubtitleTextFieldTableViewCell.swift */; };
 		431A8C401EC6E8AB00823B9C /* CircleMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 431A8C3F1EC6E8AB00823B9C /* CircleMaskView.swift */; };
-		431EA87021EB29120076EC1A /* ExponentialInsulinModelPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */; };
-		431EA87121EB29120076EC1A /* ExponentialInsulinModelPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */; };
-		431EA87221EB29150076EC1A /* InsulinModelSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6281F37B01300C320C7 /* InsulinModelSettings.swift */; };
-		431EA87321EB29160076EC1A /* InsulinModelSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6281F37B01300C320C7 /* InsulinModelSettings.swift */; };
-		431EA87421EB291A0076EC1A /* WalshInsulinModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6261F37AE5600C320C7 /* WalshInsulinModel.swift */; };
-		431EA87521EB291B0076EC1A /* WalshInsulinModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435CB6261F37AE5600C320C7 /* WalshInsulinModel.swift */; };
 		4326BA641F3A44D9007CCAD4 /* ChartLineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4326BA631F3A44D9007CCAD4 /* ChartLineModel.swift */; };
 		4328E01A1CFBE1DA00E199AA /* ActionHUDController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E0151CFBE1DA00E199AA /* ActionHUDController.swift */; };
 		4328E01E1CFBE25F00E199AA /* CarbAndBolusFlowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4328E01D1CFBE25F00E199AA /* CarbAndBolusFlowController.swift */; };
@@ -190,7 +184,6 @@
 		43D9002D21EB225D00AF44BF /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9002C21EB225D00AF44BF /* HealthKit.framework */; };
 		43D9002E21EB226F00AF44BF /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4344628320A7A3BE00C4BE6F /* LoopKit.framework */; };
 		43D9002F21EB234400AF44BF /* LoopCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43D9002A21EB209400AF44BF /* LoopCore.framework */; };
-		43D9003321EB258C00AF44BF /* InsulinModelSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */; };
 		43D9F81821EC51CC000578CD /* DateEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F81721EC51CC000578CD /* DateEntry.swift */; };
 		43D9F81A21EC593C000578CD /* UITableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F81921EC593C000578CD /* UITableViewCell.swift */; };
 		43D9F81E21EF0609000578CD /* NumberRangeEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9F81D21EF0609000578CD /* NumberRangeEntry.swift */; };
@@ -711,9 +704,6 @@
 		43511CED220FC61700566C63 /* HUDRowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDRowController.swift; sourceTree = "<group>"; };
 		43517916230A0E1A0072ECC0 /* WKInterfaceLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKInterfaceLabel.swift; sourceTree = "<group>"; };
 		435400331C9F878D00D5819C /* SetBolusUserInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetBolusUserInfo.swift; sourceTree = "<group>"; };
-		435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExponentialInsulinModelPreset.swift; sourceTree = "<group>"; };
-		435CB6261F37AE5600C320C7 /* WalshInsulinModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WalshInsulinModel.swift; sourceTree = "<group>"; };
-		435CB6281F37B01300C320C7 /* InsulinModelSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InsulinModelSettings.swift; sourceTree = "<group>"; };
 		43649A621C7A347F00523D7F /* CollectionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionType.swift; sourceTree = "<group>"; };
 		4369618F1F19C86400447E89 /* ChartPointsContextFillLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartPointsContextFillLayer.swift; sourceTree = "<group>"; };
 		436A0DA41D236A2A00104B24 /* LoopError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopError.swift; sourceTree = "<group>"; };
@@ -801,7 +791,6 @@
 		43D848AF1E7DCBE100DADCBC /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		43D9002A21EB209400AF44BF /* LoopCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LoopCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43D9002C21EB225D00AF44BF /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
-		43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InsulinModelSettings+Loop.swift"; sourceTree = "<group>"; };
 		43D9F81721EC51CC000578CD /* DateEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateEntry.swift; sourceTree = "<group>"; };
 		43D9F81921EC593C000578CD /* UITableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCell.swift; sourceTree = "<group>"; };
 		43D9F81D21EF0609000578CD /* NumberRangeEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberRangeEntry.swift; sourceTree = "<group>"; };
@@ -1578,16 +1567,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		43D9003A21EB281300AF44BF /* Insulin */ = {
-			isa = PBXGroup;
-			children = (
-				435CB6241F37ABFC00C320C7 /* ExponentialInsulinModelPreset.swift */,
-				435CB6281F37B01300C320C7 /* InsulinModelSettings.swift */,
-				435CB6261F37AE5600C320C7 /* WalshInsulinModel.swift */,
-			);
-			path = Insulin;
-			sourceTree = "<group>";
-		};
 		43D9FFA321EA9A0C00AF44BF /* Learn */ = {
 			isa = PBXGroup;
 			children = (
@@ -1621,7 +1600,6 @@
 		43D9FFD021EAE05D00AF44BF /* LoopCore */ = {
 			isa = PBXGroup;
 			children = (
-				43D9003A21EB281300AF44BF /* Insulin */,
 				43DE92581C5479E4001FFDE1 /* PotentialCarbEntryUserInfo.swift */,
 				43C05CB721EBEA54006FB252 /* HKUnit.swift */,
 				434FF1E91CF26C29000DB779 /* IdentifiableClass.swift */,
@@ -1694,7 +1672,6 @@
 				A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */,
 				1D872C9424AD176E006317D4 /* Environment+AppName.swift */,
 				A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */,
-				43D9003221EB258C00AF44BF /* InsulinModelSettings+Loop.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				89E267FE229267DF00A3F2AF /* Optional.swift */,
 				895FE0942201234000FCF18A /* OverrideSelectionViewController.swift */,
@@ -2905,7 +2882,6 @@
 				43BFF0BC1E45C80600FF19A9 /* UIColor+Loop.swift in Sources */,
 				43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */,
 				1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */,
-				43D9003321EB258C00AF44BF /* InsulinModelSettings+Loop.swift in Sources */,
 				434FF1EE1CF27EEF000DB779 /* UITableViewCell.swift in Sources */,
 				439BED2A1E76093C00B0AED5 /* CGMManager.swift in Sources */,
 				C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */,
@@ -3089,11 +3065,8 @@
 				C19E96E023D275FA003F79B0 /* LoopCompletionFreshness.swift in Sources */,
 				43D9002021EB209400AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA921EB2B26006FB252 /* PersistenceController.swift in Sources */,
-				431EA87221EB29150076EC1A /* InsulinModelSettings.swift in Sources */,
 				43C05CAB21EB2B4A006FB252 /* NSBundle.swift in Sources */,
 				43D9002221EB209400AF44BF /* LoopSettings.swift in Sources */,
-				431EA87421EB291A0076EC1A /* WalshInsulinModel.swift in Sources */,
-				431EA87021EB29120076EC1A /* ExponentialInsulinModelPreset.swift in Sources */,
 				43C05CC721EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAE21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
 				4345E40221F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,
@@ -3141,11 +3114,8 @@
 				C19E96DF23D275F8003F79B0 /* LoopCompletionFreshness.swift in Sources */,
 				43D9FFFB21EAF3D300AF44BF /* NSTimeInterval.swift in Sources */,
 				43C05CA821EB2B26006FB252 /* PersistenceController.swift in Sources */,
-				431EA87321EB29160076EC1A /* InsulinModelSettings.swift in Sources */,
 				43C05CAA21EB2B49006FB252 /* NSBundle.swift in Sources */,
 				43D9FFF521EAF27200AF44BF /* LoopSettings.swift in Sources */,
-				431EA87521EB291B0076EC1A /* WalshInsulinModel.swift in Sources */,
-				431EA87121EB29120076EC1A /* ExponentialInsulinModelPreset.swift in Sources */,
 				43C05CC821EC2ABC006FB252 /* IdentifiableClass.swift in Sources */,
 				43C05CAD21EB2BBF006FB252 /* NSUserDefaults.swift in Sources */,
 				4345E40121F67300009E00E5 /* PotentialCarbEntryUserInfo.swift in Sources */,

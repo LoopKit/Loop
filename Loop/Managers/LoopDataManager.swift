@@ -1718,37 +1718,6 @@ private extension StoredDosingDecision.BolusRecommendationWithDate {
     }
 }
 
-private extension StoredSettings.InsulinModel {
-    init?(_ insulinModelSettings: InsulinModelSettings?) {
-        guard let insulinModelSettings = insulinModelSettings else {
-            return nil
-        }
-        
-        var modelType: StoredSettings.InsulinModel.ModelType
-        var actionDuration: TimeInterval
-        var peakActivity: TimeInterval?
-        
-        switch insulinModelSettings {
-        case .exponentialPreset(let preset):
-            switch preset {
-            case .humalogNovologAdult:
-                modelType = .rapidAdult
-            case .humalogNovologChild:
-                modelType = .rapidChild
-            case .fiasp:
-                modelType = .fiasp
-            }
-            actionDuration = preset.actionDuration
-            peakActivity = preset.peakActivity
-        case .walsh(let model):
-            modelType = .walsh
-            actionDuration = model.actionDuration
-        }
-        
-        self.init(modelType: modelType, actionDuration: actionDuration, peakActivity: peakActivity)
-    }
-}
-
 // MARK: - Simulated Core Data
 
 extension LoopDataManager {
