@@ -27,18 +27,20 @@ open class ChartsManager {
         return formatter
     }()
 
-    public init(colors: ChartColorPalette, settings: ChartSettings, charts: [ChartProviding], traitCollection: UITraitCollection) {
+    public init(
+        colors: ChartColorPalette,
+        settings: ChartSettings,
+        axisLabelFont: UIFont = .systemFont(ofSize: 14), // caption1, but hard-coded until axis can scale with type preference
+        charts: [ChartProviding],
+        traitCollection: UITraitCollection
+    ) {
         self.colors = colors
         self.chartSettings = settings
         self.charts = charts
         self.traitCollection = traitCollection
         self.chartsCache = Array(repeating: nil, count: charts.count)
 
-        axisLabelSettings = ChartLabelSettings(
-            font: .systemFont(ofSize: 14),  // caption1, but hard-coded until axis can scale with type preference
-            fontColor: colors.axisLabel
-        )
-
+        axisLabelSettings = ChartLabelSettings(font: axisLabelFont, fontColor: colors.axisLabel)
         guideLinesLayerSettings = ChartGuideLinesLayerSettings(linesColor: colors.grid)
     }
 
