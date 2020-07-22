@@ -14,7 +14,9 @@ import LoopKit
 final class WatchContext: RawRepresentable {
     typealias RawValue = [String: Any]
 
-    private let version = 4
+    private let version = 5
+
+    var creationDate = Date()
 
     var preferredGlucoseUnit: HKUnit?
 
@@ -49,9 +51,11 @@ final class WatchContext: RawRepresentable {
     init() {}
 
     required init?(rawValue: RawValue) {
-        guard rawValue["v"] as? Int == version else {
+        guard rawValue["v"] as? Int == version, let creationDate = rawValue["cd"] as? Date else {
             return nil
         }
+
+        self.creationDate = creationDate
 
         if let unitString = rawValue["gu"] as? String {
             preferredGlucoseUnit = HKUnit(from: unitString)
@@ -90,7 +94,8 @@ final class WatchContext: RawRepresentable {
 
     var rawValue: RawValue {
         var raw: [String: Any] = [
-            "v": version
+            "v": version,
+            "cd": creationDate
         ]
 
         raw["ba"] = lastNetTempBasalDose

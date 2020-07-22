@@ -241,7 +241,12 @@ final class WatchDataManager: NSObject {
         }
 
         func enactBolus() {
-            guard bolus.value > 0 else { return }
+            guard bolus.value > 0 else {
+                // Ensure active carbs is updated in the absence of a bolus
+                sendWatchContextIfNeeded()
+                return
+            }
+
             self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                 if error == nil {
                     self.deviceManager.analyticsServicesManager.didSetBolusFromWatch(bolus.value)

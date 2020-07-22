@@ -100,19 +100,11 @@ extension LoopDataManager {
         }
     }
 
-    func addConfirmedBolus(_ bolus: SetBolusUserInfo) {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        activeContext?.iob = (activeContext?.iob ?? 0) + bolus.value
-    }
-
     func addConfirmedCarbEntry(_ entry: NewCarbEntry) {
         carbStore.addCarbEntry(entry) { (result) in
             switch result {
-            case .success(let entry):
-                DispatchQueue.main.async {
-                    self.activeContext?.cob = (self.activeContext?.cob ?? 0) + entry.quantity.doubleValue(for: .gram())
-                }
+            case .success:
+                break
             case .failure(let error):
                 self.log.error("Error adding entry to carbStore: %{public}@", String(describing: error))
             }

@@ -220,7 +220,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                                 WKInterfaceDevice.current().play(.success)
                             }
                         }
-                        loopManager.addConfirmedBolus(bolus)
                     }
                 }
             }
