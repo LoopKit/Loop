@@ -727,7 +727,7 @@ extension LoopDataManager {
                                       maximumBolus: loopSettings.maximumBolus,
                                       suspendThreshold: loopSettings.suspendThreshold,
                                       deviceToken: loopSettings.deviceToken?.hexadecimalString,
-                                      insulinModel: StoredSettings.InsulinModel(appGroup.insulinModelSettings),
+                                      insulinModel: appGroup.insulinModelSettings.map { StoredSettings.InsulinModel($0) },
                                       basalRateSchedule: appGroup.basalRateSchedule,
                                       insulinSensitivitySchedule: appGroup.insulinSensitivitySchedule,
                                       carbRatioSchedule: appGroup.carbRatioSchedule,
@@ -1797,6 +1797,6 @@ extension LoopDataManager {
                         insulinSensitivitySchedule: insulinSensitivitySchedule,
                         carbRatioSchedule: carbRatioSchedule,
                         basalRateSchedule: basalRateSchedule,
-                        insulinModel: StoredSettings.InsulinModel(insulinModelSettings))
+                        insulinModel: insulinModelSettings.map { StoredSettings.InsulinModel($0) })
     }
 }
