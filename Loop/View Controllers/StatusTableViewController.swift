@@ -21,11 +21,15 @@ private extension RefreshContext {
     static let all: Set<RefreshContext> = [.status, .glucose, .insulin, .carbs, .targets]
 }
 
-final class StatusTableViewController: ChartsTableViewController {
+final class StatusTableViewController: LoopChartsTableViewController {
     
     private let log = OSLog(category: "StatusTableViewController")
     
     lazy var quantityFormatter: QuantityFormatter = QuantityFormatter()
+    
+    private var preferredUnit: HKUnit? {
+        return deviceManager.loopManager.glucoseStore.preferredUnit
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,8 +84,14 @@ final class StatusTableViewController: ChartsTableViewController {
                     self?.refreshContext.update(with: .insulin)
                     self?.reloadData(animated: true)
                 }
+            },
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+                DispatchQueue.main.async {
+                    self?.log.debug("[reloadData] for HealthKit unit preference change")
+                    self?.unitPreferencesDidChange(to: self?.preferredUnit)
+                    self?.refreshContext = RefreshContext.all
+                }
             }
-            
         ]
         
         if let gestureRecognizer = charts.gestureRecognizer {
@@ -759,34 +769,33 @@ final class StatusTableViewController: ChartsTableViewController {
             
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
-                cell.chartContentView.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.glucoseChart(withFrame: frame)?.view
-                }
-                cell.titleLabel?.text = NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph")
+                })
+                cell.setTitleLabelText(label: NSLocalizedString("Glucose", comment: "The title of the glucose and prediction graph"))
             case .iob:
-                cell.chartContentView.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.iobChart(withFrame: frame)?.view
-                }
-                cell.titleLabel?.text = NSLocalizedString("Active Insulin", comment: "The title of the Insulin On-Board graph")
+                })
+                cell.setTitleLabelText(label: NSLocalizedString("Active Insulin", comment: "The title of the Insulin On-Board graph"))
             case .dose:
-                cell.chartContentView?.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.doseChart(withFrame: frame)?.view
-                }
-                cell.titleLabel?.text = NSLocalizedString("Insulin Delivery", comment: "The title of the insulin delivery graph")
+                })
+                cell.setTitleLabelText(label: NSLocalizedString("Insulin Delivery", comment: "The title of the insulin delivery graph"))
             case .cob:
-                cell.chartContentView?.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.statusCharts.cobChart(withFrame: frame)?.view
-                }
-                cell.titleLabel?.text = NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph")
+                })
+                cell.setTitleLabelText(label: NSLocalizedString("Active Carbohydrates", comment: "The title of the Carbs On-Board graph"))
             }
             
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)
             
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
-            cell.titleLabel?.alpha = alpha
-            cell.subtitleLabel?.alpha = alpha
+            cell.setAlpha(alpha: alpha)
             
-            cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
             
             return cell
         case .status:
@@ -887,15 +896,15 @@ final class StatusTableViewController: ChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 if let eventualGlucose = eventualGlucoseDescription {
-                    cell.subtitleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
+                    cell.setSubtitleLabel(label: String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
                 } else {
-                    cell.subtitleLabel?.text = nil
+                    cell.setSubtitleLabel(label: nil)
                 }
             case .iob:
                 if let currentIOB = currentIOBDescription {
-                    cell.subtitleLabel?.text = currentIOB
+                    cell.setSubtitleLabel(label: currentIOB)
                 } else {
-                    cell.subtitleLabel?.text = nil
+                    cell.setSubtitleLabel(label: nil)
                 }
             case .dose:
                 let integerFormatter = NumberFormatter()
@@ -903,15 +912,15 @@ final class StatusTableViewController: ChartsTableViewController {
                 
                 if  let total = totalDelivery,
                     let totalString = integerFormatter.string(from: total) {
-                    cell.subtitleLabel?.text = String(format: NSLocalizedString("%@ U Total", comment: "The subtitle format describing total insulin. (1: localized insulin total)"), totalString)
+                    cell.setSubtitleLabel(label: String(format: NSLocalizedString("%@ U Total", comment: "The subtitle format describing total insulin. (1: localized insulin total)"), totalString))
                 } else {
-                    cell.subtitleLabel?.text = nil
+                    cell.setSubtitleLabel(label: nil)
                 }
             case .cob:
                 if let currentCOB = currentCOBDescription {
-                    cell.subtitleLabel?.text = currentCOB
+                    cell.setSubtitleLabel(label: currentCOB)
                 } else {
-                    cell.subtitleLabel?.text = nil
+                    cell.setSubtitleLabel(label: nil)
                 }
             }
         case .hud, .status:
@@ -1053,11 +1062,11 @@ final class StatusTableViewController: ChartsTableViewController {
         case let vc as CarbAbsorptionViewController:
             vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
+            vc.preferredGlucoseUnit = preferredUnit
         case let vc as CarbEntryViewController:
             vc.deviceManager = deviceManager
-            vc.glucoseUnit = statusCharts.glucose.glucoseUnit
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
-            vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.preferredCarbUnit = deviceManager.loopManager.carbStore.preferredUnit
             vc.glucoseChartCellHeight = glucoseChartCellHeight
             
             if let activity = sender as? NSUserActivity {
@@ -1081,6 +1090,7 @@ final class StatusTableViewController: ChartsTableViewController {
             vc.delegate = self
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
+            vc.preferredGlucoseUnit = preferredUnit
         case let vc as SettingsTableViewController:
             vc.dataManager = deviceManager
         default:

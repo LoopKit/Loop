@@ -13,13 +13,14 @@ import LoopKitUI
 import HealthKit
 import LoopCore
 import LoopUI
+import os.log
 
 
 private extension RefreshContext {
     static let all: Set<RefreshContext> = [.glucose, .targets]
 }
 
-final class BolusViewController: ChartsTableViewController, IdentifiableClass, UITextFieldDelegate {
+final class BolusViewController: LoopChartsTableViewController, IdentifiableClass, UITextFieldDelegate {
     private enum Row: Int {
         case chart = 0
         case carbEntry
@@ -27,6 +28,7 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case bolus
     }
 
+    private let log = OSLog(category: "BolusViewController")
     var glucoseChartCellHeight: CGFloat?
 
     override func viewDidLoad() {
@@ -50,6 +52,13 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
                     }
 
                     self?.reloadData(animated: true)
+                }
+            },
+            NotificationCenter.default.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+                DispatchQueue.main.async {
+                    self?.log.debug("[reloadData] for HealthKit unit preference change")
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.loopManager.glucoseStore.preferredUnit)
+                    self?.refreshContext = RefreshContext.all
                 }
             }
         ]
@@ -447,12 +456,12 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         case .chart:
             let cell = cell as! ChartTableViewCell
             cell.contentView.layoutMargins.left = tableView.separatorInset.left
-            cell.chartContentView.chartGenerator = { [weak self] (frame) in
+            cell.setChartGenerator(generator: { [weak self] (frame) in
                 return self?.charts.chart(atIndex: 0, frame: frame)?.view
-            }
+            })
 
-            cell.titleLabel?.text?.removeAll()
-            cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.removeTitleLabelText()
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
             self.tableView(tableView, updateSubtitleFor: cell, at: indexPath)
             cell.selectionStyle = .none
 
@@ -470,9 +479,9 @@ final class BolusViewController: ChartsTableViewController, IdentifiableClass, U
         assert(Row(rawValue: indexPath.row) == .chart)
 
         if let eventualGlucose = eventualGlucoseDescription {
-            cell.subtitleLabel?.text = String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose)
+            cell.setSubtitleLabel(label: String(format: NSLocalizedString("Eventually %@", comment: "The subtitle format describing eventual glucose. (1: localized glucose value description)"), eventualGlucose))
         } else {
-            cell.subtitleLabel?.text?.removeAll()
+            cell.removeSubtitleLabelText()
         }
     }
 

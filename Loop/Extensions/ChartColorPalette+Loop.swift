@@ -7,6 +7,7 @@
 //
 
 import LoopUI
+import LoopKitUI
 
 
 extension ChartColorPalette {

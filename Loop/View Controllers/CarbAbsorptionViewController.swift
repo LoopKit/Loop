@@ -20,7 +20,7 @@ private extension RefreshContext {
 }
 
 
-final class CarbAbsorptionViewController: ChartsTableViewController, IdentifiableClass {
+final class CarbAbsorptionViewController: LoopChartsTableViewController, IdentifiableClass {
 
     private let log = OSLog(category: "StatusTableViewController")
 
@@ -46,6 +46,13 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
                     self?.refreshContext.update(with: .status)
                     self?.reloadData(animated: true)
+                }
+            },
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+                DispatchQueue.main.async {
+                    self?.log.debug("[reloadData] for HealthKit unit preference change")
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.loopManager.glucoseStore.preferredUnit)
+                    self?.refreshContext = RefreshContext.all
                 }
             }
         ]
@@ -293,16 +300,15 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .carbEffect:
-                cell.chartContentView.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.charts.chart(atIndex: 0, frame: frame)?.view
-                }
+                })
             }
 
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
-            cell.titleLabel?.alpha = alpha
-            cell.subtitleLabel?.alpha = alpha
+            cell.setAlpha(alpha: alpha)
 
-            cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
 
             return cell
         case .totals:
@@ -505,7 +511,7 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
-            vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.preferredCarbUnit = deviceManager.loopManager.carbStore.preferredUnit
         default:
             break
         }

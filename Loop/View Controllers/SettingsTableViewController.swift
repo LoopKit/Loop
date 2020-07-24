@@ -21,6 +21,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
     private var cancellables = Set<AnyCancellable>()
     private var showNotificationsWarning = false
+    @Environment(\.appName) var appName
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -513,11 +514,12 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                         tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
                     .store(in: &cancellables)
-
+                
                 let modelSelectionView = InsulinModelSelection(
                     viewModel: viewModel,
                     glucoseUnit: glucoseUnit,
-                    supportedModelSettings: .init(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled)
+                    supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
+                    appName: appName
                 )
 
                 let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
