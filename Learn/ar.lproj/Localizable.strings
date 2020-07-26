@@ -1,0 +1,32 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "حساب النسبة المئوية لقراءات سكر الدم ضمن نطاق محدد";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "متابعة";
+
+/* Placeholder for upper range entry */
+"Maximum" = "الحد الأعلى";
+
+/* Placeholder for lower range entry */
+"Minimum" = "الحد الأدنى";
+
+/* Lesson title */
+"Modal Day" = "يوم طبيعي";
+
+/* Lesson result text for no data */
+"No data available" = "لا يوجد بيانات متاحة";
+
+/* Section title for glucose range */
+"Range" = "النطاق";
+
+/* Title of config entry */
+"Start Date" = "تاريخ البداية";
+
+/* Lesson title */
+"Time in Range" = "الوقت في النطاق";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "يعرض قراءات سكر الدم الأكثر شيوعًا في أوقات مختلفة من اليوم";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "أسابيع";
