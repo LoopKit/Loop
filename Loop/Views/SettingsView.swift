@@ -74,7 +74,8 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            return NavigationLink(destination: TherapySettingsView(viewModel: TherapySettingsViewModel(therapySettings: viewModel.therapySettings,
+            return NavigationLink(destination: TherapySettingsView(viewModel: TherapySettingsViewModel(mode: .settings,
+                                                                                                       therapySettings: viewModel.therapySettings,
                                                                                                        supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
                                                                                                        pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
                                                                                                        syncPumpSchedule: viewModel.syncPumpSchedule,
