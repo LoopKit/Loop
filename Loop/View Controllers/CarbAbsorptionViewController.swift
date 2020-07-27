@@ -500,8 +500,6 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         }
 
         switch targetViewController {
-        case is BolusViewController:
-            assertionFailure()
         case let vc as CarbEntryViewController:
             if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
                 vc.originalCarbEntry = carbStatuses[indexPath.row].entry
@@ -518,40 +516,4 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     }
 
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
-    
-    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
-        guard let bolusViewController = segue.source as? BolusViewController else {
-            return
-        }
-
-        if let updatedEntry = bolusViewController.updatedCarbEntry {
-            if #available(iOS 12.0, *), bolusViewController.originalCarbEntry == nil {
-                let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
-                interaction.donate { (error) in
-                    if let error = error {
-                        os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
-                    }
-                }
-            }
-
-            deviceManager.loopManager.addCarbEntry(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success:
-                        // Enact the user-entered bolus
-                        if let bolus = bolusViewController.bolus, bolus > 0 {
-                            self.deviceManager.enactBolus(units: bolus) { _ in }
-                        }
-                    case .failure(let error):
-                        // Ignore bolus wizard errors
-                        if error is CarbStore.CarbStoreError {
-                            self.present(UIAlertController(with: error), animated: true)
-                        }
-                    }
-                }
-            }
-        } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            deviceManager.enactBolus(units: bolus) { _ in }
-        }
-    }
 }

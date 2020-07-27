@@ -59,8 +59,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         }
     }
 
-    var glucoseChartCellHeight: CGFloat?
-
     fileprivate var quantity: HKQuantity? {
         didSet {
             updateContinueButtonEnabled()
@@ -139,9 +137,8 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // This gets rid of the empty space at the top.
-        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 0.01))
+
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 8))
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
@@ -343,22 +340,22 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
             return
         }
 
-        let bolusVC = BolusViewController.instance()
-        bolusVC.deviceManager = deviceManager
-        bolusVC.glucoseUnit = glucoseUnit
-        if let originalEntry = originalCarbEntry {
-            bolusVC.configuration = .updatedCarbEntry(from: originalEntry, to: updatedEntry)
-        } else {
-            bolusVC.configuration = .newCarbEntry(updatedEntry)
-        }
-        bolusVC.selectedDefaultAbsorptionTimeEmoji = selectedDefaultAbsorptionTimeEmoji
-        bolusVC.glucoseChartCellHeight = glucoseChartCellHeight
-        bolusVC.preferredGlucoseUnit = glucoseUnit
-        if #available(iOS 13.0, *) {
-            bolusVC.isModalInPresentation = true
-        }
+        let viewModel = BolusEntryViewModel(
+            dataManager: deviceManager,
+            originalCarbEntry: originalCarbEntry,
+            potentialCarbEntry: updatedEntry,
+            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
+        )
 
-        show(bolusVC, sender: footerView.primaryButton)
+        let bolusEntryView = BolusEntryView(viewModel: viewModel)
+
+        // After confirming a bolus, pop back to this controller's predecessor, i.e. all the way back out of the carb flow.
+        let predecessorViewControllerType = (navigationController?.viewControllers.dropLast().last).map { type(of: $0) } ?? UIViewController.self
+        let hostingController = DismissibleHostingController(
+            rootView: bolusEntryView,
+            dismissalMode: originalCarbEntry == nil ? .modalDismiss : .pop(to: predecessorViewControllerType)
+        )
+        show(hostingController, sender: footerView.primaryButton)
     }
 
     private func validateInput() -> Bool {

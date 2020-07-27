@@ -1155,25 +1155,6 @@ extension LoopDataManager {
         )
     }
 
-    fileprivate func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue? {
-        var recentEntries = recentCarbEntries ?? []
-        if let replacedCarbEntry = replacedCarbEntry, let index = recentEntries.firstIndex(of: replacedCarbEntry) {
-            recentEntries.remove(at: index)
-        }
-
-        var entries = recentEntries.map { NewCarbEntry(quantity: $0.quantity, startDate: $0.startDate, foodType: nil, absorptionTime: $0.absorptionTime) }
-        if let potentialCarbEntry = potentialCarbEntry {
-            entries.append(potentialCarbEntry)
-            entries.sort(by: { $0.startDate > $1.startDate })
-        }
-
-        return try? carbStore.carbsOnBoard(
-            from: entries,
-            at: Date(),
-            effectVelocities: settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil
-        )
-    }
-
     /// Generates a correction effect based on how large the discrepancy is between the current glucose and its model predicted value.
     ///
     /// - Throws: LoopError.missingDataError
@@ -1420,12 +1401,6 @@ protocol LoopState {
     /// - Returns: A bolus recommendation, or `nil` if not applicable
     /// - Throws: LoopError.missingDataError if recommendation cannot be computed
     func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation?
-
-    /// Computes the carbs on board, taking into account an unstored carb entry
-    /// - Parameters:
-    ///   - potentialCarbEntry: An unstored carb entry under consideration
-    ///   - replacedCarbEntry: An existing carb entry replaced by `potentialCarbEntry`
-    func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue?
 }
 
 extension LoopState {
@@ -1512,11 +1487,6 @@ extension LoopDataManager {
         func recommendBolus(consideringPotentialCarbEntry potentialCarbEntry: NewCarbEntry?, replacingCarbEntry replacedCarbEntry: StoredCarbEntry?) throws -> BolusRecommendation? {
             dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
             return try loopDataManager.recommendBolus(consideringPotentialCarbEntry: potentialCarbEntry, replacingCarbEntry: replacedCarbEntry)
-        }
-
-        func computeCarbsOnBoard(potentialCarbEntry: NewCarbEntry?, replacing replacedCarbEntry: StoredCarbEntry?) -> CarbValue? {
-            dispatchPrecondition(condition: .onQueue(loopDataManager.dataAccessQueue))
-            return loopDataManager.computeCarbsOnBoard(potentialCarbEntry: potentialCarbEntry, replacing: replacedCarbEntry)
         }
     }
 

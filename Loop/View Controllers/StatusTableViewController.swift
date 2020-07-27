@@ -956,10 +956,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
     
-    private var glucoseChartCellHeight: CGFloat {
-        self.tableView(tableView, heightForRowAt: IndexPath(row: ChartRow.glucose.rawValue, section: Section.charts.rawValue))
-    }
-    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Section(rawValue: indexPath.section)! {
         case .charts:
@@ -1067,7 +1063,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
             vc.preferredCarbUnit = deviceManager.loopManager.carbStore.preferredUnit
-            vc.glucoseChartCellHeight = glucoseChartCellHeight
             
             if let activity = sender as? NSUserActivity {
                 vc.restoreUserActivityState(activity)
@@ -1075,12 +1070,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case let vc as InsulinDeliveryTableViewController:
             vc.doseStore = deviceManager.loopManager.doseStore
             vc.hidesBottomBarWhenPushed = true
-        case let vc as BolusViewController:
-            vc.deviceManager = deviceManager
-            vc.glucoseUnit = statusCharts.glucose.glucoseUnit
-            vc.configuration = .manualCorrection
-            vc.glucoseChartCellHeight = glucoseChartCellHeight
-            deviceManager.analyticsServicesManager.didDisplayBolusScreen()
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
                 vc.scheduledOverride = deviceManager.loopManager.settings.scheduleOverride
@@ -1100,45 +1089,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
     
-    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
-        guard let bolusViewController = segue.source as? BolusViewController else {
-            return
-        }
-        
-        if let carbEntry = bolusViewController.updatedCarbEntry {
-            if #available(iOS 12.0, *) {
-                let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
-                interaction.donate { [weak self] (error) in
-                    if let error = error {
-                        self?.log.error("Failed to donate intent: %{public}@", String(describing: error))
-                    }
-                }
-            }
-            
-            deviceManager.loopManager.addCarbEntry(carbEntry) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success:
-                        // Enact the user-entered bolus
-                        if let bolus = bolusViewController.bolus, bolus > 0 {
-                            self.deviceManager.enactBolus(units: bolus) { _ in }
-                        }
-                    case .failure(let error):
-                        // Ignore bolus wizard errors
-                        if error is CarbStore.CarbStoreError {
-                            self.present(UIAlertController(with: error), animated: true)
-                        } else {
-                            self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
-                        }
-                    }
-                }
-            }
-        } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            self.deviceManager.enactBolus(units: bolus) { _ in }
-        }
-    }
-    
-    @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {
+    @IBAction func unwindFromSettings(_ segue: UIStoryboardSegue) {}
+
+    @IBAction func presentBolusScreen() {
+        let viewModel = BolusEntryViewModel(dataManager: deviceManager)
+        let bolusEntryView = BolusEntryView(viewModel: viewModel)
+        let hostingController = DismissibleHostingController(rootView: bolusEntryView, isModalInPresentation: false)
+        let navigationWrapper = UINavigationController(rootViewController: hostingController)
+        hostingController.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: navigationWrapper, action: #selector(dismissWithAnimation))
+        self.present(navigationWrapper, animated: true)
     }
     
     private func createPreMealButtonItem(selected: Bool) -> UIBarButtonItem {
@@ -1628,5 +1587,12 @@ extension StatusTableViewController: BluetoothStateManagerObserver {
     {
         refreshContext.update(with: .status)
         reloadData(animated: true)
+    }
+}
+
+fileprivate extension UIViewController {
+    /// Argumentless wrapper around `dismiss(animated:)` in order to pass as a selector
+    @objc func dismissWithAnimation() {
+        dismiss(animated: true)
     }
 }
