@@ -73,7 +73,7 @@
                                             <constraint firstItem="dPp-lJ-5sh" firstAttribute="height" secondItem="9iF-xY-Bh4" secondAttribute="height" id="xxM-w3-vHR"/>
                                         </constraints>
                                     </view>
-                                    <view contentMode="scaleToFill" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContainerView" customModule="LoopUI">
+                                    <view contentMode="scaleToFill" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GVu-hk-PBg" customClass="ChartContainerView" customModule="LoopKitUI">
                                         <rect key="frame" x="0.0" y="103" width="375" height="135"/>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" priority="750" constant="135" id="rLK-f9-lLl"/>
