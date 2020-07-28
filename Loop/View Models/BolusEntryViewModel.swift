@@ -25,6 +25,11 @@ final class BolusEntryViewModel: ObservableObject {
         case carbEntryPersistenceFailure
     }
 
+    enum Notice {
+        case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
+        case staleGlucoseData
+    }
+
     @Published var glucoseValues: [GlucoseValue] = []
     @Published var predictedGlucoseValues: [GlucoseValue] = []
     @Published var glucoseUnit: HKUnit = .milligramsPerDeciliter
@@ -47,6 +52,7 @@ final class BolusEntryViewModel: ObservableObject {
     private var isInitiatingSaveOrBolus = false
 
     @Published var activeAlert: Alert?
+    @Published var activeNotice: Notice?
 
     private let dataManager: DeviceDataManager
     private let log = OSLog(category: "BolusEntryViewModel")
@@ -288,43 +294,9 @@ final class BolusEntryViewModel: ObservableObject {
 
             self.updatePredictedGlucoseValues(from: state)
             self.updateCarbsOnBoard(from: state)
-
-            let recommendedBolus = try? state.recommendBolus(
-                consideringPotentialCarbEntry: self.potentialCarbEntry,
-                replacingCarbEntry: self.originalCarbEntry
-            ).map { recommendation in
-                HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
-            }
-
+            self.updateRecommendedBolusAndNotice(from: state)
             DispatchQueue.main.async {
-                let priorRecommendedBolus = self.recommendedBolus
-                self.recommendedBolus = recommendedBolus
-
-                if priorRecommendedBolus != recommendedBolus,
-                    self.enteredBolus.doubleValue(for: .internationalUnit()) > 0,
-                    !self.isInitiatingSaveOrBolus
-                {
-                    self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
-                    self.activeAlert = .recommendationChanged
-                }
-
-                self.glucoseUnit = manager.settings.glucoseUnit ?? manager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
-
-                self.targetGlucoseSchedule = manager.settings.glucoseTargetRangeSchedule
-                self.preMealOverride = manager.settings.preMealOverride
-                self.scheduleOverride = manager.settings.scheduleOverride
-
-                if self.preMealOverride?.hasFinished() == true {
-                    self.preMealOverride = nil
-                }
-
-                if self.scheduleOverride?.hasFinished() == true {
-                    self.scheduleOverride = nil
-                }
-
-                self.maximumBolus = manager.settings.maximumBolus.map { maxBolusAmount in
-                    HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
-                }
+                self.updateSettings()
             }
         }
     }
@@ -339,6 +311,74 @@ final class BolusEntryViewModel: ObservableObject {
                     self.activeCarbs = nil
                 }
             }
+        }
+    }
+
+    private func updateRecommendedBolusAndNotice(from state: LoopState) {
+        let recommendedBolus: HKQuantity
+        let notice: Notice?
+        do {
+            if let recommendation = try state.recommendBolus(
+                consideringPotentialCarbEntry: self.potentialCarbEntry,
+                replacingCarbEntry: self.originalCarbEntry
+            ) {
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: recommendation.amount)
+
+                switch recommendation.notice {
+                case .glucoseBelowSuspendThreshold:
+                    let suspendThreshold = dataManager.loopManager.settings.suspendThreshold
+                    notice = .predictedGlucoseBelowSuspendThreshold(suspendThreshold: suspendThreshold!.quantity)
+                default:
+                    notice = nil
+                }
+            } else {
+                recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+                notice = nil
+            }
+        } catch {
+            recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+
+            switch error {
+            case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
+                notice = .staleGlucoseData
+            default:
+                notice = nil
+            }
+        }
+
+        DispatchQueue.main.async {
+            let priorRecommendedBolus = self.recommendedBolus
+            self.recommendedBolus = recommendedBolus
+            self.activeNotice = notice
+
+            if priorRecommendedBolus != recommendedBolus,
+                self.enteredBolus.doubleValue(for: .internationalUnit()) > 0,
+                !self.isInitiatingSaveOrBolus
+            {
+                self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+                self.activeAlert = .recommendationChanged
+            }
+        }
+    }
+
+    private func updateSettings() {
+        let settings = dataManager.loopManager.settings
+        glucoseUnit = settings.glucoseUnit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+
+        targetGlucoseSchedule = settings.glucoseTargetRangeSchedule
+        preMealOverride = settings.preMealOverride
+        scheduleOverride = settings.scheduleOverride
+
+        if preMealOverride?.hasFinished() == true {
+            preMealOverride = nil
+        }
+
+        if scheduleOverride?.hasFinished() == true {
+            scheduleOverride = nil
+        }
+
+        maximumBolus = settings.maximumBolus.map { maxBolusAmount in
+            HKQuantity(unit: .internationalUnit(), doubleValue: maxBolusAmount)
         }
     }
 

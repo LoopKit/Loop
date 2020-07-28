@@ -225,7 +225,11 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            // TODO: Implement notice here for 'no bolus recommended': https://tidepool.atlassian.net/browse/LOOP-1679
+            if viewModel.activeNotice != nil {
+                warning(for: viewModel.activeNotice!)
+                    .padding([.top, .horizontal])
+                    .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
+            }
 
             Button(
                 action: {
@@ -245,6 +249,22 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
+    }
+
+    private func warning(for notice: BolusEntryViewModel.Notice) -> some View {
+        switch notice {
+        case .predictedGlucoseBelowSuspendThreshold(suspendThreshold: let suspendThreshold):
+            let suspendThresholdString = QuantityFormatter().string(from: suspendThreshold, for: viewModel.glucoseUnit) ?? String(describing: suspendThreshold)
+            return WarningView(
+                title: Text("No Bolus Recommended", comment: "Title for bolus screen notice when no bolus is recommended"),
+                caption: Text("Your glucose is predicted to go below your suspend threshold, \(suspendThresholdString).", comment: "Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold")
+            )
+        case .staleGlucoseData:
+            return WarningView(
+                title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
+                caption: Text("Enter a manual glucose for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
+            )
+        }
     }
 
     private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {
