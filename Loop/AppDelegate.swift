@@ -50,7 +50,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         rootViewController.rootViewController.deviceManager = deviceDataManager
-        //rootViewController.rootViewController.preferredGlucoseUnit = deviceDataManager.loopManager.glucoseStore.preferredUnit
         
         let notificationOption = launchOptions?[.remoteNotification]
         

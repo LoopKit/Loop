@@ -520,7 +520,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     glucoseUnit: glucoseUnit,
                     supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                     appName: appName,
-                    mode: .settings
+                    mode: .legacySettings
                 )
 
                 let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
@@ -803,7 +803,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             dataManager?.loopManager.settings.maximumBasalRatePerHour = therapySettings.maximumBasalRatePerHour
             dataManager?.loopManager.settings.maximumBolus = therapySettings.maximumBolus
         case .insulinModel:
-            dataManager?.loopManager.insulinModelSettings = therapySettings.insulinModel
+            if let insulinModelSettings = therapySettings.insulinModelSettings {
+                dataManager?.loopManager.insulinModelSettings = insulinModelSettings
+            }
         case .carbRatio:
             dataManager?.loopManager.carbRatioSchedule = therapySettings.carbRatioSchedule
             dataManager?.analyticsServicesManager.didChangeCarbRatioSchedule()

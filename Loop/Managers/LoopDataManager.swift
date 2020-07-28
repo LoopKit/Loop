@@ -1767,6 +1767,6 @@ extension LoopDataManager {
                         insulinSensitivitySchedule: insulinSensitivitySchedule,
                         carbRatioSchedule: carbRatioSchedule,
                         basalRateSchedule: basalRateSchedule,
-                        insulinModel: insulinModelSettings)
+                        insulinModelSettings: insulinModelSettings)
     }
 }
