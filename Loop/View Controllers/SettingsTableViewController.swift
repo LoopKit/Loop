@@ -321,14 +321,14 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
             cell.textLabel?.text = "Delete Pump Data"
             cell.textLabel?.textAlignment = .center
-            cell.tintColor = .delete
+            cell.tintColor = .destructive
             cell.isEnabled = true
             return cell
         case .testingCGMDataDeletion:
             let cell = tableView.dequeueReusableCell(withIdentifier: TextButtonTableViewCell.className, for: indexPath) as! TextButtonTableViewCell
             cell.textLabel?.text = "Delete CGM Data"
             cell.textLabel?.textAlignment = .center
-            cell.tintColor = .delete
+            cell.tintColor = .destructive
             cell.isEnabled = true
             return cell
         case .support:

@@ -108,17 +108,10 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         
         activeCarbsTitleLabel.text = NSLocalizedString("Active Carbs", comment: "Widget label title describing the active carbs")
         activeInsulinTitleLabel.text = NSLocalizedString("Active Insulin", comment: "Widget label title describing the active insulin")
-        if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
-            activeCarbsTitleLabel.textColor = .secondaryLabel
-            activeCarbsAmountLabel.textColor = .label
-            activeInsulinTitleLabel.textColor = .secondaryLabel
-            activeInsulinAmountLabel.textColor = .label
-        } else {
-            activeCarbsTitleLabel.textColor = .subtitleLabelColor
-            activeCarbsAmountLabel.textColor = .black
-            activeInsulinTitleLabel.textColor = .subtitleLabelColor
-            activeCarbsAmountLabel.textColor = .black
-        }
+        activeCarbsTitleLabel.textColor = .secondaryLabel
+        activeCarbsAmountLabel.textColor = .label
+        activeInsulinTitleLabel.textColor = .secondaryLabel
+        activeInsulinAmountLabel.textColor = .label
 
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(openLoopApp(_:)))
         view.addGestureRecognizer(tapGestureRecognizer)
@@ -260,7 +253,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
             let insulinFormatter: NumberFormatter = {
                 let numberFormatter = NumberFormatter()
-                
+
                 numberFormatter.numberStyle = .decimal
                 numberFormatter.minimumFractionDigits = 1
                 numberFormatter.maximumFractionDigits = 1
@@ -268,7 +261,6 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 return numberFormatter
             }()
 
-            
             if let activeInsulin = activeInsulin,
                 let valueStr = insulinFormatter.string(from: activeInsulin)
             {
@@ -276,14 +268,14 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             } else {
                 self.activeInsulinAmountLabel.text = NSLocalizedString("? U", comment: "Displayed in the widget when the amount of active insulin cannot be determined.")
             }
-            
+
             self.hudView.pumpStatusHUD.presentStatusHighlight(context.pumpStatusHighlightContext)
             self.hudView.pumpStatusHUD.lifecycleProgress = context.pumpLifecycleProgressContext
 
             // Active carbs
             let carbsFormatter = QuantityFormatter()
             carbsFormatter.setPreferredNumberFormatter(for: carbUnit)
-            
+
             if let activeCarbs = activeCarbs,
                 let activeCarbsNumberString = carbsFormatter.string(from: activeCarbs, for: carbUnit)
             {
@@ -291,8 +283,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             } else {
                 self.activeCarbsAmountLabel.text = NSLocalizedString("? g", comment: "Displayed in the widget when the amount of active carbs cannot be determined.")
             }
-            
+
             // CGM Status
+            self.hudView.cgmStatusHUD.presentStatusHighlight(context.cgmStatusHighlightContext)
+            self.hudView.cgmStatusHUD.lifecycleProgress = context.cgmLifecycleProgressContext
+            
             guard let unit = context.predictedGlucose?.unit else {
                 return
             }
@@ -306,10 +301,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                     sensor: context.sensor
                 )
             }
-            
-            self.hudView.cgmStatusHUD.presentStatusHighlight(context.cgmStatusHighlightContext)
-            self.hudView.cgmStatusHUD.lifecycleProgress = context.cgmLifecycleProgressContext
-            
+
             // Charts
             let glucoseFormatter = QuantityFormatter()
             glucoseFormatter.setPreferredNumberFormatter(for: unit)

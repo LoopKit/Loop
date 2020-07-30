@@ -105,7 +105,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].tintColor = UIColor.COBTintColor
+        toolbarItems![0].tintColor = UIColor.cobTintColor
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].tintColor = UIColor.doseTintColor
         
@@ -113,7 +113,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             toolbarItems![8].image = UIImage(systemName: "gear")
         }
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![8].tintColor = UIColor.secondaryLabelColor
+        toolbarItems![8].tintColor = UIColor.secondaryLabel
         
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         
@@ -795,7 +795,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
             cell.setAlpha(alpha: alpha)
             
-            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabel)
             
             return cell
         case .status:
@@ -1111,7 +1111,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
         }
         
-        item.tintColor = UIColor.COBTintColor
+        item.tintColor = UIColor.cobTintColor
         
         return item
     }

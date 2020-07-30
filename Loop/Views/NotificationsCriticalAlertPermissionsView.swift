@@ -98,7 +98,7 @@ extension NotificationsCriticalAlertPermissionsView {
                     if !viewModel.criticalAlertsPermissionsGiven {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.severeWarning)
+                            .foregroundColor(.critical)
                     }
                 }
             }

@@ -46,17 +46,19 @@ extension DeviceDataManager {
     }
     
     static var addCGMStatusHighlight: AddDeviceStatusHighlight {
-        return AddDeviceStatusHighlight(localizedMessage: NSLocalizedString("Add CGM", comment: "Title text for button to set up a CGM"))
+        return AddDeviceStatusHighlight(localizedMessage: NSLocalizedString("Add CGM", comment: "Title text for button to set up a CGM"),
+                                        state: .critical)
     }
     
     static var addPumpStatusHighlight: AddDeviceStatusHighlight {
-        return AddDeviceStatusHighlight(localizedMessage: NSLocalizedString("Add Pump", comment: "Title text for button to set up a Pump"))
+        return AddDeviceStatusHighlight(localizedMessage: NSLocalizedString("Add Pump", comment: "Title text for button to set up a Pump"),
+                                        state: .critical)
     }
     
     struct AddDeviceStatusHighlight: DeviceStatusHighlight {
         var localizedMessage: String
         var imageName: String = "plus.circle"
-        var state: DeviceStatusHighlightState = .normal
+        var state: DeviceStatusHighlightState
     }
     
     func didTapOnCGMStatus(_ view: BaseHUDView? = nil) -> HUDTapAction? {
