@@ -503,24 +503,17 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 }
             case .insulinModel:
                 let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
-                let viewModel = InsulinModelSelectionViewModel(
-                    insulinModelSettings: dataManager.loopManager.insulinModelSettings ?? .exponentialPreset(.humalogNovologAdult),
-                    insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule
-                )
-
-                viewModel.$insulinModelSettings
-                    .sink { [dataManager] newValue in
-                        dataManager!.loopManager!.insulinModelSettings = newValue
-                        tableView.reloadRows(at: [indexPath], with: .automatic)
-                    }
-                    .store(in: &cancellables)
-                
                 let modelSelectionView = InsulinModelSelection(
-                    viewModel: viewModel,
+                    value: dataManager.loopManager.insulinModelSettings ?? .exponentialPreset(.humalogNovologAdult),
+                    insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule,
                     glucoseUnit: glucoseUnit,
                     supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                     appName: appName,
-                    mode: .legacySettings
+                    mode: .legacySettings,
+                    onSave: { [dataManager, tableView] newValue in
+                        dataManager!.loopManager!.insulinModelSettings = newValue
+                        tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
                 )
 
                 let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
