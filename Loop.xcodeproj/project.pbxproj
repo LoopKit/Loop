@@ -40,7 +40,6 @@
 		1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */; };
 		1DDE273F24AEA4F200796622 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */; };
 		1DDE274024AEA4F200796622 /* NotificationsCriticalAlertPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */; };
-		1DDE274124AEB6E300796622 /* Environment+AppName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D872C9424AD176E006317D4 /* Environment+AppName.swift */; };
 		1DFE9E172447B6270082C280 /* UserNotificationAlertPresenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DFE9E162447B6270082C280 /* UserNotificationAlertPresenterTests.swift */; };
 		43027F0F1DFE0EC900C51989 /* HKUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F526D5E1DF2459000A04910 /* HKUnit.swift */; };
 		4302F4E11D4E9C8900F0FCAF /* TextFieldTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */; };
@@ -645,7 +644,6 @@
 		1D4A3E2B2478628500FD601B /* StoredAlert+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataClass.swift"; sourceTree = "<group>"; };
 		1D4A3E2C2478628500FD601B /* StoredAlert+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StoredAlert+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		1D80313C24746274002810DF /* AlertStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertStoreTests.swift; sourceTree = "<group>"; };
-		1D872C9424AD176E006317D4 /* Environment+AppName.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Environment+AppName.swift"; sourceTree = "<group>"; };
 		1DA46B5F2492E2E300D71A63 /* NotificationsCriticalAlertPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsView.swift; sourceTree = "<group>"; };
 		1DA649A6244126CD00F61E75 /* UserNotificationAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserNotificationAlertPresenter.swift; sourceTree = "<group>"; };
 		1DA649A8244126DA00F61E75 /* InAppModalAlertPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InAppModalAlertPresenter.swift; sourceTree = "<group>"; };
@@ -1663,7 +1661,6 @@
 				A9CBE457248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift */,
 				A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */,
 				A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */,
-				1D872C9424AD176E006317D4 /* Environment+AppName.swift */,
 				A9F703742489C9A000C98AD8 /* GlucoseStore+SimulatedCoreData.swift */,
 				438172D81F4E9E37003C3328 /* NewPumpEvent.swift */,
 				89E267FE229267DF00A3F2AF /* Optional.swift */,
@@ -2909,7 +2906,6 @@
 				4FC8C8011DEB93E400A1452E /* NSUserDefaults+StatusExtension.swift in Sources */,
 				43E93FB61E469A4000EAB8DB /* NumberFormatter.swift in Sources */,
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
-				1DDE274124AEB6E300796622 /* Environment+AppName.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,

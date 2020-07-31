@@ -21,7 +21,6 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
     private var cancellables = Set<AnyCancellable>()
     private var showNotificationsWarning = false
-    @Environment(\.appName) var appName
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -508,13 +507,12 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule,
                     glucoseUnit: glucoseUnit,
                     supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
-                    appName: appName,
                     mode: .legacySettings,
                     onSave: { [dataManager, tableView] newValue in
                         dataManager!.loopManager!.insulinModelSettings = newValue
                         tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
-                )
+                ).environment(\.appName, Bundle.main.bundleDisplayName)
 
                 let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
                     tableView.deselectRow(at: indexPath, animated: true)
@@ -726,7 +724,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     private func presentAlertPermissionsSettings(_ tableView: UITableView, _ indexPath: IndexPath) {
         let hostingController = DismissibleHostingController(
             rootView: NotificationsCriticalAlertPermissionsView(backButtonText: NSLocalizedString("Settings", comment: "Settings return button"),
-                                                                viewModel: notificationsCriticalAlertPermissionsViewModel),
+                                                                viewModel: notificationsCriticalAlertPermissionsViewModel).environment(\.appName, Bundle.main.bundleDisplayName),
             onDisappear: {
                 tableView.deselectRow(at: indexPath, animated: true)
         })
@@ -763,7 +761,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                             self?.saveTherapySetting($0, $1)
         })
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: viewModel),
+            rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
             onDisappear: {
                 tableView.deselectRow(at: indexPath, animated: true)
         })
