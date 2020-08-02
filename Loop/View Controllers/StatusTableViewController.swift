@@ -15,6 +15,7 @@ import LoopKitUI
 import LoopUI
 import SwiftCharts
 import os.log
+import SwiftUI
 
 
 private extension RefreshContext {
@@ -971,8 +972,12 @@ final class StatusTableViewController: ChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
-            case .iob, .dose:
+            case .dose:
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
+            case .iob:
+                let model = OverrideHistoryViewModel(overrides: deviceManager.loopManager.overrideHistory.getEvents())
+                let overrideHistoryView = OverrideSelectionHistory(model: model)
+                navigationController?.pushViewController(UIHostingController(rootView: overrideHistoryView), animated: true)
             case .cob:
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
             }
