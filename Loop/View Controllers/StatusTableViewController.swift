@@ -975,7 +975,10 @@ final class StatusTableViewController: ChartsTableViewController {
             case .dose:
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
             case .iob:
-                let model = OverrideHistoryViewModel(overrides: deviceManager.loopManager.overrideHistory.getEvents())
+                let model = OverrideHistoryViewModel(
+                    overrides: deviceManager.loopManager.overrideHistory.getEvents(),
+                    glucoseUnit: deviceManager.loopManager.insulinSensitivitySchedule?.unit ?? deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+                )
                 let overrideHistoryView = OverrideSelectionHistory(model: model)
                 navigationController?.pushViewController(UIHostingController(rootView: overrideHistoryView), animated: true)
             case .cob:
