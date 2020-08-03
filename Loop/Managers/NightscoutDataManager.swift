@@ -330,7 +330,7 @@ final class NightscoutDataManager {
             let lowerTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.minValue)
             let upperTarget : HKQuantity = HKQuantity(unit : unit, doubleValue: range.maxValue)
             let correctionRange = CorrectionRange(minValue: lowerTarget, maxValue: upperTarget)
-            let endDate = override.endDate
+            let endDate = override.scheduledEndDate
             let duration : TimeInterval?
             if override.duration == .indefinite {
                 duration = nil

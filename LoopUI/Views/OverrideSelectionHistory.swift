@@ -86,16 +86,15 @@ public struct OverrideSelectionHistory: View {
         if let range = override.settings.targetRange {
             targetRange = makeTargetRangeText(from: range)
         }
-        
-//        let duration = durationFormatter.string(from: override.startDate, to: override.endDate)
+
         var duration: String {
-            switch override.duration {
-            case .finite(let interval):
-                return durationFormatter.string(from: interval)!
-            case .indefinite:
+            // Don't use the durationFormatter if the interval is infinite
+            if !override.duration.isFinite && override.scheduledEndDate == override.actualEndDate  {
                 return "∞"
             }
+            return durationFormatter.string(from: override.startDate, to: override.actualEndDate)!
         }
+        
         let insulinNeeds = override.settings.insulinNeedsScaleFactor
         
         switch override.context {
