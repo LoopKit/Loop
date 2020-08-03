@@ -52,10 +52,8 @@ public struct OverrideSelectionHistory: View {
     public var body: some View {
         List(model.overrides, id: \.self) { override in
             self.createCell(for: override)
-            
         }
-        .listRowInsets(EdgeInsets(top: 100, leading: 0, bottom: 100, trailing: 0))
-        //.listStyle(GroupedListStyle())
+        .listStyle(GroupedListStyle())
         .environment(\.horizontalSizeClass, .regular)
         .navigationBarTitle(Text(LocalizedString("Override History", comment: "Title for override history view")), displayMode: .inline)
     }
