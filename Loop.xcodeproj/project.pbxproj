@@ -459,6 +459,7 @@
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF524C623EF00628F35 /* LoopSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */; };
+		E9E5E56024D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json in Resources */ = {isa = PBXBuildFile; fileRef = E9E5E55F24D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1182,6 +1183,7 @@
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
+		E9E5E55F24D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast_after_6_hours.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1620,6 +1622,7 @@
 		43E2D8E01D20C0CB004DA55F /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				E9E5E55F24D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json */,
 				C10B28451EA9BA5E006EA1FC /* far_future_high_bg_forecast.json */,
 				43E2D8E11D20C0DB004DA55F /* read_selected_basal_profile.json */,
 				43E2D8E21D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json */,
@@ -2581,6 +2584,7 @@
 				43E2D8ED1D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json in Resources */,
 				43E2D8F01D20C0DB004DA55F /* recommend_temp_basal_high_and_rising.json in Resources */,
 				C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */,
+				E9E5E56024D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json in Resources */,
 				43E2D8F11D20C0DB004DA55F /* recommend_temp_basal_in_range_and_rising.json in Resources */,
 				43E2D8EE1D20C0DB004DA55F /* recommend_temp_basal_flat_and_high.json in Resources */,
 				C1C6591C1E1B1FDA0025CC58 /* recommend_temp_basal_dropping_then_rising.json in Resources */,
