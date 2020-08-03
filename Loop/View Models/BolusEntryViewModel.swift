@@ -179,35 +179,35 @@ final class BolusEntryViewModel: ObservableObject {
 
     func saveAndDeliver(onSuccess completion: @escaping () -> Void) {
         guard dataManager.pumpManager != nil else {
-            activeAlert = .noPumpManagerConfigured
+            presentAlert(.noPumpManagerConfigured)
             return
         }
 
         guard let maximumBolus = maximumBolus else {
-            activeAlert = .noMaxBolusConfigured
+            presentAlert(.noMaxBolusConfigured)
             return
         }
 
         guard enteredBolus < maximumBolus else {
-            activeAlert = .maxBolusExceeded
+            presentAlert(.maxBolusExceeded)
             return
         }
 
         if let manualGlucoseSample = manualGlucoseSample {
             guard Self.validManualGlucoseEntryRange.contains(manualGlucoseSample.quantity) else {
-                activeAlert = .manualGlucoseEntryOutOfAcceptableRange
+                presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
                 return
             }
 
             isInitiatingSaveOrBolus = true
-            dataManager.loopManager.glucoseStore.addGlucose(manualGlucoseSample) { result in
+            dataManager.loopManager.addGlucose([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
                         self.saveCarbsAndDeliverBolus(onSuccess: completion)
                     case .failure(let error):
                         self.isInitiatingSaveOrBolus = false
-                        self.activeAlert = .manualGlucoseEntryPersistenceFailure
+                        self.presentAlert(.manualGlucoseEntryPersistenceFailure)
                         self.log.error("Failed to add manual glucose entry: %{public}@", String(describing: error))
                     }
                 }
@@ -240,7 +240,7 @@ final class BolusEntryViewModel: ObservableObject {
                     self.authenticateAndDeliverBolus(onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
-                    self.activeAlert = .carbEntryPersistenceFailure
+                    self.presentAlert(.carbEntryPersistenceFailure)
                     self.log.error("Failed to add carb entry: %{public}@", String(describing: error))
                 }
             }
@@ -277,6 +277,17 @@ final class BolusEntryViewModel: ObservableObject {
                 }
             }
         )
+    }
+
+    private func presentAlert(_ alert: Alert) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
+        // As of iOS 13.6 / Xcode 11.6, swapping out an alert while one is active crashes SwiftUI.
+        guard activeAlert == nil else {
+            return
+        }
+
+        activeAlert = alert
     }
 
     private lazy var bolusVolumeFormatter = QuantityFormatter(for: .internationalUnit())
@@ -370,7 +381,7 @@ final class BolusEntryViewModel: ObservableObject {
             isManualGlucoseEntryEnabled = false
             enteredManualGlucose = nil
             manualGlucoseSample = nil
-            activeAlert = .glucoseNoLongerStale
+            presentAlert(.glucoseNoLongerStale)
         }
     }
 
@@ -514,7 +525,7 @@ final class BolusEntryViewModel: ObservableObject {
                 self.enteredBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
 
                 if !isUpdatingFromUserInput {
-                    self.activeAlert = .recommendationChanged
+                    self.presentAlert(.recommendationChanged)
                 }
             }
         }
