@@ -441,7 +441,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqual(1.425, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(2.68, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -868,7 +868,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
         
-        XCTAssertEqual(0.575, dose.amount)
+        XCTAssertEqual(0.9, dose.amount)
     }
 
     func testStartVeryLowEndHigh() {
@@ -932,7 +932,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(0.325, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.94, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testInRangeAndRising() {
