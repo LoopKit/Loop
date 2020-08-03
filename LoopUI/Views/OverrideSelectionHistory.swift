@@ -28,9 +28,7 @@ public struct OverrideSelectionHistory: View {
     @ObservedObject var model: OverrideHistoryViewModel
     private var quantityFormatter: QuantityFormatter
     private var glucoseNumberFormatter: NumberFormatter
-    // ANNA TODO: choose which
     private var durationFormatter: DateComponentsFormatter
-    private var dateIntervalFormatter: DateIntervalFormatter
     
     
     public init(model: OverrideHistoryViewModel) {
@@ -47,12 +45,6 @@ public struct OverrideSelectionHistory: View {
             formatter.allowedUnits = [.hour, .minute]
             formatter.unitsStyle = .short
 
-            return formatter
-        }()
-        self.dateIntervalFormatter = {
-            let formatter = DateIntervalFormatter()
-            formatter.dateStyle = .short
-            formatter.timeStyle = .short
             return formatter
         }()
     }
