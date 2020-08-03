@@ -28,7 +28,9 @@ public struct OverrideSelectionHistory: View {
     @ObservedObject var model: OverrideHistoryViewModel
     private var quantityFormatter: QuantityFormatter
     private var glucoseNumberFormatter: NumberFormatter
-    private var durationFormatter: DateIntervalFormatter
+    // ANNA TODO: choose which
+    private var durationFormatter: DateComponentsFormatter
+    private var dateIntervalFormatter: DateIntervalFormatter
     
     
     public init(model: OverrideHistoryViewModel) {
@@ -40,6 +42,14 @@ public struct OverrideSelectionHistory: View {
         }()
         self.glucoseNumberFormatter = quantityFormatter.numberFormatter
         self.durationFormatter = {
+            let formatter = DateComponentsFormatter()
+
+            formatter.allowedUnits = [.hour, .minute]
+            formatter.unitsStyle = .short
+
+            return formatter
+        }()
+        self.dateIntervalFormatter = {
             let formatter = DateIntervalFormatter()
             formatter.dateStyle = .short
             formatter.timeStyle = .short
@@ -77,7 +87,15 @@ public struct OverrideSelectionHistory: View {
             targetRange = makeTargetRangeText(from: range)
         }
         
-        let duration = durationFormatter.string(from: override.startDate, to: override.endDate)
+//        let duration = durationFormatter.string(from: override.startDate, to: override.endDate)
+        var duration: String {
+            switch override.duration {
+            case .finite(let interval):
+                return durationFormatter.string(from: interval)!
+            case .indefinite:
+                return "∞"
+            }
+        }
         let insulinNeeds = override.settings.insulinNeedsScaleFactor
         
         switch override.context {
