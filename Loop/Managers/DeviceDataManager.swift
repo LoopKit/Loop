@@ -322,9 +322,9 @@ private extension DeviceDataManager {
         updatePumpManagerBLEHeartbeatPreference()
         if let cgmManager = cgmManager {
             alertManager?.addAlertResponder(managerIdentifier: cgmManager.managerIdentifier,
-                                                  alertResponder: cgmManager)
+                                            alertResponder: cgmManager)
             alertManager?.addAlertSoundVendor(managerIdentifier: cgmManager.managerIdentifier,
-                                                    soundVendor: cgmManager)
+                                              soundVendor: cgmManager)
         }
     }
 

@@ -60,7 +60,7 @@ extension StoredAlert {
 }
 
 extension Alert {
-    init(from storedAlert: StoredAlert, adjustedForStorageTime: Bool = true) throws {
+    init(from storedAlert: StoredAlert, adjustedForStorageTime: Bool) throws {
         let fgContent = try Alert.Content(contentString: storedAlert.foregroundContent)
         let bgContent = try Alert.Content(contentString: storedAlert.backgroundContent)
         let sound = try Alert.Sound(soundString: storedAlert.sound)
@@ -118,6 +118,7 @@ extension Alert.Trigger {
         case .repeating(let repeatInterval): return NSNumber(value: repeatInterval)
         }
     }
+    
     init(storedType: Int16, storedInterval: NSNumber?, storageDate: Date? = nil, now: Date = Date()) throws {
         switch storedType {
         case 0: self = .immediate
