@@ -8,6 +8,7 @@
 import Foundation
 import LoopKit
 import LoopUI
+import LoopKitUI
 import SwiftCharts
 
 

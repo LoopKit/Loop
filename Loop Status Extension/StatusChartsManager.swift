@@ -7,6 +7,7 @@
 
 import Foundation
 import LoopUI
+import LoopKitUI
 import SwiftCharts
 import UIKit
 

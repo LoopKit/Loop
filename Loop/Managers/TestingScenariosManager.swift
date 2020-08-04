@@ -175,7 +175,9 @@ extension TestingScenariosManagerRequirements {
     }
 
     private func loadScenario(_ scenario: TestingScenario, completion: @escaping (Error?) -> Void) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         func bail(with error: Error) {
             activeScenarioURL = nil
@@ -214,7 +216,9 @@ extension TestingScenariosManagerRequirements {
     }
 
     private func wipeExistingData(completion: @escaping (Error?) -> Void) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         deviceManager.deleteTestingPumpData { error in
             guard error == nil else {

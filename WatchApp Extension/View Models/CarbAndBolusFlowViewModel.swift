@@ -24,7 +24,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     // MARK: - Published state
     @Published var isComputingRecommendedBolus = false
     @Published var recommendedBolusAmount: Double?
-    @Published var maxBolus: Double
+    @Published var bolusPickerValues: BolusPickerValues
     @Published var error: Error?
 
     // MARK: - Other state
@@ -32,8 +32,10 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     private let carbEntrySyncIdentifier = UUID().uuidString
     private var carbEntryUnderConsideration: NewCarbEntry?
     private var contextUpdateObservation: AnyObject?
+    private var hasSentConfirmationMessage = false
 
     // MARK: - Constants
+    private static let defaultSupportedBolusVolumes = (0...600).map { 0.05 * Double($0) } // U
     private static let defaultMaxBolus: Double = 10 // U
 
     // MARK: - Initialization
@@ -52,7 +54,13 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             self._recommendedBolusAmount = Published(initialValue: loopManager.activeContext?.recommendedBolusDose)
         }
 
-        self._maxBolus = Published(initialValue: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus)
+        self._bolusPickerValues = Published(
+            initialValue: BolusPickerValues(
+                supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
+                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            )
+        )
+
         self.configuration = configuration
         self.dismiss = dismiss
 
@@ -61,8 +69,18 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             object: loopManager,
             queue: nil
         ) { [weak self] _ in
-            guard let self = self else { return }
-            self.maxBolus = loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            guard
+                let self = self,
+                !self.hasSentConfirmationMessage
+            else {
+                return
+            }
+            
+            self.bolusPickerValues = BolusPickerValues(
+                supportedVolumes: loopManager.supportedBolusVolumes ?? Self.defaultSupportedBolusVolumes,
+                maxBolus: loopManager.settings.maximumBolus ?? Self.defaultMaxBolus
+            )
+
             switch self.configuration {
             case .carbEntry:
                 // If this new context wasn't generated in response to a potential carb entry message,
@@ -180,13 +198,19 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
     }
 
     private func sendSetBolusUserInfo(carbEntry: NewCarbEntry?, bolus: Double) {
+        guard !hasSentConfirmationMessage else {
+            return
+        }
+
         let bolus = SetBolusUserInfo(value: bolus, startDate: Date(), carbEntry: carbEntry)
         do {
-            try WCSession.default.sendBolusMessage(bolus) { (error) in
+            try WCSession.default.sendBolusMessage(bolus) { [weak self] (error) in
                 DispatchQueue.main.async {
                     if let error = error {
                         ExtensionDelegate.shared().present(error)
                     } else {
+                        self?.hasSentConfirmationMessage = true
+
                         let loopManager = ExtensionDelegate.shared().loopManager
                         if let carbEntry = bolus.carbEntry {
                             loopManager.addConfirmedCarbEntry(carbEntry)
@@ -196,7 +220,6 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
                                 WKInterfaceDevice.current().play(.success)
                             }
                         }
-                        loopManager.addConfirmedBolus(bolus)
                     }
                 }
             }

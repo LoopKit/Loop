@@ -69,6 +69,8 @@ final class ActionHUDController: HUDInterfaceController {
         } else if overrideButtonGroup.state == .disabled {
             overrideButtonGroup.state = .off
         }
+
+        glucoseFormatter.setPreferredNumberFormatter(for: loopManager.settings.glucoseUnit ?? .milligramsPerDeciliter)
     }
     
     private var canEnableOverride: Bool {
@@ -105,14 +107,33 @@ final class ActionHUDController: HUDInterfaceController {
 
     private var pendingMessageResponses = 0
 
+    private let glucoseFormatter = QuantityFormatter()
+
     @IBAction func togglePreMealMode() {
-        let isPreMealEnabled = preMealButtonGroup.state == .off
+        guard let range = loopManager.settings.preMealTargetRange else {
+            return
+        }
+
+        presentOnOffActionSheet(
+            title: NSLocalizedString("Pre-Meal", comment: "Title for sheet to enable/disable pre-meal on watch"),
+            message: formattedGlucoseRangeString(from: range),
+            onSelection: setPreMealEnabled
+        )
+    }
+
+    func setPreMealEnabled(_ isPreMealEnabled: Bool) {
         updateForPreMeal(enabled: isPreMealEnabled)
         pendingMessageResponses += 1
 
         var settings = loopManager.settings
+        let overrideContext = settings.scheduleOverride?.context
         if isPreMealEnabled {
             settings.enablePreMealOverride(for: .hours(1))
+
+            if !FeatureFlags.sensitivityOverridesEnabled {
+                settings.clearOverride(matching: .legacyWorkout)
+                updateForOverrideContext(nil)
+            }
         } else {
             settings.clearOverride(matching: .preMeal)
         }
@@ -127,6 +148,7 @@ final class ActionHUDController: HUDInterfaceController {
                     case .success(let context):
                         if self.pendingMessageResponses == 0 {
                             self.loopManager.settings.preMealOverride = settings.preMealOverride
+                            self.loopManager.settings.scheduleOverride = settings.scheduleOverride
                         }
 
                         ExtensionDelegate.shared().loopManager.updateContext(context)
@@ -134,6 +156,7 @@ final class ActionHUDController: HUDInterfaceController {
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
                             self.updateForPreMeal(enabled: isPreMealEnabled)
+                            self.updateForOverrideContext(overrideContext)
                         }
                     }
                 }
@@ -142,6 +165,7 @@ final class ActionHUDController: HUDInterfaceController {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
                 updateForPreMeal(enabled: isPreMealEnabled)
+                updateForOverrideContext(overrideContext)
                 presentAlert(
                     withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
                     message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
@@ -153,16 +177,32 @@ final class ActionHUDController: HUDInterfaceController {
     }
 
     @IBAction func toggleOverride() {
-        if overrideButtonGroup.state == .on {
-            sendOverride(nil)
-        } else {
-            if FeatureFlags.sensitivityOverridesEnabled {
-                presentController(withName: OverrideSelectionController.className, context: self as OverrideSelectionControllerDelegate)
-            } else {
-                let override = loopManager.settings.legacyWorkoutOverride(for: .infinity)
-                sendOverride(override)
-            }
+        if FeatureFlags.sensitivityOverridesEnabled {
+            overrideButtonGroup.state == .on
+                ? sendOverride(nil)
+                : presentController(withName: OverrideSelectionController.className, context: self as OverrideSelectionControllerDelegate)
+        } else if let range = loopManager.settings.legacyWorkoutTargetRange {
+            presentOnOffActionSheet(
+                title: NSLocalizedString("Workout", comment: "Title for sheet to enable/disable workout mode on watch"),
+                message: formattedGlucoseRangeString(from: range),
+                onSelection: { isWorkoutEnabled in
+                    let override = isWorkoutEnabled ? self.loopManager.settings.legacyWorkoutOverride(for: .infinity) : nil
+                    self.sendOverride(override)
+                }
+            )
         }
+    }
+
+    private func formattedGlucoseRangeString(from range: DoubleRange) -> String {
+        String(
+            format: NSLocalizedString(
+                "%1$@ – %2$@ %3$@",
+                comment: "Format string for glucose range (1: lower bound)(2: upper bound)(3: unit)"
+            ),
+            glucoseFormatter.numberFormatter.string(from: range.minValue) ?? String(range.minValue),
+            glucoseFormatter.numberFormatter.string(from: range.maxValue) ?? String(range.maxValue),
+            glucoseFormatter.string(from: loopManager.settings.glucoseUnit ?? .milligramsPerDeciliter)
+        )
     }
 
     private func sendOverride(_ override: TemporaryScheduleOverride?) {
@@ -170,6 +210,7 @@ final class ActionHUDController: HUDInterfaceController {
         pendingMessageResponses += 1
 
         var settings = loopManager.settings
+        let isPreMealEnabled = settings.preMealOverride?.isActive() == true
         if override?.context == .legacyWorkout {
             settings.preMealOverride = nil
         }
@@ -185,6 +226,7 @@ final class ActionHUDController: HUDInterfaceController {
                     case .success(let context):
                         if self.pendingMessageResponses == 0 {
                             self.loopManager.settings.scheduleOverride = override
+                            self.loopManager.settings.preMealOverride = settings.preMealOverride
                         }
 
                         ExtensionDelegate.shared().loopManager.updateContext(context)
@@ -192,6 +234,7 @@ final class ActionHUDController: HUDInterfaceController {
                         if self.pendingMessageResponses == 0 {
                             ExtensionDelegate.shared().present(error)
                             self.updateForOverrideContext(override?.context)
+                            self.updateForPreMeal(enabled: isPreMealEnabled)
                         }
                     }
                 }
@@ -200,6 +243,7 @@ final class ActionHUDController: HUDInterfaceController {
             pendingMessageResponses -= 1
             if pendingMessageResponses == 0 {
                 updateForOverrideContext(override?.context)
+                updateForPreMeal(enabled: isPreMealEnabled)
                 presentAlert(
                     withTitle: NSLocalizedString("Send Failed", comment: "The title of the alert controller displayed after a glucose range override send attempt fails"),
                     message: NSLocalizedString("Make sure your iPhone is nearby and try again", comment: "The recovery message displayed after a glucose range override send attempt fails"),
@@ -208,6 +252,31 @@ final class ActionHUDController: HUDInterfaceController {
                 )
             }
         }
+    }
+
+    private func presentOnOffActionSheet(
+        title: String,
+        message: String?,
+        onSelection setEnabled: @escaping (_ isEnabled: Bool) -> Void
+    ) {
+        presentAlert(
+            withTitle: title,
+            message: message,
+            preferredStyle: .actionSheet,
+            actions: [
+                WKAlertAction(
+                    title: NSLocalizedString("On", comment: "Button text for enabling temporary correction range"),
+                    style: .default,
+                    handler: { setEnabled(true) }
+                ),
+
+                WKAlertAction(
+                    title: NSLocalizedString("Off", comment: "Button text for disabling temporary correction range"),
+                    style: .default,
+                    handler: { setEnabled(false) }
+                )
+            ]
+        )
     }
 }
 

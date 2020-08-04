@@ -25,6 +25,7 @@ final class WatchDataManager: NSObject {
         super.init()
 
         NotificationCenter.default.addObserver(self, selector: #selector(updateWatch(_:)), name: .LoopDataUpdated, object: deviceManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(sendSupportedBolusVolumesIfNeeded), name: .PumpManagerChanged, object: deviceManager)
 
         watchSession?.delegate = self
         watchSession?.activate()
@@ -41,6 +42,7 @@ final class WatchDataManager: NSObject {
     }()
 
     private var lastSentSettings: LoopSettings?
+    private var lastSentBolusVolumes: [Double]?
 
     let sleepStore: SleepStore
     
@@ -97,13 +99,11 @@ final class WatchDataManager: NSObject {
             return
         }
 
-        switch updateContext {
-        case .glucose, .tempBasal:
-            sendWatchContextIfNeeded()
-        case .preferences:
+        // Any update context should trigger a watch update
+        sendWatchContextIfNeeded()
+
+        if case .preferences = updateContext {
             sendSettingsIfNeeded()
-        default:
-            break
         }
     }
 
@@ -133,6 +133,32 @@ final class WatchDataManager: NSObject {
 
         log.default("Transferring LoopSettingsUserInfo")
         session.transferUserInfo(LoopSettingsUserInfo(settings: settings).rawValue)
+    }
+
+    @objc private func sendSupportedBolusVolumesIfNeeded() {
+        guard
+            let volumes = deviceManager.pumpManager?.supportedBolusVolumes,
+            let session = watchSession,
+            session.isPaired,
+            session.isWatchAppInstalled
+        else {
+            return
+        }
+
+        guard case .activated = session.activationState else {
+            session.activate()
+            return
+        }
+
+        guard volumes != lastSentBolusVolumes else {
+            log.default("Skipping bolus volumes transfer due to no changes")
+            return
+        }
+
+        lastSentBolusVolumes = volumes
+
+        log.default("Transferring supported bolus volumes")
+        session.transferUserInfo(SupportedBolusVolumesUserInfo(supportedBolusVolumes: volumes).rawValue)
     }
 
     private func sendWatchContextIfNeeded() {
@@ -234,6 +260,8 @@ final class WatchDataManager: NSObject {
                     if let sample = samples.last {
                         context.glucose = sample.quantity
                         context.glucoseDate = sample.startDate
+                        context.glucoseIsDisplayOnly = sample.isDisplayOnly
+                        context.glucoseWasUserEntered = sample.wasUserEntered
                         context.glucoseSyncIdentifier = sample.syncIdentifier
                     }
                     updateGroup.leave()
@@ -275,7 +303,12 @@ final class WatchDataManager: NSObject {
         }
 
         func enactBolus() {
-            guard bolus.value > 0 else { return }
+            guard bolus.value > 0 else {
+                // Ensure active carbs is updated in the absence of a bolus
+                sendWatchContextIfNeeded()
+                return
+            }
+
             self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                 if error == nil {
                     self.deviceManager.analyticsServicesManager.didSetBolusFromWatch(bolus.value)
@@ -368,6 +401,7 @@ extension WatchDataManager: WCSessionDelegate {
             } else {
                 sendSettingsIfNeeded()
                 sendWatchContextIfNeeded()
+                sendSupportedBolusVolumesIfNeeded()
             }
         case .inactive, .notActivated:
             break
@@ -382,9 +416,17 @@ extension WatchDataManager: WCSessionDelegate {
 
             // This might be useless, as userInfoTransfer.userInfo seems to be nil when error is non-nil.
             switch userInfoTransfer.userInfo["name"] as? String {
-            case LoopSettingsUserInfo.name?, .none:
+            case nil:
                 lastSentSettings = nil
                 sendSettingsIfNeeded()
+                lastSentBolusVolumes = nil
+                sendSupportedBolusVolumesIfNeeded()
+            case LoopSettingsUserInfo.name:
+                lastSentSettings = nil
+                sendSettingsIfNeeded()
+            case SupportedBolusVolumesUserInfo.name:
+                lastSentBolusVolumes = nil
+                sendSupportedBolusVolumesIfNeeded()
             default:
                 break
             }
@@ -404,6 +446,7 @@ extension WatchDataManager: WCSessionDelegate {
 
     func sessionReachabilityDidChange(_ session: WCSession) {
         sendSettingsIfNeeded()
+        sendSupportedBolusVolumesIfNeeded()
     }
 }
 

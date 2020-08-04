@@ -31,7 +31,9 @@ final class LocalTestingScenariosManager: TestingScenariosManagerRequirements, D
     }
 
     init(deviceManager: DeviceDataManager) {
-        assertDebugOnly()
+        guard FeatureFlags.scenariosEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios are enabled")
+        }
 
         self.deviceManager = deviceManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!

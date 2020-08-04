@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 let FeatureFlags = FeatureFlagConfiguration()
 
 struct FeatureFlagConfiguration: Decodable {
@@ -16,6 +15,11 @@ struct FeatureFlagConfiguration: Decodable {
     let nonlinearCarbModelEnabled: Bool
     let remoteOverridesEnabled: Bool
     let criticalAlertsEnabled: Bool
+    let scenariosEnabled: Bool
+    let simulatedCoreDataEnabled: Bool
+    let walshInsulinModelEnabled: Bool
+    let fiaspInsulinModelEnabled: Bool
+    let observeHealthKitForCurrentAppOnly: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -44,6 +48,38 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.criticalAlertsEnabled = false
         #endif
+
+        #if SCENARIOS_ENABLED
+        self.scenariosEnabled = true
+        #else
+        self.scenariosEnabled = false
+        #endif
+
+        #if SIMULATED_CORE_DATA_ENABLED
+        self.simulatedCoreDataEnabled = true
+        #else
+        self.simulatedCoreDataEnabled = false
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if WALSH_INSULIN_MODEL_DISABLED
+        self.walshInsulinModelEnabled = false
+        #else
+        self.walshInsulinModelEnabled = true
+        #endif
+
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if FIASP_INSULIN_MODEL_DISABLED
+        self.fiaspInsulinModelEnabled = false
+        #else
+        self.fiaspInsulinModelEnabled = true
+        #endif
+        
+        #if OBSERVE_HEALTHKIT_FOR_CURRENT_APP_ONLY
+        self.observeHealthKitForCurrentAppOnly = true
+        #else
+        self.observeHealthKitForCurrentAppOnly = false
+        #endif
     }
 }
 
@@ -55,6 +91,10 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* nonlinearCarbModelEnabled: \(nonlinearCarbModelEnabled)",
             "* remoteOverridesEnabled: \(remoteOverridesEnabled)",
             "* criticalAlertsEnabled: \(criticalAlertsEnabled)",
+            "* scenariosEnabled: \(scenariosEnabled)",
+            "* simulatedCoreDataEnabled: \(simulatedCoreDataEnabled)",
+            "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
+            "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
         ].joined(separator: "\n")
     }
 }

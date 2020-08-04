@@ -6,53 +6,41 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
-private func pickerValueFromBolusValue(_ bolusValue: Double) -> Int {
-    switch bolusValue {
-    case let bolus where bolus > 10:
-        return Int(((bolus - 10.0) * 10).rounded()) + pickerValueFromBolusValue(10)
-    case let bolus where bolus > 1:
-        return Int(((bolus - 1.0) * 20).rounded()) + pickerValueFromBolusValue(1)
-    default:
-        return Int((bolusValue * 40).rounded())
-    }
-}
-
-private func bolusValueFromPickerValue(_ pickerValue: Int) -> Double {
-    switch pickerValue {
-    case let picker where picker > 220:
-        return Double(picker - 220) / 10.0 + bolusValueFromPickerValue(220)
-    case let picker where picker > 40:
-        return Double(picker - 40) / 20.0 + bolusValueFromPickerValue(40)
-    default:
-        return Double(pickerValue) / 40.0
-    }
-}
-
 struct BolusPickerValues: RandomAccessCollection {
-    init(maxBolus: Double) {
-        endIndex = pickerValueFromBolusValue(maxBolus) + 1
+    private var supportedVolumes: [Double]
+
+    init(supportedVolumes: [Double], maxBolus: Double) {
+        self.supportedVolumes = Array(supportedVolumes.prefix(while: { $0 <= maxBolus }))
+        if self.supportedVolumes.first != 0 {
+            self.supportedVolumes.insert(0, at: supportedVolumes.startIndex)
+        }
     }
 
-    var startIndex: Int { 0 }
-    let endIndex: Int
+    var startIndex: Int { supportedVolumes.startIndex }
+    var endIndex: Int { supportedVolumes.endIndex }
 
-    func index(after i: Int) -> Int { i + 1 }
-    func index(before i: Int) -> Int { i - 1 }
+    func index(after i: Int) -> Int { supportedVolumes.index(after: i) }
+    func index(before i: Int) -> Int { supportedVolumes.index(before: i) }
+
+    func index(_ i: Int, offsetBy distance: Int, limitedBy limit: Int) -> Int? {
+        supportedVolumes.index(i, offsetBy: distance, limitedBy: limit)
+    }
 
     subscript(pickerValue: Int) -> Double {
-        bolusValueFromPickerValue(pickerValue)
+        supportedVolumes[pickerValue]
     }
 }
 
 extension BolusPickerValues {
     func index(of bolusValue: Double) -> Int {
-        pickerValueFromBolusValue(bolusValue)
+        let indexAfter = supportedVolumes.firstIndex(where: { $0 > bolusValue }) ?? supportedVolumes.endIndex
+        return supportedVolumes.index(before: indexAfter)
     }
 
     func incrementing(_ bolusValue: Double, by pickerIncrement: Int) -> Double {
         assert(pickerIncrement >= 0)
         let thisIndex = index(of: bolusValue)
-        let targetIndex = index(thisIndex, offsetBy: pickerIncrement, limitedBy: endIndex) ?? endIndex - 1
+        let targetIndex = index(thisIndex, offsetBy: pickerIncrement, limitedBy: endIndex - 1) ?? endIndex - 1
         return self[targetIndex]
     }
 

@@ -31,6 +31,15 @@ class LoopDataManager {
         }
     }
 
+    // Main queue only
+    var supportedBolusVolumes = UserDefaults.standard.supportedBolusVolumes {
+        didSet {
+            UserDefaults.standard.supportedBolusVolumes = supportedBolusVolumes
+            needsDidUpdateContextNotification = true
+            sendDidUpdateContextNotificationIfNecessary()
+        }
+    }
+
     private let log = OSLog(category: "LoopDataManager")
 
     // Main queue only
@@ -53,15 +62,22 @@ class LoopDataManager {
 
         let healthStore = HKHealthStore()
         let cacheStore = PersistenceController.controllerInLocalDirectory()
+        
+        let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
+        let cacheDuration = absorptionTimes.slow * 2
 
         carbStore = CarbStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
             cacheStore: cacheStore,
-            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
+            cacheLength: cacheDuration,
+            defaultAbsorptionTimes: absorptionTimes,
+            observationInterval: cacheDuration,
             syncVersion: 0
         )
         glucoseStore = GlucoseStore(
             healthStore: healthStore,
+            observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
             cacheStore: cacheStore,
             cacheLength: .hours(4)
         )
@@ -84,19 +100,11 @@ extension LoopDataManager {
         }
     }
 
-    func addConfirmedBolus(_ bolus: SetBolusUserInfo) {
-        dispatchPrecondition(condition: .onQueue(.main))
-
-        activeContext?.iob = (activeContext?.iob ?? 0) + bolus.value
-    }
-
     func addConfirmedCarbEntry(_ entry: NewCarbEntry) {
         carbStore.addCarbEntry(entry) { (result) in
             switch result {
-            case .success(let entry):
-                DispatchQueue.main.async {
-                    self.activeContext?.cob = (self.activeContext?.cob ?? 0) + entry.quantity.doubleValue(for: .gram())
-                }
+            case .success:
+                break
             case .failure(let error):
                 self.log.error("Error adding entry to carbStore: %{public}@", String(describing: error))
             }

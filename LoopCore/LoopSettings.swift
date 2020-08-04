@@ -13,7 +13,7 @@ public struct LoopSettings: Equatable {
 
     public let dynamicCarbAbsorptionEnabled = true
 
-    public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .hours(2), medium: .hours(3), slow: .hours(4))
+    public static let defaultCarbAbsorptionTimes: CarbStore.DefaultAbsorptionTimes = (fast: .minutes(30), medium: .hours(3), slow: .hours(5))
 
     public var glucoseTargetRangeSchedule: GlucoseRangeSchedule?
 
@@ -28,6 +28,10 @@ public struct LoopSettings: Equatable {
             if let newValue = scheduleOverride, newValue.context == .preMeal {
                 preconditionFailure("The `scheduleOverride` field should not be used for a pre-meal target range override; use `preMealOverride` instead")
             }
+
+            if scheduleOverride?.context == .legacyWorkout {
+                preMealOverride = nil
+            }
         }
     }
 
@@ -35,6 +39,10 @@ public struct LoopSettings: Equatable {
         didSet {
             if let newValue = preMealOverride, newValue.context != .preMeal || newValue.settings.insulinNeedsScaleFactor != nil {
                 preconditionFailure("The `preMealOverride` field should be used only for a pre-meal target range override")
+            }
+
+            if preMealOverride != nil, scheduleOverride?.context == .legacyWorkout {
+                scheduleOverride = nil
             }
         }
     }

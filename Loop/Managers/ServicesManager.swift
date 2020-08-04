@@ -23,17 +23,21 @@ class ServicesManager {
 
     private let servicesLock = UnfairLock()
 
+    weak var loopDataManager: LoopDataManager?
+
     init(
         pluginManager: PluginManager,
         analyticsServicesManager: AnalyticsServicesManager,
         loggingServicesManager: LoggingServicesManager,
-        remoteDataServicesManager: RemoteDataServicesManager
+        remoteDataServicesManager: RemoteDataServicesManager,
+        dataManager: LoopDataManager
     ) {
         self.pluginManager = pluginManager
         self.analyticsServicesManager = analyticsServicesManager
         self.loggingServicesManager = loggingServicesManager
         self.remoteDataServicesManager = remoteDataServicesManager
-
+        self.loopDataManager = dataManager
+        
         restoreState()
     }
 
@@ -110,6 +114,19 @@ class ServicesManager {
     private func saveState() {
         UserDefaults.appGroup?.servicesState = services.compactMap { $0.rawValue }
     }
+    
+    private func storeSettings(settings: TherapySettings) {
+        loopDataManager?.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+        loopDataManager?.settings.preMealTargetRange = settings.preMealTargetRange
+        loopDataManager?.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
+        loopDataManager?.settings.suspendThreshold = settings.suspendThreshold
+        loopDataManager?.settings.maximumBolus = settings.maximumBolus
+        loopDataManager?.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
+        loopDataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
+        loopDataManager?.carbRatioSchedule = settings.carbRatioSchedule
+        loopDataManager?.basalRateSchedule = settings.basalRateSchedule
+        loopDataManager?.insulinModelSettings = settings.insulinModel
+    }
 
     private func restoreState() {
         UserDefaults.appGroup?.servicesState.forEach { rawValue in
@@ -130,7 +147,6 @@ class ServicesManager {
             }
         }
     }
-
 }
 
 extension ServicesManager: ServiceDelegate {
@@ -139,4 +155,7 @@ extension ServicesManager: ServiceDelegate {
         saveState()
     }
 
+    func serviceHasNewTherapySettings(_ settings: TherapySettings) {
+        storeSettings(settings: settings)
+    }
 }

@@ -20,7 +20,7 @@ private extension RefreshContext {
 }
 
 
-final class CarbAbsorptionViewController: ChartsTableViewController, IdentifiableClass {
+final class CarbAbsorptionViewController: LoopChartsTableViewController, IdentifiableClass {
 
     private let log = OSLog(category: "StatusTableViewController")
 
@@ -46,6 +46,13 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
                     self?.refreshContext.update(with: .status)
                     self?.reloadData(animated: true)
+                }
+            },
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+                DispatchQueue.main.async {
+                    self?.log.debug("[reloadData] for HealthKit unit preference change")
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.loopManager.glucoseStore.preferredUnit)
+                    self?.refreshContext = RefreshContext.all
                 }
             }
         ]
@@ -293,16 +300,15 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
             switch ChartRow(rawValue: indexPath.row)! {
             case .carbEffect:
-                cell.chartContentView.chartGenerator = { [weak self] (frame) in
+                cell.setChartGenerator(generator: { [weak self] (frame) in
                     return self?.charts.chart(atIndex: 0, frame: frame)?.view
-                }
+                })
             }
 
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
-            cell.titleLabel?.alpha = alpha
-            cell.subtitleLabel?.alpha = alpha
+            cell.setAlpha(alpha: alpha)
 
-            cell.subtitleLabel?.textColor = UIColor.secondaryLabelColor
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
 
             return cell
         case .totals:
@@ -494,8 +500,6 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
         }
 
         switch targetViewController {
-        case is BolusViewController:
-            assertionFailure()
         case let vc as CarbEntryViewController:
             if let selectedCell = sender as? UITableViewCell, let indexPath = tableView.indexPath(for: selectedCell), indexPath.row < carbStatuses.count {
                 vc.originalCarbEntry = carbStatuses[indexPath.row].entry
@@ -505,47 +509,11 @@ final class CarbAbsorptionViewController: ChartsTableViewController, Identifiabl
 
             vc.deviceManager = deviceManager
             vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
-            vc.preferredUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.preferredCarbUnit = deviceManager.loopManager.carbStore.preferredUnit
         default:
             break
         }
     }
 
     @IBAction func unwindFromEditing(_ segue: UIStoryboardSegue) {}
-    
-    @IBAction func unwindFromBolusViewController(_ segue: UIStoryboardSegue) {
-        guard let bolusViewController = segue.source as? BolusViewController else {
-            return
-        }
-
-        if let updatedEntry = bolusViewController.updatedCarbEntry {
-            if #available(iOS 12.0, *), bolusViewController.originalCarbEntry == nil {
-                let interaction = INInteraction(intent: NewCarbEntryIntent(), response: nil)
-                interaction.donate { (error) in
-                    if let error = error {
-                        os_log(.error, "Failed to donate intent: %{public}@", String(describing: error))
-                    }
-                }
-            }
-
-            deviceManager.loopManager.addCarbEntry(updatedEntry, replacing: bolusViewController.originalCarbEntry) { (result) in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success:
-                        // Enact the user-entered bolus
-                        if let bolus = bolusViewController.bolus, bolus > 0 {
-                            self.deviceManager.enactBolus(units: bolus) { _ in }
-                        }
-                    case .failure(let error):
-                        // Ignore bolus wizard errors
-                        if error is CarbStore.CarbStoreError {
-                            self.present(UIAlertController(with: error), animated: true)
-                        }
-                    }
-                }
-            }
-        } else if let bolus = bolusViewController.bolus, bolus > 0 {
-            deviceManager.enactBolus(units: bolus) { _ in }
-        }
-    }
 }

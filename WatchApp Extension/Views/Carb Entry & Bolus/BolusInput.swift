@@ -8,18 +8,15 @@
 
 import Foundation
 import SwiftUI
+import LoopKit
 
 
 struct BolusInput: View {
     @Binding var amount: Double
     var isComputingRecommendedAmount: Bool
     var recommendedAmount: Double?
-    var maxBolus: Double
+    var pickerValues: BolusPickerValues
     var isEditable: Bool
-
-    private var pickerValues: BolusPickerValues {
-        BolusPickerValues(maxBolus: maxBolus)
-    }
 
     private var pickerValue: Binding<Int> {
         Binding(
@@ -28,7 +25,17 @@ struct BolusInput: View {
         )
     }
 
-    private static let formatter = NumberFormatter.bolus
+    private static let amountFormatter: NumberFormatter = {
+        let formatter = QuantityFormatter()
+        formatter.setPreferredNumberFormatter(for: .internationalUnit())
+        return formatter.numberFormatter
+    }()
+
+    private static let recommendedAmountFormatter: NumberFormatter = {
+        let formatter = QuantityFormatter()
+        formatter.setPreferredNumberFormatter(for: .internationalUnit())
+        return formatter.numberFormatter
+    }()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,7 +44,7 @@ struct BolusInput: View {
                 isEditable: isEditable,
                 increment: { self.amount = self.pickerValues.incrementing(self.amount, by: 10) },
                 decrement: { self.amount = self.pickerValues.decrementing(self.amount, by: 10) },
-                formatVolume: Self.formatter.string(fromBolusValue:)
+                formatVolume: formatVolume
             )
             .focusable(isEditable)
             .digitalCrownRotation(
@@ -64,8 +71,42 @@ struct BolusInput: View {
             return Text("REC: Calculating...", comment: "Indicator that recommended bolus computation is in progress on Apple Watch")
         } else {
             let value = recommendedAmount ?? 0
-            let valueString = Self.formatter.string(from: value as NSNumber) ?? String(value)
+            let valueString = Self.recommendedAmountFormatter.string(from: value) ?? String(value)
             return Text("REC: \(valueString) U", comment: "Recommended bolus amount label on Apple Watch")
         }
+    }
+
+    private func formatVolume(_ volume: Double) -> String {
+        // Look at surrounding bolus volumes to determine precision
+        let previous = pickerValues.decrementing(volume, by: 1)
+        let next = pickerValues.incrementing(volume, by: 1)
+        let maxPrecision = 3
+        let requiredPrecision = [previous, volume, next]
+            .map { Decimal($0) }
+            .deltaScale(boundedBy: maxPrecision)
+        Self.amountFormatter.minimumFractionDigits = requiredPrecision
+        return Self.amountFormatter.string(from: volume) ?? String(volume)
+    }
+}
+
+fileprivate extension Decimal {
+    func rounded(toPlaces scale: Int, roundingMode: NSDecimalNumber.RoundingMode = .plain) -> Decimal {
+        var result = Decimal()
+        var localCopy = self
+        NSDecimalRound(&result, &localCopy, scale, roundingMode)
+        return result
+    }
+}
+
+fileprivate extension Collection where Element == Decimal {
+    /// Returns the maximum number of decimal places necessary to meaningfully distinguish between adjacent values.
+    /// - Precondition: The collection is sorted in ascending order.
+    func deltaScale(boundedBy maxScale: Int) -> Int {
+        let roundedToMaxScale = lazy.map { $0.rounded(toPlaces: maxScale) }
+        guard let maxDelta = roundedToMaxScale.adjacentPairs().map(-).map(abs).max() else {
+            return 0
+        }
+
+        return abs(Swift.min(maxDelta.exponent, 0))
     }
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import SwiftCharts
 
 fileprivate struct DosePointsCache {
