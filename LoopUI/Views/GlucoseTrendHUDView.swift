@@ -20,7 +20,7 @@ public final class GlucoseTrendHUDView: BaseHUDView {
     @IBOutlet private weak var trendIcon: UIImageView! {
         didSet {
             trendIcon.image = UIImage(systemName: "questionmark.circle")
-            trendIcon.tintColor = .systemBlue
+            trendIcon.tintColor = .glucoseTintColor
         }
     }
 

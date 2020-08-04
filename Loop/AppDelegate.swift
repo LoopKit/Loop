@@ -15,7 +15,7 @@ import HealthKit
 import LoopKitUI
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationController {
 
     private lazy var log = DiagnosticLog(category: "AppDelegate")
 
@@ -73,9 +73,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         deviceDataManager?.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
+        OrientationLock.deviceOrientationController = self
+
         NotificationManager.authorize(delegate: self)
 
-        deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         rootViewController.pushViewController(statusTableViewController, animated: false)
 
@@ -99,6 +100,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         finishLaunch(application: application)
 
+        window?.tintColor = .loopAccent
+                
         return true
     }
 
@@ -176,6 +179,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         if deviceDataManager == nil {
             finishLaunch(application: application)
         }
+    }
+
+    // MARK: - DeviceOrientationController
+
+    var supportedInterfaceOrientations = UIInterfaceOrientationMask.allButUpsideDown
+
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        supportedInterfaceOrientations
     }
 }
 

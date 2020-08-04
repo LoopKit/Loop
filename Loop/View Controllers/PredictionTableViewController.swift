@@ -224,7 +224,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
             })
 
             self.tableView(tableView, updateTitleFor: cell, at: indexPath)
-            cell.setTitleTextColor(color: UIColor.secondaryLabelColor)
+            cell.setTitleTextColor(color: UIColor.secondaryLabel)
             cell.selectionStyle = .none
 
             cell.addGestureRecognizer(charts.gestureRecognizer!)

@@ -22,7 +22,7 @@ import LoopKitUI
     @IBOutlet public weak var progressView: UIProgressView! {
         didSet {
             progressView.isHidden = true
-            progressView.tintColor = .systemBlue
+            progressView.tintColor = .systemGray
             // round the edges of the progress view
             progressView.layer.cornerRadius = 2
             progressView.clipsToBounds = true

@@ -125,7 +125,7 @@ class ServicesManager {
         loopDataManager?.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
         loopDataManager?.carbRatioSchedule = settings.carbRatioSchedule
         loopDataManager?.basalRateSchedule = settings.basalRateSchedule
-        loopDataManager?.insulinModelSettings = settings.insulinModel
+        loopDataManager?.insulinModelSettings = settings.insulinModelSettings
     }
 
     private func restoreState() {

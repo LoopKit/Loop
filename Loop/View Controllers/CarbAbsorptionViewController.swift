@@ -308,7 +308,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
             cell.setAlpha(alpha: alpha)
 
-            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabel)
 
             return cell
         case .totals:
@@ -358,7 +358,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     )
 
                     if absorption.isActive {
-                        cell.observedValueTextColor = UIColor.COBTintColor
+                        cell.observedValueTextColor = UIColor.cobTintColor
                     } else if 0.9 <= observedProgress && observedProgress <= 1.1 {
                         cell.observedValueTextColor = UIColor.systemGray
                     } else {
@@ -372,7 +372,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
                 // Absorbed time
                 if absorption.isActive {
-                    cell.observedDateTextColor = UIColor.COBTintColor
+                    cell.observedDateTextColor = UIColor.cobTintColor
                 } else {
                     cell.observedDateTextColor = UIColor.systemGray
 
@@ -407,7 +407,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             case let t where t < .minutes(-15):
                 textColor = .agingColor
             default:
-                textColor = .secondaryLabelColor
+                textColor = .secondaryLabel
             }
 
             cell.COBDateLabel.textColor = textColor

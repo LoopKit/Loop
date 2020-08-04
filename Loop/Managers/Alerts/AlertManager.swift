@@ -34,8 +34,6 @@ public enum AlertUserNotificationUserInfoKey: String {
 public final class AlertManager {
     private static let soundsDirectoryURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).last!.appendingPathComponent("Sounds")
 
-    fileprivate static let timestampFormatter = ISO8601DateFormatter()
-
     private let log = DiagnosticLog(category: "AlertManager")
 
     private var handlers: [AlertPresenter] = []
@@ -89,10 +87,7 @@ extension AlertManager: AlertManagerResponder {
         if let responder = responders[identifier.managerIdentifier]?.value {
             responder.acknowledgeAlert(alertIdentifier: identifier.alertIdentifier)
         }
-        // Also clear the alert from the NotificationCenter
-        log.debug("Removing notification %@ from delivered & pending notifications", identifier.value)
-        userNotificationCenter.removeDeliveredNotifications(withIdentifiers: [identifier.value])
-        userNotificationCenter.removePendingNotificationRequests(withIdentifiers: [identifier.value])
+        handlers.map { $0 as? AlertManagerResponder }.forEach { $0?.acknowledgeAlert(identifier: identifier) }
         alertStore.recordAcknowledgement(of: identifier)
     }
 }
@@ -168,7 +163,7 @@ extension AlertManager {
             case .success(let alerts):
                 alerts.forEach { alert in
                     do {
-                        self.replayAlert(try Alert(from: alert))
+                        self.replayAlert(try Alert(from: alert, adjustedForStorageTime: true))
                     } catch {
                         self.log.error("Error decoding alert from persistent storage: %@", error.localizedDescription)
                     }
@@ -233,79 +228,5 @@ extension URL {
 
     func fileCreationDate(_ fileManager: FileManager) throws -> Date {
         return try fileManager.attributesOfItem(atPath: self.path)[.creationDate] as! Date
-    }
-}
-
-public extension Alert {
-
-    enum Error: String, Swift.Error {
-        case noBackgroundContent
-    }
-
-    fileprivate func getUserNotificationContent(timestamp: Date) throws -> UNNotificationContent {
-        guard let content = backgroundContent else {
-            throw Error.noBackgroundContent
-        }
-        let userNotificationContent = UNMutableNotificationContent()
-        userNotificationContent.title = content.title
-        userNotificationContent.body = content.body
-        userNotificationContent.sound = getUserNotificationSound()
-        // TODO: Once we have a final design and approval for custom UserNotification buttons, we'll need to set categoryIdentifier
-//        userNotificationContent.categoryIdentifier = LoopNotificationCategory.alert.rawValue
-        userNotificationContent.threadIdentifier = identifier.value // Used to match categoryIdentifier, but I /think/ we want multiple threads for multiple alert types, no?
-        userNotificationContent.userInfo = [
-            LoopNotificationUserInfoKey.managerIDForAlert.rawValue: identifier.managerIdentifier,
-            LoopNotificationUserInfoKey.alertTypeID.rawValue: identifier.alertIdentifier,
-        ]
-        let encodedAlert = try encodeToString()
-        userNotificationContent.userInfo[AlertUserNotificationUserInfoKey.alert.rawValue] = encodedAlert
-        userNotificationContent.userInfo[AlertUserNotificationUserInfoKey.alertTimestamp.rawValue] =
-            AlertManager.timestampFormatter.string(from: timestamp)
-        return userNotificationContent
-    }
-
-    private func getUserNotificationSound() -> UNNotificationSound? {
-        guard let content = backgroundContent else {
-            return nil
-        }
-        if let sound = sound {
-            switch sound {
-            case .vibrate:
-                // TODO: Not sure how to "force" UNNotificationSound to "vibrate only"...so for now we just do the default
-                break
-            case .silence:
-                // TODO: Not sure how to "force" UNNotificationSound to "silence"...so for now we just do the default
-                break
-            default:
-                if let actualFileName = AlertManager.soundURL(for: self)?.lastPathComponent {
-                    let unname = UNNotificationSoundName(rawValue: actualFileName)
-                    return content.isCritical ? UNNotificationSound.criticalSoundNamed(unname) : UNNotificationSound(named: unname)
-                }
-            }
-        }
-
-        return content.isCritical ? .defaultCritical : .default
-    }
-}
-
-public extension UNNotificationRequest {
-    convenience init(from alert: Alert, timestamp: Date) throws {
-        let content = try alert.getUserNotificationContent(timestamp: timestamp)
-        self.init(identifier: alert.identifier.value,
-                  content: content,
-                  trigger: UNTimeIntervalNotificationTrigger(from: alert.trigger))
-    }
-}
-
-fileprivate extension UNTimeIntervalNotificationTrigger {
-    convenience init?(from alertTrigger: Alert.Trigger) {
-        switch alertTrigger {
-        case .immediate:
-            return nil
-        case .delayed(let timeInterval):
-            self.init(timeInterval: timeInterval, repeats: false)
-        case .repeating(let repeatInterval):
-            self.init(timeInterval: repeatInterval, repeats: true)
-        }
     }
 }

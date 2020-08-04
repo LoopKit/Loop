@@ -11,8 +11,9 @@ import LoopKitUI
 import SwiftUI
 
 public struct SettingsView: View, HorizontalSizeClassOverride {
-    @Environment(\.dismiss) var dismiss
-    
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appName) private var appName
+
     @ObservedObject var viewModel: SettingsViewModel
 
     public init(viewModel: SettingsViewModel) {
@@ -65,7 +66,7 @@ extension SettingsView {
                     if viewModel.showWarning {
                         Spacer()
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundColor(.severeWarning)
+                            .foregroundColor(.critical)
                     }
                 }
             }

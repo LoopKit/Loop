@@ -105,7 +105,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].tintColor = UIColor.COBTintColor
+        toolbarItems![0].tintColor = UIColor.cobTintColor
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].tintColor = UIColor.doseTintColor
         
@@ -113,7 +113,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             toolbarItems![8].image = UIImage(systemName: "gear")
         }
         toolbarItems![8].accessibilityLabel = NSLocalizedString("Settings", comment: "The label of the settings button")
-        toolbarItems![8].tintColor = UIColor.secondaryLabelColor
+        toolbarItems![8].tintColor = UIColor.secondaryLabel
         
         tableView.register(BolusProgressTableViewCell.nib(), forCellReuseIdentifier: BolusProgressTableViewCell.className)
         
@@ -588,6 +588,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case enactingBolus
         case bolusing(dose: DoseEntry)
         case cancelingBolus
+        case pumpSuspended(resuming: Bool)
         
         var hasRow: Bool {
             switch self {
@@ -608,6 +609,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             statusRowMode = .enactingBolus
         } else if case .canceling = bolusState {
             statusRowMode = .cancelingBolus
+        } else if case .suspended = basalDeliveryState {
+            statusRowMode = .pumpSuspended(resuming: false)
+        } else if case .resuming = basalDeliveryState {
+            statusRowMode = .pumpSuspended(resuming: true)
         } else if case .inProgress(let dose) = bolusState, dose.endDate.timeIntervalSinceNow > 0 {
             statusRowMode = .bolusing(dose: dose)
         } else if let (recommendation: tempBasal, date: date) = recommendedTempBasal {
@@ -681,6 +686,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 break
             case (.bolusing(let oldDose), .bolusing(let newDose)):
                 if oldDose != newDose {
+                    self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
+                }
+            case (.pumpSuspended(resuming: let wasResuming), .pumpSuspended(resuming: let isResuming)):
+                if isResuming != wasResuming {
                     self.tableView.reloadRows(at: [statusIndexPath], with: animated ? .fade : .none)
                 }
             default:
@@ -795,7 +804,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             let alpha: CGFloat = charts.gestureRecognizer?.state == .possible ? 1 : 0
             cell.setAlpha(alpha: alpha)
             
-            cell.setSubtitleTextColor(color: UIColor.secondaryLabelColor)
+            cell.setSubtitleTextColor(color: UIColor.secondaryLabel)
             
             return cell
         case .status:
@@ -803,6 +812,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             func getTitleSubtitleCell() -> TitleSubtitleTableViewCell {
                 let cell = tableView.dequeueReusableCell(withIdentifier: TitleSubtitleTableViewCell.className, for: indexPath) as! TitleSubtitleTableViewCell
                 cell.selectionStyle = .none
+                cell.backgroundColor = .secondarySystemBackground
                 return cell
             }
             
@@ -884,6 +894,21 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     let indicatorView = UIActivityIndicatorView(style: .default)
                     indicatorView.startAnimating()
                     cell.accessoryView = indicatorView
+                    return cell
+                case .pumpSuspended(let resuming):
+                    let cell = getTitleSubtitleCell()
+                    cell.titleLabel.text = NSLocalizedString("Insulin Suspended", comment: "The title of the cell indicating the pump is suspended")
+                    
+                    if resuming {
+                        let indicatorView = UIActivityIndicatorView(style: .default)
+                        indicatorView.startAnimating()
+                        cell.accessoryView = indicatorView
+                        cell.subtitleLabel.text = nil
+                    } else {
+                        cell.accessoryView = nil
+                        cell.subtitleLabel.text = NSLocalizedString("Tap to Resume", comment: "The subtitle of the cell displaying an action to resume insulin delivery")
+                    }
+                    cell.selectionStyle = .default
                     return cell
                 }
             }
@@ -986,6 +1011,24 @@ final class StatusTableViewController: LoopChartsTableViewController {
                             } else {
                                 self.refreshContext.update(with: .status)
                                 self.log.debug("[reloadData] after manually enacting temp basal")
+                                self.reloadData()
+                            }
+                        }
+                    }
+                case .pumpSuspended(let resuming) where !resuming:
+                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: true) , newSize: nil, animated: true)
+                    self.deviceManager.pumpManager?.resumeDelivery() { (error) in
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                let alert = UIAlertController(with: error, title: NSLocalizedString("Error Resuming", comment: "The alert title for a resume error"))
+                                self.present(alert, animated: true, completion: nil)
+                                if case .suspended = self.basalDeliveryState {
+                                    self.updateHUDandStatusRows(statusRowMode: .pumpSuspended(resuming: false), newSize: nil, animated: true)
+                                }
+                            } else {
+                                self.updateHUDandStatusRows(statusRowMode: self.determineStatusRowMode(), newSize: nil, animated: true)
+                                self.refreshContext.update(with: .insulin)
+                                self.log.debug("[reloadData] after manually resuming suspend")
                                 self.reloadData()
                             }
                         }
@@ -1111,7 +1154,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
         }
         
-        item.tintColor = UIColor.COBTintColor
+        item.tintColor = UIColor.cobTintColor
         
         return item
     }

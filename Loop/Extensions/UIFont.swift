@@ -27,4 +27,16 @@ extension UIFont {
 
         self.init(descriptor: descriptor, size: 0)
     }
+
+    static func heavy(_ textStyle: UIFont.TextStyle) -> UIFont {
+        let descriptor = UIFontDescriptor
+            .preferredFontDescriptor(withTextStyle: textStyle)
+            .addingAttributes([
+                .traits: [
+                    UIFontDescriptor.TraitKey.weight: UIFont.Weight.heavy
+                ]
+            ])
+
+        return UIFont(descriptor: descriptor, size: 0)
+    }
 }
