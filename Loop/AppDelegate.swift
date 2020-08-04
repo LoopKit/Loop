@@ -56,11 +56,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private func finishLaunch(application: UIApplication) {
         log.default("Finishing launching")
         UIDevice.current.isBatteryMonitoringEnabled = true
-        
+
         bluetoothStateManager = BluetoothStateManager()
-        bluetoothStateManager.addBluetoothStateObserver(rootViewController.rootViewController)
         alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
+
+        let statusTableViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
+        
+        statusTableViewController.deviceManager = deviceDataManager
+
+        bluetoothStateManager.addBluetoothStateObserver(statusTableViewController)
 
         loopAlertsManager = LoopAlertsManager(alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
         
@@ -69,18 +74,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         deviceDataManager?.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
         NotificationManager.authorize(delegate: self)
- 
-        let mainStatusViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
-        
-        mainStatusViewController.deviceManager = deviceDataManager
-        log.info(#function)
 
         deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
-        rootViewController.rootViewController.deviceManager = deviceDataManager
-        //rootViewController.rootViewController.preferredGlucoseUnit = deviceDataManager.loopManager.glucoseStore.preferredUnit
-        
-        rootViewController.pushViewController(mainStatusViewController, animated: false)
+        rootViewController.pushViewController(statusTableViewController, animated: false)
 
         let notificationOption = launchOptions?[.remoteNotification]
         

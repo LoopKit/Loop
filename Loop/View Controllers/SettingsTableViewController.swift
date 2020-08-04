@@ -753,7 +753,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                     bolusVolumes: $0.supportedBolusVolumes,
                                     maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
         }
-        let viewModel = SettingsViewModel(appNameAndVersion: Bundle.main.localizedNameAndVersion,
+        let viewModel = SettingsViewModel(appNameAndVersion: "My Loop Version",
                                           notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
@@ -770,7 +770,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                             self?.saveTherapySetting($0, $1)
         })
         let hostingController = DismissibleHostingController(
-            rootView: SettingsView(viewModel: viewModel),
+            rootView: SettingsView(viewModel: viewModel).environment(\.appName, "Another try"),
             onDisappear: {
                 tableView.deselectRow(at: indexPath, animated: true)
         })

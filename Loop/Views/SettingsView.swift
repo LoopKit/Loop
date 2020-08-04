@@ -193,7 +193,7 @@ fileprivate struct LargeButton: View {
 
 public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
-        let viewModel = SettingsViewModel(appNameAndVersion: "Tidepool Loop v1.2.3.456",
+        let viewModel = SettingsViewModel(appNameAndVersion: "Loop v1.2",
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),

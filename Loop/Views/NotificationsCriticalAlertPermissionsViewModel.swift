@@ -22,7 +22,7 @@ public class NotificationsCriticalAlertPermissionsViewModel: ObservableObject {
     lazy public var showWarningPublisher: AnyPublisher<Bool, Never> = {
         $notificationsPermissionsGiven
             .combineLatest($criticalAlertsPermissionsGiven)
-            .map { $0 == false || $1 == false }
+            .map { $0 == false || $1 == false && FeatureFlags.criticalAlertsEnabled }
             .eraseToAnyPublisher()
     }()
 

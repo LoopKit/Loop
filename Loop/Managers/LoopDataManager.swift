@@ -82,14 +82,9 @@ final class LoopDataManager {
             healthStore: healthStore,
             observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
             cacheStore: cacheStore,
-<<<<<<< HEAD
-            cacheLength: .hours(24),
-            defaultAbsorptionTimes: LoopSettings.defaultCarbAbsorptionTimes,
-=======
             cacheLength: localCacheDuration,
             defaultAbsorptionTimes: absorptionTimes,
             observationInterval: cacheDuration,
->>>>>>> tidepool/dev
             carbRatioSchedule: carbRatioSchedule,
             insulinSensitivitySchedule: insulinSensitivitySchedule,
             overrideHistory: overrideHistory,
