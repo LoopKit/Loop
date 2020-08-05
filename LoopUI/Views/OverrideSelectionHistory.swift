@@ -50,9 +50,11 @@ public struct OverrideSelectionHistory: View {
     }
     
     public var body: some View {
-        List(model.overrides, id: \.self) { override in
-            Section {
-                self.createCell(for: override)
+        List {
+            ForEach(model.overrides, id: \.self) { override in
+                Section {
+                    self.createCell(for: override)
+                }
             }
         }
         .listStyle(GroupedListStyle())
