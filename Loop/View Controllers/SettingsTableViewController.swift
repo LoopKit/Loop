@@ -507,11 +507,11 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule,
                     glucoseUnit: glucoseUnit,
                     supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
-                    mode: .legacySettings,
                     onSave: { [dataManager, tableView] newValue in
                         dataManager!.loopManager!.insulinModelSettings = newValue
                         tableView.reloadRows(at: [indexPath], with: .automatic)
-                    }
+                    },
+                    mode: .legacySettings
                 ).environment(\.appName, Bundle.main.bundleDisplayName)
 
                 let hostingController = DismissibleHostingController(rootView: modelSelectionView, onDisappear: {
