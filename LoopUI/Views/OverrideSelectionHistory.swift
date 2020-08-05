@@ -14,13 +14,29 @@ import HealthKit
 public class OverrideHistoryViewModel: ObservableObject {
     var overrides: [TemporaryScheduleOverride]
     var glucoseUnit: HKUnit
+    var didEditOverride: ((TemporaryScheduleOverride) -> Void)?
+    var didDeleteOverride: ((TemporaryScheduleOverride) -> Void)?
 
     public init(
         overrides: [TemporaryScheduleOverride],
-        glucoseUnit: HKUnit
+        glucoseUnit: HKUnit,
+        didEditOverride: ((TemporaryScheduleOverride) -> Void)?,
+        didDeleteOverride: ((TemporaryScheduleOverride) -> Void)?
     ) {
         self.overrides = overrides
         self.glucoseUnit = glucoseUnit
+        self.didEditOverride = didEditOverride
+        self.didDeleteOverride = didDeleteOverride
+    }
+}
+
+extension OverrideHistoryViewModel: AddEditOverrideTableViewControllerDelegate {
+    public func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didSaveOverride override: TemporaryScheduleOverride) {
+        didEditOverride?(override)
+    }
+
+    public func addEditOverrideTableViewController(_ vc: AddEditOverrideTableViewController, didCancelOverride override: TemporaryScheduleOverride) {
+        didDeleteOverride?(override)
     }
 }
 
@@ -29,7 +45,6 @@ public struct OverrideSelectionHistory: View {
     private var quantityFormatter: QuantityFormatter
     private var glucoseNumberFormatter: NumberFormatter
     private var durationFormatter: DateComponentsFormatter
-    
     
     public init(model: OverrideHistoryViewModel) {
         self.model = model
@@ -53,11 +68,14 @@ public struct OverrideSelectionHistory: View {
         List {
             ForEach(model.overrides, id: \.self) { override in
                 Section {
-                    self.createCell(for: override)
-                    .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)) 
+                    NavigationLink(destination: self.editor(for: override)) {
+                        self.createCell(for: override)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
+                    }
                 }
             }
         }
+        .environment(\.defaultMinListRowHeight, 10)
         .listStyle(GroupedListStyle())
         .environment(\.horizontalSizeClass, .regular)
         .navigationBarTitle(Text(LocalizedString("Override History", comment: "Title for override history view")), displayMode: .inline)
@@ -126,5 +144,13 @@ public struct OverrideSelectionHistory: View {
                 subtitle: Text(startTime),
                 insulinNeedsScaleFactor: insulinNeeds)
         }
+    }
+    
+    private func editor(for override: TemporaryScheduleOverride) -> some View {
+        return AddEditOverrideView(
+            inputMode: .editOverride(override),
+            glucoseUnit: model.glucoseUnit,
+            delegate: model
+        )
     }
 }

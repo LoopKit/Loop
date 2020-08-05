@@ -977,7 +977,13 @@ final class StatusTableViewController: ChartsTableViewController {
             case .iob:
                 let model = OverrideHistoryViewModel(
                     overrides: deviceManager.loopManager.overrideHistory.getEvents(),
-                    glucoseUnit: deviceManager.loopManager.insulinSensitivitySchedule?.unit ?? deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+                    glucoseUnit: deviceManager.loopManager.insulinSensitivitySchedule?.unit ?? deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter,
+                    didEditOverride: { override in
+                        // TODO: save the edited setting
+                    },
+                    didDeleteOverride: { override in
+                        // TODO: delete the override
+                    }
                 )
                 let overrideHistoryView = OverrideSelectionHistory(model: model)
                 navigationController?.pushViewController(UIHostingController(rootView: overrideHistoryView), animated: true)
