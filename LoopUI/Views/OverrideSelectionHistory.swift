@@ -54,6 +54,7 @@ public struct OverrideSelectionHistory: View {
             ForEach(model.overrides, id: \.self) { override in
                 Section {
                     self.createCell(for: override)
+                    .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12)) 
                 }
             }
         }
