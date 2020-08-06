@@ -21,7 +21,7 @@ extension Color {
     // The loopAccent color is intended to be use as the app accent color.
     public static let loopAccent = Color("accent")
     
-    static let warning = Color("warning")
+    static public let warning = Color("warning")
 }
 
 
@@ -35,7 +35,7 @@ extension Color {
     
     public static let cellBackgroundColor = Color(UIColor.cellBackgroundColor)
     
-    public static let cobTintColor = carbs
+    public static let carbTintColor = carbs
     
     public static let critical = red
     

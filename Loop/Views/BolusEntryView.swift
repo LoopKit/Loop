@@ -224,7 +224,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 Text("Carb Entry", comment: "Label for carb entry row on bolus screen")
 
                 Text(viewModel.carbEntryAmountAndEmojiString!)
-                    .foregroundColor(Color(.cobTintColor))
+                    .foregroundColor(Color(.carbTintColor))
                     .modifier(LabelBackground())
 
                 Spacer()

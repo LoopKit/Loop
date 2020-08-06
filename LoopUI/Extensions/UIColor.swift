@@ -34,7 +34,7 @@ extension UIColor {
     
     @nonobjc public static let cellBackgroundColor = secondarySystemBackground
     
-    @nonobjc public static let cobTintColor = carbs
+    @nonobjc public static let carbTintColor = carbs
     
     @nonobjc static let critical = systemRed
     

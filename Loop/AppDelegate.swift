@@ -60,7 +60,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         }
         
         window?.tintColor = .loopAccent
-                
+                        
         return true
     }
 

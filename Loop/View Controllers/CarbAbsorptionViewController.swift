@@ -358,7 +358,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     )
 
                     if absorption.isActive {
-                        cell.observedValueTextColor = UIColor.cobTintColor
+                        cell.observedValueTextColor = UIColor.carbTintColor
                     } else if 0.9 <= observedProgress && observedProgress <= 1.1 {
                         cell.observedValueTextColor = UIColor.systemGray
                     } else {
@@ -372,7 +372,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
                 // Absorbed time
                 if absorption.isActive {
-                    cell.observedDateTextColor = UIColor.cobTintColor
+                    cell.observedDateTextColor = UIColor.carbTintColor
                 } else {
                     cell.observedDateTextColor = UIColor.systemGray
 

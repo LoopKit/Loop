@@ -409,6 +409,7 @@
 		B405E35A24D2B1A400DD058D /* HUDAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15961E09E94E00E160D4 /* HUDAssets.xcassets */; };
 		B405E35B24D2E05600DD058D /* HUDAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F2C15961E09E94E00E160D4 /* HUDAssets.xcassets */; };
 		B42C951424A3C76000857C73 /* CGMStatusHUDViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */; };
+		B43DA44124D9C12100CAFF4E /* DismissibleHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */; };
 		B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */; };
 		B490A03F24D0550F00F509FA /* GlucoseValueType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A03E24D0550F00F509FA /* GlucoseValueType.swift */; };
 		B490A04124D0559D00F509FA /* DeviceLifecycleProgressState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A04024D0559D00F509FA /* DeviceLifecycleProgressState.swift */; };
@@ -417,6 +418,7 @@
 		B491B0A324D0B66D004CBE8F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = B490A03C24D04F9400F509FA /* Color.swift */; };
 		B491B0A424D0B675004CBE8F /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B11E45C18400FF19A9 /* UIColor.swift */; };
 		B4AC0D3F24B9005300CDB0A1 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437CEEE31CDE5C0A003C8C80 /* UIImage.swift */; };
+		B4D620D424D9EDB900043B3C /* GuidanceColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D620D324D9EDB900043B3C /* GuidanceColors.swift */; };
 		B4E96D4B248A6B6E002DABAD /* DeviceStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */; };
 		B4E96D4F248A6E20002DABAD /* CGMStatusHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */; };
 		B4E96D53248A7386002DABAD /* GlucoseValueHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4E96D52248A7386002DABAD /* GlucoseValueHUDView.swift */; };
@@ -1135,11 +1137,13 @@
 		A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersistentDeviceLog+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		B42C951324A3C76000857C73 /* CGMStatusHUDViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDViewModel.swift; sourceTree = "<group>"; };
 		B42C951624A3CAF200857C73 /* NotificationsCriticalAlertPermissionsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationsCriticalAlertPermissionsViewModel.swift; sourceTree = "<group>"; };
+		B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissibleHostingController.swift; sourceTree = "<group>"; };
 		B48B0BAB24900093009A48DE /* PumpStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpStatusHUDView.swift; sourceTree = "<group>"; };
 		B490A03C24D04F9400F509FA /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		B490A03E24D0550F00F509FA /* GlucoseValueType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueType.swift; sourceTree = "<group>"; };
 		B490A04024D0559D00F509FA /* DeviceLifecycleProgressState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLifecycleProgressState.swift; sourceTree = "<group>"; };
 		B490A04224D055D900F509FA /* DeviceStatusHighlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusHighlight.swift; sourceTree = "<group>"; };
+		B4D620D324D9EDB900043B3C /* GuidanceColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuidanceColors.swift; sourceTree = "<group>"; };
 		B4E96D4A248A6B6E002DABAD /* DeviceStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D4E248A6E20002DABAD /* CGMStatusHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMStatusHUDView.swift; sourceTree = "<group>"; };
 		B4E96D52248A7386002DABAD /* GlucoseValueHUDView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseValueHUDView.swift; sourceTree = "<group>"; };
@@ -1872,7 +1876,9 @@
 				43FCEEAC221A66780013DD30 /* DateFormatter.swift */,
 				B490A04024D0559D00F509FA /* DeviceLifecycleProgressState.swift */,
 				B490A04224D055D900F509FA /* DeviceStatusHighlight.swift */,
+				B43DA44024D9C12100CAFF4E /* DismissibleHostingController.swift */,
 				B490A03E24D0550F00F509FA /* GlucoseValueType.swift */,
+				B4D620D324D9EDB900043B3C /* GuidanceColors.swift */,
 				1DB1CA4C24A55F0000B3B94C /* Image.swift */,
 				434F54561D287FDB002A9274 /* NibLoadable.swift */,
 				43FCEEAE221A67A70013DD30 /* NumberFormatter+Charts.swift */,
@@ -3192,6 +3198,7 @@
 				B490A03F24D0550F00F509FA /* GlucoseValueType.swift in Sources */,
 				4F2C15931E09BF2C00E160D4 /* HUDView.swift in Sources */,
 				43BFF0B71E45C20C00FF19A9 /* NumberFormatter.swift in Sources */,
+				B43DA44124D9C12100CAFF4E /* DismissibleHostingController.swift in Sources */,
 				4F7528A51DFE208C00C322D6 /* NSTimeInterval.swift in Sources */,
 				A9C62D8E2331708700535612 /* AuthenticationTableViewCell+NibLoadable.swift in Sources */,
 				B490A04324D055D900F509FA /* DeviceStatusHighlight.swift in Sources */,
@@ -3205,6 +3212,7 @@
 				43FCEEBB22211C860013DD30 /* CarbEffectChart.swift in Sources */,
 				4F7528A01DFE1F9D00C322D6 /* LoopStateView.swift in Sources */,
 				B491B0A324D0B66D004CBE8F /* Color.swift in Sources */,
+				B4D620D424D9EDB900043B3C /* GuidanceColors.swift in Sources */,
 				B48B0BAC24900093009A48DE /* PumpStatusHUDView.swift in Sources */,
 				B491B0A424D0B675004CBE8F /* UIColor.swift in Sources */,
 				43FCEEAD221A66780013DD30 /* DateFormatter.swift in Sources */,

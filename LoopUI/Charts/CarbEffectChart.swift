@@ -74,7 +74,7 @@ extension CarbEffectChart {
 
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
-        let carbFillColor = UIColor.cobTintColor.withAlphaComponent(0.8)
+        let carbFillColor = UIColor.carbTintColor.withAlphaComponent(0.8)
         let carbBlendMode: CGBlendMode
         if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
             switch traitCollection.userInterfaceStyle {
@@ -125,7 +125,7 @@ extension CarbEffectChart {
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
                 chartPoints: allCarbEffectPoints,
-                tintColor: UIColor.cobTintColor,
+                tintColor: UIColor.carbTintColor,
                 gestureRecognizer: gestureRecognizer
             )
         }

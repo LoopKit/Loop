@@ -105,7 +105,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         // Toolbar
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
-        toolbarItems![0].tintColor = UIColor.cobTintColor
+        toolbarItems![0].tintColor = UIColor.carbTintColor
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
         toolbarItems![4].tintColor = UIColor.doseTintColor
         
@@ -1154,7 +1154,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             item.accessibilityHint = NSLocalizedString("Enables", comment: "The action hint of the workout mode toggle button when disabled")
         }
         
-        item.tintColor = UIColor.cobTintColor
+        item.tintColor = UIColor.carbTintColor
         
         return item
     }
