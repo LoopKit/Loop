@@ -18,6 +18,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
+    @State private var shouldBolusEntryBecomeFirstResponder = false
 
     @State private var isManualGlucoseEntryRowVisible = false
     @State private var enteredManualGlucose = ""
@@ -43,6 +44,11 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         }
         .onKeyboardStateChange { state in
             self.isKeyboardVisible = state.height > 0
+
+            if state.height == 0 {
+                // Ensure tapping 'Enter Bolus' can make the text field the first responder again
+                self.shouldBolusEntryBecomeFirstResponder = false
+            }
         }
         .keyboardAware()
         .edgesIgnoringSafeArea(isKeyboardVisible ? [] : .bottom)
@@ -70,9 +76,9 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var historySection: some View {
         Section {
             VStack(spacing: 8) {
-                HStack {
+                HStack(spacing: 0) {
                     activeCarbsLabel
-                    Spacer()
+                    Spacer(minLength: 8)
                     activeInsulinLabel
                 }
 
@@ -268,7 +274,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     font: .preferredFont(forTextStyle: .title1),
                     textColor: .systemBlue,
                     textAlignment: .right,
-                    keyboardType: .decimalPad
+                    keyboardType: .decimalPad,
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
                 )
                 
                 bolusUnitsLabel
@@ -356,28 +363,34 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var primaryActionButton: some View {
         Button(
             action: {
-                self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                if !self.hasDataToSave && self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
+                    self.shouldBolusEntryBecomeFirstResponder = true
+                } else {
+                    self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                }
             },
             label: {
-                if canSaveWithoutBolusing {
-                    Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
+                if hasDataToSave {
+                    if viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
+                        Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
+                    } else {
+                        Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                    }
                 } else {
-                    Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                    if viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
+                        Text("Enter Bolus", comment: "Button text to begin entering a bolus")
+                    } else {
+                        Text("Deliver", comment: "Button text to deliver a bolus")
+                    }
                 }
             }
         )
         .buttonStyle(ActionButtonStyle(isManualGlucosePromptVisible ? .secondary : .primary))
         .padding()
-        .disabled(isPrimaryActionButtonDisabled)
     }
 
-    private var canSaveWithoutBolusing: Bool {
-        (viewModel.enteredManualGlucose != nil || viewModel.potentialCarbEntry != nil)
-            && viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0
-    }
-
-    private var isPrimaryActionButtonDisabled: Bool {
-        !canSaveWithoutBolusing && viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0
+    private var hasDataToSave: Bool {
+        viewModel.enteredManualGlucose != nil || viewModel.potentialCarbEntry != nil
     }
 
     private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {
@@ -444,6 +457,7 @@ struct LabeledQuantity: View {
                 .bold()
             valueText
                 .foregroundColor(Color(.secondaryLabel))
+                .fixedSize(horizontal: true, vertical: false)
         }
         .font(.subheadline)
         .modifier(LabelBackground())
