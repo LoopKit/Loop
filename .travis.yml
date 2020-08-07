@@ -1,6 +1,10 @@
 language: objective-c
 osx_image: xcode11.6
 
+cache:
+  directories:
+  - Carthage
+
 before_script:
     - git config --global protocol.version 1
     - set -o pipefail && xcodebuild -project Loop.xcodeproj -target Cartfile
