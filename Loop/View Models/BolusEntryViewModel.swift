@@ -188,7 +188,7 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
-        guard enteredBolus < maximumBolus else {
+        guard enteredBolus <= maximumBolus else {
             presentAlert(.maxBolusExceeded)
             return
         }
