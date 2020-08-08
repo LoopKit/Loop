@@ -1,9 +1,9 @@
 language: objective-c
 osx_image: xcode11.6
 
-#cache:
-#  directories:
-#  - Carthage
+cache:
+  directories:
+  - Carthage
 
 jobs:
   include:
