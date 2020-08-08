@@ -95,7 +95,7 @@ class RecommendTempBasalTests: XCTestCase {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 55)
     }
     
-    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0)
+    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0, delay: 0)
 
     var walshInsulinModel: InsulinModel {
         return WalshInsulinModel(actionDuration: insulinActionDuration)
@@ -613,7 +613,7 @@ class RecommendBolusTests: XCTestCase {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 55)
     }
     
-    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0)
+    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0, delay: 0)
 
     var walshInsulinModel: InsulinModel {
         return WalshInsulinModel(actionDuration: insulinActionDuration)
@@ -979,7 +979,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
 
-        XCTAssertEqual(0.375, dose.amount)
+        XCTAssertEqual(0.275, dose.amount)
     }
 
     func testHighAndRising() {
