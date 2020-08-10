@@ -80,7 +80,7 @@ extension SettingsView {
                                                                                                        supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
                                                                                                        pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
                                                                                                        syncPumpSchedule: viewModel.syncPumpSchedule,
-                                                                                                       chartColors: .default,
+                                                                                                       chartColors: .primary,
                                                                                                        didSave: viewModel.didSave))) {
                 LargeButton(action: { },
                             includeArrow: false,

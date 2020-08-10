@@ -23,7 +23,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             hudView.loopCompletionHUD.stateColors = .loopStatus
             hudView.cgmStatusHUD.stateColors = .cgmStatus
             hudView.cgmStatusHUD.tintColor = .label
-            hudView.pumpStatusHUD.tintColor = .doseTintColor
+            hudView.pumpStatusHUD.tintColor = .insulinTintColor
             hudView.backgroundColor = .clear
 
             // given the reduced width of the widget, allow for tighter spacing
@@ -43,7 +43,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
                 axisLabel: .axisLabelColor,
                 grid: .gridColor,
                 glucoseTint: .glucoseTintColor,
-                doseTint: .doseTintColor
+                insulinTint: .insulinTintColor
             ),
             settings: {
                 var settings = ChartSettings()

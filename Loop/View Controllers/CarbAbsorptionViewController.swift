@@ -99,7 +99,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     private let carbEffectChart = CarbEffectChart()
 
     override func createChartsManager() -> ChartsManager {
-        return ChartsManager(colors: .default, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
+        return ChartsManager(colors: .primary, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {

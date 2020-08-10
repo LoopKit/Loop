@@ -107,7 +107,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         toolbarItems![0].accessibilityLabel = NSLocalizedString("Add Meal", comment: "The label of the carb entry button")
         toolbarItems![0].tintColor = UIColor.carbTintColor
         toolbarItems![4].accessibilityLabel = NSLocalizedString("Bolus", comment: "The label of the bolus entry button")
-        toolbarItems![4].tintColor = UIColor.doseTintColor
+        toolbarItems![4].tintColor = UIColor.insulinTintColor
         
         if #available(iOS 13.0, *) {
             toolbarItems![8].image = UIImage(systemName: "gear")
@@ -258,7 +258,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         }
     }
     
-    private lazy var statusCharts = StatusChartsManager(colors: .default, settings: .default, traitCollection: self.traitCollection)
+    private lazy var statusCharts = StatusChartsManager(colors: .primary, settings: .default, traitCollection: self.traitCollection)
     
     override func createChartsManager() -> ChartsManager {
         return statusCharts
@@ -882,9 +882,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
                     let progressCell = tableView.dequeueReusableCell(withIdentifier: BolusProgressTableViewCell.className, for: indexPath) as! BolusProgressTableViewCell
                     progressCell.selectionStyle = .none
                     progressCell.totalUnits = dose.programmedUnits
-                    progressCell.tintColor = .doseTintColor
+                    progressCell.tintColor = .insulinTintColor
                     progressCell.unit = HKUnit.internationalUnit()
                     progressCell.deliveredUnits = bolusProgressReporter?.progress.deliveredUnits
+                    progressCell.backgroundColor = .secondarySystemBackground
                     return progressCell
                 case .cancelingBolus:
                     let cell = getTitleSubtitleCell()
@@ -1225,7 +1226,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hudView.cgmStatusHUD.stateColors = .cgmStatus
             hudView.cgmStatusHUD.tintColor = .label
             hudView.pumpStatusHUD.stateColors = .pumpStatus
-            hudView.pumpStatusHUD.tintColor = .doseTintColor
+            hudView.pumpStatusHUD.tintColor = .insulinTintColor
             
             refreshContext.update(with: .status)
             self.log.debug("[reloadData] after hudView loaded")
@@ -1577,7 +1578,7 @@ extension StatusTableViewController: AddEditOverrideTableViewControllerDelegate 
 
 extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
     fileprivate func setupCGMManager(for cgmManagerType: CGMManagerUI.Type) {
-        if var setupViewController = cgmManagerType.setupViewController() {
+        if var setupViewController = cgmManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
             setupViewController.setupDelegate = self
             setupViewController.completionDelegate = self
             present(setupViewController, animated: true, completion: nil)
@@ -1596,7 +1597,7 @@ extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
 
 extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
     fileprivate func setupPumpManager(for pumpManagerType: PumpManagerUI.Type) {
-        var setupViewController = pumpManagerType.setupViewController()
+        var setupViewController = pumpManagerType.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
         setupViewController.setupDelegate = self
         setupViewController.completionDelegate = self
         setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule

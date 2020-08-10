@@ -71,7 +71,7 @@ final class BolusEntryViewModel: ObservableObject {
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart()
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
-        return ChartsManager(colors: .default, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
 
     // MARK: - Constants

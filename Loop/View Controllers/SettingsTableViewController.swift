@@ -106,7 +106,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     }()
 
     func configuredSetupViewController(for pumpManager: PumpManagerUI.Type) -> (UIViewController & PumpManagerSetupViewController & CompletionNotifying) {
-        var setupViewController = pumpManager.setupViewController()
+        var setupViewController = pumpManager.setupViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default)
         setupViewController.setupDelegate = self
         setupViewController.completionDelegate = self
         setupViewController.basalSchedule = dataManager.loopManager.basalRateSchedule
@@ -507,7 +507,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                     insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule,
                     glucoseUnit: glucoseUnit,
                     supportedModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
-                    chartColors: .default,
+                    chartColors: .primary,
                     onSave: { [dataManager, tableView] newValue in
                         dataManager!.loopManager!.insulinModelSettings = newValue
                         tableView.reloadRows(at: [indexPath], with: .automatic)
@@ -592,7 +592,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         case .services:
             if indexPath.row < activeServices.count {
                 if let serviceUI = activeServices[indexPath.row] as? ServiceUI {
-                    var settings = serviceUI.settingsViewController(chartColors: .default)
+                    var settings = serviceUI.settingsViewController(chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
                     settings.serviceSettingsDelegate = self
                     settings.completionDelegate = self
                     present(settings, animated: true)
@@ -631,7 +631,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     }
     
     private func didSelectPump(completion: (() -> Void)? = nil) {
-        if var settings = dataManager.pumpManager?.settingsViewController() {
+        if var settings = dataManager.pumpManager?.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default) {
             settings.completionDelegate = self
             present(settings, animated: true)
         } else {
@@ -669,7 +669,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     private func didSelectCGM(completion: (() -> Void)? = nil) {
         if let cgmManager = dataManager.cgmManager as? CGMManagerUI {
             if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
-                var settings = cgmManager.settingsViewController(for: unit)
+                var settings = cgmManager.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default)
                 settings.completionDelegate = self
                 present(settings, animated: true)
                 completion?()
@@ -913,7 +913,7 @@ extension SettingsTableViewController: PumpManagerSetupViewControllerDelegate {
 
 extension SettingsTableViewController: CGMManagerSetupViewControllerDelegate {
     fileprivate func setupCGMManager(_ CGMManagerType: CGMManagerUI.Type) {
-        if var setupViewController = CGMManagerType.setupViewController() {
+        if var setupViewController = CGMManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
             setupViewController.setupDelegate = self
             setupViewController.completionDelegate = self
             present(setupViewController, animated: true, completion: nil)

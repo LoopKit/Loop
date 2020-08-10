@@ -22,6 +22,7 @@ extension DismissibleHostingController {
                   onDisappear: onDisappear,
                   carbTintColor: .carbTintColor,
                   glucoseTintColor: .glucoseTintColor,
-                  guidanceColors: GuidanceColors.default)
+                  guidanceColors: GuidanceColors.default,
+                  insulinTintColor: .insulinTintColor)
     }
 }

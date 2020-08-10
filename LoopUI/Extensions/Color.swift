@@ -40,8 +40,6 @@ extension Color {
     public static let critical = red
     
     public static let destructive = critical
-
-    public static let doseTintColor = insulin
     
     public static let glucoseTintColor = glucose
     
@@ -49,7 +47,7 @@ extension Color {
 
     public static let invalid = critical
 
-    public static let iobTintColor = insulin
+    public static let insulinTintColor = insulin
     
     public static let pumpStatusNormal = insulin
     

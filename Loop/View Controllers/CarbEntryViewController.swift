@@ -127,7 +127,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     override func createChartsManager() -> ChartsManager {
         // Consider including a chart on this screen to demonstrate how absorption time affects prediction
-        ChartsManager(colors: .default, settings: .default, charts: [], traitCollection: traitCollection)
+        ChartsManager(colors: .primary, settings: .default, charts: [], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
