@@ -34,7 +34,11 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 historySection
                 summarySection
             }
-            .padding(.top, -28) // Bring the top card up closer to the navigation bar
+            // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
+            // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
+            // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
+            // TODO: Fix this in Xcode 12 when we're building for iOS 14.
+            .padding(.top, shouldBolusEntryBecomeFirstResponder ? -200 : -28)
             .listStyle(GroupedListStyle())
             .environment(\.horizontalSizeClass, horizontalOverride)
 
@@ -105,25 +109,21 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     @ViewBuilder
     private var activeCarbsLabel: some View {
-        if viewModel.activeCarbs != nil {
-            LabeledQuantity(
-                label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
-                quantity: viewModel.activeCarbs!,
-                unit: .gram()
-            )
-        }
+        LabeledQuantity(
+            label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
+            quantity: viewModel.activeCarbs,
+            unit: .gram()
+        )
     }
-
+    
     @ViewBuilder
     private var activeInsulinLabel: some View {
-        if viewModel.activeInsulin != nil {
-            LabeledQuantity(
-                label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
-                quantity: viewModel.activeInsulin!,
-                unit: .internationalUnit(),
-                maxFractionDigits: 2
-            )
-        }
+        LabeledQuantity(
+            label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
+            quantity: viewModel.activeInsulin,
+            unit: .internationalUnit(),
+            maxFractionDigits: 2
+        )
     }
 
     private var predictedGlucoseChart: some View {
@@ -356,14 +356,18 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             },
             label: { Text("Enter Manual BG", comment: "Button text prompting manual glucose entry on bolus screen") }
         )
-        .buttonStyle(ActionButtonStyle(.primary))
+        .buttonStyle(ActionButtonStyle(hasBolusEntryReadyToDeliver ? .secondary : .primary))
         .padding([.top, .horizontal])
     }
 
+    private var hasBolusEntryReadyToDeliver: Bool {
+        return self.hasDataToSave || self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) != 0
+    }
+    
     private var primaryActionButton: some View {
         Button(
             action: {
-                if !self.hasDataToSave && self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
+                if !self.hasBolusEntryReadyToDeliver {
                     self.shouldBolusEntryBecomeFirstResponder = true
                 } else {
                     self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
@@ -385,7 +389,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 }
             }
         )
-        .buttonStyle(ActionButtonStyle(isManualGlucosePromptVisible ? .secondary : .primary))
+        .buttonStyle(ActionButtonStyle(isManualGlucosePromptVisible && !hasBolusEntryReadyToDeliver ? .secondary : .primary))
         .padding()
     }
 
@@ -447,7 +451,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
 struct LabeledQuantity: View {
     var label: Text
-    var quantity: HKQuantity
+    var quantity: HKQuantity?
     var unit: HKUnit
     var maxFractionDigits: Int?
 
@@ -471,8 +475,8 @@ struct LabeledQuantity: View {
             formatter.numberFormatter.maximumFractionDigits = maxFractionDigits
         }
 
-        guard let string = formatter.string(from: quantity, for: unit) else {
-            assertionFailure("Unable to format \(quantity) \(unit)")
+        guard let string = formatter.string(from: quantity ?? HKQuantity(unit: unit, doubleValue: 0), for: unit) else {
+            assertionFailure("Unable to format \(String(describing: quantity)) \(unit)")
             return Text("")
         }
 
