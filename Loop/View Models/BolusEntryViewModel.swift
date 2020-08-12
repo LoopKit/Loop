@@ -14,6 +14,7 @@ import os.log
 import LoopKit
 import LoopKitUI
 import LoopUI
+import SwiftUI
 
 
 final class BolusEntryViewModel: ObservableObject {
@@ -75,7 +76,8 @@ final class BolusEntryViewModel: ObservableObject {
     }()
     
     // MARK: - External Insulin
-    @Published var selectedInsulinModel: InsulinModelSettings?
+    @State var selectedInsulinModel: String? = nil
+    @State var doseDate: Date = Date()
     
     var insulinModelPickerOptions: [String]
     

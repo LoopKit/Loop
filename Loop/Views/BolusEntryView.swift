@@ -145,6 +145,9 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     manualGlucoseEntryRow
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
+                } else if viewModel.insulinModelPickerOptions.count > 0 {
+                    datePicker
+                    insulinModelPicker
                 } else {
                     recommendedBolusRow
                 }
@@ -255,6 +258,18 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var recommendedBolusString: String {
         let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) ?? 0
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+    }
+    
+    private var insulinModelPicker: some View {
+        Picker(selection: $viewModel.selectedInsulinModel, label: Text("Please choose a color")) {
+            ForEach(0 ..< viewModel.insulinModelPickerOptions.count) {
+                Text(self.viewModel.insulinModelPickerOptions[$0])
+           }
+        }
+    }
+    
+    private var datePicker: some View {
+        ExpandableDatePicker(with: $viewModel.doseDate)
     }
 
     private var bolusEntryRow: some View {
