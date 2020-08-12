@@ -78,7 +78,7 @@ extension DataManager {
 
     /// The length of time insulin has an effect on blood glucose
     var insulinModelSettings: InsulinModelSettings? {
-        guard let model = doseStore.insulinModel else {
+        guard let model = doseStore.defaultInsulinModel else {
             return nil
         }
 
