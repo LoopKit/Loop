@@ -85,7 +85,7 @@ final class StatusExtensionDataManager {
 
             // Drop the first element in predictedGlucose because it is the currentGlucose
             // and will have a different interval to the next element
-            if let predictedGlucose = state.predictedGlucose?.dropFirst(),
+            if let predictedGlucose = state.predictedGlucoseIncludingPendingInsulin?.dropFirst(),
                 predictedGlucose.count > 1 {
                 let first = predictedGlucose[predictedGlucose.startIndex]
                 let second = predictedGlucose[predictedGlucose.startIndex.advanced(by: 1)]
