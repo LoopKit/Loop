@@ -85,7 +85,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
         observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
         cacheStore: cacheStore,
         observationEnabled: false,
-        insulinModel: defaults?.insulinModelSettings?.model,
+        defaultInsulinModelSetting: defaults?.insulinModelSettings,
         basalProfile: defaults?.basalRateSchedule,
         insulinSensitivitySchedule: defaults?.insulinSensitivitySchedule
     )

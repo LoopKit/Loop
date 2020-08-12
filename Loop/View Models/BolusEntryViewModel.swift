@@ -73,6 +73,17 @@ final class BolusEntryViewModel: ObservableObject {
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
         return ChartsManager(colors: .default, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
+    
+    // MARK: - External Insulin
+    @Published var selectedInsulinModel: InsulinModelSettings?
+    
+    var insulinModelPickerOptions: [String]
+    
+    static let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
+        InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title: .humalogNovologAdult,
+        InsulinModelSettings.exponentialPreset(.humalogNovologChild).title: .humalogNovologChild,
+        InsulinModelSettings.exponentialPreset(.fiasp).title: .fiasp
+    ]
 
     // MARK: - Constants
 
@@ -86,19 +97,37 @@ final class BolusEntryViewModel: ObservableObject {
         dataManager: DeviceDataManager,
         originalCarbEntry: StoredCarbEntry? = nil,
         potentialCarbEntry: NewCarbEntry? = nil,
-        selectedCarbAbsorptionTimeEmoji: String? = nil
+        selectedCarbAbsorptionTimeEmoji: String? = nil,
+        supportedInsulinModels: SupportedInsulinModelSettings? = nil
     ) {
         self.dataManager = dataManager
         self.originalCarbEntry = originalCarbEntry
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
+        self.insulinModelPickerOptions = []
 
+        findInsulinModelPickerOptions(supportedInsulinModels)
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
 
         update()
+    }
+    
+    private func findInsulinModelPickerOptions(_ allowedModels: SupportedInsulinModelSettings?) {
+        guard let allowedModels = allowedModels else {
+            return
+        }
+        
+        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title)
+        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologChild).title)
+        
+        if allowedModels.fiaspModelEnabled {
+            insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.fiasp).title)
+        }
+        
+        // ANNA TODO: not including Walsh for now in the UI (or potentially ever)
     }
 
     private func observeLoopUpdates() {
