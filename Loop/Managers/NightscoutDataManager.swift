@@ -35,11 +35,11 @@ final class NightscoutDataManager {
         self.deviceManager = deviceDataManager
 
         NotificationCenter.default.addObserver(self, selector: #selector(loopCompleted(_:)), name: .LoopCompleted, object: deviceDataManager.loopManager)
-        NotificationCenter.default.addObserver(self, selector: #selector(loopDataUpdated(_:)), name: .LoopDataUpdated, object: deviceDataManager.loopManager)
+        NotificationCenter.default.addObserver(self, selector: #selector(loopDataUpload(_:)), name: .LoopDataUpload, object: deviceDataManager.loopManager)
     }
 
 
-    @objc func loopDataUpdated(_ note: Notification) {
+    @objc func loopDataUpload(_ note: Notification) {
         guard
             let rawContext = note.userInfo?[LoopDataManager.LoopUpdateContextKey] as? LoopDataManager.LoopUpdateContext.RawValue,
             let context = LoopDataManager.LoopUpdateContext(rawValue: rawContext),
