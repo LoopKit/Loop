@@ -29,54 +29,62 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(spacing: 0) {
-            List {
-                historySection
-                summarySection
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                List {
+                    self.historySection
+                    self.summarySection
+                }
+                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
+                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
+                // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
+                // TODO: Fix this in Xcode 12 when we're building for iOS 14.
+                .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
+                .listStyle(GroupedListStyle())
+                .environment(\.horizontalSizeClass, self.horizontalOverride)
+                
+                self.actionArea
+                    .frame(height: self.isKeyboardVisible ? 0 : nil)
+                    .opacity(self.isKeyboardVisible ? 0 : 1)
             }
-            // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
-            // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
-            // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
-            // TODO: Fix this in Xcode 12 when we're building for iOS 14.
-            .padding(.top, shouldBolusEntryBecomeFirstResponder ? -200 : -28)
-            .listStyle(GroupedListStyle())
-            .environment(\.horizontalSizeClass, horizontalOverride)
-
-            actionArea
-                .frame(height: isKeyboardVisible ? 0 : nil)
-                .opacity(isKeyboardVisible ? 0 : 1)
-        }
-        .onKeyboardStateChange { state in
-            self.isKeyboardVisible = state.height > 0
-
-            if state.height == 0 {
-                // Ensure tapping 'Enter Bolus' can make the text field the first responder again
-                self.shouldBolusEntryBecomeFirstResponder = false
+            .onKeyboardStateChange { state in
+                self.isKeyboardVisible = state.height > 0
+                
+                if state.height == 0 {
+                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
+                    self.shouldBolusEntryBecomeFirstResponder = false
+                }
             }
-        }
-        .keyboardAware()
-        .edgesIgnoringSafeArea(isKeyboardVisible ? [] : .bottom)
-        .navigationBarTitle(
-            viewModel.potentialCarbEntry == nil
-                ? Text("Bolus", comment: "Title for bolus entry screen")
-                : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
-        )
-        .supportedInterfaceOrientations(.portrait)
-        .alert(item: $viewModel.activeAlert, content: alert(for:))
-        .onReceive(viewModel.$enteredBolus) { updatedBolusEntry in
-            // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
-            let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
-            self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-        }
-        .onReceive(viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-            // The view model can disable manual glucose entry if CGM data returns.
-            if !isManualGlucoseEntryEnabled {
-                self.isManualGlucoseEntryRowVisible = false
-                self.enteredManualGlucose = ""
+            .keyboardAware()
+            .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
+            .navigationBarTitle(
+                self.viewModel.potentialCarbEntry == nil
+                    ? Text("Bolus", comment: "Title for bolus entry screen")
+                    : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
+            )
+                .supportedInterfaceOrientations(.portrait)
+                .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
+                .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
+                    // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
+                    let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
+                    self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+            }
+            .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
+                // The view model can disable manual glucose entry if CGM data returns.
+                if !isManualGlucoseEntryEnabled {
+                    self.isManualGlucoseEntryRowVisible = false
+                    self.enteredManualGlucose = ""
+                }
             }
         }
     }
 
+    private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
+        // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
+        // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
+        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
+    }
+    
     private var historySection: some View {
         Section {
             VStack(spacing: 8) {
