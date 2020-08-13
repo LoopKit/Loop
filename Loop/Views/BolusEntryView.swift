@@ -319,7 +319,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            primaryActionButton
+            actionButton
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
@@ -354,7 +354,19 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             )
         }
     }
-
+    
+    private var hasBolusEntryReadyToDeliver: Bool {
+        return self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) != 0
+    }
+    
+    enum ButtonChoice { case manualGlucoseEntry, actionButton }
+    
+    private var primaryButton: ButtonChoice {
+        if !isManualGlucosePromptVisible { return .actionButton }
+        if hasBolusEntryReadyToDeliver { return .actionButton }
+        return .manualGlucoseEntry
+    }
+    
     private var enterManualGlucoseButton: some View {
         Button(
             action: {
@@ -364,15 +376,11 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             },
             label: { Text("Enter Manual BG", comment: "Button text prompting manual glucose entry on bolus screen") }
         )
-        .buttonStyle(ActionButtonStyle(hasBolusEntryReadyToDeliver ? .secondary : .primary))
+            .buttonStyle(ActionButtonStyle(primaryButton == .manualGlucoseEntry ? .primary : .secondary))
         .padding([.top, .horizontal])
     }
 
-    private var hasBolusEntryReadyToDeliver: Bool {
-        return self.hasDataToSave || self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) != 0
-    }
-    
-    private var primaryActionButton: some View {
+    private var actionButton: some View {
         Button(
             action: {
                 if !self.hasBolusEntryReadyToDeliver {
@@ -397,7 +405,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 }
             }
         )
-        .buttonStyle(ActionButtonStyle(isManualGlucosePromptVisible && !hasBolusEntryReadyToDeliver ? .secondary : .primary))
+        .buttonStyle(ActionButtonStyle(primaryButton == .actionButton ? .primary : .secondary))
         .padding()
     }
 
