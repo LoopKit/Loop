@@ -47,9 +47,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         .keyboardAware()
         .edgesIgnoringSafeArea(isKeyboardVisible ? [] : .bottom)
         .navigationBarTitle(
-            viewModel.potentialCarbEntry == nil
-                ? Text("Bolus", comment: "Title for bolus entry screen")
-                : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
+            title
         )
         .supportedInterfaceOrientations(.portrait)
         .alert(item: $viewModel.activeAlert, content: alert(for:))
@@ -65,6 +63,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 self.enteredManualGlucose = ""
             }
         }
+    }
+    
+    private var title: Text {
+        if viewModel.insulinModelPickerOptions.count > 0 {
+            return Text("Log Dose", comment: "Title for dose logging screen")
+        }
+        return viewModel.potentialCarbEntry == nil ? Text("Bolus", comment: "Title for bolus entry screen") : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
     }
 
     private var historySection: some View {
