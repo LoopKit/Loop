@@ -82,7 +82,8 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
     fileprivate enum ConfigurationRow: Int, CaseCountable {
         case glucoseTargetRange = 0
-        case correctionRangeOverrides
+        case correctionRangePreMealOverride
+        case correctionRangeWorkoutOverride
         case suspendThreshold
         case basalRate
         case deliveryLimits
@@ -260,9 +261,16 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 } else {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 }
-            case .correctionRangeOverrides:
-                configCell.textLabel?.text = TherapySetting.correctionRangeOverrides.title
+            case .correctionRangePreMealOverride:
+                configCell.textLabel?.text = TherapySetting.preMealCorrectionRangeOverride.title
                 if dataManager.loopManager.settings.preMealTargetRange == nil {
+                    configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
+                } else {
+                    // TODO: Show some text in the detail label.
+                }
+            case .correctionRangeWorkoutOverride:
+                configCell.textLabel?.text = TherapySetting.workoutCorrectionRangeOverride.title
+                if dataManager.loopManager.settings.legacyWorkoutTargetRange == nil {
                     configCell.detailTextLabel?.text = SettingsTableViewCell.TapToSetString
                 } else {
                     // TODO: Show some text in the detail label.
@@ -438,7 +446,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 })
 
                 present(hostingController, animated: true)
-            case .correctionRangeOverrides:
+            case .correctionRangePreMealOverride:
                 guard let correctionRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule else {
                     // Disallow correction range override configuration without a configured correction range schedule.
                     tableView.deselectRow(at: indexPath, animated: true)
@@ -452,11 +460,40 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                         workout: dataManager.loopManager.settings.legacyWorkoutTargetRange,
                         unit: unit
                     ),
+                    preset: .preMeal,
                     unit: unit,
                     correctionRangeScheduleRange: correctionRangeSchedule.scheduleRange(),
                     minValue: dataManager.loopManager.settings.suspendThreshold?.quantity,
                     onSave: { [dataManager] overrides in
                         dataManager?.loopManager.settings.preMealTargetRange = overrides.preMeal?.doubleRange(for: unit)
+                    },
+                    sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled
+                )
+
+                let hostingController = ExplicitlyDismissibleModal(rootView: editor, onDisappear: {
+                    tableView.deselectRow(at: indexPath, animated: true)
+                })
+
+                present(hostingController, animated: true)
+            case .correctionRangeWorkoutOverride:
+                guard let correctionRangeSchedule = dataManager.loopManager.settings.glucoseTargetRangeSchedule else {
+                    // Disallow correction range override configuration without a configured correction range schedule.
+                    tableView.deselectRow(at: indexPath, animated: true)
+                    return
+                }
+
+                let unit = correctionRangeSchedule.unit
+                let editor = CorrectionRangeOverridesEditor(
+                    value: CorrectionRangeOverrides(
+                        preMeal: dataManager.loopManager.settings.preMealTargetRange,
+                        workout: dataManager.loopManager.settings.legacyWorkoutTargetRange,
+                        unit: unit
+                    ),
+                    preset: .workout,
+                    unit: unit,
+                    correctionRangeScheduleRange: correctionRangeSchedule.scheduleRange(),
+                    minValue: dataManager.loopManager.settings.suspendThreshold?.quantity,
+                    onSave: { [dataManager] overrides in
                         dataManager?.loopManager.settings.legacyWorkoutTargetRange = overrides.workout?.doubleRange(for: unit)
                     },
                     sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled
@@ -784,8 +821,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         switch therapySetting {
         case .glucoseTargetRange:
             dataManager?.loopManager.settings.glucoseTargetRangeSchedule = therapySettings.glucoseTargetRangeSchedule
-        case .correctionRangeOverrides:
+        case .preMealCorrectionRangeOverride:
             dataManager?.loopManager.settings.preMealTargetRange = therapySettings.preMealTargetRange
+        case .workoutCorrectionRangeOverride:
             dataManager?.loopManager.settings.legacyWorkoutTargetRange = therapySettings.workoutTargetRange
         case .suspendThreshold:
             dataManager?.loopManager.settings.suspendThreshold = therapySettings.suspendThreshold
