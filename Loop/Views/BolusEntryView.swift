@@ -261,7 +261,12 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     }
     
     private var insulinModelPicker: some View {
-        ExpandablePicker(with: viewModel.insulinModelPickerOptions, pickerIndex: $viewModel.selectedInsulinModelIndex)
+        ExpandablePicker(
+            with: viewModel.insulinModelPickerOptions,
+            onUpdate: { [weak viewModel] index in
+                viewModel?.selectedInsulinModelIndex = index
+            }
+        )
     }
     
     @ViewBuilder
