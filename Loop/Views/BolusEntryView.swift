@@ -146,7 +146,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
                 } else if viewModel.insulinModelPickerOptions.count > 0 {
-                    datePicker
+                    //datePicker
                     insulinModelPicker
                 } else {
                     recommendedBolusRow
@@ -261,15 +261,15 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     }
     
     private var insulinModelPicker: some View {
-        Picker(selection: $viewModel.selectedInsulinModel, label: Text("Please choose a color")) {
-            ForEach(0 ..< viewModel.insulinModelPickerOptions.count) {
-                Text(self.viewModel.insulinModelPickerOptions[$0])
-           }
-        }
+        ExpandablePicker(with: viewModel.insulinModelPickerOptions, pickerIndex: $viewModel.selectedInsulinModelIndex)
     }
     
+    @ViewBuilder
     private var datePicker: some View {
-        ExpandableDatePicker(with: $viewModel.doseDate)
+        //ExpandableDatePicker(with: $viewModel.doseDate)
+        DatePicker("", selection: $viewModel.doseDate, in: Date().addingTimeInterval(-.hours(12))...Date().addingTimeInterval(.hours(12)), displayedComponents: [.date, .hourAndMinute])
+        .labelsHidden()
+        .pickerStyle(WheelPickerStyle())
     }
 
     private var bolusEntryRow: some View {

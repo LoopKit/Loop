@@ -76,7 +76,7 @@ final class BolusEntryViewModel: ObservableObject {
     }()
     
     // MARK: - External Insulin
-    @State var selectedInsulinModel: String? = nil
+    @State var selectedInsulinModelIndex: Int = 0
     @State var doseDate: Date = Date()
     
     var insulinModelPickerOptions: [String]

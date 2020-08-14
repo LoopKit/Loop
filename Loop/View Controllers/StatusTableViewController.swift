@@ -1111,7 +1111,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 vc.restoreUserActivityState(activity)
             }
         case let vc as InsulinDeliveryTableViewController:
-            vc.doseStore = deviceManager.loopManager.doseStore
+            vc.deviceManager = deviceManager
             vc.hidesBottomBarWhenPushed = true
         case let vc as OverrideSelectionViewController:
             if deviceManager.loopManager.settings.futureOverrideEnabled() {
