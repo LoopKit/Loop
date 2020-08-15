@@ -77,13 +77,18 @@ final class BolusEntryViewModel: ObservableObject {
     
     // MARK: - External Insulin
     var selectedInsulinModelIndex: Int = 0
+    var selectedInsulinModel: ExponentialInsulinModelPreset? {
+        return presetFromTitle[insulinModelPickerOptions[selectedInsulinModelIndex]]
+    }
     
     var insulinModelPickerOptions: [String]
+    
     var isLoggingDose: Bool {
         return insulinModelPickerOptions.count > 0
     }
     
-    static let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
+    
+    let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
         InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title: .humalogNovologAdult,
         InsulinModelSettings.exponentialPreset(.humalogNovologChild).title: .humalogNovologChild,
         InsulinModelSettings.exponentialPreset(.fiasp).title: .fiasp
@@ -245,6 +250,18 @@ final class BolusEntryViewModel: ObservableObject {
                     }
                 }
             }
+        } else if isLoggingDose {
+            let doseVolume = enteredBolus.doubleValue(for: .internationalUnit())
+            guard doseVolume > 0 else {
+                completion()
+                return
+            }
+            
+            let model = selectedInsulinModel
+            let insulinModelSettings = InsulinModelSettings(model: model!)
+            let doseDate = Date() // ANNA TODO: fixme to pull from picker
+
+            dataManager.loopManager.logOutsideInsulinDose(startDate: doseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
         } else {
             saveCarbsAndDeliverBolus(onSuccess: completion)
         }
