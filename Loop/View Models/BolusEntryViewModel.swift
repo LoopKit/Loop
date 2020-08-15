@@ -80,6 +80,9 @@ final class BolusEntryViewModel: ObservableObject {
     @State var doseDate: Date = Date()
     
     var insulinModelPickerOptions: [String]
+    var isLoggingDose: Bool {
+        return insulinModelPickerOptions.count > 0
+    }
     
     static let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
         InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title: .humalogNovologAdult,

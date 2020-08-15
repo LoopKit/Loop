@@ -66,7 +66,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     }
     
     private var title: Text {
-        if viewModel.insulinModelPickerOptions.count > 0 {
+        if viewModel.isLoggingDose {
             return Text("Log Dose", comment: "Title for dose logging screen")
         }
         return viewModel.potentialCarbEntry == nil ? Text("Bolus", comment: "Title for bolus entry screen") : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
@@ -142,7 +142,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var summarySection: some View {
         Section {
             VStack(spacing: 16) {
-                Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
+                titleText
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -150,14 +150,17 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     manualGlucoseEntryRow
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
-                } else if viewModel.insulinModelPickerOptions.count > 0 {
-                    //datePicker
-                    insulinModelPicker
+                } else if viewModel.isLoggingDose {
+                    datePicker
                 } else {
                     recommendedBolusRow
                 }
             }
             .padding(.top, 8)
+            
+            if viewModel.isLoggingDose {
+                insulinModelPicker
+            }
 
             if viewModel.isManualGlucoseEntryEnabled && viewModel.potentialCarbEntry != nil {
                 potentialCarbEntryRow
@@ -169,6 +172,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
             bolusEntryRow
         }
+    }
+    
+    private var titleText: Text {
+        if viewModel.isLoggingDose {
+            return Text("Dose Summary", comment: "Title for card to log dose")
+        }
+        return Text("Bolus Summary", comment: "Title for card displaying carb entry and bolus recommendation")
     }
 
     private var glucoseFormatter: NumberFormatter {
@@ -384,7 +394,9 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
             },
             label: {
-                if canSaveWithoutBolusing {
+                if viewModel.isLoggingDose {
+                    Text("Log Dose", comment: "Button text to log a dose")
+                } else if canSaveWithoutBolusing {
                     Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
                 } else {
                     Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
