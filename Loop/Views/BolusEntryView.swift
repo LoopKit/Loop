@@ -18,7 +18,6 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
-    @State var doseDate: Date = Date()
 
     @State private var isManualGlucoseEntryRowVisible = false
     @State private var enteredManualGlucose = ""
@@ -284,15 +283,15 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             }
         )
     }
-
     private var datePicker: some View {
         // Allow 6 hours before & after due to longest DIA
-        ZStack(alignment: .topLeading) {
-            // ANNA TOOD: fix buggy animations
-            DatePicker("", selection: $doseDate, in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)), displayedComponents: [.date, .hourAndMinute])
-            .pickerStyle(WheelPickerStyle())
-            Text("Date")
-        }
+        ExpandableDatePicker(
+            with: viewModel.selectedDoseDate,
+            text: "Date",
+            onUpdate: { [weak viewModel] date in
+                viewModel?.selectedDoseDate = date
+            }
+        )
     }
 
     private var bolusEntryRow: some View {
@@ -515,5 +514,16 @@ struct LabelBackground: ViewModifier {
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .fill(Color(.systemGray6))
             )
+    }
+}
+
+extension Binding {
+    func onChange(_ handler: @escaping (Value) -> Void) -> Binding<Value> {
+        return Binding(
+            get: { self.wrappedValue },
+            set: { selection in
+                self.wrappedValue = selection
+                handler(selection)
+        })
     }
 }

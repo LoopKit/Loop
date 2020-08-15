@@ -80,6 +80,7 @@ final class BolusEntryViewModel: ObservableObject {
     var selectedInsulinModel: ExponentialInsulinModelPreset? {
         return presetFromTitle[insulinModelPickerOptions[selectedInsulinModelIndex]]
     }
+    var selectedDoseDate: Date = Date()
     
     var insulinModelPickerOptions: [String]
     
@@ -259,9 +260,8 @@ final class BolusEntryViewModel: ObservableObject {
             
             let model = selectedInsulinModel
             let insulinModelSettings = InsulinModelSettings(model: model!)
-            let doseDate = Date() // ANNA TODO: fixme to pull from picker
 
-            dataManager.loopManager.logOutsideInsulinDose(startDate: doseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
+            dataManager.loopManager.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
         } else {
             saveCarbsAndDeliverBolus(onSuccess: completion)
         }
@@ -460,7 +460,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
         let (manualGlucoseSample, enteredBolus) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus) }
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: Date(), value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units)
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: selectedDoseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units)
 
         let predictedGlucoseValues: [GlucoseValue]
         do {
