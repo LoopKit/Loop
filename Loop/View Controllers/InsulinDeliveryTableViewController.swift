@@ -167,11 +167,13 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
     private enum DataSourceSegment: Int {
         case reservoir = 0
         case history
+        case logDose
     }
 
     private enum Values {
         case reservoir([ReservoirValue])
         case history([PersistedPumpEvent])
+        case logDose([PersistedOutsideDoseEvent])
     }
 
     // Not thread-safe
@@ -183,6 +185,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             case .reservoir(let values):
                 count = values.count
             case .history(let values):
+                count = values.count
+            case .logDose(let values):
                 count = values.count
             }
 
@@ -240,6 +244,21 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                     self.updateTimelyStats(nil)
                     self.updateTotal()
                 }
+            case .logDose:
+                doseStore?.getLoggedDoses(since: Date.distantPast) { (result) in
+                    DispatchQueue.main.async { () -> Void in
+                        switch result {
+                        case .failure(let error):
+                            self.state = .unavailable(error)
+                        case .success(let values):
+                            self.values = .logDose(values)
+                            self.tableView.reloadData()
+                        }
+                    }
+                }
+
+                self.updateTimelyStats(nil)
+                self.updateTotal()
             }
         }
     }
@@ -327,6 +346,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             confirmMessage = NSLocalizedString("Are you sure you want to delete all reservoir values?", comment: "Action sheet confirmation message for reservoir deletion")
         case .history:
             confirmMessage = NSLocalizedString("Are you sure you want to delete all history entries?", comment: "Action sheet confirmation message for pump history deletion")
+        case .logDose:
+            confirmMessage = NSLocalizedString("Are you sure you want to delete all logged dose entries?", comment: "Action sheet confirmation message for logged dose deletion")
         }
 
         let sheet = UIAlertController(deleteAllConfirmationMessage: confirmMessage) {
@@ -356,6 +377,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             doseStore?.deleteAllReservoirValues(completion)
         case .history:
             doseStore?.deleteAllPumpEvents(completion)
+        case .logDose:
+            doseStore?.deleteAllOutsideDoseEvents(completion)
         }
     }
 
@@ -375,6 +398,8 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
         case .reservoir(let values):
             return values.count
         case .history(let values):
+            return values.count
+        case .logDose(let values):
             return values.count
         }
     }
@@ -400,6 +425,12 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                 cell.textLabel?.text = entry.title ?? NSLocalizedString("Unknown", comment: "The default title to use when an entry has none")
                 cell.detailTextLabel?.text = time
                 cell.accessoryType = entry.isUploaded ? .checkmark : .none
+                cell.selectionStyle = .default
+            case .logDose(let values):
+                let event = values[indexPath.row]
+                let time = timeFormatter.string(from: event.date)
+                cell.textLabel?.text = event.title ?? NSLocalizedString("Unknown", comment: "The default title to use when an entry has none")
+                cell.detailTextLabel?.text = time
                 cell.selectionStyle = .default
             }
         }
@@ -444,6 +475,20 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
                         }
                     }
                 }
+            case .logDose(let doses):
+                var doses = doses
+                let value = doses.remove(at: indexPath.row)
+                self.values = .logDose(doses)
+
+                tableView.deleteRows(at: [indexPath], with: .automatic)
+                doseStore?.deleteOutsideDoseEvent(value) { (error) -> Void in
+                    if let error = error {
+                        DispatchQueue.main.async {
+                            self.present(UIAlertController(with: error), animated: true)
+                            self.reloadData()
+                        }
+                    }
+                }
             }
         }
     }
@@ -475,6 +520,21 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
             vc.title = NSLocalizedString("Pump Event", comment: "The title of the screen displaying a pump event")
 
             show(vc, sender: indexPath)
+        }
+        else if case .display = state, case .logDose(let doses) = values {
+                let entry = doses[indexPath.row]
+
+                let vc = CommandResponseViewController(command: { (completionHandler) -> String in
+                    var description = [String]()
+                    description.append(self.timeFormatter.string(from: entry.date))
+                    description.append(String(describing: entry))
+
+                    return description.joined(separator: "\n\n")
+                })
+
+                vc.title = NSLocalizedString("Logged Insulin Dose", comment: "The title of the screen displaying a logged insulin dose")
+
+                show(vc, sender: indexPath)
         }
     }
 
