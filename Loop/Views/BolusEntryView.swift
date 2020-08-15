@@ -18,6 +18,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
+    @State var doseDate: Date = Date()
 
     @State private var isManualGlucoseEntryRowVisible = false
     @State private var enteredManualGlucose = ""
@@ -283,13 +284,15 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             }
         )
     }
-    
-    @ViewBuilder
+
     private var datePicker: some View {
-        //ExpandableDatePicker(with: $viewModel.doseDate)
-        DatePicker("", selection: $viewModel.doseDate, in: Date().addingTimeInterval(-.hours(12))...Date().addingTimeInterval(.hours(12)), displayedComponents: [.date, .hourAndMinute])
-        .labelsHidden()
-        .pickerStyle(WheelPickerStyle())
+        // Allow 6 hours before & after due to longest DIA
+        ZStack(alignment: .topLeading) {
+            // ANNA TOOD: fix buggy animations
+            DatePicker("", selection: $doseDate, in: Date().addingTimeInterval(-.hours(6))...Date().addingTimeInterval(.hours(6)), displayedComponents: [.date, .hourAndMinute])
+            .pickerStyle(WheelPickerStyle())
+            Text("Date")
+        }
     }
 
     private var bolusEntryRow: some View {
