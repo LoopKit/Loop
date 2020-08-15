@@ -146,12 +146,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     .bold()
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                if viewModel.isManualGlucoseEntryEnabled {
+                // A manual BG shouldn't be required to log a dose
+                if viewModel.isLoggingDose {
+                    datePicker
+                } else if viewModel.isManualGlucoseEntryEnabled {
                     manualGlucoseEntryRow
                 } else if viewModel.potentialCarbEntry != nil {
                     potentialCarbEntryRow
-                } else if viewModel.isLoggingDose {
-                    datePicker
                 } else {
                     recommendedBolusRow
                 }
@@ -166,7 +167,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 potentialCarbEntryRow
             }
 
-            if viewModel.isManualGlucoseEntryEnabled || viewModel.potentialCarbEntry != nil {
+            if (viewModel.isManualGlucoseEntryEnabled && !viewModel.isLoggingDose) || viewModel.potentialCarbEntry != nil {
                 recommendedBolusRow
             }
 
@@ -330,13 +331,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            if isNoticeVisible {
+            if isNoticeVisible && !viewModel.isLoggingDose {
                 warning(for: viewModel.activeNotice!)
                     .padding([.top, .horizontal])
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            if isManualGlucosePromptVisible {
+            if isManualGlucosePromptVisible && !viewModel.isLoggingDose {
                 enterManualGlucoseButton
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
@@ -358,7 +359,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     }
 
     private var isManualGlucosePromptVisible: Bool {
-        viewModel.activeNotice == .staleGlucoseData && !viewModel.isManualGlucoseEntryEnabled
+        viewModel.activeNotice == .staleGlucoseData && !viewModel.isManualGlucoseEntryEnabled && !viewModel.isLoggingDose
     }
 
     private func warning(for notice: BolusEntryViewModel.Notice) -> some View {

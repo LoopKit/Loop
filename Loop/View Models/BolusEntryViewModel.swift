@@ -76,17 +76,16 @@ final class BolusEntryViewModel: ObservableObject {
     }()
     
     // MARK: - External Insulin
-    var selectedInsulinModelIndex: Int = 0
+    @Published var selectedInsulinModelIndex: Int = 0
+    // Return nil if we aren't logging a dose so the bolus is annotated with the correct insulin model
     var selectedInsulinModel: ExponentialInsulinModelPreset? {
-        return presetFromTitle[insulinModelPickerOptions[selectedInsulinModelIndex]]
+        return isLoggingDose ? presetFromTitle[insulinModelPickerOptions[selectedInsulinModelIndex]] : nil
     }
-    var selectedDoseDate: Date = Date()
+    @Published var selectedDoseDate: Date = Date()
     
     var insulinModelPickerOptions: [String]
     
-    var isLoggingDose: Bool {
-        return insulinModelPickerOptions.count > 0
-    }
+    let isLoggingDose: Bool
     
     
     let presetFromTitle: [String: ExponentialInsulinModelPreset] = [
@@ -115,23 +114,26 @@ final class BolusEntryViewModel: ObservableObject {
         self.potentialCarbEntry = potentialCarbEntry
         self.selectedCarbAbsorptionTimeEmoji = selectedCarbAbsorptionTimeEmoji
         self.insulinModelPickerOptions = []
+        self.isLoggingDose = supportedInsulinModels != nil
 
         findInsulinModelPickerOptions(supportedInsulinModels)
         observeLoopUpdates()
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
+        observeInsulinModelChanges()
+        observeDoseDateChanges()
 
         update()
     }
     
     private func findInsulinModelPickerOptions(_ allowedModels: SupportedInsulinModelSettings?) {
+        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title)
+        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologChild).title)
+        
         guard let allowedModels = allowedModels else {
             return
         }
-        
-        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title)
-        insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologChild).title)
         
         if allowedModels.fiaspModelEnabled {
             insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.fiasp).title)
@@ -176,6 +178,30 @@ final class BolusEntryViewModel: ObservableObject {
                     })
 
                     self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeInsulinModelChanges() {
+        $selectedInsulinModelIndex
+            .removeDuplicates()
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.dataManager.loopManager.getLoopState { manager, state in
+                    self?.updatePredictedGlucoseValues(from: state)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeDoseDateChanges() {
+        $selectedDoseDate
+            .removeDuplicates()
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.dataManager.loopManager.getLoopState { manager, state in
+                    self?.updatePredictedGlucoseValues(from: state)
                 }
             }
             .store(in: &cancellables)
@@ -262,6 +288,7 @@ final class BolusEntryViewModel: ObservableObject {
             let insulinModelSettings = InsulinModelSettings(model: model!)
 
             dataManager.loopManager.logOutsideInsulinDose(startDate: selectedDoseDate, units: doseVolume, insulinModelSetting: insulinModelSettings)
+            completion()
         } else {
             saveCarbsAndDeliverBolus(onSuccess: completion)
         }
@@ -459,8 +486,13 @@ final class BolusEntryViewModel: ObservableObject {
     private func updatePredictedGlucoseValues(from state: LoopState, completion: @escaping () -> Void = {}) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let (manualGlucoseSample, enteredBolus) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus) }
-        let enteredBolusDose = DoseEntry(type: .bolus, startDate: selectedDoseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units)
+        let (manualGlucoseSample, enteredBolus, doseDate, insulinModel) = DispatchQueue.main.sync { (self.manualGlucoseSample, self.enteredBolus, self.selectedDoseDate, self.selectedInsulinModel) }
+        var insulinModelSettings: InsulinModelSettings?
+        if let model = insulinModel {
+            insulinModelSettings = InsulinModelSettings(model: model)
+        }
+        
+        let enteredBolusDose = DoseEntry(type: .bolus, startDate: doseDate, value: enteredBolus.doubleValue(for: .internationalUnit()), unit: .units, insulinModelSetting: insulinModelSettings)
 
         let predictedGlucoseValues: [GlucoseValue]
         do {
