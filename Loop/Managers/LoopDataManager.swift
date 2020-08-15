@@ -666,9 +666,7 @@ extension LoopDataManager {
         let dose = DoseEntry(type: .bolus, startDate: startDate, value: units, unit: .units, syncIdentifier: syncIdentifier, insulinModelSetting: insulinModelSetting)
 
         logOutsideInsulinDose(dose: dose) { (error) in
-            if let error = error {
-                 print(error)
-            } else {
+            if error == nil {
                 self.recommendedBolus = nil
                 self.recommendedTempBasal = nil
                 self.insulinEffect = nil
@@ -686,7 +684,6 @@ extension LoopDataManager {
 
         doseStore.logOutsideDoseEvents(doseList) { (error) in
             if let error = error {
-                print(error)
                 completion(error)
             }
         }
