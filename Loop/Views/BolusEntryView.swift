@@ -281,14 +281,15 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             with: viewModel.insulinModelPickerOptions,
             onUpdate: { [weak viewModel] index in
                 viewModel?.selectedInsulinModelIndex = index
-            }
+            },
+            label: NSLocalizedString("Insulin Model", comment: "Insulin model title")
         )
     }
     private var datePicker: some View {
         // Allow 6 hours before & after due to longest DIA
         ExpandableDatePicker(
             with: viewModel.selectedDoseDate,
-            text: "Date",
+            text: NSLocalizedString("Date", comment: "Date picker label"),
             onUpdate: { [weak viewModel] date in
                 viewModel?.selectedDoseDate = date
             }
