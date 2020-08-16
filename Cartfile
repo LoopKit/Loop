@@ -1,4 +1,4 @@
-github "LoopKit/LoopKit" "merge-from-tidepool"
+github "novalegra/LoopKit" "novalegra/multiple-insulin-swiftui"
 github "LoopKit/CGMBLEKit" "merge-from-tidepool"
 github "i-schuetz/SwiftCharts" == 0.6.5
 github "LoopKit/dexcom-share-client-swift" "merge-from-tidepool"
