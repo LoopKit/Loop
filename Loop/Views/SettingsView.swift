@@ -142,7 +142,8 @@ extension SettingsView {
         Image(systemName: "plus.circle")
             .resizable()
             .scaledToFit()
-            .accentColor(.blue)
+            .accentColor(.accentColor)
+            .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
     }
     
     private func deviceImage(uiImage: UIImage?) -> AnyView {
@@ -167,9 +168,9 @@ fileprivate struct LargeButton: View {
 
     // TODO: The design doesn't show this, but do we need to consider different values here for different size classes?
     static let spacing: CGFloat = 15
-    static let imageWidth: CGFloat = 48
-    static let imageHeight: CGFloat = 48
-    static let topBottomPadding: CGFloat = 20
+    static let imageWidth: CGFloat = 60
+    static let imageHeight: CGFloat = 60
+    static let topBottomPadding: CGFloat = 10
     
     public var body: some View {
         Button(action: action) {
