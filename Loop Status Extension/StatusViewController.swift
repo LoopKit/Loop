@@ -75,14 +75,14 @@ class StatusViewController: UIViewController, NCWidgetProviding {
 
     lazy var glucoseStore = GlucoseStore(
         healthStore: healthStore,
-        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
         observationEnabled: false
     )
 
     lazy var doseStore = DoseStore(
         healthStore: healthStore,
-        observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+        observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
         cacheStore: cacheStore,
         observationEnabled: false,
         insulinModel: defaults?.insulinModelSettings?.model,
@@ -92,7 +92,7 @@ class StatusViewController: UIViewController, NCWidgetProviding {
     
     let absorptionTimes = LoopSettings.defaultCarbAbsorptionTimes
     lazy var carbStore = CarbStore(healthStore: healthStore,
-                                   observeHealthKitForCurrentAppOnly: FeatureFlags.observeHealthKitForCurrentAppOnly,
+                                   observeHealthKitSamplesFromOtherApps: FeatureFlags.observeHealthKitSamplesFromOtherApps,
                                    cacheStore: cacheStore,
                                    cacheLength: TimeInterval(days: 1),
                                    defaultAbsorptionTimes: absorptionTimes,
