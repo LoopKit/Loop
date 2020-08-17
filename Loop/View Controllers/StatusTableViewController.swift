@@ -1533,6 +1533,14 @@ extension StatusTableViewController: PumpManagerStatusObserver {
         
         self.basalDeliveryState = status.basalDeliveryState
         self.bolusState = status.bolusState
+        
+        // refresh display if pump status highlight or lifecycle progress have changed
+        if status.pumpStatusHighlight != oldStatus.pumpStatusHighlight ||
+           status.pumpLifecycleProgress != oldStatus.pumpLifecycleProgress
+        {
+            refreshContext.update(with: .status)
+            self.reloadData(animated: true)
+        }
     }
 }
 
