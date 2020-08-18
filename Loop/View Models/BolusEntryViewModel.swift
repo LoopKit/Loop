@@ -131,15 +131,19 @@ final class BolusEntryViewModel: ObservableObject {
         insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologAdult).title)
         insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.humalogNovologChild).title)
         
-        guard let allowedModels = allowedModels else {
-            return
-        }
-        
-        if allowedModels.fiaspModelEnabled {
+        if let allowedModels = allowedModels, allowedModels.fiaspModelEnabled {
             insulinModelPickerOptions.append(InsulinModelSettings.exponentialPreset(.fiasp).title)
         }
-        
+
         // ANNA TODO: not including Walsh for now in the UI (or potentially ever)
+    }
+    
+    var startingPickerIndex: Int {
+        if let pumpInsulinModel = dataManager.loopManager.insulinModelSettings?.model as? ExponentialInsulinModelPreset, let indexToStartOn = insulinModelPickerOptions.firstIndex(of: pumpInsulinModel.title) {
+            return indexToStartOn
+        }
+        
+        return 0
     }
 
     private func observeLoopUpdates() {

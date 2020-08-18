@@ -282,7 +282,8 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             onUpdate: { [weak viewModel] index in
                 viewModel?.selectedInsulinModelIndex = index
             },
-            label: NSLocalizedString("Insulin Model", comment: "Insulin model title")
+            label: NSLocalizedString("Insulin Model", comment: "Insulin model title"),
+            initialPickerIndex: viewModel.startingPickerIndex
         )
     }
     private var datePicker: some View {
