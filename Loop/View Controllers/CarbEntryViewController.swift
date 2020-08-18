@@ -104,8 +104,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                 quantity: quantity,
                 startDate: date,
                 foodType: foodType,
-                absorptionTime: absorptionTime,
-                externalID: originalCarbEntry?.externalID
+                absorptionTime: absorptionTime
             )
         } else {
             return nil
