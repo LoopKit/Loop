@@ -29,6 +29,12 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 therapySettingsSection
                 deviceSettingsSection
+                if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
+                    deletePumpDataSection
+                }
+                if viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                    deleteCgmDataSection
+                }
                 supportSection
             }
             .listStyle(GroupedListStyle())
@@ -130,6 +136,30 @@ extension SettingsView {
         }
     }
     
+    private var deletePumpDataSection: some View {
+        Section {
+            Button(action: { self.viewModel.pumpManagerSettingsViewModel.deleteData?() }) {
+                HStack {
+                    Spacer()
+                    Text("Delete Pump Data").accentColor(.destructive)
+                    Spacer()
+                }
+            }
+        }
+    }
+    
+    private var deleteCgmDataSection: some View {
+        Section {
+            Button(action: { self.viewModel.cgmManagerSettingsViewModel.deleteData?() }) {
+                HStack {
+                    Spacer()
+                    Text("Delete CGM Data").accentColor(.destructive)
+                    Spacer()
+                }
+            }
+        }
+    }
+    
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
             NavigationLink(destination: Text("Support")) {
@@ -214,8 +244,8 @@ public struct SettingsView_Previews: PreviewProvider {
             
             SettingsView(viewModel: viewModel)
                 .colorScheme(.dark)
-                .previewDevice(PreviewDevice(rawValue: "iPhone XS Max"))
-                .previewDisplayName("XS Max dark")
+                .previewDevice(PreviewDevice(rawValue: "iPhone 11 Pro Max"))
+                .previewDisplayName("11 Pro dark")
         }
     }
 }

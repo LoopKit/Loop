@@ -771,12 +771,22 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     }
     
     private func presentTemporaryNewSettings(_ tableView: UITableView, _ indexPath: IndexPath) {
-        let pumpViewModel = DeviceViewModel(deviceManagerUI: dataManager.pumpManager, isSetUp: dataManager.pumpManager != nil) { [weak self] in
+        let pumpViewModel = DeviceViewModel(
+            deviceManagerUI: dataManager.pumpManager,
+            isSetUp: dataManager.pumpManager != nil,
+            deleteData: (dataManager.pumpManager is TestingPumpManager) ? { [weak self] in self?.dataManager.deleteTestingPumpData()
+                } : nil,
+            onTapped: { [weak self] in
             self?.didSelectPump()
-        }
-        let cgmViewModel = DeviceViewModel(deviceManagerUI: dataManager.cgmManager as? DeviceManagerUI, isSetUp: dataManager.cgmManager != nil) { [weak self] in
+        })
+        let cgmViewModel = DeviceViewModel(
+            deviceManagerUI: dataManager.cgmManager as? DeviceManagerUI,
+            isSetUp: dataManager.cgmManager != nil,
+            deleteData: (dataManager.cgmManager is TestingCGMManager) ? { [weak self] in self?.dataManager.deleteTestingCGMData()
+                } : nil,
+            onTapped: { [weak self] in
             self?.didSelectCGM()
-        }
+        })
         let pumpSupportedIncrements = dataManager.pumpManager.map {
             PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
                                     bolusVolumes: $0.supportedBolusVolumes,

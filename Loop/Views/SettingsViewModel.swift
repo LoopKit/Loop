@@ -15,16 +15,22 @@ import SwiftUI
 public class DeviceViewModel: ObservableObject {
     public init(deviceManagerUI: DeviceManagerUI? = nil,
                 isSetUp: Bool = false,
+                deleteData: (() -> Void)? = nil,
                 onTapped: @escaping () -> Void = { }) {
         self.deviceManagerUI = deviceManagerUI
         self.isSetUp = isSetUp
+        self.deleteData = deleteData
         self.onTapped = onTapped
     }
     
     let deviceManagerUI: DeviceManagerUI?
-
-    @Published private(set) var isSetUp: Bool = false
+    let deleteData: (() -> Void)?
     
+    @Published private(set) var isSetUp: Bool = false
+    var isTestingDevice: Bool {
+        return deleteData != nil
+    }
+
     var image: UIImage? { deviceManagerUI?.smallImage }
     var name: String { deviceManagerUI?.localizedTitle ?? "" }
    
