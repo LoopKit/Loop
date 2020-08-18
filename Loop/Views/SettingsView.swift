@@ -199,8 +199,8 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: Text("Support")) {
-                Text(NSLocalizedString("Support", comment: "The title of the support section in settings"))
+            NavigationLink(destination: SupportScreenView(issueReport: viewModel.issueReport)) {
+                Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
         }
     }

@@ -376,7 +376,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     override func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-        
+            
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let sender = tableView.cellForRow(at: indexPath)
 
@@ -656,10 +656,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         case .support:
             switch SupportRow(rawValue: indexPath.row)! {
             case .diagnostic:
-                let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: dataManager)
-                vc.title = sender?.textLabel?.text
-                
-                show(vc, sender: sender)
+                issueReport(title: sender?.textLabel?.text ?? "")
             }
         }
     }
@@ -809,6 +806,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                           },
                                           didSave: { [weak self] in
                                             self?.saveTherapySetting($0, $1)
+                                          },
+                                          issueReport: { [weak self] in
+                                            self?.issueReport(title: $0)
         })
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
@@ -858,6 +858,13 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
             break // NO-OP
         }
     }
+    
+    private func issueReport(title: String) {
+        let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: dataManager)
+        vc.title = title        
+        show(vc, sender: nil)
+    }
+
 }
 
 // MARK: - DeviceManager view controller delegation
