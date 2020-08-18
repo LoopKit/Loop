@@ -308,13 +308,13 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            if isNoticeVisible {
+            if viewModel.isNoticeVisible {
                 warning(for: viewModel.activeNotice!)
                     .padding([.top, .horizontal])
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            if isManualGlucosePromptVisible {
+            if viewModel.isManualGlucosePromptVisible {
                 enterManualGlucoseButton
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
@@ -323,20 +323,6 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
-    }
-
-    private var isNoticeVisible: Bool {
-        if viewModel.activeNotice == nil {
-            return false
-        } else if viewModel.activeNotice != .staleGlucoseData {
-            return true
-        } else {
-            return !viewModel.isManualGlucoseEntryEnabled
-        }
-    }
-
-    private var isManualGlucosePromptVisible: Bool {
-        viewModel.activeNotice == .staleGlucoseData && !viewModel.isManualGlucoseEntryEnabled
     }
 
     private func warning(for notice: BolusEntryViewModel.Notice) -> some View {
@@ -354,19 +340,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             )
         }
     }
-    
-    private var hasBolusEntryReadyToDeliver: Bool {
-        return self.viewModel.enteredBolus.doubleValue(for: .internationalUnit()) != 0
-    }
-    
-    enum ButtonChoice { case manualGlucoseEntry, actionButton }
-    
-    private var primaryButton: ButtonChoice {
-        if !isManualGlucosePromptVisible { return .actionButton }
-        if hasBolusEntryReadyToDeliver { return .actionButton }
-        return .manualGlucoseEntry
-    }
-    
+            
     private var enterManualGlucoseButton: some View {
         Button(
             action: {
@@ -376,41 +350,34 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             },
             label: { Text("Enter Manual BG", comment: "Button text prompting manual glucose entry on bolus screen") }
         )
-            .buttonStyle(ActionButtonStyle(primaryButton == .manualGlucoseEntry ? .primary : .secondary))
+        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .manualGlucoseEntry ? .primary : .secondary))
         .padding([.top, .horizontal])
     }
 
     private var actionButton: some View {
-        Button(
+        Button<Text>(
             action: {
-                if !self.hasBolusEntryReadyToDeliver {
+                if self.viewModel.actionButtonAction == .enterBolus {
                     self.shouldBolusEntryBecomeFirstResponder = true
                 } else {
                     self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
                 }
             },
             label: {
-                if hasDataToSave {
-                    if viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
-                        Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
-                    } else {
-                        Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
-                    }
-                } else {
-                    if viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 {
-                        Text("Enter Bolus", comment: "Button text to begin entering a bolus")
-                    } else {
-                        Text("Deliver", comment: "Button text to deliver a bolus")
-                    }
+                switch viewModel.actionButtonAction {
+                case .saveWithoutBolusing:
+                    return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
+                case .saveAndDeliver:
+                    return Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                case .enterBolus:
+                    return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
+                case .deliver:
+                    return Text("Deliver", comment: "Button text to deliver a bolus")
                 }
             }
         )
-        .buttonStyle(ActionButtonStyle(primaryButton == .actionButton ? .primary : .secondary))
+        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
         .padding()
-    }
-
-    private var hasDataToSave: Bool {
-        viewModel.enteredManualGlucose != nil || viewModel.potentialCarbEntry != nil
     }
 
     private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {

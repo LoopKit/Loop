@@ -601,3 +601,53 @@ final class BolusEntryViewModel: ObservableObject {
 extension BolusEntryViewModel.Alert: Identifiable {
     var id: Self { self }
 }
+
+// MARK: Helpers
+extension BolusEntryViewModel {
+    
+    var isManualGlucosePromptVisible: Bool {
+        activeNotice == .staleGlucoseData && !isManualGlucoseEntryEnabled
+    }
+    
+    var isNoticeVisible: Bool {
+        if activeNotice == nil {
+            return false
+        } else if activeNotice != .staleGlucoseData {
+            return true
+        } else {
+            return !isManualGlucoseEntryEnabled
+        }
+    }
+    
+    private var hasBolusEntryReadyToDeliver: Bool {
+        enteredBolus.doubleValue(for: .internationalUnit()) != 0
+    }
+
+    private var hasDataToSave: Bool {
+        enteredManualGlucose != nil || potentialCarbEntry != nil
+    }
+
+    enum ButtonChoice { case manualGlucoseEntry, actionButton }
+    var primaryButton: ButtonChoice {
+        if !isManualGlucosePromptVisible { return .actionButton }
+        if hasBolusEntryReadyToDeliver { return .actionButton }
+        return .manualGlucoseEntry
+    }
+    
+    enum ActionButtonAction {
+        case saveWithoutBolusing
+        case saveAndDeliver
+        case enterBolus
+        case deliver
+    }
+    
+    var actionButtonAction: ActionButtonAction {
+        switch (hasDataToSave, hasBolusEntryReadyToDeliver) {
+        case (true, true): return .saveAndDeliver
+        case (true, false): return .saveWithoutBolusing
+        case (false, true): return .deliver
+        case (false, false): return .enterBolus
+        }
+    }
+}
+
