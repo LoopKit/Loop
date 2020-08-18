@@ -20,6 +20,7 @@ struct FeatureFlagConfiguration: Decodable {
     let walshInsulinModelEnabled: Bool
     let fiaspInsulinModelEnabled: Bool
     let observeHealthKitSamplesFromOtherApps: Bool
+    let includeServicesInSettingsEnabled: Bool
 
     fileprivate init() {
         // Swift compiler config is inverse, since the default state is enabled.
@@ -81,6 +82,13 @@ struct FeatureFlagConfiguration: Decodable {
         #else
         self.observeHealthKitSamplesFromOtherApps = true
         #endif
+        
+        // Swift compiler config is inverse, since the default state is enabled.
+        #if INCLUDE_SERVICES_IN_SETTINGS_DISABLED
+        self.includeServicesInSettingsEnabled = false
+        #else
+        self.includeServicesInSettingsEnabled = true
+        #endif
     }
 }
 
@@ -97,6 +105,7 @@ extension FeatureFlagConfiguration : CustomDebugStringConvertible {
             "* walshInsulinModelEnabled: \(walshInsulinModelEnabled)",
             "* fiaspInsulinModelEnabled: \(fiaspInsulinModelEnabled)",
             "* observeHealthKitSamplesFromOtherApps: \(observeHealthKitSamplesFromOtherApps)",
+            "* includeServicesInSettingsEnabled: \(includeServicesInSettingsEnabled)",
         ].joined(separator: "\n")
     }
 }

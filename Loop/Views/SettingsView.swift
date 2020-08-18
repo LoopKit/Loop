@@ -8,6 +8,7 @@
 
 import LoopKit
 import LoopKitUI
+import MockKit
 import SwiftUI
 
 public struct SettingsView: View, HorizontalSizeClassOverride {
@@ -16,6 +17,8 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
 
     @ObservedObject var viewModel: SettingsViewModel
 
+    @State var showServiceChooser: Bool = false
+    
     public init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
     }
@@ -29,6 +32,9 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 therapySettingsSection
                 deviceSettingsSection
+                if viewModel.servicesViewModel.showServices {
+                    servicesSection
+                }
                 if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
                     deletePumpDataSection
                 }
@@ -81,13 +87,14 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            return NavigationLink(destination: TherapySettingsView(viewModel: TherapySettingsViewModel(mode: .settings,
-                                                                                                       therapySettings: viewModel.therapySettings,
-                                                                                                       supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
-                                                                                                       pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
-                                                                                                       syncPumpSchedule: viewModel.syncPumpSchedule,
-                                                                                                       chartColors: .primary,
-                                                                                                       didSave: viewModel.didSave))) {
+            return NavigationLink(destination: TherapySettingsView(
+                viewModel: TherapySettingsViewModel(mode: .settings,
+                                                    therapySettings: viewModel.therapySettings,
+                                                    supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
+                                                    pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
+                                                    syncPumpSchedule: viewModel.syncPumpSchedule,
+                                                    chartColors: .primary,
+                                                    didSave: viewModel.didSave))) {
                 LargeButton(action: { },
                             includeArrow: false,
                             imageView: AnyView(Image("Therapy Icon")),
@@ -134,6 +141,36 @@ extension SettingsView {
                                label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                                descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
         }
+    }
+    
+    private var servicesSection: some View {
+        Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
+            ForEach(viewModel.servicesViewModel.activeServices.indices, id: \.self) { index in
+                // TODO: this "dismiss then call didTapService()" here is temporary, until we've completely gotten rid of SettingsTableViewController
+                Button(action: { self.dismiss(); self.viewModel.servicesViewModel.didTapService(index) }, label: {
+                    Text(self.viewModel.servicesViewModel.activeServices[index].localizedTitle)
+                })
+                    .accentColor(.primary)
+            }
+            Button(action: { self.showServiceChooser = true }, label: {
+                Text("Add Service", comment: "The title of the services section in settings")
+            })
+                .actionSheet(isPresented: $showServiceChooser) {
+                    ActionSheet(title: Text("Add Service", comment: "The title of the services section in settings"), buttons: serviceChoices)
+                }
+        }
+    }
+    
+    private var serviceChoices: [ActionSheet.Button] {
+        var result = viewModel.servicesViewModel.inactiveServices.map { availableService in
+            ActionSheet.Button.default(Text(availableService.localizedTitle)) {
+                // TODO: this "dismiss then call didTapAddService()" here is temporary, until we've completely gotten rid of SettingsTableViewController
+                self.dismiss()
+                self.viewModel.servicesViewModel.didTapAddService(availableService)
+            }
+        }
+        result.append(.cancel())
+        return result
     }
     
     private var deletePumpDataSection: some View {
@@ -224,12 +261,34 @@ fileprivate struct LargeButton: View {
     }
 }
 
+fileprivate class FakeService1: Service {
+    static var localizedTitle: String = "Service 1"
+    static var serviceIdentifier: String = "FakeService1"
+    var serviceDelegate: ServiceDelegate?
+    var rawState: RawStateValue = [:]
+    required init?(rawState: RawStateValue) {}
+    convenience init() { self.init(rawState: [:])! }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+}
+fileprivate class FakeService2: Service {
+    static var localizedTitle: String = "Service 2"
+    static var serviceIdentifier: String = "FakeService2"
+    var serviceDelegate: ServiceDelegate?
+    var rawState: RawStateValue = [:]
+    required init?(rawState: RawStateValue) {}
+    convenience init() { self.init(rawState: [:])! }
+    var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
+}
+fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
+                                                      availableServices: [FakeService1().available, FakeService2().available],
+                                                      activeServices: [FakeService1()])
 public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
         let viewModel = SettingsViewModel(appNameAndVersion: "Tidepool Loop v1.2.3.456",
                                           notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel(),
                                           pumpManagerSettingsViewModel: DeviceViewModel(),
                                           cgmManagerSettingsViewModel: DeviceViewModel(),
+                                          servicesViewModel: servicesViewModel,
                                           therapySettings: TherapySettings(),
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: true, walshModelEnabled: true),
                                           pumpSupportedIncrements: nil,

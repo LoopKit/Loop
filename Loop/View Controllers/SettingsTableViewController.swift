@@ -629,10 +629,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         case .services:
             if indexPath.row < activeServices.count {
                 if let serviceUI = activeServices[indexPath.row] as? ServiceUI {
-                    var settings = serviceUI.settingsViewController(chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
-                    settings.serviceSettingsDelegate = self
-                    settings.completionDelegate = self
-                    present(settings, animated: true)
+                    didTapService(serviceUI)
                 }
                 tableView.deselectRow(at: indexPath, animated: true)
             } else {
@@ -792,10 +789,15 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                     bolusVolumes: $0.supportedBolusVolumes,
                                     maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
         }
+        let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
+                                                  availableServices: availableServices,
+                                                  activeServices: activeServices,
+                                                  delegate: self)
         let viewModel = SettingsViewModel(appNameAndVersion: Bundle.main.localizedNameAndVersion,
                                           notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
                                           pumpManagerSettingsViewModel: pumpViewModel,
                                           cgmManagerSettingsViewModel: cgmViewModel,
+                                          servicesViewModel: servicesViewModel,
                                           therapySettings: dataManager.loopManager.therapySettings,
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
@@ -993,7 +995,14 @@ extension SettingsTableViewController {
     fileprivate var inactiveServices: [AvailableService] {
         return availableServices.filter { availableService in !dataManager.servicesManager.activeServices.contains { type(of: $0).serviceIdentifier == availableService.identifier } }
     }
-
+    
+    fileprivate func didTapService(_ serviceUI: ServiceUI) {
+        var settings = serviceUI.settingsViewController(chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
+        settings.serviceSettingsDelegate = self
+        settings.completionDelegate = self
+        present(settings, animated: true)
+    }
+    
     fileprivate func setupService(withIdentifier identifier: String) {
         guard let serviceUIType = dataManager.servicesManager.serviceUITypeByIdentifier(identifier) else {
             return
@@ -1019,6 +1028,18 @@ extension SettingsTableViewController: ServiceSetupDelegate {
 extension SettingsTableViewController: ServiceSettingsDelegate {
     func serviceSettingsNotifying(_ object: ServiceSettingsNotifying, didDeleteService service: Service) {
         dataManager.servicesManager.removeActiveService(service)
+    }
+}
+
+extension SettingsTableViewController: ServicesViewModelDelegate {
+    func addService(identifier: String) {
+        setupService(withIdentifier: identifier)
+    }
+    func gotoService(identifier: String) {
+        guard let serviceUI = activeServices.first(where: { $0.serviceIdentifier == identifier }) as? ServiceUI else {
+            return
+        }
+        didTapService(serviceUI)
     }
 }
 
