@@ -280,7 +280,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     text: typedBolusEntry,
                     placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
                     font: .preferredFont(forTextStyle: .title1),
-                    textColor: .systemBlue,
+                    textColor: .loopAccent,
                     textAlignment: .right,
                     keyboardType: .decimalPad,
                     shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
