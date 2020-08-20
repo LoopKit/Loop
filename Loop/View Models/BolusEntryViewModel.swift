@@ -375,7 +375,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         if isManualGlucoseEntryEnabled,
-            let latestGlucose = dataManager.loopManager.glucoseStore.latestGlucose,
+            let latestGlucose = dataManager.glucoseStore.latestGlucose,
             Date().timeIntervalSince(latestGlucose.startDate) <= dataManager.loopManager.settings.inputDataRecencyInterval
         {
             isManualGlucoseEntryEnabled = false
@@ -386,7 +386,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateStoredGlucoseValues() {
-        dataManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start) { [weak self] values in
+        dataManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] values in
             DispatchQueue.main.async {
                 self?.storedGlucoseValues = values
                 self?.updateGlucoseChartValues()
@@ -442,7 +442,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateActiveInsulin() {
-        dataManager.loopManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
+        dataManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
@@ -470,7 +470,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateCarbsOnBoard(from state: LoopState) {
-        dataManager.loopManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
+        dataManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let carbValue):
@@ -553,7 +553,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         let settings = dataManager.loopManager.settings
-        glucoseUnit = settings.glucoseUnit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        glucoseUnit = settings.glucoseUnit ?? dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
 
         targetGlucoseSchedule = settings.glucoseTargetRangeSchedule
         preMealOverride = settings.preMealOverride

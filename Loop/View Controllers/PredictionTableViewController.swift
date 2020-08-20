@@ -49,10 +49,10 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
                     self?.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
                 DispatchQueue.main.async {
                     self?.log.debug("[reloadData] for HealthKit unit preference change")
-                    self?.unitPreferencesDidChange(to: self?.deviceManager.loopManager.glucoseStore.preferredUnit)
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.glucoseStore.preferredUnit)
                     self?.refreshContext = RefreshContext.all
                 }
             }
@@ -120,7 +120,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
         if self.refreshContext.remove(.glucose) != nil {
             reloadGroup.enter()
-            self.deviceManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: self.chartStartDate) { (values) -> Void in
+            deviceManager.glucoseStore.getCachedGlucoseSamples(start: self.chartStartDate, end: nil) { (values) -> Void in
                 glucoseValues = values
                 reloadGroup.leave()
             }
@@ -129,7 +129,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
         // For now, do this every time
         _ = self.refreshContext.remove(.status)
         reloadGroup.enter()
-        self.deviceManager.loopManager.getLoopState { (manager, state) in
+        deviceManager.loopManager.getLoopState { (manager, state) in
             self.retrospectiveGlucoseDiscrepancies = state.retrospectiveGlucoseDiscrepancies
             totalRetrospectiveCorrection = state.totalRetrospectiveCorrection
             self.glucoseChart.setPredictedGlucoseValues(state.predictedGlucoseIncludingPendingInsulin ?? [])
@@ -263,7 +263,7 @@ class PredictionTableViewController: LoopChartsTableViewController, Identifiable
 
         if input == .retrospection,
             let lastDiscrepancy = retrospectiveGlucoseDiscrepancies?.last,
-            let currentGlucose = self.deviceManager.loopManager.glucoseStore.latestGlucose
+            let currentGlucose = deviceManager.glucoseStore.latestGlucose
         {
             let formatter = QuantityFormatter()
             formatter.setPreferredNumberFormatter(for: glucoseChart.glucoseUnit)

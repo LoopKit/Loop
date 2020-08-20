@@ -69,7 +69,7 @@ extension DeviceDataManager {
         {
             return .openAppURL(url)
         } else if let cgmManagerUI = (cgmManager as? CGMManagerUI),
-            let unit = loopManager.glucoseStore.preferredUnit
+            let unit = glucoseStore.preferredUnit
         {
             return .presentViewController(cgmManagerUI.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default))
         } else {

@@ -168,13 +168,13 @@ final class WatchDataManager: NSObject {
     private func createWatchContext(recommendingBolusFor potentialCarbEntry: NewCarbEntry? = nil, _ completion: @escaping (_ context: WatchContext) -> Void) {
         let loopManager = deviceManager.loopManager!
 
-        let glucose = loopManager.glucoseStore.latestGlucose
-        let reservoir = loopManager.doseStore.lastReservoirValue
+        let glucose = deviceManager.glucoseStore.latestGlucose
+        let reservoir =  deviceManager.doseStore.lastReservoirValue
         let basalDeliveryState = deviceManager.pumpManager?.status.basalDeliveryState
 
         loopManager.getLoopState { (manager, state) in
             let updateGroup = DispatchGroup()
-            let context = WatchContext(glucose: glucose, glucoseUnit: manager.glucoseStore.preferredUnit)
+            let context = WatchContext(glucose: glucose, glucoseUnit: self.deviceManager.glucoseStore.preferredUnit)
             context.reservoir = reservoir?.unitVolume
             context.loopLastRunDate = manager.lastLoopCompleted
             context.recommendedBolusDose = state.recommendedBolus?.recommendation.amount
@@ -194,7 +194,7 @@ final class WatchDataManager: NSObject {
             
             if let glucose = glucose {
                 updateGroup.enter()
-                manager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate) { (samples) in
+                self.deviceManager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate, end: nil) { (samples) in
                     if let sample = samples.last {
                         context.glucose = sample.quantity
                         context.glucoseDate = sample.startDate
@@ -207,7 +207,7 @@ final class WatchDataManager: NSObject {
             }
 
             updateGroup.enter()
-            manager.doseStore.insulinOnBoard(at: Date()) { (result) in
+            self.deviceManager.doseStore.insulinOnBoard(at: Date()) { (result) in
                 switch result {
                 case .success(let iobValue):
                     context.iob = iobValue.value
@@ -247,7 +247,7 @@ final class WatchDataManager: NSObject {
                 return
             }
 
-            self.deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
+            deviceManager.enactBolus(units: bolus.value, at: bolus.startDate) { (error) in
                 if error == nil {
                     self.deviceManager.analyticsServicesManager.didSetBolusFromWatch(bolus.value)
                 }
@@ -309,9 +309,8 @@ extension WatchDataManager: WCSessionDelegate {
                 replyHandler(context.rawValue)
             }
         case GlucoseBackfillRequestUserInfo.name?:
-            if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message),
-                let manager = deviceManager.loopManager {
-                manager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1)) { (values) in
+            if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message) {
+                deviceManager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1), end: nil) { (values) in
                     replyHandler(WatchHistoricalGlucose(with: values).rawValue)
                 }
             } else {

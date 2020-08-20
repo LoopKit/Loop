@@ -411,7 +411,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
                 present(hostingController, animated: true)
             case .insulinSensitivity:
-                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
 
                 let editor = InsulinSensitivityScheduleEditor(
                     schedule: dataManager.loopManager.insulinSensitivitySchedule,
@@ -429,7 +429,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 
                 present(hostingController, animated: true)
             case .glucoseTargetRange:
-                let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let unit = dataManager.loopManager.settings.glucoseTargetRangeSchedule?.unit ?? dataManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
 
                 let editor = CorrectionRangeScheduleEditor(
                     schedule: dataManager.loopManager.settings.glucoseTargetRangeSchedule,
@@ -534,11 +534,11 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
 
                 if let minBGGuard = dataManager.loopManager.settings.suspendThreshold {
                     presentSuspendThresholdEditor(initialValue: minBGGuard.quantity, unit: minBGGuard.unit)
-                } else if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+                } else if let unit = dataManager.glucoseStore.preferredUnit {
                     presentSuspendThresholdEditor(initialValue: nil, unit: unit)
                 }
             case .insulinModel:
-                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
+                let glucoseUnit = dataManager.loopManager.insulinSensitivitySchedule?.unit ?? dataManager.glucoseStore.preferredUnit ?? HKUnit.milligramsPerDeciliter
                 let modelSelectionView = InsulinModelSelection(
                     value: dataManager.loopManager.insulinModelSettings ?? .exponentialPreset(.humalogNovologAdult),
                     insulinSensitivitySchedule: dataManager.loopManager.insulinSensitivitySchedule,
@@ -699,7 +699,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     
     private func didSelectCGM(completion: (() -> Void)? = nil) {
         if let cgmManager = dataManager.cgmManager as? CGMManagerUI {
-            if let unit = dataManager.loopManager.glucoseStore.preferredUnit {
+            if let unit = dataManager.glucoseStore.preferredUnit {
                 var settings = cgmManager.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default)
                 settings.completionDelegate = self
                 present(settings, animated: true)

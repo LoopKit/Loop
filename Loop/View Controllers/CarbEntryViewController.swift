@@ -30,7 +30,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     var preferredCarbUnit = HKUnit.gram()
     
     private var glucoseUnit: HKUnit {
-        return deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        return deviceManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
     }
 
     var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
