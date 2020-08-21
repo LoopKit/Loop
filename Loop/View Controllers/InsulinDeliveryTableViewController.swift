@@ -67,7 +67,7 @@ public final class InsulinDeliveryTableViewController: UITableViewController {
 
         state = .display
         let logDoseButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didTapLogDoseButton))
-        navigationItem.rightBarButtonItems = [logDoseButton, self.editButtonItem]
+        navigationItem.rightBarButtonItems = [self.editButtonItem, logDoseButton]
     }
 
     public override func viewWillAppear(_ animated: Bool) {
