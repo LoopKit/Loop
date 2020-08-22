@@ -15,7 +15,6 @@ import LoopKitUI
 import LoopUI
 import SwiftCharts
 import os.log
-import SwiftUI
 
 
 private extension RefreshContext {
@@ -972,7 +971,7 @@ final class StatusTableViewController: ChartsTableViewController {
             switch ChartRow(rawValue: indexPath.row)! {
             case .glucose:
                 performSegue(withIdentifier: PredictionTableViewController.className, sender: indexPath)
-            case .dose, .iob:
+            case .iob, .dose:
                 performSegue(withIdentifier: InsulinDeliveryTableViewController.className, sender: indexPath)
             case .cob:
                 performSegue(withIdentifier: CarbAbsorptionViewController.className, sender: indexPath)
