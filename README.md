@@ -17,13 +17,9 @@ This is because recently there have been cases of rechargeable transmitters prov
 - **If the transmitter's battery nearly runs out it will read HIGH**. It is extremely important to use the Dexcom app and Spike in follower mode to avoid this issue. If you're using Spike directly with the rechargeable transmitter, **Loop will deliver large boluses due to the erroneously reported increase in levels**.
 
 # You are on branch spike-autobolus
-This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/cyoung1024/Loop/tree/dev-spike.
+This branch is a merge of https://github.com/LoopKit/Loop/tree/automatic-bolus and https://github.com/Andrei0105/Loop/tree/dev-spike.
 
-Last updated on Jun 10, 2020
-
-Last commit merged from automatic-bolus: https://github.com/LoopKit/Loop/commit/5fa561e2e74feca74f8115a2852ea3926ab27dcd
-
-Last commit merged from dev-spike: https://github.com/cyoung1024/Loop/commit/79435954af008d1e3ae71304868be39016f9ef61
+Last updated on Aug 23, 2020
 
 ![App Icon](/Loop/DefaultAssets.xcassets/AppIcon.appiconset/Icon-Small-40%402x.png?raw=true)
 
