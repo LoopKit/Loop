@@ -1332,22 +1332,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
 
         switch cgmManagers.count {
         case 1:
-            if let cgmManager = cgmManagers.first,
-                let cgmManagerType = deviceManager.cgmManagerTypeByIdentifier(cgmManager.identifier)
-            {
-                setupCGMManager(for: cgmManagerType)
-            }
+            setupCGMManager(cgmManagers.first!.identifier)
         default:
-            let alert = UIAlertController(cgmManagers: cgmManagers, pumpManager: deviceManager.pumpManager as? CGMManager) { [weak self] (identifier, pumpManager) in
-                if let strongSelf = self {
-                    if let cgmManagerIdentifier = identifier,
-                        let cgmManagerType = strongSelf.deviceManager.cgmManagerTypeByIdentifier(cgmManagerIdentifier)
-                    {
-                        strongSelf.setupCGMManager(for: cgmManagerType)
-                    } else if let pumpManager = pumpManager {
-                        strongSelf.deviceManager.cgmManager = pumpManager
-                    }
-                }
+            let alert = UIAlertController(cgmManagers: cgmManagers) { [weak self] identifier in
+                self?.setupCGMManager(identifier)
             }
             alert.addCancelAction { _ in }
             present(alert, animated: true, completion: nil)
@@ -1585,17 +1573,6 @@ extension StatusTableViewController: AddEditOverrideTableViewControllerDelegate 
 }
 
 extension StatusTableViewController: CGMManagerSetupViewControllerDelegate {
-    fileprivate func setupCGMManager(for cgmManagerType: CGMManagerUI.Type) {
-        if var setupViewController = cgmManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
-            setupViewController.setupDelegate = self
-            setupViewController.completionDelegate = self
-            present(setupViewController, animated: true, completion: nil)
-        } else {
-            // adds the CGM simulator
-            deviceManager.cgmManager = cgmManagerType.init(rawState: [:])
-        }
-    }
-    
     func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController,
                                        didSetUpCGMManager cgmManager: CGMManagerUI)
     {
@@ -1639,6 +1616,33 @@ extension StatusTableViewController: BluetoothStateManagerObserver {
     {
         refreshContext.update(with: .status)
         reloadData(animated: true)
+    }
+}
+
+private class DelegateShim: CGMManagerSetupViewControllerDelegate {
+    let completion: (CGMManager?) -> Void
+    init(completion: @escaping (CGMManager?) -> Void) {
+        self.completion = completion
+    }
+    func cgmManagerSetupViewController(_ cgmManagerSetupViewController: CGMManagerSetupViewController, didSetUpCGMManager cgmManager: CGMManagerUI) {
+        self.completion(cgmManager)
+    }
+}
+
+extension StatusTableViewController {
+    fileprivate func setupCGMManager(_ identifier: String) {
+        deviceManager.maybeSetupCGMManager(identifier) { cgmManagerType, setupCompletion in
+            if var setupViewController = cgmManagerType.setupViewController(glucoseTintColor: .glucoseTintColor, guidanceColors: .default) {
+                let shim = DelegateShim {
+                    setupCompletion($0)
+                }
+                setupViewController.setupDelegate = shim
+                setupViewController.completionDelegate = self
+                present(setupViewController, animated: true, completion: nil)
+            } else {
+                setupCompletion(cgmManagerType.init(rawState: [:]))
+            }
+        }
     }
 }
 

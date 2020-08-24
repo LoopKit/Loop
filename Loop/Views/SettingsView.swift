@@ -17,8 +17,10 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
 
     @ObservedObject var viewModel: SettingsViewModel
 
+    @State var showPumpChooser: Bool = false
+    @State var showCGMChooser: Bool = false
     @State var showServiceChooser: Bool = false
-    
+
     public init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
     }
@@ -32,14 +34,14 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 therapySettingsSection
                 deviceSettingsSection
-                if viewModel.servicesViewModel.showServices {
-                    servicesSection
-                }
                 if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
                     deletePumpDataSection
                 }
                 if viewModel.cgmManagerSettingsViewModel.isTestingDevice {
                     deleteCgmDataSection
+                }
+                if viewModel.servicesViewModel.showServices {
+                    servicesSection
                 }
                 supportSection
             }
@@ -111,36 +113,66 @@ extension SettingsView {
         }
     }
     
+    @ViewBuilder
     private var pumpSection: some View {
         if viewModel.pumpManagerSettingsViewModel.isSetUp {
             // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
-                               imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image),
-                               label: viewModel.pumpManagerSettingsViewModel.name,
-                               descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
+            LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
+                        imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image),
+                        label: viewModel.pumpManagerSettingsViewModel.name,
+                        descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
-                               imageView: AnyView(plusImage),
-                               label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
-                               descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
+            LargeButton(action: { self.showPumpChooser = true },
+                        imageView: AnyView(plusImage),
+                        label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
+                .actionSheet(isPresented: $showPumpChooser) {
+                    ActionSheet(title: Text("Add Pump", comment: "The title of the pump chooser in settings"), buttons: pumpChoices)
+            }
         }
     }
     
+    private var pumpChoices: [ActionSheet.Button] {
+        var result = viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
+            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                // TODO: this "dismiss then call didTapAddDevice()" here is temporary, until we've completely gotten rid of SettingsTableViewController
+                self.dismiss()
+                self.viewModel.pumpManagerSettingsViewModel.didTapAddDevice(availableDevice)
+            }
+        }
+        result.append(.cancel())
+        return result
+    }
+    
+    @ViewBuilder
     private var cgmSection: some View {
         if viewModel.cgmManagerSettingsViewModel.isSetUp {
             // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
-                               imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image),
-                               label: viewModel.cgmManagerSettingsViewModel.name,
-                               descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
+            LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
+                        imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image),
+                        label: viewModel.cgmManagerSettingsViewModel.name,
+                        descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
         } else {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            return LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
-                               imageView: AnyView(plusImage),
-                               label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
-                               descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
+            LargeButton(action: { self.showCGMChooser = true },
+                        imageView: AnyView(plusImage),
+                        label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
+                        descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
+                .actionSheet(isPresented: $showCGMChooser) {
+                    ActionSheet(title: Text("Add CGM", comment: "The title of the CGM chooser in settings"), buttons: cgmChoices)
+            }
         }
+    }
+    
+    private var cgmChoices: [ActionSheet.Button] {
+        var result = viewModel.cgmManagerSettingsViewModel.availableDevices.map { availableDevice in
+            ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
+                // TODO: this "dismiss then call didTapAddDevice()" here is temporary, until we've completely gotten rid of SettingsTableViewController
+                self.dismiss()
+                self.viewModel.cgmManagerSettingsViewModel.didTapAddDevice(availableDevice)
+            }
+        }
+        result.append(.cancel())
+        return result
     }
     
     private var servicesSection: some View {
@@ -156,7 +188,7 @@ extension SettingsView {
                 Text("Add Service", comment: "The title of the services section in settings")
             })
                 .actionSheet(isPresented: $showServiceChooser) {
-                    ActionSheet(title: Text("Add Service", comment: "The title of the services section in settings"), buttons: serviceChoices)
+                    ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
                 }
         }
     }

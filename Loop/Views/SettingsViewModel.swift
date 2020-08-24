@@ -13,28 +13,34 @@ import LoopKitUI
 import SwiftUI
 
 public class DeviceViewModel: ObservableObject {
-    public init(deviceManagerUI: DeviceManagerUI? = nil,
-                isSetUp: Bool = false,
-                deleteData: (() -> Void)? = nil,
-                onTapped: @escaping () -> Void = { }) {
-        self.deviceManagerUI = deviceManagerUI
-        self.isSetUp = isSetUp
-        self.deleteData = deleteData
-        self.onTapped = onTapped
-    }
-    
-    let deviceManagerUI: DeviceManagerUI?
+    let image: UIImage?
+    let name: String
     let deleteData: (() -> Void)?
-    
-    @Published private(set) var isSetUp: Bool = false
+    let onTapped: () -> Void
+    let didTapAddDevice: (AvailableDevice) -> Void
     var isTestingDevice: Bool {
         return deleteData != nil
     }
 
-    var image: UIImage? { deviceManagerUI?.smallImage }
-    var name: String { deviceManagerUI?.localizedTitle ?? "" }
-   
-    let onTapped: () -> Void
+    @Published private(set) var isSetUp: Bool = false
+    @Published var availableDevices: [AvailableDevice]
+
+    public init(image: UIImage? = nil,
+                name: String = "",
+                isSetUp: Bool = false,
+                availableDevices: [AvailableDevice] = [],
+                deleteData: (() -> Void)? = nil,
+                onTapped: @escaping () -> Void = { },
+                didTapAddDevice: @escaping (AvailableDevice) -> Void = { _ in  }
+                ) {
+        self.image = image
+        self.name = name
+        self.availableDevices = availableDevices
+        self.isSetUp = isSetUp
+        self.deleteData = deleteData
+        self.onTapped = onTapped
+        self.didTapAddDevice = didTapAddDevice
+    }
 }
 
 public class SettingsViewModel: ObservableObject {

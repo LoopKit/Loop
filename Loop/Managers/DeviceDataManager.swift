@@ -322,13 +322,29 @@ final class DeviceDataManager {
 
 
     var availableCGMManagers: [AvailableDevice] {
-        return pluginManager.availableCGMManagers + availableStaticCGMManagers
+        var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
+        if let pumpManagerAsCGMManager = pumpManager as? CGMManager {
+            availableCGMManagers.append(AvailableDevice(identifier: pumpManagerAsCGMManager.managerIdentifier, localizedTitle: pumpManagerAsCGMManager.localizedTitle))
+        }
+        return availableCGMManagers
     }
 
     public func cgmManagerTypeByIdentifier(_ identifier: String) -> CGMManagerUI.Type? {
         return pluginManager.getCGMManagerTypeByIdentifier(identifier) ?? staticCGMManagersByIdentifier[identifier] as? CGMManagerUI.Type
     }
-
+    
+    public typealias SetupCGMCompletion = (CGMManager?) -> Void
+    public func maybeSetupCGMManager(_ identifier: String, setupClosure: (CGMManagerUI.Type, @escaping SetupCGMCompletion) -> Void) {
+        if identifier == pumpManager?.managerIdentifier, let cgmManager = pumpManager as? CGMManager {
+            // We have a pump that is a CGM!
+            self.cgmManager = cgmManager
+        } else if let cgmManagerType = cgmManagerTypeByIdentifier(identifier) {
+            setupClosure(cgmManagerType) {
+                self.cgmManager = $0
+            }
+        }
+    }
+    
     private func cgmManagerTypeFromRawValue(_ rawValue: [String: Any]) -> CGMManager.Type? {
         guard let managerIdentifier = rawValue["managerIdentifier"] as? String else {
             return nil
