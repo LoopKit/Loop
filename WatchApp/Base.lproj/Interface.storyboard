@@ -10,7 +10,7 @@
         <!--CarbAndBolusFlowController-->
         <scene sceneID="wDd-ld-Qg8">
             <objects>
-                <hostingController identifier="CarbAndBolusFlowController" id="YfQ-6P-aH4"/>
+                <hostingController identifier="CarbAndBolusFlowController" id="YfQ-6P-aH4" customClass="CarbAndBolusFlowController" customModule="WatchApp_Extension"/>
             </objects>
             <point key="canvasLocation" x="38" y="370"/>
         </scene>
