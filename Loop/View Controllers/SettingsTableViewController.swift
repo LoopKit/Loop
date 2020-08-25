@@ -167,7 +167,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                 switchCell.switch?.isOn = dataManager.loopManager.settings.dosingEnabled
                 switchCell.textLabel?.text = NSLocalizedString("Closed Loop", comment: "The title text for the looping enabled switch cell")
 
-                switchCell.switch?.addTarget(self, action: #selector(dosingEnabledChanged(_:)), for: .valueChanged)
+                switchCell.switch?.addTarget(self, action: #selector(onDosingEnabledChanged(_:)), for: .valueChanged)
 
                 return switchCell
             case .alertPermissions:
@@ -754,9 +754,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
     
     private func presentTemporaryNewSettings(_ tableView: UITableView, _ indexPath: IndexPath) {
         let pumpViewModel = DeviceViewModel(
-            image: dataManager.pumpManager?.smallImage,
-            name: dataManager.pumpManager?.localizedTitle ?? "",
-            isSetUp: dataManager.pumpManager != nil,
+            image: {  [weak self] in self?.dataManager.pumpManager?.smallImage },
+            name: {  [weak self] in self?.dataManager.pumpManager?.localizedTitle ?? "" },
+            isSetUp: {  [weak self] in self?.dataManager.pumpManager != nil },
             availableDevices: dataManager.availablePumpManagers,
             deleteData: (dataManager.pumpManager is TestingPumpManager) ? { [weak self] in self?.dataManager.deleteTestingPumpData()
                 } : nil,
@@ -768,9 +768,9 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         })
         
         let cgmViewModel = DeviceViewModel(
-            image: (dataManager.cgmManager as? DeviceManagerUI)?.smallImage,
-            name: dataManager.cgmManager?.localizedTitle ?? "",
-            isSetUp: dataManager.cgmManager != nil,
+            image: {  [weak self] in (self?.dataManager.cgmManager as? DeviceManagerUI)?.smallImage },
+            name: {  [weak self] in self?.dataManager.cgmManager?.localizedTitle ?? "" },
+            isSetUp: {  [weak self] in self?.dataManager.cgmManager != nil },
             availableDevices: dataManager.availableCGMManagers,
             deleteData: (dataManager.cgmManager is TestingCGMManager) ? { [weak self] in self?.dataManager.deleteTestingCGMData()
                 } : nil,
@@ -800,15 +800,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
                                           syncPumpSchedule: dataManager.pumpManager?.syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: dataManager.loopManager.settings.dosingEnabled,
-                                          setDosingEnabled: { [weak self] in
-                                            self?.setDosingEnabled($0)
-                                          },
-                                          didSave: { [weak self] in
-                                            self?.saveTherapySetting($0, $1)
-                                          },
-                                          issueReport: { [weak self] in
-                                            self?.issueReport(title: $0)
-        })
+                                          delegate: self)
         let hostingController = DismissibleHostingController(
             rootView: SettingsView(viewModel: viewModel).environment(\.appName, Bundle.main.bundleDisplayName),
             onDisappear: {
@@ -818,7 +810,7 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    @objc private func dosingEnabledChanged(_ sender: UISwitch) {
+    @objc private func onDosingEnabledChanged(_ sender: UISwitch) {
         setDosingEnabled(sender.isOn)
     }
     
@@ -864,6 +856,21 @@ final class SettingsTableViewController: UITableViewController, IdentifiableClas
         show(vc, sender: nil)
     }
 
+}
+
+// MARK: - SettingsViewModel delegation
+extension SettingsTableViewController: SettingsViewModelDelegate {
+    func dosingEnabledChanged(_ newValue: Bool) {
+        setDosingEnabled(newValue)
+    }
+    
+    func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings) {
+        saveTherapySetting(therapySetting, therapySettings)
+    }
+    
+    func createIssueReport(title: String) {
+        issueReport(title: title)
+    }
 }
 
 // MARK: - DeviceManager view controller delegation

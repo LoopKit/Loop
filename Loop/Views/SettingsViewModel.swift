@@ -13,8 +13,9 @@ import LoopKitUI
 import SwiftUI
 
 public class DeviceViewModel: ObservableObject {
-    let image: UIImage?
-    let name: String
+    let isSetUp: () -> Bool
+    let image: () -> UIImage?
+    let name: () -> String
     let deleteData: (() -> Void)?
     let onTapped: () -> Void
     let didTapAddDevice: (AvailableDevice) -> Void
@@ -22,12 +23,11 @@ public class DeviceViewModel: ObservableObject {
         return deleteData != nil
     }
 
-    @Published private(set) var isSetUp: Bool = false
     @Published var availableDevices: [AvailableDevice]
 
-    public init(image: UIImage? = nil,
-                name: String = "",
-                isSetUp: Bool = false,
+    public init(image: @escaping () -> UIImage? = { nil },
+                name: @escaping () -> String = { "" },
+                isSetUp: @escaping () -> Bool = { false },
                 availableDevices: [AvailableDevice] = [],
                 deleteData: (() -> Void)? = nil,
                 onTapped: @escaping () -> Void = { },
@@ -43,20 +43,35 @@ public class DeviceViewModel: ObservableObject {
     }
 }
 
+public protocol SettingsViewModelDelegate: class {
+    func dosingEnabledChanged(_: Bool)
+    func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
+    func createIssueReport(title: String)
+}
+
 public class SettingsViewModel: ObservableObject {
     
-    var notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel
+    let notificationsCriticalAlertPermissionsViewModel: NotificationsCriticalAlertPermissionsViewModel
 
+    private weak var delegate: SettingsViewModelDelegate?
+    
     @Published var appNameAndVersion: String
     @Published var dosingEnabled: Bool {
         didSet {
-            setDosingEnabled?(dosingEnabled)
+            delegate?.dosingEnabledChanged(dosingEnabled)
         }
     }
-    private let setDosingEnabled: ((Bool) -> Void)?
     
     var showWarning: Bool {
         notificationsCriticalAlertPermissionsViewModel.showWarning
+    }
+    
+    var didSave: TherapySettingsViewModel.SaveCompletion? {
+        delegate?.didSave
+    }
+    
+    var issueReport: ((String) -> Void)? {
+        delegate?.createIssueReport
     }
 
     var pumpManagerSettingsViewModel: DeviceViewModel
@@ -67,8 +82,6 @@ public class SettingsViewModel: ObservableObject {
     let pumpSupportedIncrements: PumpSupportedIncrements?
     let syncPumpSchedule: PumpManager.SyncSchedule?
     let sensitivityOverridesEnabled: Bool
-    let didSave: TherapySettingsViewModel.SaveCompletion?
-    let issueReport: ((_ title: String) -> Void)?
 
     lazy private var cancellables = Set<AnyCancellable>()
 
@@ -82,26 +95,21 @@ public class SettingsViewModel: ObservableObject {
                 pumpSupportedIncrements: PumpSupportedIncrements?,
                 syncPumpSchedule: PumpManager.SyncSchedule?,
                 sensitivityOverridesEnabled: Bool,
-                // TODO: This is temporary until I can figure out something cleaner
                 initialDosingEnabled: Bool,
-                setDosingEnabled: ((Bool) -> Void)? = nil,
-                didSave: TherapySettingsViewModel.SaveCompletion? = nil,
-                issueReport: ((_ title: String) -> Void)? = nil
-                ) {
+                delegate: SettingsViewModelDelegate?
+    ) {
         self.notificationsCriticalAlertPermissionsViewModel = notificationsCriticalAlertPermissionsViewModel
         self.appNameAndVersion = appNameAndVersion
         self.pumpManagerSettingsViewModel = pumpManagerSettingsViewModel
         self.cgmManagerSettingsViewModel = cgmManagerSettingsViewModel
         self.servicesViewModel = servicesViewModel
-        self.setDosingEnabled = setDosingEnabled
-        self.dosingEnabled = initialDosingEnabled
         self.therapySettings = therapySettings
         self.supportedInsulinModelSettings = supportedInsulinModelSettings
         self.pumpSupportedIncrements = pumpSupportedIncrements
         self.syncPumpSchedule = syncPumpSchedule
         self.sensitivityOverridesEnabled = sensitivityOverridesEnabled
-        self.didSave = didSave
-        self.issueReport = issueReport
+        self.dosingEnabled = initialDosingEnabled
+        self.delegate = delegate
 
         // This strangeness ensures the composed ViewModels' (ObservableObjects') changes get reported to this ViewModel (ObservableObject)
         notificationsCriticalAlertPermissionsViewModel.objectWillChange.sink { [weak self] in

@@ -12,7 +12,7 @@
             <objects>
                 <tableViewController id="4cb-Yq-02o" customClass="SettingsTableViewController" customModule="Loop" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="MhB-bL-wBN">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="647"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
@@ -671,7 +671,7 @@
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="d5h-bj-8ek"/>
                         <barButtonItem image="settings" id="PHJ-4n-qiF">
                             <connections>
-                                <segue destination="Fr0-ut-OuL" kind="presentation" identifier="SettingsTableViewController" id="JAY-Kf-UMv"/>
+                                <action selector="onSettingsTapped:" destination="1zR-tC-i50" id="eJt-wB-R9Z"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -750,7 +750,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Fr0-ut-OuL" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="5cJ-yb-cD1">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="56"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

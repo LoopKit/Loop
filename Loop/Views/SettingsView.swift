@@ -73,7 +73,7 @@ extension SettingsView {
     private var alertPermissionsSection: some View {
         Section {
             NavigationLink(destination:
-                NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: NotificationsCriticalAlertPermissionsViewModel()))
+                NotificationsCriticalAlertPermissionsView(mode: .flow, viewModel: viewModel.notificationsCriticalAlertPermissionsViewModel))
             {
                 HStack {
                     Text(NSLocalizedString("Alert Permissions", comment: "Alert Permissions button text"))
@@ -115,11 +115,11 @@ extension SettingsView {
     
     @ViewBuilder
     private var pumpSection: some View {
-        if viewModel.pumpManagerSettingsViewModel.isSetUp {
+        if viewModel.pumpManagerSettingsViewModel.isSetUp() {
             // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
             LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
-                        imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image),
-                        label: viewModel.pumpManagerSettingsViewModel.name,
+                        imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image()),
+                        label: viewModel.pumpManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else {
             LargeButton(action: { self.showPumpChooser = true },
@@ -146,11 +146,11 @@ extension SettingsView {
     
     @ViewBuilder
     private var cgmSection: some View {
-        if viewModel.cgmManagerSettingsViewModel.isSetUp {
+        if viewModel.cgmManagerSettingsViewModel.isSetUp() {
             // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
             LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
-                        imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image),
-                        label: viewModel.cgmManagerSettingsViewModel.name,
+                        imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image()),
+                        label: viewModel.cgmManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
         } else {
             LargeButton(action: { self.showCGMChooser = true },
@@ -326,7 +326,8 @@ public struct SettingsView_Previews: PreviewProvider {
                                           pumpSupportedIncrements: nil,
                                           syncPumpSchedule: nil,
                                           sensitivityOverridesEnabled: false,
-                                          initialDosingEnabled: true)
+                                          initialDosingEnabled: true,
+                                          delegate: nil)
         return Group {
             SettingsView(viewModel: viewModel)
                 .colorScheme(.light)
