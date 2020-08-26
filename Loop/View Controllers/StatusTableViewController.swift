@@ -1432,7 +1432,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
     // MARK: - Debug Scenarios and Simulated Core Data
     
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        if FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled {
+        if FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled {
             if motion == .motionShake {
                 presentDebugMenu()
             }
@@ -1440,8 +1440,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
     }
     
     private func presentDebugMenu() {
-        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled else {
-            fatalError("\(#function) should be invoked only when scenarios or simulated core data are enabled")
+        guard FeatureFlags.scenariosEnabled || FeatureFlags.simulatedCoreDataEnabled || FeatureFlags.mockTherapySettingsEnabled else {
+            fatalError("\(#function) should be invoked only when scenarios, simulated core data, or mock therapy settings are enabled")
         }
         
         let actionSheet = UIAlertController(title: "Debug", message: nil, preferredStyle: .actionSheet)
@@ -1457,6 +1457,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
                 self.presentSimulatedCoreDataMenu()
             })
         }
+        if FeatureFlags.mockTherapySettingsEnabled {
+            actionSheet.addAction(UIAlertAction(title: "Mock Therapy Settings", style: .default) { _ in
+                let settings = TherapySettings.mockTherapySettings
+                self.deviceManager.loopManager.settings.glucoseTargetRangeSchedule = settings.glucoseTargetRangeSchedule
+                self.deviceManager.loopManager.settings.preMealTargetRange = settings.preMealTargetRange
+                self.deviceManager.loopManager.settings.legacyWorkoutTargetRange = settings.workoutTargetRange
+                self.deviceManager.loopManager.settings.suspendThreshold = settings.suspendThreshold
+                self.deviceManager.loopManager.settings.maximumBolus = settings.maximumBolus
+                self.deviceManager.loopManager.settings.maximumBasalRatePerHour = settings.maximumBasalRatePerHour
+                self.deviceManager.loopManager.insulinSensitivitySchedule = settings.insulinSensitivitySchedule
+                self.deviceManager.loopManager.carbRatioSchedule = settings.carbRatioSchedule
+                self.deviceManager.loopManager.basalRateSchedule = settings.basalRateSchedule
+                self.deviceManager.loopManager.insulinModelSettings = settings.insulinModelSettings
+            })
+        }
+        
         actionSheet.addCancelAction()
         present(actionSheet, animated: true)
     }
