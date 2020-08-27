@@ -21,7 +21,7 @@ extension Color {
     // The loopAccent color is intended to be use as the app accent color.
     public static let loopAccent = Color("accent")
     
-    static public let warning = Color("warning")
+    public static let warning = Color("warning")
 }
 
 

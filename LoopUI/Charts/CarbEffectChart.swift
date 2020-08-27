@@ -74,7 +74,7 @@ extension CarbEffectChart {
 
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
-        let carbFillColor = UIColor.carbTintColor.withAlphaComponent(0.8)
+        let carbFillColor = UIColor.carbTintColor.withAlphaComponent(0.5)
         let carbBlendMode: CGBlendMode
         if #available(iOSApplicationExtension 13.0, iOS 13.0, *) {
             switch traitCollection.userInterfaceStyle {
