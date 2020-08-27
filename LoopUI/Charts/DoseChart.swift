@@ -74,14 +74,14 @@ public extension DoseChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The dose area
-        let lineModel = ChartLineModel(chartPoints: basalDosePoints, lineColor: colors.insulinTint, lineWidth: 2, animDuration: 0, animDelay: 0)
+        let lineModel = ChartLineModel(chartPoints: points.basal, lineColor: colors.insulinTint, lineWidth: 2, animDuration: 0, animDelay: 0)
         let doseLine = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
 
         let doseArea = ChartPointsFillsLayer(
             xAxis: xAxisLayer.axis,
             yAxis: yAxisLayer.axis,
             fills: [ChartPointsFill(
-                chartPoints: basalDosePoints,
+                chartPoints: points.basalFill,
                 fillColor: colors.insulinTint.withAlphaComponent(0.5),
                 createContainerPoints: false
             )]
@@ -89,8 +89,8 @@ public extension DoseChart {
 
         let bolusLayer: ChartPointsScatterDownTrianglesLayer<ChartPoint>?
 
-        if bolusDosePoints.count > 0 {
-            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: bolusDosePoints, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: colors.insulinTint)
+        if points.bolus.count > 0 {
+            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: points.bolus, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: colors.insulinTint)
         } else {
             bolusLayer = nil
         }
@@ -114,7 +114,7 @@ public extension DoseChart {
                 xAxisLayer: xAxisLayer,
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
-                chartPoints: allDosePoints,
+                chartPoints: points.highlight,
                 tintColor: colors.insulinTint,
                 gestureRecognizer: gestureRecognizer
             )

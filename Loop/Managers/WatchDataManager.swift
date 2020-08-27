@@ -18,7 +18,7 @@ final class WatchDataManager: NSObject {
     
     init(deviceManager: DeviceDataManager) {
         self.deviceManager = deviceManager
-        self.sleepStore = SleepStore (healthStore: deviceManager.loopManager.glucoseStore.healthStore)
+        self.sleepStore = SleepStore (healthStore: deviceManager.glucoseStore.healthStore)
         self.lastBedtimeQuery = UserDefaults.appGroup?.lastBedtimeQuery ?? .distantPast
         self.bedtime = UserDefaults.appGroup?.bedtime
 
@@ -239,7 +239,7 @@ final class WatchDataManager: NSObject {
             
             if let glucose = glucose {
                 updateGroup.enter()
-                manager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate) { (samples) in
+                self.deviceManager.glucoseStore.getCachedGlucoseSamples(start: glucose.startDate) { (samples) in
                     if let sample = samples.last {
                         context.glucose = sample.quantity
                         context.glucoseDate = sample.startDate
