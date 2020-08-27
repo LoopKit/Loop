@@ -13,7 +13,6 @@ import LoopKitUI
 import LoopCore
 import LoopUI
 
-
 final class CarbEntryViewController: LoopChartsTableViewController, IdentifiableClass {
 
     var navigationDelegate = CarbEntryNavigationDelegate()
@@ -31,7 +30,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     var preferredCarbUnit = HKUnit.gram()
     
     private var glucoseUnit: HKUnit {
-        return deviceManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        return deviceManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
     }
 
     var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
@@ -105,8 +104,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
                 quantity: quantity,
                 startDate: date,
                 foodType: foodType,
-                absorptionTime: absorptionTime,
-                externalID: originalCarbEntry?.externalID
+                absorptionTime: absorptionTime
             )
         } else {
             return nil
@@ -128,7 +126,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
 
     override func createChartsManager() -> ChartsManager {
         // Consider including a chart on this screen to demonstrate how absorption time affects prediction
-        ChartsManager(colors: .default, settings: .default, charts: [], traitCollection: traitCollection)
+        ChartsManager(colors: .primary, settings: .default, charts: [], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {

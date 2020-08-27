@@ -14,6 +14,7 @@ import os.log
 import LoopKit
 import LoopKitUI
 import LoopUI
+import SwiftUI
 
 
 final class BolusEntryViewModel: ObservableObject {
@@ -32,6 +33,8 @@ final class BolusEntryViewModel: ObservableObject {
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
         case staleGlucoseData
     }
+
+    @Environment(\.authenticate) var authenticate
 
     // MARK: - State
 
@@ -71,7 +74,7 @@ final class BolusEntryViewModel: ObservableObject {
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart()
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
-        return ChartsManager(colors: .default, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
+        return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
 
     // MARK: - Constants
@@ -188,7 +191,7 @@ final class BolusEntryViewModel: ObservableObject {
             return
         }
 
-        guard enteredBolus < maximumBolus else {
+        guard enteredBolus <= maximumBolus else {
             presentAlert(.maxBolusExceeded)
             return
         }
@@ -198,7 +201,28 @@ final class BolusEntryViewModel: ObservableObject {
                 presentAlert(.manualGlucoseEntryOutOfAcceptableRange)
                 return
             }
+        }
 
+        // Authenticate the bolus before saving anything
+        if enteredBolus.doubleValue(for: .internationalUnit()) > 0 {
+            let message = String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString)
+            authenticate(message) {
+                switch $0 {
+                case .success:
+                    self.continueSaving(onSuccess: completion)
+                case .failure:
+                    break
+                }
+            }
+        } else if potentialCarbEntry != nil  { // Allow user to save carbs without bolusing
+            self.continueSaving(onSuccess: completion)
+        } else {
+            completion()
+        }
+    }
+    
+    private func continueSaving(onSuccess completion: @escaping () -> Void) {
+        if let manualGlucoseSample = manualGlucoseSample {
             isInitiatingSaveOrBolus = true
             dataManager.loopManager.addGlucose([manualGlucoseSample]) { result in
                 DispatchQueue.main.async {
@@ -219,7 +243,7 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func saveCarbsAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
         guard let carbEntry = potentialCarbEntry else {
-            authenticateAndDeliverBolus(onSuccess: completion)
+            deliverBolus(onSuccess: completion)
             return
         }
 
@@ -237,7 +261,7 @@ final class BolusEntryViewModel: ObservableObject {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    self.authenticateAndDeliverBolus(onSuccess: completion)
+                    self.deliverBolus(onSuccess: completion)
                 case .failure(let error):
                     self.isInitiatingSaveOrBolus = false
                     self.presentAlert(.carbEntryPersistenceFailure)
@@ -247,7 +271,7 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
-    private func authenticateAndDeliverBolus(onSuccess completion: @escaping () -> Void) {
+    private func deliverBolus(onSuccess completion: @escaping () -> Void) {
         let bolusVolume = enteredBolus.doubleValue(for: .internationalUnit())
         guard bolusVolume > 0 else {
             completion()
@@ -255,28 +279,8 @@ final class BolusEntryViewModel: ObservableObject {
         }
 
         isInitiatingSaveOrBolus = true
-
-        let context = LAContext()
-        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) else {
-            dataManager.enactBolus(units: bolusVolume)
-            completion()
-            return
-        }
-
-        context.evaluatePolicy(
-            .deviceOwnerAuthentication,
-            localizedReason: String(format: NSLocalizedString("Authenticate to Bolus %@ Units", comment: "The message displayed during a device authentication prompt for bolus specification"), enteredBolusAmountString),
-            reply: { success, error in
-                DispatchQueue.main.async {
-                    if success {
-                        self.dataManager.enactBolus(units: bolusVolume)
-                        completion()
-                    } else {
-                        self.isInitiatingSaveOrBolus = false
-                    }
-                }
-            }
-        )
+        dataManager.enactBolus(units: bolusVolume)
+        completion()
     }
 
     private func presentAlert(_ alert: Alert) {
@@ -375,7 +379,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         if isManualGlucoseEntryEnabled,
-            let latestGlucose = dataManager.loopManager.glucoseStore.latestGlucose,
+            let latestGlucose = dataManager.glucoseStore.latestGlucose,
             Date().timeIntervalSince(latestGlucose.startDate) <= dataManager.loopManager.settings.inputDataRecencyInterval
         {
             isManualGlucoseEntryEnabled = false
@@ -386,7 +390,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateStoredGlucoseValues() {
-        dataManager.loopManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start) { [weak self] values in
+        dataManager.glucoseStore.getCachedGlucoseSamples(start: chartDateInterval.start, end: nil) { [weak self] values in
             DispatchQueue.main.async {
                 self?.storedGlucoseValues = values
                 self?.updateGlucoseChartValues()
@@ -442,7 +446,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateActiveInsulin() {
-        dataManager.loopManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
+        dataManager.doseStore.insulinOnBoard(at: Date()) { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
@@ -470,7 +474,7 @@ final class BolusEntryViewModel: ObservableObject {
     }
 
     private func updateCarbsOnBoard(from state: LoopState) {
-        dataManager.loopManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
+        dataManager.carbStore.carbsOnBoard(at: Date(), effectVelocities: state.insulinCounteractionEffects) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let carbValue):
@@ -553,7 +557,7 @@ final class BolusEntryViewModel: ObservableObject {
         dispatchPrecondition(condition: .onQueue(.main))
 
         let settings = dataManager.loopManager.settings
-        glucoseUnit = settings.glucoseUnit ?? dataManager.loopManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+        glucoseUnit = settings.glucoseUnit ?? dataManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
 
         targetGlucoseSchedule = settings.glucoseTargetRangeSchedule
         preMealOverride = settings.preMealOverride
@@ -601,3 +605,53 @@ final class BolusEntryViewModel: ObservableObject {
 extension BolusEntryViewModel.Alert: Identifiable {
     var id: Self { self }
 }
+
+// MARK: Helpers
+extension BolusEntryViewModel {
+    
+    var isManualGlucosePromptVisible: Bool {
+        activeNotice == .staleGlucoseData && !isManualGlucoseEntryEnabled
+    }
+    
+    var isNoticeVisible: Bool {
+        if activeNotice == nil {
+            return false
+        } else if activeNotice != .staleGlucoseData {
+            return true
+        } else {
+            return !isManualGlucoseEntryEnabled
+        }
+    }
+    
+    private var hasBolusEntryReadyToDeliver: Bool {
+        enteredBolus.doubleValue(for: .internationalUnit()) != 0
+    }
+
+    private var hasDataToSave: Bool {
+        enteredManualGlucose != nil || potentialCarbEntry != nil
+    }
+
+    enum ButtonChoice { case manualGlucoseEntry, actionButton }
+    var primaryButton: ButtonChoice {
+        if !isManualGlucosePromptVisible { return .actionButton }
+        if hasBolusEntryReadyToDeliver { return .actionButton }
+        return .manualGlucoseEntry
+    }
+    
+    enum ActionButtonAction {
+        case saveWithoutBolusing
+        case saveAndDeliver
+        case enterBolus
+        case deliver
+    }
+    
+    var actionButtonAction: ActionButtonAction {
+        switch (hasDataToSave, hasBolusEntryReadyToDeliver) {
+        case (true, true): return .saveAndDeliver
+        case (true, false): return .saveWithoutBolusing
+        case (false, true): return .deliver
+        case (false, false): return .enterBolus
+        }
+    }
+}
+
