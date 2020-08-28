@@ -180,15 +180,18 @@ extension SettingsView {
     private var servicesSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
             ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
-                Button(action: { self.viewModel.servicesViewModel.didTapService(index) }, label: {
-                    Text(self.viewModel.servicesViewModel.activeServices()[index].localizedTitle)
-                })
-                    .accentColor(.primary)
+                LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
+                            includeArrow: false,
+                            imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as! ServiceUI).image),
+                            label: self.viewModel.servicesViewModel.activeServices()[index].localizedTitle,
+                            descriptiveText: NSLocalizedString("Cloud Service", comment: "The descriptive text for a services section item"))
             }
             if viewModel.servicesViewModel.inactiveServices().count > 0 {
-                Button(action: { self.showServiceChooser = true }, label: {
-                    Text("Add Service", comment: "The title of the services section in settings")
-                })
+                LargeButton(action: { self.showServiceChooser = true },
+                            includeArrow: false,
+                            imageView: AnyView(plusImage),
+                            label: NSLocalizedString("Add Service", comment: "The title of the services section in settings"),
+                            descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "Descriptive text for button to add Service"))
                     .actionSheet(isPresented: $showServiceChooser) {
                         ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
                 }
@@ -255,6 +258,10 @@ extension SettingsView {
         } else {
             return AnyView(Spacer())
         }
+    }
+    
+    private func serviceImage(uiImage: UIImage?) -> AnyView {
+        return deviceImage(uiImage: uiImage)
     }
 }
 
