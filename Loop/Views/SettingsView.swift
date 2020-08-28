@@ -20,6 +20,7 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
     @State var showPumpChooser: Bool = false
     @State var showCGMChooser: Bool = false
     @State var showServiceChooser: Bool = false
+    @State var showTherapySettings: Bool = false
 
     public init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
@@ -57,7 +58,7 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
 extension SettingsView {
         
     private var dismissButton: some View {
-        Button(action: { self.dismiss() }) {
+        Button(action: dismiss) {
             Text("Done").bold()
         }
     }
@@ -89,19 +90,22 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            return NavigationLink(destination: TherapySettingsView(
-                viewModel: TherapySettingsViewModel(mode: .settings,
-                                                    therapySettings: viewModel.therapySettings,
-                                                    supportedInsulinModelSettings: viewModel.supportedInsulinModelSettings,
-                                                    pumpSupportedIncrements: viewModel.pumpSupportedIncrements,
-                                                    syncPumpSchedule: viewModel.syncPumpSchedule,
-                                                    chartColors: .primary,
-                                                    didSave: viewModel.didSave))) {
-                LargeButton(action: { },
+            LargeButton(action: { self.showTherapySettings = true },
                             includeArrow: false,
                             imageView: AnyView(Image("Therapy Icon")),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
+                .sheet(isPresented: $showTherapySettings) {
+                    TherapySettingsView(
+                        viewModel: TherapySettingsViewModel(mode: .settings,
+                                                            therapySettings: self.viewModel.therapySettings,
+                                                            supportedInsulinModelSettings: self.viewModel.supportedInsulinModelSettings,
+                                                            pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
+                                                            syncPumpSchedule: self.viewModel.syncPumpSchedule,
+                                                            chartColors: .primary,
+                                                            didSave: self.viewModel.didSave)
+                    )
+                    .environment(\.dismiss, self.dismiss)
             }
         }
     }
@@ -116,13 +120,14 @@ extension SettingsView {
     @ViewBuilder
     private var pumpSection: some View {
         if viewModel.pumpManagerSettingsViewModel.isSetUp() {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            LargeButton(action: { self.dismiss(); self.viewModel.pumpManagerSettingsViewModel.onTapped() },
+            LargeButton(action: self.viewModel.pumpManagerSettingsViewModel.didTap,
+                        includeArrow: false,
                         imageView: deviceImage(uiImage: viewModel.pumpManagerSettingsViewModel.image()),
                         label: viewModel.pumpManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else {
             LargeButton(action: { self.showPumpChooser = true },
+                        includeArrow: false,
                         imageView: AnyView(plusImage),
                         label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
@@ -135,9 +140,7 @@ extension SettingsView {
     private var pumpChoices: [ActionSheet.Button] {
         var result = viewModel.pumpManagerSettingsViewModel.availableDevices.map { availableDevice in
             ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
-                // TODO: this "dismiss then call didTapAddDevice()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-                self.dismiss()
-                self.viewModel.pumpManagerSettingsViewModel.didTapAddDevice(availableDevice)
+                self.viewModel.pumpManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
         result.append(.cancel())
@@ -147,13 +150,14 @@ extension SettingsView {
     @ViewBuilder
     private var cgmSection: some View {
         if viewModel.cgmManagerSettingsViewModel.isSetUp() {
-            // TODO: this "dismiss then call onTapped()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-            LargeButton(action: { self.dismiss(); self.viewModel.cgmManagerSettingsViewModel.onTapped() },
+            LargeButton(action: self.viewModel.cgmManagerSettingsViewModel.didTap,
+                        includeArrow: false,
                         imageView: deviceImage(uiImage: viewModel.cgmManagerSettingsViewModel.image()),
                         label: viewModel.cgmManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
         } else {
             LargeButton(action: { self.showCGMChooser = true },
+                        includeArrow: false,
                         imageView: AnyView(plusImage),
                         label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
@@ -166,9 +170,7 @@ extension SettingsView {
     private var cgmChoices: [ActionSheet.Button] {
         var result = viewModel.cgmManagerSettingsViewModel.availableDevices.map { availableDevice in
             ActionSheet.Button.default(Text(availableDevice.localizedTitle)) {
-                // TODO: this "dismiss then call didTapAddDevice()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-                self.dismiss()
-                self.viewModel.cgmManagerSettingsViewModel.didTapAddDevice(availableDevice)
+                self.viewModel.cgmManagerSettingsViewModel.didTapAdd(availableDevice)
             }
         }
         result.append(.cancel())
@@ -177,27 +179,26 @@ extension SettingsView {
     
     private var servicesSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
-            ForEach(viewModel.servicesViewModel.activeServices.indices, id: \.self) { index in
-                // TODO: this "dismiss then call didTapService()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-                Button(action: { self.dismiss(); self.viewModel.servicesViewModel.didTapService(index) }, label: {
-                    Text(self.viewModel.servicesViewModel.activeServices[index].localizedTitle)
+            ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
+                Button(action: { self.viewModel.servicesViewModel.didTapService(index) }, label: {
+                    Text(self.viewModel.servicesViewModel.activeServices()[index].localizedTitle)
                 })
                     .accentColor(.primary)
             }
-            Button(action: { self.showServiceChooser = true }, label: {
-                Text("Add Service", comment: "The title of the services section in settings")
-            })
-                .actionSheet(isPresented: $showServiceChooser) {
-                    ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
+            if viewModel.servicesViewModel.inactiveServices().count > 0 {
+                Button(action: { self.showServiceChooser = true }, label: {
+                    Text("Add Service", comment: "The title of the services section in settings")
+                })
+                    .actionSheet(isPresented: $showServiceChooser) {
+                        ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
                 }
+            }
         }
     }
     
     private var serviceChoices: [ActionSheet.Button] {
-        var result = viewModel.servicesViewModel.inactiveServices.map { availableService in
+        var result = viewModel.servicesViewModel.inactiveServices().map { availableService in
             ActionSheet.Button.default(Text(availableService.localizedTitle)) {
-                // TODO: this "dismiss then call didTapAddService()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-                self.dismiss()
                 self.viewModel.servicesViewModel.didTapAddService(availableService)
             }
         }
@@ -231,7 +232,7 @@ extension SettingsView {
     
     private var supportSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Support", comment: "The title of the support section in settings"))) {
-            NavigationLink(destination: SupportScreenView(issueReport: viewModel.issueReport)) {
+            NavigationLink(destination: SupportScreenView(didTapIssueReport: viewModel.didTapIssueReport)) {
                 Text(NSLocalizedString("Support", comment: "The title of the support item in settings"))
             }
         }
@@ -312,8 +313,8 @@ fileprivate class FakeService2: Service {
     var available: AvailableService { AvailableService(identifier: serviceIdentifier, localizedTitle: localizedTitle) }
 }
 fileprivate let servicesViewModel = ServicesViewModel(showServices: true,
-                                                      availableServices: [FakeService1().available, FakeService2().available],
-                                                      activeServices: [FakeService1()])
+                                                      availableServices: { [FakeService1().available, FakeService2().available] },
+                                                      activeServices: { [FakeService1()] })
 public struct SettingsView_Previews: PreviewProvider {
     public static var previews: some View {
         let viewModel = SettingsViewModel(appNameAndVersion: "Tidepool Loop v1.2.3.456",

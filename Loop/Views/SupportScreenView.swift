@@ -12,15 +12,13 @@ import SwiftUI
 struct SupportScreenView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) private var dismiss
     
-    var issueReport: ((_ title: String) -> Void)?
+    var didTapIssueReport: ((_ title: String) -> Void)?
     
     var body: some View {
         List {
             Section {
                 Button(action: {
-                    // TODO: this "dismiss then call issueReport()" here is temporary, until we've completely gotten rid of SettingsTableViewController
-                    self.dismiss()
-                    self.issueReport?(NSLocalizedString("Issue Report", comment: "The title text for the issue report menu item"))
+                    self.didTapIssueReport?(NSLocalizedString("Issue Report", comment: "The title text for the issue report menu item"))
                 }) {
                     Text("Issue Report", comment: "The title text for the issue report menu item")
                 }
