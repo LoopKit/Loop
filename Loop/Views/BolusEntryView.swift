@@ -32,7 +32,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 List {
-                    self.historySection
+                    self.chartSection
                     self.summarySection
                 }
                 // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
@@ -85,7 +85,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
     }
     
-    private var historySection: some View {
+    private var chartSection: some View {
         Section {
             VStack(spacing: 8) {
                 HStack(spacing: 0) {
@@ -256,11 +256,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)
-                    .foregroundColor(viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 && viewModel.isBolusRecommended ? .accentColor : Color(.label))
-                    .onTapGesture {
-                        self.viewModel.acceptRecommendedBolus()
-                    }
-
+                    .foregroundColor(Color(.label))
                 bolusUnitsLabel
             }
         }

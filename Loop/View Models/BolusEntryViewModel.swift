@@ -100,6 +100,7 @@ final class BolusEntryViewModel: ObservableObject {
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
+        observeRecommendedBolusChanges()
 
         update()
     }
@@ -120,6 +121,16 @@ final class BolusEntryViewModel: ObservableObject {
                 self?.dataManager.loopManager.getLoopState { manager, state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func observeRecommendedBolusChanges() {
+        $recommendedBolus
+            .removeDuplicates()
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.setRecommendedBolus()
             }
             .store(in: &cancellables)
     }
@@ -171,10 +182,9 @@ final class BolusEntryViewModel: ObservableObject {
         return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
     }
 
-    func acceptRecommendedBolus() {
+    func setRecommendedBolus() {
         guard isBolusRecommended else { return }
         enteredBolus = recommendedBolus!
-
         dataManager.loopManager.getLoopState { [weak self] manager, state in
             self?.updatePredictedGlucoseValues(from: state)
         }
