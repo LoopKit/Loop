@@ -17,10 +17,12 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
 
     @ObservedObject var viewModel: SettingsViewModel
 
-    @State var showPumpChooser: Bool = false
-    @State var showCGMChooser: Bool = false
-    @State var showServiceChooser: Bool = false
-    @State var showTherapySettings: Bool = false
+    @State private var pumpChooserIsPresented: Bool = false
+    @State private var cgmChooserIsPresented: Bool = false
+    @State private var serviceChooserIsPresented: Bool = false
+    @State private var therapySettingsIsPresented: Bool = false
+    @State private var deletePumpDataAlertIsPresented = false
+    @State private var deleteCGMDataAlertIsPresented = false
 
     public init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
@@ -90,12 +92,12 @@ extension SettingsView {
         
     private var therapySettingsSection: some View {
         Section(header: SectionHeader(label: NSLocalizedString("Configuration", comment: "The title of the Configuration section in settings"))) {
-            LargeButton(action: { self.showTherapySettings = true },
+            LargeButton(action: { self.therapySettingsIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(Image("Therapy Icon")),
                             label: NSLocalizedString("Therapy Settings", comment: "Title text for button to Therapy Settings"),
                             descriptiveText: NSLocalizedString("Diabetes Treatment", comment: "Descriptive text for Therapy Settings"))
-                .sheet(isPresented: $showTherapySettings) {
+                .sheet(isPresented: $therapySettingsIsPresented) {
                     TherapySettingsView(
                         viewModel: TherapySettingsViewModel(mode: .settings,
                                                             therapySettings: self.viewModel.therapySettings,
@@ -126,12 +128,12 @@ extension SettingsView {
                         label: viewModel.pumpManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Insulin Pump", comment: "Descriptive text for Insulin Pump"))
         } else {
-            LargeButton(action: { self.showPumpChooser = true },
+            LargeButton(action: { self.pumpChooserIsPresented = true },
                         includeArrow: false,
                         imageView: AnyView(plusImage),
                         label: NSLocalizedString("Add Pump", comment: "Title text for button to add pump device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a pump", comment: "Descriptive text for button to add pump device"))
-                .actionSheet(isPresented: $showPumpChooser) {
+                .actionSheet(isPresented: $pumpChooserIsPresented) {
                     ActionSheet(title: Text("Add Pump", comment: "The title of the pump chooser in settings"), buttons: pumpChoices)
             }
         }
@@ -156,12 +158,12 @@ extension SettingsView {
                         label: viewModel.cgmManagerSettingsViewModel.name(),
                         descriptiveText: NSLocalizedString("Continuous Glucose Monitor", comment: "Descriptive text for Continuous Glucose Monitor"))
         } else {
-            LargeButton(action: { self.showCGMChooser = true },
+            LargeButton(action: { self.cgmChooserIsPresented = true },
                         includeArrow: false,
                         imageView: AnyView(plusImage),
                         label: NSLocalizedString("Add CGM", comment: "Title text for button to add CGM device"),
                         descriptiveText: NSLocalizedString("Tap here to set up a CGM", comment: "Descriptive text for button to add CGM device"))
-                .actionSheet(isPresented: $showCGMChooser) {
+                .actionSheet(isPresented: $cgmChooserIsPresented) {
                     ActionSheet(title: Text("Add CGM", comment: "The title of the CGM chooser in settings"), buttons: cgmChoices)
             }
         }
@@ -187,12 +189,12 @@ extension SettingsView {
                             descriptiveText: NSLocalizedString("Cloud Service", comment: "The descriptive text for a services section item"))
             }
             if viewModel.servicesViewModel.inactiveServices().count > 0 {
-                LargeButton(action: { self.showServiceChooser = true },
+                LargeButton(action: { self.serviceChooserIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(plusImage),
                             label: NSLocalizedString("Add Service", comment: "The title of the services section in settings"),
                             descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "Descriptive text for button to add Service"))
-                    .actionSheet(isPresented: $showServiceChooser) {
+                    .actionSheet(isPresented: $serviceChooserIsPresented) {
                         ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
                 }
             }
@@ -211,26 +213,39 @@ extension SettingsView {
     
     private var deletePumpDataSection: some View {
         Section {
-            Button(action: { self.viewModel.pumpManagerSettingsViewModel.deleteData?() }) {
+            Button(action: { self.deletePumpDataAlertIsPresented.toggle() }) {
                 HStack {
                     Spacer()
-                    Text("Delete Pump Data").accentColor(.destructive)
+                    Text("Delete Testing Pump Data").accentColor(.destructive)
                     Spacer()
                 }
+            }
+            .alert(isPresented: $deletePumpDataAlertIsPresented) {
+                makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
             }
         }
     }
     
     private var deleteCgmDataSection: some View {
         Section {
-            Button(action: { self.viewModel.cgmManagerSettingsViewModel.deleteData?() }) {
+            Button(action: { self.deleteCGMDataAlertIsPresented.toggle() }) {
                 HStack {
                     Spacer()
-                    Text("Delete CGM Data").accentColor(.destructive)
+                    Text("Delete Testing CGM Data").accentColor(.destructive)
                     Spacer()
                 }
             }
+            .alert(isPresented: $deleteCGMDataAlertIsPresented) {
+                makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
+            }
         }
+    }
+    
+    private func makeDeleteAlert(for model: DeviceViewModel) -> SwiftUI.Alert {
+        return SwiftUI.Alert(title: Text("Delete Testing Data"),
+                             message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
+                             primaryButton: .cancel(),
+                             secondaryButton: .destructive(Text("Delete"), action: model.deleteData))
     }
     
     private var supportSection: some View {
