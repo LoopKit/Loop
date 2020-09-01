@@ -72,7 +72,7 @@ final class BolusEntryViewModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     let chartManager: ChartsManager = {
-        let predictedGlucoseChart = PredictedGlucoseChart()
+        let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil)
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
