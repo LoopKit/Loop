@@ -38,7 +38,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         bluetoothStateManager = BluetoothStateManager()
         bluetoothStateManager.addBluetoothStateObserver(rootViewController.rootViewController)
         alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
-        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
+        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager, rootViewController: rootViewController)
         loopAlertsManager = LoopAlertsManager(alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
         
         SharedLogging.instance = deviceDataManager.loggingServicesManager

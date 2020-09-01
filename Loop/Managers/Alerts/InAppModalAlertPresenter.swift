@@ -140,24 +140,10 @@ extension InAppModalAlertPresenter {
         // For now, this is a simple alert with an "OK" button
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(newActionFunc(action, isCritical ? .destructive : .default, { _ in completion() }))
-        topViewController(controller: rootViewController)?.present(alertController, animated: true)
+        rootViewController?.topmostViewController.present(alertController, animated: true)
         return alertController
     }
-    
-    // Helper function pulled from SO...may be outdated, especially in the SwiftUI world
-    private func topViewController(controller: UIViewController?) -> UIViewController? {
-        if let tabController = controller as? UITabBarController {
-            return topViewController(controller: tabController.selectedViewController)
-        }
-        if let navController = controller as? UINavigationController {
-            return topViewController(controller: navController.visibleViewController)
-        }
-        if let presented = controller?.presentedViewController {
-            return topViewController(controller: presented)
-        }
-        return controller
-    }
-    
+        
     private func playSound(for alert: Alert) {
         guard let sound = alert.sound else { return }
         switch sound {

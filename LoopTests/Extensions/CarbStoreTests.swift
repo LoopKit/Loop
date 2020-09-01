@@ -9,6 +9,20 @@
 import XCTest
 import LoopKit
 
+struct TestLocalizedError: LocalizedError {
+    public let errorDescription: String?
+    public let failureReason: String?
+    public let helpAnchor: String?
+    public let recoverySuggestion: String?
+
+    init(errorDescription: String? = nil, failureReason: String? = nil, helpAnchor: String? = nil, recoverySuggestion: String? = nil) {
+        self.errorDescription = errorDescription
+        self.failureReason = failureReason
+        self.helpAnchor = helpAnchor
+        self.recoverySuggestion = recoverySuggestion
+    }
+}
+
 class CarbStoreCarbStoreErrorCodableTests: XCTestCase {
     func testCodableConfigurationError() throws {
         try assertCarbStoreErrorCodable(.notConfigured, encodesJSON: """
