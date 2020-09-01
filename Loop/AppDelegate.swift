@@ -59,7 +59,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
 
         bluetoothStateManager = BluetoothStateManager()
         alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
-        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
+        deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager, rootViewController: rootViewController)
 
         let statusTableViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
         

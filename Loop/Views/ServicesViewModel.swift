@@ -17,20 +17,22 @@ public protocol ServicesViewModelDelegate: class {
 public class ServicesViewModel: ObservableObject {
     
     @Published var showServices: Bool
-    @Published var availableServices: [AvailableService]
-    @Published var activeServices: [Service]
+    @Published var availableServices: () -> [AvailableService]
+    @Published var activeServices: () -> [Service]
     
-    var inactiveServices: [AvailableService] {
-        return availableServices.filter { availableService in
-            !activeServices.contains { $0.serviceIdentifier == availableService.identifier }
+    var inactiveServices: () -> [AvailableService] {
+        return {
+            return self.availableServices().filter { availableService in
+                !self.activeServices().contains { $0.serviceIdentifier == availableService.identifier }
+            }
         }
     }
     
     weak var delegate: ServicesViewModelDelegate?
     
     init(showServices: Bool,
-         availableServices: [AvailableService],
-         activeServices: [Service],
+         availableServices: @escaping () -> [AvailableService],
+         activeServices: @escaping () -> [Service],
          delegate: ServicesViewModelDelegate? = nil) {
         self.showServices = showServices
         self.activeServices = activeServices
@@ -39,7 +41,7 @@ public class ServicesViewModel: ObservableObject {
     }
     
     func didTapService(_ index: Int) {
-        delegate?.gotoService(identifier: activeServices[index].serviceIdentifier)
+        delegate?.gotoService(identifier: activeServices()[index].serviceIdentifier)
     }
     
     func didTapAddService(_ availableService: AvailableService) {

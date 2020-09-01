@@ -17,8 +17,8 @@ public class DeviceViewModel: ObservableObject {
     let image: () -> UIImage?
     let name: () -> String
     let deleteData: (() -> Void)?
-    let onTapped: () -> Void
-    let didTapAddDevice: (AvailableDevice) -> Void
+    let didTap: () -> Void
+    let didTapAdd: (_ device: AvailableDevice) -> Void
     var isTestingDevice: Bool {
         return deleteData != nil
     }
@@ -38,15 +38,15 @@ public class DeviceViewModel: ObservableObject {
         self.availableDevices = availableDevices
         self.isSetUp = isSetUp
         self.deleteData = deleteData
-        self.onTapped = onTapped
-        self.didTapAddDevice = didTapAddDevice
+        self.didTap = onTapped
+        self.didTapAdd = didTapAddDevice
     }
 }
 
 public protocol SettingsViewModelDelegate: class {
     func dosingEnabledChanged(_: Bool)
     func didSave(therapySetting: TherapySetting, therapySettings: TherapySettings)
-    func createIssueReport(title: String)
+    func didTapIssueReport(title: String)
 }
 
 public class SettingsViewModel: ObservableObject {
@@ -70,8 +70,8 @@ public class SettingsViewModel: ObservableObject {
         delegate?.didSave
     }
     
-    var issueReport: ((String) -> Void)? {
-        delegate?.createIssueReport
+    var didTapIssueReport: ((String) -> Void)? {
+        delegate?.didTapIssueReport
     }
 
     var pumpManagerSettingsViewModel: DeviceViewModel

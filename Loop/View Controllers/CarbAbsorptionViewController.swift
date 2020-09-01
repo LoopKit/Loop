@@ -27,6 +27,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.tableView.allowsSelectionDuringEditing = true
+
         carbEffectChart.glucoseDisplayRange = HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 100)...HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 175)
 
         let notificationCenter = NotificationCenter.default

@@ -450,9 +450,12 @@ final class StatusTableViewController: LoopChartsTableViewController {
             if let predictedGlucoseValues = predictedGlucoseValues {
                 self.statusCharts.setPredictedGlucoseValues(predictedGlucoseValues)
             }
-            if let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y {
+            if !FeatureFlags.predictedGlucoseChartClampEnabled,
+                let lastPoint = self.statusCharts.glucose.predictedGlucosePoints.last?.y
+            {
                 self.eventualGlucoseDescription = String(describing: lastPoint)
             } else {
+                // if the predicted glucose values are clamped, the eventually glucose description should not be displayed, since it may not align with what is being charted.
                 self.eventualGlucoseDescription = nil
             }
             if currentContext.contains(.targets) {
@@ -1126,8 +1129,6 @@ final class StatusTableViewController: LoopChartsTableViewController {
         case let vc as PredictionTableViewController:
             vc.deviceManager = deviceManager
             vc.preferredGlucoseUnit = preferredUnit
-        case let vc as SettingsTableViewController:
-            vc.dataManager = deviceManager
         default:
             break
         }
@@ -1246,8 +1247,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                     maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
         }
         let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
-                                                  availableServices: deviceManager.servicesManager.availableServices,
-                                                  activeServices: deviceManager.servicesManager.activeServices,
+                                                  availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
+                                                  activeServices: { [weak self] in self?.deviceManager.servicesManager.activeServices ?? [] },
                                                   delegate: self)
         let viewModel = SettingsViewModel(appNameAndVersion: Bundle.main.localizedNameAndVersion,
                                           notificationsCriticalAlertPermissionsViewModel: notificationsCriticalAlertPermissionsViewModel,
@@ -1273,7 +1274,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             return
         }
         settings.completionDelegate = self
-        present(settings, animated: true)
+        show(settings, sender: self)
     }
 
     private func onCGMTapped() {
@@ -1285,7 +1286,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
         
         var settings = cgmManager.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default)
         settings.completionDelegate = self
-        present(settings, animated: true)
+        show(settings, sender: self)
     }
 
     // MARK: - HUDs
@@ -1611,8 +1612,12 @@ extension UIAlertController {
 
 extension StatusTableViewController: CompletionDelegate {
     func completionNotifyingDidComplete(_ object: CompletionNotifying) {
-        if let vc = object as? UIViewController, presentedViewController === vc {
-            dismiss(animated: true, completion: nil)
+        if let vc = object as? UIViewController {
+            if presentedViewController === vc {
+                dismiss(animated: true, completion: nil)
+            } else {
+                vc.dismiss(animated: true, completion: nil)
+            }
         }
     }
 }
@@ -1691,7 +1696,7 @@ extension StatusTableViewController: PumpManagerSetupViewControllerDelegate {
         setupViewController.basalSchedule = deviceManager.loopManager.basalRateSchedule
         setupViewController.maxBolusUnits = deviceManager.loopManager.settings.maximumBolus
         setupViewController.maxBasalRateUnitsPerHour = deviceManager.loopManager.settings.maximumBasalRatePerHour
-        present(setupViewController, animated: true, completion: nil)
+        show(setupViewController, sender: self)
     }
     
     func pumpManagerSetupViewController(_ pumpManagerSetupViewController: PumpManagerSetupViewController,
@@ -1741,7 +1746,7 @@ extension StatusTableViewController {
                 }
                 setupViewController.setupDelegate = shim
                 setupViewController.completionDelegate = self
-                present(setupViewController, animated: true, completion: nil)
+                show(setupViewController, sender: self)
             } else {
                 setupCompletion(cgmManagerType.init(rawState: [:]))
             }
@@ -1794,10 +1799,14 @@ extension StatusTableViewController: SettingsViewModelDelegate {
         }
     }
     
-    func createIssueReport(title: String) {
-        let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: deviceManager)
-        vc.title = title
-        show(vc, sender: nil)
+    func didTapIssueReport(title: String) {
+        // TODO: this dismiss here is temporary, until we know exactly where
+        // we want this screen to belong in the navigation flow
+        dismiss(animated: true) {
+            let vc = CommandResponseViewController.generateDiagnosticReport(deviceManager: self.deviceManager)
+            vc.title = title
+            self.show(vc, sender: nil)
+        }
     }
 }
 
@@ -1830,7 +1839,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         var settings = serviceUI.settingsViewController(chartColors: .primary, carbTintColor: .carbTintColor, glucoseTintColor: .glucoseTintColor, guidanceColors: .default, insulinTintColor: .insulinTintColor)
         settings.serviceSettingsDelegate = self
         settings.completionDelegate = self
-        present(settings, animated: true)
+        show(settings, sender: self)
     }
     
     fileprivate func setupService(withIdentifier identifier: String) {
@@ -1841,7 +1850,7 @@ extension StatusTableViewController: ServicesViewModelDelegate {
         if var setupViewController = serviceUIType.setupViewController() {
             setupViewController.serviceSetupDelegate = self
             setupViewController.completionDelegate = self
-            present(setupViewController, animated: true, completion: nil)
+            show(setupViewController, sender: self)
         } else if let service = serviceUIType.init(rawState: [:]) {
             deviceManager.servicesManager.addActiveService(service)
         }
