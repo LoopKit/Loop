@@ -14,6 +14,10 @@ import SwiftUI
 public struct SettingsView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.appName) private var appName
+    @Environment(\.carbTintColor) private var carbTintColor
+    @Environment(\.glucoseTintColor) private var glucoseTintColor
+    @Environment(\.guidanceColors) private var guidanceColors
+    @Environment(\.insulinTintColor) private var insulinTintColor
 
     @ObservedObject var viewModel: SettingsViewModel
 
@@ -105,9 +109,13 @@ extension SettingsView {
                                                             pumpSupportedIncrements: self.viewModel.pumpSupportedIncrements,
                                                             syncPumpSchedule: self.viewModel.syncPumpSchedule,
                                                             chartColors: .primary,
-                                                            didSave: self.viewModel.didSave)
-                    )
-                    .environment(\.dismiss, self.dismiss)
+                                                            didSave: self.viewModel.didSave))
+                        .environment(\.dismiss, self.dismiss)
+                        .environment(\.appName, self.appName)
+                        .environment(\.carbTintColor, self.carbTintColor)
+                        .environment(\.glucoseTintColor, self.glucoseTintColor)
+                        .environment(\.guidanceColors, self.guidanceColors)
+                        .environment(\.insulinTintColor, self.insulinTintColor)
             }
         }
     }
