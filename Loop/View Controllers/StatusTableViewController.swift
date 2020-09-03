@@ -1210,14 +1210,22 @@ final class StatusTableViewController: LoopChartsTableViewController {
     
     private func presentSettings() {
         let notificationsCriticalAlertPermissionsViewModel = NotificationsCriticalAlertPermissionsViewModel()
+        let deletePumpDataFunc: () -> DeviceViewModel.DeleteTestingDataFunc? = { [weak self] in
+            (self?.deviceManager.pumpManager is TestingPumpManager) ? {
+                [weak self] in self?.deviceManager.deleteTestingPumpData()
+                } : nil
+        }
+        let deleteCGMDataFunc: () -> DeviceViewModel.DeleteTestingDataFunc? = { [weak self] in
+            (self?.deviceManager.cgmManager is TestingCGMManager) ? {
+                [weak self] in self?.deviceManager.deleteTestingCGMData()
+                } : nil
+        }
         let pumpViewModel = DeviceViewModel(
             image: { [weak self] in self?.deviceManager.pumpManager?.smallImage },
             name: { [weak self] in self?.deviceManager.pumpManager?.localizedTitle ?? "" },
             isSetUp: { [weak self] in self?.deviceManager.pumpManager != nil },
             availableDevices: deviceManager.availablePumpManagers,
-            deleteData: (deviceManager.pumpManager is TestingPumpManager) ? {
-                [weak self] in self?.deviceManager.deleteTestingPumpData()
-                } : nil,
+            deleteTestingDataFunc: deletePumpDataFunc,
             onTapped: { [weak self] in
                 self?.onPumpTapped()
             },
@@ -1232,9 +1240,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
             name: {[weak self] in self?.deviceManager.cgmManager?.localizedTitle ?? "" },
             isSetUp: {[weak self] in self?.deviceManager.cgmManager != nil },
             availableDevices: deviceManager.availableCGMManagers,
-            deleteData: (deviceManager.cgmManager is TestingCGMManager) ? {
-                [weak self] in self?.deviceManager.deleteTestingCGMData()
-                } : nil,
+            deleteTestingDataFunc: deleteCGMDataFunc,
             onTapped: { [weak self] in
                 self?.onCGMTapped()
             },

@@ -41,11 +41,8 @@ public struct SettingsView: View, HorizontalSizeClassOverride {
                 }
                 therapySettingsSection
                 deviceSettingsSection
-                if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
-                    deletePumpDataSection
-                }
-                if viewModel.cgmManagerSettingsViewModel.isTestingDevice {
-                    deleteCgmDataSection
+                if viewModel.pumpManagerSettingsViewModel.isTestingDevice || viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                    deleteDataSection
                 }
                 if viewModel.servicesViewModel.showServices {
                     servicesSection
@@ -188,22 +185,22 @@ extension SettingsView {
     }
     
     private var servicesSection: some View {
-        Section(header: SectionHeader(label: NSLocalizedString("Services", comment: "The title of the services section in settings"))) {
+        Section(header: SectionHeader(label: NSLocalizedString("Accounts", comment: "The title of the accounts section in settings"))) {
             ForEach(viewModel.servicesViewModel.activeServices().indices, id: \.self) { index in
                 LargeButton(action: { self.viewModel.servicesViewModel.didTapService(index) },
                             includeArrow: false,
                             imageView: self.serviceImage(uiImage: (self.viewModel.servicesViewModel.activeServices()[index] as! ServiceUI).image),
                             label: self.viewModel.servicesViewModel.activeServices()[index].localizedTitle,
-                            descriptiveText: NSLocalizedString("Cloud Service", comment: "The descriptive text for a services section item"))
+                            descriptiveText: "")
             }
             if viewModel.servicesViewModel.inactiveServices().count > 0 {
                 LargeButton(action: { self.serviceChooserIsPresented = true },
                             includeArrow: false,
                             imageView: AnyView(plusImage),
-                            label: NSLocalizedString("Add Service", comment: "The title of the services section in settings"),
-                            descriptiveText: NSLocalizedString("Tap here to set up a Service", comment: "Descriptive text for button to add Service"))
+                            label: NSLocalizedString("Add Account", comment: "The title of the add account button in settings"),
+                            descriptiveText: NSLocalizedString("Tap here to set up a Account", comment: "The descriptive text of the add account button in settings"))
                     .actionSheet(isPresented: $serviceChooserIsPresented) {
-                        ActionSheet(title: Text("Add Service", comment: "The title of the services action sheet in settings"), buttons: serviceChoices)
+                        ActionSheet(title: Text("Add Account", comment: "The title of the add account action sheet in settings"), buttons: serviceChoices)
                 }
             }
         }
@@ -219,32 +216,31 @@ extension SettingsView {
         return result
     }
     
-    private var deletePumpDataSection: some View {
+    private var deleteDataSection: some View {
         Section {
-            Button(action: { self.deletePumpDataAlertIsPresented.toggle() }) {
-                HStack {
-                    Spacer()
-                    Text("Delete Testing Pump Data").accentColor(.destructive)
-                    Spacer()
+            if viewModel.pumpManagerSettingsViewModel.isTestingDevice {
+                Button(action: { self.deletePumpDataAlertIsPresented.toggle() }) {
+                    HStack {
+                        Spacer()
+                        Text("Delete Testing Pump Data").accentColor(.destructive)
+                        Spacer()
+                    }
+                }
+                .alert(isPresented: $deletePumpDataAlertIsPresented) {
+                    makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
                 }
             }
-            .alert(isPresented: $deletePumpDataAlertIsPresented) {
-                makeDeleteAlert(for: self.viewModel.pumpManagerSettingsViewModel)
-            }
-        }
-    }
-    
-    private var deleteCgmDataSection: some View {
-        Section {
-            Button(action: { self.deleteCGMDataAlertIsPresented.toggle() }) {
-                HStack {
-                    Spacer()
-                    Text("Delete Testing CGM Data").accentColor(.destructive)
-                    Spacer()
+            if viewModel.cgmManagerSettingsViewModel.isTestingDevice {
+                Button(action: { self.deleteCGMDataAlertIsPresented.toggle() }) {
+                    HStack {
+                        Spacer()
+                        Text("Delete Testing CGM Data").accentColor(.destructive)
+                        Spacer()
+                    }
                 }
-            }
-            .alert(isPresented: $deleteCGMDataAlertIsPresented) {
-                makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
+                .alert(isPresented: $deleteCGMDataAlertIsPresented) {
+                    makeDeleteAlert(for: self.viewModel.cgmManagerSettingsViewModel)
+                }
             }
         }
     }
@@ -253,7 +249,7 @@ extension SettingsView {
         return SwiftUI.Alert(title: Text("Delete Testing Data"),
                              message: Text("Are you sure you want to delete all your \(model.name()) Data?\n(This action is not reversible)"),
                              primaryButton: .cancel(),
-                             secondaryButton: .destructive(Text("Delete"), action: model.deleteData))
+                             secondaryButton: .destructive(Text("Delete"), action: model.deleteTestingDataFunc()))
     }
     
     private var supportSection: some View {
@@ -268,7 +264,7 @@ extension SettingsView {
         Image(systemName: "plus.circle")
             .resizable()
             .scaledToFit()
-            .accentColor(.accentColor)
+            .accentColor(Color(.systemGray))
             .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
     }
     

@@ -13,14 +13,16 @@ import LoopKitUI
 import SwiftUI
 
 public class DeviceViewModel: ObservableObject {
+    public typealias DeleteTestingDataFunc = () -> Void
+    
     let isSetUp: () -> Bool
     let image: () -> UIImage?
     let name: () -> String
-    let deleteData: (() -> Void)?
+    let deleteTestingDataFunc: () -> DeleteTestingDataFunc?
     let didTap: () -> Void
     let didTapAdd: (_ device: AvailableDevice) -> Void
     var isTestingDevice: Bool {
-        return deleteData != nil
+        return deleteTestingDataFunc() != nil
     }
 
     @Published var availableDevices: [AvailableDevice]
@@ -29,7 +31,7 @@ public class DeviceViewModel: ObservableObject {
                 name: @escaping () -> String = { "" },
                 isSetUp: @escaping () -> Bool = { false },
                 availableDevices: [AvailableDevice] = [],
-                deleteData: (() -> Void)? = nil,
+                deleteTestingDataFunc: @escaping  () -> DeleteTestingDataFunc? = { nil },
                 onTapped: @escaping () -> Void = { },
                 didTapAddDevice: @escaping (AvailableDevice) -> Void = { _ in  }
                 ) {
@@ -37,7 +39,7 @@ public class DeviceViewModel: ObservableObject {
         self.name = name
         self.availableDevices = availableDevices
         self.isSetUp = isSetUp
-        self.deleteData = deleteData
+        self.deleteTestingDataFunc = deleteTestingDataFunc
         self.didTap = onTapped
         self.didTapAdd = didTapAddDevice
     }
