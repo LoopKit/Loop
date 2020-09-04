@@ -28,6 +28,9 @@
 /* The short unit display string for millimoles of glucose per liter */
 "mmol/L" = "毫摩尔/升";
 
+/* Lesson title */
+"Modal Day" = "Modal Day";
+
 /* Lesson result text for no data */
 "No data available" = "无数据";
 

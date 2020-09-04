@@ -16,14 +16,38 @@
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "启动闭环";
 
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The short unit display string for grams */
+"g" = "g";
+
+/* String displayed instead of a glucose value above the CGM range */
+"HIGH" = "HIGH";
+
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "闭环已停止运行%@";
+
+/* String displayed instead of a glucose value below the CGM range */
+"LOW" = "LOW";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "请注意";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "关闭闭环";
+
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
 
 /* Accessibility value for an unknown value */
 "Unknown" = "未知";

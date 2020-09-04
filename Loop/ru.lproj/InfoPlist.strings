@@ -1,3 +1,6 @@
+/* Bundle display name */
+"CFBundleDisplayName" = "Loop";
+
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
 
@@ -6,6 +9,9 @@
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Блутус применяется для коммуникации с инсулиновой помпой и устройствами непрерывного мониторинга СК";
+
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Идентификатор Face ID применяется для авторизации болюса инсулина";

@@ -4,6 +4,9 @@
 /* Title of the user activity for adding carbs */
 "Add Carb Entry" = "Tilføj kulhydrater";
 
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Beregner procentdelen af ​​blodsukkermålinger inden for et specificeret interval";
+
 /* Title of the button to begin lesson execution */
 "Continue" = "Fortsæt";
 
@@ -14,7 +17,7 @@
 "g" = "g";
 
 /* Placeholder for upper range entry */
-"Maximum" = "Maximum";
+"Maximum" = "Maksimum";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -38,10 +41,10 @@
 "Range" = "Interval";
 
 /* Title of config entry */
-"Start Date" = "Start Dato";
+"Start Date" = "Start dato";
 
 /* Lesson title */
-"Time in Range" = "Tme in Range";
+"Time in Range" = "Time in Range";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";

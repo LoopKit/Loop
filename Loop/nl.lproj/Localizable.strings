@@ -1,3 +1,9 @@
+/* Manage Notifications in Settings descriptive text */
+"\n            Critical Alerts will always play a sound and appear on the Lock screen even if your iPhone is muted or Do Not Disturb is on.\n            " = "\n            Kritische waarschuwingen zullen altijd geluid laten horen en verschijnen op het vergrendelingsscherm, zelfs als uw iPhone is gedempt of 'Niet storen' is ingeschakeld.\n            ";
+
+/* Manage Notifications in Settings descriptive text */
+"\n            Notifications appear on your Lock screen or pop up while you’re using other apps.\n            \n            Notifications give you important (appName) app information without requiring you to open the app.  You can customize when and how you want to receive these notifications.\n            " = "\n            Er verschijnen meldingen op uw vergrendelscherm of pop-up terwijl u andere apps gebruikt.\n            \n            Meldingen geven je belangrijke (appName) app-informatie zonder dat je de app hoeft te openen. U kunt aanpassen wanneer en hoe u deze meldingen wilt ontvangen.\n            ";
+
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (Wachten: %@)";
 
@@ -15,6 +21,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/E";
@@ -43,11 +52,20 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30  min vergelijking van glucose voorspelling versus actueel, gevolgd door afbouw over 60 min";
 
+/* Alert message for a manual glucose entry out of range error */
+"A manual glucose entry must be between %@ and %@" = "Een handmatige glucose invoer moet tussen %1$@ en %2$@ liggen";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "Een model gebaseerd op de gepubliceerde opname van Fiasp insuline.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Een model gebaseerd op de gepubliceerde opname van Humalog, Novorapid, en Apidra insuline bij volwassenen.";
+
+/* Alert message for a missing pump error */
+"A pump must be configured before a bolus can be delivered." = "Er moet een pomp worden geconfigureerd voordat een bolus kan worden afgeleverd.";
+
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Absorptie tijd";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AccepteerVoorgesteldeBolus";
@@ -57,6 +75,9 @@
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Actieve koolhydraten: %@";
+
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Actieve koolhydraten";
 
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Actieve insuline";
@@ -71,7 +92,7 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Voeg CGM toe";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Voeg maaltijd toe";
 
 /* Action sheet title selecting Pump
@@ -79,22 +100,42 @@
 "Add Pump" = "Voeg pomp toe";
 
 /* Title text for button to set up a service */
-"Add Service" = "Add Service";
+"Add Service" = "Service toevoegen";
 
-/* Button title to delete a service */
-"Delete Service" = "Delete Service";
-
-/* Confirmation message for deleting a service */
-"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+/* Alert Permissions button text
+   Notification & Critical Alert Permissions screen title
+   Title text for Notification & Critical Alert Permissions button cell */
+"Alert Permissions" = "Waarschuwingsmachtigingen";
 
 /* The title of the section containing algorithm settings */
 "Algorithm Settings" = "Algoritme instellingen";
 
+/* The title of the Amplitude service */
+"Amplitude" = "Amplitude";
+
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "Een aanpassing aan het volwassen model gebaseerd om praktijk effecten bij kinderen.";
 
+/* Alert message for a carb entry persistence error */
+"An error occurred while trying to save your carb entry." = "Er is een fout opgetreden tijdens het opslaan van de invoer van uw koolhydraten.";
+
+/* Alert message for a manual glucose entry persistence error */
+"An error occurred while trying to save your manual glucose entry." = "Er is een fout opgetreden tijdens het opslaan van uw handmatige glucose invoer.";
+
+/* Alert message when glucose data returns while on bolus screen */
+"An updated bolus recommendation is available." = "Er is een bijgewerkte bolusaanbeveling beschikbaar.";
+
+/* The title of the amplitude API key credential */
+"API Key" = "API Sleutel";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API Secret";
+
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Weet je zeker dat je de CGM wilt verwijderen";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Bent u zeker dat u deze service wilt verwijderen?";
 
 /* Format fragment for a specific time */
 "at %@" = "bij %@";
@@ -109,9 +150,27 @@
    The title text for the basal rate schedule */
 "Basal Rates" = "Basaal waardes";
 
+/* Message to the user to that the bluetooth is off */
+"Bluetooth Off" = "Bluetooth uit";
+
+/* Bluetooth off alert title */
+"Bluetooth Off Alert" = "Bluetooth Uit Waarschuwing";
+
+/* Message to the user that bluetooth is unavailable to the app */
+"Bluetooth Unavailable" = "Bluetooth niet beschikbaar";
+
+/* Bluetooth unavailable alert title */
+"Bluetooth Unavailable Alert" = "Bluetooth niet beschikbaar alarm";
+
 /* The label of the bolus entry button
    The notification title for a bolus failure */
 "Bolus" = "Bolus";
+
+/* Alert title for an updated bolus recommendation */
+"Bolus Recommendation Updated" = "Bolus aanbeveling bijgewerkt";
+
+/* Title for card displaying carb entry and bolus recommendation */
+"Bolus Summary" = "Bolus Samenvatting";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Bolused %1$@ van %2$@";
@@ -128,9 +187,19 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Koolhydraten impact";
 
+/* Back button text for bolus screen to return to carb entry screen
+   Label for carb entry row on bolus screen */
+"Carb Entry" = "Koolhydraten invoer";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Koolhydraten ratio's";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Voeg koolhydraten toe";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Koolhydraten invoer bewerken";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Koolhydraten";
@@ -153,11 +222,14 @@
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Controleer je CGM gegevensbron";
 
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Kies een langere opnametijd voor grotere maaltijden of voor degene die vetten en eiwitten bevatten. Dit is alleen een leidraad voor het algoritme en hoeft niet exact te zijn.";
+
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Gesloten loop";
 
 /* The title of the action used to dismiss an error alert */
-"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+"com.loudnate.LoopKit.errorAlertActionTitle" = "Ok";
 
 /* The title of the configuration section in settings */
 "Configuration" = "Configuratie";
@@ -178,20 +250,53 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Aangepast programma";
 
-/* Button title to delete CGM */
-"Delete CGM" = "Verwijder CGM";
+/* The title of the cell indicating a generic custom preset is enabled */
+"Custom Preset" = "Aangepaste voorinstelling";
+
+/* The title of the Loggly customer token credential */
+"Customer Token" = "Klant token";
+
+/* Title of the carb entry date picker cell */
+"Date" = "Datum";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
 
 /* The title of the button to remove the credentials for a service */
 "Delete Account" = "Verwijder account";
 
+/* Button title to delete CGM */
+"Delete CGM" = "Verwijder CGM";
+
+/* Button title to delete a service */
+"Delete Service" = "Service verwijderen";
+
 /* Title text for delivery limits */
 "Delivery Limits" = "Toediening limieten";
+
+/* Descriptive text for Therapy Settings */
+"Diabetes Treatment" = "Diabetes Behandeling";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Uitschakelen";
 
+/* Default alert dismissal */
+"Dismiss" = "Afwijzen";
+
+/* No comment provided by engineer. */
+"Done" = "Voltooid";
+
+/* Message to the user to enable bluetooth */
+"Enable Bluetooth" = "Bluetooth inschakelen";
+
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Inschakelen";
+
+/* Caption for bolus screen notice when glucose data is missing or stale */
+"Enter a manual glucose for a recommended bolus amount." = "Voer een handmatige glucose in voor een aanbevolen bolushoeveelheid.";
+
+/* Button text prompting manual glucose entry on bolus screen */
+"Enter Manual BG" = "Voer handmatige BG in";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Voer drempel voor onderbreking insuline in";
@@ -214,6 +319,15 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Voor %1$@";
 
+/* The short unit display string for grams */
+"g" = "g";
+
+/* Get help with Notification & Critical Alert Permissions support button text */
+"Get help with Notification & Critical Alert Permissions" = "Krijg hulp bij notificaties & kritieke waarschuwing rechten";
+
+/* No comment provided by engineer. */
+"Get help with Notification & Critical Alert Permissions screen" = "Krijg hulp met notificaties & kritieke waarschuwing rechten scherm";
+
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glucose";
 
@@ -222,6 +336,12 @@
 
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "Glucose gegevens niet beschikbaar";
+
+/* Alert title when glucose data returns while on bolus screen */
+"Glucose Data Now Available" = "Glucose gegevens beschikbaar";
+
+/* Alert title for a manual glucose entry out of range error */
+"Glucose Entry Out of Range" = "Glucose invoer buiten bereik";
 
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glucose momentum";
@@ -245,9 +365,15 @@
    The title text for the insulin model setting row */
 "Insulin Model" = "Insuline model";
 
+/* Descriptive text for Insulin Pump */
+"Insulin Pump" = "Insulinepomp";
+
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Insuline gevoeligheden";
+
+/* The title of the cell indicating the pump is suspended */
+"Insulin Suspended" = "Insuline tijdelijk uitgeschakeld";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Niet valide gegevens: %1$@";
@@ -264,11 +390,35 @@
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop fout";
 
+/* Bluetooth unavailable alert body. */
+"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop heeft een probleem met uw Bluetooth-instellingen gedetecteerd en zal niet met succes werken totdat Bluetooth is ingeschakeld. U ontvangt geen glucosewaardes en kan niet bolussen.";
+
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop is niet goed afgerond in %@";
 
+/* Bluetooth off background alert body. */
+"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop werkt pas als Bluetooth is ingeschakeld. U zult geen glucosemetingen ontvangen, of in staat zijn om bolus.";
+
+/* Manage Critical Alerts in Settings button text */
+"Manage Critical Alerts in Settings" = "Kritieke waarschuwingen beheren in instellingen";
+
+/* Manage Notifications in Settings button text */
+"Manage Notifications in Settings" = "Meldingen beheren in Instellingen";
+
+/* Label for manual glucose entry row on bolus screen */
+"Manual BG Entry" = "Handmatige BG invoer";
+
+/* Title for bolus entry screen when also entering carbs */
+"Meal Bolus" = "Maaltijd bolus";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Missende gegevens: %1$@";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum impact";
@@ -276,8 +426,26 @@
 /* Sensor state description for the non-valid state */
 "Needs Attention" = "Aandacht vereist";
 
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* Title for bolus screen notice when no bolus is recommended */
+"No Bolus Recommended" = "Geen Bolus aanbevolen";
+
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Geen gekoppelde apparaten, of fout bij apparaat verbinding";
+
+/* Alert title for a missing maximum bolus setting error */
+"No Maximum Bolus Configured" = "Geen maximale bolus geconfigureerd";
+
+/* Alert title for a missing pump error */
+"No Pump Configured" = "Geen pomp geconfigureerd";
+
+/* Title for bolus screen notice when glucose data is missing or stale */
+"No Recent Glucose Data" = "Geen recente glucosegegevens";
+
+/* The title of the notification action to acknowledge a device alert */
+"OK" = "Ok";
 
 /* The title text for the override presets */
 "Override Presets" = "Aangepast programma’s";
@@ -293,6 +461,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Voorspeld: %1$@\nActueel: %2$@ (%3$@)";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
+"prediction-description-retrospective-correction" = "voorspelling-beschrijving-retrospectief-correctie";
 
 /* The title of the pump section in settings */
 "Pump" = "Pomp";
@@ -315,6 +486,9 @@
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pomp tijdelijk uitgeschakeld";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Snelwerkende - volwassenen";
 
@@ -326,6 +500,9 @@
 
 /* The title of the cell displaying a recommended temp basal value */
 "Recommended Basal" = "Voorgestelde basaal";
+
+/* Label for recommended bolus row on bolus screen */
+"Recommended Bolus" = "Voorgestelde basaal";
 
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Voorgestelde bolus: %@ Eenheden";
@@ -339,6 +516,12 @@
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Opnieuw proberen";
 
+/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
+"Save and Deliver" = "Opslaan en leveren";
+
+/* Button text to save carbs and/or manual glucose entry without a bolus */
+"Save without Bolusing" = "Opslaan zonder bolus";
+
 /* The title of the services section in settings */
 "Services" = "Diensten";
 
@@ -351,26 +534,63 @@
 /* Format fragment for a start time */
 "since %@" = "na %@";
 
+/* The title of the nightscout site URL credential */
+"Site URL" = "Webpagina URL";
+
 /* The format for the description of a temporary override start date */
 "starting at %@" = "start op %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Start bolus";
 
+/* Section title for Support
+   The title of the support section in settings */
+"Support" = "Ondersteuning";
+
 /* The title text in settings */
 "Suspend Threshold" = "Onderbrekingsdrempel";
+
+/* Descriptive text for button to add CGM device */
+"Tap here to set up a CGM" = "Tik hier om een CGM in te stellen";
+
+/* Descriptive text for button to add pump device */
+"Tap here to set up a pump" = "Tik hier om een pomp in te stellen";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Klik om te herstarten";
 
+/* Alert message for an updated bolus recommendation */
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "De bolusaanbeveling is bijgewerkt. Bevestig de bolus opnieuw.";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Het oude model dat door Loop wordt gebruikt, waardoor de actieduur kan worden aangepast.";
+
+/* Alert message for a maximum bolus validation error (1: max bolus value) */
+"The maximum bolus amount is %@ U." = "De maximale bolushoeveelheid is %@ Eenheden.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "De maximale bolushoeveelheid is %@ Eenheden";
 
+/* Alert message for a missing maximum bolus setting error */
+"The maximum bolus setting must be configured before a bolus can be delivered." = "De maximale bolusinstelling moet worden ingesteld voordat een bolus kan worden afgeleverd.";
+
+/* Title text for button to Therapy Settings */
+"Therapy Settings" = "Therapie instellingen";
+
+/* Bluetooth off foreground alert body */
+"Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Schakel Bluetooth in om waarschuwingen, alarmen of sensorglucosewaardes te ontvangen.";
+
 /* The short unit display string for international units of insulin */
 "U" = "E";
+
+/* Alert title for a carb entry persistence error */
+"Unable to Save Carb Entry" = "Kan koolhydraten invoer niet opslaan";
+
+/* Alert title for a manual glucose entry persistence error */
+"Unable to Save Manual Glucose Entry" = "Kan handmatige glucoseinvoer niet opslaan";
+
+/* The alert body for an error while canceling a bolus */
+"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Niet in staat om de bolus te stoppen. Verplaats je iPhone dichter bij de pomp en probeer het opnieuw. Controleer de geschiedenis van de toediening van uw insuline voor meer informatie en houd uw glucose nauwlettend in het oog.";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "tot %@";
@@ -386,4 +606,7 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Trainings doel waardes";
+
+/* Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold */
+"Your glucose is below or predicted to go below your suspend threshold, %@." = "Uw glucose is onder of verwacht dat u onder uw opschortingsdrempel komt, %@.";
 

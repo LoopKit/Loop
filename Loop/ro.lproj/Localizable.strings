@@ -1,3 +1,9 @@
+/* Manage Notifications in Settings descriptive text */
+"\n            Critical Alerts will always play a sound and appear on the Lock screen even if your iPhone is muted or Do Not Disturb is on.\n            " = "\n            Critical Alerts will always play a sound and appear on the Lock screen even if your iPhone is muted or Do Not Disturb is on.\n            ";
+
+/* Manage Notifications in Settings descriptive text */
+"\n            Notifications appear on your Lock screen or pop up while you’re using other apps.\n            \n            Notifications give you important (appName) app information without requiring you to open the app.  You can customize when and how you want to receive these notifications.\n            " = "\n            Notifications appear on your Lock screen or pop up while you’re using other apps.\n            \n            Notifications give you important (appName) app information without requiring you to open the app.  You can customize when and how you want to receive these notifications.\n            ";
+
 /* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
 " (pending: %@)" = " (urmează a fi administrate: %@)";
 
@@ -15,6 +21,9 @@
 
 /* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
 "%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string combining carb entry quantity and absorption time emoji */
+"%1$@ %2$@" = "%1$@ %2$@";
 
 /* Format string for carb ratio average. (1: value)(2: carb unit) */
 "%1$@ %2$@/U" = "%1$@ %2$@/U";
@@ -43,11 +52,20 @@
 /* Description of the prediction input effect for retrospective correction */
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "Comparație pe 30 min a glicemiei anticipate față de cea observată, continuată cu o diminuare pe 60 min.";
 
+/* Alert message for a manual glucose entry out of range error */
+"A manual glucose entry must be between %@ and %@" = "A manual glucose entry must be between %1$@ and %2$@";
+
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "Un model bazat pe absorbția declarată a insulinei Fiasp.";
 
 /* Subtitle of Rapid-Acting – Adult preset */
 "A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "Un model bazat pe absorbția declarată a insulinei Humalog, Novolog și Apidra la adulți.";
+
+/* Alert message for a missing pump error */
+"A pump must be configured before a bolus can be delivered." = "A pump must be configured before a bolus can be delivered.";
+
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Absorption Time";
 
 /* Action to copy the recommended Bolus value to the actual Bolus Field */
 "AcceptRecommendedBolus" = "AcceptRecommendedBolus";
@@ -57,6 +75,9 @@
 
 /* The string format describing active carbohydrates. (1: localized glucose value description) */
 "Active Carbohydrates: %@" = "Carbohidrați activi: %@";
+
+/* Title describing quantity of still-absorbing carbohydrates */
+"Active Carbs" = "Active Carbs";
 
 /* The title of the Insulin On-Board graph */
 "Active Insulin" = "Insulină activă";
@@ -71,18 +92,38 @@
    Title text for button to set up a CGM */
 "Add CGM" = "Adaugă CGM";
 
-/* The label of the carb entry button */
+/* The label of the meal button */
 "Add Meal" = "Adaugă masă";
 
 /* Action sheet title selecting Pump
    Title text for button to set up a new pump */
 "Add Pump" = "Adaugă pompă";
 
+/* Title text for button to set up a service */
+"Add Service" = "Add Service";
+
+/* Alert Permissions button text
+   Notification & Critical Alert Permissions screen title
+   Title text for Notification & Critical Alert Permissions button cell */
+"Alert Permissions" = "Alert Permissions";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "Algorithm Settings";
+
 /* The title of the Amplitude service */
 "Amplitude" = "Amplitude";
 
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "O ajustare a modelului de adulți, bazată pe efecte empirice observate la copii.";
+
+/* Alert message for a carb entry persistence error */
+"An error occurred while trying to save your carb entry." = "An error occurred while trying to save your carb entry.";
+
+/* Alert message for a manual glucose entry persistence error */
+"An error occurred while trying to save your manual glucose entry." = "An error occurred while trying to save your manual glucose entry.";
+
+/* Alert message when glucose data returns while on bolus screen */
+"An updated bolus recommendation is available." = "An updated bolus recommendation is available.";
 
 /* The title of the amplitude API key credential */
 "API Key" = "API Key";
@@ -92,6 +133,9 @@
 
 /* Confirmation message for deleting a CGM */
 "Are you sure you want to delete this CGM?" = "Sigur doriți să ștergeți acest CGM?";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
 
 /* Format fragment for a specific time */
 "at %@" = "la %@";
@@ -106,9 +150,27 @@
    The title text for the basal rate schedule */
 "Basal Rates" = "Rate bazale";
 
+/* Message to the user to that the bluetooth is off */
+"Bluetooth Off" = "Bluetooth Off";
+
+/* Bluetooth off alert title */
+"Bluetooth Off Alert" = "Bluetooth Off Alert";
+
+/* Message to the user that bluetooth is unavailable to the app */
+"Bluetooth Unavailable" = "Bluetooth Unavailable";
+
+/* Bluetooth unavailable alert title */
+"Bluetooth Unavailable Alert" = "Bluetooth Unavailable Alert";
+
 /* The label of the bolus entry button
    The notification title for a bolus failure */
 "Bolus" = "Bolus";
+
+/* Alert title for an updated bolus recommendation */
+"Bolus Recommendation Updated" = "Bolus Recommendation Updated";
+
+/* Title for card displaying carb entry and bolus recommendation */
+"Bolus Summary" = "Bolus Summary";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
 "Bolused %1$@ of %2$@" = "Bolus administrat %1$@ of %2$@";
@@ -125,9 +187,19 @@
 /* Details for missing data error when carb effects are missing */
 "Carb effects" = "Efecte carbohidrați";
 
+/* Back button text for bolus screen to return to carb entry screen
+   Label for carb entry row on bolus screen */
+"Carb Entry" = "Carb Entry";
+
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
 "Carb Ratios" = "Raport carbohidrați/insulină";
+
+/* The title of the view controller to create a new carb entry */
+"carb-entry-title-add" = "Add Carb Entry";
+
+/* The title of the view controller to edit an existing carb entry */
+"carb-entry-title-edit" = "Edit Carb Entry";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Carbohidrați";
@@ -149,6 +221,9 @@
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Verificați sursa de date CGM";
+
+/* Carb entry section footer text explaining absorption time */
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact.";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Loop automat";
@@ -175,20 +250,53 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Înlocuire";
 
+/* The title of the cell indicating a generic custom preset is enabled */
+"Custom Preset" = "Custom Preset";
+
 /* The title of the Loggly customer token credential */
 "Customer Token" = "Customer Token";
+
+/* Title of the carb entry date picker cell */
+"Date" = "Date";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Delete Account";
 
 /* Button title to delete CGM */
 "Delete CGM" = "Șterge CGM";
 
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
 /* Title text for delivery limits */
 "Delivery Limits" = "Limite administrare";
+
+/* Descriptive text for Therapy Settings */
+"Diabetes Treatment" = "Diabetes Treatment";
 
 /* The action hint of the workout mode toggle button when enabled */
 "Disables" = "Dezactivează";
 
+/* Default alert dismissal */
+"Dismiss" = "Dismiss";
+
+/* No comment provided by engineer. */
+"Done" = "Done";
+
+/* Message to the user to enable bluetooth */
+"Enable Bluetooth" = "Enable Bluetooth";
+
 /* The action hint of the workout mode toggle button when disabled */
 "Enables" = "Activează";
+
+/* Caption for bolus screen notice when glucose data is missing or stale */
+"Enter a manual glucose for a recommended bolus amount." = "Enter a manual glucose for a recommended bolus amount.";
+
+/* Button text prompting manual glucose entry on bolus screen */
+"Enter Manual BG" = "Enter Manual BG";
 
 /* The placeholder text instructing users to enter a suspend treshold */
 "Enter suspend threshold" = "Introduceți limita pentru suspendare";
@@ -211,6 +319,15 @@
 /* The format string used to describe a finite workout targets duration */
 "For %1$@" = "Timp de %1$@";
 
+/* The short unit display string for grams */
+"g" = "g";
+
+/* Get help with Notification & Critical Alert Permissions support button text */
+"Get help with Notification & Critical Alert Permissions" = "Get help with Notification & Critical Alert Permissions";
+
+/* No comment provided by engineer. */
+"Get help with Notification & Critical Alert Permissions screen" = "Get help with Notification & Critical Alert Permissions screen";
+
 /* The title of the glucose and prediction graph */
 "Glucose" = "Glicemie";
 
@@ -220,11 +337,14 @@
 /* Description of error when glucose data is missing */
 "Glucose data not available" = "Nu sunt disponibile date despre glicemie";
 
+/* Alert title when glucose data returns while on bolus screen */
+"Glucose Data Now Available" = "Glucose Data Now Available";
+
+/* Alert title for a manual glucose entry out of range error */
+"Glucose Entry Out of Range" = "Glucose Entry Out of Range";
+
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Momentum glicemie";
-
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Nedeterminat";
@@ -245,9 +365,15 @@
    The title text for the insulin model setting row */
 "Insulin Model" = "Model insulină";
 
+/* Descriptive text for Insulin Pump */
+"Insulin Pump" = "Insulin Pump";
+
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
 "Insulin Sensitivities" = "Sensibilitate insulină";
+
+/* The title of the cell indicating the pump is suspended */
+"Insulin Suspended" = "Insulin Suspended";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Date invalide: %1$@";
@@ -261,26 +387,65 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Se încarcă...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Eșec Loop";
+
+/* Bluetooth unavailable alert body. */
+"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop nu a rulat cu succes timp de %@";
 
+/* Bluetooth off background alert body. */
+"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus.";
+
+/* Manage Critical Alerts in Settings button text */
+"Manage Critical Alerts in Settings" = "Manage Critical Alerts in Settings";
+
+/* Manage Notifications in Settings button text */
+"Manage Notifications in Settings" = "Manage Notifications in Settings";
+
+/* Label for manual glucose entry row on bolus screen */
+"Manual BG Entry" = "Manual BG Entry";
+
+/* Title for bolus entry screen when also entering carbs */
+"Meal Bolus" = "Meal Bolus";
+
+/* The short unit display string for milligrams of glucose per decilter */
+"mg/dL" = "mg/dL";
+
 /* The error message for missing data. (1: missing data details) */
 "Missing data: %1$@" = "Date lipsă: %1$@";
+
+/* The short unit display string for millimoles of glucose per liter */
+"mmol/L" = "mmol/L";
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Efecte momentum";
 
+/* Sensor state description for the non-valid state */
+"Needs Attention" = "Needs Attention";
+
 /* The title of the Nightscout service */
 "Nightscout" = "Nightscout";
 
+/* Title for bolus screen notice when no bolus is recommended */
+"No Bolus Recommended" = "No Bolus Recommended";
+
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Nu este conectat niciun dispozitiv sau s-a produs o eroare la conectare";
+
+/* Alert title for a missing maximum bolus setting error */
+"No Maximum Bolus Configured" = "No Maximum Bolus Configured";
+
+/* Alert title for a missing pump error */
+"No Pump Configured" = "No Pump Configured";
+
+/* Title for bolus screen notice when glucose data is missing or stale */
+"No Recent Glucose Data" = "No Recent Glucose Data";
+
+/* The title of the notification action to acknowledge a device alert */
+"OK" = "OK";
 
 /* The title text for the override presets */
 "Override Presets" = "Presetări de înlocuire";
@@ -296,6 +461,9 @@
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Prognozată: %1$@\nActuală: %2$@ (%3$@)";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
+"prediction-description-retrospective-correction" = "prediction-description-retrospective-correction";
 
 /* The title of the pump section in settings */
 "Pump" = "Pompă";
@@ -318,6 +486,9 @@
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pompă suspendată";
 
+/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
+"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
+
 /* Title of insulin model preset */
 "Rapid-Acting – Adults" = "Rapid-Acting – Adulți";
 
@@ -330,6 +501,9 @@
 /* The title of the cell displaying a recommended temp basal value */
 "Recommended Basal" = "Bazal recomandat";
 
+/* Label for recommended bolus row on bolus screen */
+"Recommended Bolus" = "Recommended Bolus";
+
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Bolus recomandat: %@ unități";
 
@@ -341,6 +515,12 @@
 
 /* The title of the notification action to retry a bolus command */
 "Retry" = "Reîncearcă";
+
+/* Button text to save carbs and/or manual glucose entry and deliver a bolus */
+"Save and Deliver" = "Save and Deliver";
+
+/* Button text to save carbs and/or manual glucose entry without a bolus */
+"Save without Bolusing" = "Save without Bolusing";
 
 /* The title of the services section in settings */
 "Services" = "Servicii";
@@ -363,20 +543,54 @@
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Start Bolus";
 
+/* Section title for Support
+   The title of the support section in settings */
+"Support" = "Support";
+
 /* The title text in settings */
 "Suspend Threshold" = "Limită suspendare";
+
+/* Descriptive text for button to add CGM device */
+"Tap here to set up a CGM" = "Tap here to set up a CGM";
+
+/* Descriptive text for button to add pump device */
+"Tap here to set up a pump" = "Tap here to set up a pump";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Apăsați pentru a relua";
 
+/* Alert message for an updated bolus recommendation */
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "The bolus recommendation has updated. Please reconfirm the bolus amount.";
+
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Modelul învechit utilizat de Loop, permite personalizarea duratei de acțiune.";
+
+/* Alert message for a maximum bolus validation error (1: max bolus value) */
+"The maximum bolus amount is %@ U." = "The maximum bolus amount is %@ U.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Cantitatea maximă de bolus este de %@ unități";
 
+/* Alert message for a missing maximum bolus setting error */
+"The maximum bolus setting must be configured before a bolus can be delivered." = "The maximum bolus setting must be configured before a bolus can be delivered.";
+
+/* Title text for button to Therapy Settings */
+"Therapy Settings" = "Therapy Settings";
+
+/* Bluetooth off foreground alert body */
+"Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings.";
+
 /* The short unit display string for international units of insulin */
 "U" = "U";
+
+/* Alert title for a carb entry persistence error */
+"Unable to Save Carb Entry" = "Unable to Save Carb Entry";
+
+/* Alert title for a manual glucose entry persistence error */
+"Unable to Save Manual Glucose Entry" = "Unable to Save Manual Glucose Entry";
+
+/* The alert body for an error while canceling a bolus */
+"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely.";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "până la %@";
@@ -392,4 +606,7 @@
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Ținte de activitate sportivă";
+
+/* Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold */
+"Your glucose is below or predicted to go below your suspend threshold, %@." = "Your glucose is below or predicted to go below your suspend threshold, %@.";
 
