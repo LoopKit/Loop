@@ -373,6 +373,10 @@
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */; };
+		A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */; };
+		A9347F3124E7521800C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */; };
+		A9347F3224E7522400C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */; };
+		A9347F3324E7522900C99C34 /* WatchHistoricalCarbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */; };
 		A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */; };
 		A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */; };
 		A966152A23EA5A37005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */; };
@@ -394,6 +398,8 @@
 		A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */; };
 		A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */; };
 		A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DAE7CF2332D77F006AE942 /* LoopTests.swift */; };
+		A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */; };
+		A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */; };
 		A9E6DFE6246A042E005B1A1C /* CarbStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */; };
 		A9E6DFE8246A043D005B1A1C /* DoseStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */; };
 		A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */; };
@@ -1154,6 +1160,8 @@
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DosingDecisionStore.swift; path = ../Stores/DosingDecisionStore.swift; sourceTree = "<group>"; };
+		A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbs.swift; sourceTree = "<group>"; };
+		A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfo.swift; sourceTree = "<group>"; };
 		A951C5FF23E8AB51003E26DC /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
 		A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
@@ -1175,6 +1183,8 @@
 		A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DosingDecisionStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9DAE7CF2332D77F006AE942 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
+		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
+		A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbsTests.swift; sourceTree = "<group>"; };
 		A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerErrorTests.swift; sourceTree = "<group>"; };
@@ -2018,6 +2028,7 @@
 			isa = PBXGroup;
 			children = (
 				89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */,
+				A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */,
 				43C3B6F620BBCAA30026CAFA /* PumpManager.swift */,
@@ -2027,6 +2038,7 @@
 				89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */,
 				4FF4D0FF1E18374700846527 /* WatchContext.swift */,
 				C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */,
+				A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */,
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 			);
@@ -2199,7 +2211,9 @@
 		A9E6DFED246A0460005B1A1C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */,
 				A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */,
+				A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3136,6 +3150,7 @@
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
+				A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */,
 				4372E487213C86240068E043 /* SampleValue.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
@@ -3161,6 +3176,7 @@
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */,
 				1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */,
+				A9347F3124E7521800C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				A9CBE458248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift in Sources */,
 				897A5A9924C22DE800C4E71D /* BolusEntryViewModel.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
@@ -3278,6 +3294,7 @@
 				89E08FC4242E73F0000D719B /* GramLabelPositionKey.swift in Sources */,
 				4F82655020E69F9A0031A8F5 /* HUDInterfaceController.swift in Sources */,
 				4372E492213D956C0068E043 /* GlucoseRangeSchedule.swift in Sources */,
+				A9347F3324E7522900C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				895788AD242E69A2002CB114 /* AbsorptionTimeSelection.swift in Sources */,
 				89A605EF2432925D009C1096 /* CompletionCheckmark.swift in Sources */,
 				89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */,
@@ -3319,6 +3336,7 @@
 				C1201E2D23ECDF3D002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43517917230A0E1A0072ECC0 /* WKInterfaceLabel.swift in Sources */,
+				A9347F3224E7522400C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				895788B3242E69A2002CB114 /* ActionButton.swift in Sources */,
 				894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */,
 				E98A55F524EEE15A0008715D /* OnOffSelectionController.swift in Sources */,
@@ -3415,8 +3433,10 @@
 			files = (
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
+				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */,
 				A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */,
+				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertPresenterTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,

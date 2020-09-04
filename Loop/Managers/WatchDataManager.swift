@@ -308,6 +308,20 @@ extension WatchDataManager: WCSessionDelegate {
             createWatchContext { (context) in
                 replyHandler(context.rawValue)
             }
+        case CarbBackfillRequestUserInfo.name?:
+            if let userInfo = CarbBackfillRequestUserInfo(rawValue: message) {
+                deviceManager.carbStore.getSyncCarbObjects(start: userInfo.startDate) { (result) in
+                    switch result {
+                    case .failure(let error):
+                        self.log.error("%{public}@", String(describing: error))
+                        replyHandler([:])
+                    case .success(let objects):
+                        replyHandler(WatchHistoricalCarbs(objects: objects).rawValue)
+                    }
+                }
+            } else {
+                replyHandler([:])
+            }
         case GlucoseBackfillRequestUserInfo.name?:
             if let userInfo = GlucoseBackfillRequestUserInfo(rawValue: message) {
                 deviceManager.glucoseStore.getCachedGlucoseSamples(start: userInfo.startDate.addingTimeInterval(1), end: nil) { (values) in

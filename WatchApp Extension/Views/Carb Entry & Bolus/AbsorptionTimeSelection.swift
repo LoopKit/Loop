@@ -10,6 +10,7 @@ import SwiftUI
 
 
 struct AbsorptionTimeSelection: View {
+    @Binding var lastEntryDate: Date
     @Binding var selectedAbsorptionTime: CarbAbsorptionTime
     @Binding var expanded: Bool
     var amount: Int
@@ -30,6 +31,7 @@ struct AbsorptionTimeSelection: View {
         Button(
             action: {
                 if self.expanded {
+                    self.lastEntryDate = Date()
                     self.selectedAbsorptionTime = absorptionTime
                 } else {
                     withAnimation {

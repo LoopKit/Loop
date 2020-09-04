@@ -74,7 +74,7 @@ class AlertStoreTests: XCTestCase {
         XCTAssertEqual("managerIdentifier2.alertIdentifier2", object.identifier.value)
         XCTAssertEqual(true, object.isCritical)
         XCTAssertEqual(Self.historicDate, object.issuedDate)
-        XCTAssertEqual(0, object.modificationCounter)
+        XCTAssertEqual(1, object.modificationCounter)
         XCTAssertEqual("{\"sound\":{\"name\":\"soundName\"}}", object.sound)
         XCTAssertEqual(Alert.Trigger.immediate, object.trigger)
     }
