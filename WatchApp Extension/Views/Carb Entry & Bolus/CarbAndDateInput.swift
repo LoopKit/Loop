@@ -10,6 +10,7 @@ import SwiftUI
 
 
 struct CarbAndDateInput: View {
+    @Binding var lastEntryDate: Date
     @Binding var amount: Int
     @Binding var date: Date
     var initialDate: Date
@@ -33,11 +34,25 @@ struct CarbAndDateInput: View {
     private var digitalCrownRotation: Binding<Int> {
         switch inputMode {
         case .carbs:
-            return $amount
+            return Binding(
+                get: { self.amount },
+                set: {
+                    if $0 != self.amount {
+                        self.lastEntryDate = Date()
+                        self.amount = $0
+                    }
+                }
+            )
         case .date:
             return Binding(
                 get: { Int(self.date.timeIntervalSince(self.initialDate).minutes) },
-                set: { self.date = self.initialDate.addingTimeInterval(.minutes(Double($0))) }
+                set: {
+                    let date = self.initialDate.addingTimeInterval(.minutes(Double($0)))
+                    if date != self.date {
+                        self.lastEntryDate = Date()
+                        self.date = date
+                    }
+                }
             )
         }
     }
@@ -69,6 +84,8 @@ struct CarbAndDateInput: View {
     }
 
     private func increment() {
+        self.lastEntryDate = Date()
+
         switch self.inputMode {
         case .carbs:
             self.amount = (self.amount + carbIncrement).clamped(to: validCarbAmountRange)
@@ -80,6 +97,8 @@ struct CarbAndDateInput: View {
     }
 
     private func decrement() {
+        self.lastEntryDate = Date()
+
         switch self.inputMode {
         case .carbs:
             self.amount = (self.amount - carbIncrement).clamped(to: validCarbAmountRange)

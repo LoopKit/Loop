@@ -55,6 +55,28 @@ class CarbStoreCarbStoreErrorCodableTests: XCTestCase {
         )
     }
 
+    func testCodableCoreDataError() throws {
+        let localizedError = TestLocalizedError(errorDescription: "CarbStoreError.coreDataError.error.errorDescription",
+                                                failureReason: "CarbStoreError.coreDataError.error.failureReason",
+                                                helpAnchor: "CarbStoreError.coreDataError.error.helpAnchor",
+                                                recoverySuggestion: "CarbStoreError.coreDataError.error.recoverySuggestion")
+        try assertCarbStoreErrorCodable(.coreDataError(localizedError), encodesJSON: """
+{
+  "carbStoreError" : {
+    "coreDataError" : {
+      "error" : {
+        "errorDescription" : "CarbStoreError.coreDataError.error.errorDescription",
+        "failureReason" : "CarbStoreError.coreDataError.error.failureReason",
+        "helpAnchor" : "CarbStoreError.coreDataError.error.helpAnchor",
+        "recoverySuggestion" : "CarbStoreError.coreDataError.error.recoverySuggestion"
+      }
+    }
+  }
+}
+"""
+        )
+    }
+
     func testCodablePersistenceError() throws {
         try assertCarbStoreErrorCodable(.unauthorized, encodesJSON: """
 {
@@ -99,6 +121,8 @@ extension CarbStore.CarbStoreError: Equatable {
         case (.notConfigured, .notConfigured):
             return true
         case (.healthStoreError(let lhsError), .healthStoreError(let rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        case (.coreDataError(let lhsError), .coreDataError(let rhsError)):
             return lhsError.localizedDescription == rhsError.localizedDescription
         case (.unauthorized, .unauthorized),
              (.noData, .noData):

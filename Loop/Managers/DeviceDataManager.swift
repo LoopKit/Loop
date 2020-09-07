@@ -178,7 +178,8 @@ final class DeviceDataManager {
             carbRatioSchedule: UserDefaults.appGroup?.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear
+            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
         self.doseStore = DoseStore(

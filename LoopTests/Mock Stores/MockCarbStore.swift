@@ -74,8 +74,8 @@ class MockCarbStore: CarbStoreProtocol {
         return []
     }
     
-    func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping ([CarbValue]) -> Void) {
-        completion([])
+    func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (CarbStoreResult<[CarbValue]>) -> Void) {
+        completion(.success([]))
     }
     
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (CarbStoreResult<CarbValue>) -> Void) {
@@ -90,7 +90,7 @@ class MockCarbStore: CarbStoreProtocol {
         completion(.failure(.notConfigured))
     }
     
-    func getGlucoseEffects(start: Date, end: Date? = nil, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(samples: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void) {
+    func getGlucoseEffects(start: Date, end: Date? = nil, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void) {
         let fixture: [JSONDictionary] = loadFixture(fixtureToLoad)
 
         let dateFormatter = ISO8601DateFormatter.localTimeDate()

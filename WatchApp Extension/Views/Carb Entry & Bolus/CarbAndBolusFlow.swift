@@ -34,6 +34,7 @@ struct CarbAndBolusFlow: View {
     @Environment(\.sizeClass) private var sizeClass
 
     // MARK: - State: Carb Entry
+    @State private var carbLastEntryDate = Date()
     @State private var carbAmount = 15
     @State private var carbEntryDate = Date()
     @State private var carbAbsorptionTime: CarbAbsorptionTime = .medium
@@ -90,6 +91,7 @@ extension CarbAndBolusFlow {
         VStack(spacing: 4) {
             if flowState == .carbEntry {
                 CarbAndDateInput(
+                    lastEntryDate: $carbLastEntryDate,
                     amount: $carbAmount,
                     date: $carbEntryDate,
                     initialDate: viewModel.interactionStartDate,
@@ -108,6 +110,7 @@ extension CarbAndBolusFlow {
 
             if configuration != .manualBolus && flowState != .bolusConfirmation {
                 AbsorptionTimeSelection(
+                    lastEntryDate: $carbLastEntryDate,
                     selectedAbsorptionTime: $carbAbsorptionTime,
                     expanded: absorptionButtonsExpanded,
                     amount: carbAmount
@@ -137,7 +140,7 @@ extension CarbAndBolusFlow {
     }
 
     private func transitionToBolusEntry() {
-        viewModel.recommendBolus(forGrams: carbAmount, eatenAt: carbEntryDate, absorptionTime: carbAbsorptionTime)
+        viewModel.recommendBolus(forGrams: carbAmount, eatenAt: carbEntryDate, absorptionTime: carbAbsorptionTime, lastEntryDate: carbLastEntryDate)
         withAnimation {
             flowState = .bolusEntry
             inputMode = .carbs
