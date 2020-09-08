@@ -18,6 +18,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @ObservedObject var viewModel: BolusEntryViewModel
 
     @State private var enteredBolusAmount = ""
+    @State private var shouldBolusEntryBecomeFirstResponder = false
 
     @State private var isManualGlucoseEntryRowVisible = false
     @State private var enteredManualGlucose = ""
@@ -28,51 +29,68 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(spacing: 0) {
-            List {
-                historySection
-                summarySection
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                List {
+                    self.historySection
+                    self.summarySection
+                }
+                // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
+                // list up instead, so the summarySection is visible and the keyboard shows when you tap "Enter Bolus".
+                // Unfortunately, after entry, the field scoots back down and remains hidden.  So this is not a great solution.
+                // TODO: Fix this in Xcode 12 when we're building for iOS 14.
+                .padding(.top, self.shouldAutoScroll(basedOn: geometry) ? -200 : -28)
+                .listStyle(GroupedListStyle())
+                .environment(\.horizontalSizeClass, self.horizontalOverride)
+                
+                self.actionArea
+                    .frame(height: self.isKeyboardVisible ? 0 : nil)
+                    .opacity(self.isKeyboardVisible ? 0 : 1)
             }
-            .padding(.top, -28) // Bring the top card up closer to the navigation bar
-            .listStyle(GroupedListStyle())
-            .environment(\.horizontalSizeClass, horizontalOverride)
-
-            actionArea
-                .frame(height: isKeyboardVisible ? 0 : nil)
-                .opacity(isKeyboardVisible ? 0 : 1)
-        }
-        .onKeyboardStateChange { state in
-            self.isKeyboardVisible = state.height > 0
-        }
-        .keyboardAware()
-        .edgesIgnoringSafeArea(isKeyboardVisible ? [] : .bottom)
-        .navigationBarTitle(
-            viewModel.potentialCarbEntry == nil
-                ? Text("Bolus", comment: "Title for bolus entry screen")
-                : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
-        )
-        .supportedInterfaceOrientations(.portrait)
-        .alert(item: $viewModel.activeAlert, content: alert(for:))
-        .onReceive(viewModel.$enteredBolus) { updatedBolusEntry in
-            // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
-            let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
-            self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
-        }
-        .onReceive(viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
-            // The view model can disable manual glucose entry if CGM data returns.
-            if !isManualGlucoseEntryEnabled {
-                self.isManualGlucoseEntryRowVisible = false
-                self.enteredManualGlucose = ""
+            .onKeyboardStateChange { state in
+                self.isKeyboardVisible = state.height > 0
+                
+                if state.height == 0 {
+                    // Ensure tapping 'Enter Bolus' can make the text field the first responder again
+                    self.shouldBolusEntryBecomeFirstResponder = false
+                }
+            }
+            .keyboardAware()
+            .edgesIgnoringSafeArea(self.isKeyboardVisible ? [] : .bottom)
+            .navigationBarTitle(
+                self.viewModel.potentialCarbEntry == nil
+                    ? Text("Bolus", comment: "Title for bolus entry screen")
+                    : Text("Meal Bolus", comment: "Title for bolus entry screen when also entering carbs")
+            )
+                .supportedInterfaceOrientations(.portrait)
+                .alert(item: self.$viewModel.activeAlert, content: self.alert(for:))
+                .onReceive(self.viewModel.$enteredBolus) { updatedBolusEntry in
+                    // The view model can update the user's entered bolus when the recommendation changes; ensure the text entry updates in tandem.
+                    let amount = updatedBolusEntry.doubleValue(for: .internationalUnit())
+                    self.enteredBolusAmount = amount == 0 ? "" : Self.doseAmountFormatter.string(from: amount) ?? String(amount)
+            }
+            .onReceive(self.viewModel.$isManualGlucoseEntryEnabled) { isManualGlucoseEntryEnabled in
+                // The view model can disable manual glucose entry if CGM data returns.
+                if !isManualGlucoseEntryEnabled {
+                    self.isManualGlucoseEntryRowVisible = false
+                    self.enteredManualGlucose = ""
+                }
             }
         }
     }
 
+    private func shouldAutoScroll(basedOn geometry: GeometryProxy) -> Bool {
+        // Taking a guess of 640 to cover iPhone SE, iPod Touch, and other smaller devices.
+        // Devices such as the iPhone 11 Pro Max do not need to auto-scroll.
+        shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
+    }
+    
     private var historySection: some View {
         Section {
             VStack(spacing: 8) {
-                HStack {
+                HStack(spacing: 0) {
                     activeCarbsLabel
-                    Spacer()
+                    Spacer(minLength: 8)
                     activeInsulinLabel
                 }
 
@@ -99,25 +117,21 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     @ViewBuilder
     private var activeCarbsLabel: some View {
-        if viewModel.activeCarbs != nil {
-            LabeledQuantity(
-                label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
-                quantity: viewModel.activeCarbs!,
-                unit: .gram()
-            )
-        }
+        LabeledQuantity(
+            label: Text("Active Carbs", comment: "Title describing quantity of still-absorbing carbohydrates"),
+            quantity: viewModel.activeCarbs,
+            unit: .gram()
+        )
     }
-
+    
     @ViewBuilder
     private var activeInsulinLabel: some View {
-        if viewModel.activeInsulin != nil {
-            LabeledQuantity(
-                label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
-                quantity: viewModel.activeInsulin!,
-                unit: .internationalUnit(),
-                maxFractionDigits: 2
-            )
-        }
+        LabeledQuantity(
+            label: Text("Active Insulin", comment: "Title describing quantity of still-absorbing insulin"),
+            quantity: viewModel.activeInsulin,
+            unit: .internationalUnit(),
+            maxFractionDigits: 2
+        )
     }
 
     private var predictedGlucoseChart: some View {
@@ -218,7 +232,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                 Text("Carb Entry", comment: "Label for carb entry row on bolus screen")
 
                 Text(viewModel.carbEntryAmountAndEmojiString!)
-                    .foregroundColor(Color(.cobTintColor))
+                    .foregroundColor(Color(.carbTintColor))
                     .modifier(LabelBackground())
 
                 Spacer()
@@ -266,9 +280,10 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     text: typedBolusEntry,
                     placeholder: Self.doseAmountFormatter.string(from: 0.0)!,
                     font: .preferredFont(forTextStyle: .title1),
-                    textColor: .systemBlue,
+                    textColor: .loopAccent,
                     textAlignment: .right,
-                    keyboardType: .decimalPad
+                    keyboardType: .decimalPad,
+                    shouldBecomeFirstResponder: shouldBolusEntryBecomeFirstResponder
                 )
                 
                 bolusUnitsLabel
@@ -293,35 +308,21 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
     private var actionArea: some View {
         VStack(spacing: 0) {
-            if isNoticeVisible {
+            if viewModel.isNoticeVisible {
                 warning(for: viewModel.activeNotice!)
                     .padding([.top, .horizontal])
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            if isManualGlucosePromptVisible {
+            if viewModel.isManualGlucosePromptVisible {
                 enterManualGlucoseButton
                     .transition(AnyTransition.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            primaryActionButton
+            actionButton
         }
         .padding(.bottom) // FIXME: unnecessary on iPhone 8 size devices
         .background(Color(.secondarySystemGroupedBackground).shadow(radius: 5))
-    }
-
-    private var isNoticeVisible: Bool {
-        if viewModel.activeNotice == nil {
-            return false
-        } else if viewModel.activeNotice != .staleGlucoseData {
-            return true
-        } else {
-            return !viewModel.isManualGlucoseEntryEnabled
-        }
-    }
-
-    private var isManualGlucosePromptVisible: Bool {
-        viewModel.activeNotice == .staleGlucoseData && !viewModel.isManualGlucoseEntryEnabled
     }
 
     private func warning(for notice: BolusEntryViewModel.Notice) -> some View {
@@ -339,7 +340,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             )
         }
     }
-
+            
     private var enterManualGlucoseButton: some View {
         Button(
             action: {
@@ -349,35 +350,34 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             },
             label: { Text("Enter Manual BG", comment: "Button text prompting manual glucose entry on bolus screen") }
         )
-        .buttonStyle(ActionButtonStyle(.primary))
+        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .manualGlucoseEntry ? .primary : .secondary))
         .padding([.top, .horizontal])
     }
 
-    private var primaryActionButton: some View {
-        Button(
+    private var actionButton: some View {
+        Button<Text>(
             action: {
-                self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                if self.viewModel.actionButtonAction == .enterBolus {
+                    self.shouldBolusEntryBecomeFirstResponder = true
+                } else {
+                    self.viewModel.saveAndDeliver(onSuccess: self.dismiss)
+                }
             },
             label: {
-                if canSaveWithoutBolusing {
-                    Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
-                } else {
-                    Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                switch viewModel.actionButtonAction {
+                case .saveWithoutBolusing:
+                    return Text("Save without Bolusing", comment: "Button text to save carbs and/or manual glucose entry without a bolus")
+                case .saveAndDeliver:
+                    return Text("Save and Deliver", comment: "Button text to save carbs and/or manual glucose entry and deliver a bolus")
+                case .enterBolus:
+                    return Text("Enter Bolus", comment: "Button text to begin entering a bolus")
+                case .deliver:
+                    return Text("Deliver", comment: "Button text to deliver a bolus")
                 }
             }
         )
-        .buttonStyle(ActionButtonStyle(isManualGlucosePromptVisible ? .secondary : .primary))
+        .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .actionButton ? .primary : .secondary))
         .padding()
-        .disabled(isPrimaryActionButtonDisabled)
-    }
-
-    private var canSaveWithoutBolusing: Bool {
-        (viewModel.enteredManualGlucose != nil || viewModel.potentialCarbEntry != nil)
-            && viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0
-    }
-
-    private var isPrimaryActionButtonDisabled: Bool {
-        !canSaveWithoutBolusing && viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0
     }
 
     private func alert(for alert: BolusEntryViewModel.Alert) -> SwiftUI.Alert {
@@ -434,7 +434,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
 
 struct LabeledQuantity: View {
     var label: Text
-    var quantity: HKQuantity
+    var quantity: HKQuantity?
     var unit: HKUnit
     var maxFractionDigits: Int?
 
@@ -444,12 +444,17 @@ struct LabeledQuantity: View {
                 .bold()
             valueText
                 .foregroundColor(Color(.secondaryLabel))
+                .fixedSize(horizontal: true, vertical: false)
         }
         .font(.subheadline)
         .modifier(LabelBackground())
     }
 
     var valueText: Text {
+        guard let quantity = quantity else {
+            return Text("--")
+        }
+        
         let formatter = QuantityFormatter()
         formatter.setPreferredNumberFormatter(for: unit)
 
@@ -458,7 +463,7 @@ struct LabeledQuantity: View {
         }
 
         guard let string = formatter.string(from: quantity, for: unit) else {
-            assertionFailure("Unable to format \(quantity) \(unit)")
+            assertionFailure("Unable to format \(String(describing: quantity)) \(unit)")
             return Text("")
         }
 

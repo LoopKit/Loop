@@ -117,15 +117,13 @@ fileprivate extension StoredCarbEntry {
                                foodType: "Simulated",
                                absorptionTime: absorptionTime,
                                createdByCurrentApp: true,
-                               externalID: UUID().uuidString,
-                               isUploaded: false)
+                               externalID: UUID().uuidString)
     }
 }
 
 fileprivate extension DeletedCarbEntry {
     static func simulated(startDate: Date) -> DeletedCarbEntry {
         return DeletedCarbEntry(externalID: UUID().uuidString,
-                                isUploaded: false,
                                 startDate: startDate,
                                 uuid: UUID(),
                                 syncIdentifier: UUID().uuidString,

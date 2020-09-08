@@ -69,9 +69,9 @@ extension DeviceDataManager {
         {
             return .openAppURL(url)
         } else if let cgmManagerUI = (cgmManager as? CGMManagerUI),
-            let unit = loopManager.glucoseStore.preferredUnit
+            let unit = glucoseStore.preferredUnit
         {
-            return .presentViewController(cgmManagerUI.settingsViewController(for: unit))
+            return .presentViewController(cgmManagerUI.settingsViewController(for: unit, glucoseTintColor: .glucoseTintColor, guidanceColors: .default))
         } else {
             return .setupNewCGM
         }
@@ -86,7 +86,7 @@ extension DeviceDataManager {
         {
             return action
         } else if let pumpManager = pumpManager {
-            return .presentViewController(pumpManager.settingsViewController())
+            return .presentViewController(pumpManager.settingsViewController(insulinTintColor: .insulinTintColor, guidanceColors: .default))
         } else {
             return .setupNewPump
         }

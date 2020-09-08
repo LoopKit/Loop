@@ -48,10 +48,10 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     self?.reloadData(animated: true)
                 }
             },
-            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.loopManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
+            notificationCenter.addObserver(forName: .HKUserPreferencesDidChange, object: deviceManager.glucoseStore.healthStore, queue: nil) {[weak self] _ in
                 DispatchQueue.main.async {
                     self?.log.debug("[reloadData] for HealthKit unit preference change")
-                    self?.unitPreferencesDidChange(to: self?.deviceManager.loopManager.glucoseStore.preferredUnit)
+                    self?.unitPreferencesDidChange(to: self?.deviceManager.glucoseStore.preferredUnit)
                     self?.refreshContext = RefreshContext.all
                 }
             }
@@ -99,7 +99,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     private let carbEffectChart = CarbEffectChart()
 
     override func createChartsManager() -> ChartsManager {
-        return ChartsManager(colors: .default, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
+        return ChartsManager(colors: .primary, settings: .default, charts: [carbEffectChart], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
@@ -130,7 +130,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
         charts.startDate = chartStartDate
 
         let midnight = Calendar.current.startOfDay(for: Date())
-        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.loopManager.carbStore.maximumAbsorptionTimeInterval))
+        let listStart = min(midnight, chartStartDate, Date(timeIntervalSinceNow: -deviceManager.carbStore.maximumAbsorptionTimeInterval))
 
         let reloadGroup = DispatchGroup()
         let shouldUpdateGlucose = currentContext.contains(.glucose)
@@ -150,7 +150,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 insulinCounteractionEffects = allInsulinCounteractionEffects.filterDateRange(chartStartDate, nil)
 
                 reloadGroup.enter()
-                manager.carbStore.getCarbStatus(start: listStart, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getCarbStatus(start: listStart, end: nil, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? allInsulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success(let status):
                         carbStatuses = status
@@ -164,7 +164,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                 }
 
                 reloadGroup.enter()
-                manager.carbStore.getGlucoseEffects(start: chartStartDate, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
+                self.deviceManager.carbStore.getGlucoseEffects(start: chartStartDate, end: nil, effectVelocities: manager.settings.dynamicCarbAbsorptionEnabled ? insulinCounteractionEffects : nil) { (result) in
                     switch result {
                     case .success((_, let effects)):
                         carbEffects = effects
@@ -182,7 +182,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
         if shouldUpdateCarbs {
             reloadGroup.enter()
-            deviceManager.loopManager.carbStore.getTotalCarbs(since: midnight) { (result) in
+            deviceManager.carbStore.getTotalCarbs(since: midnight) { (result) in
                 switch result {
                 case .success(let total):
                     carbTotal = total
@@ -358,7 +358,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
                     )
 
                     if absorption.isActive {
-                        cell.observedValueTextColor = UIColor.cobTintColor
+                        cell.observedValueTextColor = UIColor.carbTintColor
                     } else if 0.9 <= observedProgress && observedProgress <= 1.1 {
                         cell.observedValueTextColor = UIColor.systemGray
                     } else {
@@ -372,7 +372,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
 
                 // Absorbed time
                 if absorption.isActive {
-                    cell.observedDateTextColor = UIColor.cobTintColor
+                    cell.observedDateTextColor = UIColor.carbTintColor
                 } else {
                     cell.observedDateTextColor = UIColor.systemGray
 
@@ -440,7 +440,7 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
     public override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let status = carbStatuses[indexPath.row]
-            deviceManager.loopManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in
+            deviceManager.carbStore.deleteCarbEntry(status.entry) { (result) -> Void in
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
@@ -508,8 +508,8 @@ final class CarbAbsorptionViewController: LoopChartsTableViewController, Identif
             }
 
             vc.deviceManager = deviceManager
-            vc.defaultAbsorptionTimes = deviceManager.loopManager.carbStore.defaultAbsorptionTimes
-            vc.preferredCarbUnit = deviceManager.loopManager.carbStore.preferredUnit
+            vc.defaultAbsorptionTimes = deviceManager.carbStore.defaultAbsorptionTimes
+            vc.preferredCarbUnit = deviceManager.carbStore.preferredUnit
         default:
             break
         }

@@ -39,7 +39,7 @@ final class StatusExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
             return
         }
 

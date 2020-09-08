@@ -113,8 +113,7 @@ final class CarbAndBolusFlowViewModel: ObservableObject {
             quantity: HKQuantity(unit: .gram(), doubleValue: Double(grams)),
             startDate: carbEntryDate,
             foodType: nil,
-            absorptionTime: absorptionTime(for: carbAbsorptionTime),
-            syncIdentifier: UUID().uuidString
+            absorptionTime: absorptionTime(for: carbAbsorptionTime)
         )
 
         guard entry.quantity.doubleValue(for: .gram()) > 0 else {

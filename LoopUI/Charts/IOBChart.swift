@@ -54,10 +54,10 @@ public extension IOBChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The IOB area
-        let lineModel = ChartLineModel(chartPoints: iobPoints, lineColor: UIColor.iobTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
+        let lineModel = ChartLineModel(chartPoints: iobPoints, lineColor: UIColor.insulinTintColor, lineWidth: 2, animDuration: 0, animDelay: 0)
         let iobLine = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
 
-        let iobArea = ChartPointsFillsLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, fills: [ChartPointsFill(chartPoints: iobPoints, fillColor: UIColor.iobTintColor.withAlphaComponent(0.5))])
+        let iobArea = ChartPointsFillsLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, fills: [ChartPointsFill(chartPoints: iobPoints, fillColor: UIColor.insulinTintColor.withAlphaComponent(0.5))])
 
         // Grid lines
         let gridLayer = ChartGuideLinesForValuesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, settings: guideLinesLayerSettings, axisValuesX: Array(xAxisValues.dropFirst().dropLast()), axisValuesY: yAxisValues)
@@ -69,7 +69,7 @@ public extension IOBChart {
             let viewFrame = CGRect(x: chart.contentView.bounds.minX, y: chartPointModel.screenLoc.y - width / 2, width: chart.contentView.bounds.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
-            v.layer.backgroundColor = UIColor.iobTintColor.cgColor
+            v.layer.backgroundColor = UIColor.insulinTintColor.cgColor
             return v
         })
 
@@ -79,7 +79,7 @@ public extension IOBChart {
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
                 chartPoints: iobPoints,
-                tintColor: UIColor.iobTintColor,
+                tintColor: UIColor.insulinTintColor,
                 gestureRecognizer: gestureRecognizer
             )
         }

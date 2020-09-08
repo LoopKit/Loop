@@ -200,7 +200,8 @@ extension TestingScenariosManagerRequirements {
             }
 
             let instance = scenario.instantiate()
-            self.deviceManager.loopManager.carbStore.addCarbEntries(instance.carbEntries) { result in
+
+            self.deviceManager.carbStore.addCarbEntries(instance.carbEntries) { result in
                 switch result {
                 case .success(_):
                     pumpManager.reservoirFillFraction = 1.0
@@ -232,7 +233,7 @@ extension TestingScenariosManagerRequirements {
                     return
                 }
 
-                self.deviceManager.loopManager.carbStore.deleteAllCarbEntries(completion: completion)
+                self.deviceManager.carbStore.deleteAllCarbEntries(completion: completion)
             }
         }
     }

@@ -101,7 +101,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         finishLaunch(application: application)
 
         window?.tintColor = .loopAccent
-                
+                        
         return true
     }
 
