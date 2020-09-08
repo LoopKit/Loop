@@ -152,6 +152,13 @@ final class DeviceDataManager {
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
+            } catch let error {
+                preconditionFailure("Could not create DeviceLog directory: \(error)")
+            }
+        }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
 
         loggingServicesManager = LoggingServicesManager()
