@@ -144,11 +144,11 @@
 "Authenticate to Bolus %@ Units" = "Godkend bolus af %@ Enheder";
 
 /* Details for configuration error when basal rate schedule is missing */
-"Basal Rate Schedule" = "Basal rater skema";
+"Basal Rate Schedule" = "Basalrater skema";
 
 /* The title of the basal rate profile screen
    The title text for the basal rate schedule */
-"Basal Rates" = "Basal rater";
+"Basal Rates" = "Basalrater";
 
 /* Message to the user to that the bluetooth is off */
 "Bluetooth Off" = "Bluetooth slukket";
@@ -245,10 +245,10 @@
 "Correction Range" = "Korrektionsinterval";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = " Nuværende blodsukker på %1$@ er under dit korrektionsområde.";
+"Current glucose of %1$@ is below correction range." = "Nuværende blodsukker på %1$@ er under dit korrektionsinterval.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Overstyr";
+"Custom Override" = "Override";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Brugerdefineret preset";
@@ -293,7 +293,7 @@
 "Enables" = "Aktiverer";
 
 /* Caption for bolus screen notice when glucose data is missing or stale */
-"Enter a manual glucose for a recommended bolus amount." = "Indtast en manuel blodsukker for en anbefalet bolus dosis.";
+"Enter a manual glucose for a recommended bolus amount." = "Indtast en manuel blodsukker for en anbefalet bolus.";
 
 /* Button text prompting manual glucose entry on bolus screen */
 "Enter Manual BG" = "Indtast manuel blodsukker";
@@ -566,10 +566,10 @@
 "The legacy model used by Loop, allowing customization of action duration." = "Den model, der bruges af Loop, tillader tilpasning af handlingens varighed.";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
-"The maximum bolus amount is %@ U." = "Den maksimale bolusdosis er %@ enheder.";
+"The maximum bolus amount is %@ U." = "Den maksimale bolus er %@ enheder.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Den maksimale bolusdosis er %@ Enheder";
+"The maximum bolus amount is %@ Units" = "Den maksimale bolus er %@ Enheder";
 
 /* Alert message for a missing maximum bolus setting error */
 "The maximum bolus setting must be configured before a bolus can be delivered." = "Den maksimale bolus indstilling skal konfigureres før en bolus kan leveres.";
@@ -602,7 +602,7 @@
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nuværende og forventet blodsukker er under suspenderingsgrænsen, vil Loop ikke anbefale en bolus, og vil altid anbefale en midlertidig basal rate på 0 enheder i timen.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "Når nuværende og forventet blodsukker er under suspenderingsgrænsen, vil Loop ikke anbefale en bolus, og vil altid anbefale en midlertidig basalrate på 0 enheder i timen.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Træningsmål";

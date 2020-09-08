@@ -32,10 +32,10 @@
 "Mhe-aR-kQQ.text" = "—";
 
 /* Class = "WKInterfaceLabel"; text = "TITLE"; ObjectID = "MZU-QV-PtZ"; */
-"MZU-QV-PtZ.text" = "TITLE";
+"MZU-QV-PtZ.text" = "Rubrik";
 
 /* Class = "WKInterfaceLabel"; text = "Override"; ObjectID = "nC0-X3-oFJ"; */
-"nC0-X3-oFJ.text" = "Override";
+"nC0-X3-oFJ.text" = "Undantag";
 
 /* Class = "WKInterfaceController"; title = "Loop"; ObjectID = "rNf-Mh-tID"; */
 "rNf-Mh-tID.title" = "Loop";
@@ -44,7 +44,7 @@
 "smL-Rc-IZh.text" = "Bolus";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "T4U-wP-dSW"; */
-"T4U-wP-dSW.text" = "Label";
+"T4U-wP-dSW.text" = "Titel";
 
 /* Class = "WKInterfaceLabel"; text = "🏃‍♀️"; ObjectID = "UVY-pa-SUL"; */
 "UVY-pa-SUL.text" = "🏃‍♀️";
@@ -65,5 +65,5 @@
 "yl8-ZP-c3l.text" = "---";
 
 /* Class = "WKInterfaceLabel"; text = "Label"; ObjectID = "zO8-x6-bZd"; */
-"zO8-x6-bZd.text" = "Label";
+"zO8-x6-bZd.text" = "Titel";
 

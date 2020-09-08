@@ -2,22 +2,22 @@
 "? g" = "? g";
 
 /* Displayed in the widget when the amount of active insulin cannot be determined. */
-"? U" = "? U";
+"? U" = "? E";
 
 /* The subtitle format describing the grams of active carbs.  (1: localized carb value description) */
 "%1$@" = "%1$@";
 
 /* The subtitle format describing units of active insulin. (1: localized insulin value description) */
-"%1$@ U" = "%1$@ U";
+"%1$@ U" = "%1$@ E";
 
 /* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
 "%1$@ v%2$@" = "%1$@ v%2$@";
 
 /* Widget label title describing the active carbs */
-"Active Carbs" = "Active Carbs";
+"Active Carbs" = "Aktiva kolhydrater";
 
 /* Widget label title describing the active insulin */
-"Active Insulin" = "Active Insulin";
+"Active Insulin" = "Aktivt insulin";
 
 /* The short unit display string for decibles */
 "dB" = "dB";

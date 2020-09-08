@@ -51,7 +51,7 @@
 "mmol/L" = "mmol/L";
 
 /* HUD row title for Net Basal Rate */
-"Net Basal Rate" = "Netto basal rate";
+"Net Basal Rate" = "Netto basalrate";
 
 /* Button text for disabling temporary correction range */
 "Off" = "Fra";

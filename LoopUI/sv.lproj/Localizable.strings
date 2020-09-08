@@ -5,7 +5,7 @@
 "%@ U" = "%@ E";
 
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ at %2$@";
+"%1$@ at %2$@" = "%1$@ kl %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ enheter/h kl. %2$@";
@@ -23,19 +23,19 @@
 "g" = "g";
 
 /* String displayed instead of a glucose value above the CGM range */
-"HIGH" = "HIGH";
+"HIGH" = "HÖGT";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "Loop kördes för %@ sedan";
 
 /* String displayed instead of a glucose value below the CGM range */
-"LOW" = "LOW";
+"LOW" = "LÅGT";
 
 /* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "mg/dL";
+"mg/dL" = "mg/dl";
 
 /* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "mmol/L";
+"mmol/L" = "mmol/l";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "Kräver åtgärd";

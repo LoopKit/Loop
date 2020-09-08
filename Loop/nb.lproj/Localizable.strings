@@ -373,7 +373,7 @@
 "Insulin Sensitivities" = "Insulinfølsomhet";
 
 /* The title of the cell indicating the pump is suspended */
-"Insulin Suspended" = "Insulin Suspended";
+"Insulin Suspended" = "Insulin pauset";
 
 /* The error message when invalid data was encountered. (1: details of invalid data) */
 "Invalid data: %1$@" = "Ugyldig data: %1$@";
@@ -391,25 +391,25 @@
 "Loop Failure" = "Loop feilet";
 
 /* Bluetooth unavailable alert body. */
-"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus.";
+"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop har oppdaget et problem med Bluetooth-innstillingene, og vil ikke virke vellykket før Bluetooth er aktivert. Du vil ikke få avlesninger av blodsukker, og kan ikke sette bolus.";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har ikke kjørt vellykket på %@";
 
 /* Bluetooth off background alert body. */
-"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus.";
+"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop vil ikke fungere før Bluetooth er aktivert. Du vil ikke motta glukose avlesninger, eller kunne sette bolus.";
 
 /* Manage Critical Alerts in Settings button text */
-"Manage Critical Alerts in Settings" = "Manage Critical Alerts in Settings";
+"Manage Critical Alerts in Settings" = "Administrer kritiske varsler i innstillinger";
 
 /* Manage Notifications in Settings button text */
-"Manage Notifications in Settings" = "Manage Notifications in Settings";
+"Manage Notifications in Settings" = "Administrer varslinger i innstillinger";
 
 /* Label for manual glucose entry row on bolus screen */
-"Manual BG Entry" = "Manual BG Entry";
+"Manual BG Entry" = "Registrering av manuelt blodsukker";
 
 /* Title for bolus entry screen when also entering carbs */
-"Meal Bolus" = "Meal Bolus";
+"Meal Bolus" = "Måltidsbolus";
 
 /* The short unit display string for milligrams of glucose per decilter */
 "mg/dL" = "mg/dL";
@@ -430,19 +430,19 @@
 "Nightscout" = "Nightscout";
 
 /* Title for bolus screen notice when no bolus is recommended */
-"No Bolus Recommended" = "No Bolus Recommended";
+"No Bolus Recommended" = "Ingen anbefalt bolus";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Ingen tilkoblede enheter, eller feil under tilkobling til enhet";
 
 /* Alert title for a missing maximum bolus setting error */
-"No Maximum Bolus Configured" = "No Maximum Bolus Configured";
+"No Maximum Bolus Configured" = "Ingen maksimal bolus konfigurert";
 
 /* Alert title for a missing pump error */
-"No Pump Configured" = "No Pump Configured";
+"No Pump Configured" = "Ingen pumpe konfigurert";
 
 /* Title for bolus screen notice when glucose data is missing or stale */
-"No Recent Glucose Data" = "No Recent Glucose Data";
+"No Recent Glucose Data" = "Mangler blodsukkerdata";
 
 /* The title of the notification action to acknowledge a device alert */
 "OK" = "OK";
@@ -502,7 +502,7 @@
 "Recommended Basal" = "Anbefalt basal";
 
 /* Label for recommended bolus row on bolus screen */
-"Recommended Bolus" = "Recommended Bolus";
+"Recommended Bolus" = "Anbefalt bolus";
 
 /* Accessibility hint describing recommended bolus units */
 "Recommended Bolus: %@ Units" = "Anbefalt bolus: %@ enheter";
@@ -517,10 +517,10 @@
 "Retry" = "Prøv igjen";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Save and Deliver";
+"Save and Deliver" = "Lagre og gi bolus";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
-"Save without Bolusing" = "Save without Bolusing";
+"Save without Bolusing" = "Lagre uten å gi bolus";
 
 /* The title of the services section in settings */
 "Services" = "Tjenester";
@@ -535,7 +535,7 @@
 "since %@" = "siden %@";
 
 /* The title of the nightscout site URL credential */
-"Site URL" = "Site URL";
+"Site URL" = "Nettsted (URL)";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "startet %@";
@@ -551,28 +551,28 @@
 "Suspend Threshold" = "Grense for insulinstopp";
 
 /* Descriptive text for button to add CGM device */
-"Tap here to set up a CGM" = "Tap here to set up a CGM";
+"Tap here to set up a CGM" = "Trykk her for å konfigurere en CGM";
 
 /* Descriptive text for button to add pump device */
-"Tap here to set up a pump" = "Tap here to set up a pump";
+"Tap here to set up a pump" = "Trykk her for å konfigurere en pumpe";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Trykk for å gjenoppta";
 
 /* Alert message for an updated bolus recommendation */
-"The bolus recommendation has updated. Please reconfirm the bolus amount." = "The bolus recommendation has updated. Please reconfirm the bolus amount.";
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusanbefalingen er oppdatert. Vennligst bekreft igjen.";
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Den gamle modellen brukt av Loop, tillater endring av varighet for handling.";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
-"The maximum bolus amount is %@ U." = "The maximum bolus amount is %@ U.";
+"The maximum bolus amount is %@ U." = "Maksimal bolus er satt til %@ E.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
 "The maximum bolus amount is %@ Units" = "Maks bolus er satt til %@ enheter";
 
 /* Alert message for a missing maximum bolus setting error */
-"The maximum bolus setting must be configured before a bolus can be delivered." = "The maximum bolus setting must be configured before a bolus can be delivered.";
+"The maximum bolus setting must be configured before a bolus can be delivered." = "En pumpe må konfigureres før en bolus kan leveres.";
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Therapy Settings";

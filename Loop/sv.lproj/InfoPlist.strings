@@ -11,7 +11,7 @@
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth används för att kommunicera med insulinpump och CGM.";
 
 /* Privacy - Camera Usage Description */
-"NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
+"NSCameraUsageDescription" = "Kamera används för att skanna streckkoder";
 
 /* Privacy - Face ID Usage Description */
 "NSFaceIDUsageDescription" = "Kräv Face ID för att kunna godkänna bolus.";

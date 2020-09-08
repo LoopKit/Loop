@@ -62,13 +62,13 @@
 "k3F-Na-7mn.text" = "Rekommenderad basaldos";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
-"Krd-Aa-ret.text" = "Label";
+"Krd-Aa-ret.text" = "Titel";
 
 /* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
 "m9c-SQ-djE.text" = "Klicka för att ange";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "OFA-qT-ZAg"; */
-"OFA-qT-ZAg.text" = "Label";
+"OFA-qT-ZAg.text" = "Titel";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
 "PA3-sP-cWY.title" = "Förväntat glukosvärde";
@@ -92,7 +92,7 @@
 "tuw-av-A3x.text" = "Glukos";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
-"Tz7-80-bJ7.title" = "Add/Edit Carb Entry";
+"Tz7-80-bJ7.title" = "Lägg till/Ändra kolhydrater";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Titel";
