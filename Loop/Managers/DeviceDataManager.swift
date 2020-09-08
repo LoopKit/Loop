@@ -235,7 +235,7 @@ final class DeviceDataManager {
         )
         cacheStore.delegate = loopManager
         
-        watchManager = WatchDataManager(deviceManager: self)
+        watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
         let remoteDataServicesManager = RemoteDataServicesManager(
             carbStore: carbStore,

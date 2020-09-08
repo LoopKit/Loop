@@ -4279,7 +4279,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
@@ -4298,7 +4298,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
@@ -4314,7 +4314,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4336,7 +4336,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4358,7 +4358,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -4380,7 +4380,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -4543,7 +4543,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4560,7 +4560,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = UY678SP37Q;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";

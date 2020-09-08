@@ -27,9 +27,7 @@ class SleepStore {
     
     private let log = OSLog(category: "SleepStore")
     
-    public init(
-        healthStore: HKHealthStore
-    ) {
+    public init(healthStore: HKHealthStore) {
         self.healthStore = healthStore
     }
     
@@ -38,14 +36,8 @@ class SleepStore {
             with: .equalTo,
             value: HKCategoryValueSleepAnalysis.inBed.rawValue
         )
-        
-        let asleepPredicate = HKQuery.predicateForCategorySamples(
-            with: .equalTo,
-            value: HKCategoryValueSleepAnalysis.asleep.rawValue
-        )
-        
-        getAverageSleepStartTime(matching: inBedPredicate, sampleLimit: sampleLimit) {
-            (result) in
+                
+        getAverageSleepStartTime(matching: inBedPredicate, sampleLimit: sampleLimit) { (result) in
             switch result {
             case .success(_):
                 completion(result)
@@ -53,6 +45,10 @@ class SleepStore {
                 switch error {
                 case SleepStoreError.noSleepDataAvailable:
                     // if there were no .inBed samples, check if there are any .asleep samples that could be used to estimate bedtime
+                    let asleepPredicate = HKQuery.predicateForCategorySamples(
+                        with: .equalTo,
+                        value: HKCategoryValueSleepAnalysis.asleep.rawValue
+                    )
                     self.getAverageSleepStartTime(matching: asleepPredicate, sampleLimit: sampleLimit, completion)
                 default:
                     // otherwise, call completion
@@ -81,12 +77,12 @@ class SleepStore {
                 }
                 
                 // find the average hour and minute components from the sleep start times
-                let average = samples.reduce(0, {
-                    if let metadata = $1.metadata, let timezone = metadata[HKMetadataKeyTimeZone] {
-                        return $0 + $1.startDate.timeOfDayInSeconds(sampleTimeZone:  NSTimeZone(name: timezone as! String)! as TimeZone)
+                let average = samples.reduce(0, { (base, sample) in
+                    if let metadata = sample.metadata, let timezoneStr = metadata[HKMetadataKeyTimeZone] as? String, let timezone = NSTimeZone(name: timezoneStr) {
+                        return base + sample.startDate.timeOfDayInSeconds(sampleTimeZone: timezone as TimeZone)
                     } else {
                         // default to the current timezone if the sample does not contain one in its metadata
-                        return $0 + $1.startDate.timeOfDayInSeconds(sampleTimeZone: Calendar.current.timeZone)
+                        return base + sample.startDate.timeOfDayInSeconds(sampleTimeZone: Calendar.current.timeZone)
                     }
                 }) / samples.count
                 
@@ -94,11 +90,11 @@ class SleepStore {
                 let averageMinute = average % 3600 / 60
                 
                 // find the next time that the user will go to bed, based on the averages we've computed
-                if let bedtime = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: averageHour, minute: averageMinute), matchingPolicy: .nextTime), bedtime.timeIntervalSinceNow <= .hours(24) {
-                    completion(.success(bedtime))
-                } else {
+                guard let bedtime = Calendar.current.nextDate(after: Date(), matching: DateComponents(hour: averageHour, minute: averageMinute), matchingPolicy: .nextTime), bedtime.timeIntervalSinceNow <= .hours(24) else {
                     completion(.failure(SleepStoreError.noMatchingBedtime))
+                    return
                 }
+                completion(.success(bedtime))
             } else {
                 completion(.failure(SleepStoreError.unknownReturnConfiguration))
             }
