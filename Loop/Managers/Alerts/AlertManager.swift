@@ -44,7 +44,7 @@ public final class AlertManager {
     private let fileManager: FileManager
 
     let alertStore: AlertStore
-
+    
     public init(rootViewController: UIViewController,
                 handlers: [AlertPresenter]? = nil,
                 userNotificationCenter: UserNotificationCenter = UNUserNotificationCenter.current(),
@@ -54,7 +54,16 @@ public final class AlertManager {
         self.userNotificationCenter = userNotificationCenter
         self.fileManager = fileManager
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-        self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: documentsDirectory, expireAfter: expireAfter)
+        let alertStoreDirectory = documentsDirectory?.appendingPathComponent("AlertStore")
+        if let alertStoreDirectory = alertStoreDirectory {
+            do {
+                try fileManager.ensureDirectoryExists(at: alertStoreDirectory, with: FileProtectionType.completeUntilFirstUserAuthentication)
+                log.debug("AlertStore directory ensured")
+            } catch {
+                log.error("Could not create AlertStore directory: %@", error.localizedDescription)
+            }
+        }
+        self.alertStore = alertStore ?? AlertStore(storageDirectoryURL: alertStoreDirectory, expireAfter: expireAfter)
         self.handlers = handlers ??
             [UserNotificationAlertPresenter(userNotificationCenter: userNotificationCenter),
             InAppModalAlertPresenter(rootViewController: rootViewController, alertManagerResponder: self)]
@@ -209,6 +218,28 @@ extension AlertManager {
 // MARK: Extensions
 
 extension FileManager {
+    
+    func directoryExists(at url: URL) -> Bool {
+        var isDirectory: ObjCBool = false
+        let exists = fileExists(atPath: url.path, isDirectory: &isDirectory)
+        return exists && isDirectory.boolValue
+    }
+    
+    func ensureDirectoryExists(at url: URL, with protectionType: FileProtectionType? = nil) throws {
+        if !directoryExists(at: url) {
+            try createDirectory(at: url, withIntermediateDirectories: true, attributes: protectionType.map { [FileAttributeKey.protectionKey: $0 ] })
+        }
+        guard let protectionType = protectionType else {
+            return
+        }
+        // double check protection type
+        var attrs = try attributesOfItem(atPath: url.path)
+        if attrs[FileAttributeKey.protectionKey] as? FileProtectionType != protectionType {
+            attrs[FileAttributeKey.protectionKey] = protectionType
+            try setAttributes(attrs, ofItemAtPath: url.path)
+        }
+    }
+ 
     func copyIfNewer(from fromURL: URL, to toURL: URL) throws {
         if fileExists(atPath: toURL.path) {
             // If the source file is newer, remove the old one, otherwise skip it.
@@ -224,9 +255,10 @@ extension FileManager {
     }
 }
 
-extension URL {
+fileprivate extension URL {
 
     func fileCreationDate(_ fileManager: FileManager) throws -> Date {
         return try fileManager.attributesOfItem(atPath: self.path)[.creationDate] as! Date
     }
 }
+
