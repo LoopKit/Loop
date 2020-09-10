@@ -20,6 +20,8 @@ extension UserDefaults {
         case loopSettings = "com.loopkit.Loop.loopSettings"
         case insulinSensitivitySchedule = "com.loudnate.Naterade.InsulinSensitivitySchedule"
         case overrideHistory = "com.tidepool.loopkit.overrideHistory"
+        case lastBedtimeQuery = "com.loopkit.Loop.lastBedtimeQuery"
+        case bedtime = "com.loopkit.Loop.bedtime"
     }
 
     public static let appGroup = UserDefaults(suiteName: Bundle.main.appGroupSuiteName)
@@ -149,6 +151,24 @@ extension UserDefaults {
         }
         set {
             set(newValue?.rawValue, forKey: Key.overrideHistory.rawValue)
+        }
+    }
+    
+    public var lastBedtimeQuery: Date? {
+        get {
+            return object(forKey: Key.lastBedtimeQuery.rawValue) as? Date
+        }
+        set {
+            set(newValue, forKey: Key.lastBedtimeQuery.rawValue)
+        }
+    }
+    
+    public var bedtime: Date? {
+        get {
+            return object(forKey: Key.bedtime.rawValue) as? Date
+        }
+        set {
+            set(newValue, forKey: Key.bedtime.rawValue)
         }
     }
 }

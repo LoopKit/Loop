@@ -1,0 +1,389 @@
+/* The string format appended to active insulin that describes pending insulin. (1: pending insulin) */
+" (pending: %@)" = " (保留中: %@)";
+
+/* The format for an active override preset. (1: preset symbol)(2: preset name) */
+"%@ %@" = "%1$@ %2$@";
+
+/* Formats absorbed carb value */
+"%@ absorbed" = "%@ 吸収済";
+
+/* The subtitle format describing total insulin. (1: localized insulin total) */
+"%@ U Total" = "計 %@ 単位";
+
+/* Appends a full-stop to a statement */
+"%@." = "%@.";
+
+/* Format string for glucose target range. (1: Min target)(2: Max target)(3: glucose unit) */
+"%1$@ – %2$@ %3$@" = "%1$@ – %2$@ %3$@";
+
+/* Format string for carb ratio average. (1: value)(2: carb unit) */
+"%1$@ %2$@/U" = "%1$@ %2$@/U";
+
+/* Formats (1: carb start time) and (2: carb absorption duration) */
+"%1$@ + %2$@" = "%1$@ + %2$@";
+
+/* Low reservoir alert format string. (1: Number of units remaining) */
+"%1$@ U left" = "残 %1$@単位";
+
+/* Low reservoir alert with time remaining format string. (1: Number of units remaining)(2: approximate time remaining) */
+"%1$@ U left: %2$@" = "残 %1$@単位: %2$@";
+
+/* The format for recommended temp basal rate and time. (1: localized rate number)(2: localized time) */
+"%1$@ U/hour @ %2$@" = "%1$@ U/時 @ %2$@";
+
+/* The format string for the app name and version number. (1: bundle name)(2: bundle version) */
+"%1$@ v%2$@" = "%1$@ v%2$@";
+
+/* Formats (1: carb value) and (2: food type) */
+"%1$@: %2$@" = "%1$@: %2$@";
+
+/* Description of the prediction input effect for glucose momentum */
+"15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15分 グルコース回帰係数 (b₁)、30分退化適用";
+
+/* Description of the prediction input effect for retrospective correction */
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30分 グルコース予想値と実際値の比較、60分退化適用";
+
+/* Subtitle of Fiasp preset */
+"A model based on the published absorption of Fiasp insulin." = "Fiaspインスリンの公表吸収率に基づいたモデル。";
+
+/* Subtitle of Rapid-Acting – Adult preset */
+"A model based on the published absorption of Humalog, Novolog, and Apidra insulin in adults." = "大人使用時の Humalog、Novolog、Apidraインスリンの公表吸収率に基づいたモデル。";
+
+/* Action to copy the recommended Bolus value to the actual Bolus Field */
+"AcceptRecommendedBolus" = "推奨ボーラス値を使う";
+
+/* The title of the Carbs On-Board graph */
+"Active Carbohydrates" = "残存糖質";
+
+/* The string format describing active carbohydrates. (1: localized glucose value description) */
+"Active Carbohydrates: %@" = "残存糖質: %@";
+
+/* The title of the Insulin On-Board graph */
+"Active Insulin" = "残存インスリン";
+
+/* The string format describing active insulin. (1: localized insulin value description) */
+"Active Insulin: %@" = "残存インスリン: %@";
+
+/* Title of the user activity for adding carbs */
+"Add Carb Entry" = "カーボを追加";
+
+/* Action sheet title selecting CGM
+   Title text for button to set up a CGM */
+"Add CGM" = "CGMを追加";
+
+/* The label of the carb entry button */
+"Add Meal" = "食事を追加";
+
+/* Action sheet title selecting Pump
+   Title text for button to set up a new pump */
+"Add Pump" = "ポンプを追加";
+
+/* The title of the Amplitude service */
+"Amplitude" = "Amplitude";
+
+/* Subtitle of Rapid-Acting – Children preset */
+"An adjustment to the adult model based on empirical effects in children." = "大人モデルに経験効果を加算し調整したモデル。";
+
+/* The title of the amplitude API key credential */
+"API Key" = "API キー";
+
+/* The title of the nightscout API secret credential */
+"API Secret" = "API シークレット";
+
+/* Confirmation message for deleting a CGM */
+"Are you sure you want to delete this CGM?" = "このCGMを削除しますか?";
+
+/* Format fragment for a specific time */
+"at %@" = "%@ 時点";
+
+/* The message displayed during a device authentication prompt for bolus specification */
+"Authenticate to Bolus %@ Units" = "ボーラス %@単位　認証してください";
+
+/* Details for configuration error when basal rate schedule is missing */
+"Basal Rate Schedule" = "基礎レートスケジュール";
+
+/* The title of the basal rate profile screen
+   The title text for the basal rate schedule */
+"Basal Rates" = "基礎レート";
+
+/* The label of the bolus entry button
+   The notification title for a bolus failure */
+"Bolus" = "ボーラス";
+
+/* The format string for bolus progress. (1: delivered volume)(2: total volume) */
+"Bolused %1$@ of %2$@" = "%2$@ のうち %1$@ ボーラス済";
+
+/* The format string for bolus in progress showing total volume. (1: total volume) */
+"Bolusing %1$@" = "%1$@ ボーラス中";
+
+/* The title of the cancel action in an action sheet */
+"Cancel" = "取消";
+
+/* The title of the cell indicating a bolus is being canceled */
+"Canceling Bolus" = "ボーラスをキャンセルします";
+
+/* Details for missing data error when carb effects are missing */
+"Carb effects" = "糖質効果";
+
+/* The title of the carb ratios schedule screen
+   The title text for the carb ratio schedule */
+"Carb Ratios" = "糖質比";
+
+/* Title of the prediction input effect for carbohydrates */
+"Carbohydrates" = "糖質";
+
+/* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "吸収済糖質(g) ÷ 糖質比 (g/U) × インスリン効果値(%1$@/U)";
+
+/* The notification alert describing a low pump battery */
+"Change the pump battery immediately" = "すぐにポンプの電池を替えてください";
+
+/* The notification alert describing an empty pump reservoir */
+"Change the pump reservoir now" = "ポンプのレザーバを替えてください";
+
+/* Details for configuration error when one or more loop settings are missing */
+"Check settings" = "設定を確認する";
+
+/* Recovery suggestion when reservoir data is missing */
+"Check that your pump is in range" = "ポンプが近くにあることを確認してください";
+
+/* Recovery suggestion when glucose data is missing */
+"Check your CGM data source" = "CGM データソースを確認してください";
+
+/* The title text for the looping enabled switch cell */
+"Closed Loop" = "クローズドループ";
+
+/* The title of the action used to dismiss an error alert */
+"com.loudnate.LoopKit.errorAlertActionTitle" = "OK";
+
+/* The title of the configuration section in settings */
+"Configuration" = "コンフィグレーション";
+
+/* The error message displayed for configuration errors. (1: configuration error details) */
+"Configuration Error: %1$@" = "設定エラー: %1$@";
+
+/* The title of the continuous glucose monitor section in settings */
+"Continuous Glucose Monitor" = "CGM";
+
+/* The title of the glucose target range schedule screen
+   The title text for the glucose target range schedule */
+"Correction Range" = "補正範囲";
+
+/* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
+"Current glucose of %1$@ is below correction range." = "現在の血糖値は %1$@ で補正範囲を下回っています。";
+
+/* The title of the cell indicating a generic temporary override is enabled */
+"Custom Override" = "カスタムオーバーライド";
+
+/* The title of the Loggly customer token credential */
+"Customer Token" = "カスタマートークン";
+
+/* Button title to delete CGM */
+"Delete CGM" = "CGMを削除";
+
+/* Title text for delivery limits */
+"Delivery Limits" = "注入限度";
+
+/* The action hint of the workout mode toggle button when enabled */
+"Disables" = "無効にする";
+
+/* The action hint of the workout mode toggle button when disabled */
+"Enables" = "有効にする";
+
+/* The placeholder text instructing users to enter a suspend treshold */
+"Enter suspend threshold" = "一時停止値を入力";
+
+/* The alert title for an error while canceling a bolus */
+"Error Canceling Bolus" = "ボーラスのキャンセルにエラー";
+
+/* The alert title for a resume error */
+"Error Resuming" = "再開エラー";
+
+/* The subtitle format describing eventual glucose. (1: localized glucose value description) */
+"Eventually %@" = "予想 %@";
+
+/* The title of the alert describing a maximum bolus validation error */
+"Exceeds Maximum Bolus" = "ボーラス最大値を超えています";
+
+/* Title of insulin model preset */
+"Fiasp" = "Fiasp";
+
+/* The format string used to describe a finite workout targets duration */
+"For %1$@" = "%1$@につき";
+
+/* The title of the glucose and prediction graph */
+"Glucose" = "血糖値";
+
+/* The error message when glucose data is too old to be used. (1: glucose data age in minutes) */
+"Glucose data is %1$@ old" = "血糖データは %1$@ 前のものです";
+
+/* Description of error when glucose data is missing */
+"Glucose data not available" = "グルコースデータがありません";
+
+/* Title of the prediction input effect for glucose momentum */
+"Glucose Momentum" = "グルコース モメンタム";
+
+/* The title of a target alert action specifying an indefinitely long workout targets duration */
+"Indefinitely" = "無期限";
+
+/* Title of the prediction input effect for insulin */
+"Insulin" = "インスリン";
+
+/* Description of the prediction input effect for insulin */
+"Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "吸収済インスリン(U) × インスリン効果値(%1$@/U)";
+
+/* The title of the insulin delivery graph */
+"Insulin Delivery" = "インスリン放出";
+
+/* Details for missing data error when insulin effects are missing */
+"Insulin effects" = "インスリン効果";
+
+/* Details for configuration error when insulin model is missing
+   The title text for the insulin model setting row */
+"Insulin Model" = "インスリンモデル";
+
+/* The title of the insulin sensitivities schedule screen
+   The title text for the insulin sensitivity schedule */
+"Insulin Sensitivities" = "インスリン効果値";
+
+/* The error message when invalid data was encountered. (1: details of invalid data) */
+"Invalid data: %1$@" = "無効データ: %1$@";
+
+/* The title text for the issue report cell */
+"Issue Report" = "問題を報告";
+
+/* Glucose HUD accessibility hint */
+"Launches CGM app" = "CGMアプリを起動";
+
+/* The loading message for the diagnostic report screen */
+"Loading..." = "ロード中...";
+
+/* The title of the loggly service */
+"Loggly" = "Loggly";
+
+/* The notification title for a loop failure */
+"Loop Failure" = "ループの不良";
+
+/* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
+"Loop has not completed successfully in %@" = "ループが %@ の間クローズされていません";
+
+/* The error message for missing data. (1: missing data details) */
+"Missing data: %1$@" = "データがありません: %1$@";
+
+/* Details for missing data error when momentum effects are missing */
+"Momentum effects" = "モメンタム効果";
+
+/* The title of the Nightscout service */
+"Nightscout" = "Nightscout";
+
+/* The error message displayed for device connection errors. */
+"No connected devices, or failure during device connection" = "機器が未接続、または接続に問題";
+
+/* The label of the pre-meal mode toggle button */
+"Pre-Meal Targets" = "食前ターゲット";
+
+/* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
+"Predicted glucose at %1$@ is %2$@." = "%1$@の予想グルコースは %2$@です。";
+
+/* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "予想グルコースは %1$@ で一時停止値を下回ります。";
+
+/* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
+"Predicted: %1$@\nActual: %2$@ (%3$@)" = "Predicted: %1$@\nActual: %2$@ (%3$@)";
+
+/* The title of the pump section in settings */
+"Pump" = "ポンプ";
+
+/* The notification title for a low pump battery */
+"Pump Battery Low" = "ポンプの電池が不足";
+
+/* The error message when pump data is too old to be used. (1: pump data age in minutes) */
+"Pump data is %1$@ old" = "ポンプデータが %1$@前のものです";
+
+/* Details for configuration error when pump manager is missing */
+"Pump Manager" = "ポンプ設定";
+
+/* The notification title for an empty pump reservoir */
+"Pump Reservoir Empty" = "ポンプのリザーバが空です";
+
+/* The notification title for a low pump reservoir */
+"Pump Reservoir Low" = "ポンプのリザーバが低です";
+
+/* The title of the cell indicating the pump is suspended */
+"Pump Suspended" = "ポンプ一時停止中";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Adults" = "超速攻型 - 大人";
+
+/* Title of insulin model preset */
+"Rapid-Acting – Children" = "超速攻型 - 子供";
+
+/* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
+"Recommendation expired: %1$@ old" = "推奨が %1$@ 経過したため失効";
+
+/* The title of the cell displaying a recommended temp basal value */
+"Recommended Basal" = "推奨基礎分泌量";
+
+/* Accessibility hint describing recommended bolus units */
+"Recommended Bolus: %@ Units" = "推奨ボーラス: %@ 単位";
+
+/* Details for missing data error when reservoir data is missing */
+"Reservoir" = "リザーバ";
+
+/* Title of the prediction input effect for retrospective correction */
+"Retrospective Correction" = "レトロ補正";
+
+/* The title of the notification action to retry a bolus command */
+"Retry" = "やり直す";
+
+/* The title of the services section in settings */
+"Services" = "サービス";
+
+/* The label of the settings button */
+"Settings" = "設定";
+
+/* Loop Completion HUD accessibility hint */
+"Shows last loop error" = "前回のループエラー";
+
+/* Format fragment for a start time */
+"since %@" = "%@ から";
+
+/* The title of the nightscout site URL credential */
+"Site URL" = "アドレス";
+
+/* The format for the description of a temporary override start date */
+"starting at %@" = "%@から開始";
+
+/* The title of the cell indicating a bolus is being sent */
+"Starting Bolus" = "ボーラス注入を開始";
+
+/* The title text in settings */
+"Suspend Threshold" = "一時停止値";
+
+/* The subtitle of the cell displaying an action to resume insulin delivery */
+"Tap to Resume" = "タップして再開する";
+
+/* Subtitle description of Walsh insulin model setting */
+"The legacy model used by Loop, allowing customization of action duration." = "ループのレガシーモデルで、作用期間をカスタマイズできます。";
+
+/* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
+"The maximum bolus amount is %@ Units" = "最大ボーラス量は %@単位です";
+
+/* The short unit display string for international units of insulin */
+"U" = "U";
+
+/* The format for the description of a temporary override end date */
+"until %@" = "%@まで";
+
+/* The title of the alert controller used to select a duration for workout targets */
+"Use Workout Glucose Targets" = "運動時ターゲットを使用";
+
+/* Title of insulin model setting */
+"Walsh" = "Walsh";
+
+/* Explanation of suspend threshold */
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "現在または予測グルコースが一時停止値を下回るため、ループはボーラスを推奨しません。０単位/時の一時的基礎レートを推奨します。";
+
+/* The label of the workout mode toggle button */
+"Workout Targets" = "運動時ターゲット";
+

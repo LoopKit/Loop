@@ -95,7 +95,7 @@ class RecommendTempBasalTests: XCTestCase {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 55)
     }
     
-    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0)
+    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0, delay: 0)
 
     var walshInsulinModel: InsulinModel {
         return WalshInsulinModel(actionDuration: insulinActionDuration)
@@ -411,13 +411,15 @@ class RecommendTempBasalTests: XCTestCase {
 
     func testHighAndFalling() {
         let glucose = loadGlucoseValueFixture("recommend_temp_basal_high_and_falling")
+        
+        let insulinModel = WalshInsulinModel(actionDuration: insulinActionDuration, delay: 0)
 
         let dose = glucose.recommendedTempBasal(
             to: glucoseTargetRange,
             at: glucose.first!.startDate,
             suspendThreshold: suspendThreshold.quantity,
             sensitivity: insulinSensitivitySchedule,
-            model: walshInsulinModel,
+            model: insulinModel,
             basalRates: basalRateSchedule,
             maxBasalRate: maxBasalRate,
             lastTempBasal: nil
@@ -459,7 +461,7 @@ class RecommendTempBasalTests: XCTestCase {
             lastTempBasal: nil
         )
 
-        XCTAssertEqual(1.475, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.60, dose!.unitsPerHour, accuracy: 1.0 / 40.0)
         XCTAssertEqual(TimeInterval(minutes: 30), dose!.duration)
     }
 
@@ -613,7 +615,7 @@ class RecommendBolusTests: XCTestCase {
         return GlucoseThreshold(unit: HKUnit.milligramsPerDeciliter, value: 55)
     }
     
-    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0)
+    var exponentialInsulinModel: InsulinModel = ExponentialInsulinModel(actionDuration: 21600.0, peakActivityTime: 4500.0, delay: 0)
 
     var walshInsulinModel: InsulinModel {
         return WalshInsulinModel(actionDuration: insulinActionDuration)
@@ -717,7 +719,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
 
-        XCTAssertEqual(1.575, dose.amount)
+        XCTAssertEqual(1.7, dose.amount)
 
         if case BolusRecommendationNotice.currentGlucoseBelowTarget(let glucose) = dose.notice! {
             XCTAssertEqual(glucose.quantity.doubleValue(for: .milligramsPerDeciliter), 60)
@@ -832,7 +834,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
         
-        XCTAssertEqual(1.4, dose.amount)
+        XCTAssertEqual(1.575, dose.amount)
         XCTAssertEqual(BolusRecommendationNotice.predictedGlucoseBelowTarget(minGlucose: glucose[1]), dose.notice!)
     }
 
@@ -851,7 +853,7 @@ class RecommendBolusTests: XCTestCase {
             volumeRounder: fortyIncrementsPerUnitRounder
         )
         
-        XCTAssertEqual(0.575, dose.amount)
+        XCTAssertEqual(0.7, dose.amount)
     }
     
     func testStartLowEndHighWithPendingBolusExponentialModel() {
@@ -900,7 +902,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.575, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.7, dose.amount, accuracy: 1.0 / 40.0)
     }
 
     func testHighAndFalling() {
@@ -916,7 +918,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(0.325, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.4, dose.amount, accuracy: 1.0 / 40.0)
     }
     
     func testHighAndFallingExponentialModel() {
@@ -948,7 +950,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(0.325, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(0.4, dose.amount, accuracy: 1.0 / 40.0)
 
         // Less existing temp
 
@@ -995,7 +997,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.25, dose.amount)
+        XCTAssertEqual(1.35, dose.amount, accuracy: 1.0 / 40.0)
 
         // Use mmol sensitivity value
         let insulinSensitivitySchedule = InsulinSensitivitySchedule(unit: HKUnit.millimolesPerLiter, dailyItems: [RepeatingScheduleValue(startTime: 0.0, value: 10.0 / 3)])!
@@ -1010,7 +1012,7 @@ class RecommendBolusTests: XCTestCase {
             maxBolus: maxBolus
         )
 
-        XCTAssertEqual(1.25, dose.amount, accuracy: 1.0 / 40.0)
+        XCTAssertEqual(1.35, dose.amount, accuracy: 1.0 / 40.0)
     }
     
     func testHighAndRisingExponentialModel() {

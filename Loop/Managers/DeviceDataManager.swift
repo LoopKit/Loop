@@ -151,7 +151,15 @@ final class DeviceDataManager {
 
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        deviceLog = PersistentDeviceLog(storageFile: documentsDirectory.appendingPathComponent("DeviceLog.sqlite"), maxEntryAge: localCacheDuration)
+        let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
+            } catch let error {
+                preconditionFailure("Could not create DeviceLog directory: \(error)")
+            }
+        }
+        deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
 
         loggingServicesManager = LoggingServicesManager()
         analyticsServicesManager = AnalyticsServicesManager()
@@ -234,7 +242,7 @@ final class DeviceDataManager {
         )
         cacheStore.delegate = loopManager
         
-        watchManager = WatchDataManager(deviceManager: self)
+        watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
         let remoteDataServicesManager = RemoteDataServicesManager(
             carbStore: carbStore,
@@ -325,7 +333,6 @@ final class DeviceDataManager {
 
         updatePumpManagerBLEHeartbeatPreference()
     }
-
 
     var availableCGMManagers: [AvailableDevice] {
         var availableCGMManagers = pluginManager.availableCGMManagers + availableStaticCGMManagers
@@ -538,6 +545,7 @@ extension DeviceDataManager {
 
 // MARK: - DeviceManagerDelegate
 extension DeviceDataManager: DeviceManagerDelegate {
+
     func scheduleNotification(for manager: DeviceManager,
                               identifier: String,
                               content: UNNotificationContent,
@@ -550,7 +558,7 @@ extension DeviceDataManager: DeviceManagerDelegate {
 
         UNUserNotificationCenter.current().add(request)
     }
-
+    
     func clearNotification(for manager: DeviceManager, identifier: String) {
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [identifier])
     }

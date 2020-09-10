@@ -1,8 +1,8 @@
-/* Bundle display name */
-"CFBundleDisplayName" = "Loop";
-
 /* Bundle name */
 "CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "Bluetooth brukes til å kommunisere med insulinpumpe og kontinuerlige glukosemonitorer.";
 
 /* Privacy - Bluetooth Peripheral Usage Description */
 "NSBluetoothPeripheralUsageDescription" = "Bluetooth brukes til å kommunisere med insulinpumpe og kontinuerlige glukosemonitorer.";

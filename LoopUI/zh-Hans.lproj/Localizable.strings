@@ -4,47 +4,26 @@
 /* The format string describing the basal rate. */
 "%@ U" = "%@ 单位";
 
-/* Format string for reservoir volume. (1: The localized volume) */
-"%@U" = "%@单位";
-
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
 "%1$@ at %2$@" = "%2$@ 分钟时为 %1$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
 "%1$@ units per hour at %2$@" = "%1$@ 每小时的单位 %2$@";
 
-/* Accessibility format string for (1: localized volume)(2: time) */
-"%1$@ units remaining at %2$@" = "%1$@ 剩余的单位 %2$@";
+/* Format string describing glucose units per minute (1: glucose unit string) */
+"%1$@/min" = "%1$@/分钟";
 
 /* Accessibility hint describing completion HUD for a closed loop */
 "Closed loop" = "启动闭环";
 
-/* The short unit display string for decibles */
-"dB" = "dB";
-
-/* The short unit display string for grams */
-"g" = "克";
-
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
 "Loop ran %@ ago" = "闭环已停止运行%@";
-
-/* The short unit display string for milligrams of glucose per decilter */
-"mg/dL" = "毫克/分升";
-
-/* The short unit display string for millimoles of glucose per liter */
-"mmol/L" = "毫摩尔/升";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
 "Needs attention" = "请注意";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "关闭闭环";
-
-/* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
-"QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
-
-/* The short unit display string for international units of insulin */
-"U" = "单位";
 
 /* Accessibility value for an unknown value */
 "Unknown" = "未知";

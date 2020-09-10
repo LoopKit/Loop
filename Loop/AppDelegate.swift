@@ -27,62 +27,110 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
     private var bluetoothStateManager: BluetoothStateManager!
 
     var window: UIWindow?
+    
+    var launchOptions: [UIApplication.LaunchOptionsKey: Any]?
 
     private var rootViewController: RootNavigationController! {
         return window?.rootViewController as? RootNavigationController
     }
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    
+    private func isAfterFirstUnlock() -> Bool {
+        let fileManager = FileManager.default
+        do {
+            let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let fileURL = documentDirectory.appendingPathComponent("protection.test")
+            guard fileManager.fileExists(atPath: fileURL.path) else {
+                let contents = Data("unimportant".utf8)
+                try? contents.write(to: fileURL, options: .completeFileProtectionUntilFirstUserAuthentication)
+                // If file doesn't exist, we're at first start, which will be user directed.
+                return true
+            }
+            let contents = try? Data(contentsOf: fileURL)
+            return contents != nil
+        } catch {
+            log.error("Could not create after first unlock test file: %@", String(describing: error))
+        }
+        return false
+    }
+    
+    private func finishLaunch(application: UIApplication) {
+        log.default("Finishing launching")
         UIDevice.current.isBatteryMonitoringEnabled = true
 
         bluetoothStateManager = BluetoothStateManager()
-        bluetoothStateManager.addBluetoothStateObserver(rootViewController.rootViewController)
         alertManager = AlertManager(rootViewController: rootViewController, expireAfter: Bundle.main.localCacheDuration ?? .days(1))
         deviceDataManager = DeviceDataManager(pluginManager: pluginManager, alertManager: alertManager, bluetoothStateManager: bluetoothStateManager, rootViewController: rootViewController)
+
+        let statusTableViewController = UIStoryboard(name: "Main", bundle: Bundle(for: AppDelegate.self)).instantiateViewController(withIdentifier: "MainStatusViewController") as! StatusTableViewController
+        
+        statusTableViewController.deviceManager = deviceDataManager
+
+        bluetoothStateManager.addBluetoothStateObserver(statusTableViewController)
+
         loopAlertsManager = LoopAlertsManager(alertManager: alertManager, bluetoothStateManager: bluetoothStateManager)
         
         SharedLogging.instance = deviceDataManager.loggingServicesManager
 
+        deviceDataManager?.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
+
         OrientationLock.deviceOrientationController = self
 
         NotificationManager.authorize(delegate: self)
-        
-        log.info(#function)
 
-        deviceDataManager.analyticsServicesManager.application(application, didFinishLaunchingWithOptions: launchOptions)
 
-        rootViewController.rootViewController.deviceManager = deviceDataManager
-        
+        rootViewController.pushViewController(statusTableViewController, animated: false)
+
         let notificationOption = launchOptions?[.remoteNotification]
         
         if let notification = notificationOption as? [String: AnyObject] {
-            deviceDataManager.handleRemoteNotification(notification)
+            deviceDataManager?.handleRemoteNotification(notification)
         }
         
+        launchOptions = nil
+    }
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        self.launchOptions = launchOptions
+        
+        log.default("didFinishLaunchingWithOptions %{public}@", String(describing: launchOptions))
+        
+        guard isAfterFirstUnlock() else {
+            log.default("Launching before first unlock; pausing launch...")
+            return false
+        }
+
+        finishLaunch(application: application)
+
         window?.tintColor = .loopAccent
                         
         return true
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
+        log.default(#function)
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        deviceDataManager.updatePumpManagerBLEHeartbeatPreference()
+        deviceDataManager?.updatePumpManagerBLEHeartbeatPreference()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        log.default(#function)
     }
 
     // MARK: - Continuity
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        log.default(#function)
 
         if #available(iOS 12.0, *) {
             if userActivity.activityType == NewCarbEntryIntent.className {
@@ -108,7 +156,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
         log.default("RemoteNotifications device token: %{public}@", token)
-        deviceDataManager.loopManager.settings.deviceToken = deviceToken
+        deviceDataManager?.loopManager.settings.deviceToken = deviceToken
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -123,8 +171,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, DeviceOrientationCo
             return
         }
       
-        deviceDataManager.handleRemoteNotification(notification)
+        deviceDataManager?.handleRemoteNotification(notification)
         completionHandler(.noData)
+    }
+    
+    func applicationProtectedDataDidBecomeAvailable(_ application: UIApplication) {
+        log.default("applicationProtectedDataDidBecomeAvailable")
+        
+        if deviceDataManager == nil {
+            finishLaunch(application: application)
+        }
     }
 
     // MARK: - DeviceOrientationController
@@ -146,9 +202,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 let startDate = response.notification.request.content.userInfo[LoopNotificationUserInfoKey.bolusStartDate.rawValue] as? Date,
                 startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5)
             {
-                deviceDataManager.analyticsServicesManager.didRetryBolus()
+                deviceDataManager?.analyticsServicesManager.didRetryBolus()
 
-                deviceDataManager.enactBolus(units: units, at: startDate) { (_) in
+                deviceDataManager?.enactBolus(units: units, at: startDate) { (_) in
                     completionHandler()
                 }
                 return

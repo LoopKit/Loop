@@ -1,0 +1,33 @@
+/* Lesson subtitle */
+"Computes the percentage of glucose measurements within a specified range" = "Beräknar procentandelen glukosmätningar inom ett specifikt målvärde";
+
+/* Title of the button to begin lesson execution */
+"Continue" = "Fortsätt";
+
+/* Placeholder for upper range entry */
+"Maximum" = "Maximum";
+
+/* Placeholder for lower range entry */
+"Minimum" = "Minimum";
+
+/* Lesson title */
+"Modal Day" = "Genomsnittlig dag";
+
+/* Lesson result text for no data */
+"No data available" = "Ingen data tillgänglig";
+
+/* Section title for glucose range */
+"Range" = "Målvärde";
+
+/* Title of config entry */
+"Start Date" = "Starttid";
+
+/* Lesson title */
+"Time in Range" = "Tid inom målvärde";
+
+/* Lesson subtitle */
+"Visualizes the most frequent glucose values by time of day" = "Visar de vanligaste glukosvärdena under olika tider på dygnet";
+
+/* Unit string for a count of calendar weeks */
+"Weeks" = "Veckor";
+

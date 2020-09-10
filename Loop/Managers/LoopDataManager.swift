@@ -776,7 +776,7 @@ extension LoopDataManager {
             doseStore.getGlucoseEffects(start: nextEffectDate, end: nil, basalDosingEnd: nil) { (result) -> Void in
                 switch result {
                 case .failure(let error):
-                    self.logger.error("%{public}@", String(describing: error))
+                    self.logger.error("Could not fetch insulin effects: %{public}@", String(describing: error))
                     self.insulinEffectIncludingPendingInsulin = nil
                 case .success(let effects):
                     self.insulinEffectIncludingPendingInsulin = effects
@@ -1354,7 +1354,7 @@ extension LoopDataManager {
 
         let tempBasal = predictedGlucose.recommendedTempBasal(
             to: glucoseTargetRange,
-            at: now(),
+            at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
@@ -1381,7 +1381,7 @@ extension LoopDataManager {
         let predictionDrivingBolusRecommendation = pendingInsulin > 0 ? predictedGlucoseIncludingPendingInsulin : predictedGlucose
         let recommendation = predictionDrivingBolusRecommendation.recommendedBolus(
             to: glucoseTargetRange,
-            at: now(),
+            at: predictedGlucose[0].startDate,
             suspendThreshold: settings.suspendThreshold?.quantity,
             sensitivity: insulinSensitivity,
             model: model,
@@ -1657,7 +1657,7 @@ extension LoopDataManager {
 
                 "predictedGlucose: [",
                 "* PredictedGlucoseValue(start, mg/dL)",
-                (state.predictedGlucose ?? []).reduce(into: "", { (entries, entry) in
+                (state.predictedGlucoseIncludingPendingInsulin ?? []).reduce(into: "", { (entries, entry) in
                     entries.append("* \(entry.startDate), \(entry.quantity.doubleValue(for: .milligramsPerDeciliter))\n")
                 }),
                 "]",
