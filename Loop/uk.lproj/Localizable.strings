@@ -390,3 +390,11 @@
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Цільові значення при фізичних навантаженнях";
 
+/* Title of the carb entry date picker cell */
+"Date" = "Дата";
+
+/* Title of the carb entry absorption time cell */
+"Absorption Time" = "Час поглинання";
+
+"Add Carb Entry" = "Додати запис вуглеводів";
+

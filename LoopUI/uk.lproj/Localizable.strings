@@ -1,32 +1,32 @@
 /* Accessbility format value describing glucose: (1: glucose number)(2: glucose time) */
-"%1$@ at %2$@" = "%1$@ at %2$@";
+"%1$@ at %2$@" = "%1$@ о %2$@";
 
 /* Accessibility format string describing the basal rate. (1: localized basal rate value)(2: last updated time) */
-"%1$@ units per hour at %2$@" = "%1$@ units per hour at %2$@";
+"%1$@ units per hour at %2$@" = "%1$@ одиниць на годину о %2$@";
 
 /* Format string describing glucose units per minute (1: glucose unit string) */
-"%1$@/min" = "%1$@/min";
+"%1$@/min" = "%1$@/хв";
 
 /* Format string describing the time interval since the last completion date. (1: The localized date components */
-"%@ ago" = "%@ ago";
+"%@ ago" = "%@ тому";
 
 /* The format string describing the basal rate. */
-"%@ U" = "%@ U";
+"%@ U" = "%@ од";
 
 /* Accessibility hint describing completion HUD for a closed loop */
-"Closed loop" = "Closed loop";
+"Closed loop" = "Замкнутий цикл";
 
 /* Accessbility format label describing the time interval since the last completion date. (1: The localized date components) */
-"Loop ran %@ ago" = "Loop ran %@ ago";
+"Loop ran %@ ago" = "Запуск циклу %@ тому";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
-"Needs attention" = "Needs attention";
+"Needs attention" = "Потребує уваги";
 
 /* Accessbility hint describing completion HUD for an open loop */
-"Open loop" = "Open loop";
+"Open loop" = "Відкритий цикл";
 
 /* Accessibility value for an unknown value */
-"Unknown" = "Unknown";
+"Unknown" = "Невідомо";
 
 /* Acessibility label describing completion HUD waiting for first run */
-"Waiting for first run" = "Waiting for first run";
+"Waiting for first run" = "Очікування першого запуску";

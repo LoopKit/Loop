@@ -1,6 +1,9 @@
-"80eo5o" = "Add Carb Entry";
+/* INIntentTitle */
+"80eo5o" = "Додати запис вуглеводів";
 
-"OcNxIj" = "Add Carb Entry";
+/* INIntentParameterCombinationTitle */
+"OcNxIj" = "Додати запис вуглеводів";
 
-"yc02Yq" = "Add a carb entry to Loop";
+/* INIntentDescription */
+"yc02Yq" = "Додати запис вуглеводів до Loop";
 

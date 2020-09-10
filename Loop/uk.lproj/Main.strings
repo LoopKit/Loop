@@ -1,60 +1,60 @@
 
 /* Class = "UILabel"; text = "g"; ObjectID = "0RV-d5-muE"; */
-"0RV-d5-muE.text" = "g";
+"0RV-d5-muE.text" = "г";
 
 /* Class = "UINavigationItem"; title = "Status"; ObjectID = "3kU-n2-fha"; */
-"3kU-n2-fha.title" = "Status";
+"3kU-n2-fha.title" = "Статус";
 
 /* Class = "UILabel"; text = "Pump ID"; ObjectID = "5TX-kX-nBo"; */
-"5TX-kX-nBo.text" = "Pump ID";
+"5TX-kX-nBo.text" = "ID Помпи";
 
 /* Class = "UILabel"; text = "3.5 U/hour @ 12:12 PM"; ObjectID = "5gz-kZ-iF1"; */
-"5gz-kZ-iF1.text" = "3.5 U/hour @ 12:12 PM";
+"5gz-kZ-iF1.text" = "3.5 о/год @ 12:12 PM";
 
 /* Class = "UILabel"; text = "Bolus"; ObjectID = "5oA-6d-ZTL"; */
-"5oA-6d-ZTL.text" = "Bolus";
+"5oA-6d-ZTL.text" = "Болюс";
 
 /* Class = "UITextField"; accessibilityLabel = "Bolus Amount"; ObjectID = "7LT-50-ZzK"; */
-"7LT-50-ZzK.accessibilityLabel" = "Bolus Amount";
+"7LT-50-ZzK.accessibilityLabel" = "Сума болюсу";
 
 /* Class = "UITextField"; placeholder = "0.0"; ObjectID = "7LT-50-ZzK"; */
 "7LT-50-ZzK.placeholder" = "0.0";
 
 /* Class = "UILabel"; text = "Predicted"; ObjectID = "87H-N1-0vJ"; */
-"87H-N1-0vJ.text" = "Predicted";
+"87H-N1-0vJ.text" = "Передбачається";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.accessibilityLabel" = "Units";
+"BR0-dr-Fj2.accessibilityLabel" = "Одиниці";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "BR0-dr-Fj2"; */
-"BR0-dr-Fj2.text" = "U";
+"BR0-dr-Fj2.text" = "Од.";
 
 /* Class = "UILabel"; text = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction."; ObjectID = "D4C-I2-dhA"; */
-"D4C-I2-dhA.text" = "Future glucose is predicted by combining the effects of multiple inputs. Use this tool to toggle various inputs to see how they compare to the final prediction.";
+"D4C-I2-dhA.text" = "Майбутня глюкоза прогнозується шляхом поєднання ефектів кількох входів. Використовуйте цей інструмент для перемикання різних входів, щоб побачити, як вони порівнюються з кінцевим прогнозом.";
 
 /* Class = "UILabel"; text = "DEVICES"; ObjectID = "DyC-Sv-qP8"; */
-"DyC-Sv-qP8.text" = "DEVICES";
+"DyC-Sv-qP8.text" = "ПРИСТРОЇ";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "E41-FN-nkk"; */
-"E41-FN-nkk.text" = "eventually 92 mg/dL";
+"E41-FN-nkk.text" = "зрештою 92 mg/dL";
 
 /* Class = "UILabel"; text = "Observed"; ObjectID = "EAn-Ja-S1d"; */
-"EAn-Ja-S1d.text" = "Observed";
+"EAn-Ja-S1d.text" = "Спостерігається";
 
 /* Class = "UIButton"; normalTitle = "🍭"; ObjectID = "Fal-Vf-lfh"; */
 "Fal-Vf-lfh.normalTitle" = "🍭";
 
 /* Class = "UILabel"; text = "Eventually 92 mg/dL"; ObjectID = "G51-pt-pmi"; */
-"G51-pt-pmi.text" = "Eventually 92 mg/dL";
+"G51-pt-pmi.text" = "Зрештою 92 mg/dL";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "IRb-Yj-AQH"; */
 "IRb-Yj-AQH.text" = "Label";
 
 /* Class = "UILabel"; text = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption."; ObjectID = "IxU-As-glo"; */
-"IxU-As-glo.text" = "Observed changes in glucose, subtracting changes modeled from insulin delivery, can be used to estimate carbohydrate absorption.";
+"IxU-As-glo.text" = "Спостережувані зміни рівня глюкози, віднімаючи зміни, змодельовані з доставки інсуліну, можуть бути використані для оцінки поглинання вуглеводів.";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "J7x-W5-gwo"; */
-"J7x-W5-gwo.text" = "Detail";
+"J7x-W5-gwo.text" = "Подробиці";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "Krd-Aa-ret"; */
 "Krd-Aa-ret.text" = "Label";
@@ -63,10 +63,10 @@
 "OFA-qT-ZAg.text" = "Label";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Predicted Glucose";
+"PA3-sP-cWY.title" = "Прогнозована глюкоза";
 
 /* Class = "UILabel"; text = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments."; ObjectID = "PJv-p9-cFe"; */
-"PJv-p9-cFe.text" = "An insulin activity model is used to estimate effects of insulin on glucose levels. An accurate model can help prevent insulin stacking and safely recommend corrective treatments.";
+"PJv-p9-cFe.text" = "Модель інсулінової активності використовується для оцінки впливу інсуліну на рівень глюкози. Точна модель може допомогти запобігти накопиченню інсуліну та безпечно рекомендувати коригуючі методи лікування.";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";
@@ -75,85 +75,85 @@
 "QhO-Yi-AqQ.normalTitle" = "🌮";
 
 /* Class = "UILabel"; text = "eventually 92 mg/dL"; ObjectID = "Rse-x8-amW"; */
-"Rse-x8-amW.text" = "eventually 92 mg/dL";
+"Rse-x8-amW.text" = "зрештою 92 mg/dL";
 
 /* Class = "UILabel"; text = "g COB"; ObjectID = "SQx-au-ZcM"; */
-"SQx-au-ZcM.text" = "g COB";
+"SQx-au-ZcM.text" = "г COB";
 
 /* Class = "UINavigationItem"; title = "Add/Edit Carb Entry"; ObjectID = "Tz7-80-bJ7"; */
-"Tz7-80-bJ7.title" = "Add/Edit Carb Entry";
+"Tz7-80-bJ7.title" = "Додавання/редагування введення вуглеводів";
 
 /* Class = "UINavigationItem"; title = "Carbohydrates"; ObjectID = "Vpi-5b-bY5"; */
-"Vpi-5b-bY5.title" = "Carbohydrates";
+"Vpi-5b-bY5.title" = "Вугдеводи";
 
 /* Class = "UITextField"; text = "4 hour"; ObjectID = "Wk3-xv-IM5"; */
-"Wk3-xv-IM5.text" = "4 hour";
+"Wk3-xv-IM5.text" = "4 год.";
 
 /* Class = "UILabel"; text = "Amount Consumed"; ObjectID = "Wx8-Tf-FnG"; */
-"Wx8-Tf-FnG.text" = "Amount Consumed";
+"Wx8-Tf-FnG.text" = "Сума споживання";
 
 /* Class = "UITextField"; placeholder = "0"; ObjectID = "Yf6-fw-Gex"; */
 "Yf6-fw-Gex.placeholder" = "0";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "aCb-Qs-bpu"; */
-"aCb-Qs-bpu.text" = "Detail";
+"aCb-Qs-bpu.text" = "Подробиці";
 
 /* Class = "UINavigationItem"; title = "Bolus"; ObjectID = "aiu-ZA-zVa"; */
-"aiu-ZA-zVa.title" = "Bolus";
+"aiu-ZA-zVa.title" = "Болюс";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "ap1-M6-naG"; */
-"ap1-M6-naG.text" = "Food Type";
+"ap1-M6-naG.text" = "Тип їжі";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "bIL-Ub-qYp"; */
 "bIL-Ub-qYp.text" = "Label";
 
 /* Class = "UILabel"; text = "Glucose Change"; ObjectID = "bq4-98-cQU"; */
-"bq4-98-cQU.text" = "Glucose Change";
+"bq4-98-cQU.text" = "Зміна глюкози";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "cpo-Po-gFM"; */
 "cpo-Po-gFM.text" = "Label";
 
 /* Class = "UILabel"; text = "g Total"; ObjectID = "d3X-AN-tA5"; */
-"d3X-AN-tA5.text" = "g Total";
+"d3X-AN-tA5.text" = "г Всього";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "d6m-qV-wWi"; */
 "d6m-qV-wWi.text" = "Label";
 
 /* Class = "UINavigationItem"; title = "Settings"; ObjectID = "dmB-PQ-B44"; */
-"dmB-PQ-B44.title" = "Settings";
+"dmB-PQ-B44.title" = "Налаштування";
 
 /* Class = "UITableViewController"; title = "Carbohydrate Effects"; ObjectID = "hZZ-2S-lrd"; */
-"hZZ-2S-lrd.title" = "Carbohydrate Effects";
+"hZZ-2S-lrd.title" = "Ефекти вуглеводів";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "jQv-xb-gwu"; */
-"jQv-xb-gwu.text" = "Detail";
+"jQv-xb-gwu.text" = "Подробиці";
 
 /* Class = "UILabel"; text = "⚠ Glucose Predicted Below Range"; ObjectID = "k0g-P7-OVN"; */
-"k0g-P7-OVN.text" = "⚠ Glucose Predicted Below Range";
+"k0g-P7-OVN.text" = "⚠ Глюкоза прогнозується нижче діапазону";
 
 /* Class = "UILabel"; text = "Recommended Basal"; ObjectID = "k3F-Na-7mn"; */
-"k3F-Na-7mn.text" = "Recommended Basal";
+"k3F-Na-7mn.text" = "Рекомендований базал";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "l7l-mw-Oc9"; */
 "l7l-mw-Oc9.text" = "Label";
 
 /* Class = "UILabel"; text = "Tap to set"; ObjectID = "m9c-SQ-djE"; */
-"m9c-SQ-djE.text" = "Tap to set";
+"m9c-SQ-djE.text" = "Торкніться, щоб встановити";
 
 /* Class = "UILabel"; accessibilityLabel = "Units"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.accessibilityLabel" = "Units";
+"mVz-dr-xLU.accessibilityLabel" = "Одиниці";
 
 /* Class = "UILabel"; text = "U"; ObjectID = "mVz-dr-xLU"; */
-"mVz-dr-xLU.text" = "U";
+"mVz-dr-xLU.text" = "Од.";
 
 /* Class = "UITableViewController"; title = "Insulin Model"; ObjectID = "pi6-Dh-72V"; */
-"pi6-Dh-72V.title" = "Insulin Model";
+"pi6-Dh-72V.title" = "Модель інсуліну";
 
 /* Class = "UILabel"; text = "Food Type"; ObjectID = "qPH-vU-xlu"; */
-"qPH-vU-xlu.text" = "Food Type";
+"qPH-vU-xlu.text" = "Тип їжі";
 
 /* Class = "UILabel"; text = "Glucose"; ObjectID = "tuw-av-A3x"; */
-"tuw-av-A3x.text" = "Glucose";
+"tuw-av-A3x.text" = "Глюкоза";
 
 /* Class = "UILabel"; text = "Label"; ObjectID = "ufi-Kj-33k"; */
 "ufi-Kj-33k.text" = "Label";
@@ -165,10 +165,10 @@
 "yn7-2M-jZz.text" = "0";
 
 /* Class = "UILabel"; text = "Recommended"; ObjectID = "ywT-OR-NnU"; */
-"ywT-OR-NnU.text" = "Recommended";
+"ywT-OR-NnU.text" = "Рекомендовано";
 
 /* Class = "UILabel"; text = "Title"; ObjectID = "zbc-87-wxZ"; */
-"zbc-87-wxZ.text" = "Title";
+"zbc-87-wxZ.text" = "Назва";
 
 /* Class = "UILabel"; text = "0"; ObjectID = "zvZ-uf-zMX"; */
 "zvZ-uf-zMX.text" = "0";
