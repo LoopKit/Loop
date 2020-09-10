@@ -13,9 +13,6 @@
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
 
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Se utiliza reconocimiento facial para autenticar el bolo de insulina.";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Datos de alimentos de la base de datos de Salud se utiliza para determinar los efectos en el nivel de glucosa. Datos de glucosa de la bsase de datos de Salud se utilizan para graficar y determinar cálculos de momento.";
 

@@ -13,9 +13,6 @@
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Kameraet brukes til å skanne strekkoder for enheter";
 
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID brukes til å autentisere insulin bolus.";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Matdata fra Health-databasen brukes til å bestemme blodsukkereffekt. Blodsukkerdata hentes fra HealthKit for opptegning og analyse.";
 

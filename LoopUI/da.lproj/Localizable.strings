@@ -38,7 +38,7 @@
 "mmol/L" = "mmol/L";
 
 /* Accessibility label component for glucose HUD describing an invalid state */
-"Needs attention" = "Behøver opmærksomhed";
+"Needs attention" = "Kræver opmærksomhed";
 
 /* Accessbility hint describing completion HUD for an open loop */
 "Open loop" = "Åben loop";

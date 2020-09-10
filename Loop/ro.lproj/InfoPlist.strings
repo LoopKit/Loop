@@ -13,9 +13,6 @@
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
 
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Face ID este folosit la autentificarea pentru bolus.";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Informațiile despre nutriție din baza de date Sănătate sunt folosite pentru a determina efectele glucozei. Informațiile despre glucoză din baza de date Sănătate sunt folosite pentru construirea de grafice și calcule de trend/momentum.";
 

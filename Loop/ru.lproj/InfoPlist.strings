@@ -13,9 +13,6 @@
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
 
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "Идентификатор Face ID применяется для авторизации болюса инсулина";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "Данные о пище из базы данных Здоровье используются для определения влияния на гликемию. Данные гликемии из базы данных Здоровье используются для графического отображения и вычисления скорости изменений";
 

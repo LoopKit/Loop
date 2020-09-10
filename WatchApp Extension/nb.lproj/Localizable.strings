@@ -11,7 +11,7 @@
 "Active Insulin" = "Aktivt insulin";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Add Carb Entry";
+"Add Carb Entry" = "Legg til karbohydrater";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -20,10 +20,10 @@
 "Bolus Failed" = "Bolus mislyktes";
 
 /* Alert title for updated bolus recommendation on Apple Watch */
-"Bolus Recommendation Updated" = "Bolus Recommendation Updated";
+"Bolus Recommendation Updated" = "Oppdatert bolusanbefaling";
 
 /* Button text to continue from carb entry to bolus entry on Apple Watch */
-"Continue" = "Continue";
+"Continue" = "Fortsett";
 
 /* The short unit display string for decibles */
 "dB" = "dB";
@@ -53,14 +53,14 @@
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Netto Basaldose";
 
-/* Button text for disabling temporary correction range */
-"Off" = "Off";
+/* Label for off button */
+"Off" = "Av";
 
 /* No comment provided by engineer. */
 "OK" = "OK";
 
-/* Button text for enabling temporary correction range */
-"On" = "On";
+/* Label for on button */
+"On" = "På";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Overstyr";
@@ -84,20 +84,20 @@
 "Rec: %@ U" = "Rec: %@ E";
 
 /* Indicator that recommended bolus computation is in progress on Apple Watch */
-"REC: Calculating..." = "REC: Calculating...";
+"REC: Calculating..." = "Beregner anbefalt bolus...";
 
 /* HUD row title for remaining reservoir volume */
 "Reservoir Volume" = "Reservoarstørrelse";
 
 /* Button text to confirm carb entry without bolusing on Apple Watch */
-"Save" = "Save";
+"Save" = "Lagre";
 
 /* Button text to confirm carb entry and bolus on Apple Watch */
-"Save & Bolus" = "Save & Bolus";
+"Save & Bolus" = "Lagre & bolus";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Send mislyktes";
+"Send Failed" = "Sending mislyktes";
 
 /* Help text for bolus confirmation on Apple Watch */
 "Turn Digital Crown\nto bolus" = "Turn Digital Crown\nto bolus";
@@ -109,7 +109,7 @@
 "U/hr" = "E/t";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
-"Unable to Reach iPhone" = "Unable to Reach iPhone";
+"Unable to Reach iPhone" = "Kan ikke nå iPhone";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Trening";

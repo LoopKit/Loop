@@ -544,6 +544,8 @@
 "Starting Bolus" = "开始输注大剂量";
 
 /* Section title for Support
+   Support screen title
+   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 

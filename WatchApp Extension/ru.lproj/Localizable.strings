@@ -53,13 +53,13 @@
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Нетто скорость базала";
 
-/* Button text for disabling temporary correction range */
+/* Label for off button */
 "Off" = "Off";
 
 /* No comment provided by engineer. */
 "OK" = "OK";
 
-/* Button text for enabling temporary correction range */
+/* Label for on button */
 "On" = "On";
 
 /* The text for the Watch button for enabling a temporary override */

@@ -53,7 +53,7 @@
 "30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min sammenligning av glukose-prediksjon vs faktisk, fortsatt med forfall over 60 min.";
 
 /* Alert message for a manual glucose entry out of range error */
-"A manual glucose entry must be between %@ and %@" = "En manuell glukoseoppføring må være mellom %1$@ og %2$@";
+"A manual glucose entry must be between %@ and %@" = "Manuelle registreringer av glukose må være mellom %1$@ og %2$@";
 
 /* Subtitle of Fiasp preset */
 "A model based on the published absorption of Fiasp insulin." = "En modell basert på publiserte data for absorpsjon av Fiasp insulin.";
@@ -117,7 +117,7 @@
 "An adjustment to the adult model based on empirical effects in children." = "En justering til modellen tilpasset voksne, basert på empiriske effekter hos barn.";
 
 /* Alert message for a carb entry persistence error */
-"An error occurred while trying to save your carb entry." = "Det oppsto en feil under forsøk på å lagre oppføringen av karbohydrater.";
+"An error occurred while trying to save your carb entry." = "Det oppsto en feil under forsøk på å lagre karbohydrater.";
 
 /* Alert message for a manual glucose entry persistence error */
 "An error occurred while trying to save your manual glucose entry." = "Det oppsto en feil under forsøk på å lagre den manuelle inntastingen av blodsukkerdata.";
@@ -170,10 +170,10 @@
 "Bolus Recommendation Updated" = "Oppdatert bolusanbefaling";
 
 /* Title for card displaying carb entry and bolus recommendation */
-"Bolus Summary" = "Bolus Sammendrag";
+"Bolus Summary" = "Bolus-sammendrag";
 
 /* The format string for bolus progress. (1: delivered volume)(2: total volume) */
-"Bolused %1$@ of %2$@" = "Ga bolus %1$@ of %2$";
+"Bolused %1$@ of %2$@" = "Ga bolus %1$@ of %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
 "Bolusing %1$@" = "Gir bolus %1$@";
@@ -196,10 +196,10 @@
 "Carb Ratios" = "Karbohydratforhold";
 
 /* The title of the view controller to create a new carb entry */
-"carb-entry-title-add" = "Add Carb Entry";
+"carb-entry-title-add" = "Legg til karbohydrater";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Edit Carb Entry";
+"carb-entry-title-edit" = "Endre karbohydrater";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Karbohydrater";
@@ -223,7 +223,7 @@
 "Check your CGM data source" = "Sjekk blodsukkerkilde";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Velg en lengre absorpsjonstid for større måltider, eller de som inneholder fett og proteiner. Dette er bare veiledning til algoritmen og trenger ikke å være helt nøyaktig.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Velg en lengre absorpsjonstid for større måltider, eller de som inneholder fett og proteiner. Dette er bare en veiledning til algoritmen, og trenger ikke være helt nøyaktig.";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Lukket Loop";
@@ -272,7 +272,7 @@
 "Delete Service" = "Slett tjeneste";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Leveringsgrense";
+"Delivery Limits" = "Leveringsgrenser";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Diabetes behandling";
@@ -311,7 +311,7 @@
 "Eventually %@" = "Omsider %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Overskrider maks bolus";
+"Exceeds Maximum Bolus" = "Overskrider maksimal bolus";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -436,7 +436,7 @@
 "No connected devices, or failure during device connection" = "Ingen tilkoblede enheter, eller feil under tilkobling til enhet";
 
 /* Alert title for a missing maximum bolus setting error */
-"No Maximum Bolus Configured" = "Ingen maksimal bolus konfigurert";
+"No Maximum Bolus Configured" = "Ingen maksimal bolus er konfigurert";
 
 /* Alert title for a missing pump error */
 "No Pump Configured" = "Ingen pumpe konfigurert";
@@ -517,7 +517,7 @@
 "Retry" = "Prøv igjen";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Lagre og gi bolus";
+"Save and Deliver" = "Lagre, og gi bolus";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Lagre uten å gi bolus";
@@ -544,6 +544,8 @@
 "Starting Bolus" = "Starter bolus";
 
 /* Section title for Support
+   Support screen title
+   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 
@@ -569,28 +571,28 @@
 "The maximum bolus amount is %@ U." = "Maksimal bolus er satt til %@ E.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Maks bolus er satt til %@ enheter";
+"The maximum bolus amount is %@ Units" = "Maksimal bolus er satt til %@ enheter";
 
 /* Alert message for a missing maximum bolus setting error */
-"The maximum bolus setting must be configured before a bolus can be delivered." = "En pumpe må konfigureres før en bolus kan leveres.";
+"The maximum bolus setting must be configured before a bolus can be delivered." = "Innstillingen for maksimal bolus må må konfigureres før bolus kan leveres.";
 
 /* Title text for button to Therapy Settings */
-"Therapy Settings" = "Therapy Settings";
+"Therapy Settings" = "Behandlingsinnstillinger";
 
 /* Bluetooth off foreground alert body */
-"Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings.";
+"Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Slå på Bluetooth for å motta varsler, alarmer eller avlesninger fra glukosesensor.";
 
 /* The short unit display string for international units of insulin */
 "U" = "E";
 
 /* Alert title for a carb entry persistence error */
-"Unable to Save Carb Entry" = "Unable to Save Carb Entry";
+"Unable to Save Carb Entry" = "Kunne ikke lagre karbohydrater";
 
 /* Alert title for a manual glucose entry persistence error */
 "Unable to Save Manual Glucose Entry" = "Unable to Save Manual Glucose Entry";
 
 /* The alert body for an error while canceling a bolus */
-"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely.";
+"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Pågående bolus kan ikke stoppes. Flytt iPhone eller link nærmere pumpen, og prøv igjen. Sjekk historikken for insulinleveranser, og overvåk blodsukkeret nøye.";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "frem til %@";

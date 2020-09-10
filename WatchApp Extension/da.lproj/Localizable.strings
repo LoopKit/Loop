@@ -11,7 +11,7 @@
 "Active Insulin" = "Aktivt insulin";
 
 /* Title of the user activity for adding carbs */
-"Add Carb Entry" = "Tilføj kulhydrat indtastning";
+"Add Carb Entry" = "Tilføj kulhydrat";
 
 /* Button text to confirm manual bolus on Apple Watch */
 "Bolus" = "Bolus";
@@ -29,7 +29,7 @@
 "dB" = "dB";
 
 /* The action button title to dismiss an error message */
-"Dismiss" = "Ignorer";
+"Dismiss" = "Afvis";
 
 /* Short unit label for gram measurement
    The short unit display string for grams */
@@ -38,7 +38,7 @@
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a carb entry send attempt fails
    The recovery message displayed after a glucose range override send attempt fails */
-"Make sure your iPhone is nearby and try again" = "Sørg for at din iPhone er i nærheden, og prøv igen";
+"Make sure your iPhone is nearby and try again" = "Sørg for at din iPhone er tæt på, og prøv igen";
 
 /* The recovery message displayed after a bolus attempt fails
    The recovery message displayed after a potential carb entry send attempt fails */
@@ -53,20 +53,20 @@
 /* HUD row title for Net Basal Rate */
 "Net Basal Rate" = "Netto basalrate";
 
-/* Button text for disabling temporary correction range */
+/* Label for off button */
 "Off" = "Fra";
 
 /* No comment provided by engineer. */
 "OK" = "OK";
 
-/* Button text for enabling temporary correction range */
+/* Label for on button */
 "On" = "Til";
 
 /* The text for the Watch button for enabling a temporary override */
 "Override" = "Override";
 
 /* Alert message for updated bolus recommendation on Apple Watch */
-"Please reconfirm the bolus amount." = "Bekræft venligst bolus.";
+"Please reconfirm the bolus amount." = "Bekræft venligst bolus igen.";
 
 /* Title for sheet to enable/disable pre-meal on watch */
 "Pre-Meal" = "Før-Måltid";
@@ -93,11 +93,11 @@
 "Save" = "Gem";
 
 /* Button text to confirm carb entry and bolus on Apple Watch */
-"Save & Bolus" = "Gem & Bolus";
+"Save & Bolus" = "Gem & bolus";
 
 /* The title of the alert controller displayed after a carb entry send attempt fails
    The title of the alert controller displayed after a glucose range override send attempt fails */
-"Send Failed" = "Sending fejlede";
+"Send Failed" = "Afsendelse mislykkedes";
 
 /* Help text for bolus confirmation on Apple Watch */
 "Turn Digital Crown\nto bolus" = "Drej det digitale hjul for bolus";
@@ -109,7 +109,7 @@
 "U/hr" = "E/t";
 
 /* The title of the alert controller displayed after a potential carb entry send attempt fails */
-"Unable to Reach iPhone" = "iPhone er uden for rækkevidde";
+"Unable to Reach iPhone" = "iPhone er uden for urets rækkevidde";
 
 /* The text for the Watch button for enabling workout mode */
 "Workout" = "Træning";

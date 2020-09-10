@@ -50,7 +50,7 @@
 "15 min glucose regression coefficient (b₁), continued with decay over 30 min" = "15 minuters glukosregressionskoefficient (b₁), fortsatt med 30 minuters avklingande";
 
 /* Description of the prediction input effect for retrospective correction */
-"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min jämförelse av glukosprediktion och faktiskt värde, fortsatt med 60 miuters avklingande.";
+"30 min comparison of glucose prediction vs actual, continued with decay over 60 min" = "30 min jämförelse av glukosprediktion och faktiskt värde, fortsatt med 60 minuters avklingande";
 
 /* Alert message for a manual glucose entry out of range error */
 "A manual glucose entry must be between %@ and %@" = "Det manuellt inmatade blodsockervärdet måste vara mellan %1$@ och %2$@";
@@ -167,7 +167,7 @@
 "Bolus" = "Bolus";
 
 /* Alert title for an updated bolus recommendation */
-"Bolus Recommendation Updated" = "Bolusrekommendation uppdaterad";
+"Bolus Recommendation Updated" = "Bolusrekommendation har uppdaterats";
 
 /* Title for card displaying carb entry and bolus recommendation */
 "Bolus Summary" = "Bolus sammanfattning";
@@ -176,7 +176,7 @@
 "Bolused %1$@ of %2$@" = "Givit bolus %1$@ av %2$@";
 
 /* The format string for bolus in progress showing total volume. (1: total volume) */
-"Bolusing %1$@" = "Ger bolus %1$@ ";
+"Bolusing %1$@" = "Ger bolus %1$@";
 
 /* The title of the cancel action in an action sheet */
 "Cancel" = "Avbryt";
@@ -193,7 +193,7 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Kolhydratskvoter";
+"Carb Ratios" = "Insulinkvoter";
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Lägg till kolhydrater";
@@ -223,7 +223,7 @@
 "Check your CGM data source" = "Kontrollera din CGM:s datakälla";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorbtionstid för stora måltider eller måltider som innehåller fett och protein. Detta är endast en rekommendation till algoritmen och behöver inte vara exakt.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för stora måltider eller måltider som innehåller fett och protein. Detta är endast en rekommendation till algoritmen och behöver inte vara exakt.";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Sluten loop";
@@ -311,7 +311,7 @@
 "Eventually %@" = "Förväntat %@";
 
 /* The title of the alert describing a maximum bolus validation error */
-"Exceeds Maximum Bolus" = "Överstiger maxbolusdos";
+"Exceeds Maximum Bolus" = "Överskrider din inställning för maxbolus";
 
 /* Title of insulin model preset */
 "Fiasp" = "Fiasp";
@@ -448,7 +448,7 @@
 "OK" = "OK";
 
 /* The title text for the override presets */
-"Override Presets" = "Override förinställningar";
+"Override Presets" = "Förinställningar för Undantag";
 
 /* The label of the pre-meal mode toggle button */
 "Pre-Meal Targets" = "Målvärden före måltid";
@@ -499,7 +499,7 @@
 "Recommendation expired: %1$@ old" = "Rekommendationen gick ut för %1$@ sedan";
 
 /* The title of the cell displaying a recommended temp basal value */
-"Recommended Basal" = "Rekommenderat basalvärde";
+"Recommended Basal" = "Rekommenderad basaldos";
 
 /* Label for recommended bolus row on bolus screen */
 "Recommended Bolus" = "Rekommenderad bolus";
@@ -529,7 +529,7 @@
 "Settings" = "Inställningar";
 
 /* Loop Completion HUD accessibility hint */
-"Shows last loop error" = "Visar senaste loopfelet";
+"Shows last loop error" = "Visar senaste Loop-fel";
 
 /* Format fragment for a start time */
 "since %@" = "sedan %@";
@@ -538,12 +538,14 @@
 "Site URL" = "Adress (URL)";
 
 /* The format for the description of a temporary override start date */
-"starting at %@" = "Börjar kl.  %@";
+"starting at %@" = "börjar kl. %@";
 
 /* The title of the cell indicating a bolus is being sent */
 "Starting Bolus" = "Påbörjar bolus";
 
 /* Section title for Support
+   Support screen title
+   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 
@@ -560,10 +562,10 @@
 "Tap to Resume" = "Tryck för att återuppta";
 
 /* Alert message for an updated bolus recommendation */
-"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusrekommendationen har uppdaterats. Konfirmera bolus";
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusrekommendationen har uppdaterats. Bekräfta bolus.";
 
 /* Subtitle description of Walsh insulin model setting */
-"The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassing av effektvaraktighet.";
+"The legacy model used by Loop, allowing customization of action duration." = "Äldre modell använd av Loop, vilken tillåter anpassning av insulinets verkningstid.";
 
 /* Alert message for a maximum bolus validation error (1: max bolus value) */
 "The maximum bolus amount is %@ U." = "Den högst tillåtna bolusmängden är %@ E.";
@@ -602,7 +604,7 @@
 "Walsh" = "Walsh";
 
 /* Explanation of suspend threshold */
-"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat slutglukosvärde är under tröskelvärdet kommer Loop inte att rekommendera en bolus, utan kommer alltid att föreslå en temporär basal på 0 enheter per timme.";
+"When current or forecasted glucose is below the suspend threshold, Loop will not recommend a bolus, and will always recommend a temporary basal rate of 0 units per hour." = "När nuvarande eller förväntat framtida blodglukosvärde är under tröskelvärdet kommer Loop inte att rekommendera en bolus, och dessutom alltid att föreslå en temporär basal på 0 enheter per timme.";
 
 /* The label of the workout mode toggle button */
 "Workout Targets" = "Målvärden för träning";

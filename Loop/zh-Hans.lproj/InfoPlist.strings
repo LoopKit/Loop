@@ -13,9 +13,6 @@
 /* Privacy - Camera Usage Description */
 "NSCameraUsageDescription" = "Camera is used to scan barcodes of devices";
 
-/* Privacy - Face ID Usage Description */
-"NSFaceIDUsageDescription" = "使用人脸解锁来确认输注胰岛素剂量";
-
 /* Privacy - Health Share Usage Description */
 "NSHealthShareUsageDescription" = "数据库中的膳食数据用于确定葡萄糖影响。健康数据库中的葡萄糖数据用于绘图和动量计算。";
 

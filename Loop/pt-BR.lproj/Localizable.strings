@@ -544,6 +544,8 @@
 "Starting Bolus" = "Iniciando Bolus";
 
 /* Section title for Support
+   Support screen title
+   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 

@@ -193,22 +193,22 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Kulhydrat ratios";
+"Carb Ratios" = "Kulhydratforhold";
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Tilføj kulhydrater";
 
 /* The title of the view controller to edit an existing carb entry */
-"carb-entry-title-edit" = "Rediger kulhydrat indtag";
+"carb-entry-title-edit" = "Rediger kulhydrat";
 
 /* Title of the prediction input effect for carbohydrates */
 "Carbohydrates" = "Kulhydrater";
 
 /* Description of the prediction input effect for carbohydrates. (1: The glucose unit string) */
-"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Kulhydrater absorberet (g) ÷ Kulhydrat ratio (g/E) × Insulin følsomhed (%1$@/E)";
+"Carbs Absorbed (g) ÷ Carb Ratio (g/U) × Insulin Sensitivity (%1$@/U)" = "Kulhydrater absorberet (g) ÷ Kulhydratforhold (g/E) × Insulin følsomhed (%1$@/E)";
 
 /* The notification alert describing a low pump battery */
-"Change the pump battery immediately" = "Udskift pumpe batteri omgående";
+"Change the pump battery immediately" = "Skift straks pumpens batteri";
 
 /* The notification alert describing an empty pump reservoir */
 "Change the pump reservoir now" = "Skift pumpe reservoir nu";
@@ -217,7 +217,7 @@
 "Check settings" = "Kontroller indstillinger";
 
 /* Recovery suggestion when reservoir data is missing */
-"Check that your pump is in range" = "Kontroller, at din pumpe er indenfor rækkevidde";
+"Check that your pump is in range" = "Kontroller, at din pumpe er tæt nok på";
 
 /* Recovery suggestion when glucose data is missing */
 "Check your CGM data source" = "Kontroller din CGM data kilde";
@@ -272,7 +272,7 @@
 "Delete Service" = "Slet tjeneste";
 
 /* Title text for delivery limits */
-"Delivery Limits" = "Indgivningsgrænser";
+"Delivery Limits" = "Insulin-grænser";
 
 /* Descriptive text for Therapy Settings */
 "Diabetes Treatment" = "Diabetes behandling";
@@ -356,7 +356,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin absorberet (E) × Insulin følsomhed (%1$@/E)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin Indgivelse";
+"Insulin Delivery" = "Insulin afgivelse";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulin effekter";
@@ -370,7 +370,7 @@
 
 /* The title of the insulin sensitivities schedule screen
    The title text for the insulin sensitivity schedule */
-"Insulin Sensitivities" = "Insulin følsomheder";
+"Insulin Sensitivities" = "Insulinfølsomheder";
 
 /* The title of the cell indicating the pump is suspended */
 "Insulin Suspended" = "Insulin suspenderet";
@@ -382,10 +382,10 @@
 "Issue Report" = "Fejl rapport";
 
 /* Glucose HUD accessibility hint */
-"Launches CGM app" = "Åbner CGM app’en";
+"Launches CGM app" = "Åbner CGM app";
 
 /* The loading message for the diagnostic report screen */
-"Loading..." = "Danner...";
+"Loading..." = "Indlæser...";
 
 /* The notification title for a loop failure */
 "Loop Failure" = "Loop fejl";
@@ -484,7 +484,7 @@
 "Pump Reservoir Low" = "Pumpe reservoir lavt";
 
 /* The title of the cell indicating the pump is suspended */
-"Pump Suspended" = "Pumpe pauset";
+"Pump Suspended" = "Pumpe stoppet";
 
 /* Format string for combining localized numeric value and unit. (1: numeric value)(2: unit) */
 "QUANTITY_VALUE_AND_UNIT" = "%1$@ %2$@";
@@ -496,7 +496,7 @@
 "Rapid-Acting – Children" = "Hurtigt-Virkende – Børn";
 
 /* The error message when a recommendation has expired. (1: age of recommendation in minutes) */
-"Recommendation expired: %1$@ old" = "Forslag udløbet: %1$@ gamle";
+"Recommendation expired: %1$@ old" = "Anbefaling udløbet: %1$@ gamle";
 
 /* The title of the cell displaying a recommended temp basal value */
 "Recommended Basal" = "Anbefalet basal";
@@ -517,7 +517,7 @@
 "Retry" = "Forsøg igen";
 
 /* Button text to save carbs and/or manual glucose entry and deliver a bolus */
-"Save and Deliver" = "Gem og leverér";
+"Save and Deliver" = "Gem og afgiv";
 
 /* Button text to save carbs and/or manual glucose entry without a bolus */
 "Save without Bolusing" = "Gem uden at give bolus";
@@ -544,6 +544,8 @@
 "Starting Bolus" = "Starter bolus";
 
 /* Section title for Support
+   Support screen title
+   The title of the support item in settings
    The title of the support section in settings */
 "Support" = "Support";
 
@@ -554,13 +556,13 @@
 "Tap here to set up a CGM" = "Tryk her for at konfigurere en CGM";
 
 /* Descriptive text for button to add pump device */
-"Tap here to set up a pump" = "Tryk her for at konfigurere en pumpe";
+"Tap here to set up a pump" = "Tryk her for at oprette en pumpe";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
 "Tap to Resume" = "Tryk for at fortsætte";
 
 /* Alert message for an updated bolus recommendation */
-"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusanbefalingen er opdateret. Bekræft venligst bolusen.";
+"The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusanbefalingen er opdateret. Bekræft venligst bolus.";
 
 /* Subtitle description of Walsh insulin model setting */
 "The legacy model used by Loop, allowing customization of action duration." = "Den model, der bruges af Loop, tillader tilpasning af handlingens varighed.";
@@ -569,10 +571,10 @@
 "The maximum bolus amount is %@ U." = "Den maksimale bolus er %@ enheder.";
 
 /* Body of the alert describing a maximum bolus validation error. (1: The localized max bolus value) */
-"The maximum bolus amount is %@ Units" = "Den maksimale bolus er %@ Enheder";
+"The maximum bolus amount is %@ Units" = "Den maksimale bolus er %@ enheder";
 
 /* Alert message for a missing maximum bolus setting error */
-"The maximum bolus setting must be configured before a bolus can be delivered." = "Den maksimale bolus indstilling skal konfigureres før en bolus kan leveres.";
+"The maximum bolus setting must be configured before a bolus can be delivered." = "Maksimal bolus skal konfigureres før en bolus kan leveres.";
 
 /* Title text for button to Therapy Settings */
 "Therapy Settings" = "Indstillinger for terapi";
@@ -587,7 +589,7 @@
 "Unable to Save Carb Entry" = "Kan ikke gemme kulhydrat indtastningen";
 
 /* Alert title for a manual glucose entry persistence error */
-"Unable to Save Manual Glucose Entry" = "Kan ikke gemme blodsukker indtastningen";
+"Unable to Save Manual Glucose Entry" = "Det manuelt indtastet blodsukker kan ikke gemmes";
 
 /* The alert body for an error while canceling a bolus */
 "Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Kan ikke stoppe igangværende bolus. Flyt din iPhone tættere på pumpen og prøv igen. Tjek din historik for insulinindgivelse for detaljer og overvåg nøje dit blodsukkerniveau.";
@@ -596,7 +598,7 @@
 "until %@" = "indtil %@";
 
 /* The title of the alert controller used to select a duration for workout targets */
-"Use Workout Glucose Targets" = "Anvend motion blodsukker mål";
+"Use Workout Glucose Targets" = "Anvend træning blodsukker mål";
 
 /* Title of insulin model setting */
 "Walsh" = "Walsh";
