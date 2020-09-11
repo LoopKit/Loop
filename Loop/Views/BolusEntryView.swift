@@ -185,7 +185,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var manualGlucoseEntryRow: some View {
         if viewModel.isManualGlucoseEntryEnabled {
             HStack {
-                Text("Manual BG Entry", comment: "Label for manual glucose entry row on bolus screen")
+                Text("Fingerstick Glucose", comment: "Label for manual glucose entry row on bolus screen")
                 Spacer()
                 HStack(alignment: .firstTextBaseline) {
                     DismissibleKeyboardTextField(
@@ -334,7 +334,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         case .staleGlucoseData:
             return WarningView(
                 title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
-                caption: Text("Enter a manual glucose for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
+                caption: Text("Enter a blood glucose from a meter for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
             )
         case .stalePumpData:
             return WarningView(
@@ -352,7 +352,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
                     self.viewModel.isManualGlucoseEntryEnabled = true
                 }
             },
-            label: { Text("Enter Manual BG", comment: "Button text prompting manual glucose entry on bolus screen") }
+            label: { Text("Enter Fingerstick Glucose", comment: "Button text prompting manual glucose entry on bolus screen") }
         )
         .buttonStyle(ActionButtonStyle(viewModel.primaryButton == .manualGlucoseEntry ? .primary : .secondary))
         .padding([.top, .horizontal])
