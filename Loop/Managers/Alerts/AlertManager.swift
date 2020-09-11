@@ -219,16 +219,8 @@ extension AlertManager {
 
 extension FileManager {
     
-    func directoryExists(at url: URL) -> Bool {
-        var isDirectory: ObjCBool = false
-        let exists = fileExists(atPath: url.path, isDirectory: &isDirectory)
-        return exists && isDirectory.boolValue
-    }
-    
     func ensureDirectoryExists(at url: URL, with protectionType: FileProtectionType? = nil) throws {
-        if !directoryExists(at: url) {
-            try createDirectory(at: url, withIntermediateDirectories: true, attributes: protectionType.map { [FileAttributeKey.protectionKey: $0 ] })
-        }
+        try createDirectory(at: url, withIntermediateDirectories: true, attributes: protectionType.map { [FileAttributeKey.protectionKey: $0 ] })
         guard let protectionType = protectionType else {
             return
         }
