@@ -107,6 +107,16 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     private var shouldBeginEditingQuantity = true
 
     private var shouldBeginEditingFoodType = false
+    
+    private var shouldDisplayAccurateCarbEntryWarning = false {
+        didSet {
+            if shouldDisplayAccurateCarbEntryWarning != oldValue {
+                DispatchQueue.main.async {
+                    self.displayAccuracyWarning()
+                }
+            }
+        }
+    }
 
     var updatedCarbEntry: NewCarbEntry? {
         if  let lastEntryDate = lastEntryDate,
@@ -154,8 +164,6 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 8))
-
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
         tableView.register(DateAndDurationTableViewCell.nib(), forCellReuseIdentifier: DateAndDurationTableViewCell.className)
@@ -176,10 +184,20 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        if shouldBeginEditingQuantity, let cell = tableView.cellForRow(at: IndexPath(row: Row.value.rawValue, section: 0)) as? DecimalTextFieldTableViewCell {
+        if shouldBeginEditingQuantity, let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.value.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DecimalTextFieldTableViewCell {
             shouldBeginEditingQuantity = false
             cell.textField.becomeFirstResponder()
         }
+
+        // check if the warning should be displayed
+        updateDisplayAccurateCarbEntryWarning()
+        
+        // monitor loop updates
+        notificationObservers += [
+            NotificationCenter.default.addObserver(forName: .LoopDataUpdated, object: deviceManager.loopManager, queue: nil) { [weak self] _ in
+                self?.updateDisplayAccurateCarbEntryWarning()
+            }
+        ]
     }
 
     override func viewDidLayoutSubviews() {
@@ -197,117 +215,223 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
     }
 
     private var foodKeyboard: EmojiInputController!
+    
+    private func updateDisplayAccurateCarbEntryWarning() {
+        deviceManager.loopManager.getLoopState { [weak self] (_, state) in
+            let endDate = Date()
+            let startDate = endDate.addingTimeInterval(.minutes(-20))
+            let threshold = HKQuantity(unit: GlucoseEffectVelocity.unit, doubleValue: 3)
+
+            let filteredInsulinCounteractionEffects = state.insulinCounteractionEffects.filterDateRange(startDate, endDate)
+
+            // at least 3 insulin counteraction effects are required to calculate the average
+            guard filteredInsulinCounteractionEffects.count >= 3,
+                let averageInsulinCounteractionEffect = filteredInsulinCounteractionEffects.average(unit: GlucoseEffectVelocity.unit) else
+            {
+                self?.shouldDisplayAccurateCarbEntryWarning = false
+                return
+            }
+
+            self?.shouldDisplayAccurateCarbEntryWarning = averageInsulinCounteractionEffect >= threshold
+        }
+    }
+    
+    private func displayAccuracyWarning() {
+        tableView.beginUpdates()
+
+        if shouldDisplayAccurateCarbEntryWarning {
+            tableView.insertSections([Sections.warning.rawValue], with: .top)
+        } else {
+            tableView.deleteSections([Sections.warning.rawValue], with: .top)
+        }
+        
+        tableView.endUpdates()
+    }
 
     // MARK: - Table view data source
+    fileprivate enum Sections: Int, CaseIterable {
+        case warning
+        case details
+        
+        static func indexForDetailsSection(displayWarningSection: Bool) -> Int {
+            return displayWarningSection ? Sections.details.rawValue : Sections.details.rawValue - 1
+        }
+        
+        static func numberOfSections(displayWarningSection: Bool) -> Int {
+            return displayWarningSection ? Sections.allCases.count : Sections.allCases.count - 1
+        }
+        
+        static func section(for indexPath: IndexPath, displayWarningSection: Bool) -> Int {
+            return displayWarningSection ? indexPath.section : indexPath.section + 1
+        }
+        
+        static func numberOfRows(for section: Int, displayWarningSection: Bool) -> Int {
+            if section == Sections.warning.rawValue && displayWarningSection {
+                return 1
+            }
 
-    fileprivate enum Row: Int {
+            return DetailsRow.allCases.count
+        }
+        
+        static func footer(for section: Int, displayWarningSection: Bool) -> String? {
+            if section == Sections.warning.rawValue && displayWarningSection {
+                return nil
+            }
+                    
+            return NSLocalizedString("Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact.", comment: "Carb entry section footer text explaining absorption time")
+        }
+        
+        static func headerHeight(for section: Int, displayWarningSection: Bool) -> CGFloat {
+            return 8
+        }
+        
+        static func footerHeight(for section: Int, displayWarningSection: Bool) -> CGFloat {
+            if section == Sections.warning.rawValue && displayWarningSection {
+                return 1
+            }
+            
+            return UITableView.automaticDimension
+        }
+    }
+    
+    fileprivate enum DetailsRow: Int, CaseIterable {
         case value
         case date
         case foodType
         case absorptionTime
-
-        static let count = 4
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return Sections.numberOfSections(displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Row.count
+        return Sections.numberOfRows(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch Row(rawValue: indexPath.row)! {
-        case .value:
-            let cell = tableView.dequeueReusableCell(withIdentifier: DecimalTextFieldTableViewCell.className) as! DecimalTextFieldTableViewCell
-
-            if let quantity = quantity {
-                cell.number = NSNumber(value: quantity.doubleValue(for: preferredCarbUnit))
-            }
-            cell.textField.isEnabled = isSampleEditable
-            cell.unitLabel?.text = String(describing: preferredCarbUnit)
-            cell.delegate = self
-
-            return cell
-        case .date:
-            let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationTableViewCell.className) as! DateAndDurationTableViewCell
-
-            cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the carb entry date picker cell")
-            cell.datePicker.isEnabled = isSampleEditable
-            cell.datePicker.datePickerMode = .dateAndTime
-            cell.datePicker.maximumDate = Date(timeIntervalSinceNow: maximumDateFutureInterval)
-            cell.datePicker.minuteInterval = 1
-            cell.date = date
-            cell.delegate = self
-
-            return cell
-        case .foodType:
-            if usesCustomFoodType {
-                let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldTableViewCell.className, for: indexPath) as! TextFieldTableViewCell
-
-                cell.textField.text = foodType
-                cell.delegate = self
-
-                if let textField = cell.textField as? CustomInputTextField {
-                    if foodKeyboard == nil {
-                        foodKeyboard = CarbAbsorptionInputController()
-                        foodKeyboard.delegate = self
-                    }
-
-                    textField.customInput = foodKeyboard
-                }
-
-                return cell
+        switch Sections(rawValue: Sections.section(for: indexPath, displayWarningSection: shouldDisplayAccurateCarbEntryWarning))! {
+        case .warning:
+            let cell: UITableViewCell
+            if let existingCell = tableView.dequeueReusableCell(withIdentifier: "CarbEntryAccuracyWarningCell") {
+                cell = existingCell
             } else {
-                let cell = tableView.dequeueReusableCell(withIdentifier: FoodTypeShortcutCell.className, for: indexPath) as! FoodTypeShortcutCell
-
-                if absorptionTime == nil {
-                    cell.selectionState = .medium
+                cell = UITableViewCell(style: .default, reuseIdentifier: "CarbEntryAccuracyWarningCell")
+            }
+            
+            cell.imageView?.image = UIImage(systemName: "exclamationmark.triangle.fill")
+            cell.imageView?.tintColor = .destructive
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.text = NSLocalizedString("Your glucose is rapidly rising. Check that any carbs you've eaten were logged. If you logged carbs, check that the time you entered lines up with when you started eating.", comment: "Warning to ensure the carb entry is accurate")
+            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .caption1)
+            cell.textLabel?.textColor = .secondaryLabel
+            cell.isUserInteractionEnabled = false
+            return cell
+        case .details:
+            switch DetailsRow(rawValue: indexPath.row)! {
+            case .value:
+                let cell = tableView.dequeueReusableCell(withIdentifier: DecimalTextFieldTableViewCell.className) as! DecimalTextFieldTableViewCell
+                
+                if let quantity = quantity {
+                    cell.number = NSNumber(value: quantity.doubleValue(for: preferredCarbUnit))
                 }
-
-                selectedDefaultAbsorptionTimeEmoji = cell.selectedEmoji
+                cell.textField.isEnabled = isSampleEditable
+                cell.unitLabel?.text = String(describing: preferredCarbUnit)
                 cell.delegate = self
-
+                
+                return cell
+            case .date:
+                let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationTableViewCell.className) as! DateAndDurationTableViewCell
+                
+                cell.titleLabel.text = NSLocalizedString("Date", comment: "Title of the carb entry date picker cell")
+                cell.datePicker.isEnabled = isSampleEditable
+                cell.datePicker.datePickerMode = .dateAndTime
+                cell.datePicker.maximumDate = Date(timeIntervalSinceNow: maximumDateFutureInterval)
+                cell.datePicker.minuteInterval = 1
+                cell.date = date
+                cell.delegate = self
+                
+                return cell
+            case .foodType:
+                if usesCustomFoodType {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: TextFieldTableViewCell.className, for: indexPath) as! TextFieldTableViewCell
+                    
+                    cell.textField.text = foodType
+                    cell.delegate = self
+                    
+                    if let textField = cell.textField as? CustomInputTextField {
+                        if foodKeyboard == nil {
+                            foodKeyboard = CarbAbsorptionInputController()
+                            foodKeyboard.delegate = self
+                        }
+                        
+                        textField.customInput = foodKeyboard
+                    }
+                    
+                    return cell
+                } else {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: FoodTypeShortcutCell.className, for: indexPath) as! FoodTypeShortcutCell
+                    
+                    if absorptionTime == nil {
+                        cell.selectionState = .medium
+                    }
+                    
+                    selectedDefaultAbsorptionTimeEmoji = cell.selectedEmoji
+                    cell.delegate = self
+                    
+                    return cell
+                }
+            case .absorptionTime:
+                let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationTableViewCell.className) as! DateAndDurationTableViewCell
+                
+                cell.titleLabel.text = NSLocalizedString("Absorption Time", comment: "Title of the carb entry absorption time cell")
+                cell.datePicker.isEnabled = isSampleEditable
+                cell.datePicker.datePickerMode = .countDownTimer
+                cell.datePicker.minuteInterval = Int(absorptionTimePickerInterval.minutes)
+                
+                if let duration = absorptionTime ?? defaultAbsorptionTimes?.medium {
+                    cell.duration = duration
+                }
+                
+                cell.maximumDuration = maxAbsorptionTime
+                cell.delegate = self
+                
                 return cell
             }
-        case .absorptionTime:
-            let cell = tableView.dequeueReusableCell(withIdentifier: DateAndDurationTableViewCell.className) as! DateAndDurationTableViewCell
-
-            cell.titleLabel.text = NSLocalizedString("Absorption Time", comment: "Title of the carb entry absorption time cell")
-            cell.datePicker.isEnabled = isSampleEditable
-            cell.datePicker.datePickerMode = .countDownTimer
-            cell.datePicker.minuteInterval = Int(absorptionTimePickerInterval.minutes)
-
-            if let duration = absorptionTime ?? defaultAbsorptionTimes?.medium {
-                cell.duration = duration
-            }
-
-            cell.maximumDuration = maxAbsorptionTime
-            cell.delegate = self
-
-            return cell
         }
     }
 
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        switch Row(rawValue: indexPath.row)! {
-        case .value, .date:
-            break
-        case .foodType:
-            if usesCustomFoodType, shouldBeginEditingFoodType, let cell = cell as? TextFieldTableViewCell {
-                shouldBeginEditingFoodType = false
-                cell.textField.becomeFirstResponder()
+        switch Sections(rawValue: Sections.section(for: indexPath, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)) {
+        case .details:
+            switch DetailsRow(rawValue: indexPath.row)! {
+            case .value, .date:
+                break
+            case .foodType:
+                if usesCustomFoodType, shouldBeginEditingFoodType, let cell = cell as? TextFieldTableViewCell {
+                    shouldBeginEditingFoodType = false
+                    cell.textField.becomeFirstResponder()
+                }
+            case .absorptionTime:
+                break
             }
-        case .absorptionTime:
+        default:
             break
         }
     }
 
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        return NSLocalizedString("Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact.", comment: "Carb entry section footer text explaining absorption time")
+        return Sections.footer(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
     }
-
+    
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return Sections.headerHeight(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return Sections.footerHeight(for: section, displayWarningSection: shouldDisplayAccurateCarbEntryWarning)
+    }
+    
     // MARK: - UITableViewDelegate
 
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
@@ -322,7 +446,7 @@ final class CarbEntryViewController: LoopChartsTableViewController, Identifiable
         case is FoodTypeShortcutCell:
             usesCustomFoodType = true
             shouldBeginEditingFoodType = true
-            tableView.reloadRows(at: [IndexPath(row: Row.foodType.rawValue, section: 0)], with: .none)
+            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))], with: .none)
         default:
             break
         }
@@ -416,7 +540,7 @@ extension CarbEntryViewController: TextFieldTableViewCellDelegate {
     func textFieldTableViewCellDidChangeEditing(_ cell: TextFieldTableViewCell) {
         guard let row = tableView.indexPath(for: cell)?.row else { return }
 
-        switch Row(rawValue: row) {
+        switch DetailsRow(rawValue: row) {
         case .value?:
             if let cell = cell as? DecimalTextFieldTableViewCell, let number = cell.number {
                 quantity = HKQuantity(unit: preferredCarbUnit, doubleValue: number.doubleValue)
@@ -440,7 +564,7 @@ extension CarbEntryViewController: DatePickerTableViewCellDelegate {
     func datePickerTableViewCellDidUpdateDate(_ cell: DatePickerTableViewCell) {
         guard let row = tableView.indexPath(for: cell)?.row else { return }
 
-        switch Row(rawValue: row) {
+        switch DetailsRow(rawValue: row) {
         case .date?:
             date = cell.date
         case .absorptionTime?:
@@ -468,14 +592,14 @@ extension CarbEntryViewController: FoodTypeShortcutCellDelegate {
             tableView.beginUpdates()
             usesCustomFoodType = true
             shouldBeginEditingFoodType = true
-            tableView.reloadRows(at: [IndexPath(row: Row.foodType.rawValue, section: 0)], with: .fade)
+            tableView.reloadRows(at: [IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))], with: .fade)
             tableView.endUpdates()
         }
 
         if let absorptionTime = absorptionTime {
             self.absorptionTime = absorptionTime
 
-            if let cell = tableView.cellForRow(at: IndexPath(row: Row.absorptionTime.rawValue, section: 0)) as? DateAndDurationTableViewCell {
+            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DateAndDurationTableViewCell {
                 cell.duration = absorptionTime
             }
         }
@@ -487,7 +611,7 @@ extension CarbEntryViewController: FoodTypeShortcutCellDelegate {
 
 extension CarbEntryViewController: EmojiInputControllerDelegate {
     func emojiInputControllerDidAdvanceToStandardInputMode(_ controller: EmojiInputController) {
-        if let cell = tableView.cellForRow(at: IndexPath(row: Row.foodType.rawValue, section: 0)) as? TextFieldTableViewCell, let textField = cell.textField as? CustomInputTextField, textField.customInput != nil {
+        if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.foodType.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? TextFieldTableViewCell, let textField = cell.textField as? CustomInputTextField, textField.customInput != nil {
             let customInput = textField.customInput
             textField.customInput = nil
             textField.resignFirstResponder()
@@ -505,7 +629,7 @@ extension CarbEntryViewController: EmojiInputControllerDelegate {
             // only adjust the absorption time if it wasn't already set.
             absorptionTime = orderedAbsorptionTimes[section]
             
-            if let cell = tableView.cellForRow(at: IndexPath(row: Row.absorptionTime.rawValue, section: 0)) as? DateAndDurationTableViewCell {
+            if let cell = tableView.cellForRow(at: IndexPath(row: DetailsRow.absorptionTime.rawValue, section: Sections.indexForDetailsSection(displayWarningSection: shouldDisplayAccurateCarbEntryWarning))) as? DateAndDurationTableViewCell {
                 cell.duration = orderedAbsorptionTimes[section]
             }
         }
