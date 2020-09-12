@@ -156,6 +156,8 @@ final class StatusTableViewController: LoopChartsTableViewController {
         onscreen = true
 
         deviceManager.analyticsServicesManager.didDisplayStatusScreen()
+        
+        deviceManager.checkDeliveryUncertaintyState()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

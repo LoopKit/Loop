@@ -39,8 +39,9 @@ class DeliveryUncertaintyAlertManager {
                 self.showUncertainDeliveryRecoveryView()
             }
             alert.addAction(action)
-            self.rootViewController.dismiss(animated: true)
-            self.rootViewController.present(alert, animated: animated)
+            self.rootViewController.dismiss(animated: false) {
+                self.rootViewController.present(alert, animated: animated)
+            }
             self.uncertainDeliveryAlert = alert
         }
     }
