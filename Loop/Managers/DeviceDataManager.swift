@@ -713,11 +713,13 @@ extension DeviceDataManager: PumpManagerDelegate {
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
         
-        DispatchQueue.main.async {
-            if status.deliveryIsUncertain {
-                self.deliveryUncertaintyAlertManager?.showAlert()
-            } else {
-                self.deliveryUncertaintyAlertManager?.clearAlert()
+        if status.deliveryIsUncertain != oldStatus.deliveryIsUncertain {
+            DispatchQueue.main.async {
+                if status.deliveryIsUncertain {
+                    self.deliveryUncertaintyAlertManager?.showAlert()
+                } else {
+                    self.deliveryUncertaintyAlertManager?.clearAlert()
+                }
             }
         }
     }
