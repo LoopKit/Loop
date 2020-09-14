@@ -79,7 +79,8 @@ final class BolusEntryViewModel: ObservableObject {
     }
     
     let chartManager: ChartsManager = {
-        let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil)
+        let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
+                                                          yAxisStepSizeMGDLOverride: FeatureFlags.predictedGlucoseChartClampEnabled ? 40 : nil)
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()

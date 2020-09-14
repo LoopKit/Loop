@@ -68,15 +68,28 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
     public private(set) var endDate: Date?
 
     private var predictedGlucoseSoftBounds: PredictedGlucoseBounds?
-
+    
+    private let yAxisStepSizeMGDLOverride: Double?
+    
+    private var maxYAxisValue: ChartAxisValue?
+    
+    private var minYAxisValue: ChartAxisValue?
+    
+    private var maxYAxisSegmentCount: Double {
+        // when a glucose value is below the predicted glucose minimum soft bound, allow for more y-axis segments
+        return glucoseValueBelowSoftBoundsMinimum() ? 5 : 4
+    }
+    
     private func updateEndDate(_ date: Date) {
         if endDate == nil || date > endDate! {
             self.endDate = date
         }
     }
     
-    public init(predictedGlucoseBounds: PredictedGlucoseBounds?) {
+    public init(predictedGlucoseBounds: PredictedGlucoseBounds? = nil,
+                yAxisStepSizeMGDLOverride: Double? = nil) {
         self.predictedGlucoseSoftBounds = predictedGlucoseBounds
+        self.yAxisStepSizeMGDLOverride = yAxisStepSizeMGDLOverride
         super.init()
     }
 }
@@ -131,16 +144,19 @@ extension PredictedGlucoseChart {
             glucoseDisplayRangePoints
         ].flatMap { $0 }
 
-        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points,
+        let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesUsingLinearSegmentStep(chartPoints: points,
             minSegmentCount: 2,
-            maxSegmentCount: 4,
-            multiple: glucoseUnit.chartableIncrement * 25,
+            maxSegmentCount: maxYAxisSegmentCount,
+            multiple: glucoseUnit == .milligramsPerDeciliter ? (yAxisStepSizeMGDLOverride ?? 25) : 1,
             axisValueGenerator: {
                 ChartAxisValueDouble($0, labelSettings: axisLabelSettings)
             },
             addPaddingSegmentIfEdge: false
         )
 
+        minYAxisValue = yAxisValues.first
+        maxYAxisValue = yAxisValues.last
+        
         let yAxisModel = ChartAxisModel(axisValues: yAxisValues, lineColor: colors.axisLine, labelSpaceReservationMode: .fixed(labelsWidthY))
 
         let coordsSpace = ChartCoordsSpaceLeftBottomSingleAxis(chartSettings: chartSettings, chartFrame: frame, xModel: xAxisModel, yModel: yAxisModel)
@@ -265,17 +281,31 @@ extension PredictedGlucoseChart {
 
 // MARK: - Clamping the predicted glucose values
 extension PredictedGlucoseChart {
-    var chartedGlucoseValueMaximum: HKQuantity? {
+    var chartMaximumValue: HKQuantity? {
         guard let glucosePointMaximum = glucosePoints.max(by: { point1, point2 in point1.y.scalar < point2.y.scalar }) else {
             return nil
         }
+        
+        if let maxYAxisValue = maxYAxisValue,
+            maxYAxisValue.scalar > glucosePointMaximum.y.scalar
+        {
+            return HKQuantity(unit: glucoseUnit, doubleValue: maxYAxisValue.scalar)
+        }
+        
         return HKQuantity(unit: glucoseUnit, doubleValue: glucosePointMaximum.y.scalar)
     }
-    
-    var chartedGlucoseValueMinimum: HKQuantity? {
+        
+    var chartMinimumValue: HKQuantity? {
         guard let glucosePointMinimum = glucosePoints.min(by: { point1, point2 in point1.y.scalar < point2.y.scalar }) else {
             return nil
         }
+        
+        if let minYAxisValue = minYAxisValue,
+            minYAxisValue.scalar < glucosePointMinimum.y.scalar
+        {
+            return HKQuantity(unit: glucoseUnit, doubleValue: minYAxisValue.scalar)
+        }
+        
         return HKQuantity(unit: glucoseUnit, doubleValue: glucosePointMinimum.y.scalar)
     }
     
@@ -284,9 +314,9 @@ extension PredictedGlucoseChart {
             return glucoseValues
         }
         
-        let predictedGlucoseValueMaximum = chartedGlucoseValueMaximum != nil ? max(predictedGlucoseBounds.maximum, chartedGlucoseValueMaximum!) : predictedGlucoseBounds.maximum
+        let predictedGlucoseValueMaximum = chartMaximumValue != nil ? max(predictedGlucoseBounds.maximum, chartMaximumValue!) : predictedGlucoseBounds.maximum
         
-        let predictedGlucoseValueMinimum = chartedGlucoseValueMinimum != nil ? min(predictedGlucoseBounds.minimum, chartedGlucoseValueMinimum!) : predictedGlucoseBounds.minimum
+        let predictedGlucoseValueMinimum = chartMinimumValue != nil ? min(predictedGlucoseBounds.minimum, chartMinimumValue!) : predictedGlucoseBounds.minimum
         
         return glucoseValues.map {
             if $0.quantity > predictedGlucoseValueMaximum {
@@ -297,6 +327,24 @@ extension PredictedGlucoseChart {
                 return $0
             }
         }
+    }
+    
+    var chartedGlucoseValueMinimum: HKQuantity? {
+        guard let glucosePointMinimum = glucosePoints.min(by: { point1, point2 in point1.y.scalar < point2.y.scalar }) else {
+            return nil
+        }
+        
+        return HKQuantity(unit: glucoseUnit, doubleValue: glucosePointMinimum.y.scalar)
+    }
+    
+    func glucoseValueBelowSoftBoundsMinimum() -> Bool {
+        guard let predictedGlucoseSoftBounds = predictedGlucoseSoftBounds,
+            let chartedGlucoseValueMinimum = chartedGlucoseValueMinimum else
+        {
+            return false
+        }
+            
+        return chartedGlucoseValueMinimum < predictedGlucoseSoftBounds.minimum
     }
     
     public struct PredictedGlucoseBounds {
