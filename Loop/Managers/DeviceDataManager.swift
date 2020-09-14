@@ -376,6 +376,14 @@ final class DeviceDataManager {
         return Manager.init(rawState: rawState) as? CGMManagerUI
     }
     
+    func checkDeliveryUncertaintyState() {
+        if let pumpManager = pumpManager, pumpManager.status.deliveryIsUncertain {
+            DispatchQueue.main.async {
+                self.deliveryUncertaintyAlertManager!.showAlert()
+            }
+        }
+    }
+    
     // Get HealthKit authorization for all of the stores
     func authorize(_ completion: @escaping () -> Void) {
         // Authorize all types at once for simplicity
@@ -483,12 +491,6 @@ private extension DeviceDataManager {
                                                     soundVendor: pumpManager)
             
             deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, rootViewController: rootViewController)
-            
-            if pumpManager.status.deliveryIsUncertain {
-                DispatchQueue.main.async {
-                    self.deliveryUncertaintyAlertManager!.showAlert()
-                }
-            }
         }
     }
 
@@ -711,11 +713,13 @@ extension DeviceDataManager: PumpManagerDelegate {
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
         
-        DispatchQueue.main.async {
-            if status.deliveryIsUncertain {
-                self.deliveryUncertaintyAlertManager?.showAlert()
-            } else {
-                self.deliveryUncertaintyAlertManager?.clearAlert()
+        if status.deliveryIsUncertain != oldStatus.deliveryIsUncertain {
+            DispatchQueue.main.async {
+                if status.deliveryIsUncertain {
+                    self.deliveryUncertaintyAlertManager?.showAlert()
+                } else {
+                    self.deliveryUncertaintyAlertManager?.clearAlert()
+                }
             }
         }
     }
