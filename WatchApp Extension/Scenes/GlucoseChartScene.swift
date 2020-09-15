@@ -256,11 +256,11 @@ class GlucoseChartScene: SKScene {
         ) {
             var override = override
             if let startDate = startDate {
-                guard startDate < override.endDate else {
+                guard startDate < override.scheduledEndDate else {
                     return
                 }
 
-                override.activeInterval = DateInterval(start: startDate, end: override.endDate)
+                override.activeInterval = DateInterval(start: startDate, end: override.scheduledEndDate)
             }
 
             guard let overrideHashable = TemporaryScheduleOverrideHashable(override) else {
@@ -273,7 +273,7 @@ class GlucoseChartScene: SKScene {
             sprite1.move(to: scaler.rect(for: overrideHashable, unit: unit), animated: !created)
             inactiveNodes.removeValue(forKey: overrideHashable.chartHashValue)
 
-            if override.endDate < spannedInterval.end, shouldExtendToChartEnd {
+            if override.scheduledEndDate < spannedInterval.end, shouldExtendToChartEnd {
                 var extendedOverride = override
                 extendedOverride.duration = .finite(spannedInterval.end.timeIntervalSince(overrideHashable.start))
                 // Target range already known to be non-nil
@@ -291,7 +291,7 @@ class GlucoseChartScene: SKScene {
         }
 
         if let override = data.activeScheduleOverride {
-            plotOverride(override, pushingStartTo: data.activePreMealOverride?.endDate, extendingToChartEnd: data.activePreMealOverride == nil)
+            plotOverride(override, pushingStartTo: data.activePreMealOverride?.scheduledEndDate, extendingToChartEnd: data.activePreMealOverride == nil)
         }
 
         data.historicalGlucose?.filter { scaler.dates.contains($0.startDate) }.forEach {
