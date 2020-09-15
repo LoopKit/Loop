@@ -26,6 +26,11 @@ class StatusViewController: UIViewController, NCWidgetProviding {
             hudView.pumpStatusHUD.tintColor = .insulinTintColor
             hudView.backgroundColor = .clear
 
+            if view.bounds.width < 375 {
+                // need to adjust for narrow display
+                hudView.adjustViewsForNarrowDisplay = true
+            }
+            
             // given the reduced width of the widget, allow for tighter spacing
             hudView.containerView.spacing = 6.0
         }

@@ -18,6 +18,20 @@ public class StatusBarHUDView: UIView, NibLoadable {
     @IBOutlet public weak var pumpStatusHUD: PumpStatusHUDView!
         
     public var containerView: UIStackView!
+    
+    public var adjustViewsForNarrowDisplay: Bool = false {
+        didSet {
+            if adjustViewsForNarrowDisplay != oldValue {
+                cgmStatusHUD.adjustViewsForNarrowDisplay = adjustViewsForNarrowDisplay
+                pumpStatusHUD.adjustViewsForNarrowDisplay = adjustViewsForNarrowDisplay
+                if adjustViewsForNarrowDisplay {
+                    containerView.spacing = 8.0
+                } else {
+                    containerView.spacing = 16.0
+                }
+            }
+        }
+    }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)

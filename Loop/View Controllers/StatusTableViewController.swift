@@ -1327,6 +1327,10 @@ final class StatusTableViewController: LoopChartsTableViewController {
             hudView.cgmStatusHUD.tintColor = .label
             hudView.pumpStatusHUD.stateColors = .pumpStatus
             hudView.pumpStatusHUD.tintColor = .insulinTintColor
+            if view.bounds.width < 375 {
+                // need to adjust for narrow display
+                hudView.adjustViewsForNarrowDisplay = true
+            }
 
             refreshContext.update(with: .status)
             self.log.debug("[reloadData] after hudView loaded")
