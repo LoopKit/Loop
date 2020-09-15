@@ -39,7 +39,7 @@ final class StatusExtensionDataManager {
     }
     
     private func update() {
-        guard let unit = (deviceManager.loopManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
+        guard let unit = (deviceManager.glucoseStore.preferredUnit ?? context?.predictedGlucose?.unit) else {
             return
         }
 
@@ -111,13 +111,20 @@ final class StatusExtensionDataManager {
                     isStateValid: sensorInfo.isStateValid,
                     stateDescription: sensorInfo.stateDescription,
                     trendType: sensorInfo.trendType,
-                    isLocal: sensorInfo.isLocal
+                    isLocal: sensorInfo.isLocal,
+                    glucoseValueType: sensorInfo.glucoseValueType
                 )
             }
             
             if let pumpManagerHUDProvider = dataManager.pumpManagerHUDProvider {
-                context.pumpManagerHUDViewsContext = PumpManagerHUDViewsContext(pumpManagerHUDViewsRawValue: PumpManagerHUDViewsRawValueFromHUDProvider(pumpManagerHUDProvider))
+                context.pumpManagerHUDViewContext = PumpManagerHUDViewContext(pumpManagerHUDViewRawValue: PumpManagerHUDViewRawValueFromHUDProvider(pumpManagerHUDProvider))
             }
+            
+            context.pumpStatusHighlightContext = DeviceStatusHighlightContext(from: dataManager.pumpStatusHighlight)
+            context.pumpLifecycleProgressContext = DeviceLifecycleProgressContext(from: dataManager.pumpLifecycleProgress)
+
+            context.cgmStatusHighlightContext = DeviceStatusHighlightContext(from: dataManager.cgmStatusHighlight)
+            context.cgmLifecycleProgressContext = DeviceLifecycleProgressContext(from: dataManager.cgmLifecycleProgress)
 
             completionHandler(context)
         }

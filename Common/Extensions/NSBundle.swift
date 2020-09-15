@@ -10,8 +10,16 @@ import Foundation
 
 
 extension Bundle {
+    var fullVersionString: String {
+        return "\(shortVersionString).\(version)"
+    }
+
     var shortVersionString: String {
         return object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
+    }
+
+    var version: String {
+        return object(forInfoDictionaryKey: "CFBundleVersion") as! String
     }
 
     var bundleDisplayName: String {
@@ -19,7 +27,7 @@ extension Bundle {
     }
 
     var localizedNameAndVersion: String {
-        return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundleDisplayName, shortVersionString)
+        return String(format: NSLocalizedString("%1$@ v%2$@", comment: "The format string for the app name and version number. (1: bundle name)(2: bundle version)"), bundleDisplayName, fullVersionString)
     }
     
     private var mainAppBundleIdentifier: String? {
@@ -60,5 +68,13 @@ extension Bundle {
 
     var xcodeVersion: String? {
         return object(forInfoDictionaryKey: "com-loopkit-Loop-xcode-version") as? String
+    }
+
+    var localCacheDuration: TimeInterval? {
+        guard let localCacheDurationDaysString = object(forInfoDictionaryKey: "LoopLocalCacheDurationDays") as? String,
+            let localCacheDurationDays = Double(localCacheDurationDaysString) else {
+                return nil
+        }
+        return .days(localCacheDurationDays)
     }
 }

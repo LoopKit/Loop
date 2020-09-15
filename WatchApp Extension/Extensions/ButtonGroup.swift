@@ -14,6 +14,8 @@ class ButtonGroup {
     private let background: WKInterfaceGroup
     private let onBackgroundColor: UIColor
     private let offBackgroundColor: UIColor
+    private let onIconColor: UIColor
+    private let offIconColor: UIColor
 
     enum State {
         case on
@@ -27,10 +29,10 @@ class ButtonGroup {
             let backgroundColor: UIColor
             switch state {
             case .on:
-                imageTintColor = offBackgroundColor
+                imageTintColor = onIconColor
                 backgroundColor = onBackgroundColor
             case .off:
-                imageTintColor = onBackgroundColor
+                imageTintColor = offIconColor
                 backgroundColor = offBackgroundColor
             case .disabled:
                 imageTintColor = .disabledButtonColor
@@ -43,12 +45,21 @@ class ButtonGroup {
         }
     }
 
-    init(button: WKInterfaceButton, image: WKInterfaceImage, background: WKInterfaceGroup, onBackgroundColor: UIColor, offBackgroundColor: UIColor) {
+    init(button: WKInterfaceButton,
+         image: WKInterfaceImage,
+         background: WKInterfaceGroup,
+         onBackgroundColor: UIColor,
+         offBackgroundColor: UIColor,
+         onIconColor: UIColor,
+         offIconColor: UIColor)
+    {
         self.button = button
         self.image = image
         self.background = background
         self.onBackgroundColor = onBackgroundColor
         self.offBackgroundColor = offBackgroundColor
+        self.onIconColor = onIconColor
+        self.offIconColor = offIconColor
     }
 
     func turnOff() {

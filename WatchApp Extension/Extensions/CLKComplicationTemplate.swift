@@ -114,6 +114,7 @@ extension CLKComplicationTemplate {
             let template = CLKComplicationTemplateModularSmallStackText()
             template.line1TextProvider = glucoseAndTrendText
             template.line2TextProvider = timeText
+            template.highlightLine2 = true
             return template
         case .modularLarge:
             let template = CLKComplicationTemplateModularLargeTallBody()

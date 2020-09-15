@@ -78,20 +78,20 @@
    Title text for button to set up a new pump */
 "Add Pump" = "Pumpe hinzufügen";
 
-/* The title of the Amplitude service */
-"Amplitude" = "Amplitude";
+/* Title text for button to set up a service */
+"Add Service" = "Add Service";
+
+/* Button title to delete a service */
+"Delete Service" = "Delete Service";
+
+/* Confirmation message for deleting a service */
+"Are you sure you want to delete this service?" = "Are you sure you want to delete this service?";
+
+/* The title of the section containing algorithm settings */
+"Algorithm Settings" = "Algorithmus-Einstellungen";
 
 /* Subtitle of Rapid-Acting – Children preset */
 "An adjustment to the adult model based on empirical effects in children." = "Eine Anpassung an das Erwachsenenmodell basierend auf empirischen Effekten bei Kindern.";
-
-/* The title of the amplitude API key credential */
-"API Key" = "API Key";
-
-/* The title of the nightscout API secret credential */
-"API Secret" = "API Secret";
-
-/* Confirmation message for deleting a CGM */
-"Are you sure you want to delete this CGM?" = "Möchten Sie dieses CGM wirklich löschen?";
 
 /* Format fragment for a specific time */
 "at %@" = "bei %@";
@@ -175,11 +175,14 @@
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Eigener Override";
 
-/* The title of the Loggly customer token credential */
-"Customer Token" = "Kunden-Token";
-
 /* Button title to delete CGM */
 "Delete CGM" = "CGM löschen";
+
+/* The short unit display string for decibles */
+"dB" = "dB";
+
+/* The title of the button to remove the credentials for a service */
+"Delete Account" = "Konto löschen";
 
 /* Title text for delivery limits */
 "Delivery Limits" = "Verabreichungslimits";
@@ -223,9 +226,6 @@
 /* Title of the prediction input effect for glucose momentum */
 "Glucose Momentum" = "Glukose-Momentum";
 
-/* The placeholder text for the nightscout site URL credential */
-"https://mysite.herokuapp.com" = "https://mysite.herokuapp.com";
-
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
 "Indefinitely" = "Unbegrenzt";
 
@@ -261,9 +261,6 @@
 /* The loading message for the diagnostic report screen */
 "Loading..." = "Wird geladen ...";
 
-/* The title of the loggly service */
-"Loggly" = "Loggly";
-
 /* The notification title for a loop failure */
 "Loop Failure" = "Loopfehler";
 
@@ -275,9 +272,6 @@
 
 /* Details for missing data error when momentum effects are missing */
 "Momentum effects" = "Momentum effects";
-
-/* The title of the Nightscout service */
-"Nightscout" = "Nightscout";
 
 /* The error message displayed for device connection errors. */
 "No connected devices, or failure during device connection" = "Keine angeschlossenen Geräte oder Fehler während der Geräteverbindung";
@@ -353,9 +347,6 @@
 
 /* Format fragment for a start time */
 "since %@" = "seit %@";
-
-/* The title of the nightscout site URL credential */
-"Site URL" = "Seiten-URL";
 
 /* The format for the description of a temporary override start date */
 "starting at %@" = "Beginnt um %@";

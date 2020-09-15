@@ -27,8 +27,8 @@ class PredictionInputEffectTableViewCell: UITableViewCell {
                 titleLabel.textColor = UIColor.darkText
                 subtitleLabel.textColor = UIColor.darkText
             } else {
-                titleLabel.textColor = UIColor.secondaryLabelColor
-                subtitleLabel.textColor = UIColor.secondaryLabelColor
+                titleLabel.textColor = UIColor.secondaryLabel
+                subtitleLabel.textColor = UIColor.secondaryLabel
             }
         }
     }

@@ -10,17 +10,15 @@ import UIKit
 import UserNotifications
 import LoopKit
 
-struct NotificationManager {
+enum NotificationManager {
 
     enum Action: String {
         case retryBolus
+        case acknowledgeAlert
     }
+}
 
-    enum UserInfoKey: String {
-        case bolusAmount
-        case bolusStartDate
-    }
-
+extension NotificationManager {
     private static var notificationCategories: Set<UNNotificationCategory> {
         var categories = [UNNotificationCategory]()
 
@@ -36,20 +34,43 @@ struct NotificationManager {
             intentIdentifiers: [],
             options: []
         ))
+        
+        let acknowledgeAlertAction = UNNotificationAction(
+            identifier: Action.acknowledgeAlert.rawValue,
+            title: NSLocalizedString("OK", comment: "The title of the notification action to acknowledge a device alert"),
+            options: .foreground
+        )
+        
+        categories.append(UNNotificationCategory(
+            identifier: LoopNotificationCategory.alert.rawValue,
+            actions: [acknowledgeAlertAction],
+            intentIdentifiers: [],
+            options: .customDismissAction
+        ))
 
         return Set(categories)
     }
 
     static func authorize(delegate: UNUserNotificationCenterDelegate) {
+        var authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        if FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+            authOptions.insert(.criticalAlert)
+        }
+        
         let center = UNUserNotificationCenter.current()
-
         center.delegate = delegate
-        center.requestAuthorization(options: [.badge, .sound, .alert]) { (granted, error) in
-            guard granted else { return }
+        center.requestAuthorization(options: authOptions) { (granted, error) in
+            guard granted else {
+                return
+            }
             UNUserNotificationCenter.current().getNotificationSettings { settings in
-                guard settings.authorizationStatus == .authorized else { return }
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
+                guard settings.authorizationStatus == .authorized else {
+                    return
+                }
+                if FeatureFlags.remoteOverridesEnabled {
+                    DispatchQueue.main.async {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
                 }
             }
         }
@@ -59,34 +80,20 @@ struct NotificationManager {
 
     // MARK: - Notifications
 
-    static func sendBolusFailureNotification(for error: Error, units: Double, at startDate: Date) {
+    static func sendBolusFailureNotification(for error: PumpManagerError, units: Double, at startDate: Date) {
         let notification = UNMutableNotificationContent()
 
         notification.title = NSLocalizedString("Bolus", comment: "The notification title for a bolus failure")
 
         let sentenceFormat = NSLocalizedString("%@.", comment: "Appends a full-stop to a statement")
 
-        switch error {
-        case let error as SetBolusError:
-            notification.subtitle = error.errorDescriptionWithUnits(units)
+        notification.subtitle = error.errorDescription ?? "Bolus Failure"
 
-            let body = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: " ")
+        let body = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
+            String(format: sentenceFormat, $0)
+        }).joined(separator: " ")
 
-            notification.body = body
-        case let error as LocalizedError:
-            if let subtitle = error.errorDescription {
-                notification.subtitle = subtitle
-            }
-            let message = [error.failureReason, error.recoverySuggestion].compactMap({ $0 }).map({
-                String(format: sentenceFormat, $0)
-            }).joined(separator: "\n")
-            notification.body = message.isEmpty ? String(describing: error) : message
-        default:
-            notification.body = error.localizedDescription
-        }
-
+        notification.body = body
         notification.sound = .default
 
         if startDate.timeIntervalSinceNow >= TimeInterval(minutes: -5) {
@@ -94,8 +101,8 @@ struct NotificationManager {
         }
 
         notification.userInfo = [
-            UserInfoKey.bolusAmount.rawValue: units,
-            UserInfoKey.bolusStartDate.rawValue: startDate
+            LoopNotificationUserInfoKey.bolusAmount.rawValue: units,
+            LoopNotificationUserInfoKey.bolusStartDate.rawValue: startDate
         ]
 
         let request = UNNotificationRequest(
@@ -108,16 +115,11 @@ struct NotificationManager {
         UNUserNotificationCenter.current().add(request)
     }
 
-    // Cancel any previous scheduled notifications in the Loop Not Running category
-    static func clearPendingNotificationRequests() {
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-    }
-
     static func scheduleLoopNotRunningNotifications() {
         // Give a little extra time for a loop-in-progress to complete
         let gracePeriod = TimeInterval(minutes: 0.5)
 
-        for minutes: Double in [20, 40, 60, 120] {
+        for (minutes, isCritical) in [(20.0, false), (40.0, false), (60.0, true), (120.0, true)] {
             let notification = UNMutableNotificationContent()
             let failureInterval = TimeInterval(minutes: minutes)
 
@@ -131,7 +133,11 @@ struct NotificationManager {
             }
 
             notification.title = NSLocalizedString("Loop Failure", comment: "The notification title for a loop failure")
-            notification.sound = .default
+            if isCritical, FeatureFlags.criticalAlertsEnabled, #available(iOS 12.0, *) {
+                notification.sound = .defaultCritical
+            } else {
+                notification.sound = .default
+            }
             notification.categoryIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
             notification.threadIdentifier = LoopNotificationCategory.loopNotRunning.rawValue
 

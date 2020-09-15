@@ -7,7 +7,9 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import SwiftCharts
+import HealthKit
 
 public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
 
@@ -37,6 +39,13 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
         }
     }
 
+    public var preMealOverride: TemporaryScheduleOverride? {
+        didSet {
+            preMealOverridePoints = []
+            preMealOverrideDurationPoints = []
+        }
+    }
+
     public var scheduleOverride: TemporaryScheduleOverride? {
         didSet {
             targetOverridePoints = []
@@ -46,6 +55,10 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
 
     private var targetGlucosePoints: [ChartPoint] = []
 
+    private var preMealOverridePoints: [ChartPoint] = []
+
+    private var preMealOverrideDurationPoints: [ChartPoint] = []
+
     private var targetOverridePoints: [ChartPoint] = []
 
     private var targetOverrideDurationPoints: [ChartPoint] = []
@@ -54,10 +67,17 @@ public class PredictedGlucoseChart: GlucoseChart, ChartProviding {
 
     public private(set) var endDate: Date?
 
+    private var predictedGlucoseSoftBounds: PredictedGlucoseBounds?
+
     private func updateEndDate(_ date: Date) {
         if endDate == nil || date > endDate! {
             self.endDate = date
         }
+    }
+    
+    public init(predictedGlucoseBounds: PredictedGlucoseBounds?) {
+        self.predictedGlucoseSoftBounds = predictedGlucoseBounds
+        super.init()
     }
 }
 
@@ -78,7 +98,24 @@ extension PredictedGlucoseChart {
         if targetGlucosePoints.isEmpty, xAxisValues.count > 1, let schedule = targetGlucoseSchedule {
             targetGlucosePoints = ChartPoint.pointsForGlucoseRangeSchedule(schedule, unit: glucoseUnit, xAxisValues: xAxisValues)
 
-            if let override = scheduleOverride, override.isActive() || override.startDate > Date() {
+            var displayedScheduleOverride = scheduleOverride
+            if let preMealOverride = preMealOverride, preMealOverride.isActive() {
+                preMealOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(preMealOverride, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
+                preMealOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(preMealOverride, unit: glucoseUnit, xAxisValues: xAxisValues)
+
+                if displayedScheduleOverride != nil {
+                    if displayedScheduleOverride!.endDate > preMealOverride.endDate {
+                        displayedScheduleOverride!.activeInterval = DateInterval(start: preMealOverride.endDate, end: displayedScheduleOverride!.endDate)
+                    } else {
+                        displayedScheduleOverride = nil
+                    }
+                }
+            } else {
+                preMealOverridePoints = []
+                preMealOverrideDurationPoints = []
+            }
+
+            if let override = displayedScheduleOverride, override.isActive() || override.startDate > Date() {
                 targetOverridePoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues, extendEndDateToChart: true)
                 targetOverrideDurationPoints = ChartPoint.pointsForGlucoseRangeScheduleOverride(override, unit: glucoseUnit, xAxisValues: xAxisValues)
             } else {
@@ -87,7 +124,12 @@ extension PredictedGlucoseChart {
             }
         }
 
-        let points = glucosePoints + predictedGlucosePoints + targetGlucosePoints + targetOverridePoints + glucoseDisplayRangePoints
+        let points = [
+            glucosePoints, predictedGlucosePoints,
+            preMealOverridePoints, preMealOverrideDurationPoints,
+            targetGlucosePoints, targetOverridePoints,
+            glucoseDisplayRangePoints
+        ].flatMap { $0 }
 
         let yAxisValues = ChartAxisValuesStaticGenerator.generateYAxisValuesWithChartPoints(points,
             minSegmentCount: 2,
@@ -106,26 +148,44 @@ extension PredictedGlucoseChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The glucose targets
-        let targetsLayer = ChartPointsFillsLayer(
-            xAxis: xAxisLayer.axis,
-            yAxis: yAxisLayer.axis,
-            fills: [
-                ChartPointsFill(
-                    chartPoints: targetGlucosePoints,
-                    fillColor: colors.glucoseTint.withAlphaComponent(targetOverridePoints.count > 1 ? 0.15 : 0.3),
-                    createContainerPoints: false
-                ),
+        let targetFillAlpha: CGFloat = preMealOverridePoints.count > 1 || targetOverridePoints.count > 1 ? 0.15 : 0.3
+        var fills: [ChartPointsFill?] = [
+            ChartPointsFill(
+                chartPoints: targetGlucosePoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(targetFillAlpha),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: preMealOverridePoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: preMealOverrideDurationPoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            ),
+            ChartPointsFill(
+                chartPoints: targetOverrideDurationPoints,
+                fillColor: colors.glucoseTint.withAlphaComponent(0.3),
+                createContainerPoints: false
+            )
+        ]
+
+        if preMealOverridePoints.isEmpty {
+            fills.append(
                 ChartPointsFill(
                     chartPoints: targetOverridePoints,
                     fillColor: colors.glucoseTint.withAlphaComponent(0.3),
                     createContainerPoints: false
-                ),
-                ChartPointsFill(
-                    chartPoints: targetOverrideDurationPoints,
-                    fillColor: colors.glucoseTint.withAlphaComponent(0.3),
-                    createContainerPoints: false
                 )
-            ]
+            )
+        }
+
+        let targetsLayer = ChartPointsFillsLayer(
+            xAxis: xAxisLayer.axis,
+            yAxis: yAxisLayer.axis,
+            fills: fills
         )
 
         // Grid lines
@@ -145,7 +205,7 @@ extension PredictedGlucoseChart {
         var prediction: ChartLayer?
 
         if predictedGlucosePoints.count > 1 {
-            let lineColor = (alternatePrediction == nil) ? colors.glucoseTint : UIColor.secondaryLabelColor
+            let lineColor = (alternatePrediction == nil) ? colors.glucoseTint : UIColor.secondaryLabel
 
             let lineModel = ChartLineModel.predictionLine(
                 points: predictedGlucosePoints,
@@ -193,10 +253,59 @@ extension PredictedGlucoseChart {
     }
 
     public func setPredictedGlucoseValues(_ glucoseValues: [GlucoseValue]) {
-        predictedGlucosePoints = glucosePointsFromValues(glucoseValues)
+        let clampedPredicatedGlucoseValues = clampPredictedGlucoseValues(glucoseValues)
+        predictedGlucosePoints = glucosePointsFromValues(clampedPredicatedGlucoseValues)
     }
 
     public func setAlternatePredictedGlucoseValues(_ glucoseValues: [GlucoseValue]) {
         alternatePredictedGlucosePoints = glucosePointsFromValues(glucoseValues)
+    }
+}
+
+
+// MARK: - Clamping the predicted glucose values
+extension PredictedGlucoseChart {
+    var chartedGlucoseValueMaximum: HKQuantity? {
+        guard let glucosePointMaximum = glucosePoints.max(by: { point1, point2 in point1.y.scalar < point2.y.scalar }) else {
+            return nil
+        }
+        return HKQuantity(unit: glucoseUnit, doubleValue: glucosePointMaximum.y.scalar)
+    }
+    
+    var chartedGlucoseValueMinimum: HKQuantity? {
+        guard let glucosePointMinimum = glucosePoints.min(by: { point1, point2 in point1.y.scalar < point2.y.scalar }) else {
+            return nil
+        }
+        return HKQuantity(unit: glucoseUnit, doubleValue: glucosePointMinimum.y.scalar)
+    }
+    
+    func clampPredictedGlucoseValues(_ glucoseValues: [GlucoseValue]) -> [GlucoseValue] {
+        guard let predictedGlucoseBounds = predictedGlucoseSoftBounds else {
+            return glucoseValues
+        }
+        
+        let predictedGlucoseValueMaximum = chartedGlucoseValueMaximum != nil ? max(predictedGlucoseBounds.maximum, chartedGlucoseValueMaximum!) : predictedGlucoseBounds.maximum
+        
+        let predictedGlucoseValueMinimum = chartedGlucoseValueMinimum != nil ? min(predictedGlucoseBounds.minimum, chartedGlucoseValueMinimum!) : predictedGlucoseBounds.minimum
+        
+        return glucoseValues.map {
+            if $0.quantity > predictedGlucoseValueMaximum {
+                return PredictedGlucoseValue(startDate: $0.startDate, quantity: predictedGlucoseValueMaximum)
+            } else if $0.quantity < predictedGlucoseValueMinimum {
+                return PredictedGlucoseValue(startDate: $0.startDate, quantity: predictedGlucoseValueMinimum)
+            } else {
+                return $0
+            }
+        }
+    }
+    
+    public struct PredictedGlucoseBounds {
+        var minimum: HKQuantity
+        var maximum: HKQuantity
+        
+        public static var `default`: PredictedGlucoseBounds {
+            return PredictedGlucoseBounds(minimum: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 40),
+                                          maximum: HKQuantity(unit: .milligramsPerDeciliter, doubleValue: 400))
+        }
     }
 }

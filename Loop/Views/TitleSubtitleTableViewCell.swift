@@ -14,7 +14,7 @@ class TitleSubtitleTableViewCell: UITableViewCell {
 
     @IBOutlet weak var subtitleLabel: UILabel! {
         didSet {
-            subtitleLabel.textColor = UIColor.secondaryLabelColor
+            subtitleLabel.textColor = UIColor.secondaryLabel
         }
     }
 

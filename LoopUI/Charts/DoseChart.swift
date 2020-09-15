@@ -7,6 +7,7 @@
 
 import Foundation
 import LoopKit
+import LoopKitUI
 import SwiftCharts
 
 fileprivate struct DosePointsCache {
@@ -73,7 +74,7 @@ public extension DoseChart {
         let (xAxisLayer, yAxisLayer, innerFrame) = (coordsSpace.xAxisLayer, coordsSpace.yAxisLayer, coordsSpace.chartInnerFrame)
 
         // The dose area
-        let lineModel = ChartLineModel(chartPoints: points.basal, lineColor: colors.doseTint, lineWidth: 2, animDuration: 0, animDelay: 0)
+        let lineModel = ChartLineModel(chartPoints: points.basal, lineColor: colors.insulinTint, lineWidth: 2, animDuration: 0, animDelay: 0)
         let doseLine = ChartPointsLineLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, lineModels: [lineModel])
 
         let doseArea = ChartPointsFillsLayer(
@@ -81,15 +82,15 @@ public extension DoseChart {
             yAxis: yAxisLayer.axis,
             fills: [ChartPointsFill(
                 chartPoints: points.basalFill,
-                fillColor: colors.doseTint.withAlphaComponent(0.5),
+                fillColor: colors.insulinTint.withAlphaComponent(0.5),
                 createContainerPoints: false
             )]
         )
 
         let bolusLayer: ChartPointsScatterDownTrianglesLayer<ChartPoint>?
-        
+
         if points.bolus.count > 0 {
-            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: points.bolus, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: colors.doseTint)
+            bolusLayer = ChartPointsScatterDownTrianglesLayer(xAxis: xAxisLayer.axis, yAxis: yAxisLayer.axis, chartPoints: points.bolus, displayDelay: 0, itemSize: CGSize(width: 12, height: 12), itemFillColor: colors.insulinTint)
         } else {
             bolusLayer = nil
         }
@@ -104,7 +105,7 @@ public extension DoseChart {
             let viewFrame = CGRect(x: chart.contentView.bounds.minX, y: chartPointModel.screenLoc.y - width / 2, width: chart.contentView.bounds.size.width, height: width)
 
             let v = UIView(frame: viewFrame)
-            v.layer.backgroundColor = colors.doseTint.cgColor
+            v.layer.backgroundColor = colors.insulinTint.cgColor
             return v
         })
 
@@ -114,7 +115,7 @@ public extension DoseChart {
                 yAxisLayer: yAxisLayer,
                 axisLabelSettings: axisLabelSettings,
                 chartPoints: points.highlight,
-                tintColor: colors.doseTint,
+                tintColor: colors.insulinTint,
                 gestureRecognizer: gestureRecognizer
             )
         }

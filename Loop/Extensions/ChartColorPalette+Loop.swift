@@ -7,10 +7,11 @@
 //
 
 import LoopUI
+import LoopKitUI
 
 
 extension ChartColorPalette {
-    static var `default`: ChartColorPalette {
-        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, glucoseTint: .glucoseTintColor, doseTint: .doseTintColor)
+    static var primary: ChartColorPalette {
+        return ChartColorPalette(axisLine: .axisLineColor, axisLabel: .axisLabelColor, grid: .gridColor, glucoseTint: .glucoseTintColor, insulinTint: .insulinTintColor)
     }
 }

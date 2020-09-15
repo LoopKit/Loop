@@ -48,9 +48,9 @@ extension UIAlertController {
     /// Initializes an action sheet-styled controller for selecting a PumpManager
     ///
     /// - Parameters:
-    ///   - cgmManagers: An array of PumpManagers
+    ///   - pumpManagers: An array of available PumpManagers
     ///   - selectionHandler: A closure to execute when a manager is selected
-    ///   - manager: The selected manager
+    ///   - identifier: Identifier of the selected PumpManager
     internal convenience init(pumpManagers: [AvailableDevice], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add Pump", comment: "Action sheet title selecting Pump"),
@@ -72,35 +72,23 @@ extension UIAlertController {
     /// Initializes an action sheet-styled controller for selecting a CGMManager
     ///
     /// - Parameters:
-    ///   - cgmManagers: An array of CGMManager-conforming types
-    ///   - pumpManager: A PumpManager/CGMManager combo instance
+    ///   - cgmManagers: An array of available CGMManagers
     ///   - selectionHandler: A closure to execute when either a new CGMManager or the current PumpManager is selected
-    ///   - cgmManager: The selected CGMManager type
-    ///   - pumpManager: The selected PumpManager instance
-    internal convenience init(cgmManagers: [CGMManagerUI.Type], pumpManager: CGMManager?, selectionHandler: @escaping (_ cgmManager: CGMManagerUI.Type?, _ pumpManager: CGMManager?) -> Void) {
+    ///   - identifier: Identifier of the selected CGMManager
+    internal convenience init(cgmManagers: [AvailableDevice], selectionHandler: @escaping (_ identifier: String) -> Void) {
         self.init(
             title: NSLocalizedString("Add CGM", comment: "Action sheet title selecting CGM"),
             message: nil,
             preferredStyle: .actionSheet
         )
-
-        if let pumpManager = pumpManager {
-            addAction(UIAlertAction(
-                title: pumpManager.localizedTitle,
-                style: .default,
-                handler: { (_) in
-                    selectionHandler(nil, pumpManager)
-                }
-            ))
-        }
-
+        
         for manager in cgmManagers {
             addAction(UIAlertAction(
                 title: manager.localizedTitle,
                 style: .default,
                 handler: { (_) in
-                    selectionHandler(manager, nil)
-                }
+                    selectionHandler(manager.identifier)
+            }
             ))
         }
     }
@@ -122,6 +110,30 @@ extension UIAlertController {
 
         addCancelAction { (_) in
             handler(false)
+        }
+    }
+
+    /// Initializes an action sheet-styled controller for selecting a service.
+    ///
+    /// - Parameters:
+    ///   - services: An array of available services.
+    ///   - selectionHandler: A closure to execute when a service is selected.
+    ///   - identifier: The identifier of the selected service.
+    internal convenience init(services: [AvailableService], selectionHandler: @escaping (_ identifier: String) -> Void) {
+        self.init(
+            title: NSLocalizedString("Add Service", comment: "Action sheet title selecting service"),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+
+        for service in services {
+            addAction(UIAlertAction(
+                title: service.localizedTitle,
+                style: .default,
+                handler: { (_) in
+                    selectionHandler(service.identifier)
+                }
+            ))
         }
     }
 

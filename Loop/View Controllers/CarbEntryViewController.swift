@@ -13,8 +13,7 @@ import LoopKitUI
 import LoopCore
 import LoopUI
 
-
-final class CarbEntryViewController: ChartsTableViewController, IdentifiableClass {
+final class CarbEntryViewController: LoopChartsTableViewController, IdentifiableClass {
 
     var navigationDelegate = CarbEntryNavigationDelegate()
 
@@ -28,7 +27,11 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
 
     fileprivate var orderedAbsorptionTimes = [TimeInterval]()
 
-    var preferredUnit = HKUnit.gram()
+    var preferredCarbUnit = HKUnit.gram()
+    
+    private var glucoseUnit: HKUnit {
+        return deviceManager.glucoseStore.preferredUnit ?? .milligramsPerDeciliter
+    }
 
     var maxQuantity = HKQuantity(unit: .gram(), doubleValue: 250)
 
@@ -38,8 +41,6 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     var maxAbsorptionTime = TimeInterval(hours: 8)
 
     var maximumDateFutureInterval = TimeInterval(hours: 4)
-
-    var glucoseUnit: HKUnit = .milligramsPerDeciliter
 
     var originalCarbEntry: StoredCarbEntry? {
         didSet {
@@ -57,26 +58,42 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         }
     }
 
+    fileprivate var lastEntryDate: Date?
+
+    fileprivate func updateLastEntryDate() { lastEntryDate = Date() }
+
     fileprivate var quantity: HKQuantity? {
         didSet {
+            if quantity != oldValue {
+                updateLastEntryDate()
+            }
             updateContinueButtonEnabled()
         }
     }
 
     fileprivate var date = Date() {
         didSet {
+            if date != oldValue {
+                updateLastEntryDate()
+            }
             updateContinueButtonEnabled()
         }
     }
 
     fileprivate var foodType: String? {
         didSet {
+            if foodType != oldValue {
+                updateLastEntryDate()
+            }
             updateContinueButtonEnabled()
         }
     }
 
     fileprivate var absorptionTime: TimeInterval? {
         didSet {
+            if absorptionTime != oldValue {
+                updateLastEntryDate()
+            }
             updateContinueButtonEnabled()
         }
     }
@@ -92,7 +109,8 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     private var shouldBeginEditingFoodType = false
 
     var updatedCarbEntry: NewCarbEntry? {
-        if  let quantity = quantity,
+        if  let lastEntryDate = lastEntryDate,
+            let quantity = quantity,
             let absorptionTime = absorptionTime ?? defaultAbsorptionTimes?.medium
         {
             if let o = originalCarbEntry, o.quantity == quantity && o.startDate == date && o.foodType == foodType && o.absorptionTime == absorptionTime {
@@ -100,11 +118,11 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             }
 
             return NewCarbEntry(
+                date: lastEntryDate,
                 quantity: quantity,
                 startDate: date,
                 foodType: foodType,
-                absorptionTime: absorptionTime,
-                externalID: originalCarbEntry?.externalID
+                absorptionTime: absorptionTime
             )
         } else {
             return nil
@@ -118,7 +136,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     private(set) lazy var footerView: SetupTableFooterView = {
         let footerView = SetupTableFooterView(frame: .zero)
         footerView.primaryButton.addTarget(self, action: #selector(continueButtonPressed), for: .touchUpInside)
-        footerView.primaryButton.isEnabled = quantity != nil && quantity!.doubleValue(for: preferredUnit) > 0
+        footerView.primaryButton.isEnabled = quantity != nil && quantity!.doubleValue(for: preferredCarbUnit) > 0
         return footerView
     }()
 
@@ -126,7 +144,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
 
     override func createChartsManager() -> ChartsManager {
         // Consider including a chart on this screen to demonstrate how absorption time affects prediction
-        ChartsManager(colors: .default, settings: .default, charts: [], traitCollection: traitCollection)
+        ChartsManager(colors: .primary, settings: .default, charts: [], traitCollection: traitCollection)
     }
 
     override func glucoseUnitDidChange() {
@@ -135,9 +153,8 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // This gets rid of the empty space at the top.
-        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 0.01))
+
+        tableView.tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 8))
 
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
@@ -151,7 +168,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: footerView.primaryButton.titleLabel?.text, style: .plain, target: self, action: #selector(continueButtonPressed))
         navigationItem.rightBarButtonItem?.isEnabled = false
-        
+
         // Sets text for back button on bolus screen
         navigationItem.backBarButtonItem = UIBarButtonItem(title: NSLocalizedString("Carb Entry", comment: "Back button text for bolus screen to return to carb entry screen"), style: .plain, target: nil, action: nil)
     }
@@ -206,10 +223,10 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             let cell = tableView.dequeueReusableCell(withIdentifier: DecimalTextFieldTableViewCell.className) as! DecimalTextFieldTableViewCell
 
             if let quantity = quantity {
-                cell.number = NSNumber(value: quantity.doubleValue(for: preferredUnit))
+                cell.number = NSNumber(value: quantity.doubleValue(for: preferredCarbUnit))
             }
             cell.textField.isEnabled = isSampleEditable
-            cell.unitLabel?.text = String(describing: preferredUnit)
+            cell.unitLabel?.text = String(describing: preferredCarbUnit)
             cell.delegate = self
 
             return cell
@@ -318,6 +335,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
 
     override func restoreUserActivityState(_ activity: NSUserActivity) {
         if let entry = activity.newCarbEntry {
+            lastEntryDate = entry.date
             quantity = entry.quantity
             date = entry.startDate
 
@@ -339,17 +357,22 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             return
         }
 
-        let bolusVC = BolusViewController.instance()
-        bolusVC.deviceManager = deviceManager
-        bolusVC.glucoseUnit = glucoseUnit
-        if let originalEntry = originalCarbEntry {
-            bolusVC.configuration = .updatedCarbEntry(from: originalEntry, to: updatedEntry)
-        } else {
-            bolusVC.configuration = .newCarbEntry(updatedEntry)
-        }
-        bolusVC.selectedDefaultAbsorptionTimeEmoji = selectedDefaultAbsorptionTimeEmoji
+        let viewModel = BolusEntryViewModel(
+            dataManager: deviceManager,
+            originalCarbEntry: originalCarbEntry,
+            potentialCarbEntry: updatedEntry,
+            selectedCarbAbsorptionTimeEmoji: selectedDefaultAbsorptionTimeEmoji
+        )
 
-        show(bolusVC, sender: footerView.primaryButton)
+        let bolusEntryView = BolusEntryView(viewModel: viewModel)
+
+        // After confirming a bolus, pop back to this controller's predecessor, i.e. all the way back out of the carb flow.
+        let predecessorViewControllerType = (navigationController?.viewControllers.dropLast().last).map { type(of: $0) } ?? UIViewController.self
+        let hostingController = DismissibleHostingController(
+            rootView: bolusEntryView,
+            dismissalMode: originalCarbEntry == nil ? .modalDismiss : .pop(to: predecessorViewControllerType)
+        )
+        show(hostingController, sender: footerView.primaryButton)
     }
 
     private func validateInput() -> Bool {
@@ -361,7 +384,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
             return false
         }
 
-        guard let quantity = quantity, quantity.doubleValue(for: preferredUnit) > 0 else { return false }
+        guard let quantity = quantity, quantity.doubleValue(for: preferredCarbUnit) > 0 else { return false }
         guard quantity.compare(maxQuantity) != .orderedDescending else {
             navigationDelegate.showMaxQuantityValidationWarning(for: self, maxQuantityGrams: maxQuantity.doubleValue(for: .gram()))
             return false
@@ -371,7 +394,7 @@ final class CarbEntryViewController: ChartsTableViewController, IdentifiableClas
     }
 
     private func updateContinueButtonEnabled() {
-        let hasValidQuantity = quantity != nil && quantity!.doubleValue(for: preferredUnit) > 0
+        let hasValidQuantity = quantity != nil && quantity!.doubleValue(for: preferredCarbUnit) > 0
         let haveChangesBeenMade = updatedCarbEntry != nil
         
         let readyToContinue = hasValidQuantity && haveChangesBeenMade
@@ -390,13 +413,13 @@ extension CarbEntryViewController: TextFieldTableViewCellDelegate {
         tableView.endUpdates()
     }
 
-    func textFieldTableViewCellDidEndEditing(_ cell: TextFieldTableViewCell) {
+    func textFieldTableViewCellDidChangeEditing(_ cell: TextFieldTableViewCell) {
         guard let row = tableView.indexPath(for: cell)?.row else { return }
 
         switch Row(rawValue: row) {
         case .value?:
             if let cell = cell as? DecimalTextFieldTableViewCell, let number = cell.number {
-                quantity = HKQuantity(unit: preferredUnit, doubleValue: number.doubleValue)
+                quantity = HKQuantity(unit: preferredCarbUnit, doubleValue: number.doubleValue)
             } else {
                 quantity = nil
             }
@@ -407,19 +430,8 @@ extension CarbEntryViewController: TextFieldTableViewCellDelegate {
         }
     }
 
-    func textFieldTableViewCellDidChangeEditing(_ cell: TextFieldTableViewCell) {
-        guard let row = tableView.indexPath(for: cell)?.row else { return }
-
-        switch Row(rawValue: row) {
-        case .value?:
-            if let cell = cell as? DecimalTextFieldTableViewCell, let number = cell.number {
-                quantity = HKQuantity(unit: preferredUnit, doubleValue: number.doubleValue)
-            } else {
-                quantity = nil
-            }
-        default:
-            break
-        }
+    func textFieldTableViewCellDidEndEditing(_ cell: TextFieldTableViewCell) {
+        textFieldTableViewCellDidChangeEditing(cell)
     }
 }
 
@@ -489,11 +501,13 @@ extension CarbEntryViewController: EmojiInputControllerDelegate {
             return
         }
 
-        let lastAbsorptionTime = self.absorptionTime
-        self.absorptionTime = orderedAbsorptionTimes[section]
-
-        if let cell = tableView.cellForRow(at: IndexPath(row: Row.absorptionTime.rawValue, section: 0)) as? DateAndDurationTableViewCell {
-            cell.duration = max(lastAbsorptionTime ?? 0, orderedAbsorptionTimes[section])
+        if absorptionTime == nil {
+            // only adjust the absorption time if it wasn't already set.
+            absorptionTime = orderedAbsorptionTimes[section]
+            
+            if let cell = tableView.cellForRow(at: IndexPath(row: Row.absorptionTime.rawValue, section: 0)) as? DateAndDurationTableViewCell {
+                cell.duration = orderedAbsorptionTimes[section]
+            }
         }
     }
 }
