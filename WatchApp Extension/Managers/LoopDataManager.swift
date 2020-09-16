@@ -98,17 +98,6 @@ extension LoopDataManager {
         }
     }
 
-    func addConfirmedCarbEntry(_ entry: NewCarbEntry) {
-        carbStore.addCarbEntry(entry) { (result) in
-            switch result {
-            case .success:
-                break
-            case .failure(let error):
-                self.log.error("Error adding entry to carbStore: %{public}@", String(describing: error))
-            }
-        }
-    }
-
     func sendDidUpdateContextNotificationIfNecessary() {
         dispatchPrecondition(condition: .onQueue(.main))
 
