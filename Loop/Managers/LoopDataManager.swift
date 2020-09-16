@@ -563,6 +563,9 @@ extension LoopDataManager {
         } else {
             carbStore.addCarbEntry(carbEntry, completion: addCompletion)
         }
+      
+      GlucloserLogging.shared.saveCarbs(dateTime: carbEntry.startDate,
+                                        carbs: carbEntry.quantity)
     }
 
     /// Adds a bolus requested of the pump, but not confirmed.
@@ -594,6 +597,10 @@ extension LoopDataManager {
 
             completion?()
         }
+      if let delivered = dose.deliveredUnits {
+        GlucloserLogging.shared.saveInsulin(dateTime: dose.startDate,
+                                            units: delivered)
+      }
     }
 
     /// Notifies the manager that the bolus failed.
