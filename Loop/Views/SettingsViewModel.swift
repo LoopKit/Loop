@@ -81,8 +81,8 @@ public class SettingsViewModel: ObservableObject {
     var servicesViewModel: ServicesViewModel
     var therapySettings: TherapySettings
     let supportedInsulinModelSettings: SupportedInsulinModelSettings
-    let pumpSupportedIncrements: PumpSupportedIncrements?
-    let syncPumpSchedule: PumpManager.SyncSchedule?
+    let pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?
+    let syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?
     let sensitivityOverridesEnabled: Bool
 
     lazy private var cancellables = Set<AnyCancellable>()
@@ -94,8 +94,8 @@ public class SettingsViewModel: ObservableObject {
                 servicesViewModel: ServicesViewModel,
                 therapySettings: TherapySettings,
                 supportedInsulinModelSettings: SupportedInsulinModelSettings,
-                pumpSupportedIncrements: PumpSupportedIncrements?,
-                syncPumpSchedule: PumpManager.SyncSchedule?,
+                pumpSupportedIncrements: (() -> PumpSupportedIncrements?)?,
+                syncPumpSchedule: (() -> PumpManager.SyncSchedule?)?,
                 sensitivityOverridesEnabled: Bool,
                 initialDosingEnabled: Bool,
                 delegate: SettingsViewModelDelegate?

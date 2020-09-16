@@ -1253,10 +1253,15 @@ final class StatusTableViewController: LoopChartsTableViewController {
             didTapAddDevice: { [weak self] in
                 self?.setupCGMManager($0.identifier)
         })
-        let pumpSupportedIncrements = deviceManager.pumpManager.map {
-            PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
-                                    bolusVolumes: $0.supportedBolusVolumes,
-                                    maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+        let pumpSupportedIncrements = { [weak self] in
+            self?.deviceManager.pumpManager.map {
+                PumpSupportedIncrements(basalRates: $0.supportedBasalRates,
+                                        bolusVolumes: $0.supportedBolusVolumes,
+                                        maximumBasalScheduleEntryCount: $0.maximumBasalScheduleEntryCount)
+            }
+        }
+        let syncBasalRateSchedule = { [weak self] in
+            self?.deviceManager.pumpManager?.syncBasalRateSchedule
         }
         let servicesViewModel = ServicesViewModel(showServices: FeatureFlags.includeServicesInSettingsEnabled,
                                                   availableServices: { [weak self] in self?.deviceManager.servicesManager.availableServices ?? [] },
@@ -1270,7 +1275,7 @@ final class StatusTableViewController: LoopChartsTableViewController {
                                           therapySettings: deviceManager.loopManager.therapySettings,
                                           supportedInsulinModelSettings: SupportedInsulinModelSettings(fiaspModelEnabled: FeatureFlags.fiaspInsulinModelEnabled, walshModelEnabled: FeatureFlags.walshInsulinModelEnabled),
                                           pumpSupportedIncrements: pumpSupportedIncrements,
-                                          syncPumpSchedule: deviceManager.pumpManager?.syncBasalRateSchedule,
+                                          syncPumpSchedule: syncBasalRateSchedule,
                                           sensitivityOverridesEnabled: FeatureFlags.sensitivityOverridesEnabled,
                                           initialDosingEnabled: deviceManager.loopManager.settings.dosingEnabled,
                                           delegate: self
