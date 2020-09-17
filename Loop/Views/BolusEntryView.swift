@@ -253,6 +253,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         HStack {
             Text("Recommended Bolus", comment: "Label for recommended bolus row on bolus screen")
             Spacer()
+            ActivityIndicator(isAnimating: $viewModel.isRefreshingPump, style: .default)
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)

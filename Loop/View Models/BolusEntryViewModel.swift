@@ -72,11 +72,11 @@ final class BolusEntryViewModel: ObservableObject {
     private let log = OSLog(category: "BolusEntryViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
-    private var pumpManagerRefreshCompletion: (() -> Void)?
     private var isPumpDataStale: Bool {
         // "borrowed" from LoopDataManager
         Date().timeIntervalSince(dataManager.doseStore.lastAddedPumpData) <= dataManager.loopManager.settings.inputDataRecencyInterval
     }
+    @Published var isRefreshingPump: Bool = false
     
     let chartManager: ChartsManager = {
         let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil,
@@ -112,18 +112,12 @@ final class BolusEntryViewModel: ObservableObject {
 
         update()
     }
-
+    
     private func observeLoopUpdates() {
         NotificationCenter.default
             .publisher(for: .LoopDataUpdated, object: dataManager.loopManager)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.update() }
-            .store(in: &cancellables)
-        
-        // Look for Loop starting, and assume that if it started after assertCurrentPumpData that we want to call pumpManagerRefreshCompletion
-        NotificationCenter.default
-            .publisher(for: .LoopRunning, object: dataManager.loopManager)
-            .sink { [weak self] _ in self?.pumpManagerRefreshCompletion?(); self?.pumpManagerRefreshCompletion = nil }
             .store(in: &cancellables)
     }
 
@@ -201,6 +195,7 @@ final class BolusEntryViewModel: ObservableObject {
     func setRecommendedBolus() {
         guard isBolusRecommended else { return }
         enteredBolus = recommendedBolus!
+        isRefreshingPump = false
         dataManager.loopManager.getLoopState { [weak self] manager, state in
             self?.updatePredictedGlucoseValues(from: state)
         }
@@ -517,8 +512,25 @@ final class BolusEntryViewModel: ObservableObject {
             completion()
             return
         }
-        pumpManagerRefreshCompletion = completion
-        pumpManager.assertCurrentPumpData()
+        
+        DispatchQueue.main.async {
+            // v-- This needs to happen on the main queue
+            self.isRefreshingPump = true
+            let wrappedCompletion: () -> Void = { [weak self] in
+                self?.dataManager.loopManager.getLoopState { [weak self] _, _ in
+                    // v-- This needs to happen in LoopDataManager's dataQueue
+                    completion()
+                    // ^v-- Unfortunately, these two things might happen concurrently, so in theory the
+                    // completion above may not "complete" by the time we clear isRefreshingPump.  To fix that
+                    // would require some very confusing wiring, but I think it is a minor issue.
+                    DispatchQueue.main.async {
+                        // v-- This needs to happen on the main queue
+                        self?.isRefreshingPump = false
+                    }
+                }
+            }
+            pumpManager.ensureCurrentPumpData(completion: wrappedCompletion)
+        }
     }
     
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
