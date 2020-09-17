@@ -163,7 +163,6 @@
 		43C05CCA21EC382B006FB252 /* NumberEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C05CC921EC382B006FB252 /* NumberEntry.swift */; };
 		43C0944A1CACCC73001F6403 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C094491CACCC73001F6403 /* NotificationManager.swift */; };
 		43C2FAE11EB656A500364AFF /* GlucoseEffectVelocity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */; };
-		43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */; };
 		43C513191E864C4E001547C7 /* GlucoseRangeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */; };
 		43C5F257222C7B7200905D10 /* TimeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C5F256222C7B7200905D10 /* TimeComponents.swift */; };
 		43C5F258222C7BD400905D10 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D9FFA421EA9A0C00AF44BF /* AppDelegate.swift */; };
@@ -229,7 +228,6 @@
 		43F1C31A1F5DC87700395429 /* ChartPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 438991661E91B563000EEF90 /* ChartPoint.swift */; };
 		43F41C371D3BF32400C11ED6 /* UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F41C361D3BF32400C11ED6 /* UIAlertController.swift */; };
 		43F5C2C91B929C09003EB13D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F5C2C81B929C09003EB13D /* HealthKit.framework */; };
-		43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */; };
 		43F64DD91D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */; };
 		43F78D261C8FC000002152D1 /* DoseMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F78D251C8FC000002152D1 /* DoseMath.swift */; };
 		43F78D4F1C914197002152D1 /* LoopKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F78D4B1C914197002152D1 /* LoopKit.framework */; };
@@ -313,7 +311,6 @@
 		892A5D59222F0A27008961AB /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D58222F0A27008961AB /* Debug.swift */; };
 		892A5D5B222F0D7C008961AB /* LoopTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */; };
 		892A5D692230C41D008961AB /* RangeReplaceableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */; };
-		892ADE0A2446E9C3007CE08C /* ExplicitlyDismissibleModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */; };
 		892D7C5123B54A15008A9656 /* CarbEntryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */; };
 		892FB4CD22040104005293EC /* OverridePresetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CC22040104005293EC /* OverridePresetRow.swift */; };
 		892FB4CF220402C0005293EC /* OverrideSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 892FB4CE220402C0005293EC /* OverrideSelectionController.swift */; };
@@ -373,6 +370,10 @@
 		89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */; };
 		89FE21AD24AC57E30033F501 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89FE21AC24AC57E30033F501 /* Collection.swift */; };
 		A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */; };
+		A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */; };
+		A9347F3124E7521800C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */; };
+		A9347F3224E7522400C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */; };
+		A9347F3324E7522900C99C34 /* WatchHistoricalCarbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */; };
 		A966152623EA5A26005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */; };
 		A966152723EA5A26005D8B29 /* DerivedAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */; };
 		A966152A23EA5A37005D8B29 /* DefaultAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A966152823EA5A37005D8B29 /* DefaultAssets.xcassets */; };
@@ -380,7 +381,6 @@
 		A98556852493F901000FD662 /* AlertStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98556842493F901000FD662 /* AlertStore+SimulatedCoreData.swift */; };
 		A999D40424663CE1004C89D4 /* DoseStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40324663CE1004C89D4 /* DoseStore.swift */; };
 		A999D40624663D18004C89D4 /* PumpManagerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40524663D18004C89D4 /* PumpManagerError.swift */; };
-		A999D40824663D6D004C89D4 /* SetBolusError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40724663D6D004C89D4 /* SetBolusError.swift */; };
 		A999D40A24663DC7004C89D4 /* CarbStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A999D40924663DC7004C89D4 /* CarbStore.swift */; };
 		A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */; };
 		A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 439897341CD2F7DE00223065 /* NSTimeInterval.swift */; };
@@ -395,10 +395,11 @@
 		A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */; };
 		A9CBE45C248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */; };
 		A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DAE7CF2332D77F006AE942 /* LoopTests.swift */; };
+		A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */; };
+		A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */; };
 		A9E6DFE6246A042E005B1A1C /* CarbStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */; };
 		A9E6DFE8246A043D005B1A1C /* DoseStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */; };
 		A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */; };
-		A9E6DFEC246A0453005B1A1C /* SetBolusErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFEB246A0453005B1A1C /* SetBolusErrorTests.swift */; };
 		A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */; };
 		A9F66FC3247F451500096EA7 /* UIDevice+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */; };
 		A9F703732489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */; };
@@ -436,6 +437,8 @@
 		C13255D6223E7BE2008AF50C /* BolusProgressTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */; };
 		C136AA2423109CC6008A320D /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C13BAD941E8009B000050CB5 /* NumberFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43BFF0B31E45C1BE00FF19A9 /* NumberFormatter.swift */; };
+		C13DA2B024F6C7690098BB29 /* UIViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13DA2AF24F6C7690098BB29 /* UIViewController.swift */; };
+		C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */; };
 		C165B8CE23302C5D0004112E /* RemoteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = C165B8CD23302C5D0004112E /* RemoteCommand.swift */; };
 		C16DA84222E8E112008624C2 /* LoopPlugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = C16DA84122E8E112008624C2 /* LoopPlugins.swift */; };
 		C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17824991E1999FA00D9D25C /* CaseCountable.swift */; };
@@ -457,6 +460,7 @@
 		C1FB428D21791D2500FAB378 /* PumpManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C3B6F620BBCAA30026CAFA /* PumpManager.swift */; };
 		C1FB428F217921D600FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
 		C1FB4290217922A100FAB378 /* PumpManagerUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB428E217921D600FAB378 /* PumpManagerUI.swift */; };
+		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E90909D124E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */; };
 		E90909D224E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */; };
 		E90909D324E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E90909CE24E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json */; };
@@ -503,7 +507,6 @@
 		E98A55F524EEE15A0008715D /* OnOffSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */; };
 		E98A55F724EEE1E10008715D /* OnOffSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */; };
 		E98A55F924EEFC200008715D /* OnOffSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */; };
-		E9BB27AB23B85C3500FB4987 /* SleepStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9BB27AA23B85C3500FB4987 /* SleepStore.swift */; };
 		E9C00EF224C6221B00628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF324C6222400628F35 /* LoopSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EEF24C620EF00628F35 /* LoopSettings.swift */; };
 		E9C00EF524C623EF00628F35 /* LoopSettings+Loop.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */; };
@@ -514,12 +517,6 @@
 		E9C58A7F24DB529A00487A17 /* counteraction_effect_falling_glucose.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7A24DB529A00487A17 /* counteraction_effect_falling_glucose.json */; };
 		E9C58A8024DB529A00487A17 /* insulin_effect.json in Resources */ = {isa = PBXBuildFile; fileRef = E9C58A7B24DB529A00487A17 /* insulin_effect.json */; };
 		E9E5E56024D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json in Resources */ = {isa = PBXBuildFile; fileRef = E9E5E55F24D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json */; };
-		F5B07EDE24F3D4B800BFE78C /* ckcomplication.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EDC24F3D4B800BFE78C /* ckcomplication.strings */; };
-		F5B07EE324F3D4B800BFE78C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EE124F3D4B800BFE78C /* InfoPlist.strings */; };
-		F5B07EE624F3D4B800BFE78C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EE424F3D4B800BFE78C /* InfoPlist.strings */; };
-		F5B07EE924F3D4B800BFE78C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EE724F3D4B800BFE78C /* InfoPlist.strings */; };
-		F5B07EEC24F3D4B800BFE78C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EEA24F3D4B800BFE78C /* InfoPlist.strings */; };
-		F5B07EF024F3D4B800BFE78C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5B07EEE24F3D4B800BFE78C /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -827,7 +824,6 @@
 		43C094491CACCC73001F6403 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		43C246A71D89990F0031F8D1 /* Crypto.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Crypto.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		43C2FAE01EB656A500364AFF /* GlucoseEffectVelocity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseEffectVelocity.swift; sourceTree = "<group>"; };
-		43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsImageTableViewCell.swift; sourceTree = "<group>"; };
 		43C3B6F620BBCAA30026CAFA /* PumpManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManager.swift; sourceTree = "<group>"; };
 		43C513181E864C4E001547C7 /* GlucoseRangeSchedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlucoseRangeSchedule.swift; sourceTree = "<group>"; };
 		43C5F256222C7B7200905D10 /* TimeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeComponents.swift; sourceTree = "<group>"; };
@@ -885,7 +881,6 @@
 		43F5C2C81B929C09003EB13D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		43F5C2D41B92A4A6003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		43F5C2D61B92A4DC003EB13D /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingsTableViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleSubtitleTableViewCell.swift; sourceTree = "<group>"; };
 		43F78D251C8FC000002152D1 /* DoseMath.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoseMath.swift; sourceTree = "<group>"; };
 		43F78D4B1C914197002152D1 /* LoopKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LoopKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1159,7 +1154,6 @@
 		892A5D58222F0A27008961AB /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		892A5D5A222F0D7C008961AB /* LoopTestingKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; name = LoopTestingKit.framework; path = Carthage/Build/iOS/LoopTestingKit.framework; sourceTree = SOURCE_ROOT; };
 		892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeReplaceableCollection.swift; sourceTree = "<group>"; };
-		892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplicitlyDismissibleModal.swift; sourceTree = "<group>"; };
 		892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbEntryViewController.swift; sourceTree = "<group>"; };
 		892FB4CC22040104005293EC /* OverridePresetRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverridePresetRow.swift; sourceTree = "<group>"; };
 		892FB4CE220402C0005293EC /* OverrideSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverrideSelectionController.swift; sourceTree = "<group>"; };
@@ -1218,6 +1212,8 @@
 		89F9119524358E6900ECCAF3 /* BolusPickerValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BolusPickerValues.swift; sourceTree = "<group>"; };
 		89FE21AC24AC57E30033F501 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		A92E557D2464DFFD00DB93BB /* DosingDecisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DosingDecisionStore.swift; path = ../Stores/DosingDecisionStore.swift; sourceTree = "<group>"; };
+		A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbs.swift; sourceTree = "<group>"; };
+		A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfo.swift; sourceTree = "<group>"; };
 		A951C5FF23E8AB51003E26DC /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
 		A966152423EA5A25005D8B29 /* DefaultAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DefaultAssets.xcassets; sourceTree = "<group>"; };
 		A966152523EA5A25005D8B29 /* DerivedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = DerivedAssets.xcassets; sourceTree = "<group>"; };
@@ -1226,7 +1222,6 @@
 		A98556842493F901000FD662 /* AlertStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlertStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A999D40324663CE1004C89D4 /* DoseStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStore.swift; sourceTree = "<group>"; };
 		A999D40524663D18004C89D4 /* PumpManagerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerError.swift; sourceTree = "<group>"; };
-		A999D40724663D6D004C89D4 /* SetBolusError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetBolusError.swift; sourceTree = "<group>"; };
 		A999D40924663DC7004C89D4 /* CarbStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStore.swift; sourceTree = "<group>"; };
 		A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DosingDecisionStoreTests.swift; sourceTree = "<group>"; };
 		A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserNotifications+Loop.swift"; sourceTree = "<group>"; };
@@ -1240,10 +1235,11 @@
 		A9CBE459248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DosingDecisionStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
 		A9DAE7CF2332D77F006AE942 /* LoopTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoopTests.swift; sourceTree = "<group>"; };
+		A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbBackfillRequestUserInfoTests.swift; sourceTree = "<group>"; };
+		A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHistoricalCarbsTests.swift; sourceTree = "<group>"; };
 		A9E6DFE5246A042E005B1A1C /* CarbStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarbStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoseStoreTests.swift; sourceTree = "<group>"; };
 		A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerErrorTests.swift; sourceTree = "<group>"; };
-		A9E6DFEB246A0453005B1A1C /* SetBolusErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetBolusErrorTests.swift; sourceTree = "<group>"; };
 		A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopErrorTests.swift; sourceTree = "<group>"; };
 		A9F66FC2247F451500096EA7 /* UIDevice+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Loop.swift"; sourceTree = "<group>"; };
 		A9F703722489BC8500C98AD8 /* CarbStore+SimulatedCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CarbStore+SimulatedCoreData.swift"; sourceTree = "<group>"; };
@@ -1279,6 +1275,8 @@
 		C12CB9B623106A6200F84978 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12CB9B823106A6300F84978 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Intents.strings; sourceTree = "<group>"; };
 		C12F21A61DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = recommend_temp_basal_very_low_end_in_range.json; sourceTree = "<group>"; };
+		C13DA2AF24F6C7690098BB29 /* UIViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewController.swift; sourceTree = "<group>"; };
+		C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryUncertaintyAlertManager.swift; sourceTree = "<group>"; };
 		C165B8CD23302C5D0004112E /* RemoteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommand.swift; sourceTree = "<group>"; };
 		C16DA84122E8E112008624C2 /* LoopPlugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopPlugins.swift; sourceTree = "<group>"; };
 		C17824991E1999FA00D9D25C /* CaseCountable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CaseCountable.swift; sourceTree = "<group>"; };
@@ -1299,6 +1297,7 @@
 		C1F8B1DB223862D500DD66CF /* BolusProgressTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = BolusProgressTableViewCell.xib; sourceTree = "<group>"; };
 		C1FB428B217806A300FAB378 /* StateColorPalette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StateColorPalette.swift; sourceTree = "<group>"; };
 		C1FB428E217921D600FAB378 /* PumpManagerUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PumpManagerUI.swift; sourceTree = "<group>"; };
+		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E90909CC24E34AC500F963D2 /* high_and_rising_with_cob_momentum_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_momentum_effect.json; sourceTree = "<group>"; };
 		E90909CD24E34AC500F963D2 /* high_and_rising_with_cob_insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_insulin_effect.json; sourceTree = "<group>"; };
 		E90909CE24E34AC500F963D2 /* high_and_rising_with_cob_predicted_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = high_and_rising_with_cob_predicted_glucose.json; sourceTree = "<group>"; };
@@ -1345,7 +1344,6 @@
 		E98A55F424EEE15A0008715D /* OnOffSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionController.swift; sourceTree = "<group>"; };
 		E98A55F624EEE1E10008715D /* OnOffSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionView.swift; sourceTree = "<group>"; };
 		E98A55F824EEFC200008715D /* OnOffSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnOffSelectionViewModel.swift; sourceTree = "<group>"; };
-		E9BB27AA23B85C3500FB4987 /* SleepStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepStore.swift; sourceTree = "<group>"; };
 		E9C00EEF24C620EF00628F35 /* LoopSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopSettings.swift; sourceTree = "<group>"; };
 		E9C00EF424C623EF00628F35 /* LoopSettings+Loop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LoopSettings+Loop.swift"; sourceTree = "<group>"; };
 		E9C58A7124DB489100487A17 /* LoopDataManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopDataManagerTests.swift; sourceTree = "<group>"; };
@@ -1355,149 +1353,6 @@
 		E9C58A7A24DB529A00487A17 /* counteraction_effect_falling_glucose.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = counteraction_effect_falling_glucose.json; sourceTree = "<group>"; };
 		E9C58A7B24DB529A00487A17 /* insulin_effect.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = insulin_effect.json; sourceTree = "<group>"; };
 		E9E5E55F24D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = far_future_high_bg_forecast_after_6_hours.json; sourceTree = "<group>"; };
-		F50F464724F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464824F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464924F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464A24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F50F464B24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464C24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464D24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464E24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F50F464F24F3D4C60087DD2E /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5193D9324F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5193D9424F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9524F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9624F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9724F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9824F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9924F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5193D9A24F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5193D9B24F3D4F00008375F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35BC24F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35BD24F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F51D35BE24F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35BF24F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35C024F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35C124F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35C224F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35C324F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F51D35C424F3D51800FC17B0 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F531E26F24F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27024F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/ckcomplication.strings"; sourceTree = "<group>"; };
-		F531E27124F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27224F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27324F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27424F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27524F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27624F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F531E27724F3D544004BAFAA /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		F536B9F724F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F536B9F824F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9F924F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9FA24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9FB24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9FC24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9FD24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F536B9FE24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F536B9FF24F3D56E000153A8 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69E624F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69E724F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F56A69E824F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69E924F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69EA24F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69EB24F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69EC24F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69ED24F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F56A69EE24F3D4D400DA39D1 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F570A24524F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F570A24624F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24724F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24824F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24924F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24A24F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24B24F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24C24F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F570A24D24F3D4FD00B01AFE /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F575CEA524F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F575CEA624F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEA724F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEA824F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEA924F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEAA24F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEAB24F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F575CEAC24F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F575CEAD24F3D52700990A54 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3524F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3624F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5870C3724F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3824F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3924F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3A24F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3B24F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5870C3C24F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5870C3D24F3D55200FA7DCF /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A124F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F58CC8A224F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A324F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A424F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A524F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A624F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A724F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A824F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F58CC8A924F3D57D00A05917 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5B07EDD24F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5B07EDF24F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EE024F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EE224F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EE524F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EE824F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EEB24F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EED24F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5B07EEF24F3D4B800BFE78C /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5C15A8C24F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A8D24F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A8E24F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5C15A8F24F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A9024F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A9124F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A9224F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C15A9324F3D4E2000B4B2D /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5C78B5C24F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5C78B5D24F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B5E24F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B5F24F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B6024F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B6124F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B6224F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B6324F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5C78B6424F3D50C00CBD6F7 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5D7237A24F3D535005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7237B24F3D535005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5D7237C24F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7237D24F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7237E24F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7237F24F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7238024F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7238124F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5D7238224F3D536005AF46F /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5E04AFA24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/ckcomplication.strings; sourceTree = "<group>"; };
-		F5E04AFB24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04AFC24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04AFD24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04AFE24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04AFF24F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04B0024F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04B0124F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		F5E04B0224F3D56000BB52FB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		F5E2F93424F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93524F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/ckcomplication.strings"; sourceTree = "<group>"; };
-		F5E2F93624F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93724F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93824F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93924F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93A24F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93B24F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		F5E2F93C24F3D58C00B81A9D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1798,8 +1653,6 @@
 				7D7076601FE06EE3004AC8EA /* Localizable.strings */,
 				43D533BB1CFD1DD7009E3085 /* WatchApp Extension.entitlements */,
 				43A943911B926B7B0051FA24 /* Info.plist */,
-				F5B07EEA24F3D4B800BFE78C /* InfoPlist.strings */,
-				F5B07EDC24F3D4B800BFE78C /* ckcomplication.strings */,
 				43A9438D1B926B7B0051FA24 /* ComplicationController.swift */,
 				43A943871B926B7B0051FA24 /* ExtensionDelegate.swift */,
 				43A9438F1B926B7B0051FA24 /* Assets.xcassets */,
@@ -1919,8 +1772,6 @@
 				43D848AF1E7DCBE100DADCBC /* Result.swift */,
 				43D9FFD121EAE05D00AF44BF /* LoopCore.h */,
 				43D9FFD221EAE05D00AF44BF /* Info.plist */,
-				F5B07EEE24F3D4B800BFE78C /* Localizable.strings */,
-				F5B07EE124F3D4B800BFE78C /* InfoPlist.strings */,
 				E9C00EEF24C620EF00628F35 /* LoopSettings.swift */,
 			);
 			path = LoopCore;
@@ -1933,7 +1784,6 @@
 				43E2D8E01D20C0CB004DA55F /* Fixtures */,
 				43E2D8D31D20BF42004DA55F /* DoseMathTests.swift */,
 				43E2D8D51D20BF42004DA55F /* Info.plist */,
-				F5B07EE424F3D4B800BFE78C /* InfoPlist.strings */,
 			);
 			path = DoseMathTests;
 			sourceTree = "<group>";
@@ -1990,7 +1840,6 @@
 				A9F703762489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift */,
 				A999D40524663D18004C89D4 /* PumpManagerError.swift */,
 				892A5D682230C41D008961AB /* RangeReplaceableCollection.swift */,
-				A999D40724663D6D004C89D4 /* SetBolusError.swift */,
 				A9CBE45B248ACC03008E7BA2 /* SettingsStore+SimulatedCoreData.swift */,
 				C1FB428B217806A300FAB378 /* StateColorPalette.swift */,
 				43F89CA222BDFBBC006BB54E /* UIActivityIndicatorView.swift */,
@@ -1999,6 +1848,7 @@
 				8968B1112408B3520074BB48 /* UIFont.swift */,
 				437CEEE31CDE5C0A003C8C80 /* UIImage.swift */,
 				434FF1ED1CF27EEF000DB779 /* UITableViewCell.swift */,
+				C13DA2AF24F6C7690098BB29 /* UIViewController.swift */,
 				430B29922041F5B200BA9F93 /* UserDefaults+Loop.swift */,
 				A9B607AF247F000F00792BE4 /* UserNotifications+Loop.swift */,
 			);
@@ -2013,12 +1863,10 @@
 				892D7C5023B54A14008A9656 /* CarbEntryViewController.swift */,
 				43A51E201EB6DBDD000736CC /* LoopChartsTableViewController.swift */,
 				433EA4C31D9F71C800CD78FB /* CommandResponseViewController.swift */,
-				892ADE092446E9C3007CE08C /* ExplicitlyDismissibleModal.swift */,
 				C178249F1E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift */,
 				4302F4E21D4EA54200F0FCAF /* InsulinDeliveryTableViewController.swift */,
 				437D9BA21D7BC977007245E8 /* PredictionTableViewController.swift */,
 				439A7941211F631C0041B75F /* RootNavigationController.swift */,
-				43F5C2DA1B92A5E1003EB13D /* SettingsTableViewController.swift */,
 				43E3449E1B9D68E900C85C07 /* StatusTableViewController.swift */,
 				89CA2B31226C18B8004D9350 /* TestingScenariosTableViewController.swift */,
 				4302F4E01D4E9C8900F0FCAF /* TextFieldTableViewController.swift */,
@@ -2040,8 +1888,8 @@
 				899433B723FE129700FA4BEA /* OverrideBadgeView.swift */,
 				89CAB36224C8FE95009EE3CE /* PredictedGlucoseChartView.swift */,
 				438D42FA1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift */,
+				439706E522D2E84900C81566 /* PredictionSettingTableViewCell.swift */,
 				1D49795724E7289700948F05 /* ServicesViewModel.swift */,
-				43C3B6EB20B650A80026CAFA /* SettingsImageTableViewCell.swift */,
 				1DE09BA824A3E23F009EE9F9 /* SettingsView.swift */,
 				1DB1CA4E24A56D7600B3B94C /* SettingsViewModel.swift */,
 				43F64DD81D9C92C900D24DC6 /* TitleSubtitleTableViewCell.swift */,
@@ -2077,6 +1925,7 @@
 				89ADE13A226BFA0F0067222B /* TestingScenariosManager.swift */,
 				4328E0341CFC0AE100E199AA /* WatchDataManager.swift */,
 				E9BB27AA23B85C3500FB4987 /* SleepStore.swift */,
+				C148CEE624FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -2103,7 +1952,6 @@
 				7D7076371FE06EDE004AC8EA /* Localizable.strings */,
 				4F70C1FD1DE8E662006380B7 /* Loop Status Extension.entitlements */,
 				4F70C1E51DE8DCA7006380B7 /* Info.plist */,
-				F5B07EE724F3D4B800BFE78C /* InfoPlist.strings */,
 				43BFF0CC1E466C8400FF19A9 /* StateColorPalette.swift */,
 				43FCEEB0221A863E0013DD30 /* StatusChartsManager.swift */,
 				4F70C1E01DE8DCA7006380B7 /* StatusViewController.swift */,
@@ -2233,6 +2081,7 @@
 			isa = PBXGroup;
 			children = (
 				89F9119324358E4500ECCAF3 /* CarbAbsorptionTime.swift */,
+				A9347F3024E7521800C99C34 /* CarbBackfillRequestUserInfo.swift */,
 				4F11D3BF20DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift */,
 				4372E48F213CFCE70068E043 /* LoopSettingsUserInfo.swift */,
 				43C3B6F620BBCAA30026CAFA /* PumpManager.swift */,
@@ -2242,6 +2091,7 @@
 				89A1B66D24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift */,
 				4FF4D0FF1E18374700846527 /* WatchContext.swift */,
 				C1201E2B23ECDBD0002DA84A /* WatchContextRequestUserInfo.swift */,
+				A9347F2E24E7508A00C99C34 /* WatchHistoricalCarbs.swift */,
 				4F11D3C120DD80B3006E072C /* WatchHistoricalGlucose.swift */,
 				4F7E8AC620E2AC0300AEA65E /* WatchPredictedGlucose.swift */,
 			);
@@ -2407,7 +2257,6 @@
 				A9E6DFE7246A043C005B1A1C /* DoseStoreTests.swift */,
 				A9A63F8C246B261100588D5B /* DosingDecisionStoreTests.swift */,
 				A9E6DFE9246A0448005B1A1C /* PumpManagerErrorTests.swift */,
-				A9E6DFEB246A0453005B1A1C /* SetBolusErrorTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2415,7 +2264,9 @@
 		A9E6DFED246A0460005B1A1C /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A9DFAFB224F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift */,
 				A9E6DFEE246A0474005B1A1C /* LoopErrorTests.swift */,
+				A9DFAFB424F048A000950D1E /* WatchHistoricalCarbsTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2993,9 +2844,7 @@
 			files = (
 				7D70765E1FE06EE3004AC8EA /* Localizable.strings in Resources */,
 				43A943901B926B7B0051FA24 /* Assets.xcassets in Resources */,
-				F5B07EDE24F3D4B800BFE78C /* ckcomplication.strings in Resources */,
 				B405E35924D2A75B00DD058D /* DerivedAssets.xcassets in Resources */,
-				F5B07EEC24F3D4B800BFE78C /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3003,8 +2852,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5B07EE324F3D4B800BFE78C /* InfoPlist.strings in Resources */,
-				F5B07EF024F3D4B800BFE78C /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3041,7 +2888,6 @@
 				43E2D8ED1D20C0DB004DA55F /* recommend_temp_basal_correct_low_at_min.json in Resources */,
 				43E2D8F01D20C0DB004DA55F /* recommend_temp_basal_high_and_rising.json in Resources */,
 				C12F21A71DFA79CB00748193 /* recommend_temp_basal_very_low_end_in_range.json in Resources */,
-				F5B07EE624F3D4B800BFE78C /* InfoPlist.strings in Resources */,
 				E9E5E56024D3519700B5DFFE /* far_future_high_bg_forecast_after_6_hours.json in Resources */,
 				43E2D8F11D20C0DB004DA55F /* recommend_temp_basal_in_range_and_rising.json in Resources */,
 				43E2D8EE1D20C0DB004DA55F /* recommend_temp_basal_flat_and_high.json in Resources */,
@@ -3088,6 +2934,7 @@
 				E9C58A7D24DB529A00487A17 /* basal_profile.json in Resources */,
 				E93E86CD24E2E02200FF40C8 /* high_and_stable_counteraction_effect.json in Resources */,
 				E93E86C324E1FE6100FF40C8 /* flat_and_stable_counteraction_effect.json in Resources */,
+				7D2366E621250E0A0028B67D /* InfoPlist.strings in Resources */,
 				E9C58A7E24DB529A00487A17 /* dynamic_glucose_effect_partially_observed.json in Resources */,
 				E90909F324E35B4D00F963D2 /* high_and_falling_carb_effect.json in Resources */,
 				E93E86CA24E2E02200FF40C8 /* high_and_stable_insulin_effect.json in Resources */,
@@ -3106,7 +2953,6 @@
 				4F70C1E41DE8DCA7006380B7 /* MainInterface.storyboard in Resources */,
 				B405E35B24D2E05600DD058D /* HUDAssets.xcassets in Resources */,
 				7D7076351FE06EDE004AC8EA /* Localizable.strings in Resources */,
-				F5B07EE924F3D4B800BFE78C /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3350,8 +3196,6 @@
 				1DDE273F24AEA4F200796622 /* NotificationsCriticalAlertPermissionsViewModel.swift in Sources */,
 				439A7942211F631C0041B75F /* RootNavigationController.swift in Sources */,
 				4F11D3C020DCBEEC006E072C /* GlucoseBackfillRequestUserInfo.swift in Sources */,
-				892ADE0A2446E9C3007CE08C /* ExplicitlyDismissibleModal.swift in Sources */,
-				43F5C2DB1B92A5E1003EB13D /* SettingsTableViewController.swift in Sources */,
 				89E267FC2292456700A3F2AF /* FeatureFlags.swift in Sources */,
 				43A567691C94880B00334FAC /* LoopDataManager.swift in Sources */,
 				1DA649A9244126DA00F61E75 /* InAppModalAlertPresenter.swift in Sources */,
@@ -3366,6 +3210,7 @@
 				A9CBE45A248ACBE1008E7BA2 /* DosingDecisionStore+SimulatedCoreData.swift in Sources */,
 				A9C62D8A2331703100535612 /* ServicesManager.swift in Sources */,
 				43DBF0531C93EC8200B3C386 /* DeviceDataManager.swift in Sources */,
+				A9347F2F24E7508A00C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				C17824A01E19CF9800D9D25C /* GlucoseThresholdTableViewController.swift in Sources */,
 				4372E487213C86240068E043 /* SampleValue.swift in Sources */,
 				437CEEE41CDE5C0A003C8C80 /* UIImage.swift in Sources */,
@@ -3391,6 +3236,7 @@
 				C178249A1E1999FA00D9D25C /* CaseCountable.swift in Sources */,
 				B4F3D25124AF890C0095CE44 /* BluetoothStateManager.swift in Sources */,
 				1DDE273D24AEA4B000796622 /* SettingsViewModel.swift in Sources */,
+				A9347F3124E7521800C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				A9CBE458248AB564008E7BA2 /* DoseStore+SimulatedCoreData.swift in Sources */,
 				897A5A9924C22DE800C4E71D /* BolusEntryViewModel.swift in Sources */,
 				4374B5EF209D84BF00D17AA8 /* OSLog.swift in Sources */,
@@ -3403,6 +3249,7 @@
 				1D4A3E2E2478628500FD601B /* StoredAlert+CoreDataProperties.swift in Sources */,
 				E95D380124EADE7C005E2F50 /* DoseStoreProtocol.swift in Sources */,
 				43D381621EBD9759007F8C8F /* HeaderValuesTableViewCell.swift in Sources */,
+				C13DA2B024F6C7690098BB29 /* UIViewController.swift in Sources */,
 				A9C62D892331703100535612 /* LoggingServicesManager.swift in Sources */,
 				89E267FF229267DF00A3F2AF /* Optional.swift in Sources */,
 				43785E982120E7060057DED1 /* Intents.intentdefinition in Sources */,
@@ -3415,6 +3262,7 @@
 				C1FB428C217806A400FAB378 /* StateColorPalette.swift in Sources */,
 				4F08DE8F1E7BB871006741EA /* CollectionType+Loop.swift in Sources */,
 				A9F703772489D8AA00C98AD8 /* PersistentDeviceLog+SimulatedCoreData.swift in Sources */,
+				C148CEE724FD91BD00711B3B /* DeliveryUncertaintyAlertManager.swift in Sources */,
 				435400341C9F878D00D5819C /* SetBolusUserInfo.swift in Sources */,
 				1DDE273E24AEA4B000796622 /* SettingsView.swift in Sources */,
 				A9B607B0247F000F00792BE4 /* UserNotifications+Loop.swift in Sources */,
@@ -3432,7 +3280,6 @@
 				4328E0331CFC091100E199AA /* WatchContext+LoopKit.swift in Sources */,
 				4F526D611DF8D9A900A04910 /* NetBasal.swift in Sources */,
 				A92E557E2464DFFD00DB93BB /* DosingDecisionStore.swift in Sources */,
-				43C3B6EC20B650A80026CAFA /* SettingsImageTableViewCell.swift in Sources */,
 				89ADE13B226BFA0F0067222B /* TestingScenariosManager.swift in Sources */,
 				4F7E8ACB20E2ACB500AEA65E /* WatchPredictedGlucose.swift in Sources */,
 				436A0DA51D236A2A00104B24 /* LoopError.swift in Sources */,
@@ -3458,7 +3305,6 @@
 				439706E622D2E84900C81566 /* PredictionSettingTableViewCell.swift in Sources */,
 				430D85891F44037000AF2D4F /* HUDViewTableViewCell.swift in Sources */,
 				43A51E211EB6DBDD000736CC /* LoopChartsTableViewController.swift in Sources */,
-				A999D40824663D6D004C89D4 /* SetBolusError.swift in Sources */,
 				8968B1122408B3520074BB48 /* UIFont.swift in Sources */,
 				438D42FB1D7D11A4003244B0 /* PredictionInputEffectTableViewCell.swift in Sources */,
 				89A1B66E24ABFDF800117AC2 /* SupportedBolusVolumesUserInfo.swift in Sources */,
@@ -3508,6 +3354,7 @@
 				89E08FC4242E73F0000D719B /* GramLabelPositionKey.swift in Sources */,
 				4F82655020E69F9A0031A8F5 /* HUDInterfaceController.swift in Sources */,
 				4372E492213D956C0068E043 /* GlucoseRangeSchedule.swift in Sources */,
+				A9347F3324E7522900C99C34 /* WatchHistoricalCarbs.swift in Sources */,
 				895788AD242E69A2002CB114 /* AbsorptionTimeSelection.swift in Sources */,
 				89A605EF2432925D009C1096 /* CompletionCheckmark.swift in Sources */,
 				89F9119624358E6900ECCAF3 /* BolusPickerValues.swift in Sources */,
@@ -3549,6 +3396,7 @@
 				C1201E2D23ECDF3D002DA84A /* WatchContextRequestUserInfo.swift in Sources */,
 				43A9438E1B926B7B0051FA24 /* ComplicationController.swift in Sources */,
 				43517917230A0E1A0072ECC0 /* WKInterfaceLabel.swift in Sources */,
+				A9347F3224E7522400C99C34 /* CarbBackfillRequestUserInfo.swift in Sources */,
 				895788B3242E69A2002CB114 /* ActionButton.swift in Sources */,
 				894F6DD3243BCBDB00CCE676 /* Environment+SizeClass.swift in Sources */,
 				E98A55F524EEE15A0008715D /* OnOffSelectionController.swift in Sources */,
@@ -3645,8 +3493,10 @@
 			files = (
 				1D80313D24746274002810DF /* AlertStoreTests.swift in Sources */,
 				A9A63F8E246B271600588D5B /* NSTimeInterval.swift in Sources */,
+				A9DFAFB324F0415E00950D1E /* CarbBackfillRequestUserInfoTests.swift in Sources */,
 				A9A63F8D246B261100588D5B /* DosingDecisionStoreTests.swift in Sources */,
 				A9E6DFEF246A0474005B1A1C /* LoopErrorTests.swift in Sources */,
+				A9DFAFB524F048A000950D1E /* WatchHistoricalCarbsTests.swift in Sources */,
 				A9E6DFEA246A0448005B1A1C /* PumpManagerErrorTests.swift in Sources */,
 				1DA7A84424477698008257F0 /* InAppModalAlertPresenterTests.swift in Sources */,
 				E93E86A824DDCC4400FF40C8 /* MockDoseStore.swift in Sources */,
@@ -3658,7 +3508,6 @@
 				A9E6DFE6246A042E005B1A1C /* CarbStoreTests.swift in Sources */,
 				A9DAE7D02332D77F006AE942 /* LoopTests.swift in Sources */,
 				E93E86B024DDE1BD00FF40C8 /* MockGlucoseStore.swift in Sources */,
-				A9E6DFEC246A0453005B1A1C /* SetBolusErrorTests.swift in Sources */,
 				1DFE9E172447B6270082C280 /* UserNotificationAlertPresenterTests.swift in Sources */,
 				A9E6DFE8246A043D005B1A1C /* DoseStoreTests.swift in Sources */,
 				E93E86B224DDE21D00FF40C8 /* MockCarbStore.swift in Sources */,
@@ -3980,22 +3829,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D23667A21250C480028B67D /* Base */,
-				F5B07EE024F3D4B800BFE78C /* da */,
-				F50F464924F3D4C60087DD2E /* de */,
-				F56A69E924F3D4D400DA39D1 /* es */,
-				F5C15A8D24F3D4E2000B4B2D /* fi */,
-				F5193D9624F3D4F00008375F /* fr */,
-				F570A24724F3D4FD00B01AFE /* it */,
-				F5C78B5E24F3D50C00CBD6F7 /* ja */,
-				F51D35BF24F3D51800FC17B0 /* nb */,
-				F575CEA824F3D52700990A54 /* nl */,
-				F5D7237C24F3D536005AF46F /* pl */,
-				F531E27124F3D544004BAFAA /* pt-BR */,
-				F5870C3724F3D55200FA7DCF /* ro */,
-				F5E04AFD24F3D56000BB52FB /* ru */,
-				F536B9F824F3D56E000153A8 /* sv */,
-				F58CC8A424F3D57D00A05917 /* vi */,
-				F5E2F93424F3D58C00B81A9D /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -4176,21 +4009,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				80F864E52433BF5D0026EC26 /* fi */,
-				F5B07EDF24F3D4B800BFE78C /* da */,
-				F50F464824F3D4C60087DD2E /* de */,
-				F56A69E824F3D4D400DA39D1 /* es */,
-				F5193D9524F3D4F00008375F /* fr */,
-				F570A24824F3D4FD00B01AFE /* it */,
-				F5C78B5F24F3D50C00CBD6F7 /* ja */,
-				F51D35BE24F3D51800FC17B0 /* nb */,
-				F575CEA924F3D52700990A54 /* nl */,
-				F5D7237A24F3D535005AF46F /* pl */,
-				F531E27224F3D544004BAFAA /* pt-BR */,
-				F5870C3D24F3D55200FA7DCF /* ro */,
-				F5E04AFB24F3D56000BB52FB /* ru */,
-				F536B9F924F3D56E000153A8 /* sv */,
-				F58CC8A224F3D57D00A05917 /* vi */,
-				F5E2F93724F3D58C00B81A9D /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -4199,162 +4017,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				7D23667E21250CAC0028B67D /* Base */,
-				F5B07EED24F3D4B800BFE78C /* da */,
-				F50F464E24F3D4C60087DD2E /* de */,
-				F56A69ED24F3D4D400DA39D1 /* es */,
-				F5C15A9224F3D4E2000B4B2D /* fi */,
-				F5193D9924F3D4F00008375F /* fr */,
-				F570A24C24F3D4FD00B01AFE /* it */,
-				F5C78B6324F3D50C00CBD6F7 /* ja */,
-				F51D35C324F3D51800FC17B0 /* nb */,
-				F575CEAD24F3D52700990A54 /* nl */,
-				F5D7238024F3D536005AF46F /* pl */,
-				F531E27624F3D544004BAFAA /* pt-BR */,
-				F5870C3A24F3D55200FA7DCF /* ro */,
-				F5E04B0024F3D56000BB52FB /* ru */,
-				F536B9FF24F3D56E000153A8 /* sv */,
-				F58CC8A824F3D57D00A05917 /* vi */,
-				F5E2F93B24F3D58C00B81A9D /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EDC24F3D4B800BFE78C /* ckcomplication.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EDD24F3D4B800BFE78C /* da */,
-				F50F464A24F3D4C60087DD2E /* de */,
-				F56A69E724F3D4D400DA39D1 /* es */,
-				F5C15A8E24F3D4E2000B4B2D /* fi */,
-				F5193D9324F3D4F00008375F /* fr */,
-				F570A24524F3D4FD00B01AFE /* it */,
-				F5C78B5C24F3D50C00CBD6F7 /* ja */,
-				F51D35BD24F3D51800FC17B0 /* nb */,
-				F575CEA524F3D52700990A54 /* nl */,
-				F5D7237B24F3D535005AF46F /* pl */,
-				F531E27024F3D544004BAFAA /* pt-BR */,
-				F5870C3624F3D55200FA7DCF /* ro */,
-				F5E04AFA24F3D56000BB52FB /* ru */,
-				F536B9F724F3D56E000153A8 /* sv */,
-				F58CC8A124F3D57D00A05917 /* vi */,
-				F5E2F93524F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = ckcomplication.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EE124F3D4B800BFE78C /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EE224F3D4B800BFE78C /* da */,
-				F50F464B24F3D4C60087DD2E /* de */,
-				F56A69EA24F3D4D400DA39D1 /* es */,
-				F5C15A8F24F3D4E2000B4B2D /* fi */,
-				F5193D9B24F3D4F00008375F /* fr */,
-				F570A24924F3D4FD00B01AFE /* it */,
-				F5C78B6124F3D50C00CBD6F7 /* ja */,
-				F51D35C024F3D51800FC17B0 /* nb */,
-				F575CEA724F3D52700990A54 /* nl */,
-				F5D7237D24F3D536005AF46F /* pl */,
-				F531E27324F3D544004BAFAA /* pt-BR */,
-				F5870C3824F3D55200FA7DCF /* ro */,
-				F5E04AFE24F3D56000BB52FB /* ru */,
-				F536B9FB24F3D56E000153A8 /* sv */,
-				F58CC8A524F3D57D00A05917 /* vi */,
-				F5E2F93824F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EE424F3D4B800BFE78C /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EE524F3D4B800BFE78C /* da */,
-				F50F464724F3D4C60087DD2E /* de */,
-				F56A69E624F3D4D400DA39D1 /* es */,
-				F5C15A8C24F3D4E2000B4B2D /* fi */,
-				F5193D9424F3D4F00008375F /* fr */,
-				F570A24624F3D4FD00B01AFE /* it */,
-				F5C78B5D24F3D50C00CBD6F7 /* ja */,
-				F51D35BC24F3D51800FC17B0 /* nb */,
-				F575CEA624F3D52700990A54 /* nl */,
-				F5D7238124F3D536005AF46F /* pl */,
-				F531E26F24F3D544004BAFAA /* pt-BR */,
-				F5870C3524F3D55200FA7DCF /* ro */,
-				F5E04AFC24F3D56000BB52FB /* ru */,
-				F536B9FA24F3D56E000153A8 /* sv */,
-				F58CC8A324F3D57D00A05917 /* vi */,
-				F5E2F93624F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EE724F3D4B800BFE78C /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EE824F3D4B800BFE78C /* da */,
-				F50F464C24F3D4C60087DD2E /* de */,
-				F56A69EB24F3D4D400DA39D1 /* es */,
-				F5C15A9024F3D4E2000B4B2D /* fi */,
-				F5193D9724F3D4F00008375F /* fr */,
-				F570A24A24F3D4FD00B01AFE /* it */,
-				F5C78B6024F3D50C00CBD6F7 /* ja */,
-				F51D35C124F3D51800FC17B0 /* nb */,
-				F575CEAA24F3D52700990A54 /* nl */,
-				F5D7237E24F3D536005AF46F /* pl */,
-				F531E27524F3D544004BAFAA /* pt-BR */,
-				F5870C3924F3D55200FA7DCF /* ro */,
-				F5E04AFF24F3D56000BB52FB /* ru */,
-				F536B9FD24F3D56E000153A8 /* sv */,
-				F58CC8A624F3D57D00A05917 /* vi */,
-				F5E2F93924F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EEA24F3D4B800BFE78C /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EEB24F3D4B800BFE78C /* da */,
-				F50F464D24F3D4C60087DD2E /* de */,
-				F56A69EC24F3D4D400DA39D1 /* es */,
-				F5C15A9124F3D4E2000B4B2D /* fi */,
-				F5193D9824F3D4F00008375F /* fr */,
-				F570A24B24F3D4FD00B01AFE /* it */,
-				F5C78B6224F3D50C00CBD6F7 /* ja */,
-				F51D35C224F3D51800FC17B0 /* nb */,
-				F575CEAB24F3D52700990A54 /* nl */,
-				F5D7237F24F3D536005AF46F /* pl */,
-				F531E27424F3D544004BAFAA /* pt-BR */,
-				F5870C3C24F3D55200FA7DCF /* ro */,
-				F5E04B0124F3D56000BB52FB /* ru */,
-				F536B9FC24F3D56E000153A8 /* sv */,
-				F58CC8A724F3D57D00A05917 /* vi */,
-				F5E2F93A24F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F5B07EEE24F3D4B800BFE78C /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F5B07EEF24F3D4B800BFE78C /* da */,
-				F50F464F24F3D4C60087DD2E /* de */,
-				F56A69EE24F3D4D400DA39D1 /* es */,
-				F5C15A9324F3D4E2000B4B2D /* fi */,
-				F5193D9A24F3D4F00008375F /* fr */,
-				F570A24D24F3D4FD00B01AFE /* it */,
-				F5C78B6424F3D50C00CBD6F7 /* ja */,
-				F51D35C424F3D51800FC17B0 /* nb */,
-				F575CEAC24F3D52700990A54 /* nl */,
-				F5D7238224F3D536005AF46F /* pl */,
-				F531E27724F3D544004BAFAA /* pt-BR */,
-				F5870C3B24F3D55200FA7DCF /* ro */,
-				F5E04B0224F3D56000BB52FB /* ru */,
-				F536B9FE24F3D56E000153A8 /* sv */,
-				F58CC8A924F3D57D00A05917 /* vi */,
-				F5E2F93C24F3D58C00B81A9D /* zh-Hans */,
-			);
-			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -4615,7 +4279,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-DDEBUG";
@@ -4634,7 +4298,7 @@
 				CODE_SIGN_ENTITLEMENTS = "$(LOOP_ENTITLEMENTS)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				INFOPLIST_FILE = Loop/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(MAIN_APP_BUNDLE_IDENTIFIER)";
@@ -4650,7 +4314,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4672,7 +4336,7 @@
 				CODE_SIGN_ENTITLEMENTS = "WatchApp Extension/WatchApp Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				INFOPLIST_FILE = "WatchApp Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4694,7 +4358,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -4716,7 +4380,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = "$(APPICON_NAME)";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/watchOS";
 				IBSC_MODULE = WatchApp_Extension;
 				INFOPLIST_FILE = WatchApp/Info.plist;
@@ -4879,7 +4543,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_DEBUG)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -4896,7 +4560,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Loop Status Extension/Loop Status Extension.entitlements";
 				CODE_SIGN_IDENTITY = "$(LOOP_CODE_SIGN_IDENTITY_RELEASE)";
 				CODE_SIGN_STYLE = "$(LOOP_CODE_SIGN_STYLE)";
-				DEVELOPMENT_TEAM = 25Y6X2KGTW;
+				DEVELOPMENT_TEAM = "$(LOOP_DEVELOPMENT_TEAM)";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = "Loop Status Extension/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
