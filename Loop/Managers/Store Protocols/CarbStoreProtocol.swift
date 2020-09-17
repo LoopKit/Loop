@@ -49,11 +49,11 @@ protocol CarbStoreProtocol: AnyObject {
     func generateDiagnosticReport(_ completion: @escaping (_ report: String) -> Void)
     
     // MARK: COB & Effect Generation
-    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(samples: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void)
+    func getGlucoseEffects(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping(_ result: CarbStoreResult<(entries: [StoredCarbEntry], effects: [GlucoseEffect])>) -> Void)
     
     func glucoseEffects<Sample: CarbEntry>(of samples: [Sample], startingAt start: Date, endingAt end: Date?, effectVelocities: [GlucoseEffectVelocity]?) throws -> [GlucoseEffect]
     
-    func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ values: [CarbValue]) -> Void)
+    func getCarbsOnBoardValues(start: Date, end: Date?, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<[CarbValue]>) -> Void)
     
     func carbsOnBoard(at date: Date, effectVelocities: [GlucoseEffectVelocity]?, completion: @escaping (_ result: CarbStoreResult<CarbValue>) -> Void)
     

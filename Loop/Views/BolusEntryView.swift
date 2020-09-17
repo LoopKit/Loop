@@ -32,7 +32,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 List {
-                    self.historySection
+                    self.chartSection
                     self.summarySection
                 }
                 // As of iOS 13, we can't programmatically scroll to the Bolus entry text field.  This ugly hack scoots the
@@ -85,7 +85,7 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
         shouldBolusEntryBecomeFirstResponder && geometry.size.height < 640
     }
     
-    private var historySection: some View {
+    private var chartSection: some View {
         Section {
             VStack(spacing: 8) {
                 HStack(spacing: 0) {
@@ -256,18 +256,16 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             HStack(alignment: .firstTextBaseline) {
                 Text(recommendedBolusString)
                     .font(.title)
-                    .foregroundColor(viewModel.enteredBolus.doubleValue(for: .internationalUnit()) == 0 && viewModel.isBolusRecommended ? .accentColor : Color(.label))
-                    .onTapGesture {
-                        self.viewModel.acceptRecommendedBolus()
-                    }
-
+                    .foregroundColor(Color(.label))
                 bolusUnitsLabel
             }
         }
     }
 
     private var recommendedBolusString: String {
-        let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) ?? 0
+        guard let amount = viewModel.recommendedBolus?.doubleValue(for: .internationalUnit()) else {
+            return "-"
+        }
         return Self.doseAmountFormatter.string(from: amount) ?? String(amount)
     }
 
@@ -337,6 +335,12 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
             return WarningView(
                 title: Text("No Recent Glucose Data", comment: "Title for bolus screen notice when glucose data is missing or stale"),
                 caption: Text("Enter a manual glucose for a recommended bolus amount.", comment: "Caption for bolus screen notice when glucose data is missing or stale")
+            )
+        case .stalePumpData:
+            return WarningView(
+                title: Text("No Recent Pump Data", comment: "Title for bolus screen notice when pump data is missing or stale"),
+                caption: Text("Your pump data is stale. Loop cannot recommend a bolus amount.", comment: "Caption for bolus screen notice when pump data is missing or stale"),
+                severity: .critical
             )
         }
     }

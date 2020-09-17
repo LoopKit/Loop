@@ -150,6 +150,16 @@ class PumpManagerErrorCodableTests: XCTestCase {
         )
     }
     
+    func testCodableUncertainDeliveryError() throws {
+        try assertPumpManagerErrorCodable(.uncertainDelivery, encodesJSON: """
+{
+  "pumpManagerError" : "uncertainDelivery"
+}
+"""
+        )
+    }
+
+    
     private func assertPumpManagerErrorCodable(_ original: PumpManagerError, encodesJSON string: String) throws {
         let data = try encoder.encode(TestContainer(pumpManagerError: original))
         XCTAssertEqual(String(data: data, encoding: .utf8), string)
@@ -182,6 +192,8 @@ extension PumpManagerError: Equatable {
                 lhsLocalizedError?.failureReason == rhsLocalizedError?.failureReason &&
                 lhsLocalizedError?.helpAnchor == rhsLocalizedError?.helpAnchor &&
                 lhsLocalizedError?.recoverySuggestion == rhsLocalizedError?.recoverySuggestion
+        case (.uncertainDelivery, .uncertainDelivery):
+            return true
         default:
             return false
         }

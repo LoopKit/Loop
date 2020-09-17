@@ -32,6 +32,7 @@ final class BolusEntryViewModel: ObservableObject {
     enum Notice: Equatable {
         case predictedGlucoseBelowSuspendThreshold(suspendThreshold: HKQuantity)
         case staleGlucoseData
+        case stalePumpData
     }
 
     @Environment(\.authenticate) var authenticate
@@ -71,8 +72,14 @@ final class BolusEntryViewModel: ObservableObject {
     private let log = OSLog(category: "BolusEntryViewModel")
     private var cancellables: Set<AnyCancellable> = []
 
+    private var pumpManagerRefreshCompletion: (() -> Void)?
+    private var isPumpDataStale: Bool {
+        // "borrowed" from LoopDataManager
+        Date().timeIntervalSince(dataManager.doseStore.lastAddedPumpData) <= dataManager.loopManager.settings.inputDataRecencyInterval
+    }
+    
     let chartManager: ChartsManager = {
-        let predictedGlucoseChart = PredictedGlucoseChart()
+        let predictedGlucoseChart = PredictedGlucoseChart(predictedGlucoseBounds: FeatureFlags.predictedGlucoseChartClampEnabled ? .default : nil)
         predictedGlucoseChart.glucoseDisplayRange = BolusEntryViewModel.defaultGlucoseDisplayRange
         return ChartsManager(colors: .primary, settings: .default, charts: [predictedGlucoseChart], traitCollection: .current)
     }()
@@ -100,6 +107,7 @@ final class BolusEntryViewModel: ObservableObject {
         observeEnteredBolusChanges()
         observeEnteredManualGlucoseChanges()
         observeElapsedTime()
+        observeRecommendedBolusChanges()
 
         update()
     }
@@ -109,6 +117,12 @@ final class BolusEntryViewModel: ObservableObject {
             .publisher(for: .LoopDataUpdated, object: dataManager.loopManager)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.update() }
+            .store(in: &cancellables)
+        
+        // Look for Loop starting, and assume that if it started after assertCurrentPumpData that we want to call pumpManagerRefreshCompletion
+        NotificationCenter.default
+            .publisher(for: .LoopRunning, object: dataManager.loopManager)
+            .sink { [weak self] _ in self?.pumpManagerRefreshCompletion?(); self?.pumpManagerRefreshCompletion = nil }
             .store(in: &cancellables)
     }
 
@@ -120,6 +134,16 @@ final class BolusEntryViewModel: ObservableObject {
                 self?.dataManager.loopManager.getLoopState { manager, state in
                     self?.updatePredictedGlucoseValues(from: state)
                 }
+            }
+            .store(in: &cancellables)
+    }
+
+    private func observeRecommendedBolusChanges() {
+        $recommendedBolus
+            .removeDuplicates()
+            .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.setRecommendedBolus()
             }
             .store(in: &cancellables)
     }
@@ -139,7 +163,9 @@ final class BolusEntryViewModel: ObservableObject {
                         self?.updateGlucoseChartValues()
                     })
 
-                    self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                    self?.ensurePumpDataIsFresh { [weak self] in
+                        self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: true)
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -171,10 +197,9 @@ final class BolusEntryViewModel: ObservableObject {
         return recommendedBolus.doubleValue(for: .internationalUnit()) > 0
     }
 
-    func acceptRecommendedBolus() {
+    func setRecommendedBolus() {
         guard isBolusRecommended else { return }
         enteredBolus = recommendedBolus!
-
         dataManager.loopManager.getLoopState { [weak self] manager, state in
             self?.updatePredictedGlucoseValues(from: state)
         }
@@ -462,13 +487,13 @@ final class BolusEntryViewModel: ObservableObject {
 
     private func updateFromLoopState() {
         dataManager.loopManager.getLoopState { [weak self] manager, state in
-            guard let self = self else { return }
-
-            self.updatePredictedGlucoseValues(from: state)
-            self.updateCarbsOnBoard(from: state)
-            self.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
-            DispatchQueue.main.async {
-                self.updateSettings()
+            self?.updatePredictedGlucoseValues(from: state)
+            self?.updateCarbsOnBoard(from: state)
+            self?.ensurePumpDataIsFresh { [weak self] in
+                self?.updateRecommendedBolusAndNotice(from: state, isUpdatingFromUserInput: false)
+                DispatchQueue.main.async {
+                    self?.updateSettings()
+                }
             }
         }
     }
@@ -486,10 +511,19 @@ final class BolusEntryViewModel: ObservableObject {
         }
     }
 
+    private func ensurePumpDataIsFresh(then completion: @escaping () -> Void) {
+        guard let pumpManager = dataManager.pumpManager, !isPumpDataStale else {
+            completion()
+            return
+        }
+        pumpManagerRefreshCompletion = completion
+        pumpManager.assertCurrentPumpData()
+    }
+    
     private func updateRecommendedBolusAndNotice(from state: LoopState, isUpdatingFromUserInput: Bool) {
         dispatchPrecondition(condition: .notOnQueue(.main))
 
-        let recommendedBolus: HKQuantity
+        let recommendedBolus: HKQuantity?
         let notice: Notice?
         do {
             if let recommendation = try computeBolusRecommendation(from: state) {
@@ -507,11 +541,13 @@ final class BolusEntryViewModel: ObservableObject {
                 notice = nil
             }
         } catch {
-            recommendedBolus = HKQuantity(unit: .internationalUnit(), doubleValue: 0)
+            recommendedBolus = nil
 
             switch error {
             case LoopError.missingDataError(.glucose), LoopError.glucoseTooOld:
                 notice = .staleGlucoseData
+            case LoopError.pumpDataTooOld:
+                notice = .stalePumpData
             default:
                 notice = nil
             }

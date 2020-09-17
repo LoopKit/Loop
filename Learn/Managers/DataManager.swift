@@ -39,7 +39,8 @@ final class DataManager {
             defaultAbsorptionTimes: (fast: .minutes(30), medium: .hours(3), slow: .hours(5)),
             observationInterval: 0,
             carbRatioSchedule: carbRatioSchedule,
-            insulinSensitivitySchedule: insulinSensitivitySchedule
+            insulinSensitivitySchedule: insulinSensitivitySchedule,
+            provenanceIdentifier: Bundle.main.bundleIdentifier!
         )
 
         doseStore = DoseStore(

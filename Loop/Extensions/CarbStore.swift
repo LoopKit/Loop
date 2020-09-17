@@ -25,6 +25,8 @@ extension CarbStore.CarbStoreError: Codable {
             let container = try decoder.container(keyedBy: CodableKeys.self)
             if let healthStoreError = try container.decodeIfPresent(HealthStoreError.self, forKey: .healthStoreError) {
                 self = .healthStoreError(healthStoreError.error)
+            } else if let coreDataError = try container.decodeIfPresent(CoreDataError.self, forKey: .coreDataError) {
+                self = .coreDataError(coreDataError.error)
             } else {
                 throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "invalid enumeration"))
             }
@@ -39,6 +41,9 @@ extension CarbStore.CarbStoreError: Codable {
         case .healthStoreError(let error):
             var container = encoder.container(keyedBy: CodableKeys.self)
             try container.encode(HealthStoreError(error: error), forKey: .healthStoreError)
+        case .coreDataError(let error):
+            var container = encoder.container(keyedBy: CodableKeys.self)
+            try container.encode(CoreDataError(error: error), forKey: .coreDataError)
         case .unauthorized:
             var container = encoder.singleValueContainer()
             try container.encode(CodableKeys.unauthorized.rawValue)
@@ -55,10 +60,19 @@ extension CarbStore.CarbStoreError: Codable {
             self.error = CodableLocalizedError(error)
         }
     }
-    
+
+    private struct CoreDataError: Codable {
+        let error: CodableLocalizedError
+
+        init(error: Error) {
+            self.error = CodableLocalizedError(error)
+        }
+    }
+
     private enum CodableKeys: String, CodingKey {
         case notConfigured
         case healthStoreError
+        case coreDataError
         case unauthorized
         case noData
     }

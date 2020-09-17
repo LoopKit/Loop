@@ -129,6 +129,10 @@ final class DeviceDataManager {
             return loopManager.settings.maximumBasalRatePerHour
         }
     }
+    
+    private var rootViewController: UIViewController
+    
+    private var deliveryUncertaintyAlertManager: DeliveryUncertaintyAlertManager?
 
     // MARK: - WatchKit
 
@@ -142,12 +146,19 @@ final class DeviceDataManager {
 
     private(set) var loopManager: LoopDataManager!
 
-    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager) {
+    init(pluginManager: PluginManager, alertManager: AlertManager, bluetoothStateManager: BluetoothStateManager, rootViewController: UIViewController) {
         let localCacheDuration = Bundle.main.localCacheDuration ?? .days(1)
 
         let fileManager = FileManager.default
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let deviceLogDirectory = documentsDirectory.appendingPathComponent("DeviceLog")
+        if !fileManager.fileExists(atPath: deviceLogDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: deviceLogDirectory, withIntermediateDirectories: false)
+            } catch let error {
+                preconditionFailure("Could not create DeviceLog directory: \(error)")
+            }
+        }
         deviceLog = PersistentDeviceLog(storageFile: deviceLogDirectory.appendingPathComponent("Storage.sqlite"), maxEntryAge: localCacheDuration)
 
         loggingServicesManager = LoggingServicesManager()
@@ -155,6 +166,7 @@ final class DeviceDataManager {
 
         self.pluginManager = pluginManager
         self.alertManager = alertManager
+        self.rootViewController = rootViewController
         
         self.healthStore = HKHealthStore()
         self.cacheStore = PersistenceController.controllerInAppGroupDirectory()
@@ -173,7 +185,8 @@ final class DeviceDataManager {
             carbRatioSchedule: UserDefaults.appGroup?.carbRatioSchedule,
             insulinSensitivitySchedule: sensitivitySchedule,
             overrideHistory: overrideHistory,
-            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear
+            carbAbsorptionModel: FeatureFlags.nonlinearCarbModelEnabled ? .nonlinear : .linear,
+            provenanceIdentifier: HKSource.default().bundleIdentifier
         )
         
         self.doseStore = DoseStore(
@@ -229,7 +242,7 @@ final class DeviceDataManager {
         )
         cacheStore.delegate = loopManager
         
-        watchManager = WatchDataManager(deviceManager: self)
+        watchManager = WatchDataManager(deviceManager: self, healthStore: healthStore)
 
         let remoteDataServicesManager = RemoteDataServicesManager(
             carbStore: carbStore,
@@ -468,6 +481,14 @@ private extension DeviceDataManager {
                                                   alertResponder: pumpManager)
             alertManager?.addAlertSoundVendor(managerIdentifier: pumpManager.managerIdentifier,
                                                     soundVendor: pumpManager)
+            
+            deliveryUncertaintyAlertManager = DeliveryUncertaintyAlertManager(pumpManager: pumpManager, rootViewController: rootViewController)
+            
+            if pumpManager.status.deliveryIsUncertain {
+                DispatchQueue.main.async {
+                    self.deliveryUncertaintyAlertManager!.showAlert()
+                }
+            }
         }
     }
 
@@ -487,13 +508,17 @@ extension DeviceDataManager {
         }
 
         self.loopManager.addRequestedBolus(DoseEntry(type: .bolus, startDate: Date(), value: units, unit: .units), completion: nil)
-        pumpManager.enactBolus(units: units, at: startDate, willRequest: { (dose) in
-            // No longer used...
-        }) { (result) in
+        pumpManager.enactBolus(units: units, at: startDate) { (result) in
             switch result {
             case .failure(let error):
                 self.log.error("%{public}@", String(describing: error))
-                NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                switch error {
+                case .uncertainDelivery:
+                    // Do not generate notification on uncertain delivery error
+                    break
+                default:
+                    NotificationManager.sendBolusFailureNotification(for: error, units: units, at: startDate)
+                }
                 self.loopManager.bolusRequestFailed(error) {
                     completion(error)
                 }
@@ -685,8 +710,16 @@ extension DeviceDataManager: PumpManagerDelegate {
 
         // Update the pump-schedule based settings
         loopManager.setScheduleTimeZone(status.timeZone)
+        
+        DispatchQueue.main.async {
+            if status.deliveryIsUncertain {
+                self.deliveryUncertaintyAlertManager?.showAlert()
+            } else {
+                self.deliveryUncertaintyAlertManager?.clearAlert()
+            }
+        }
     }
-
+    
     func pumpManagerWillDeactivate(_ pumpManager: PumpManager) {
         dispatchPrecondition(condition: .onQueue(queue))
 
@@ -730,7 +763,7 @@ extension DeviceDataManager: PumpManagerDelegate {
         }
     }
 
-    func pumpManager(_ pumpManager: PumpManager, didReadReservoirValue units: Double, at date: Date, completion: @escaping (_ result: PumpManagerResult<(newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool)>) -> Void) {
+    func pumpManager(_ pumpManager: PumpManager, didReadReservoirValue units: Double, at date: Date, completion: @escaping (_ result: Swift.Result<(newValue: ReservoirValue, lastValue: ReservoirValue?, areStoredValuesContinuous: Bool), Error>) -> Void) {
         dispatchPrecondition(condition: .onQueue(queue))
         log.default("PumpManager:%{public}@ did read reservoir value", String(describing: type(of: pumpManager)))
 
@@ -906,6 +939,11 @@ extension DeviceDataManager: LoopDataManagerDelegate {
             completion(.failure(LoopError.configurationError(.pumpManager)))
             return
         }
+        
+        guard !pumpManager.status.deliveryIsUncertain else {
+            completion(.failure(LoopError.connectionError))
+            return
+        }
 
         log.default("LoopManager did recommend basal change")
 
@@ -1003,3 +1041,4 @@ extension DeviceDataManager: BluetoothStateManagerObserver {
         self.bluetoothState = bluetoothState
     }
 }
+

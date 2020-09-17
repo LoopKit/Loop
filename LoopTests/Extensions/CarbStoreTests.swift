@@ -9,6 +9,20 @@
 import XCTest
 import LoopKit
 
+struct TestLocalizedError: LocalizedError {
+    public let errorDescription: String?
+    public let failureReason: String?
+    public let helpAnchor: String?
+    public let recoverySuggestion: String?
+
+    init(errorDescription: String? = nil, failureReason: String? = nil, helpAnchor: String? = nil, recoverySuggestion: String? = nil) {
+        self.errorDescription = errorDescription
+        self.failureReason = failureReason
+        self.helpAnchor = helpAnchor
+        self.recoverySuggestion = recoverySuggestion
+    }
+}
+
 class CarbStoreCarbStoreErrorCodableTests: XCTestCase {
     func testCodableConfigurationError() throws {
         try assertCarbStoreErrorCodable(.notConfigured, encodesJSON: """
@@ -33,6 +47,28 @@ class CarbStoreCarbStoreErrorCodableTests: XCTestCase {
         "failureReason" : "CarbStoreError.healthStoreError.error.failureReason",
         "helpAnchor" : "CarbStoreError.healthStoreError.error.helpAnchor",
         "recoverySuggestion" : "CarbStoreError.healthStoreError.error.recoverySuggestion"
+      }
+    }
+  }
+}
+"""
+        )
+    }
+
+    func testCodableCoreDataError() throws {
+        let localizedError = TestLocalizedError(errorDescription: "CarbStoreError.coreDataError.error.errorDescription",
+                                                failureReason: "CarbStoreError.coreDataError.error.failureReason",
+                                                helpAnchor: "CarbStoreError.coreDataError.error.helpAnchor",
+                                                recoverySuggestion: "CarbStoreError.coreDataError.error.recoverySuggestion")
+        try assertCarbStoreErrorCodable(.coreDataError(localizedError), encodesJSON: """
+{
+  "carbStoreError" : {
+    "coreDataError" : {
+      "error" : {
+        "errorDescription" : "CarbStoreError.coreDataError.error.errorDescription",
+        "failureReason" : "CarbStoreError.coreDataError.error.failureReason",
+        "helpAnchor" : "CarbStoreError.coreDataError.error.helpAnchor",
+        "recoverySuggestion" : "CarbStoreError.coreDataError.error.recoverySuggestion"
       }
     }
   }
@@ -85,6 +121,8 @@ extension CarbStore.CarbStoreError: Equatable {
         case (.notConfigured, .notConfigured):
             return true
         case (.healthStoreError(let lhsError), .healthStoreError(let rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        case (.coreDataError(let lhsError), .coreDataError(let rhsError)):
             return lhsError.localizedDescription == rhsError.localizedDescription
         case (.unauthorized, .unauthorized),
              (.noData, .noData):

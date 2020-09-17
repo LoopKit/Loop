@@ -12,31 +12,6 @@ import LoopKit
 @testable import Loop
 
 class LoopErrorCodableTests: XCTestCase {
-    func testCodableBolusCommand() throws {
-        let localizedError = TestLocalizedError(errorDescription: "LoopError.bolusCommand.certain.localizedError.errorDescription",
-                                                failureReason: "LoopError.bolusCommand.certain.localizedError.failureReason",
-                                                helpAnchor: "LoopError.bolusCommand.certain.localizedError.helpAnchor",
-                                                recoverySuggestion: "LoopError.bolusCommand.certain.localizedError.recoverySuggestion")
-        try assertLoopErrorCodable(.bolusCommand(SetBolusError.uncertain(localizedError)), encodesJSON: """
-{
-  "loopError" : {
-    "bolusCommand" : {
-      "setBolusError" : {
-        "uncertain" : {
-          "localizedError" : {
-            "errorDescription" : "LoopError.bolusCommand.certain.localizedError.errorDescription",
-            "failureReason" : "LoopError.bolusCommand.certain.localizedError.failureReason",
-            "helpAnchor" : "LoopError.bolusCommand.certain.localizedError.helpAnchor",
-            "recoverySuggestion" : "LoopError.bolusCommand.certain.localizedError.recoverySuggestion"
-          }
-        }
-      }
-    }
-  }
-}
-"""
-        )
-    }
     
     func testCodableConfigurationError() throws {
         try assertLoopErrorCodable(.configurationError(.pumpManager), encodesJSON: """
@@ -155,8 +130,6 @@ class LoopErrorCodableTests: XCTestCase {
 extension LoopError: Equatable {
     public static func == (lhs: LoopError, rhs: LoopError) -> Bool {
         switch (lhs, rhs) {
-        case (.bolusCommand(let lhsSetBolusError), .bolusCommand(let rhsSetBolusError)):
-            return lhsSetBolusError == rhsSetBolusError
         case (.configurationError(let lhsConfigurationErrorDetail), .configurationError(let rhsConfigurationErrorDetail)):
             return lhsConfigurationErrorDetail == rhsConfigurationErrorDetail
         case (.connectionError, .connectionError):

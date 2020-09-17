@@ -43,7 +43,6 @@ public class AlertStore {
         let storeDescription = NSPersistentStoreDescription()
         if let storageDirectoryURL = storageDirectoryURL {
             let storageFileURL = storageDirectoryURL
-                .appendingPathComponent("AlertStore")
                 .appendingPathComponent("AlertStore.sqlite")
             storeDescription.url = storageFileURL
             predicateExpressionNotYetExpired = predicateExpressionNotYetExpiredSQLite
