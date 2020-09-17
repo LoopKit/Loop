@@ -114,7 +114,7 @@
 "Amplitude" = "Amplitude";
 
 /* Subtitle of Rapid-Acting – Children preset */
-"An adjustment to the adult model based on empirical effects in children." = "En justering av vuxenmodellen baserad på empirisk effekt på barn.";
+"An adjustment to the adult model based on empirical effects in children." = "En justering av vuxenmodellen baserad på empirisk erfarenhet av insulineffekt hos barn.";
 
 /* Alert message for a carb entry persistence error */
 "An error occurred while trying to save your carb entry." = "Ett fel uppstod när du skulle spara dina kolhydrater.";
@@ -193,7 +193,7 @@
 
 /* The title of the carb ratios schedule screen
    The title text for the carb ratio schedule */
-"Carb Ratios" = "Insulinkvoter";
+"Carb Ratios" = "Kolhydratskvoter";
 
 /* The title of the view controller to create a new carb entry */
 "carb-entry-title-add" = "Lägg till kolhydrater";
@@ -214,7 +214,7 @@
 "Change the pump reservoir now" = "Byt pumpreservoar nu";
 
 /* Details for configuration error when one or more loop settings are missing */
-"Check settings" = "Kontrollera inställningarna";
+"Check settings" = "Kontrollera inställningar";
 
 /* Recovery suggestion when reservoir data is missing */
 "Check that your pump is in range" = "Kontrollera att pumpen är inom räckhåll";
@@ -223,7 +223,7 @@
 "Check your CGM data source" = "Kontrollera din CGM:s datakälla";
 
 /* Carb entry section footer text explaining absorption time */
-"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för stora måltider eller måltider som innehåller fett och protein. Detta är endast en rekommendation till algoritmen och behöver inte vara exakt.";
+"Choose a longer absorption time for larger meals, or those containing fats and proteins. This is only guidance to the algorithm and need not be exact." = "Välj en längre absorptionstid för stora måltider eller måltider som innehåller fett och protein. Denna är endast en vägledning för algoritmen och behöver inte vara exakt.";
 
 /* The title text for the looping enabled switch cell */
 "Closed Loop" = "Sluten loop";
@@ -248,7 +248,7 @@
 "Current glucose of %1$@ is below correction range." = "Nuvarande glukosvärde %1$@ är under målvärde.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
-"Custom Override" = "Anpassad override";
+"Custom Override" = "Anpassat undantag";
 
 /* The title of the cell indicating a generic custom preset is enabled */
 "Custom Preset" = "Anpassad förinställning";
@@ -305,7 +305,7 @@
 "Error Canceling Bolus" = "Fel vid försök att avbryta bolus";
 
 /* The alert title for a resume error */
-"Error Resuming" = "Fel vid försök att återgå";
+"Error Resuming" = "Fel vid försök att återuppta insulintillförsel";
 
 /* The subtitle format describing eventual glucose. (1: localized glucose value description) */
 "Eventually %@" = "Förväntat %@";
@@ -347,7 +347,7 @@
 "Glucose Momentum" = "Glukosförändring";
 
 /* The title of a target alert action specifying an indefinitely long workout targets duration */
-"Indefinitely" = "Oändligt";
+"Indefinitely" = "Tills vidare";
 
 /* Title of the prediction input effect for insulin */
 "Insulin" = "Insulin";
@@ -391,13 +391,13 @@
 "Loop Failure" = "Loop-fel";
 
 /* Bluetooth unavailable alert body. */
-"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop har upptäckt ett problem med dina Bluetooth-inställningar och kommer inte att fungera förrän Bluetooth är aktiverat. Du kommer inte att kunna se blodsockervärde eller ge bolus.";
+"Loop has detected an issue with your Bluetooth settings, and will not work successfully until Bluetooth is enabled. You will not receive glucose readings, or be able to bolus." = "Loop har upptäckt ett problem med dina Bluetooth-inställningar och kommer inte att fungera förrän Bluetooth är aktiverat. Du kommer varken att kunna se blodsockervärde eller ge bolus.";
 
 /* The notification alert describing a long-lasting loop failure. The substitution parameter is the time interval since the last loop */
 "Loop has not completed successfully in %@" = "Loop har inte lyckats köra på %@";
 
 /* Bluetooth off background alert body. */
-"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop kommer inte att fungera förrän Bluetooth är aktiverat. Du kommer inte att kunna se blodsockervärde eller ge bolus.";
+"Loop will not work successfully until Bluetooth is enabled. You will not recieve glucose readings, or be able to bolus." = "Loop kommer inte att fungera förrän Bluetooth är aktiverat. Du kommer varken att kunna se blodsockervärde eller ge bolus.";
 
 /* Manage Critical Alerts in Settings button text */
 "Manage Critical Alerts in Settings" = "Hantera kritiska varningar i inställningar";
@@ -451,10 +451,10 @@
 "Override Presets" = "Förinställningar för Undantag";
 
 /* The label of the pre-meal mode toggle button */
-"Pre-Meal Targets" = "Målvärden före måltid";
+"Pre-Meal Targets" = "Målvärden för Före måltid";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Förväntat glukosvärde vid %1$@ är %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Förväntat blodglukosvärde vid %1$@ är %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
 "Predicted glucose of %1$@ is below your suspend threshold setting." = "Förväntat glukosvärde %1$@ är under ditt tröskelvärde.";
@@ -472,16 +472,16 @@
 "Pump Battery Low" = "Låg batterinivå i pump";
 
 /* The error message when pump data is too old to be used. (1: pump data age in minutes) */
-"Pump data is %1$@ old" = "Pumpvärdena är %1$@ gamla";
+"Pump data is %1$@ old" = "Pumpvärden är %1$@ gamla";
 
 /* Details for configuration error when pump manager is missing */
 "Pump Manager" = "Pumphantering";
 
 /* The notification title for an empty pump reservoir */
-"Pump Reservoir Empty" = "Pumpreservoaren är tom";
+"Pump Reservoir Empty" = "Insulinreservoaren är tom";
 
 /* The notification title for a low pump reservoir */
-"Pump Reservoir Low" = "Pumpreservoaren har låg nivå";
+"Pump Reservoir Low" = "Insulinreservoaren har låg nivå";
 
 /* The title of the cell indicating the pump is suspended */
 "Pump Suspended" = "Pumpen är pausad";
@@ -559,7 +559,7 @@
 "Tap here to set up a pump" = "Tryck här för att konfigurera en pump";
 
 /* The subtitle of the cell displaying an action to resume insulin delivery */
-"Tap to Resume" = "Tryck för att återuppta";
+"Tap to Resume" = "Tryck för att återuppta insulintillförsel";
 
 /* Alert message for an updated bolus recommendation */
 "The bolus recommendation has updated. Please reconfirm the bolus amount." = "Bolusrekommendationen har uppdaterats. Bekräfta bolus.";
@@ -577,7 +577,7 @@
 "The maximum bolus setting must be configured before a bolus can be delivered." = "Den högst tillåtna bolusmängden måste ställas in innan en bolus kan ges.";
 
 /* Title text for button to Therapy Settings */
-"Therapy Settings" = "Therapy Settings";
+"Therapy Settings" = "Behandlingsinställningar";
 
 /* Bluetooth off foreground alert body */
 "Turn on Bluetooth to receive alerts, alarms or sensor glucose readings." = "Aktivera Bluetooth för att ta emot varningar, larm eller blodglukosavläsningar.";

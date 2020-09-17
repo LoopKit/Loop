@@ -454,10 +454,10 @@
 "Pre-Meal Targets" = "Pre-måltids mål";
 
 /* Message when offering bolus recommendation even though bg is below range and minBG is in future. (1: glucose time)(2: glucose number) */
-"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker om %1$@ er %2$@.";
+"Predicted glucose at %1$@ is %2$@." = "Forventet blodsukker kl %1$@ er %2$@.";
 
 /* Notice message when recommending bolus when BG is below the suspend threshold. (1: glucose value) */
-"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstilling for insulinstopp";
+"Predicted glucose of %1$@ is below your suspend threshold setting." = "Forventet blodsukker %1$@ er under innstilling for insulinstopp.";
 
 /* Format string describing retrospective glucose prediction comparison. (1: Predicted glucose)(2: Actual glucose)(3: difference) */
 "Predicted: %1$@\nActual: %2$@ (%3$@)" = "Forespeilet: %1$@\nFaktisk: %2$@ (%3$@)";
@@ -610,5 +610,5 @@
 "Workout Targets" = "Treningsmål";
 
 /* Caption for bolus screen notice when no bolus is recommended due to prediction dropping below suspend threshold */
-"Your glucose is below or predicted to go below your suspend threshold, %@." = "Your glucose is below or predicted to go below your suspend threshold, %@.";
+"Your glucose is below or predicted to go below your suspend threshold, %@." = "Blodsukkeret er under, eller forventes å gå under under innstillingen for insulinstopp, %@.";
 

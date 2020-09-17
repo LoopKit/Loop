@@ -1,5 +1,5 @@
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Nuvarande glukosvärde %1$@ är under målvärdet.";
+"Current glucose of %1$@ is below correction range." = "Nuvarande blodglukosvärde %1$@ är under målvärde.";
 
 /* The short unit display string for decibles */
 "dB" = "dB";

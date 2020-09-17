@@ -14,7 +14,7 @@
 "NSCameraUsageDescription" = "Kameraet brukes til å skanne strekkoder for enheter";
 
 /* Privacy - Health Share Usage Description */
-"NSHealthShareUsageDescription" = "Matdata fra Health-databasen brukes til å bestemme blodsukkereffekt. Blodsukkerdata hentes fra HealthKit for opptegning og analyse.";
+"NSHealthShareUsageDescription" = "Måltider med karbohydrater lagret i helsedatabasen brukes til å bestemme blodsukkereffekter. Blodsukkerdata fra helsedatabasen brukes til beregning av grafer og momentum. Søvndata fra helsedatabasen brukes til å forbedre Apple Watch-komplikasjonen.";
 
 /* Privacy - Health Update Usage Description */
 "NSHealthUpdateUsageDescription" = "Angitte karbohydrater i matdataene som tastes inn i appen blir lagret i Health-databasen.";

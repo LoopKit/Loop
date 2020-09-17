@@ -71,7 +71,7 @@
 "OFA-qT-ZAg.text" = "Titel";
 
 /* Class = "UITableViewController"; title = "Predicted Glucose"; ObjectID = "PA3-sP-cWY"; */
-"PA3-sP-cWY.title" = "Förväntat glukosvärde";
+"PA3-sP-cWY.title" = "Förväntat blodglukosvärde";
 
 /* Class = "UIButton"; normalTitle = "🍽"; ObjectID = "Qe9-uc-vPR"; */
 "Qe9-uc-vPR.normalTitle" = "🍽";

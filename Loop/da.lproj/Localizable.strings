@@ -242,10 +242,10 @@
 
 /* The title of the glucose target range schedule screen
    The title text for the glucose target range schedule */
-"Correction Range" = "Korrektionsinterval";
+"Correction Range" = "Korrektionsområde";
 
 /* Message when offering bolus recommendation even though bg is below range. (1: glucose value) */
-"Current glucose of %1$@ is below correction range." = "Nuværende blodsukker på %1$@ er under dit korrektionsinterval.";
+"Current glucose of %1$@ is below correction range." = " Nuværende blodsukker på %1$@ er under dit korrektionsområde.";
 
 /* The title of the cell indicating a generic temporary override is enabled */
 "Custom Override" = "Override";
@@ -356,7 +356,7 @@
 "Insulin Absorbed (U) × Insulin Sensitivity (%1$@/U)" = "Insulin absorberet (E) × Insulin følsomhed (%1$@/E)";
 
 /* The title of the insulin delivery graph */
-"Insulin Delivery" = "Insulin afgivelse";
+"Insulin Delivery" = "Insulinafgivelse";
 
 /* Details for missing data error when insulin effects are missing */
 "Insulin effects" = "Insulin effekter";
@@ -592,7 +592,7 @@
 "Unable to Save Manual Glucose Entry" = "Det manuelt indtastet blodsukker kan ikke gemmes";
 
 /* The alert body for an error while canceling a bolus */
-"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Kan ikke stoppe igangværende bolus. Flyt din iPhone tættere på pumpen og prøv igen. Tjek din historik for insulinindgivelse for detaljer og overvåg nøje dit blodsukkerniveau.";
+"Unable to stop the bolus in progress. Move your iPhone closer to the pump and try again. Check your insulin delivery history for details, and monitor your glucose closely." = "Kan ikke stoppe igangværende bolus. Flyt din iPhone tættere på pumpen og prøv igen. Tjek din historik for insulinafgivelse for detaljer og overvåg nøje dit blodsukkerniveau.";
 
 /* The format for the description of a temporary override end date */
 "until %@" = "indtil %@";
