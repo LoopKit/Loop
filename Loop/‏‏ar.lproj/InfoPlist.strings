@@ -1,0 +1,18 @@
+
+/* Bundle name */
+"CFBundleName" = "$(PRODUCT_NAME)";
+
+/* Privacy - Bluetooth Always Usage Description */
+"NSBluetoothAlwaysUsageDescription" = "يستخدم البلوتوث للتواصل مع مضخة الأنسولين وأجهزة متابعة سكر الدم المستمرة.";
+
+/* Privacy - Bluetooth Peripheral Usage Description */
+"NSBluetoothPeripheralUsageDescription" = "يستخدم البلوتوث للتواصل مع مضخة الأنسولين وأجهزة متابعة سكر الدم المستمرة.";
+
+/* Privacy - Face ID Usage Description */
+"NSFaceIDUsageDescription" = "تستخدم هوية التعرف على الوجه للتحقق من أجل جرعة الأنسولين.";
+
+/* Privacy - Health Share Usage Description */
+"NSHealthShareUsageDescription" = "يتم استخدام بيانات الوجبات من قواعد بيانات تطبيق صحتي لتحديد تأثيرات سكر الدم. يتم استخدام بيانات سكر الدم منقواعد بيانات تطبيق صحتي للرسم البياني والتحليل. تُستخدم بيانات النوم من قواعد بيانات تطبيق صحتي لتحسين توصيل تحديثات تعقيدات ساعة أبل أثناء فترة استيقاظك.";
+
+/* Privacy - Health Update Usage Description */
+"NSHealthUpdateUsageDescription" = "بيانات كربوهيدرات الوجبة المدخلة للتطبيق و الساعة محفوظة في قواعد بيانات تطبيق صحتي. يتم تخزين بيانات سكر الدم المستردة من نظام متابعة سكر الدم المستمرة بشكل آمن في تطبيق صحتي.";
