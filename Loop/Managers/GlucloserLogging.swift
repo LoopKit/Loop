@@ -18,8 +18,8 @@ class GlucloserLogging {
   init() {
     urlSession = URLSession(configuration: URLSessionConfiguration.default)
     dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-    dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZ"
+    dateFormatter.timeZone = TimeZone.autoupdatingCurrent
   }
   
   public func saveInsulin(dateTime: Date, units: Double) {

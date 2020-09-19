@@ -597,10 +597,9 @@ extension LoopDataManager {
 
             completion?()
         }
-      if let delivered = dose.deliveredUnits {
-        GlucloserLogging.shared.saveInsulin(dateTime: dose.startDate,
-                                            units: delivered)
-      }
+      let units = dose.programmedUnits
+      GlucloserLogging.shared.saveInsulin(dateTime: dose.startDate,
+                                          units: units)
     }
 
     /// Notifies the manager that the bolus failed.
