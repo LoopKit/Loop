@@ -349,6 +349,88 @@ extension Result where Success == Void {
     }
 }
 
+// MARK: - Critical Event Log Export
+
+extension AlertStore: CriticalEventLog {
+    private var exportProgressUnitCountPerObject: Int64 { 1 }
+    private var exportFetchLimit: Int { Int(criticalEventLogExportProgressUnitCountPerFetch / exportProgressUnitCountPerObject) }
+
+    public var exportName: String { "Alerts.json" }
+
+    public func exportProgressTotalUnitCount(startDate: Date, endDate: Date? = nil) -> Result<Int64, Error> {
+        var result: Result<Int64, Error>?
+
+        self.managedObjectContext.performAndWait {
+            do {
+                let request: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                request.predicate = self.exportDatePredicate(startDate: startDate, endDate: endDate)
+
+                let objectCount = try self.managedObjectContext.count(for: request)
+                result = .success(Int64(objectCount) * exportProgressUnitCountPerObject)
+            } catch let error {
+                result = .failure(error)
+            }
+        }
+
+        return result!
+    }
+
+    public func export(startDate: Date, endDate: Date, to stream: OutputStream, progress: Progress) -> Error? {
+        let encoder = JSONStreamEncoder(stream: stream)
+        var modificationCounter: Int64 = 0
+        var fetching = true
+        var error: Error?
+
+        while fetching && error == nil {
+            self.managedObjectContext.performAndWait {
+                do {
+                    guard !progress.isCancelled else {
+                        throw CriticalEventLogError.cancelled
+                    }
+
+                    let request: NSFetchRequest<StoredAlert> = StoredAlert.fetchRequest()
+                    request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [NSPredicate(format: "modificationCounter > %d", modificationCounter),
+                                                                                            self.exportDatePredicate(startDate: startDate, endDate: endDate)])
+                    request.sortDescriptors = [NSSortDescriptor(key: "modificationCounter", ascending: true)]
+                    request.fetchLimit = self.exportFetchLimit
+
+                    let objects = try self.managedObjectContext.fetch(request)
+                    if objects.isEmpty {
+                        fetching = false
+                        return
+                    }
+
+                    try encoder.encode(objects)
+
+                    modificationCounter = objects.last!.modificationCounter
+
+                    progress.completedUnitCount += Int64(objects.count) * exportProgressUnitCountPerObject
+                } catch let fetchError {
+                    error = fetchError
+                }
+            }
+        }
+
+        if let closeError = encoder.close(), error == nil {
+            error = closeError
+        }
+
+        return error
+    }
+
+    private func exportDatePredicate(startDate: Date, endDate: Date? = nil) -> NSPredicate {
+        var issuedDatePredicate = NSPredicate(format: "issuedDate >= %@", startDate as NSDate)
+        var acknowledgedDatePredicate = NSPredicate(format: "acknowledgedDate >= %@", startDate as NSDate)
+        var retractedDatePredicate = NSPredicate(format: "retractedDate >= %@", startDate as NSDate)
+        if let endDate = endDate {
+            issuedDatePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [issuedDatePredicate, NSPredicate(format: "issuedDate < %@", endDate as NSDate)])
+            acknowledgedDatePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [acknowledgedDatePredicate, NSPredicate(format: "acknowledgedDate < %@", endDate as NSDate)])
+            retractedDatePredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [retractedDatePredicate, NSPredicate(format: "retractedDate < %@", endDate as NSDate)])
+        }
+        return NSCompoundPredicate(orPredicateWithSubpredicates: [issuedDatePredicate, acknowledgedDatePredicate, retractedDatePredicate])
+    }
+}
+
 // MARK: - Core Data (Bulk) - TEST ONLY
 
 extension AlertStore {

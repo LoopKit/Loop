@@ -6,6 +6,7 @@
 //  Copyright © 2020 LoopKit Authors. All rights reserved.
 //
 
+import LoopKit
 import LoopKitUI
 import SwiftUI
 
@@ -13,6 +14,7 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
     @Environment(\.dismiss) private var dismiss
     
     var didTapIssueReport: ((_ title: String) -> Void)?
+    var criticalEventLogExportViewModel: CriticalEventLogExportViewModel
     
     var body: some View {
         List {
@@ -21,6 +23,9 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
                     self.didTapIssueReport?(NSLocalizedString("Issue Report", comment: "The title text for the issue report menu item"))
                 }) {
                     Text("Issue Report", comment: "The title text for the issue report menu item")
+                }
+                NavigationLink(destination: CriticalEventLogExportView(viewModel: self.criticalEventLogExportViewModel)) {
+                    Text(NSLocalizedString("Export Critical Event Logs", comment: "The title of the export critical event logs in support"))
                 }
             }
         }
@@ -32,6 +37,6 @@ struct SupportScreenView: View, HorizontalSizeClassOverride {
 
 struct SupportScreenView_Previews: PreviewProvider {
     static var previews: some View {
-        SupportScreenView()
+        SupportScreenView(criticalEventLogExportViewModel: CriticalEventLogExportViewModel(exporterFactory: MockCriticalEventLogExporterFactory()))
     }
 }

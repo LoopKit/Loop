@@ -639,3 +639,86 @@ class AlertStoreTests: XCTestCase {
         }
     }
 }
+
+class AlertStoreLogCriticalEventLogTests: XCTestCase {
+    var alertStore: AlertStore!
+    var outputStream: MockOutputStream!
+    var progress: Progress!
+    
+    override func setUp() {
+        super.setUp()
+
+        let alerts = [AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:08:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m1", alertIdentifier: "a1"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate)),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:10:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m2", alertIdentifier: "a2"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate)),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:04:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m3", alertIdentifier: "a3"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate)),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:06:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m4", alertIdentifier: "a4"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate)),
+                      AlertStore.DatedAlert(date: dateFormatter.date(from: "2100-01-02T03:02:00Z")!, alert: Alert(identifier: Alert.Identifier(managerIdentifier: "m5", alertIdentifier: "a5"), foregroundContent: nil, backgroundContent: nil, trigger: .immediate))]
+
+        alertStore = AlertStore()
+        XCTAssertNil(alertStore.addAlerts(alerts: alerts))
+
+        outputStream = MockOutputStream()
+        progress = Progress()
+    }
+
+    override func tearDown() {
+        alertStore = nil
+
+        super.tearDown()
+    }
+    
+    func testExportProgressTotalUnitCount() {
+        switch alertStore.exportProgressTotalUnitCount(startDate: dateFormatter.date(from: "2100-01-02T03:03:00Z")!,
+                                                       endDate: dateFormatter.date(from: "2100-01-02T03:09:00Z")!) {
+        case .failure(let error):
+            XCTFail("Unexpected failure: \(error)")
+        case .success(let progressTotalUnitCount):
+            XCTAssertEqual(progressTotalUnitCount, 3 * 1)
+        }
+    }
+    
+    func testExportProgressTotalUnitCountEmpty() {
+        switch alertStore.exportProgressTotalUnitCount(startDate: dateFormatter.date(from: "2100-01-02T03:00:00Z")!,
+                                                       endDate: dateFormatter.date(from: "2100-01-02T03:01:00Z")!) {
+        case .failure(let error):
+            XCTFail("Unexpected failure: \(error)")
+        case .success(let progressTotalUnitCount):
+            XCTAssertEqual(progressTotalUnitCount, 0)
+        }
+    }
+
+    func testExport() {
+        XCTAssertNil(alertStore.export(startDate: dateFormatter.date(from: "2100-01-02T03:03:00Z")!,
+                                       endDate: dateFormatter.date(from: "2100-01-02T03:09:00Z")!,
+                                       to: outputStream,
+                                       progress: progress))
+        XCTAssertEqual(outputStream.string, """
+[
+{"acknowledgedDate":"2100-01-02T03:08:00.000Z","alertIdentifier":"a1","isCritical":false,"issuedDate":"2100-01-02T03:08:00.000Z","managerIdentifier":"m1","modificationCounter":1,"triggerType":0},
+{"acknowledgedDate":"2100-01-02T03:04:00.000Z","alertIdentifier":"a3","isCritical":false,"issuedDate":"2100-01-02T03:04:00.000Z","managerIdentifier":"m3","modificationCounter":3,"triggerType":0},
+{"acknowledgedDate":"2100-01-02T03:06:00.000Z","alertIdentifier":"a4","isCritical":false,"issuedDate":"2100-01-02T03:06:00.000Z","managerIdentifier":"m4","modificationCounter":4,"triggerType":0}
+]
+"""
+        )
+        XCTAssertEqual(progress.completedUnitCount, 3 * 1)
+    }
+
+    func testExportEmpty() {
+        XCTAssertNil(alertStore.export(startDate: dateFormatter.date(from: "2100-01-02T03:00:00Z")!,
+                                       endDate: dateFormatter.date(from: "2100-01-02T03:01:00Z")!,
+                                       to: outputStream,
+                                       progress: progress))
+        XCTAssertEqual(outputStream.string, "[]")
+        XCTAssertEqual(progress.completedUnitCount, 0)
+    }
+
+    func testExportCancelled() {
+        progress.cancel()
+        XCTAssertEqual(alertStore.export(startDate: dateFormatter.date(from: "2100-01-02T03:03:00Z")!,
+                                         endDate: dateFormatter.date(from: "2100-01-02T03:09:00Z")!,
+                                         to: outputStream,
+                                         progress: progress) as? CriticalEventLogError, CriticalEventLogError.cancelled)
+    }
+
+    private let dateFormatter = ISO8601DateFormatter()
+}
