@@ -303,12 +303,12 @@ struct BolusEntryView: View, HorizontalSizeClassOverride {
     private var datePicker: some View {
         // ANNA TODO: check this works as intended
         // Allow 6 hours before & after due to longest DIA
-        ExpandableDatePicker(
-            with: $viewModel.selectedDoseDate
-//            text: NSLocalizedString("Date", comment: "Date picker label"),
-//            onUpdate: { [weak viewModel] date in
-//                viewModel?.selectedDoseDate = date
-//            }
+        ExpandableDateListPicker(
+            with: viewModel.selectedDoseDate,
+            text: NSLocalizedString("Date", comment: "Date picker label"),
+            onUpdate: { [weak viewModel] date in
+                viewModel?.selectedDoseDate = date
+            }
         )
     }
 
